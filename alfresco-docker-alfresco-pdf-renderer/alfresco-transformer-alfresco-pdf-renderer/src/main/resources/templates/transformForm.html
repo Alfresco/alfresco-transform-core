@@ -1,0 +1,33 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+	<div th:if="${message}">
+		<h2 th:text="${message}"/>
+	</div>
+
+	<div>
+        <h2>Alfresco PDF Renderer Test Transformation</h2>
+		<form method="POST" enctype="multipart/form-data" action="/transform">
+			<table>
+                <tr><td><div>file *</div></td><td><input type="file" name="file" /></td></tr>
+                <tr><td><div>targetExtension *</div></td><td><input type="text" name="targetExtension" value="" /></td></tr>
+				<tr><td><div>timeout</div></td><td><input type="text" name="timeout" value="" /></td></tr>
+				
+				<tr><td><div>page</div></td><td><input type="text" name="page" value="" /></td></tr>
+				
+				<tr><td><div>width</div></td><td><input type="text" name="width" value="" /></td></tr>
+				<tr><td><div>height</div></td><td><input type="text" name="height" value="" /></td></tr>
+				<tr><td><div>allowEnlargement</div></td><td><input type="checkbox" name="allowEnlargement" value="true" /></td></tr>
+				<tr><td><div>maintainAspectRatio</div></td><td><input type="checkbox" name="maintainAspectRatio" value="true" /></td></tr>
+				
+				<tr><td></td><td><input type="submit" value="Transform" /></td></tr>
+			</table>
+		</form>
+	</div>
+
+    <div>
+        <a href="/log">Log entries</a>
+    </div>
+
+</body>
+</html>

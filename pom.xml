@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.alfresco</groupId>
+        <artifactId>alfresco-super-pom</artifactId>
+        <version>9</version>
+    </parent>
+
+    <groupId>org.alfresco</groupId>
+    <artifactId>alfresco-docker-transformers</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <dependency.spring-boot.version>1.5.10.RELEASE</dependency.spring-boot.version>
+        <dependency.alfresco-core.version>6.18</dependency.alfresco-core.version>
+        <dependency.alfresco-transformer-base.version>${project.version}</dependency.alfresco-transformer-base.version>
+    </properties>
+
+    <modules>
+        <module>alfresco-transformer-base</module>
+        <module>alfresco-docker-alfresco-pdf-renderer</module>
+        <module>alfresco-docker-imagemagick</module>
+        <module>alfresco-docker-libreoffice</module>
+    </modules>
+
+    <scm>
+        <connection>scm:git@git.alfresco.com:Repository/alfresco-docker-transformers.git</connection>
+        <developerConnection>scm:git@git.alfresco.com:Repository/alfresco-docker-transformers.git</developerConnection>
+        <url>https://git.alfresco.com/Repository/alfresco-docker-transformers.git</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>alfresco-internal</id>
+            <url>https://artifacts.alfresco.com/nexus/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>alfresco-internal-snapshots</id>
+            <url>https://artifacts.alfresco.com/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+</project>
