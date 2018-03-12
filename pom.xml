@@ -29,20 +29,20 @@
     </modules>
 
     <scm>
-        <connection>scm:git@git.alfresco.com:Repository/alfresco-docker-transformers.git</connection>
-        <developerConnection>scm:git@git.alfresco.com:Repository/alfresco-docker-transformers.git</developerConnection>
-        <url>https://git.alfresco.com/Repository/alfresco-docker-transformers.git</url>
+        <connection>scm:git:https://git.alfresco.com/Repository/alfresco-docker-transformers.git</connection>
+        <developerConnection>scm:git:https://git.alfresco.com/Repository/alfresco-docker-transformers.git</developerConnection>
+        <url>https://git.alfresco.com/Repository/alfresco-docker-transformers</url>
         <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
         <repository>
             <id>alfresco-internal</id>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/releases</url>
+            <url>https://artifacts.alfresco.com/nexus/content/repositories/enterprise-releases</url>
         </repository>
         <snapshotRepository>
             <id>alfresco-internal-snapshots</id>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/snapshots</url>
+            <url>https://artifacts.alfresco.com/nexus/content/repositories/enterprise-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
