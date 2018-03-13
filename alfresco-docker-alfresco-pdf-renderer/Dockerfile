@@ -4,9 +4,9 @@ FROM quay.io/alfresco/alfresco-base-java:9
 
 ENV ALFRESCO_PDF_RENDERER_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-pdf-renderer/1.1/alfresco-pdf-renderer-1.1-linux.tgz
 
-COPY target/alfresco-transformer-alfresco-pdf-renderer*.jar /usr/bin
+COPY target/alfresco-docker-alfresco-pdf-renderer*.jar /usr/bin
 
-RUN ln /usr/bin/alfresco-transformer-alfresco-pdf-renderer*.jar /usr/bin/alfresco-transformer-alfresco-pdf-renderer.jar && \
+RUN ln /usr/bin/alfresco-docker-alfresco-pdf-renderer*.jar /usr/bin/alfresco-docker-alfresco-pdf-renderer.jar && \
     yum install -y wget && \
     wget $ALFRESCO_PDF_RENDERER_LIB_RPM_URL && \
     tar xf alfresco-pdf-renderer-*-linux.tgz -C /usr/bin && \
@@ -16,5 +16,5 @@ RUN ln /usr/bin/alfresco-transformer-alfresco-pdf-renderer*.jar /usr/bin/alfresc
 
 EXPOSE 8090
 
-ENTRYPOINT java -jar /usr/bin/alfresco-transformer-alfresco-pdf-renderer.jar
+ENTRYPOINT java -jar /usr/bin/alfresco-docker-alfresco-pdf-renderer.jar
 
