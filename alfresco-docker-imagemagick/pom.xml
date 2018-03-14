@@ -62,6 +62,37 @@
                     </execution>
                 </executions>
             </plugin>
+
+
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>fabric8-maven-plugin</artifactId>
+                <version>3.5.37</version>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>alfresco/${artifactId}</name>
+                            <registry>quay.io</registry>
+                            <build>
+                                <dockerFileDir>${project.basedir}/</dockerFileDir>
+                                <tags>
+                                    <tag>${project.version}</tag>
+                                </tags>
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>buildAndPush</id>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                        <phase>deploy</phase>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -93,42 +124,6 @@
                                 <id>buildImage</id>
                                 <goals>
                                     <goal>build</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>io.fabric8</groupId>
-                        <artifactId>fabric8-maven-plugin</artifactId>
-                        <version>3.5.37</version>
-                        <configuration>
-                            <images>
-                                <image>
-                                    <name>alfresco/${artifactId}</name>
-                                    <registry>quay.io</registry>
-                                    <build>
-                                        <dockerFileDir>${project.basedir}/</dockerFileDir>
-                                        <tags>
-                                            <tag>${project.version}</tag>
-                                        </tags>
-                                    </build>
-                                </image>
-                            </images>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>buildAndPush</id>
-                                <goals>
-                                    <goal>build</goal>
-                                    <goal>push</goal>
                                 </goals>
                             </execution>
                         </executions>
