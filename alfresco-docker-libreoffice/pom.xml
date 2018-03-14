@@ -49,12 +49,12 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-jodconverter-core</artifactId>
-            <version>3.0.1.1</version>
+            <version>${dependency.alfresco-jodconverter-core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>2.0.8</version>
+            <version>${dependency.pdfbox.version}</version>
         </dependency>
     </dependencies>
 
@@ -63,7 +63,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.0.0.RELEASE</version>
+                <version>${dependency.spring-boot.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -77,7 +77,7 @@
             <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>fabric8-maven-plugin</artifactId>
-                <version>3.5.37</version>
+                <version>${dependency.fabric8.version}</version>
                 <configuration>
                     <images>
                         <image>
@@ -115,7 +115,7 @@
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>fabric8-maven-plugin</artifactId>
-                        <version>3.5.37</version>
+                        <version>${dependency.fabric8.version}</version>
                         <configuration>
                             <images>
                                 <image>

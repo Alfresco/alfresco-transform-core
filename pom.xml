@@ -19,6 +19,9 @@
         <dependency.spring-boot.version>1.5.10.RELEASE</dependency.spring-boot.version>
         <dependency.alfresco-core.version>6.18</dependency.alfresco-core.version>
         <dependency.alfresco-transformer-base.version>${project.version}</dependency.alfresco-transformer-base.version>
+        <dependency.fabric8.version>3.5.37</dependency.fabric8.version>
+        <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
+        <dependency.pdfbox.version>2.0.8</dependency.pdfbox.version>
     </properties>
 
     <modules>
