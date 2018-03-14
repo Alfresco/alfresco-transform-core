@@ -109,7 +109,7 @@
 
     <profiles>
         <profile>
-            <id>dockerImages</id>
+            <id>enterpriseDocker</id> <!-- local build only -->
             <build>
                 <plugins>
                     <plugin>
