@@ -109,7 +109,7 @@
 
     <profiles>
         <profile>
-            <id>enterpriseDocker</id> <!-- local build only -->
+            <id>enterpriseDocker</id>
             <build>
                 <plugins>
                     <plugin>
@@ -122,20 +122,17 @@
                                     <name>alfresco/${artifactId}</name>
                                     <build>
                                         <dockerFileDir>${project.basedir}/</dockerFileDir>
-                                        <tags>
-                                            <tag>${project.version}</tag>
-                                        </tags>
                                     </build>
                                 </image>
                             </images>
                         </configuration>
                         <executions>
                             <execution>
-                                <id>buildImage</id>
+                                <phase>install</phase>
+                                <id>build</id>
                                 <goals>
                                     <goal>build</goal>
                                 </goals>
-                                <phase>install</phase>
                             </execution>
                         </executions>
                     </plugin>
@@ -144,7 +141,7 @@
         </profile>
 
         <profile>
-            <id>pushImages</id> <!-- used only in bamboo for building and pushing snapshots -->
+            <id>pushImages</id>
             <build>
                 <plugins>
                     <plugin>
