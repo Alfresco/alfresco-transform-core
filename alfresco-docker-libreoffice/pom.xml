@@ -81,7 +81,7 @@
                 <configuration>
                     <images>
                         <image>
-                            <name>alfresco/${artifactId}</name>
+                            <name>alfresco/${project.artifactId}</name>
                             <registry>quay.io</registry>
                             <build>
                                 <dockerFileDir>${project.basedir}/</dockerFileDir>
@@ -119,9 +119,12 @@
                         <configuration>
                             <images>
                                 <image>
-                                    <name>alfresco/${artifactId}</name>
+                                    <name>alfresco/${project.artifactId}</name>
                                     <build>
                                         <dockerFileDir>${project.basedir}/</dockerFileDir>
+                                        <tags>
+                                            <tag>local</tag>
+                                        </tags>
                                     </build>
                                 </image>
                             </images>
@@ -151,7 +154,7 @@
                         <configuration>
                             <images>
                                 <image>
-                                    <name>alfresco/${artifactId}</name>
+                                    <name>alfresco/${project.artifactId}</name>
                                     <build>
                                         <dockerFileDir>${project.basedir}/</dockerFileDir>
                                         <tags>
