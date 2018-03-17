@@ -69,6 +69,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
     //      "${jodconverter.maxTasksPerProcess}" will be injected.
 
     private Integer maxTasksPerProcess;
+    private String url;
     private String officeHome;
     private int[] portNumbers;
     private Long taskExecutionTimeout;
@@ -88,6 +89,11 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
         {
             this.maxTasksPerProcess = l.intValue();
         }
+    }
+
+    public void setUrl(String url)
+    {
+        this.url = url;
     }
 
     public void setOfficeHome(String officeHome)
@@ -170,7 +176,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
 
     public void setConnectTimeout(String connectTimeout)
     {
-        this.connectTimeout = parseStringForLong(connectTimeout.trim());
+    	this.connectTimeout = parseStringForLong(connectTimeout.trim());
     }
 
     public void setEnabled(String enabled)
@@ -248,8 +254,8 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
     int[] getPortNumbers()
     {
         return (enabled == null || !enabled) && deprecatedOooEnabled != null && deprecatedOooEnabled
-                ? deprecatedOooPortNumbers
-                : portNumbers;
+            ? deprecatedOooPortNumbers
+            : portNumbers;
     }
 
     private Long parseStringForLong(String string)
@@ -277,8 +283,8 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
      */
     public boolean isAvailable()
     {
-        final boolean result = isAvailable && officeManager != null;
-        return result;
+        final boolean result = isAvailable && (officeManager != null || (url != null && !url.isEmpty()));
+		return result;
     }
 
     /*
@@ -287,8 +293,8 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
      */
     public void afterPropertiesSet() throws Exception
     {
-        // isAvailable defaults to false afterPropertiesSet. It only becomes true on successful completion of this method.
-        this.isAvailable = false;
+    	// isAvailable defaults to false afterPropertiesSet. It only becomes true on successful completion of this method.
+    	this.isAvailable = false;
 
         int[] portNumbers = getPortNumbers();
         String officeHome = getOfficeHome();
@@ -308,6 +314,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
             logger.debug("  jodconverter.taskExecutionTimeout = " + taskExecutionTimeout);
             logger.debug("  jodconverter.taskQueueTimeout = " + taskQueueTimeout);
             logger.debug("  jodconverter.connectTimeout = " + connectTimeout);
+            logger.debug("  jodconverter.url = " + url);
         }
 
         // Only start the JodConverter instance(s) if the subsystem is enabled.
@@ -316,71 +323,75 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
             return;
         }
 
-        logAllSofficeFilesUnderOfficeHome();
+        if (url == null || url.isEmpty())
+        {
 
-        try
-        {
-            DefaultOfficeManagerConfiguration defaultOfficeMgrConfig = new DefaultOfficeManagerConfiguration();
-            if (maxTasksPerProcess != null && maxTasksPerProcess > 0)
-            {
-                defaultOfficeMgrConfig.setMaxTasksPerProcess(maxTasksPerProcess);
-            }
-            if (officeHome != null)
-            {
-                defaultOfficeMgrConfig.setOfficeHome(officeHome);
-            }
-            if (portNumbers != null && portNumbers.length != 0)
-            {
-                defaultOfficeMgrConfig.setPortNumbers(portNumbers);
-            }
-            if (taskExecutionTimeout != null && taskExecutionTimeout > 0)
-            {
-                defaultOfficeMgrConfig.setTaskExecutionTimeout(taskExecutionTimeout);
-            }
-            if (taskQueueTimeout != null && taskQueueTimeout > 0)
-            {
-                defaultOfficeMgrConfig.setTaskQueueTimeout(taskQueueTimeout);
-            }
-            if (templateProfileDir != null)
-            {
-                defaultOfficeMgrConfig.setTemplateProfileDir(templateProfileDir);
-            }
-            if (connectTimeout != null)
-            {
-                defaultOfficeMgrConfig.setConnectTimeout(connectTimeout);
-            }
-            // Try to configure and start the JodConverter library.
-            officeManager = defaultOfficeMgrConfig.buildOfficeManager();
-            officeManager.start();
-        }
-        catch (IllegalStateException isx)
-        {
-            if (logger.isErrorEnabled())
-            {
-                logger.error("Unable to pre-initialise JodConverter library. "
-                        + "The following error is shown for informational purposes only.", isx);
-            }
-            return;
-        }
-        catch (OfficeException ox)
-        {
-            if (logger.isErrorEnabled())
-            {
-                logger.error("Unable to start JodConverter library. "
-                        + "The following error is shown for informational purposes only.", ox);
-            }
+            logAllSofficeFilesUnderOfficeHome();
 
-            // We need to let it continue (comment-out return statement) even if an error occurs. See MNT-13706 and associated issues.
-            //return;
-        }
-        catch (Exception x)
-        {
-            if (logger.isErrorEnabled())
+            try
             {
-                logger.error("Unexpected error in configuring or starting the JodConverter library."
-                        + "The following error is shown for informational purposes only.",x);
+                DefaultOfficeManagerConfiguration defaultOfficeMgrConfig = new DefaultOfficeManagerConfiguration();
+                if (maxTasksPerProcess != null && maxTasksPerProcess > 0)
+                {
+                    defaultOfficeMgrConfig.setMaxTasksPerProcess(maxTasksPerProcess);
+                }
+                if (officeHome != null && officeHome.length() != 0)
+                {
+                    defaultOfficeMgrConfig.setOfficeHome(officeHome);
+                }
+                if (portNumbers != null && portNumbers.length != 0)
+                {
+                    defaultOfficeMgrConfig.setPortNumbers(portNumbers);
+                }
+                if (taskExecutionTimeout != null && taskExecutionTimeout > 0)
+                {
+                    defaultOfficeMgrConfig.setTaskExecutionTimeout(taskExecutionTimeout);
+                }
+                if (taskQueueTimeout != null && taskQueueTimeout > 0)
+                {
+                    defaultOfficeMgrConfig.setTaskQueueTimeout(taskQueueTimeout);
+                }
+                if (templateProfileDir != null)
+                {
+                    defaultOfficeMgrConfig.setTemplateProfileDir(templateProfileDir);
+                }
+                if (connectTimeout != null)
+                {
+                    defaultOfficeMgrConfig.setConnectTimeout(connectTimeout);
+                }
+                // Try to configure and start the JodConverter library.
+                officeManager = defaultOfficeMgrConfig.buildOfficeManager();
+                officeManager.start();
             }
-            return;
+            catch (IllegalStateException isx)
+            {
+                if (logger.isErrorEnabled())
+                {
+                    logger.error("Unable to pre-initialise JodConverter library. "
+                            + "The following error is shown for informational purposes only.", isx);
+                }
+                return;
+            }
+            catch (OfficeException ox)
+            {
+                if (logger.isErrorEnabled())
+                {
+                    logger.error("Unable to start JodConverter library. "
+                            + "The following error is shown for informational purposes only.", ox);
+                }
+
+                // We need to let it continue (comment-out return statement) even if an error occurs. See MNT-13706 and associated issues.
+                //return;
+            }
+            catch (Exception x)
+            {
+                if (logger.isErrorEnabled())
+                {
+                    logger.error("Unexpected error in configuring or starting the JodConverter library."
+                            + "The following error is shown for informational purposes only.", x);
+                }
+                return;
+            }
         }
 
         // If any exceptions are thrown in the above code, then isAvailable
@@ -407,62 +418,62 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
 
     private void logAllSofficeFilesUnderOfficeHome()
     {
-        if (logger.isDebugEnabled() == false)
-        {
-            return;
-        }
+    	if (logger.isDebugEnabled() == false)
+    	{
+    		return;
+    	}
 
-        String officeHome = getOfficeHome();
-        File requestedOfficeHome = new File(officeHome);
+    	String officeHome = getOfficeHome();
+    	File requestedOfficeHome = new File(officeHome);
 
-        logger.debug("Some information on soffice* files and their permissions");
+    	logger.debug("Some information on soffice* files and their permissions");
 
-        logFileInfo(requestedOfficeHome);
+    	logFileInfo(requestedOfficeHome);
 
-        for (File f : findSofficePrograms(requestedOfficeHome, new ArrayList<File>(), 2))
-        {
-            logFileInfo(f);
-        }
+    	for (File f : findSofficePrograms(requestedOfficeHome, new ArrayList<File>(), 2))
+    	{
+    		logFileInfo(f);
+    	}
     }
 
     private List<File> findSofficePrograms(File searchRoot, List<File> results, int maxRecursionDepth)
     {
-        return this.findSofficePrograms(searchRoot, results, 0, maxRecursionDepth);
+    	return this.findSofficePrograms(searchRoot, results, 0, maxRecursionDepth);
     }
 
     private List<File> findSofficePrograms(File searchRoot, List<File> results,
-                                           int currentRecursionDepth, int maxRecursionDepth)
+    		int currentRecursionDepth, int maxRecursionDepth)
     {
-        if (currentRecursionDepth >= maxRecursionDepth)
-        {
-            return results;
-        }
+    	if (currentRecursionDepth >= maxRecursionDepth)
+    	{
+    		return results;
+    	}
 
-        File[] matchingFiles = searchRoot.listFiles(new FilenameFilter()
-        {
-            @Override
-            public boolean accept(File dir, String name)
-            {
-                return name.startsWith("soffice");
-            }
-        });
-        for (File f : matchingFiles)
-        {
-            results.add(f);
-        }
+    	File[] matchingFiles = searchRoot.listFiles(new FilenameFilter()
+    	    {
+    			@Override
+	    		public boolean accept(File dir, String name)
+    			{
+		    		return name.startsWith("soffice");
+	    		}
+    		});
+    	for (File f : matchingFiles)
+    	{
+    		results.add(f);
+    	}
 
-        for (File dir : searchRoot.listFiles(new FileFilter()
-        {
-            @Override
-            public boolean accept(File f) {
-                return f.isDirectory();
-            }
-        }))
-        {
-            findSofficePrograms(dir, results, currentRecursionDepth + 1, maxRecursionDepth);
-        }
+    	for (File dir : searchRoot.listFiles(new FileFilter()
+    	    {
+				@Override
+				public boolean accept(File f) {
+					return f.isDirectory();
+				}
+    	    }))
+    	{
+    		findSofficePrograms(dir, results, currentRecursionDepth + 1, maxRecursionDepth);
+    	}
 
-        return results;
+    	return results;
     }
 
     /**
@@ -471,50 +482,50 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
      */
     private void logFileInfo(File f)
     {
-        if (logger.isDebugEnabled() == false)
-        {
-            return;
-        }
+    	if (logger.isDebugEnabled() == false)
+    	{
+    		return;
+    	}
 
-        StringBuilder msg = new StringBuilder();
-        msg.append(f).append(" ");
-        if (f.exists())
-        {
-            if (f.canRead())
-            {
-                msg.append("(")
-                        .append(f.isDirectory() ? "d" : "-")
-                        .append(f.canRead() ? "r" : "-")
-                        .append(f.canWrite() ? "w" : "-")
-                        .append(f.canExecute() ? "x" : "-")
-                        .append(")");
-            }
-        }
-        else
-        {
-            msg.append("does not exist");
-        }
-        logger.debug(msg.toString());
+    	StringBuilder msg = new StringBuilder();
+    	msg.append(f).append(" ");
+    	if (f.exists())
+    	{
+    		if (f.canRead())
+    		{
+    			msg.append("(")
+    			   .append(f.isDirectory() ? "d" : "-")
+    			   .append(f.canRead() ? "r" : "-")
+    			   .append(f.canWrite() ? "w" : "-")
+    			   .append(f.canExecute() ? "x" : "-")
+    			   .append(")");
+    		}
+    	}
+    	else
+    	{
+    		msg.append("does not exist");
+    	}
+    	logger.debug(msg.toString());
     }
 
     /*
      * (non-Javadoc)
      * @see org.springframework.beans.factory.DisposableBean#destroy()
      */
-    public void destroy() throws Exception {
-        this.isAvailable = false;
-        if (officeManager != null)
-        {
-            // If there is an OfficeException when stopping the officeManager below, then there is
-            // little that can be done other than logging the exception and carrying on. The JodConverter-based
-            // libraries will not be used in any case, as isAvailable is false.
-            //
-            // Any exception thrown out of this method will be logged and swallowed by Spring
-            // (see javadoc for method declaration). Therefore there is no handling here for
-            // exceptions from jodConverter.
-            officeManager.stop();
-        }
-    }
+	public void destroy() throws Exception {
+	    this.isAvailable = false;
+	    if (officeManager != null)
+	    {
+	    	// If there is an OfficeException when stopping the officeManager below, then there is
+	    	// little that can be done other than logging the exception and carrying on. The JodConverter-based
+	    	// libraries will not be used in any case, as isAvailable is false.
+	    	//
+	    	// Any exception thrown out of this method will be logged and swallowed by Spring
+	    	// (see javadoc for method declaration). Therefore there is no handling here for
+	    	// exceptions from jodConverter.
+	        officeManager.stop();
+	    }
+	}
 
     /* (non-Javadoc)
      * @see org.alfresco.repo.content.JodConverterWorker#getOfficeManager()
