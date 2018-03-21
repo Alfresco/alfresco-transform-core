@@ -2,8 +2,8 @@
 
 FROM quay.io/alfresco/alfresco-base-java:9
 
-ENV IMAGEMAGICK_RPM_URL=https://www.imagemagick.org/download/linux/CentOS/x86_64/ImageMagick-7.0.7-26.x86_64.rpm
-ENV IMAGEMAGICK_LIB_RPM_URL=https://www.imagemagick.org/download/linux/CentOS/x86_64/ImageMagick-libs-7.0.7-26.x86_64.rpm
+ENV IMAGEMAGICK_RPM_URL=https://www.imagemagick.org/download/linux/CentOS/x86_64/ImageMagick-7.0.7-27.x86_64.rpm
+ENV IMAGEMAGICK_LIB_RPM_URL=https://www.imagemagick.org/download/linux/CentOS/x86_64/ImageMagick-libs-7.0.7-27.x86_64.rpm
 
 COPY target/alfresco-docker-imagemagick*.jar /usr/bin
 
