@@ -21,6 +21,7 @@
         <dependency.spring-boot.version>1.5.10.RELEASE</dependency.spring-boot.version>
         <dependency.alfresco-core.version>6.18</dependency.alfresco-core.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
+        <env.project_version>${project.version}</env.project_version>
     </properties>
 
     <modules>
