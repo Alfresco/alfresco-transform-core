@@ -2,7 +2,7 @@
 
 FROM quay.io/alfresco/alfresco-base-java:9
 
-ENV LIBREOFFICE_RPM_URL=http://download.documentfoundation.org/libreoffice/stable/5.4.5/rpm/x86_64/LibreOffice_5.4.5_Linux_x86-64_rpm.tar.gz
+ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/5.4.6/libreoffice-dist-5.4.6-linux.gz
 
 COPY target/alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin
 

@@ -1,9 +1,9 @@
-# Image provides a container in which to run ImageMagick transformations for Alfresco Content Services.
+e# Image provides a container in which to run ImageMagick transformations for Alfresco Content Services.
 
 FROM quay.io/alfresco/alfresco-base-java:9
 
-ENV IMAGEMAGICK_RPM_URL=https://www.imagemagick.org/download/linux/CentOS/x86_64/ImageMagick-7.0.7-27.x86_64.rpm
-ENV IMAGEMAGICK_LIB_RPM_URL=https://www.imagemagick.org/download/linux/CentOS/x86_64/ImageMagick-libs-7.0.7-27.x86_64.rpm
+ENV IMAGEMAGICK_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/7.0.7-27/imagemagick-distribution-7.0.7-27-linux.rpm
+ENV IMAGEMAGICK_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/7.0.7-27/imagemagick-distribution-7.0.7-27-libs-linux.rpm
 
 COPY target/alfresco-docker-imagemagick-${env.project_version}.jar /usr/bin
 
