@@ -81,7 +81,9 @@ public class LibreOfficeController extends AbstractTransformerController
     public LibreOfficeController() throws Exception
     {
         logger = LogFactory.getLog(LibreOfficeController.class);
-
+        logger.info("-------------------------------------------------------------------------------------------------------------------------------------------------------");
+        logger.info("This transformer uses LibreOffice from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt");
+        logger.info("-------------------------------------------------------------------------------------------------------------------------------------------------------");
         setJodConverter(createJodConverter());
     }
 

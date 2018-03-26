@@ -1,8 +1,11 @@
 # Image provides a container in which to run LibreOffice transformations for Alfresco Content Services.
 
+# LibreOffice is from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt
+
 FROM quay.io/alfresco/alfresco-base-java:9
 
 ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/5.4.6/libreoffice-dist-5.4.6-linux.gz
+ENV LIBREOFFICE_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/zip/src/main/resources/licenses/3rd-party/libreoffice.txt
 
 COPY target/alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin
 
@@ -10,6 +13,7 @@ RUN ln /usr/bin/alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin/
     yum install -y wget && \
     yum install -y cairo cups-libs libSM && \
     wget $LIBREOFFICE_RPM_URL && \
+    wget $LIBREOFFICE_LICENSE_FILE && \
     tar xzf libreoffice-dist-*-linux.gz && \
     yum localinstall -y LibreOffice*/RPMS/*.rpm && \
     rm -rf libreoffice-dist-*-linux.gz LibreOffice_*_Linux_x86-64_rpm && \

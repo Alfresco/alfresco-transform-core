@@ -80,6 +80,9 @@ public class ImageMagickController extends AbstractTransformerController
     public ImageMagickController()
     {
         logger = LogFactory.getLog(ImageMagickController.class);
+        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        logger.info("This transformer uses ImageMagick from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt");
+        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
         setTransformCommand(createTransformCommand());
         setCheckCommand(createCheckCommand());
     }
