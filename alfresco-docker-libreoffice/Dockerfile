@@ -10,9 +10,9 @@ RUN ln /usr/bin/alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin/
     yum install -y wget && \
     yum install -y cairo cups-libs libSM && \
     wget $LIBREOFFICE_RPM_URL && \
-    tar xzf LibreOffice_*_Linux_x86-64_rpm.tar.gz && \
+    tar xzf libreoffice-dist-*-linux.gz && \
     yum localinstall -y LibreOffice*/RPMS/*.rpm && \
-    rm -rf LibreOffice_*_Linux_x86-64_rpm.tar.gz LibreOffice_*_Linux_x86-64_rpm && \
+    rm -rf libreoffice-dist-*-linux.gz LibreOffice_*_Linux_x86-64_rpm && \
     yum remove -y wget && \
     yum clean all
 

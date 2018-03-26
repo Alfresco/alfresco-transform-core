@@ -1,4 +1,4 @@
-e# Image provides a container in which to run ImageMagick transformations for Alfresco Content Services.
+# Image provides a container in which to run ImageMagick transformations for Alfresco Content Services.
 
 FROM quay.io/alfresco/alfresco-base-java:9
 
@@ -11,8 +11,8 @@ RUN ln /usr/bin/alfresco-docker-imagemagick-${env.project_version}.jar /usr/bin/
     yum install -y wget && \
     wget $IMAGEMAGICK_RPM_URL && \
     wget $IMAGEMAGICK_LIB_RPM_URL && \
-    yum localinstall -y ImageMagick-*.x86_64.rpm && \
-    rm -f ImageMagick-*.x86_64.rpm && \
+    yum localinstall -y imagemagick-distribution-*-linux.rpm && \
+    rm -f imagemagick-distribution-*-linux.rpm && \
     yum remove -y wget && \
     yum clean all
 
