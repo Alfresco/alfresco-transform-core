@@ -16,7 +16,7 @@
     <properties>
         <image.name>alfresco/${project.artifactId}</image.name>
         <image.registry>quay.io</image.registry>
-        <public.image.registry>registry.hub.docker.com</public.image.registry>
+        <public.image.registry>docker.io</public.image.registry>
     </properties>
 
     <dependencyManagement>
@@ -165,8 +165,6 @@
                                         <dockerFileDir>${project.basedir}/</dockerFileDir>
                                     </build>
                                 </image>
-                                <!-- This project is for enterprise use only, it will be pushed only to quay.io
-                                     Added the image push to dockerhub for a possible future use
                                 <image>
                                     <name>${image.name}:${project.version}</name>
                                     <registry>${public.image.registry}</registry>
@@ -174,7 +172,6 @@
                                         <dockerFileDir>${project.basedir}/</dockerFileDir>
                                     </build>
                                 </image>
-                                -->
                             </images>
                         </configuration>
                         <executions>
