@@ -1,6 +1,6 @@
 # Image provides a container in which to run alfresco-pdf-renderer transformations for Alfresco Content Services.
 
-# The alfresco-pdf-renderer transformer uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt
+# alfresco-pdf-renderer uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt
 
 FROM quay.io/alfresco/alfresco-base-java:9
 

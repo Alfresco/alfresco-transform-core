@@ -72,9 +72,9 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
     public AlfrescoPdfRendererController()
     {
         logger = LogFactory.getLog(AlfrescoPdfRendererController.class);
-        logger.info("------------------------------------------------------------------------------------------------------------------------------------------");
-        logger.info("This transformer uses PDFium from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt");
-        logger.info("------------------------------------------------------------------------------------------------------------------------------------------");
+        logger.info("-----------------------------------------------------------------------------------------------------------------------------------------------------------");
+        logger.info("alfresco-pdf-renderer uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt");
+        logger.info("-----------------------------------------------------------------------------------------------------------------------------------------------------------");
         setTransformCommand(createTransformCommand());
         setCheckCommand(createCheckCommand());
     }
