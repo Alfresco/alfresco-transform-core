@@ -4,12 +4,12 @@
     <name>Alfresco Docker Pdf Renderer</name>
     <packaging>jar</packaging>
 
-    <version>0.5</version>
+    <version>0.6-SNAPSHOT</version>
 
     <parent>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-docker-transformers</artifactId>
-        <version>0.5</version>
+        <version>0.6-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
