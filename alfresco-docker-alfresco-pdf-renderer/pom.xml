@@ -16,7 +16,6 @@
     <properties>
         <image.name>alfresco/${project.artifactId}</image.name>
         <image.registry>quay.io</image.registry>
-        <public.image.registry>docker.io</public.image.registry>
     </properties>
 
     <dependencyManagement>
@@ -167,7 +166,6 @@
                                 </image>
                                 <image>
                                     <name>${image.name}:${project.version}</name>
-                                    <registry>${public.image.registry}</registry>
                                     <build>
                                         <dockerFileDir>${project.basedir}/</dockerFileDir>
                                     </build>
