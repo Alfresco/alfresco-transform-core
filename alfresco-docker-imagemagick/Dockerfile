@@ -1,6 +1,7 @@
-# Image provides a container in which to run ImageMagick transformations for Alfresco Content Services.
+# Image provides a container in which to run ImageMagick transformations for Alfresco Enterprise Content Services.
 
-# ImageMagick is from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt
+# The container is only intended to be used with the Alfresco Enterprise editon which is covered by https://www.alfresco.com/legal/agreements and https://www.alfresco.com/terms-use.
+# ImageMagick is from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt.
 
 FROM quay.io/alfresco/alfresco-base-java:9
 

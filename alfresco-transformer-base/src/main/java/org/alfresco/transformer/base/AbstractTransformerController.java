@@ -98,6 +98,16 @@ public abstract class AbstractTransformerController
         checkCommand = runtimeExec;
     }
 
+    protected void logEnterpriseLicenseMessage()
+    {
+        logger.info("This image is only intended to be use with the Alfresco Enterprise Content Repository which is covered by ");
+        logger.info("https://www.alfresco.com/legal/agreements and https://www.alfresco.com/terms-use");
+        logger.info("");
+        logger.info("License rights for this program may be obtained from Alfresco Software, Ltd. pursuant to a written agreement");
+        logger.info("and any use of this program without such an agreement is prohibited.");
+        logger.info("");
+    }
+
     @RequestMapping("/version")
     @ResponseBody
     String version()
