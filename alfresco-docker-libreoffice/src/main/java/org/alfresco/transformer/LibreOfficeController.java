@@ -96,6 +96,24 @@ public class LibreOfficeController extends AbstractTransformerController
         this.jodconverter = jodconverter;
     }
 
+    @Override
+    protected String getTransformerName()
+    {
+        return "LibreOffice";
+    }
+
+    @Override
+    protected String version()
+    {
+        // This method is simply used to check the availability in the case of LibreOffice.
+        if (!jodconverter.isAvailable())
+        {
+            throw new TransformException(500, "LibreOffice is not yet available");
+        }
+
+        return "LibreOffice available";
+    }
+
     @PostMapping("/transform")
     public ResponseEntity<Resource> transform(HttpServletRequest request,
                                               @RequestParam("file") MultipartFile sourceMultipartFile,

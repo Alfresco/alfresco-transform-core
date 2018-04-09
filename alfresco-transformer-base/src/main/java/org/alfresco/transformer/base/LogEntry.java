@@ -25,7 +25,10 @@
  */
 package org.alfresco.transformer.base;
 
-import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -40,6 +43,7 @@ public class LogEntry
     private static final AtomicInteger count = new AtomicInteger(0);
     private static final Deque<LogEntry> log = new ConcurrentLinkedDeque<>();
     private static final int MAX_LOG_SIZE = 10;
+    private static final SimpleDateFormat HH_MM_SS = new SimpleDateFormat("HH:mm:ss");
 
     private static ThreadLocal<LogEntry> currentLogEntry = new ThreadLocal<LogEntry>()
     {
@@ -70,6 +74,32 @@ public class LogEntry
     private long targetSize;
     private String options;
     private String message;
+
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getId());
+        sb.append(' ');
+        sb.append(HH_MM_SS.format(getDate()));
+        sb.append(' ');
+        sb.append(getStatusCode());
+        sb.append(' ');
+        sb.append(getDuration());
+        sb.append(' ');
+        sb.append(getSource());
+        sb.append(' ');
+        sb.append(getSourceSize());
+        sb.append(' ');
+        sb.append(getTarget());
+        sb.append(' ');
+        sb.append(getTargetSize());
+        sb.append(' ');
+        sb.append(getOptions());
+        sb.append(' ');
+        sb.append(getMessage());
+        return sb.toString();
+    }
 
     public static Collection<LogEntry> getLog()
     {
@@ -127,6 +157,11 @@ public class LogEntry
         LogEntry logEntry = currentLogEntry.get();
         logEntry.durationStreamOut = System.currentTimeMillis() - logEntry.start - logEntry.durationStreamIn - logEntry.durationTransform;
         currentLogEntry.remove();
+
+        if (AbstractTransformerController.logger != null && AbstractTransformerController.logger.isDebugEnabled())
+        {
+            AbstractTransformerController.logger.debug(logEntry.toString());
+        }
     }
 
     public int getId()

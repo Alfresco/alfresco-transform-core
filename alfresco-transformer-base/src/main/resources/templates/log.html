@@ -1,40 +1,37 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 
-    <div th:if="${message}">
-        <h2 th:text="${message}"/>
+    <div>
+        <h2 th:text="${title}"></h2>
+        <div th:if="${log}">
+            <table>
+                <tr>
+                    <th>Id</th>
+                    <th>Time</th>
+                    <th>Status Code</th>
+                    <th>Duration (ms)</th>
+                    <th>Source</th>
+                    <th></th>
+                    <th>Target</th>
+                    <th></th>
+                    <th>Options</th>
+                    <th>Message</th>
+                </tr>
+                <tr th:each="entry : ${log}">
+                    <td th:text="${entry.id}"></td>
+                    <td th:text="${#dates.format(entry.date, 'HH:mm:ss')}"></td>
+                    <td th:text="${entry.statusCode}"></td>
+                    <td th:text="${entry.duration}"></td>
+                    <td th:text="${entry.source}"></td>
+                    <td th:text="${entry.sourceSize}"></td>
+                    <td th:text="${entry.target}"></td>
+                    <td th:text="${entry.targetSize}"></td>
+                    <td th:text="${entry.options}"></td>
+                    <td th:text="${entry.message}"></td>
+                </tr>
+            </table>
+        </div>
     </div>
-
-    <h2>Log entries</h2>
-    <div th:if="${log}">
-        <table>
-            <tr>
-                <th>Id</th>
-                <th>Time</th>
-                <th>Status Code</th>
-                <th>Duration (ms)</th>
-                <th>Source</th>
-                <th></th>
-                <th>Target</th>
-                <th></th>
-                <th>Options</th>
-                <th>Message</th>
-            </tr>
-            <tr th:each="entry : ${log}">
-                <td th:text="${entry.id}"></td>
-                <td th:text="${#dates.format(entry.date, 'HH:mm:ss')}"></td>
-                <td th:text="${entry.statusCode}"></td>
-                <td th:text="${entry.duration}"></td>
-                <td th:text="${entry.source}"></td>
-                <td th:text="${entry.sourceSize}"></td>
-                <td th:text="${entry.target}"></td>
-                <td th:text="${entry.targetSize}"></td>
-                <td th:text="${entry.options}"></td>
-                <td th:text="${entry.message}"></td>
-            </tr>
-        </table>
-    </div>
-
 
     <div>
         <br/>

@@ -66,6 +66,12 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
         setCheckCommand(createCheckCommand());
     }
 
+    @Override
+    protected String getTransformerName()
+    {
+        return "Alfresco PDF Renderer";
+    }
+
     private static RuntimeExec createTransformCommand()
     {
         RuntimeExec runtimeExec = new RuntimeExec();

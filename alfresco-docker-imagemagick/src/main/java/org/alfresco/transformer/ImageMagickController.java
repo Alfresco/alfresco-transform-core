@@ -71,6 +71,12 @@ public class ImageMagickController extends AbstractTransformerController
         setCheckCommand(createCheckCommand());
     }
 
+    @Override
+    protected String getTransformerName()
+    {
+        return "ImageMagick";
+    }
+
     private static RuntimeExec createTransformCommand()
     {
         RuntimeExec runtimeExec = new RuntimeExec();
