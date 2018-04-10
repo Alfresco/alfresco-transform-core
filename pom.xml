@@ -10,7 +10,7 @@
 
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-docker-transformers</artifactId>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.8-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -41,7 +41,7 @@
     <distributionManagement>
         <repository>
             <id>alfresco-internal</id>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/enterprise-releases</url>
+            <url>https://artifacts.alfresco.com/nexus/content/repositories/internal-releases</url>
         </repository>
         <snapshotRepository>
             <id>alfresco-internal-snapshots</id>
