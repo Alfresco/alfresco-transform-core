@@ -98,9 +98,21 @@ public abstract class AbstractTransformerController
         checkCommand = runtimeExec;
     }
 
+    protected void logEnterpriseLicenseMessage()
+    {
+        logger.info("This image is only intended to be used with the Alfresco Enterprise Content Repository which is covered by ");
+        logger.info("https://www.alfresco.com/legal/agreements and https://www.alfresco.com/terms-use");
+        logger.info("");
+        logger.info("License rights for this program may be obtained from Alfresco Software, Ltd. pursuant to a written agreement");
+        logger.info("and any use of this program without such an agreement is prohibited.");
+        logger.info("");
+    }
+
+    protected abstract String getTransformerName();
+
     @RequestMapping("/version")
     @ResponseBody
-    String version()
+    protected String version()
     {
         String version = "Version not checked";
         if (checkCommand != null)
@@ -130,6 +142,7 @@ public abstract class AbstractTransformerController
     @GetMapping("/log")
     public String log(Model model)
     {
+        model.addAttribute("title", getTransformerName() + " Log Entries");
         Collection<LogEntry> log = LogEntry.getLog();
         if (!log.isEmpty())
         {
@@ -138,9 +151,16 @@ public abstract class AbstractTransformerController
         return "log"; // the name of the template
     }
 
+    @GetMapping("/error")
+    public String error()
+    {
+        return "error"; // the name of the template
+    }
+
     @ExceptionHandler(TypeMismatchException.class)
     public void handleParamsTypeMismatch(HttpServletResponse response, MissingServletRequestParameterException e) throws IOException
     {
+        String transformerName = getTransformerName();
         String name = e.getParameterName();
         String message = "Request parameter " + name + " is of the wrong type";
         int statusCode = 400;
@@ -152,12 +172,13 @@ public abstract class AbstractTransformerController
 
         LogEntry.setStatusCodeAndMessage(statusCode, message);
 
-        response.sendError(statusCode, message);
+        response.sendError(statusCode, transformerName+" - "+message);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public void handleMissingParams(HttpServletResponse response, MissingServletRequestParameterException e) throws IOException
     {
+        String transformerName = getTransformerName();
         String name = e.getParameterName();
         String message = "Request parameter " + name + " is missing";
         int statusCode = 400;
@@ -169,12 +190,13 @@ public abstract class AbstractTransformerController
 
         LogEntry.setStatusCodeAndMessage(statusCode, message);
 
-        response.sendError(statusCode, message);
+        response.sendError(statusCode, transformerName+" - "+message);
     }
 
     @ExceptionHandler(TransformException.class)
     public void transformExceptionWithMessage(HttpServletResponse response, TransformException e) throws IOException
     {
+        String transformerName = getTransformerName();
         String message = e.getMessage();
         int statusCode = e.getStatusCode();
 
@@ -185,8 +207,31 @@ public abstract class AbstractTransformerController
 
         LogEntry.setStatusCodeAndMessage(statusCode, message);
 
-        response.sendError(statusCode, message);
+        // Forced to include the transformer name in the message (see commented out version of this method)
+        response.sendError(statusCode, transformerName+" - "+message);
     }
+
+    // Results in HTML rather than json but there is an error in the log about "template might not exist or might
+    // not be accessible by any of the configured Template Resolvers" for the transformer.html (which is correct
+    // because that failed). Looks like Spring only supports returning json or XML when returning an Object or even
+    // a ResponseEntity without this logged exception, which is a shame as it would have been nicer to have just
+    // added the transformerName to the Object.
+//    @ExceptionHandler(TransformException.class)
+//    public final Map<String, Object> transformExceptionWithMessage(HttpServletResponse response, TransformException e, WebRequest request)
+//    {
+//        String transformerName = getTransformerName();
+//        String message = e.getMessage();
+//        int statusCode = e.getStatusCode();
+//
+//        LogEntry.setStatusCodeAndMessage(statusCode, message);
+//
+//        Map<String, Object> errorAttributes = new HashMap<>();
+//        errorAttributes.put("title", transformerName);
+//        errorAttributes.put("message", message);
+//        errorAttributes.put("status", Integer.toString(statusCode));
+//        errorAttributes.put("error", HttpStatus.valueOf(statusCode).getReasonPhrase());
+//        return errorAttributes;
+//    }
 
     protected String createTargetFileName(MultipartFile sourceMultipartFile, String targetExtension)
     {

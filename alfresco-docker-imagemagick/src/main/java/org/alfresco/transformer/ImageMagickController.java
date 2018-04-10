@@ -1,26 +1,12 @@
 /*
  * #%L
- * Alfresco Repository
+ * Alfresco Enterprise Repository
  * %%
  * Copyright (C) 2005 - 2018 Alfresco Software Limited
  * %%
- * This file is part of the Alfresco software.
- * If the software was purchased under a paid Alfresco license, the terms of
- * the paid license agreement will prevail.  Otherwise, the software is
- * provided under the following open source license terms:
- *
- * Alfresco is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Alfresco is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * License rights for this program may be obtained from Alfresco Software, Ltd.
+ * pursuant to a written agreement and any use of this program without such an
+ * agreement is prohibited.
  * #L%
  */
 package org.alfresco.transformer;
@@ -35,14 +21,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -81,10 +64,17 @@ public class ImageMagickController extends AbstractTransformerController
     {
         logger = LogFactory.getLog(ImageMagickController.class);
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        logEnterpriseLicenseMessage();
         logger.info("This transformer uses ImageMagick from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt");
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
         setTransformCommand(createTransformCommand());
         setCheckCommand(createCheckCommand());
+    }
+
+    @Override
+    protected String getTransformerName()
+    {
+        return "ImageMagick";
     }
 
     private static RuntimeExec createTransformCommand()
