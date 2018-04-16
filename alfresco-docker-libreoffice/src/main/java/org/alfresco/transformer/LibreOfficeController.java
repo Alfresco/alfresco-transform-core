@@ -71,11 +71,14 @@ public class LibreOfficeController extends AbstractTransformerController
         logEnterpriseLicenseMessage();
         logger.info("This transformer uses LibreOffice from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt");
         logger.info("-------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+        // TODO Remove this when we are happy that creating the jodconverter on the first transform is okay.
+//        setJodConverter(createJodConverter(null));
     }
 
     private static JodConverter createJodConverter(Long taskExecutionTimeout)
     {
-        String timeout = taskExecutionTimeout <= 0 ? "120000" : taskExecutionTimeout.toString();
+        String timeout = taskExecutionTimeout == null || taskExecutionTimeout <= 0 ? "120000" : taskExecutionTimeout.toString();
 
         JodConverterSharedInstance jodconverter = new JodConverterSharedInstance();
 
@@ -119,12 +122,11 @@ public class LibreOfficeController extends AbstractTransformerController
     @Override
     protected String version()
     {
-        // This method is simply used to check the availability in the case of LibreOffice.
-        if (!jodconverter.isAvailable())
-        {
-            throw new TransformException(500, "LibreOffice is not yet available");
-        }
-
+        // TODO Remove this when we are happy that creating the jodconverter on the first transform is okay.
+//        if (!jodconverter.isAvailable())
+//        {
+//            throw new TransformException(500, "LibreOffice is not yet available");
+//        }
         return "LibreOffice available";
     }
 
