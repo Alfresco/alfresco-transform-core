@@ -291,7 +291,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
      * (non-Javadoc)
      * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
      */
-    public void afterPropertiesSet() throws Exception
+    public void afterPropertiesSet()
     {
     	// isAvailable defaults to false afterPropertiesSet. It only becomes true on successful completion of this method.
     	this.isAvailable = false;

@@ -114,6 +114,7 @@ public class ImageMagickController extends AbstractTransformerController
                                               @RequestParam("file") MultipartFile sourceMultipartFile,
                                               @RequestParam("targetExtension") String targetExtension,
                                               @RequestParam(value = "timeout", required = false) Long timeout,
+                                              @RequestParam(value = "testDelay", required = false) Long testDelay,
 
                                               @RequestParam(value = "startPage", required = false) Integer startPage,
                                               @RequestParam(value = "endPage", required = false) Integer endPage,
@@ -138,7 +139,11 @@ public class ImageMagickController extends AbstractTransformerController
         if (cropGravity != null)
         {
             cropGravity = cropGravity.trim();
-            if (!cropGravity.isEmpty() && !GRAVITY_VALUES.contains(cropGravity))
+            if (cropGravity.isEmpty())
+            {
+                cropGravity = null;
+            }
+            else if (!GRAVITY_VALUES.contains(cropGravity))
             {
                 throw new TransformException(400, "Invalid cropGravity value");
             }
@@ -258,6 +263,6 @@ public class ImageMagickController extends AbstractTransformerController
 
         executeTransformCommand(properties, targetFile, timeout);
 
-        return createAttachment(targetFilename, targetFile);
+        return createAttachment(targetFilename, targetFile, testDelay);
     }
 }

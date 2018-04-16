@@ -241,10 +241,10 @@ public abstract class AbstractTransformerController
         if (sourceFilename != null && !sourceFilename.isEmpty())
         {
             String ext = StringUtils.getFilenameExtension(sourceFilename);
-            if (ext != null && !ext.isEmpty())
-            {
-                targetFilename =sourceFilename.substring(0, sourceFilename.length()-ext.length()-1)+'.'+targetExtension;
-            }
+            targetFilename = (ext != null && !ext.isEmpty()
+                ? sourceFilename.substring(0, sourceFilename.length()-ext.length()-1)
+                : sourceFilename)+
+                '.'+targetExtension;
         }
         return targetFilename;
     }
@@ -330,7 +330,6 @@ public abstract class AbstractTransformerController
             else
             {
                 throw new TransformException(500, "Could not read the target file: " + file.getPath());
-
             }
         }
         catch (MalformedURLException e)
@@ -339,14 +338,14 @@ public abstract class AbstractTransformerController
         }
     }
 
-    protected void executeTransformCommand(Map<String, String> properties, File targetFile, Long timeout)
+    public void executeTransformCommand(Map<String, String> properties, File targetFile, Long timeout)
     {
-        long timeoutMs = timeout != null && timeout > 0 ? timeout : 0;
-        RuntimeExec.ExecutionResult result = transformCommand.execute(properties, timeoutMs);
+        timeout = timeout != null && timeout > 0 ? timeout : 0;
+        RuntimeExec.ExecutionResult result = transformCommand.execute(properties, timeout);
 
         if (result.getExitValue() != 0 && result.getStdErr() != null && result.getStdErr().length() > 0)
         {
-            throw new TransformException(400, "Transformer exit code was not 0: \n" + result);
+            throw new TransformException(400, "Transformer exit code was not 0: \n" + result.getStdErr());
         }
 
         if (!targetFile.exists() || targetFile.length() == 0)
@@ -355,7 +354,7 @@ public abstract class AbstractTransformerController
         }
     }
 
-    protected ResponseEntity<Resource> createAttachment(String targetFilename, File targetFile)
+    protected ResponseEntity<Resource> createAttachment(String targetFilename, File targetFile, Long testDelay)
     {
         try
         {
@@ -365,6 +364,7 @@ public abstract class AbstractTransformerController
                     "attachment; filename*= UTF-8''" + targetFilename).body(targetResource);
             LogEntry.setTargetSize(targetFile.length());
             LogEntry.setStatusCodeAndMessage(200, "Success");
+            LogEntry.addDelay(testDelay);
             return body;
         }
         catch (UnsupportedEncodingException e)

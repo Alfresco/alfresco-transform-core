@@ -71,16 +71,17 @@ public class LibreOfficeController extends AbstractTransformerController
         logEnterpriseLicenseMessage();
         logger.info("This transformer uses LibreOffice from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt");
         logger.info("-------------------------------------------------------------------------------------------------------------------------------------------------------");
-        setJodConverter(createJodConverter());
     }
 
-    private static JodConverter createJodConverter() throws Exception
+    private static JodConverter createJodConverter(Long taskExecutionTimeout)
     {
+        String timeout = taskExecutionTimeout <= 0 ? "120000" : taskExecutionTimeout.toString();
+
         JodConverterSharedInstance jodconverter = new JodConverterSharedInstance();
 
         jodconverter.setOfficeHome(OFFICE_HOME);         // jodconverter.officeHome
         jodconverter.setMaxTasksPerProcess("200");       // jodconverter.maxTasksPerProcess
-        jodconverter.setTaskExecutionTimeout("120000");  // jodconverter.maxTasksPerProcess
+        jodconverter.setTaskExecutionTimeout(timeout);   // jodconverter.maxTaskExecutionTimeout
         jodconverter.setTaskQueueTimeout("30000");       // jodconverter.taskQueueTimeout
         jodconverter.setConnectTimeout("28000");         // jodconverter.connectTimeout
         jodconverter.setPortNumbers("8100");             // jodconverter.portNumbers
@@ -94,6 +95,19 @@ public class LibreOfficeController extends AbstractTransformerController
     public void setJodConverter(JodConverter jodconverter)
     {
         this.jodconverter = jodconverter;
+    }
+
+    /**
+     * Jodconverter timeouts are per OfficeManager, so we would need multiple OfficeManagers if we
+     * have different timeouts. Alfresco only has one. So we delay building it until the first request.
+     * This was not done previously.
+     */
+    private synchronized void setJodConverterOnFirstRequest(Long timeout)
+    {
+        if (jodconverter == null)
+        {
+            setJodConverter(createJodConverter(timeout));
+        }
     }
 
     @Override
@@ -118,29 +132,30 @@ public class LibreOfficeController extends AbstractTransformerController
     public ResponseEntity<Resource> transform(HttpServletRequest request,
                                               @RequestParam("file") MultipartFile sourceMultipartFile,
                                               @RequestParam("targetExtension") String targetExtension,
-                                              @RequestParam(value = "timeout", required = false) Long timeout)
+                                              @RequestParam(value = "timeout", required = false) Long timeout,
+                                              @RequestParam(value = "testDelay", required = false) Long testDelay)
     {
         String targetFilename = createTargetFileName(sourceMultipartFile, targetExtension);
         File sourceFile = createSourceFile(request, sourceMultipartFile);
         File targetFile = createTargetFile(request, targetFilename);
         // Both files are deleted by TransformInterceptor.afterCompletion
 
-        executeTransformCommand(sourceFile, targetFile);
+        executeTransformCommand(sourceFile, targetFile, timeout);
 
-        return createAttachment(targetFilename, targetFile);
+        return createAttachment(targetFilename, targetFile, testDelay);
     }
 
-    protected void executeTransformCommand(File sourceFile, File targetFile)
+    protected void executeTransformCommand(File sourceFile, File targetFile, Long timeout)
     {
+        timeout = timeout != null && timeout > 0 ? timeout : 0;
+
         try
         {
-            OfficeManager officeManager = jodconverter.getOfficeManager();
-            OfficeDocumentConverter converter = new OfficeDocumentConverter(officeManager);
-            converter.convert(sourceFile, targetFile);
+            convert(sourceFile, targetFile, timeout);
         }
         catch (OfficeException e)
         {
-            throw new TransformException(500, "LibreOffice server conversion failed: \n"+
+            throw new TransformException(400, "LibreOffice server conversion failed: \n"+
                     "   from file: " + sourceFile + "\n" +
                     "   to file: " + targetFile,
                     e);
@@ -167,6 +182,14 @@ public class LibreOfficeController extends AbstractTransformerController
         {
             throw new TransformException(500, "Transformer failed to create an output file");
         }
+    }
+
+    void convert(File sourceFile, File targetFile, long timeout)
+    {
+        setJodConverterOnFirstRequest(timeout);
+        OfficeManager officeManager = jodconverter.getOfficeManager();
+        OfficeDocumentConverter converter = new OfficeDocumentConverter(officeManager);
+        converter.convert(sourceFile, targetFile);
     }
 
     /**

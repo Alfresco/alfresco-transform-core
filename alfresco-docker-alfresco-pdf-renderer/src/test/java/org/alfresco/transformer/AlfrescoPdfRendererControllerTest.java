@@ -23,26 +23,30 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer.base;
+package org.alfresco.transformer;
 
-public class TransformException extends RuntimeException
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.io.IOException;
+
+/**
+ * Test the AlfrescoPdfRendererControllerTest without a server.
+ * Super class includes tests for the AbstractTransformerController.
+ */
+@RunWith(SpringRunner.class)
+@WebMvcTest(AlfrescoPdfRendererController.class)
+public class AlfrescoPdfRendererControllerTest extends AbstractTransformerControllerTest
 {
-    private int statusCode;
+    @SpyBean
+    private AlfrescoPdfRendererController controller;
 
-    public TransformException(int statusCode, String message)
+    @Before
+    public void before() throws IOException
     {
-        super(message);
-        this.statusCode = statusCode;
-    }
-
-    public TransformException(int statusCode, String message, Throwable cause)
-    {
-        super(message, cause);
-        this.statusCode = statusCode;
-    }
-
-    public int getStatusCode()
-    {
-        return statusCode;
+        super.mockTransformCommand(controller, "pdf", "png", "application/pdf");
     }
 }

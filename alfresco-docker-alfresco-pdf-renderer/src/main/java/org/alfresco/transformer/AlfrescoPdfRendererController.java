@@ -103,6 +103,7 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
                                               @RequestParam("file") MultipartFile sourceMultipartFile,
                                               @RequestParam("targetExtension") String targetExtension,
                                               @RequestParam(value = "timeout", required = false) Long timeout,
+                                              @RequestParam(value = "testDelay", required = false) Long testDelay,
 
                                               @RequestParam(value = "page", required = false) Integer page,
                                               @RequestParam(value = "width", required = false) Integer width,
@@ -146,6 +147,6 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
 
         executeTransformCommand(properties, targetFile, timeout);
 
-        return createAttachment(targetFilename, targetFile);
+        return createAttachment(targetFilename, targetFile, testDelay);
     }
 }

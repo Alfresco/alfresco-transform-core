@@ -67,6 +67,7 @@ public class LogEntry
     private long durationStreamIn;
     private long durationTransform;
     private long durationStreamOut;
+    private long durationDelay;
 
     private String source;
     private long sourceSize;
@@ -152,10 +153,40 @@ public class LogEntry
         logEntry.durationTransform = System.currentTimeMillis() - logEntry.start - logEntry.durationStreamIn;
     }
 
+    // In order to test connection timeouts, a testDelay may be added as a request parameter.
+    // This method waits for this period to end. It is in this class as all the times are recorded here.
+    public static void addDelay(Long testDelay)
+    {
+        if (testDelay != null && testDelay > 0)
+        {
+            currentLogEntry.get().addDelayInternal(testDelay);
+        }
+    }
+
+    private void addDelayInternal(Long testDelay)
+    {
+        durationDelay = testDelay - System.currentTimeMillis() + start;
+        if (durationDelay > 0)
+        {
+            try
+            {
+                Thread.sleep(durationDelay);
+            }
+            catch (InterruptedException ignore)
+            {
+                Thread.currentThread().interrupt();
+            }
+        }
+        else
+        {
+            durationDelay = 0;
+        }
+    }
+
     public static void complete()
     {
         LogEntry logEntry = currentLogEntry.get();
-        logEntry.durationStreamOut = System.currentTimeMillis() - logEntry.start - logEntry.durationStreamIn - logEntry.durationTransform;
+        logEntry.durationStreamOut = System.currentTimeMillis() - logEntry.start - logEntry.durationStreamIn - logEntry.durationTransform - logEntry.durationDelay;
         currentLogEntry.remove();
 
         if (AbstractTransformerController.logger != null && AbstractTransformerController.logger.isDebugEnabled())
@@ -181,23 +212,11 @@ public class LogEntry
 
     public String getDuration()
     {
-        return time(durationStreamIn  +  durationTransform  +  durationStreamOut)+" ("+
-                time(durationStreamIn)+' '+time(durationTransform)+' '+time(durationStreamOut)+")";
-    }
-
-    public long getDurationStreamIn()
-    {
-        return durationStreamIn;
-    }
-
-    public long getDurationTransform()
-    {
-        return durationTransform;
-    }
-
-    public long getDurationStreamOut()
-    {
-        return durationStreamOut;
+        return time(durationStreamIn  +  durationTransform  +  durationDelay + durationStreamOut)+" ("+
+                time(durationStreamIn)+' '+
+                time(durationTransform)+' '+
+                (durationDelay > 0 ? time(durationDelay)+' ' : "")+
+                time(durationStreamOut)+")";
     }
 
     public String getSource()

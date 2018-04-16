@@ -4,8 +4,6 @@
     <name>Alfresco Docker Pdf Renderer</name>
     <packaging>jar</packaging>
 
-    <version>0.9-SNAPSHOT</version>
-
     <parent>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-docker-transformers</artifactId>
@@ -49,6 +47,14 @@
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-core</artifactId>
             <version>${dependency.alfresco-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-transformer-base</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

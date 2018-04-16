@@ -4,8 +4,6 @@
     <name>Alfresco Docker LibreOffice</name>
     <packaging>jar</packaging>
 
-    <version>0.9-SNAPSHOT</version>
-
     <parent>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-docker-transformers</artifactId>
@@ -59,6 +57,14 @@
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
             <version>${dependency.pdfbox.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-transformer-base</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

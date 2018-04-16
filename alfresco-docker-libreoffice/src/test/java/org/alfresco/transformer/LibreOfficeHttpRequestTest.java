@@ -23,26 +23,28 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer.base;
+package org.alfresco.transformer;
 
-public class TransformException extends RuntimeException
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+/**
+ * Tests AlfrescoPdfRendererHttpRequestTest with a server test harness.
+ */
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class LibreOfficeHttpRequestTest extends AbstractHttpRequestTest
 {
-    private int statusCode;
-
-    public TransformException(int statusCode, String message)
+    @Override
+    protected String getTransformerName()
     {
-        super(message);
-        this.statusCode = statusCode;
+        return "LibreOffice";
     }
 
-    public TransformException(int statusCode, String message, Throwable cause)
+    @Override
+    protected String getSourceExtension()
     {
-        super(message, cause);
-        this.statusCode = statusCode;
-    }
-
-    public int getStatusCode()
-    {
-        return statusCode;
-    }
+        return "doc";
+    };
 }
