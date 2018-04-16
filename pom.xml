@@ -10,6 +10,7 @@
 
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-docker-transformers</artifactId>
+    <version>0.9-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
