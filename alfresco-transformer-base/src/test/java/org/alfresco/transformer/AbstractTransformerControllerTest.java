@@ -273,6 +273,15 @@ public abstract class AbstractTransformerControllerTest
                 .andExpect(status().reason(containsString("The source filename was not supplied")));
     }
 
+    @Test
+    public void noTargetExtensionTest() throws Exception
+    {
+        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/transform")
+                .file(sourceFile))
+                .andExpect(status().is(400))
+                .andExpect(status().reason(containsString("Request parameter targetExtension is missing")));
+    }
+
 //    @Test
 //    // Not a real test, but helpful for trying out the duration times in log code.
 //    public void testTimes() throws InterruptedException

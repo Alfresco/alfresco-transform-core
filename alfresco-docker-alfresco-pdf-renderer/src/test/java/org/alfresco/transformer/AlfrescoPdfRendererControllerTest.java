@@ -26,12 +26,16 @@
 package org.alfresco.transformer;
 
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.IOException;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test the AlfrescoPdfRendererControllerTest without a server.
@@ -48,5 +52,45 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
     public void before() throws IOException
     {
         super.mockTransformCommand(controller, "pdf", "png", "application/pdf");
+    }
+
+    @Test
+    public void optionsTest() throws Exception
+    {
+        expectedOptions = "--width=321 --height=654 --allow-enlargement --maintain-aspect-ratio --page=2";
+        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/transform")
+                .file(sourceFile)
+                .param("targetExtension", targetExtension)
+
+                .param("page", "2")
+
+                .param("width", "321")
+                .param("height", "654")
+                .param("allowEnlargement", "true")
+                .param("maintainAspectRatio", "true"))
+
+                .andExpect(status().is(200))
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
+    }
+
+    @Test
+    public void optionsNegateBooleansTest() throws Exception
+    {
+        expectedOptions = "--width=321 --height=654 --page=2";
+        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/transform")
+                .file(sourceFile)
+                .param("targetExtension", targetExtension)
+
+                .param("page", "2")
+
+                .param("width", "321")
+                .param("height", "654")
+                .param("allowEnlargement", "false")
+                .param("maintainAspectRatio", "false"))
+
+                .andExpect(status().is(200))
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
     }
 }

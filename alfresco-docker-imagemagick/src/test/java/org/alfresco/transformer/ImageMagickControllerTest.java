@@ -107,8 +107,42 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                 .param("resizeHeight", "654")
                 .param("resizePercentage", "true")
                 .param("allowEnlargement", "true")
-                .param("maintainAspectRatio", "true")
-        )
+                .param("maintainAspectRatio", "true"))
+
+                .andExpect(status().is(200))
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
+    }
+
+    @Test
+    public void optionsNegateBooleansTest() throws Exception
+    {
+        expectedOptions = "-auto-orient -gravity SouthEast -crop 123x456+90+12 +repage -resize 321x654>";
+        expectedSourceSuffix = "[2-3]";
+        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/transform")
+                .file(sourceFile)
+                .param("targetExtension", targetExtension)
+
+                .param("startPage", "2")
+                .param("endPage", "3")
+
+                .param("alphaRemove", "false")
+                .param("autoOrient", "true")
+
+                .param("cropGravity", "SouthEast")
+                .param("cropWidth", "123")
+                .param("cropHeight", "456")
+                .param("cropPercentage", "false")
+                .param("cropXOffset", "90")
+                .param("cropYOffset", "12")
+
+                .param("thumbnail", "false")
+                .param("resizeWidth", "321")
+                .param("resizeHeight", "654")
+                .param("resizePercentage", "false")
+                .param("allowEnlargement", "false")
+                .param("maintainAspectRatio", "false"))
+
                 .andExpect(status().is(200))
                 .andExpect(content().bytes(expectedTargetFileBytes))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
