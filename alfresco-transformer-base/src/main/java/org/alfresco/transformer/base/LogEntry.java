@@ -32,6 +32,8 @@ import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.Math.max;
+
 /**
  * Provides setter and getter methods to allow the current Thread to set various log properties and for these
  * values to be retrieved. The {@link #complete()} method should be called at the end of a request to flush the
@@ -65,14 +67,14 @@ public class LogEntry
     private int statusCode;
 
     private long durationStreamIn;
-    private long durationTransform;
-    private long durationStreamOut;
-    private long durationDelay;
+    private long durationTransform = -1;
+    private long durationStreamOut = -1;
+    private long durationDelay = -1;
 
     private String source;
     private long sourceSize;
     private String target;
-    private long targetSize;
+    private long targetSize = -1;
     private String options;
     private String message;
 
@@ -165,7 +167,7 @@ public class LogEntry
 
     private void addDelayInternal(Long testDelay)
     {
-        durationDelay = testDelay - System.currentTimeMillis() + start;
+        long durationDelay = Math.max(testDelay - System.currentTimeMillis() + start, -1);
         if (durationDelay > 0)
         {
             try
@@ -176,17 +178,22 @@ public class LogEntry
             {
                 Thread.currentThread().interrupt();
             }
+            this.durationDelay = durationDelay;
         }
         else
         {
-            durationDelay = 0;
+            this.durationDelay = -1;
         }
     }
 
     public static void complete()
     {
         LogEntry logEntry = currentLogEntry.get();
-        logEntry.durationStreamOut = System.currentTimeMillis() - logEntry.start - logEntry.durationStreamIn - logEntry.durationTransform - logEntry.durationDelay;
+        if (logEntry.statusCode == 200)
+        {
+            logEntry.durationStreamOut = System.currentTimeMillis() - logEntry.start -
+                    logEntry.durationStreamIn - max(logEntry.durationTransform, 0) - max(logEntry.durationDelay, 0);
+        }
         currentLogEntry.remove();
 
         if (AbstractTransformerController.logger != null && AbstractTransformerController.logger.isDebugEnabled())
@@ -212,11 +219,14 @@ public class LogEntry
 
     public String getDuration()
     {
-        return time(durationStreamIn  +  durationTransform  +  durationDelay + durationStreamOut)+" ("+
-                time(durationStreamIn)+' '+
-                time(durationTransform)+' '+
-                (durationDelay > 0 ? time(durationDelay)+' ' : "")+
-                time(durationStreamOut)+")";
+        return time(durationStreamIn + max(durationTransform, 0) + max(durationDelay, 0) + max(durationStreamOut, 0))+
+                " ("+
+                (time(durationStreamIn)+' '+
+                 time(durationTransform)+' '+
+                 (durationDelay > 0
+                 ? time(durationDelay)+' '+(durationStreamOut < 0 ? "-" : time(durationStreamOut))
+                 : time(durationStreamOut))).trim()+
+                ")";
     }
 
     public String getSource()
@@ -251,15 +261,15 @@ public class LogEntry
 
     private String time(long ms)
     {
-        return size(ms, "1 ms",
+        return ms == -1 ? "" : size(ms, "1ms",
             new String[] { "ms",  "s",   "min",       "hr" },
             new long[]   {       1000, 60*1000, 60*60*1000, Long.MAX_VALUE});
     }
 
     private String size(long size)
     {
-        return size(size, "1 byte",
-            new String[] { "bytes", "KB",      "MB",           "GB",                "TB" },
+        return size == -1 ? "" : size(size, "1 byte",
+            new String[] { "bytes", " KB",      " MB",           " GB",                " TB" },
             new long[]   {          1024, 1024*1024, 1024*1024*1024, 1024*1024*1024*1024, Long.MAX_VALUE });
     }
 
@@ -294,7 +304,6 @@ public class LogEntry
             sb.append(".");
             sb.append(decimalPoint);
         }
-        sb.append(' ');
         sb.append(unit);
 
         return sb.toString();
