@@ -18,7 +18,7 @@
         <image.tag>latest</image.tag>
         <dependency.pdfbox.version>2.0.8</dependency.pdfbox.version>
         <dependency.fabric8.version>3.5.37</dependency.fabric8.version>
-        <dependency.spring-boot.version>1.5.10.RELEASE</dependency.spring-boot.version>
+        <dependency.spring-boot.version>1.5.12.RELEASE</dependency.spring-boot.version>
         <dependency.alfresco-core.version>7.2</dependency.alfresco-core.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
         <dependency.ch-qos-logback.version>1.2.3</dependency.ch-qos-logback.version>
@@ -38,6 +38,48 @@
         <url>https://git.alfresco.com/Repository/alfresco-docker-transformers</url>
         <tag>HEAD</tag>
     </scm>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-parent</artifactId>
+                <version>${dependency.spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>${dependency.ch-qos-logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-access</artifactId>
+                <version>${dependency.ch-qos-logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${dependency.ch-qos-logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.alfresco</groupId>
+                <artifactId>alfresco-core</artifactId>
+                <version>${dependency.alfresco-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.alfresco</groupId>
+                <artifactId>alfresco-jodconverter-core</artifactId>
+                <version>${dependency.alfresco-jodconverter-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pdfbox</groupId>
+                <artifactId>pdfbox</artifactId>
+                <version>${dependency.pdfbox.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <distributionManagement>
         <repository>
