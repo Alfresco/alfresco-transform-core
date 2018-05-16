@@ -38,7 +38,7 @@ import java.io.IOException;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Test the AlfrescoPdfRendererControllerTest without a server.
+ * Test the AlfrescoPdfRendererController without a server.
  * Super class includes tests for the AbstractTransformerController.
  */
 @RunWith(SpringRunner.class)

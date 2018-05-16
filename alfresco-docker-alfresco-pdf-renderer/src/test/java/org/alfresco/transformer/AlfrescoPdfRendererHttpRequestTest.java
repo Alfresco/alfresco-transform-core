@@ -31,7 +31,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * Tests AlfrescoPdfRendererHttpRequestTest with a server test harness.
+ * Tests AlfrescoPdfRendererController with a server test harness.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
