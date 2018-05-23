@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer.base;
+package org.alfresco.transformer;
 
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.exec.RuntimeExec;
@@ -55,28 +55,32 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Abstract Controller, provides structure and helper methods to sub-class transformer controllers.
+ * <p>Abstract Controller, provides structure and helper methods to sub-class transformer controllers.</p>
  *
- * Status Codes:
+ * <p>Status Codes:</p>
+ * <ul>
+ *   <li>200 Success</li>
+ *   <li>400 Bad Request: Request parameter <name> is missing (missing mandatory parameter)</li>
+ *   <li>400 Bad Request: Request parameter <name> is of the wrong type</li>
+ *   <li>400 Bad Request: Transformer exit code was not 0 (possible problem with the source file)</li>
+ *   <li>400 Bad Request: The source filename was not supplied</li>
+ *   <li>500 Internal Server Error: (no message with low level IO problems)</li>
+ *   <li>500 Internal Server Error: The target filename was not supplied (should not happen as targetExtension is checked)</li>
+ *   <li>500 Internal Server Error: Transformer version check exit code was not 0</li>
+ *   <li>500 Internal Server Error: Transformer version check failed to create any output</li>
+ *   <li>500 Internal Server Error: Could not read the target file</li>
+ *   <li>500 Internal Server Error: The target filename was malformed (should not happen because of other checks)</li>
+ *   <li>500 Internal Server Error: Transformer failed to create an output file (the exit code was 0, so there should be some content)</li>
+ *   <li>500 Internal Server Error: Filename encoding error</li>
+ *   <li>507 Insufficient Storage: Failed to store the source file</li>
  *
- *   200 Success
- *   400 Bad Request: Request parameter <name> is missing (missing mandatory parameter)
- *   400 Bad Request: Request parameter <name> is of the wrong type
- *   400 Bad Request: Transformer exit code was not 0 (possible problem with the source file)
- *   400 Bad Request: The source filename was not supplied
- *   500 Internal Server Error: (no message with low level IO problems)
- *   500 Internal Server Error: The target filename was not supplied (should not happen as targetExtension is checked)
- *   500 Internal Server Error: Transformer version check exit code was not 0
- *   500 Internal Server Error: Transformer version check failed to create any output
- *   500 Internal Server Error: Could not read the target file
- *   500 Internal Server Error: The target filename was malformed (should not happen because of other checks)
- *   500 Internal Server Error: Transformer failed to create an output file (the exit code was 0, so there should be some content)
- *   500 Internal Server Error: Filename encoding error
- *   507 Insufficient Storage: Failed to store the source file
- *
- *   408 Request Timeout         -- TODO implement general timeout mechanism rather than depend on transformer timeout (might be possible for external processes)
- *   415 Unsupported Media Type  -- TODO possibly implement a check on supported source and target mimetypes (probably not)
- *   429 Too Many Requests       -- TODO implement general throttling mechanism (needs to be done)
+ *   <li>408 Request Timeout         -- TODO implement general timeout mechanism rather than depend on transformer timeout
+ *                                  (might be possible for external processes)</li>
+ *   <li>415 Unsupported Media Type  -- TODO possibly implement a check on supported source and target mimetypes (probably not)</li>
+ *   <li>429 Too Many Requests: Returned by liveness probe</li>
+ * </ul>
+ * <p>Provides methods to help super classes perform /transform requests. Also responses to /version, /ready and /live
+ * requests.</p>
  */
 public abstract class AbstractTransformerController
 {
@@ -87,6 +91,8 @@ public abstract class AbstractTransformerController
 
     protected RuntimeExec transformCommand;
     private RuntimeExec checkCommand;
+
+    private ProbeTestTransform probeTestTransform = null;
 
     public void setTransformCommand(RuntimeExec runtimeExec)
     {
@@ -132,6 +138,36 @@ public abstract class AbstractTransformerController
 
         return version;
     }
+
+    @GetMapping("/ready")
+    @ResponseBody
+    public String ready(HttpServletRequest request)
+    {
+        return probe(request, false);
+    }
+
+    @GetMapping("/live")
+    @ResponseBody
+    public String live(HttpServletRequest request)
+    {
+        return probe(request, true);
+    }
+
+    private String probe(HttpServletRequest request, boolean isLiveProbe)
+    {
+        return getProbeTestTransformInternal().doTransformOrNothing(request, isLiveProbe);
+    }
+
+    private ProbeTestTransform getProbeTestTransformInternal()
+    {
+        if (probeTestTransform == null)
+        {
+            probeTestTransform = getProbeTestTransform();
+        }
+        return probeTestTransform;
+    }
+
+    abstract ProbeTestTransform getProbeTestTransform();
 
     @GetMapping("/")
     public String transformForm(Model model)
@@ -205,7 +241,8 @@ public abstract class AbstractTransformerController
             logger.error(message);
         }
 
-        LogEntry.setStatusCodeAndMessage(statusCode, message);
+        long time = LogEntry.setStatusCodeAndMessage(statusCode, message);
+        getProbeTestTransformInternal().recordTransformTime(time);
 
         // Forced to include the transformer name in the message (see commented out version of this method)
         response.sendError(statusCode, transformerName+" - "+message);
@@ -259,6 +296,7 @@ public abstract class AbstractTransformerController
      */
     protected File createSourceFile(HttpServletRequest request, MultipartFile multipartFile)
     {
+        getProbeTestTransformInternal().incrementTransformerCount();
         String filename = multipartFile.getOriginalFilename();
         long size = multipartFile.getSize();
         filename = checkFilename(  true, filename);
@@ -363,8 +401,9 @@ public abstract class AbstractTransformerController
             ResponseEntity<Resource> body = ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename*= UTF-8''" + targetFilename).body(targetResource);
             LogEntry.setTargetSize(targetFile.length());
-            LogEntry.setStatusCodeAndMessage(200, "Success");
-            LogEntry.addDelay(testDelay);
+            long time = LogEntry.setStatusCodeAndMessage(200, "Success");
+            time += LogEntry.addDelay(testDelay);
+            getProbeTestTransformInternal().recordTransformTime(time);
             return body;
         }
         catch (UnsupportedEncodingException e)

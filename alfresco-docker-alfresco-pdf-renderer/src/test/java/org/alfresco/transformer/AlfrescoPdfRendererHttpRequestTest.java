@@ -25,6 +25,7 @@
  */
 package org.alfresco.transformer;
 
+import org.alfresco.transformer.AbstractHttpRequestTest;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;

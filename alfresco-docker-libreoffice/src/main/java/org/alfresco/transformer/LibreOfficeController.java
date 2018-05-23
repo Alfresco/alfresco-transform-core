@@ -12,8 +12,6 @@
 package org.alfresco.transformer;
 
 import com.sun.star.task.ErrorCodeIOException;
-import org.alfresco.transformer.base.AbstractTransformerController;
-import org.alfresco.transformer.base.TransformException;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -71,9 +69,6 @@ public class LibreOfficeController extends AbstractTransformerController
         logEnterpriseLicenseMessage();
         logger.info("This transformer uses LibreOffice from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt");
         logger.info("-------------------------------------------------------------------------------------------------------------------------------------------------------");
-
-        // TODO Remove this when we are happy that creating the jodconverter on the first transform is okay.
-//        setJodConverter(createJodConverter(null));
     }
 
     private static JodConverter createJodConverter(Long taskExecutionTimeout)
@@ -122,12 +117,22 @@ public class LibreOfficeController extends AbstractTransformerController
     @Override
     protected String version()
     {
-        // TODO Remove this when we are happy that creating the jodconverter on the first transform is okay.
-//        if (!jodconverter.isAvailable())
-//        {
-//            throw new TransformException(500, "LibreOffice is not yet available");
-//        }
         return "LibreOffice available";
+    }
+
+    @Override
+    protected ProbeTestTransform getProbeTestTransform()
+    {
+        // See the Javadoc on this method and Probes.md for the choice of these values.
+        return new ProbeTestTransform(this, "quick.doc", "quick.pdf",
+                11817, 1024, 150, 10240, 60*30+1, 60*15+20)
+        {
+            @Override
+            protected void executeTransformCommand(File sourceFile, File targetFile)
+            {
+                LibreOfficeController.this.executeTransformCommand(sourceFile, targetFile, null);
+            }
+        };
     }
 
     @PostMapping("/transform")

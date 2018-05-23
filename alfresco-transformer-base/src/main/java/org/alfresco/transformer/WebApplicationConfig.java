@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer.base;
+package org.alfresco.transformer;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +35,7 @@ public class WebApplicationConfig extends WebMvcConfigurerAdapter {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(transformInterceptor()).addPathPatterns("/transform");;
+        registry.addInterceptor(transformInterceptor()).addPathPatterns("/transform", "/live", "/ready");;
     }
 
     @Bean

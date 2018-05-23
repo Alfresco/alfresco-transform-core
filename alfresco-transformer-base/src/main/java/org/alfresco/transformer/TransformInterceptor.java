@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer.base;
+package org.alfresco.transformer;
 
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -48,8 +48,8 @@ public class TransformInterceptor extends HandlerInterceptorAdapter
             throws Exception
     {
         // TargetFile cannot be deleted until completion, otherwise 0 bytes are sent.
-        deleteFile(request, "sourceFile");
-        deleteFile(request, "targetFile");
+        deleteFile(request, AbstractTransformerController.SOURCE_FILE);
+        deleteFile(request, AbstractTransformerController.TARGET_FILE);
 
         LogEntry.complete();
     }

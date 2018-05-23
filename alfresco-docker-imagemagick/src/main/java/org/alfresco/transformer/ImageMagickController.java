@@ -11,9 +11,6 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transformer.base.AbstractTransformerController;
-import org.alfresco.transformer.base.LogEntry;
-import org.alfresco.transformer.base.TransformException;
 import org.alfresco.util.exec.RuntimeExec;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,6 +104,21 @@ public class ImageMagickController extends AbstractTransformerController
         runtimeExec.setCommandsAndArguments(commandsAndArguments);
 
         return runtimeExec;
+    }
+
+    @Override
+    protected ProbeTestTransform getProbeTestTransform()
+    {
+        // See the Javadoc on this method and Probes.md for the choice of these values.
+        return new ProbeTestTransform(this, "quick.jpg", "quick.png",
+                35593, 1024, 150, 1024, 60*15+1,60*15+0)
+        {
+            @Override
+            protected void executeTransformCommand(File sourceFile, File targetFile)
+            {
+                ImageMagickController.this.executeTransformCommand("", sourceFile, "", targetFile, null);
+            }
+        };
     }
 
     @PostMapping("/transform")
@@ -254,6 +266,13 @@ public class ImageMagickController extends AbstractTransformerController
                         : "["+startPage+'-'+endPage+']';
 
         String options = args.toString();
+        executeTransformCommand(options, sourceFile, pageRange, targetFile, timeout);
+
+        return createAttachment(targetFilename, targetFile, testDelay);
+    }
+
+    private void executeTransformCommand(String options, File sourceFile, String pageRange, File targetFile, Long timeout)
+    {
         LogEntry.setOptions(pageRange+(pageRange.isEmpty() ? "" : " ")+options);
 
         Map<String, String> properties = new HashMap<String, String>(5);
@@ -262,7 +281,5 @@ public class ImageMagickController extends AbstractTransformerController
         properties.put("target", targetFile.getAbsolutePath());
 
         executeTransformCommand(properties, targetFile, timeout);
-
-        return createAttachment(targetFilename, targetFile, testDelay);
     }
 }

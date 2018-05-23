@@ -25,7 +25,6 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transformer.base.AbstractTransformerController;
 import org.alfresco.util.exec.RuntimeExec;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -81,7 +80,7 @@ public abstract class AbstractTransformerControllerTest
     protected byte[] expectedSourceFileBytes;
     protected byte[] expectedTargetFileBytes;
 
-    private AbstractTransformerController controller;
+    protected AbstractTransformerController controller;
 
     // Called by sub class
     public void mockTransformCommand(AbstractTransformerController controller, String sourceExtension, String targetExtension, String sourceMimetype) throws IOException
@@ -298,4 +297,33 @@ public abstract class AbstractTransformerControllerTest
 //            System.out.println(str);
 //        }
 //    }
+
+    @Test
+    public void calculateMaxTime() throws Exception
+    {
+        ProbeTestTransform probeTestTransform = controller.getProbeTestTransform();
+        probeTestTransform.livenessPercent = 110;
+
+        long [][] values = new long[][] {
+                {5000, 0, Long.MAX_VALUE}, // 1st transform is ignored
+                {1000, 1000, 2100},        // 1000 + 1000*1.1
+                {3000, 2000, 4200},        // 2000 + 2000*1.1
+                {2000, 2000, 4200},
+                {6000, 3000, 6300},
+                {8000, 4000, 8400},
+                {4444, 4000, 8400},        // no longer in the first few, so normal and max times don't change
+                {5555, 4000, 8400}
+        };
+
+        for (long[] v: values)
+        {
+            long time = v[0];
+            long expectedNormalTime = v[1];
+            long expectedMaxTime = v[2];
+
+            probeTestTransform.calculateMaxTime(time, true);
+            assertEquals("", expectedNormalTime, probeTestTransform.normalTime);
+            assertEquals("", expectedMaxTime, probeTestTransform.maxTime);
+        }
+    }
 }

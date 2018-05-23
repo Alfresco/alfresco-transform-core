@@ -66,6 +66,8 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
     @Before
     public void before() throws IOException
     {
+        super.controller = controller;
+
         sourceExtension = "doc";
         targetExtension = "pdf";
         sourceMimetype = "application/msword";
