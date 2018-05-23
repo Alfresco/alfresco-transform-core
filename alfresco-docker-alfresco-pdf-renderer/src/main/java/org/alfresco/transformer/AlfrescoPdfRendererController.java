@@ -11,8 +11,6 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transformer.base.AbstractTransformerController;
-import org.alfresco.transformer.base.LogEntry;
 import org.alfresco.util.exec.RuntimeExec;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +96,21 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
         return runtimeExec;
     }
 
+    @Override
+    protected ProbeTestTransform getProbeTestTransform()
+    {
+        // See the Javadoc on this method and Probes.md for the choice of these values.
+        return new ProbeTestTransform(this,"quick.pdf", "quick.png",
+                7455, 1024, 150, 10240, 60*20+1, 60*15-15)
+        {
+            @Override
+            protected void executeTransformCommand(File sourceFile, File targetFile)
+            {
+                AlfrescoPdfRendererController.this.executeTransformCommand("", sourceFile, targetFile, null);
+            }
+        };
+    }
+
     @PostMapping("/transform")
     public ResponseEntity<Resource> transform(HttpServletRequest request,
                                               @RequestParam("file") MultipartFile sourceMultipartFile,
@@ -138,6 +151,13 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
             args.add("--page=" + page);
         }
         String options = args.toString();
+        executeTransformCommand(options, sourceFile, targetFile, timeout);
+
+        return createAttachment(targetFilename, targetFile, testDelay);
+    }
+
+    private void executeTransformCommand(String options, File sourceFile, File targetFile, @RequestParam(value = "timeout", required = false) Long timeout)
+    {
         LogEntry.setOptions(options);
 
         Map<String, String> properties = new HashMap<String, String>(5);
@@ -146,7 +166,5 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
         properties.put("target", targetFile.getAbsolutePath());
 
         executeTransformCommand(properties, targetFile, timeout);
-
-        return createAttachment(targetFilename, targetFile, testDelay);
     }
 }

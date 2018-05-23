@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer.base;
+package org.alfresco.transformer;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -42,6 +42,8 @@ import static java.lang.Math.max;
  */
 public class LogEntry
 {
+    // TODO allow ProbeTestTransform to find out if there are any transforms running longer than the max time.
+
     private static final AtomicInteger count = new AtomicInteger(0);
     private static final Deque<LogEntry> log = new ConcurrentLinkedDeque<>();
     private static final int MAX_LOG_SIZE = 10;
@@ -82,26 +84,26 @@ public class LogEntry
     public String toString()
     {
         StringBuilder sb = new StringBuilder();
-        sb.append(getId());
-        sb.append(' ');
-        sb.append(HH_MM_SS.format(getDate()));
-        sb.append(' ');
-        sb.append(getStatusCode());
-        sb.append(' ');
-        sb.append(getDuration());
-        sb.append(' ');
-        sb.append(getSource());
-        sb.append(' ');
-        sb.append(getSourceSize());
-        sb.append(' ');
-        sb.append(getTarget());
-        sb.append(' ');
-        sb.append(getTargetSize());
-        sb.append(' ');
-        sb.append(getOptions());
-        sb.append(' ');
+        append(sb, Integer.toString(getId()));
+        append(sb, HH_MM_SS.format(getDate()));
+        append(sb, Integer.toString(getStatusCode()));
+        append(sb, getDuration());
+        append(sb, getSource());
+        append(sb, getSourceSize());
+        append(sb, getTarget());
+        append(sb, getTargetSize());
+        append(sb, getOptions());
         sb.append(getMessage());
         return sb.toString();
+    }
+
+    private void append(StringBuilder sb, String value)
+    {
+        if (value != null && !value.isEmpty() && !"0bytes".equals(value))
+        {
+            sb.append(value);
+            sb.append(' ');
+        }
     }
 
     public static Collection<LogEntry> getLog()
@@ -147,25 +149,29 @@ public class LogEntry
         currentLogEntry.get().options = options;
     }
 
-    public static void setStatusCodeAndMessage(int statusCode, String message)
+    public static long setStatusCodeAndMessage(int statusCode, String message)
     {
         LogEntry logEntry = currentLogEntry.get();
         logEntry.statusCode = statusCode;
         logEntry.message = message;
         logEntry.durationTransform = System.currentTimeMillis() - logEntry.start - logEntry.durationStreamIn;
+
+        return logEntry.durationTransform;
     }
 
     // In order to test connection timeouts, a testDelay may be added as a request parameter.
     // This method waits for this period to end. It is in this class as all the times are recorded here.
-    public static void addDelay(Long testDelay)
+    public static long addDelay(Long testDelay)
     {
+        long durationDelay = 0;
         if (testDelay != null && testDelay > 0)
         {
-            currentLogEntry.get().addDelayInternal(testDelay);
+            durationDelay = currentLogEntry.get().addDelayInternal(testDelay);
         }
+        return durationDelay;
     }
 
-    private void addDelayInternal(Long testDelay)
+    private long addDelayInternal(Long testDelay)
     {
         long durationDelay = Math.max(testDelay - System.currentTimeMillis() + start, -1);
         if (durationDelay > 0)
@@ -179,10 +185,12 @@ public class LogEntry
                 Thread.currentThread().interrupt();
             }
             this.durationDelay = durationDelay;
+            return durationDelay;
         }
         else
         {
             this.durationDelay = -1;
+            return 0;
         }
     }
 
@@ -219,7 +227,10 @@ public class LogEntry
 
     public String getDuration()
     {
-        return time(durationStreamIn + max(durationTransform, 0) + max(durationDelay, 0) + max(durationStreamOut, 0))+
+        long duration = durationStreamIn + max(durationTransform, 0) + max(durationDelay, 0) + max(durationStreamOut, 0);
+        return duration <= 5
+               ? ""
+               : time(duration)+
                 " ("+
                 (time(durationStreamIn)+' '+
                  time(durationTransform)+' '+
