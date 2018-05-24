@@ -7,6 +7,7 @@ FROM quay.io/alfresco/alfresco-base-java:9
 
 ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/5.4.6/libreoffice-dist-5.4.6-linux.gz
 ENV LIBREOFFICE_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/libreoffice.txt
+ENV JAVA_OPTS=""
 
 COPY target/alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin
 
@@ -23,4 +24,4 @@ RUN ln /usr/bin/alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin/
 
 EXPOSE 8090
 
-ENTRYPOINT java -jar /usr/bin/alfresco-docker-libreoffice.jar
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-docker-libreoffice.jar
