@@ -33,12 +33,10 @@ import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -83,7 +81,9 @@ public abstract class AbstractTransformerControllerTest
     protected AbstractTransformerController controller;
 
     // Called by sub class
-    public void mockTransformCommand(AbstractTransformerController controller, String sourceExtension, String targetExtension, String sourceMimetype) throws IOException
+    public void mockTransformCommand(AbstractTransformerController controller, String sourceExtension,
+                                     String targetExtension, String sourceMimetype,
+                                     boolean readTargetFileBytes) throws IOException
     {
         this.controller = controller;
         this.sourceExtension = sourceExtension;
@@ -92,8 +92,8 @@ public abstract class AbstractTransformerControllerTest
 
         expectedOptions = null;
         expectedSourceSuffix = null;
-        expectedSourceFileBytes = Files.readAllBytes(getTestFile("quick."+sourceExtension, true).toPath());
-        expectedTargetFileBytes = Files.readAllBytes(getTestFile("quick."+targetExtension, true).toPath());
+        expectedSourceFileBytes = readTestFile(sourceExtension);
+        expectedTargetFileBytes = readTargetFileBytes ? readTestFile(targetExtension) : null;
         sourceFile = new MockMultipartFile("file", "quick."+sourceExtension, sourceMimetype, expectedSourceFileBytes);
 
         controller.setTransformCommand(mockTransformCommand);
@@ -159,6 +159,11 @@ public abstract class AbstractTransformerControllerTest
         when(mockExecutionResult.getStdOut()).thenReturn("STDOUT");
     }
 
+    protected byte[] readTestFile(String extension) throws IOException
+    {
+        return Files.readAllBytes(getTestFile("quick."+extension, true).toPath());
+    }
+
     protected File getTestFile(String testFilename, boolean required) throws IOException
     {
         ClassLoader classLoader = getClass().getClassLoader();
@@ -170,12 +175,26 @@ public abstract class AbstractTransformerControllerTest
         return testFileUrl == null ? null : new File(testFileUrl.getFile());
     }
 
+    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
+    {
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.fileUpload("/transform").file(sourceFile);
+
+        if (params.length % 2 != 0)
+        {
+            throw new IllegalArgumentException("each param should have a name and value.");
+        }
+        for (int i=0; i<params.length; i+=2)
+        {
+            builder = builder.param(params[i], params[i+1]);
+        }
+
+        return builder;
+    }
+
     @Test
     public void simpleTransformTest() throws Exception
     {
-        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/transform")
-                .file(sourceFile)
-                .param("targetExtension", targetExtension))
+        mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension))
                 .andExpect(status().is(200))
                 .andExpect(content().bytes(expectedTargetFileBytes))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
@@ -185,10 +204,7 @@ public abstract class AbstractTransformerControllerTest
     public void testDelayTest() throws Exception
     {
         long start = System.currentTimeMillis();
-        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/transform")
-                .file(sourceFile)
-                .param("targetExtension", targetExtension)
-                .param("testDelay", "400"))
+        mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension, "testDelay", "400"))
                 .andExpect(status().is(200))
                 .andExpect(content().bytes(expectedTargetFileBytes))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
@@ -201,9 +217,7 @@ public abstract class AbstractTransformerControllerTest
     @Test
     public void noTargetFileTest() throws Exception
     {
-        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/transform")
-                .file(sourceFile)
-                .param("targetExtension", "xxx"))
+        mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", "xxx"))
                 .andExpect(status().is(500));
     }
 
@@ -212,9 +226,7 @@ public abstract class AbstractTransformerControllerTest
     {
         when(mockExecutionResult.getExitValue()).thenReturn(1);
 
-        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/transform")
-                .file(sourceFile)
-                .param("targetExtension", "xxx"))
+        mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", "xxx"))
                 .andExpect(status().is(400))
                 .andExpect(status().reason(containsString("Transformer exit code was not 0: \nSTDERR")));
     }
@@ -225,9 +237,7 @@ public abstract class AbstractTransformerControllerTest
     {
         sourceFile = new MockMultipartFile("file", "../quick."+sourceExtension, sourceMimetype, expectedSourceFileBytes);
 
-        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/transform")
-                .file(sourceFile)
-                .param("targetExtension", targetExtension))
+        mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension))
                 .andExpect(status().is(200))
                 .andExpect(content().bytes(expectedTargetFileBytes))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
@@ -239,9 +249,7 @@ public abstract class AbstractTransformerControllerTest
     {
         sourceFile = new MockMultipartFile("file", "../quick", sourceMimetype, expectedSourceFileBytes);
 
-        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/transform")
-                .file(sourceFile)
-                .param("targetExtension", targetExtension))
+        mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension))
                 .andExpect(status().is(200))
                 .andExpect(content().bytes(expectedTargetFileBytes))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
@@ -253,9 +261,7 @@ public abstract class AbstractTransformerControllerTest
     {
         sourceFile = new MockMultipartFile("file", "abc/", sourceMimetype, expectedSourceFileBytes);
 
-        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/transform")
-                .file(sourceFile)
-                .param("targetExtension", targetExtension))
+        mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension))
                 .andExpect(status().is(400))
                 .andExpect(status().reason(containsString("The source filename was not supplied")));
     }
@@ -265,9 +271,7 @@ public abstract class AbstractTransformerControllerTest
     {
         sourceFile = new MockMultipartFile("file", "", sourceMimetype, expectedSourceFileBytes);
 
-        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/transform")
-                .file(sourceFile)
-                .param("targetExtension", targetExtension))
+        mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension))
                 .andExpect(status().is(400))
                 .andExpect(status().reason(containsString("The source filename was not supplied")));
     }
@@ -275,8 +279,7 @@ public abstract class AbstractTransformerControllerTest
     @Test
     public void noTargetExtensionTest() throws Exception
     {
-        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/transform")
-                .file(sourceFile))
+        mockMvc.perform(mockMvcRequest("/transform", sourceFile))
                 .andExpect(status().is(400))
                 .andExpect(status().reason(containsString("Request parameter targetExtension is missing")));
     }

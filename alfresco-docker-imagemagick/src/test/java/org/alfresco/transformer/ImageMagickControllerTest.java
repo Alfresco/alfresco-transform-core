@@ -51,7 +51,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     @Before
     public void before() throws IOException
     {
-        super.mockTransformCommand(controller, "jpg", "png", "image/jpg");
+        super.mockTransformCommand(controller, "jpg", "png", "image/jpg", true);
     }
 
     @Test

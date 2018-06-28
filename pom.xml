@@ -19,7 +19,8 @@
         <dependency.pdfbox.version>2.0.8</dependency.pdfbox.version>
         <dependency.fabric8.version>3.5.37</dependency.fabric8.version>
         <dependency.spring-boot.version>1.5.12.RELEASE</dependency.spring-boot.version>
-        <dependency.alfresco-core.version>7.2</dependency.alfresco-core.version>
+        <dependency.alfresco-core.version>7.3</dependency.alfresco-core.version>
+        <dependency.alfresco-data-model.version>8.8</dependency.alfresco-data-model.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
         <dependency.ch-qos-logback.version>1.2.3</dependency.ch-qos-logback.version>
         <env.project_version>${project.version}</env.project_version>
@@ -27,6 +28,7 @@
 
     <modules>
         <module>alfresco-transformer-base</module>
+        <module>alfresco-docker-tika</module>
         <module>alfresco-docker-alfresco-pdf-renderer</module>
         <module>alfresco-docker-imagemagick</module>
         <module>alfresco-docker-libreoffice</module>
@@ -67,6 +69,11 @@
                 <groupId>org.alfresco</groupId>
                 <artifactId>alfresco-core</artifactId>
                 <version>${dependency.alfresco-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.alfresco</groupId>
+                <artifactId>alfresco-data-model</artifactId>
+                <version>${dependency.alfresco-data-model.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.alfresco</groupId>
