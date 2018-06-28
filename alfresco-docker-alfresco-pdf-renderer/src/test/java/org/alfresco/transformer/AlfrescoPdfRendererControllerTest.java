@@ -51,7 +51,7 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
     @Before
     public void before() throws IOException
     {
-        super.mockTransformCommand(controller, "pdf", "png", "application/pdf");
+        super.mockTransformCommand(controller, "pdf", "png", "application/pdf", true);
     }
 
     @Test

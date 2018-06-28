@@ -51,8 +51,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>Abstract Controller, provides structure and helper methods to sub-class transformer controllers.</p>
@@ -374,6 +373,87 @@ public abstract class AbstractTransformerController
         {
             throw new TransformException(500, "The target filename was malformed: " + file.getPath(), e);
         }
+    }
+
+    public void callTransform(File sourceFile, File targetFile, String... args) throws TransformException
+    {
+        args = buildArgs(sourceFile, targetFile, args);
+        try
+        {
+            callTransform(args);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new TransformException(400, getMessage(e));
+        }
+        catch (Exception e)
+        {
+            throw new TransformException(500, getMessage(e));
+        }
+        if (!targetFile.exists() || targetFile.length() == 0)
+        {
+            throw new TransformException(500, "Transformer failed to create an output file");
+        }
+    }
+
+    private String getMessage(Exception e)
+    {
+        return e.getMessage() == null ? e.getClass().getSimpleName(): e.getMessage();
+    }
+
+    protected void callTransform(String[] args)
+    {
+        // Overridden when the transform is done in the JVM rather than in an external command.
+    }
+
+    protected String[] buildArgs(File sourceFile, File targetFile, String[] args)
+    {
+        ArrayList<String> methodArgs = new ArrayList<>(args.length+2);
+        StringJoiner sj = new StringJoiner(" ");
+        for (String arg: args)
+        {
+            addArg(methodArgs, sj, arg);
+        }
+
+        addFileArg(methodArgs, sj, sourceFile);
+        addFileArg(methodArgs, sj, targetFile);
+
+        LogEntry.setOptions(sj.toString());
+
+        return methodArgs.toArray(new String[methodArgs.size()]);
+    }
+
+    private void addArg(ArrayList<String> methodArgs, StringJoiner sj, String arg)
+    {
+        if (arg != null)
+        {
+            sj.add(arg);
+            methodArgs.add(arg);
+        }
+    }
+
+    private void addFileArg(ArrayList<String> methodArgs, StringJoiner sj, File arg)
+    {
+        if (arg != null)
+        {
+            String path = arg.getAbsolutePath();
+            int i = path.lastIndexOf('.');
+            String ext = i == -1 ? "???" : path.substring(i+1);
+            sj.add(ext);
+            methodArgs.add(path);
+        }
+    }
+
+    protected void executeTransformCommand(String options, File sourceFile, File targetFile, Long timeout)
+    {
+        LogEntry.setOptions(options);
+
+        Map<String, String> properties = new HashMap<String, String>(5);
+        properties.put("options", options);
+        properties.put("source", sourceFile.getAbsolutePath());
+        properties.put("target", targetFile.getAbsolutePath());
+
+        executeTransformCommand(properties, targetFile, timeout);
     }
 
     public void executeTransformCommand(Map<String, String> properties, File targetFile, Long timeout)

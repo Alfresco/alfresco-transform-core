@@ -155,16 +155,4 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
 
         return createAttachment(targetFilename, targetFile, testDelay);
     }
-
-    private void executeTransformCommand(String options, File sourceFile, File targetFile, @RequestParam(value = "timeout", required = false) Long timeout)
-    {
-        LogEntry.setOptions(options);
-
-        Map<String, String> properties = new HashMap<String, String>(5);
-        properties.put("options", options);
-        properties.put("source", sourceFile.getAbsolutePath());
-        properties.put("target", targetFile.getAbsolutePath());
-
-        executeTransformCommand(properties, targetFile, timeout);
-    }
 }

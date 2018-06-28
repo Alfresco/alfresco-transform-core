@@ -1,0 +1,39 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+	<div>
+		<h2>Tika Test Transformations</h2>
+        <form method="POST" enctype="multipart/form-data" action="/transform">
+            <table>
+                <tr><td><div style="text-align:right">transform *</div></td><td><select name="transform">
+                    <option value="Archive">Archive</option>
+                    <option value="OutlookMsg">OutlookMsg</option>
+                    <option selected="selected" value="PdfBox">PdfBox</option>
+                    <option value="Office">Office</option>
+                    <option value="Poi">Poi</option>
+                    <option value="OOXML">OOXML</option>
+                    <option value="TikaAuto">TikaAuto</option>
+                    <option value="TextMining">TextMining</option>
+                    <option value="UNSET"></option>
+                    <option value="BADVALUE">BADVALUE</option>
+                    <option value="MIXED CASE TikaAuto">TikaAuto</option>
+                </select></td></tr>
+                <tr><td><div style="text-align:right">file *</div></td><td><input type="file" name="file" /></td></tr>
+                <tr><td><div style="text-align:right">targetExtension *</div></td><td><input type="text" name="targetExtension" value="txt" /></td></tr>
+                <tr><td><div style="text-align:right">targetMimetype *</div></td><td><input type="text" name="targetMimetype" value="text/plain" /></td></tr>
+                <tr><td><div style="text-align:right">targetEncoding *</div></td><td><input type="text" name="targetEncoding" value="UTF-8" /></td></tr>
+                <tr><td><div style="text-align:right">includeContents (archive) *</div></td><td><input type="checkbox" name="includeContents" value="true" /></td></tr>
+                <tr><td><div style="text-align:right">timeout</div></td><td><input type="text" name="timeout" value="" /></td></tr>
+                <tr><td><div style="text-align:right">testDelay</div></td><td><input type="text" name="testDelay" value="" /></td></tr>
+
+                <tr><td></td><td><input type="submit" value="Transform" /></td></tr>
+            </table>
+        </form>
+    </div>
+
+    <div>
+        <a href="/log">Log entries</a>
+    </div>
+
+</body>
+</html>
