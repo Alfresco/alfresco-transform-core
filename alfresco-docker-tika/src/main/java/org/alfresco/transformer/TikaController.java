@@ -113,7 +113,9 @@ public class TikaController extends AbstractTransformerController
                                               @RequestParam(value = "testDelay", required = false) Long testDelay,
 
                                               @RequestParam(value = "transform") String transform,
-                                              @RequestParam(value="includeContents", required = false) Boolean includeContents)
+                                              @RequestParam(value="includeContents", required = false) Boolean includeContents,
+                                              @RequestParam(value="notExtractBookmarksText", required = false) Boolean notExtractBookmarksText)
+    										  
     {
         if (!TRANSFORM_NAMES.contains(transform))
         {
@@ -130,6 +132,7 @@ public class TikaController extends AbstractTransformerController
 
         callTransform(sourceFile, targetFile, transform,
                 includeContents != null && includeContents ? INCLUDE_CONTENTS : null,
+                notExtractBookmarksText  != null && notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT: null,	
                 TARGET_MIMETYPE+targetMimetype, TARGET_ENCODING+targetEncoding);
 
         return createAttachment(targetFilename, targetFile, testDelay);

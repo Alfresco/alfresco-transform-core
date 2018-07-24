@@ -341,4 +341,13 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     {
         transform(TEXT_MINING, DOC, TXT, MIMETYPE_WORD, MIMETYPE_TEXT_PLAIN, null, EXPECTED_TEXT_CONTENT_CONTAINS);
     }
+    
+    @Test
+    public void pdfToTxtExtractBookmarksTest() throws Exception
+    {
+        super.mockTransformCommand(controller, PDF, TXT, MIMETYPE_PDF, true);
+        mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension).param("notExtractBookmarksText", "true"))
+                .andExpect(status().is(200))
+                .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick." + targetExtension));
+    }
 }
