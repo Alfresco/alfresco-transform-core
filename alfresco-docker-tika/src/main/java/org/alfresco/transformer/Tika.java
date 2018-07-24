@@ -22,6 +22,7 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.microsoft.OfficeParser;
 import org.apache.tika.parser.microsoft.ooxml.OOXMLParser;
 import org.apache.tika.parser.pdf.PDFParser;
+import org.apache.tika.parser.pdf.PDFParserConfig;
 import org.apache.tika.parser.pkg.PackageParser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.apache.tika.sax.ExpandedTitleContentHandler;
@@ -429,6 +430,7 @@ public class Tika
     public static final String TARGET_MIMETYPE = "--targetMimetype=";
     public static final String TARGET_ENCODING = "--targetEncoding=";
     public static final String INCLUDE_CONTENTS = "--includeContents";
+    public static final String NOT_EXTRACT_BOOKMARKS_TEXT = "--notExtractBookmarksText";
 
     public static final String CSV     = "csv";
     public static final String DOC     = "doc";
@@ -449,6 +451,7 @@ public class Tika
     private Parser autoDetectParser;
     private Parser ooXmlParser = new OOXMLParser();
     private Parser tikaOfficeDetectParser = new TikaOfficeDetectParser();
+    private  PDFParserConfig pdfParserConfig = new PDFParserConfig();
 
     private DocumentSelector pdfBoxEmbededDocumentSelector = new DocumentSelector()
     {
@@ -505,6 +508,7 @@ public class Tika
         String sourceFilename = null;
         String targetFilename = null;
         Boolean includeContents = null;
+        Boolean notExtractBookmarksText = null;
 
         for (String arg: args)
         {
@@ -522,6 +526,11 @@ public class Tika
                 else if (arg.startsWith(TARGET_MIMETYPE))
                 {
                     targetMimetype = getValue(arg, true, targetMimetype, TARGET_MIMETYPE);
+                }
+                else if(arg.startsWith(NOT_EXTRACT_BOOKMARKS_TEXT))
+                {
+                        getValue(arg, false, notExtractBookmarksText, NOT_EXTRACT_BOOKMARKS_TEXT);
+                        notExtractBookmarksText = true;
                 }
                 else
                 {
@@ -553,8 +562,9 @@ public class Tika
             throw new IllegalArgumentException("Missing arguments");
         }
         includeContents = includeContents == null ? false : includeContents;
+        notExtractBookmarksText = notExtractBookmarksText == null ? false : notExtractBookmarksText; 
 
-        transform(transform, includeContents, sourceFilename, targetFilename, targetMimetype, targetEncoding);
+        transform(transform, includeContents, notExtractBookmarksText,sourceFilename, targetFilename, targetMimetype, targetEncoding);
     }
 
     private String getValue(String arg, boolean valueExpected, Object value, String optionName)
@@ -577,6 +587,7 @@ public class Tika
 
     // Adds transform specific values such as parser and documentSelector.
     private void transform(String transform, Boolean includeContents,
+                           Boolean notExtractBookmarksText,
                            String sourceFilename,
                            String targetFilename, String targetMimetype, String targetEncoding)
     {
@@ -608,11 +619,12 @@ public class Tika
                 break;
         }
 
-        transform(parser, documentSelector, includeContents, sourceFilename, targetFilename, targetMimetype, targetEncoding);
+        transform(parser, documentSelector, includeContents, notExtractBookmarksText, sourceFilename, targetFilename, targetMimetype, targetEncoding);
     }
 
 
     private void transform(Parser parser, DocumentSelector documentSelector, Boolean includeContents,
+                           Boolean notExtractBookmarksText,
                            String sourceFilename,
                            String targetFilename, String targetMimetype, String targetEncoding)
     {
@@ -626,7 +638,7 @@ public class Tika
             os = new FileOutputStream(targetFilename);
             ow = new BufferedWriter(new OutputStreamWriter(os, targetEncoding));
             Metadata metadata = new Metadata();
-            ParseContext context = buildParseContext(documentSelector, includeContents);
+            ParseContext context = buildParseContext(documentSelector, includeContents, notExtractBookmarksText);
             ContentHandler handler = getContentHandler(targetMimetype, ow);
 
             parser.parse(is, handler, metadata, context);
@@ -780,15 +792,26 @@ public class Tika
         }
     }
 
-    protected ParseContext buildParseContext(DocumentSelector documentSelector, Boolean includeContents)
+    protected ParseContext buildParseContext(DocumentSelector documentSelector, Boolean includeContents, Boolean notExtractBookmarksText)
     {
         ParseContext context = new ParseContext();
+
         if (documentSelector != null)
         {
             context.set(DocumentSelector.class, documentSelector);
         }
 
-        // pdfParserConfig is never set in the original repo code, so code removed here.
+        if (pdfParserConfig != null)
+        {
+
+            if (notExtractBookmarksText != null)
+            {
+                pdfParserConfig.setExtractBookmarksText(!notExtractBookmarksText);
+            }
+
+            // pdfParserConfig is set to override default settings
+            context.set(PDFParserConfig.class, pdfParserConfig);
+        }
 
         // If Archive transform
         if (includeContents != null)
@@ -798,4 +821,5 @@ public class Tika
 
         return context;
     }
+
 }
