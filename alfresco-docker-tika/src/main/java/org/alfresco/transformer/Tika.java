@@ -527,10 +527,10 @@ public class Tika
                 {
                     targetMimetype = getValue(arg, true, targetMimetype, TARGET_MIMETYPE);
                 }
-                else if(arg.startsWith(NOT_EXTRACT_BOOKMARKS_TEXT))
+                else if (arg.startsWith(NOT_EXTRACT_BOOKMARKS_TEXT))
                 {
-                        getValue(arg, false, notExtractBookmarksText, NOT_EXTRACT_BOOKMARKS_TEXT);
-                        notExtractBookmarksText = true;
+                    getValue(arg, false, notExtractBookmarksText, NOT_EXTRACT_BOOKMARKS_TEXT);
+                    notExtractBookmarksText = true;
                 }
                 else
                 {
@@ -564,7 +564,7 @@ public class Tika
         includeContents = includeContents == null ? false : includeContents;
         notExtractBookmarksText = notExtractBookmarksText == null ? false : notExtractBookmarksText; 
 
-        transform(transform, includeContents, notExtractBookmarksText,sourceFilename, targetFilename, targetMimetype, targetEncoding);
+        transform(transform, includeContents, notExtractBookmarksText, sourceFilename, targetFilename, targetMimetype, targetEncoding);
     }
 
     private String getValue(String arg, boolean valueExpected, Object value, String optionName)
@@ -801,14 +801,9 @@ public class Tika
             context.set(DocumentSelector.class, documentSelector);
         }
 
-        if (pdfParserConfig != null)
+        if (notExtractBookmarksText.equals(true))
         {
-
-            if (notExtractBookmarksText != null)
-            {
-                pdfParserConfig.setExtractBookmarksText(!notExtractBookmarksText);
-            }
-
+            pdfParserConfig.setExtractBookmarksText(false);
             // pdfParserConfig is set to override default settings
             context.set(PDFParserConfig.class, pdfParserConfig);
         }

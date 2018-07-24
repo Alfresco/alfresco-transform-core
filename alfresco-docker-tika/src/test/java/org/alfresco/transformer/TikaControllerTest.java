@@ -345,7 +345,6 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @Test
     public void pdfToTxtExtractBookmarksTest() throws Exception
     {
-
         super.mockTransformCommand(controller, PDF, TXT, MIMETYPE_PDF, true);
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension).param("notExtractBookmarksText", "true"))
                 .andExpect(status().is(200))
