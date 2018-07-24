@@ -146,7 +146,19 @@ public class ImageMagickController extends AbstractTransformerController
                                               @RequestParam(value = "resizeHeight", required = false) Integer resizeHeight,
                                               @RequestParam(value = "resizePercentage", required = false) Boolean resizePercentage,
                                               @RequestParam(value = "allowEnlargement", required = false) Boolean allowEnlargement,
-                                              @RequestParam(value = "maintainAspectRatio", required = false) Boolean maintainAspectRatio)
+                                              @RequestParam(value = "maintainAspectRatio", required = false) Boolean maintainAspectRatio,
+
+                                              // The commandOptions parameter is supported in ACS 6.0.1 because there may be
+                                              // custom renditions that use it. However the Transform service should
+                                              // not support it as it provides the option to specify arbitrary command
+                                              // options or even the option to run something else on the command line.
+                                              // All Transform service options should be checked as is done for the other
+                                              // request parameters. Setting this option in the rendition's
+                                              // ImageTransformationOptions object is being deprecated for the point where
+                                              // The Transform service is being used for all transforms. In the case of
+                                              // ACS 6.0, this is relatively safe as it requires an AMP to be installed
+                                              // which supplies the commandOptions.
+                                              @RequestParam(value = "commandOptions", required = false) String commandOptions)
     {
         if (cropGravity != null)
         {
@@ -265,7 +277,9 @@ public class ImageMagickController extends AbstractTransformerController
                         ? "["+startPage+']'
                         : "["+startPage+'-'+endPage+']';
 
-        String options = args.toString();
+        String options =
+                (commandOptions == null || "".equals(commandOptions.trim()) ? "" : commandOptions + ' ') +
+                args.toString();
         executeTransformCommand(options, sourceFile, pageRange, targetFile, timeout);
 
         return createAttachment(targetFilename, targetFile, testDelay);

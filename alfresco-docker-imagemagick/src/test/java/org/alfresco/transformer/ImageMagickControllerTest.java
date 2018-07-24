@@ -147,4 +147,21 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                 .andExpect(content().bytes(expectedTargetFileBytes))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
     }
+
+    @Test
+    public void deprecatedCommandOptionsTest() throws Exception
+    {
+        // Example of why the commandOptions parameter is a bad idea.
+        expectedOptions = "( horrible command / ); -resize 321x654>";
+        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/transform")
+                .file(sourceFile)
+                .param("targetExtension", targetExtension)
+                .param("thumbnail", "false")
+                .param("resizeWidth", "321")
+                .param("resizeHeight", "654")
+                .param("commandOptions", "( horrible command / );"))
+                .andExpect(status().is(200))
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
+    }
 }
