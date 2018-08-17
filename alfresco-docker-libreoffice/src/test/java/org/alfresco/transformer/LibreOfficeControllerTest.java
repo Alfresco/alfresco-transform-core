@@ -25,6 +25,22 @@
  */
 package org.alfresco.transformer;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
+
+import org.alfresco.transform.client.model.TransformRequest;
 import org.artofsolving.jodconverter.office.OfficeException;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,22 +51,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.util.Arrays;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.util.StringUtils;
 
 /**
  * Test the LibreOfficeController without a server.
@@ -66,6 +67,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
     @Before
     public void before() throws IOException
     {
+        controller.setAlfrescoSharedFileStoreClient(alfrescoSharedFileStoreClient);
         super.controller = controller;
 
         sourceExtension = "doc";
@@ -83,6 +85,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
         {
             File sourceFile = invocation.getArgumentAt(0, File.class);
             File targetFile = invocation.getArgumentAt(1, File.class);
+            String actualTargetExtension = StringUtils.getFilenameExtension(targetFile.getAbsolutePath());
 
             assertNotNull(sourceFile);
             assertNotNull(targetFile);
@@ -101,12 +104,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
             {
                 String testFilename = actualTarget.substring(i+1);
                 File testFile = getTestFile(testFilename, false);
-                if (testFile != null)
-                {
-                    FileChannel source = new FileInputStream(testFile).getChannel();
-                    FileChannel target = new FileOutputStream(targetFile).getChannel();
-                    target.transferFrom(source, 0, source.size());
-                }
+                generateTargetFileFromResourceFile(actualTargetExtension, testFile, targetFile);
             }
 
             // Check the supplied source file has not been changed.
@@ -128,5 +126,12 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
                 .param("targetExtension", "xxx"))
                 .andExpect(status().is(400))
                 .andExpect(status().reason(containsString("LibreOffice - LibreOffice server conversion failed:")));
+    }
+
+    @Override
+    protected void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest)
+    {
+        transformRequest.setSourceExtension("doc");
+        transformRequest.setTargetExtension("pdf");
     }
 }

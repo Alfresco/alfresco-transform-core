@@ -11,7 +11,12 @@
  */
 package org.alfresco.transformer;
 
-import com.sun.star.task.ErrorCodeIOException;
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -21,15 +26,14 @@ import org.artofsolving.jodconverter.office.OfficeException;
 import org.artofsolving.jodconverter.office.OfficeManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
+import com.sun.star.task.ErrorCodeIOException;
 
 /**
  * Controller for the Docker based LibreOffice transformer.
@@ -135,14 +139,14 @@ public class LibreOfficeController extends AbstractTransformerController
         };
     }
 
-    @PostMapping("/transform")
+    @PostMapping(value = "/transform", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
                                               @RequestParam("file") MultipartFile sourceMultipartFile,
                                               @RequestParam("targetExtension") String targetExtension,
                                               @RequestParam(value = "timeout", required = false) Long timeout,
                                               @RequestParam(value = "testDelay", required = false) Long testDelay)
     {
-        String targetFilename = createTargetFileName(sourceMultipartFile, targetExtension);
+        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(), targetExtension);
         File sourceFile = createSourceFile(request, sourceMultipartFile);
         File targetFile = createTargetFile(request, targetFilename);
         // Both files are deleted by TransformInterceptor.afterCompletion
@@ -150,6 +154,13 @@ public class LibreOfficeController extends AbstractTransformerController
         executeTransformCommand(sourceFile, targetFile, timeout);
 
         return createAttachment(targetFilename, targetFile, testDelay);
+    }
+
+    @Override
+    protected void processTransform(File sourceFile, File targetFile,
+        Map<String, String> transformOptions, Long timeout)
+    {
+        executeTransformCommand(sourceFile, targetFile, timeout);
     }
 
     protected void executeTransformCommand(File sourceFile, File targetFile, Long timeout)

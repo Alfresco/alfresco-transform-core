@@ -25,6 +25,13 @@
  */
 package org.alfresco.transformer;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.IOException;
+
+import org.alfresco.transform.client.model.TransformRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,10 +39,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.io.IOException;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test the ImageMagickController without a server.
@@ -51,6 +54,9 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     @Before
     public void before() throws IOException
     {
+        controller.setAlfrescoSharedFileStoreClient(alfrescoSharedFileStoreClient);
+        super.controller = controller;
+
         super.mockTransformCommand(controller, "jpg", "png", "image/jpg", true);
     }
 
@@ -163,5 +169,12 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                 .andExpect(status().is(200))
                 .andExpect(content().bytes(expectedTargetFileBytes))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
+    }
+
+    @Override
+    protected void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest)
+    {
+        transformRequest.setSourceExtension("png");
+        transformRequest.setTargetExtension("png");
     }
 }

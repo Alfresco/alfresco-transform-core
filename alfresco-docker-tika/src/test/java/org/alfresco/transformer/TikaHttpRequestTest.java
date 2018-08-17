@@ -47,5 +47,5 @@ public class TikaHttpRequestTest extends AbstractHttpRequestTest
     protected String getSourceExtension()
     {
         return "pdf";
-    };
+    }
 }

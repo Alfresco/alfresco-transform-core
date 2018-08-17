@@ -1,0 +1,19 @@
+spring:
+  http:
+    multipart:
+      max-file-size: 8192MB
+      max-request-size: 8192MB
+
+server:
+  port: 8090
+
+logging:
+  level:
+    #org.alfresco.util.exec.RuntimeExec: debug
+    org.alfresco.transformer.LibreOfficeController: debug
+    org.alfresco.transformer.JodConverterSharedInstance: debug
+    org.alfresco.transformer.AlfrescoPdfRendererController: debug
+    org.alfresco.transformer.ImageMagickController: debug
+    org.alfresco.transformer.TikaController: debug
+
+fileStoreUrl: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}

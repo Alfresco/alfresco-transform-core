@@ -25,30 +25,54 @@
  */
 package org.alfresco.transformer;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transformer.model.FileRefEntity;
+import org.alfresco.transformer.model.FileRefResponse;
 import org.alfresco.util.exec.RuntimeExec;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.util.StringUtils;
 
-import java.io.*;
-import java.net.URL;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Super class for testing controllers without a server. Includes tests for the AbstractTransformerController itself.
@@ -58,11 +82,17 @@ public abstract class AbstractTransformerControllerTest
     @Autowired
     protected MockMvc mockMvc;
 
+    @Autowired
+    protected ObjectMapper objectMapper;
+
     @Mock
     private RuntimeExec mockTransformCommand;
 
     @Mock
     private RuntimeExec mockCheckCommand;
+
+    @Mock
+    protected AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
 
     @Mock
     private RuntimeExec.ExecutionResult mockExecutionResult;
@@ -79,6 +109,11 @@ public abstract class AbstractTransformerControllerTest
     protected byte[] expectedTargetFileBytes;
 
     protected AbstractTransformerController controller;
+
+    @Before
+    public void before() throws Exception
+    {
+    }
 
     // Called by sub class
     public void mockTransformCommand(AbstractTransformerController controller, String sourceExtension,
@@ -109,6 +144,7 @@ public abstract class AbstractTransformerControllerTest
                 String actualOptions = actualProperties.get("options");
                 String actualSource = actualProperties.get("source");
                 String actualTarget = actualProperties.get("target");
+                String actualTargetExtension = StringUtils.getFilenameExtension(actualTarget);
 
                 assertNotNull(actualSource);
                 assertNotNull(actualTarget);
@@ -137,13 +173,9 @@ public abstract class AbstractTransformerControllerTest
                 {
                     String testFilename = actualTarget.substring(i+1);
                     File testFile = getTestFile(testFilename, false);
-                    if (testFile != null)
-                    {
-                        File targetFile = new File(actualTarget);
-                        FileChannel source = new FileInputStream(testFile).getChannel();
-                        FileChannel target = new FileOutputStream(targetFile).getChannel();
-                        target.transferFrom(source, 0, source.size());
-                    }
+                    File targetFile = new File(actualTarget);
+                    generateTargetFileFromResourceFile(actualTargetExtension, testFile,
+                        targetFile);
                 }
 
                 // Check the supplied source file has not been changed.
@@ -157,6 +189,37 @@ public abstract class AbstractTransformerControllerTest
         when(mockExecutionResult.getExitValue()).thenReturn(0);
         when(mockExecutionResult.getStdErr()).thenReturn("STDERROR");
         when(mockExecutionResult.getStdOut()).thenReturn("STDOUT");
+    }
+
+    /**
+     * This method ends up being the core of the mock.
+     * It copies content from an existing file in the resources folder to the desired location
+     * in order to simulate a successful transformation.
+     *
+     * @param actualTargetExtension Requested extension.
+     * @param testFile The test file (transformed) - basically the result.
+     * @param targetFile The location where the content from the testFile should be copied
+     * @throws IOException in case of any errors.
+     */
+    void generateTargetFileFromResourceFile(String actualTargetExtension, File testFile,
+        File targetFile) throws IOException
+    {
+        if (testFile != null)
+        {
+            FileChannel source = new FileInputStream(testFile).getChannel();
+            FileChannel target = new FileOutputStream(targetFile).getChannel();
+            target.transferFrom(source, 0, source.size());
+        }
+        else
+        {
+            testFile = getTestFile("quick." + actualTargetExtension, false);
+            if (testFile != null)
+            {
+                FileChannel source = new FileInputStream(testFile).getChannel();
+                FileChannel target = new FileOutputStream(targetFile).getChannel();
+                target.transferFrom(source, 0, source.size());
+            }
+        }
     }
 
     protected byte[] readTestFile(String extension) throws IOException
@@ -329,4 +392,60 @@ public abstract class AbstractTransformerControllerTest
             assertEquals("", expectedMaxTime, probeTestTransform.maxTime);
         }
     }
+
+    @Test
+    public void testPojoTransform() throws Exception
+    {
+        // Files
+        String sourceFileRef = UUID.randomUUID().toString();
+        File sourceFile = getTestFile("quick." + sourceExtension, true);
+        String targetFileRef = UUID.randomUUID().toString();
+
+
+        // Transformation Request POJO
+        TransformRequest transformRequest = new TransformRequest();
+        transformRequest.setRequestId("1");
+        transformRequest.setSchema(1);
+        transformRequest.setClientData("Alfresco Digital Business Platform");
+        transformRequest.setTransformationRequestOptions(new HashMap<>());
+
+        transformRequest.setSourceReference(sourceFileRef);
+        transformRequest.setSourceExtension(sourceExtension);
+        // TODO: ATS-53
+        transformRequest.setSourceMediaType("TODO");
+        transformRequest.setSourceSize(sourceFile.length());
+
+        transformRequest.setTargetExtension(targetExtension);
+        transformRequest.setTargetMediaType("TODO");
+
+        // HTTP Request
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
+        ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
+            sourceFile), headers, HttpStatus.OK);
+
+        when(alfrescoSharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
+        when(alfrescoSharedFileStoreClient.saveFile(any())).thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
+        when(mockExecutionResult.getExitValue()).thenReturn(0);
+
+        // Update the Transformation Request with any specific params before sending it
+        updateTransformRequestWithSpecificOptions(transformRequest);
+
+        // Serialize and call the transformer
+        String tr = objectMapper.writeValueAsString(transformRequest);
+        String transformationReplyAsString = mockMvc.perform(MockMvcRequestBuilders.post("/transform")
+            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).content(tr))
+            .andExpect(status().is(HttpStatus.CREATED.value()))
+            .andReturn().getResponse().getContentAsString();
+
+        TransformReply transformReply = objectMapper.readValue(transformationReplyAsString, TransformReply.class);
+
+        // Assert the reply
+        assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
+        assertEquals(transformRequest.getClientData(), transformReply.getClientData());
+        assertEquals(transformRequest.getSchema(), transformReply.getSchema());
+    }
+
+    protected abstract void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest);
 }

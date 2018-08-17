@@ -25,6 +25,44 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_HTML;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_OPENXML_WORDPROCESSING;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_OUTLOOK_MSG;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_PDF;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_TEXT_CSV;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_WORD;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_XHTML;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_XML;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_ZIP;
+import static org.alfresco.transformer.Tika.ARCHIVE;
+import static org.alfresco.transformer.Tika.CSV;
+import static org.alfresco.transformer.Tika.DOC;
+import static org.alfresco.transformer.Tika.DOCX;
+import static org.alfresco.transformer.Tika.HTML;
+import static org.alfresco.transformer.Tika.MSG;
+import static org.alfresco.transformer.Tika.OUTLOOK_MSG;
+import static org.alfresco.transformer.Tika.PDF;
+import static org.alfresco.transformer.Tika.PDF_BOX;
+import static org.alfresco.transformer.Tika.POI;
+import static org.alfresco.transformer.Tika.POI_OFFICE;
+import static org.alfresco.transformer.Tika.POI_OO_XML;
+import static org.alfresco.transformer.Tika.PPTX;
+import static org.alfresco.transformer.Tika.TEXT_MINING;
+import static org.alfresco.transformer.Tika.TIKA_AUTO;
+import static org.alfresco.transformer.Tika.TXT;
+import static org.alfresco.transformer.Tika.XHTML;
+import static org.alfresco.transformer.Tika.XML;
+import static org.alfresco.transformer.Tika.XSLX;
+import static org.alfresco.transformer.Tika.ZIP;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.alfresco.transform.client.model.TransformRequest;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -33,12 +71,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-import static org.alfresco.repo.content.MimetypeMap.*;
-import static org.alfresco.transformer.Tika.*;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test the TikaController without a server.
@@ -62,6 +94,16 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     String transform = PDF_BOX;
     String targetEncoding = "UTF-8";
     String targetMimetype = MIMETYPE_TEXT_PLAIN;
+
+    @Before
+    public void before() throws Exception
+    {
+        controller.setAlfrescoSharedFileStoreClient(alfrescoSharedFileStoreClient);
+        super.controller = controller;
+
+        sourceExtension = "pdf";
+        targetExtension = "txt";
+    }
 
     private void transform(String transform, String sourceExtension, String targetExtension,
                            String sourceMimetype, String targetMimetype,
@@ -349,5 +391,15 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension).param("notExtractBookmarksText", "true"))
                 .andExpect(status().is(200))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick." + targetExtension));
+    }
+
+    @Override
+    protected void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest)
+    {
+        transformRequest.setSourceExtension(sourceExtension);
+        transformRequest.setTargetExtension(targetExtension);
+        transformRequest.getTransformationRequestOptions().put("transform", "PdfBox");
+        transformRequest.getTransformationRequestOptions().put("targetMimetype", "text/plain");
+        transformRequest.getTransformationRequestOptions().put("targetEncoding", "UTF-8");
     }
 }

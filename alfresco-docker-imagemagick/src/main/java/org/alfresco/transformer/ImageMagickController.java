@@ -11,19 +11,25 @@
  */
 package org.alfresco.transformer;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.alfresco.util.exec.RuntimeExec;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.util.*;
 
 /**
  * Controller for the Docker based ImageMagick transformer.
@@ -121,7 +127,7 @@ public class ImageMagickController extends AbstractTransformerController
         };
     }
 
-    @PostMapping("/transform")
+    @PostMapping(value = "/transform", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
                                               @RequestParam("file") MultipartFile sourceMultipartFile,
                                               @RequestParam("targetExtension") String targetExtension,
@@ -160,6 +166,68 @@ public class ImageMagickController extends AbstractTransformerController
                                               // which supplies the commandOptions.
                                               @RequestParam(value = "commandOptions", required = false) String commandOptions)
     {
+        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(),
+            targetExtension);
+        File sourceFile = createSourceFile(request, sourceMultipartFile);
+        File targetFile = createTargetFile(request, targetFilename);
+        // Both files are deleted by TransformInterceptor.afterCompletion
+
+        String options = buildTransformOptions(startPage, endPage , alphaRemove, autoOrient, cropGravity, cropWidth, cropHeight, cropPercentage,
+            cropXOffset, cropYOffset, thumbnail, resizeWidth, resizeHeight, resizePercentage, allowEnlargement, maintainAspectRatio, commandOptions);
+        String pageRange = calculatePageRange(startPage, endPage);
+
+        executeTransformCommand(options, sourceFile, pageRange, targetFile, timeout);
+
+        return createAttachment(targetFilename, targetFile, testDelay);
+    }
+
+    @Override
+    protected void processTransform(File sourceFile, File targetFile,
+        Map<String, String> transformOptions, Long timeout)
+    {
+        Integer startPage = stringToInteger(transformOptions.get("startPage"));
+        Integer endPage = stringToInteger(transformOptions.get("endPage"));
+        Boolean alphaRemove = stringToBoolean(transformOptions.get("alphaRemove"));
+        Boolean autoOrient = stringToBoolean(transformOptions.get("autoOrient"));
+        String cropGravity = transformOptions.get("cropGravity");
+        Integer cropWidth = stringToInteger(transformOptions.get("cropWidth"));
+        Integer cropHeight = stringToInteger(transformOptions.get("cropHeight"));
+        Boolean cropPercentage = stringToBoolean(transformOptions.get("cropPercentage"));
+        Integer cropXOffset = stringToInteger(transformOptions.get("cropXOffset"));
+        Integer cropYOffset = stringToInteger(transformOptions.get("cropYOffset"));
+        Boolean thumbnail = stringToBoolean(transformOptions.get("thumbnail"));
+        Integer resizeWidth = stringToInteger(transformOptions.get("resizeWidth"));
+        Integer resizeHeight = stringToInteger(transformOptions.get("resizeHeight"));
+        Boolean resizePercentage = stringToBoolean(transformOptions.get("resizePercentage"));
+        Boolean allowEnlargement = stringToBoolean(transformOptions.get("allowEnlargement"));
+        Boolean maintainAspectRatio = stringToBoolean(transformOptions.get("maintainAspectRatio"));
+        String commandOptions = transformOptions.get("commandOptions");
+
+        String options = buildTransformOptions(startPage, endPage , alphaRemove, autoOrient, cropGravity, cropWidth, cropHeight, cropPercentage,
+        cropXOffset, cropYOffset, thumbnail, resizeWidth, resizeHeight, resizePercentage, allowEnlargement, maintainAspectRatio, commandOptions);
+        String pageRange = calculatePageRange(startPage, endPage);
+
+        executeTransformCommand(options, sourceFile, pageRange, targetFile, timeout);
+    }
+
+    private void executeTransformCommand(String options, File sourceFile, String pageRange, File targetFile, Long timeout)
+    {
+        LogEntry.setOptions(pageRange+(pageRange.isEmpty() ? "" : " ")+options);
+
+        Map<String, String> properties = new HashMap<String, String>(5);
+        properties.put("options", options);
+        properties.put("source", sourceFile.getAbsolutePath()+pageRange);
+        properties.put("target", targetFile.getAbsolutePath());
+
+        executeTransformCommand(properties, targetFile, timeout);
+    }
+
+    private String buildTransformOptions(Integer startPage, Integer endPage, Boolean alphaRemove,
+        Boolean autoOrient, String cropGravity, Integer cropWidth, Integer cropHeight,
+        Boolean cropPercentage, Integer cropXOffset, Integer cropYOffset, Boolean thumbnail,
+        Integer resizeWidth, Integer resizeHeight, Boolean resizePercentage,
+        Boolean allowEnlargement, Boolean maintainAspectRatio, String commandOptions)
+    {
         if (cropGravity != null)
         {
             cropGravity = cropGravity.trim();
@@ -173,11 +241,6 @@ public class ImageMagickController extends AbstractTransformerController
             }
         }
 
-        String targetFilename = createTargetFileName(sourceMultipartFile, targetExtension);
-        File sourceFile = createSourceFile(request, sourceMultipartFile);
-        File targetFile = createTargetFile(request, targetFilename);
-        // Both files are deleted by TransformInterceptor.afterCompletion
-
         StringJoiner args = new StringJoiner(" ");
         if (alphaRemove != null && alphaRemove)
         {
@@ -190,7 +253,7 @@ public class ImageMagickController extends AbstractTransformerController
         }
 
         if (cropGravity != null || cropWidth != null || cropHeight != null || cropPercentage != null ||
-                cropXOffset != null || cropYOffset != null)
+            cropXOffset != null || cropYOffset != null)
         {
             if (cropGravity != null)
             {
@@ -268,32 +331,20 @@ public class ImageMagickController extends AbstractTransformerController
             }
         }
 
-        String pageRange =
-                startPage == null
-                        ? endPage == null
-                        ? ""
-                        : "["+endPage+']'
-                        : endPage == null || startPage.equals(endPage)
-                        ? "["+startPage+']'
-                        : "["+startPage+'-'+endPage+']';
-
-        String options =
-                (commandOptions == null || "".equals(commandOptions.trim()) ? "" : commandOptions + ' ') +
-                args.toString();
-        executeTransformCommand(options, sourceFile, pageRange, targetFile, timeout);
-
-        return createAttachment(targetFilename, targetFile, testDelay);
+        return (commandOptions == null || "".equals(commandOptions.trim()) ? "" : commandOptions + ' ') +
+            args.toString();
     }
 
-    private void executeTransformCommand(String options, File sourceFile, String pageRange, File targetFile, Long timeout)
+    private String calculatePageRange(Integer startPage, Integer endPage)
     {
-        LogEntry.setOptions(pageRange+(pageRange.isEmpty() ? "" : " ")+options);
-
-        Map<String, String> properties = new HashMap<String, String>(5);
-        properties.put("options", options);
-        properties.put("source", sourceFile.getAbsolutePath()+pageRange);
-        properties.put("target", targetFile.getAbsolutePath());
-
-        executeTransformCommand(properties, targetFile, timeout);
+        return
+            startPage == null
+                ? endPage == null
+                ? ""
+                : "["+endPage+']'
+                : endPage == null || startPage.equals(endPage)
+                ? "["+startPage+']'
+                : "["+startPage+'-'+endPage+']';
     }
+
 }
