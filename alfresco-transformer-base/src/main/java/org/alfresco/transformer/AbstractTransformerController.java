@@ -25,33 +25,51 @@
  */
 package org.alfresco.transformer;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringJoiner;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transformer.model.FileRefResponse;
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.exec.RuntimeExec;
 import org.apache.commons.logging.Log;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.*;
 
 /**
  * <p>Abstract Controller, provides structure and helper methods to sub-class transformer controllers.</p>
@@ -85,6 +103,10 @@ public abstract class AbstractTransformerController
 {
     public static final String SOURCE_FILE = "sourceFile";
     public static final String TARGET_FILE = "targetFile";
+    public static final String FILENAME = "filename=";
+
+    @Autowired
+    private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
 
     protected static Log logger;
 
@@ -114,6 +136,125 @@ public abstract class AbstractTransformerController
     }
 
     protected abstract String getTransformerName();
+
+    /**
+     * '/transform' endpoint which consumes and produces 'application/json'
+     *
+     * This is the way to tell Spring to redirect the request to this endpoint
+     * instead of the older one, which produces 'html'
+     *
+     * @param transformRequest The transformation request
+     * @param timeout Transformation timeout
+     * @return A transformation reply
+     */
+    @PostMapping(value = "/transform", produces = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<TransformReply> transform(@RequestBody TransformRequest transformRequest,
+        @RequestParam(value = "timeout", required = false) Long timeout)
+    {
+        TransformReply transformReply = new TransformReply();
+        transformReply.setRequestId(transformRequest.getRequestId());
+        transformReply.setSourceReference(transformRequest.getSourceReference());
+        transformReply.setSchema(transformRequest.getSchema());
+        transformReply.setClientData(transformRequest.getClientData());
+
+        // Load the source file
+        File sourceFile;
+        try
+        {
+            sourceFile = loadSourceFile(transformRequest.getSourceReference());
+        }
+        catch (TransformException te)
+        {
+            transformReply.setStatus(te.getStatusCode());
+            transformReply
+                .setErrorDetails("Failed at reading the source file. " + te.getMessage());
+
+            return new ResponseEntity<>(transformReply, HttpStatus.valueOf(transformReply.getStatus()));
+        }
+        catch (HttpClientErrorException hcee)
+        {
+            transformReply.setStatus(hcee.getStatusCode().value());
+            transformReply
+                .setErrorDetails("Failed at reading the source file. " + hcee.getMessage());
+
+            return new ResponseEntity<>(transformReply, HttpStatus.valueOf(transformReply.getStatus()));
+        }
+        catch (Exception e)
+        {
+            transformReply.setStatus(500);
+            transformReply.setErrorDetails("Failed at reading the source file. " + e.getMessage());
+
+            return new ResponseEntity<>(transformReply, HttpStatus.valueOf(transformReply.getStatus()));
+        }
+
+        // Create local temp target file in order to run the transformation
+        String targetFilename = createTargetFileName(sourceFile.getName(),
+            transformRequest.getTargetExtension());
+        File targetFile = buildFile(targetFilename);
+
+        // Run the transformation
+        try
+        {
+            processTransform(sourceFile, targetFile,
+                transformRequest.getTransformationRequestOptions(), timeout);
+        }
+        catch (TransformException te)
+        {
+            transformReply.setStatus(te.getStatusCode());
+            transformReply
+                .setErrorDetails("Failed at processing transformation. " + te.getMessage());
+
+            return new ResponseEntity<>(transformReply, HttpStatus.valueOf(transformReply.getStatus()));
+        }
+        catch (Exception e)
+        {
+            transformReply.setStatus(500);
+            transformReply
+                .setErrorDetails("Failed at processing transformation. " + e.getMessage());
+
+            return new ResponseEntity<>(transformReply, HttpStatus.valueOf(transformReply.getStatus()));
+        }
+
+        // Write the target file
+        FileRefResponse targetRef;
+        try
+        {
+            targetRef = alfrescoSharedFileStoreClient.saveFile(targetFile);
+        }
+        catch (TransformException te)
+        {
+            transformReply.setStatus(te.getStatusCode());
+            transformReply
+                .setErrorDetails("Failed at writing the transformed file. " + te.getMessage());
+
+            return new ResponseEntity<>(transformReply, HttpStatus.valueOf(transformReply.getStatus()));
+        }
+        catch (HttpClientErrorException hcee)
+        {
+            transformReply.setStatus(hcee.getStatusCode().value());
+            transformReply
+                .setErrorDetails("Failed at writing the transformed file. " + hcee.getMessage());
+
+            return new ResponseEntity<>(transformReply, HttpStatus.valueOf(transformReply.getStatus()));
+        }
+        catch (Exception e)
+        {
+            transformReply.setStatus(500);
+            transformReply
+                .setErrorDetails("Failed at writing the transformed file. " + e.getMessage());
+
+            return new ResponseEntity<>(transformReply, HttpStatus.valueOf(transformReply.getStatus()));
+        }
+
+        transformReply.setTargetReference(targetRef.getEntry().getFileRef());
+        transformReply.setStatus(HttpStatus.CREATED.value());
+
+        return new ResponseEntity<>(transformReply, HttpStatus.valueOf(transformReply.getStatus()));
+    }
+
+    protected abstract void processTransform(File sourceFile, File targetFile,
+        Map<String, String> transformOptions, Long timeout);
 
     @RequestMapping("/version")
     @ResponseBody
@@ -269,10 +410,71 @@ public abstract class AbstractTransformerController
 //        return errorAttributes;
 //    }
 
-    protected String createTargetFileName(MultipartFile sourceMultipartFile, String targetExtension)
+    /**
+     * Loads the file with the specified sourceReference from Alfresco Shared File Store
+     *
+     * @param sourceReference reference to the file in Alfresco Shared File Store
+     * @return the file containing the source content for the transformation
+     */
+    protected File loadSourceFile(String sourceReference)
+    {
+
+        ResponseEntity<Resource> responseEntity = alfrescoSharedFileStoreClient
+            .retrieveFile(sourceReference);
+        getProbeTestTransformInternal().incrementTransformerCount();
+
+        HttpHeaders headers = responseEntity.getHeaders();
+        String filename = getFilenameFromContentDisposition(headers);
+
+        String extension = StringUtils.getFilenameExtension(filename);
+        MediaType contentType = headers.getContentType();
+        long size = headers.getContentLength();
+
+        Resource body = responseEntity.getBody();
+        File file = TempFileProvider.createTempFile("source_", "." + extension);
+
+        if (logger.isDebugEnabled())
+        {
+            logger.debug(
+                "Read source content " + sourceReference + " length="
+                    + size + " contentType=" + contentType);
+        }
+        save(body, file);
+        LogEntry.setSource(filename, size);
+        return file;
+    }
+
+
+    private String getFilenameFromContentDisposition(HttpHeaders headers)
+    {
+        String filename = "";
+        String contentDisposition = headers.getFirst(HttpHeaders.CONTENT_DISPOSITION);
+        if (contentDisposition != null)
+        {
+            String[] strings = contentDisposition.split("; *");
+            for (String string: strings)
+            {
+                if (string.startsWith(FILENAME))
+                {
+                    filename = string.substring(FILENAME.length());
+                    break;
+                }
+            }
+        }
+        return filename;
+    }
+
+    /**
+     * Returns the file name for the target file
+     *
+     * @param fileName Desired file name
+     * @param targetExtension File extension
+     * @return Target file name
+     */
+    protected String createTargetFileName(String fileName, String targetExtension)
     {
         String targetFilename = null;
-        String sourceFilename = sourceMultipartFile.getOriginalFilename();
+        String sourceFilename = fileName;
         sourceFilename = StringUtils.getFilename(sourceFilename);
         if (sourceFilename != null && !sourceFilename.isEmpty())
         {
@@ -317,11 +519,16 @@ public abstract class AbstractTransformerController
      */
     protected File createTargetFile(HttpServletRequest request, String filename)
     {
-        filename = checkFilename( false, filename);
-        LogEntry.setTarget(filename);
-        File file = TempFileProvider.createTempFile("target_", "_" + filename);
+        File file = buildFile(filename);
         request.setAttribute(TARGET_FILE, file);
         return file;
+    }
+
+    private File buildFile(String filename)
+    {
+        filename = checkFilename( false, filename);
+        LogEntry.setTarget(filename);
+        return TempFileProvider.createTempFile("target_", "_" + filename);
     }
 
     /**
@@ -354,6 +561,20 @@ public abstract class AbstractTransformerController
             throw new TransformException(507, "Failed to store the source file", e);
         }
     }
+
+    private void save(Resource body, File file)
+    {
+        try
+        {
+            InputStream inputStream = body == null ? null : body.getInputStream();
+            Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+        catch (IOException e)
+        {
+            throw new TransformException(507, "Failed to store the source file", e);
+        }
+    }
+
 
     private Resource load(File file)
     {
@@ -490,5 +711,38 @@ public abstract class AbstractTransformerController
         {
             throw new TransformException(500, "Filename encoding error", e);
         }
+    }
+
+    /**
+     * Safely converts a {@link String} to an {@link Integer}
+     *
+     * @param param String to be converted
+     * @return Null if param is null or converted value as {@link Integer}
+     */
+    protected Integer stringToInteger(String param)
+    {
+        return param == null ? null : Integer.parseInt(param);
+    }
+
+    /**
+     * Safely converts a {@link String} to an {@link Integer}
+     *
+     * @param param String to be converted
+     * @return Null if param is null or converted value as {@link Boolean}
+     */
+    protected Boolean stringToBoolean(String param)
+    {
+        return param == null? null : Boolean.parseBoolean(param);
+    }
+
+    public AlfrescoSharedFileStoreClient getAlfrescoSharedFileStoreClient()
+    {
+        return alfrescoSharedFileStoreClient;
+    }
+
+    public void setAlfrescoSharedFileStoreClient(
+        AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient)
+    {
+        this.alfrescoSharedFileStoreClient = alfrescoSharedFileStoreClient;
     }
 }

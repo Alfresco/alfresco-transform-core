@@ -11,23 +11,31 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transformer.Tika.INCLUDE_CONTENTS;
+import static org.alfresco.transformer.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
+import static org.alfresco.transformer.Tika.PDF_BOX;
+import static org.alfresco.transformer.Tika.TARGET_ENCODING;
+import static org.alfresco.transformer.Tika.TARGET_MIMETYPE;
+import static org.alfresco.transformer.Tika.TRANSFORM_NAMES;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.logging.LogFactory;
 import org.apache.tika.exception.TikaException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
-
-import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transformer.Tika.*;
 
 /**
  * Controller for the Docker based Tika transformers.
@@ -102,7 +110,7 @@ public class TikaController extends AbstractTransformerController
         };
     }
 
-    @PostMapping("/transform")
+    @PostMapping(value = "/transform", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
                                               @RequestParam("file") MultipartFile sourceMultipartFile,
                                               @RequestParam("targetExtension") String targetExtension,
@@ -122,7 +130,7 @@ public class TikaController extends AbstractTransformerController
             throw new TransformException(400, "Invalid transform value");
         }
 
-        String targetFilename = createTargetFileName(sourceMultipartFile, targetExtension);
+        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(), targetExtension);
         File sourceFile = createSourceFile(request, sourceMultipartFile);
         File targetFile = createTargetFile(request, targetFilename);
         // Both files are deleted by TransformInterceptor.afterCompletion
@@ -136,5 +144,22 @@ public class TikaController extends AbstractTransformerController
                 TARGET_MIMETYPE+targetMimetype, TARGET_ENCODING+targetEncoding);
 
         return createAttachment(targetFilename, targetFile, testDelay);
+    }
+
+    @Override
+    protected void processTransform(File sourceFile, File targetFile,
+        Map<String, String> transformOptions, Long timeout)
+    {
+
+        String transform = transformOptions.get("transform");
+        Boolean includeContents = stringToBoolean("includeContents");
+        Boolean notExtractBookmarksText = stringToBoolean("notExtractBookmarksText");
+        String targetMimetype = transformOptions.get("targetMimetype");
+        String targetEncoding = transformOptions.get("targetEncoding");
+
+        callTransform(sourceFile, targetFile, transform,
+            includeContents != null && includeContents ? INCLUDE_CONTENTS : null,
+            notExtractBookmarksText  != null && notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT: null,
+            TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);
     }
 }

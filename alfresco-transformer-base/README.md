@@ -111,6 +111,65 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
 }
 ~~~
 
+* *TransformerName*Controller#processTransform(File sourceFile, File targetFile, Map<String, String> transformOptions, Long timeout)
+
+### /transform (Consumes: `application/json`, Produces: `application/json`)
+The new *consumes* and *produces* arguments have been specified in order to differentiate this endpoint from the previous one (which **consumes** `multipart/form-data`)
+
+The endpoint should **always** receive a `TransformationRequest` and should **always** respond with a `TransformationReply`.
+
+As specific transformers require specific arguments (e.g. `transform` for the **Tika transformer**) the request body should include this in the `transformRequestOptions` via the `Map<String,String> transformRequestOptions`.
+
+**Example request body**
+```javascript
+var transformRequest = {
+	"requestId": "1",
+	"sourceReference": "2f9ed237-c734-4366-8c8b-6001819169a4",
+	"sourceMediaType": "pdf",
+	"sourceSize": 123456,
+	"sourceExtension": "pdf",
+	"targetMediaType": "txt",
+	"targetExtension": "txt",
+	"clientType": "ACS",
+	"clientData": "Yo No Soy Marinero, Soy Capitan, Soy Capitan!",
+	"schema": 1,
+	"transformRequestOptions": {
+		"targetMimetype": "text/plain",
+		"targetEncoding": "UTF-8",
+		"transform": "PdfBox"
+	}
+}
+```
+
+**Example response body**
+
+```javascript
+var transformReply = {
+    "requestId": "1",
+    "status": 201,
+    "errorDetails": null,
+    "sourceReference": "2f9ed237-c734-4366-8c8b-6001819169a4",
+    "targetReference": "34d69ff0-7eaa-4741-8a9f-e1915e6995bf",
+    "clientType": "ACS",
+    "clientData": "Yo No Soy Marinero, Soy Capitan, Soy Capitan!",
+    "schema": 1
+}
+```
+
+### processTransform method
+```java
+public abstract class AbstractTransformerController 
+{
+    void processTransform(File sourceFile, File targetFile, Map<String, String> transformOptions, Long timeout) { /* Perform the transformation*/ }
+}
+```
+
+The **abstract** method is declared in the *AbstractTransformerController* and must be implemented by the specific controllers.
+
+This method is called by the *AbstractTransformerController* directly in the **new** `/transform` endpoint which **consumes** `application/json` and **produces** `application/json`.
+
+The method is responsible for performing the transformation. Upon a **successful** transformation it updates the `targetFile` parameter.
+
 * Application.java - [Spring Boot](https://projects.spring.io/spring-boot/) expects to find an Application in
  a project's source files. The following may be used:
 
