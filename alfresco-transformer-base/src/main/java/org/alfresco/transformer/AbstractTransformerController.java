@@ -39,12 +39,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.client.model.TransformRequestValidator;
 import org.alfresco.transformer.model.FileRefResponse;
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.exec.RuntimeExec;
@@ -59,6 +61,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.DirectFieldBindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -107,6 +111,9 @@ public abstract class AbstractTransformerController
 
     @Autowired
     private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
+
+    @Autowired
+    private TransformRequestValidator transformRequestValidator;
 
     protected static Log logger;
 
@@ -157,6 +164,17 @@ public abstract class AbstractTransformerController
         transformReply.setSourceReference(transformRequest.getSourceReference());
         transformReply.setSchema(transformRequest.getSchema());
         transformReply.setClientData(transformRequest.getClientData());
+
+        Errors errors = validateTransformRequest(transformRequest);
+        if (!errors.getAllErrors().isEmpty())
+        {
+            transformReply.setStatus(HttpStatus.BAD_REQUEST.value());
+            transformReply.setErrorDetails(errors.getAllErrors().stream().map(Object::toString)
+                .collect(Collectors.joining(", ")));
+
+            return new ResponseEntity<>(transformReply,
+                HttpStatus.valueOf(transformReply.getStatus()));
+        }
 
         // Load the source file
         File sourceFile;
@@ -251,6 +269,13 @@ public abstract class AbstractTransformerController
         transformReply.setStatus(HttpStatus.CREATED.value());
 
         return new ResponseEntity<>(transformReply, HttpStatus.valueOf(transformReply.getStatus()));
+    }
+
+    private Errors validateTransformRequest(TransformRequest transformRequest)
+    {
+        DirectFieldBindingResult errors = new DirectFieldBindingResult(transformRequest, "request");
+        transformRequestValidator.validate(transformRequest, errors);
+        return errors;
     }
 
     protected abstract void processTransform(File sourceFile, File targetFile,
