@@ -24,7 +24,7 @@
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
         <dependency.ch-qos-logback.version>1.2.3</dependency.ch-qos-logback.version>
         <env.project_version>${project.version}</env.project_version>
-        <alfresco-transform-data-model.version>0.0.6</alfresco-transform-data-model.version>
+        <alfresco-transform-data-model.version>0.0.7</alfresco-transform-data-model.version>
     </properties>
 
     <modules>

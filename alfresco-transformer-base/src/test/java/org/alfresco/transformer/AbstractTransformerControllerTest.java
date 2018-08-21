@@ -407,7 +407,7 @@ public abstract class AbstractTransformerControllerTest
         transformRequest.setRequestId("1");
         transformRequest.setSchema(1);
         transformRequest.setClientData("Alfresco Digital Business Platform");
-        transformRequest.setTransformationRequestOptions(new HashMap<>());
+        transformRequest.setTransformRequestOptions(new HashMap<>());
         transformRequest.setSourceReference(sourceFileRef);
         transformRequest.setSourceExtension(sourceExtension);
         transformRequest.setSourceSize(sourceFile.length());

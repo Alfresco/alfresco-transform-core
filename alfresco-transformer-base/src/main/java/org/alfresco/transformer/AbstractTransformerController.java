@@ -215,7 +215,7 @@ public abstract class AbstractTransformerController
         try
         {
             processTransform(sourceFile, targetFile,
-                transformRequest.getTransformationRequestOptions(), timeout);
+                transformRequest.getTransformRequestOptions(), timeout);
         }
         catch (TransformException te)
         {
