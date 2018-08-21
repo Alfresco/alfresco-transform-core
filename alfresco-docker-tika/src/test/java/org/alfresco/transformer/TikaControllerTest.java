@@ -402,7 +402,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         transformRequest.setSourceMediaType(MediaType.APPLICATION_PDF_VALUE);
         transformRequest.setTargetMediaType(MediaType.TEXT_PLAIN_VALUE);
         transformRequest.getTransformationRequestOptions().put("transform", "PdfBox");
-        transformRequest.getTransformationRequestOptions().put("targetMimetype", "text/plain");
+        transformRequest.getTransformationRequestOptions().put("targetMimetype", MediaType.TEXT_PLAIN_VALUE);
         transformRequest.getTransformationRequestOptions().put("targetEncoding", "UTF-8");
     }
 }
