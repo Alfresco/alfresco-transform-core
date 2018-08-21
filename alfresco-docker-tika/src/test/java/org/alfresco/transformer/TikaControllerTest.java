@@ -67,6 +67,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MvcResult;
@@ -398,8 +399,10 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     {
         transformRequest.setSourceExtension(sourceExtension);
         transformRequest.setTargetExtension(targetExtension);
-        transformRequest.getTransformationRequestOptions().put("transform", "PdfBox");
-        transformRequest.getTransformationRequestOptions().put("targetMimetype", "text/plain");
-        transformRequest.getTransformationRequestOptions().put("targetEncoding", "UTF-8");
+        transformRequest.setSourceMediaType(MediaType.APPLICATION_PDF_VALUE);
+        transformRequest.setTargetMediaType(MediaType.TEXT_PLAIN_VALUE);
+        transformRequest.getTransformRequestOptions().put("transform", "PdfBox");
+        transformRequest.getTransformRequestOptions().put("targetMimetype", MediaType.TEXT_PLAIN_VALUE);
+        transformRequest.getTransformRequestOptions().put("targetEncoding", "UTF-8");
     }
 }

@@ -48,6 +48,7 @@ import org.junit.runner.RunWith;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -133,5 +134,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
     {
         transformRequest.setSourceExtension("doc");
         transformRequest.setTargetExtension("pdf");
+        transformRequest.setSourceMediaType("application/msword");
+        transformRequest.setTargetMediaType(MediaType.IMAGE_PNG_VALUE);
     }
 }

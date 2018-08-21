@@ -37,6 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -176,5 +177,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     {
         transformRequest.setSourceExtension("png");
         transformRequest.setTargetExtension("png");
+        transformRequest.setSourceMediaType(MediaType.IMAGE_PNG_VALUE);
+        transformRequest.setTargetMediaType(MediaType.IMAGE_PNG_VALUE);
     }
 }

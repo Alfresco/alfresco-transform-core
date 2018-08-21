@@ -407,16 +407,11 @@ public abstract class AbstractTransformerControllerTest
         transformRequest.setRequestId("1");
         transformRequest.setSchema(1);
         transformRequest.setClientData("Alfresco Digital Business Platform");
-        transformRequest.setTransformationRequestOptions(new HashMap<>());
-
+        transformRequest.setTransformRequestOptions(new HashMap<>());
         transformRequest.setSourceReference(sourceFileRef);
         transformRequest.setSourceExtension(sourceExtension);
-        // TODO: ATS-53
-        transformRequest.setSourceMediaType("TODO");
         transformRequest.setSourceSize(sourceFile.length());
-
         transformRequest.setTargetExtension(targetExtension);
-        transformRequest.setTargetMediaType("TODO");
 
         // HTTP Request
         HttpHeaders headers = new HttpHeaders();
@@ -445,6 +440,26 @@ public abstract class AbstractTransformerControllerTest
         assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
         assertEquals(transformRequest.getClientData(), transformReply.getClientData());
         assertEquals(transformRequest.getSchema(), transformReply.getSchema());
+    }
+
+    @Test
+    public void testEmptyPojoTransform() throws Exception
+    {
+        // Transformation Request POJO
+        TransformRequest transformRequest = new TransformRequest();
+
+        // Serialize and call the transformer
+        String tr = objectMapper.writeValueAsString(transformRequest);
+        String transformationReplyAsString = mockMvc.perform(MockMvcRequestBuilders.post("/transform")
+            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).content(tr))
+            .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))
+            .andReturn().getResponse().getContentAsString();
+
+        TransformReply transformReply = objectMapper.readValue(transformationReplyAsString, TransformReply.class);
+
+        // Assert the reply
+        assertEquals(HttpStatus.BAD_REQUEST.value(), transformReply.getStatus());
     }
 
     protected abstract void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest);
