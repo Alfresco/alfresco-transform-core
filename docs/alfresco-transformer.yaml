@@ -35,14 +35,18 @@ paths:
       description: |
         **Note:** available with Alfresco Transform Engines 2.0 and newer versions.
         
-        This endpoint supports both JSON and multipart/form-data.
+        This endpoint supports both JSON and Multipart. The JSON API is used within the 
+        Alfresco Transform Service (eg. ACS 6.1). The Multipart API remains for backwards 
+        compatibility (eg. ACS 6.0).
         
         **Using JSON (application/json -> application/json)**
         
-        The JSON API relies on the source and target files to be stored and retrieved via 
-        the Shared File Store. This is used within the Alfresco Transform Service. 
         The ACS Content Repository 6.1 (or higher) provides the option to offload 
         supported transformations to the Alfresco Transform Service.
+         
+        The JSON API is used within the Alfresco Transform Service. It relies on the 
+        source and target files being stored and retrieved via the Alfresco Shared File 
+        Store (see also [alfresco-sfs.yaml](https://github.com/Alfresco/alfresco-shared-file-store/blob/master/docs/api-definitions/alfresco-sfs.yaml)).       
         
         Here's a pseudo-example transform request:
         
@@ -65,7 +69,7 @@ paths:
         }
         ```
         
-        Here's an pseudo-example response of a successful transform:
+        Here's a pseudo-example response of a successful transform:
         
         ```JSON
         {
@@ -78,11 +82,12 @@ paths:
         }
         ```
         
-        Here's an pseudo-example response of a successful transform:
+        Here's a pseudo-example response of a failed transform:
         
         ```JSON
         {
           "schema": 1,
+          "status": 400,
           "errorDetails": "Lorem ipsum dolor sit amet, ..."
           "requestId": "0aead31c-e3ca-42c9-8e16-c1938ff64c3a",
           "clientData": "opaque-client-specific-data-123xyz",
