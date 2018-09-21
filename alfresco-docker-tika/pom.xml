@@ -47,17 +47,6 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-data-model</artifactId>
-            <exclusion>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-rt-transports-http</artifactId>
-            </exclusion>
-        </dependency>
-
-        <!-- for Alfresco Data Model 8.8 (explicitly fix CVE) -->
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-transports-http</artifactId>
-            <version>3.1.16</version>
         </dependency>
 
         <dependency>
@@ -97,7 +86,7 @@
             </exclusions>
         </dependency>
 
-        <!-- for Apache Tika Parsers 1.17-20180201-alfresco-patched (explicitly fix CVE) -->
+        <!-- for Apache Tika Parsers - eg. encrypted PDF -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
