@@ -91,6 +91,13 @@
                 <artifactId>alfresco-transform-data-model</artifactId>
                 <version>${alfresco-transform-data-model.version}</version>
             </dependency>
+            <!-- via Data Model / OpenCMIS Client -->
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-transports-http</artifactId>
+                <version>3.0.16</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
