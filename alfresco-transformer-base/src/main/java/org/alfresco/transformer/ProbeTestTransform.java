@@ -25,10 +25,6 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.util.TempFileProvider;
-import org.apache.commons.logging.Log;
-
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +32,11 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.alfresco.util.TempFileProvider;
+import org.apache.commons.logging.Log;
 
 /**
  * Provides the logic performing test transformations by the live and ready probes.
@@ -76,6 +77,7 @@ abstract class ProbeTestTransform
     long maxTime = Long.MAX_VALUE;
     long nextTransformTime;
 
+    private final boolean livenessTransformEnabled;
     private final long livenessTransformPeriod;
     private long maxTransformCount = Long.MAX_VALUE;
     private long maxTransformTime;
@@ -111,6 +113,19 @@ abstract class ProbeTestTransform
         maxTransformCount = getPositiveLongEnv("maxTransforms", maxTransforms);
         maxTransformTime = getPositiveLongEnv("maxTransformSeconds", maxTransformSeconds)*1000;
         livenessTransformPeriod = getPositiveLongEnv("livenessTransformPeriodSeconds", livenessTransformPeriodSeconds)*1000;
+        livenessTransformEnabled = getBooleanEnvVar("livenessTransformEnabled", false);
+    }
+
+    private boolean getBooleanEnvVar(final String name, final boolean defaultValue)
+    {
+        try
+        {
+            return Boolean.parseBoolean(System.getenv(name));
+        }
+        catch (Exception ignore)
+        {
+        }
+        return defaultValue;
     }
 
     protected long getPositiveLongEnv(String name, long defaultValue)
@@ -140,6 +155,11 @@ abstract class ProbeTestTransform
     {
         // If not initialised OR it is a live probe and we are scheduled to to do a test transform.
         probeCount++;
+        // TODO: update/fix/refactor liveness probes as part of ATS-138
+        if (isLiveProbe && !livenessTransformEnabled)
+        {
+            return doNothing(true);
+        }
         return (isLiveProbe && livenessTransformPeriod > 0 &&
                 (transCount <= AVERAGE_OVER_TRANSFORMS || nextTransformTime < System.currentTimeMillis()))
                 || !initialised.get()
