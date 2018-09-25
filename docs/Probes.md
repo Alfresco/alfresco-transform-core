@@ -1,5 +1,14 @@
 # Transformer k8s liveness and readiness probes
 
+>**Note:** The transform-specific liveness probes are currently disabled by default in the 
+Alfresco Docker Transformers **2.0.0-RC3** release. They can be enabled through the 
+"**livenessTransformEnabled**" environment variable.
+>
+> The T-Engine liveness probes will be reevaluated/changed/improved as part of the ATS-138 story.
+>
+> Without the transform-specific liveness probees, calls to the "/live" endpoint of the 
+T-Engines only check if the JVM is alive.
+
 The transformer's liveness and readiness probes perform small test transformations to check that a pod has fully started up and that it is still healthy.
 
 Initial test transforms are performed by both probes on start up. After a successful transform, the readiness probe always returns a success message and does no more transformations. As a result requests will not be suspended to the pod unless there is a network issue.
