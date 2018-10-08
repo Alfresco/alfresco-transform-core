@@ -84,14 +84,14 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 
         doAnswer((Answer) invocation ->
         {
-            File sourceFile = invocation.getArgumentAt(0, File.class);
-            File targetFile = invocation.getArgumentAt(1, File.class);
+            File sourceFile = invocation.getArgument(0);
+            File targetFile = invocation.getArgument(1);
             String actualTargetExtension = StringUtils.getFilenameExtension(targetFile.getAbsolutePath());
 
             assertNotNull(sourceFile);
             assertNotNull(targetFile);
 
-            Long actualTimeout = invocation.getArgumentAt(2, Long.class);
+            Long actualTimeout = invocation.getArgument(2);
             assertNotNull(actualTimeout);
             if (expectedTimeout != null)
             {

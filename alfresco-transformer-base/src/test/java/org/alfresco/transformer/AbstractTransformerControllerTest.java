@@ -138,7 +138,7 @@ public abstract class AbstractTransformerControllerTest
         {
             public RuntimeExec.ExecutionResult answer(InvocationOnMock invocation) throws Throwable
             {
-                Map<String, String> actualProperties = invocation.getArgumentAt(0, Map.class);
+                Map<String, String> actualProperties = invocation.getArgument(0);
                 assertEquals("There should be 3 properties", 3, actualProperties.size());
 
                 String actualOptions = actualProperties.get("options");
@@ -160,7 +160,7 @@ public abstract class AbstractTransformerControllerTest
                     assertEquals("expectedOptions", expectedOptions, actualOptions);
                 }
 
-                Long actualTimeout = invocation.getArgumentAt(1, Long.class);
+                Long actualTimeout = invocation.getArgument(1);
                 assertNotNull(actualTimeout);
                 if (expectedTimeout != null)
                 {

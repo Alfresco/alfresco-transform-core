@@ -720,22 +720,15 @@ public abstract class AbstractTransformerController
 
     protected ResponseEntity<Resource> createAttachment(String targetFilename, File targetFile, Long testDelay)
     {
-        try
-        {
-            Resource targetResource = load(targetFile);
-            targetFilename = UriUtils.encodePath(StringUtils.getFilename(targetFilename), "UTF-8");
-            ResponseEntity<Resource> body = ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename*= UTF-8''" + targetFilename).body(targetResource);
-            LogEntry.setTargetSize(targetFile.length());
-            long time = LogEntry.setStatusCodeAndMessage(200, "Success");
-            time += LogEntry.addDelay(testDelay);
-            getProbeTestTransformInternal().recordTransformTime(time);
-            return body;
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new TransformException(500, "Filename encoding error", e);
-        }
+        Resource targetResource = load(targetFile);
+        targetFilename = UriUtils.encodePath(StringUtils.getFilename(targetFilename), "UTF-8");
+        ResponseEntity<Resource> body = ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename*= UTF-8''" + targetFilename).body(targetResource);
+        LogEntry.setTargetSize(targetFile.length());
+        long time = LogEntry.setStatusCodeAndMessage(200, "Success");
+        time += LogEntry.addDelay(testDelay);
+        getProbeTestTransformInternal().recordTransformTime(time);
+        return body;
     }
 
     /**
