@@ -27,12 +27,8 @@ management:
         - prometheus
         - health
   metrics:
-    enable[go]: false
     enable[http]: false
     enable[net]: false
     enable[logback]: false
-    enable[prometheus]: false
-    enable[promhttp]: false
     enable[tomcat]: false
-    enable[scrape]: false
     enable[jvm.classes]: false
