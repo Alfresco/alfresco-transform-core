@@ -17,3 +17,22 @@ logging:
     org.alfresco.transformer.TikaController: debug
 
 fileStoreUrl: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+        - metrics
+        - prometheus
+        - health
+  metrics:
+    enable[go]: false
+    enable[http]: false
+    enable[net]: false
+    enable[logback]: false
+    enable[prometheus]: false
+    enable[promhttp]: false
+    enable[tomcat]: false
+    enable[scrape]: false
+    enable[jvm.classes]: false
