@@ -28,7 +28,6 @@ management:
         - health
   metrics:
     enable[http]: false
-    enable[net]: false
     enable[logback]: false
     enable[tomcat]: false
     enable[jvm.classes]: false
