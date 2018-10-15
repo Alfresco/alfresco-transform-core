@@ -31,3 +31,6 @@ management:
     enable[logback]: false
     enable[tomcat]: false
     enable[jvm.classes]: false
+
+pod:
+  name: ${POD_NAME:t-engine}
