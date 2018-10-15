@@ -24,11 +24,11 @@ import org.springframework.context.annotation.Bean;
 @EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
 public class Application
 {
-    @Value("${pod.name}")
-    private String podName;
+    @Value("${container.name}")
+    private String containerName;
 
     @Bean MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
-        return registry -> registry.config().commonTags("podName", podName);
+        return registry -> registry.config().commonTags("containerName", containerName);
     }
 
     public static void main(String[] args)

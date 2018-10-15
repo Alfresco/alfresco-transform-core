@@ -32,5 +32,5 @@ management:
     enable[tomcat]: false
     enable[jvm.classes]: false
 
-pod:
-  name: ${POD_NAME:t-engine}
+container:
+  name: ${HOSTNAME:t-engine}
