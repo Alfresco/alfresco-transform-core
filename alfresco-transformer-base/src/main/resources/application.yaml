@@ -17,3 +17,20 @@ logging:
     org.alfresco.transformer.TikaController: debug
 
 fileStoreUrl: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+        - metrics
+        - prometheus
+        - health
+  metrics:
+    enable[http]: false
+    enable[logback]: false
+    enable[tomcat]: false
+    enable[jvm.classes]: false
+
+container:
+  name: ${HOSTNAME:t-engine}
