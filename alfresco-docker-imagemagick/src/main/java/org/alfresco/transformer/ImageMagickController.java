@@ -201,10 +201,9 @@ public class ImageMagickController extends AbstractTransformerController
         Boolean resizePercentage = stringToBoolean(transformOptions.get("resizePercentage"));
         Boolean allowEnlargement = stringToBoolean(transformOptions.get("allowEnlargement"));
         Boolean maintainAspectRatio = stringToBoolean(transformOptions.get("maintainAspectRatio"));
-        String commandOptions = transformOptions.get("commandOptions");
 
         String options = buildTransformOptions(startPage, endPage , alphaRemove, autoOrient, cropGravity, cropWidth, cropHeight, cropPercentage,
-        cropXOffset, cropYOffset, thumbnail, resizeWidth, resizeHeight, resizePercentage, allowEnlargement, maintainAspectRatio, commandOptions);
+        cropXOffset, cropYOffset, thumbnail, resizeWidth, resizeHeight, resizePercentage, allowEnlargement, maintainAspectRatio, null);
         String pageRange = calculatePageRange(startPage, endPage);
 
         executeTransformCommand(options, sourceFile, pageRange, targetFile, timeout);
