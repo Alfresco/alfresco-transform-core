@@ -25,18 +25,22 @@
  */
 package org.alfresco.transformer;
 
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import static org.alfresco.transformer.fs.FileManager.SOURCE_FILE;
+import static org.alfresco.transformer.fs.FileManager.TARGET_FILE;
+import static org.alfresco.transformer.fs.FileManager.deleteFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
+
+import org.alfresco.transformer.logging.LogEntry;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 
 public class TransformInterceptor extends HandlerInterceptorAdapter
 {
     @Override
     public boolean preHandle(HttpServletRequest request,
-                             HttpServletResponse response, Object handler) throws Exception
+        HttpServletResponse response, Object handler)
     {
         LogEntry.start();
         return true;
@@ -45,21 +49,11 @@ public class TransformInterceptor extends HandlerInterceptorAdapter
     @Override
     public void afterCompletion(HttpServletRequest request,
                                 HttpServletResponse response, Object handler, Exception ex)
-            throws Exception
     {
         // TargetFile cannot be deleted until completion, otherwise 0 bytes are sent.
-        deleteFile(request, AbstractTransformerController.SOURCE_FILE);
-        deleteFile(request, AbstractTransformerController.TARGET_FILE);
+        deleteFile(request, SOURCE_FILE);
+        deleteFile(request, TARGET_FILE);
 
         LogEntry.complete();
-    }
-
-    private void deleteFile(HttpServletRequest request, String attributeName)
-    {
-        File file = (File) request.getAttribute(attributeName);
-        if (file != null)
-        {
-            file.delete();
-        }
     }
 }

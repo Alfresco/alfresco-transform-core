@@ -23,8 +23,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer;
+package org.alfresco.transformer.config;
 
+import org.alfresco.transformer.TransformInterceptor;
+import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;

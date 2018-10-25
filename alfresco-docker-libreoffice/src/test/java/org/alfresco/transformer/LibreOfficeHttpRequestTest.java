@@ -25,7 +25,6 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transformer.AbstractHttpRequestTest;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -47,5 +46,5 @@ public class LibreOfficeHttpRequestTest extends AbstractHttpRequestTest
     protected String getSourceExtension()
     {
         return "doc";
-    };
+    }
 }

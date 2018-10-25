@@ -23,12 +23,11 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer;
+package org.alfresco.transformer.executors;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -41,7 +40,7 @@ import org.artofsolving.jodconverter.office.OfficeManager;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
-///////// THIS FILE IS A COPY OF THE CODE IN alfresco-repository /////////////
+///////// THIS FILE WAS A COPY OF THE CODE IN alfresco-repository /////////////
 
 /**
  * Makes use of the JodConverter library and an installed
@@ -51,10 +50,10 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class JodConverterSharedInstance implements InitializingBean, DisposableBean, JodConverter
 {
-    private static Log logger = LogFactory.getLog(JodConverterSharedInstance.class);
+    private static final Log logger = LogFactory.getLog(JodConverterSharedInstance.class);
 
     private OfficeManager officeManager;
-    boolean isAvailable = false;
+    private boolean isAvailable = false;
 
     // JodConverter's built-in configuration settings.
     //
@@ -82,7 +81,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
     private Boolean deprecatedOooEnabled;
     private int[] deprecatedOooPortNumbers;
 
-    public void setMaxTasksPerProcess(String maxTasksPerProcess)
+    void setMaxTasksPerProcess(String maxTasksPerProcess)
     {
         Long l = parseStringForLong(maxTasksPerProcess.trim());
         if (l != null)
@@ -96,7 +95,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
         this.url = url;
     }
 
-    public void setOfficeHome(String officeHome)
+    void setOfficeHome(String officeHome)
     {
         this.officeHome = officeHome == null ? "" : officeHome.trim();
     }
@@ -106,7 +105,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
         this.deprecatedOooExe = deprecatedOooExe == null ? "" : deprecatedOooExe.trim();
     }
 
-    public void setPortNumbers(String s)
+    void setPortNumbers(String s)
     {
         portNumbers = parsePortNumbers(s, "jodconverter");
     }
@@ -147,12 +146,12 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
         return portNumbers;
     }
 
-    public void setTaskExecutionTimeout(String taskExecutionTimeout)
+    void setTaskExecutionTimeout(String taskExecutionTimeout)
     {
         this.taskExecutionTimeout = parseStringForLong(taskExecutionTimeout.trim());
     }
 
-    public void setTemplateProfileDir(String templateProfileDir)
+    void setTemplateProfileDir(String templateProfileDir)
     {
         if (templateProfileDir == null || templateProfileDir.trim().length() == 0)
         {
@@ -169,26 +168,26 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
         }
     }
 
-    public void setTaskQueueTimeout(String taskQueueTimeout)
+    void setTaskQueueTimeout(String taskQueueTimeout)
     {
         this.taskQueueTimeout = parseStringForLong(taskQueueTimeout.trim());
     }
 
-    public void setConnectTimeout(String connectTimeout)
+    void setConnectTimeout(String connectTimeout)
     {
     	this.connectTimeout = parseStringForLong(connectTimeout.trim());
     }
 
-    public void setEnabled(String enabled)
+    void setEnabled(final String enabledStr)
     {
-        this.enabled = parseEnabled(enabled);
+        enabled = parseEnabled(enabledStr);
 
         // If this is a request from the Enterprise Admin console to disable the JodConverter.
-        if (this.enabled == false && (deprecatedOooEnabled == null || deprecatedOooEnabled == false))
+        if (!enabled && (deprecatedOooEnabled == null || !deprecatedOooEnabled))
         {
             // We need to change isAvailable to false so we don't make calls to a previously started OfficeManger.
             // In the case of Enterprise it is very unlikely that ooo.enabled will have been set to true.
-            this.isAvailable = false;
+            isAvailable = false;
         }
     }
 
@@ -207,7 +206,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
     // So that Community systems <= Alfresco 6.0.1-ea keep working on upgrade, we may need to use the deprecated
     // ooo.exe setting rather than the jodconverter.officeHome setting if we don't have the jod setting as
     // oooDirect was replaced by jodconverter after this release.
-    String getOfficeHome()
+    private String getOfficeHome()
     {
         String officeHome = this.officeHome;
         if ((officeHome == null || officeHome.isEmpty()) && (deprecatedOooExe != null && !deprecatedOooExe.isEmpty()))
@@ -243,7 +242,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
     //     Community set properties via alfresco-global.properties.
     //     Enterprise may do the same but may also reset jodconverter.enabled them via the Admin console.
     //     In the case of Enterprise it is very unlikely that ooo.enabled will be set to true.
-    boolean isEnabled()
+    private boolean isEnabled()
     {
         return (deprecatedOooEnabled != null && deprecatedOooEnabled) || (enabled != null && enabled);
     }
@@ -251,7 +250,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
     // So that Community systems <= Alfresco 6.0.1-ea keep working on upgrade, we may need to use the deprecated
     // ooo.port setting rather than the jodconverter.portNumbers if ooo.enabled is true and jodconverter.enabled
     // is false.
-    int[] getPortNumbers()
+    private int[] getPortNumbers()
     {
         return (enabled == null || !enabled) && deprecatedOooEnabled != null && deprecatedOooEnabled
             ? deprecatedOooPortNumbers
@@ -260,11 +259,9 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
 
     private Long parseStringForLong(String string)
     {
-        Long result = null;
         try
         {
-            long l = Long.parseLong(string);
-            result = new Long(l);
+            return Long.parseLong(string);
         }
         catch (NumberFormatException nfe)
         {
@@ -272,9 +269,8 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
             {
                 logger.debug("Cannot parse numerical value from " + string);
             }
-            // else intentionally empty
         }
-        return result;
+        return null;
     }
 
     /*
@@ -283,14 +279,14 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
      */
     public boolean isAvailable()
     {
-        final boolean result = isAvailable && (officeManager != null || (url != null && !url.isEmpty()));
-		return result;
+        return isAvailable && (officeManager != null || (url != null && !url.isEmpty()));
     }
 
     /*
      * (non-Javadoc)
      * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
      */
+    @Override
     public void afterPropertiesSet()
     {
     	// isAvailable defaults to false afterPropertiesSet. It only becomes true on successful completion of this method.
@@ -318,7 +314,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
         }
 
         // Only start the JodConverter instance(s) if the subsystem is enabled.
-        if (isEnabled() == false)
+        if (!isEnabled())
         {
             return;
         }
@@ -418,7 +414,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
 
     private void logAllSofficeFilesUnderOfficeHome()
     {
-    	if (logger.isDebugEnabled() == false)
+    	if (!logger.isDebugEnabled())
     	{
     		return;
     	}
@@ -430,7 +426,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
 
     	logFileInfo(requestedOfficeHome);
 
-    	for (File f : findSofficePrograms(requestedOfficeHome, new ArrayList<File>(), 2))
+    	for (File f : findSofficePrograms(requestedOfficeHome, new ArrayList<>(), 2))
     	{
     		logFileInfo(f);
     	}
@@ -449,26 +445,11 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
     		return results;
     	}
 
-    	File[] matchingFiles = searchRoot.listFiles(new FilenameFilter()
-    	    {
-    			@Override
-	    		public boolean accept(File dir, String name)
-    			{
-		    		return name.startsWith("soffice");
-	    		}
-    		});
-    	for (File f : matchingFiles)
-    	{
-    		results.add(f);
-    	}
+    	File[] matchingFiles = searchRoot.listFiles((dir, name) -> name.startsWith("soffice"));
+        Arrays.stream(matchingFiles)
+              .forEach(results::add);
 
-    	for (File dir : searchRoot.listFiles(new FileFilter()
-    	    {
-				@Override
-				public boolean accept(File f) {
-					return f.isDirectory();
-				}
-    	    }))
+    	for (File dir : searchRoot.listFiles(File::isDirectory))
     	{
     		findSofficePrograms(dir, results, currentRecursionDepth + 1, maxRecursionDepth);
     	}
@@ -482,7 +463,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
      */
     private void logFileInfo(File f)
     {
-    	if (logger.isDebugEnabled() == false)
+    	if (!logger.isDebugEnabled())
     	{
     		return;
     	}
@@ -512,7 +493,9 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
      * (non-Javadoc)
      * @see org.springframework.beans.factory.DisposableBean#destroy()
      */
-	public void destroy() throws Exception {
+    @Override
+    public void destroy()
+    {
 	    this.isAvailable = false;
 	    if (officeManager != null)
 	    {
@@ -530,6 +513,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
     /* (non-Javadoc)
      * @see org.alfresco.repo.content.JodConverterWorker#getOfficeManager()
      */
+    @Override
     public OfficeManager getOfficeManager()
     {
         return officeManager;

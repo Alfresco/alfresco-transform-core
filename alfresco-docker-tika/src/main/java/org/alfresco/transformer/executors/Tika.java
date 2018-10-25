@@ -9,7 +9,36 @@
  * agreement is prohibited.
  * #L%
  */
-package org.alfresco.transformer;
+package org.alfresco.transformer.executors;
+
+import static java.util.Arrays.asList;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_HTML;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_IMAGE_PNG;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_IMAGE_TIFF;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_TEXT_CSV;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_XHTML;
+import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_XML;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.net.URL;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.sax.TransformerHandler;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
@@ -29,19 +58,6 @@ import org.apache.tika.sax.ExpandedTitleContentHandler;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.sax.SAXTransformerFactory;
-import javax.xml.transform.sax.TransformerHandler;
-import javax.xml.transform.stream.StreamResult;
-import java.io.*;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import static org.alfresco.repo.content.MimetypeMap.*;
 
 /**
  * Stripped down command line Tika transformers. Not actually run as a separate process, but the code fits the patten
@@ -424,7 +440,7 @@ public class Tika
     public static final String TIKA_AUTO = "TikaAuto";
     public static final String TEXT_MINING = "TextMining";
 
-    public static final List<String> TRANSFORM_NAMES = Arrays.asList(
+    public static final List<String> TRANSFORM_NAMES = asList(
             ARCHIVE, OUTLOOK_MSG, PDF_BOX, POI_OFFICE, POI, POI_OO_XML, TIKA_AUTO, TEXT_MINING);
 
     public static final String TARGET_MIMETYPE = "--targetMimetype=";
@@ -445,17 +461,17 @@ public class Tika
     public static final String XML     = "xml";
     public static final String ZIP     = "zip";
 
-    private Parser packageParser = new PackageParser();
-    private Parser pdfParser = new PDFParser();
-    private Parser officeParser = new OfficeParser();
-    private Parser autoDetectParser;
-    private Parser ooXmlParser = new OOXMLParser();
-    private Parser tikaOfficeDetectParser = new TikaOfficeDetectParser();
-    private  PDFParserConfig pdfParserConfig = new PDFParserConfig();
+    private final Parser packageParser = new PackageParser();
+    private final Parser pdfParser = new PDFParser();
+    private final Parser officeParser = new OfficeParser();
+    private final Parser autoDetectParser;
+    private final Parser ooXmlParser = new OOXMLParser();
+    private final Parser tikaOfficeDetectParser = new TikaOfficeDetectParser();
+    private final PDFParserConfig pdfParserConfig = new PDFParserConfig();
 
     private DocumentSelector pdfBoxEmbededDocumentSelector = new DocumentSelector()
     {
-        private List<String> disabledMediaTypes = Arrays.asList(new String[] {MIMETYPE_IMAGE_JPEG, MIMETYPE_IMAGE_TIFF, MIMETYPE_IMAGE_PNG});
+        private final List<String> disabledMediaTypes = asList(MIMETYPE_IMAGE_JPEG, MIMETYPE_IMAGE_TIFF, MIMETYPE_IMAGE_PNG);
 
         @Override
         public boolean select(Metadata metadata)
@@ -628,17 +644,14 @@ public class Tika
                            String sourceFilename,
                            String targetFilename, String targetMimetype, String targetEncoding)
     {
-        InputStream is = null;
-        OutputStream os = null;
-        Writer ow = null;
 
-        try
+        try (InputStream is = new BufferedInputStream(new FileInputStream(sourceFilename));
+             OutputStream os = new FileOutputStream(targetFilename);
+             Writer ow = new BufferedWriter(new OutputStreamWriter(os, targetEncoding)))
         {
-            is = new BufferedInputStream(new FileInputStream(sourceFilename));
-            os = new FileOutputStream(targetFilename);
-            ow = new BufferedWriter(new OutputStreamWriter(os, targetEncoding));
             Metadata metadata = new Metadata();
-            ParseContext context = buildParseContext(documentSelector, includeContents, notExtractBookmarksText);
+            ParseContext context = buildParseContext(documentSelector, includeContents,
+                notExtractBookmarksText);
             ContentHandler handler = getContentHandler(targetMimetype, ow);
 
             parser.parse(is, handler, metadata, context);
@@ -647,24 +660,9 @@ public class Tika
         {
             throw new IllegalStateException(e.getMessage(), e);
         }
-        finally
-        {
-            if (is != null)
-            {
-                try { is.close(); } catch (Throwable e) {}
-            }
-            if (os != null)
-            {
-                try { os.close(); } catch (Throwable e) {}
-            }
-            if (ow != null)
-            {
-                try { ow.close(); } catch (Throwable e) {}
-            }
-        }
     }
 
-    protected ContentHandler getContentHandler(String targetMimetype, Writer output)
+    private ContentHandler getContentHandler(String targetMimetype, Writer output)
     {
         try
         {
@@ -676,7 +674,7 @@ public class Tika
             else
             {
                 SAXTransformerFactory factory = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
-                TransformerHandler transformerHandler = null;
+                TransformerHandler transformerHandler;
                 transformerHandler = factory.newTransformerHandler();
                 transformerHandler.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");
                 transformerHandler.setResult(new StreamResult(output));
@@ -792,7 +790,8 @@ public class Tika
         }
     }
 
-    protected ParseContext buildParseContext(DocumentSelector documentSelector, Boolean includeContents, Boolean notExtractBookmarksText)
+    private ParseContext buildParseContext(DocumentSelector documentSelector,
+        Boolean includeContents, Boolean notExtractBookmarksText)
     {
         ParseContext context = new ParseContext();
 

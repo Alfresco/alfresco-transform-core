@@ -37,41 +37,68 @@ import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_WORD;
 import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_XHTML;
 import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_XML;
 import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_ZIP;
-import static org.alfresco.transformer.Tika.ARCHIVE;
-import static org.alfresco.transformer.Tika.CSV;
-import static org.alfresco.transformer.Tika.DOC;
-import static org.alfresco.transformer.Tika.DOCX;
-import static org.alfresco.transformer.Tika.HTML;
-import static org.alfresco.transformer.Tika.MSG;
-import static org.alfresco.transformer.Tika.OUTLOOK_MSG;
-import static org.alfresco.transformer.Tika.PDF;
-import static org.alfresco.transformer.Tika.PDF_BOX;
-import static org.alfresco.transformer.Tika.POI;
-import static org.alfresco.transformer.Tika.POI_OFFICE;
-import static org.alfresco.transformer.Tika.POI_OO_XML;
-import static org.alfresco.transformer.Tika.PPTX;
-import static org.alfresco.transformer.Tika.TEXT_MINING;
-import static org.alfresco.transformer.Tika.TIKA_AUTO;
-import static org.alfresco.transformer.Tika.TXT;
-import static org.alfresco.transformer.Tika.XHTML;
-import static org.alfresco.transformer.Tika.XML;
-import static org.alfresco.transformer.Tika.XSLX;
-import static org.alfresco.transformer.Tika.ZIP;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.alfresco.transformer.executors.Tika.ARCHIVE;
+import static org.alfresco.transformer.executors.Tika.CSV;
+import static org.alfresco.transformer.executors.Tika.DOC;
+import static org.alfresco.transformer.executors.Tika.DOCX;
+import static org.alfresco.transformer.executors.Tika.HTML;
+import static org.alfresco.transformer.executors.Tika.MSG;
+import static org.alfresco.transformer.executors.Tika.OUTLOOK_MSG;
+import static org.alfresco.transformer.executors.Tika.PDF;
+import static org.alfresco.transformer.executors.Tika.PDF_BOX;
+import static org.alfresco.transformer.executors.Tika.POI;
+import static org.alfresco.transformer.executors.Tika.POI_OFFICE;
+import static org.alfresco.transformer.executors.Tika.POI_OO_XML;
+import static org.alfresco.transformer.executors.Tika.PPTX;
+import static org.alfresco.transformer.executors.Tika.TEXT_MINING;
+import static org.alfresco.transformer.executors.Tika.TIKA_AUTO;
+import static org.alfresco.transformer.executors.Tika.TXT;
+import static org.alfresco.transformer.executors.Tika.XHTML;
+import static org.alfresco.transformer.executors.Tika.XML;
+import static org.alfresco.transformer.executors.Tika.XSLX;
+import static org.alfresco.transformer.executors.Tika.ZIP;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transformer.executors.TikaJavaExecutor;
+import org.alfresco.transformer.model.FileRefEntity;
+import org.alfresco.transformer.model.FileRefResponse;
+import org.alfresco.util.exec.RuntimeExec;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.util.StringUtils;
 
 /**
  * Test the TikaController without a server.
@@ -81,29 +108,118 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 @WebMvcTest(TikaController.class)
 public class TikaControllerTest extends AbstractTransformerControllerTest
 {
-    public static final String EXPECTED_XHTML_CONTENT_CONTAINS = "<p>The quick brown fox jumps over the lazy dog</p>";
-    public static final String EXPECTED_TEXT_CONTENT_CONTAINS  =    "The quick brown fox jumps over the lazy dog";
-    public static final String EXPECTED_MSG_CONTENT_CONTAINS = "Recipients\n" +
-            "\tmark.rogers@alfresco.com; speedy@quick.com; mrquick@nowhere.com\n" +
-            "\n" +
-            "The quick brown fox jumps over the lazy dogs";
-    public static final String EXPECTED_CSV_CONTENT_CONTAINS = "\"The\",\"quick\",\"brown\",\"fox\"";
+    private static final String EXPECTED_XHTML_CONTENT_CONTAINS = "<p>The quick brown fox jumps over the lazy dog</p>";
+    private static final String EXPECTED_TEXT_CONTENT_CONTAINS  =    "The quick brown fox jumps over the lazy dog";
+    private static final String EXPECTED_MSG_CONTENT_CONTAINS = "Recipients\n" +
+                                                                "\tmark.rogers@alfresco.com; speedy@quick.com; mrquick@nowhere.com\n" +
+                                                                "\n" +
+                                                                "The quick brown fox jumps over the lazy dogs";
+    private static final String EXPECTED_CSV_CONTENT_CONTAINS = "\"The\",\"quick\",\"brown\",\"fox\"";
 
+    @Mock
+    private RuntimeExec.ExecutionResult mockExecutionResult;
+
+    @Mock
+    private RuntimeExec mockTransformCommand;
+
+    @Mock
+    private RuntimeExec mockCheckCommand;
+
+    @SpyBean
+    private TikaJavaExecutor javaExecutor;
+    
     @SpyBean
     private TikaController controller;
 
-    String transform = PDF_BOX;
-    String targetEncoding = "UTF-8";
-    String targetMimetype = MIMETYPE_TEXT_PLAIN;
+    private String transform = PDF_BOX;
+    private String targetEncoding = "UTF-8";
+    private String targetMimetype = MIMETYPE_TEXT_PLAIN;
 
     @Before
-    public void before() throws Exception
+    public void before()
     {
-        controller.setAlfrescoSharedFileStoreClient(alfrescoSharedFileStoreClient);
-        super.controller = controller;
-
         sourceExtension = "pdf";
         targetExtension = "txt";
+    }
+
+    @Override
+    protected void mockTransformCommand(String sourceExtension,
+        String targetExtension, String sourceMimetype,
+        boolean readTargetFileBytes) throws IOException
+    {
+        this.sourceExtension = sourceExtension;
+        this.targetExtension = targetExtension;
+        this.sourceMimetype = sourceMimetype;
+
+        expectedOptions = null;
+        expectedSourceSuffix = null;
+        expectedSourceFileBytes = readTestFile(sourceExtension);
+        expectedTargetFileBytes = readTargetFileBytes ? readTestFile(targetExtension) : null;
+        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
+            expectedSourceFileBytes);
+
+        when(mockTransformCommand.execute(any(), anyLong())).thenAnswer(
+            (Answer<RuntimeExec.ExecutionResult>) invocation -> {
+                Map<String, String> actualProperties = invocation.getArgument(0);
+                assertEquals("There should be 3 properties", 3, actualProperties.size());
+
+                String actualOptions = actualProperties.get("options");
+                String actualSource = actualProperties.get("source");
+                String actualTarget = actualProperties.get("target");
+                String actualTargetExtension = StringUtils.getFilenameExtension(actualTarget);
+
+                assertNotNull(actualSource);
+                assertNotNull(actualTarget);
+                if (expectedSourceSuffix != null)
+                {
+                    assertTrue(
+                        "The source file \"" + actualSource + "\" should have ended in \"" + expectedSourceSuffix + "\"",
+                        actualSource.endsWith(expectedSourceSuffix));
+                    actualSource = actualSource.substring(0,
+                        actualSource.length() - expectedSourceSuffix.length());
+                }
+
+                assertNotNull(actualOptions);
+                if (expectedOptions != null)
+                {
+                    assertEquals("expectedOptions", expectedOptions, actualOptions);
+                }
+
+                Long actualTimeout = invocation.getArgument(1);
+                assertNotNull(actualTimeout);
+                if (expectedTimeout != null)
+                {
+                    assertEquals("expectedTimeout", expectedTimeout, actualTimeout);
+                }
+
+                // Copy a test file into the target file location if it exists
+                int i = actualTarget.lastIndexOf('_');
+                if (i >= 0)
+                {
+                    String testFilename = actualTarget.substring(i + 1);
+                    File testFile = getTestFile(testFilename, false);
+                    File targetFile = new File(actualTarget);
+                    generateTargetFileFromResourceFile(actualTargetExtension, testFile,
+                        targetFile);
+                }
+
+                // Check the supplied source file has not been changed.
+                byte[] actualSourceFileBytes = Files.readAllBytes(new File(actualSource).toPath());
+                assertTrue("Source file is not the same",
+                    Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes));
+
+                return mockExecutionResult;
+            });
+
+        when(mockExecutionResult.getExitValue()).thenReturn(0);
+        when(mockExecutionResult.getStdErr()).thenReturn("STDERROR");
+        when(mockExecutionResult.getStdOut()).thenReturn("STDOUT");
+    }
+
+    @Override
+    protected AbstractTransformerController getController()
+    {
+        return controller;
     }
 
     private void transform(String transform, String sourceExtension, String targetExtension,
@@ -111,7 +227,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
                            Boolean includeContents, String expectedContentContains) throws Exception
     {
         // We don't use targetFileBytes as some of the transforms contain different date text based on the os being used.
-        super.mockTransformCommand(controller, sourceExtension, targetExtension, sourceMimetype, false);
+        mockTransformCommand(sourceExtension, targetExtension, sourceMimetype, false);
         this.transform = transform;
         this.targetMimetype = targetMimetype;
 
@@ -141,7 +257,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @Override
     public void simpleTransformTest() throws Exception
     {
-        super.mockTransformCommand(controller, PDF, TXT, MIMETYPE_PDF, true);
+        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         super.simpleTransformTest();
     }
 
@@ -149,21 +265,13 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @Override
     public void testDelayTest() throws Exception
     {
-        super.mockTransformCommand(controller, PDF, TXT, MIMETYPE_PDF, true);
+        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         super.testDelayTest();
     }
 
     @Test
     @Override
-    public void badExitCodeTest() throws Exception
-    {
-        // Ignore the test in super class as the Tika transforms are real rather than mocked up.
-        // It is the mock that returns a non zero exit code.
-    }
-
-    @Test
-    @Override
-    public void noTargetFileTest() throws Exception
+    public void noTargetFileTest()
     {
         // Ignore the test in super class as the Tika transforms are real rather than mocked up.
         // It is the mock that returns a zero length file for other transformers, when we supply an invalid targetExtension.
@@ -175,7 +283,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @Override
     public void dotDotSourceFilenameTest() throws Exception
     {
-        super.mockTransformCommand(controller, PDF, TXT, MIMETYPE_PDF, true);
+        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         super.dotDotSourceFilenameTest();
     }
 
@@ -183,7 +291,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @Override
     public void noExtensionSourceFilenameTest() throws Exception
     {
-        super.mockTransformCommand(controller, PDF, TXT, MIMETYPE_PDF, true);
+        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         super.noExtensionSourceFilenameTest();
     }
 
@@ -191,7 +299,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @Override
     public void badSourceFilenameTest() throws Exception
     {
-        super.mockTransformCommand(controller, PDF, TXT, MIMETYPE_PDF, true);
+        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         super.badSourceFilenameTest();
     }
 
@@ -199,7 +307,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @Override
     public void blankSourceFilenameTest() throws Exception
     {
-        super.mockTransformCommand(controller, PDF, TXT, MIMETYPE_PDF, true);
+        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         super.blankSourceFilenameTest();
     }
 
@@ -207,7 +315,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @Override
     public void noTargetExtensionTest() throws Exception
     {
-        super.mockTransformCommand(controller, PDF, TXT, MIMETYPE_PDF, true);
+        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         super.noTargetExtensionTest();
     }
 
@@ -215,7 +323,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @Override
     public void calculateMaxTime() throws Exception
     {
-        super.mockTransformCommand(controller, PDF, TXT, MIMETYPE_PDF, true);
+        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         super.calculateMaxTime();
     }
 
@@ -224,7 +332,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @Test
     public void badEncodingTest() throws Exception
     {
-        super.mockTransformCommand(controller, PDF, TXT, MIMETYPE_PDF, true);
+        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         targetEncoding = "rubbish";
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension))
                 .andExpect(status().is(500));
@@ -388,7 +496,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @Test
     public void pdfToTxtExtractBookmarksTest() throws Exception
     {
-        super.mockTransformCommand(controller, PDF, TXT, MIMETYPE_PDF, true);
+        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension).param("notExtractBookmarksText", "true"))
                 .andExpect(status().is(200))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick." + targetExtension));
@@ -405,4 +513,54 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         transformRequest.getTransformRequestOptions().put("targetMimetype", MediaType.TEXT_PLAIN_VALUE);
         transformRequest.getTransformRequestOptions().put("targetEncoding", "UTF-8");
     }
+    
+    @Test
+    public void testPojoTransform() throws Exception
+    {
+        // Files
+        String sourceFileRef = UUID.randomUUID().toString();
+        File sourceFile = getTestFile("quick." + sourceExtension, true);
+        String targetFileRef = UUID.randomUUID().toString();
+
+
+        // Transformation Request POJO
+        TransformRequest transformRequest = new TransformRequest();
+        transformRequest.setRequestId("1");
+        transformRequest.setSchema(1);
+        transformRequest.setClientData("Alfresco Digital Business Platform");
+        transformRequest.setTransformRequestOptions(new HashMap<>());
+        transformRequest.setSourceReference(sourceFileRef);
+        transformRequest.setSourceExtension(sourceExtension);
+        transformRequest.setSourceSize(sourceFile.length());
+        transformRequest.setTargetExtension(targetExtension);
+
+        // HTTP Request
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
+        ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
+            sourceFile), headers, HttpStatus.OK);
+
+        when(alfrescoSharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
+        when(alfrescoSharedFileStoreClient.saveFile(any())).thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
+        when(mockExecutionResult.getExitValue()).thenReturn(0);
+
+        // Update the Transformation Request with any specific params before sending it
+        updateTransformRequestWithSpecificOptions(transformRequest);
+
+        // Serialize and call the transformer
+        String tr = objectMapper.writeValueAsString(transformRequest);
+        String transformationReplyAsString = mockMvc.perform(MockMvcRequestBuilders.post("/transform")
+                                                                                   .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                                                                                   .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).content(tr))
+                                                    .andExpect(status().is(HttpStatus.CREATED.value()))
+                                                    .andReturn().getResponse().getContentAsString();
+
+        TransformReply transformReply = objectMapper.readValue(transformationReplyAsString, TransformReply.class);
+
+        // Assert the reply
+        assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
+        assertEquals(transformRequest.getClientData(), transformReply.getClientData());
+        assertEquals(transformRequest.getSchema(), transformReply.getSchema());
+    }
+
 }

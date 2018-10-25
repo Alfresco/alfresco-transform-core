@@ -32,8 +32,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
@@ -54,7 +52,7 @@ public abstract class AbstractHttpRequestTest
     protected abstract String getSourceExtension();
 
     @Test
-    public void testPageExists() throws Exception
+    public void testPageExists()
     {
         String result = restTemplate.getForObject("http://localhost:" + port + "/", String.class);
 
@@ -63,7 +61,7 @@ public abstract class AbstractHttpRequestTest
     }
 
     @Test
-    public void logPageExists() throws Exception
+    public void logPageExists()
     {
         String result = restTemplate.getForObject("http://localhost:" + port + "/log", String.class);
 
@@ -72,7 +70,7 @@ public abstract class AbstractHttpRequestTest
     }
 
     @Test
-    public void errorPageExists() throws Exception
+    public void errorPageExists()
     {
         String result = restTemplate.getForObject("http://localhost:" + port + "/error", String.class);
 
@@ -81,7 +79,7 @@ public abstract class AbstractHttpRequestTest
     }
 
     @Test
-    public void noFileError() throws Exception
+    public void noFileError()
     {
         // Transformer name is not part of the title as this is checked by another handler
         assertTransformError(false,
@@ -94,22 +92,22 @@ public abstract class AbstractHttpRequestTest
         assertMissingParameter("targetExtension");
     }
 
-    protected void assertMissingParameter(String name) throws IOException
+    private void assertMissingParameter(String name)
     {
         assertTransformError(true,
                 getTransformerName() + " - Request parameter " + name + " is missing");
     }
 
-    protected void assertTransformError(boolean addFile, String errorMessage) throws IOException
+    private void assertTransformError(boolean addFile, String errorMessage)
     {
-        LinkedMultiValueMap<String, Object> parameters = new LinkedMultiValueMap<String, Object>();
+        LinkedMultiValueMap<String, Object> parameters = new LinkedMultiValueMap<>();
         if (addFile)
         {
             parameters.add("file", new org.springframework.core.io.ClassPathResource("quick."+getSourceExtension()));
         }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        HttpEntity<LinkedMultiValueMap<String, Object>> entity = new HttpEntity<LinkedMultiValueMap<String, Object>>(parameters, headers);
+        HttpEntity<LinkedMultiValueMap<String, Object>> entity = new HttpEntity<>(parameters, headers);
         ResponseEntity<String> response = restTemplate.exchange("/transform", HttpMethod.POST, entity, String.class, "");
         assertEquals(errorMessage, getErrorMessage(response.getBody()));
     }
@@ -117,7 +115,7 @@ public abstract class AbstractHttpRequestTest
     // Strip out just the error message from the returned json content body
     // Had been expecting the Error page to be returned, but we end up with the json in this test harness.
     // Is correct if run manually, so not worrying too much about this.
-    private String getErrorMessage(String content) throws IOException
+    private String getErrorMessage(String content)
     {
         String message = "";
         int i = content.indexOf("\"message\":\"");

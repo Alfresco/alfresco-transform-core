@@ -12,6 +12,8 @@
 package org.alfresco.transformer;
 
 import io.micrometer.core.instrument.MeterRegistry;
+
+import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
@@ -27,8 +29,14 @@ public class Application
     @Value("${container.name}")
     private String containerName;
 
-    @Bean MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
+    @Bean
+    MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
         return registry -> registry.config().commonTags("containerName", containerName);
+    }
+    
+    @Bean
+    public ImageMagickCommandExecutor commandExecutor() {
+        return new ImageMagickCommandExecutor();
     }
 
     public static void main(String[] args)

@@ -9,11 +9,11 @@
  * agreement is prohibited.
  * #L%
  */
-package org.alfresco.transformer;
+package org.alfresco.transformer.executors;
 
 import org.artofsolving.jodconverter.office.OfficeManager;
 
-///////// THIS FILE IS A COPY OF THE CODE IN alfresco-repository /////////////
+///////// THIS FILE WAS A COPY OF THE CODE IN alfresco-repository /////////////
 
 public interface JodConverter
 {
@@ -21,11 +21,11 @@ public interface JodConverter
      * Gets the JodConverter OfficeManager.
      * @return
      */
-    public abstract OfficeManager getOfficeManager();
+    OfficeManager getOfficeManager();
 
     /**
      * This method returns a boolean indicating whether the JodConverter connection to OOo is available.
      * @return <code>true</code> if available, else <code>false</code>
      */
-    public abstract boolean isAvailable();
+    boolean isAvailable();
 }
