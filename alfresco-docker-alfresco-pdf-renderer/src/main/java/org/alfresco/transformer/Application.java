@@ -11,9 +11,6 @@
  */
 package org.alfresco.transformer;
 
-import io.micrometer.core.instrument.MeterRegistry;
-
-import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
@@ -21,6 +18,8 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+
+import io.micrometer.core.instrument.MeterRegistry;
 
 @SpringBootApplication
 @EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
@@ -34,11 +33,6 @@ public class Application
         return registry -> registry.config().commonTags("containerName", containerName);
     }
     
-    @Bean
-    public PdfRendererCommandExecutor commandExecutor() {
-        return new PdfRendererCommandExecutor();
-    }
-
     public static void main(String[] args)
     {
         SpringApplication.run(Application.class, args);

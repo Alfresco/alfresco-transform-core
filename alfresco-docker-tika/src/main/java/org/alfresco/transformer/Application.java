@@ -11,7 +11,6 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transformer.executors.TikaJavaExecutor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
@@ -33,12 +32,6 @@ public class Application
     MeterRegistryCustomizer<MeterRegistry> metricsCommonTags()
     {
         return registry -> registry.config().commonTags("containerName", containerName);
-    }
-
-    @Bean
-    public TikaJavaExecutor javaExecutor() throws Exception
-    {
-        return new TikaJavaExecutor();
     }
 
     public static void main(String[] args)

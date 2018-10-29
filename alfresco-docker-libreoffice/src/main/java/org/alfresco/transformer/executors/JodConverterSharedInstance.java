@@ -25,11 +25,16 @@
  */
 package org.alfresco.transformer.executors;
 
+import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.apache.commons.logging.Log;
@@ -37,8 +42,6 @@ import org.apache.commons.logging.LogFactory;
 import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
 import org.artofsolving.jodconverter.office.OfficeException;
 import org.artofsolving.jodconverter.office.OfficeManager;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 
 ///////// THIS FILE WAS A COPY OF THE CODE IN alfresco-repository /////////////
 
@@ -48,7 +51,7 @@ import org.springframework.beans.factory.InitializingBean;
  *
  * @author Neil McErlean
  */
-public class JodConverterSharedInstance implements InitializingBean, DisposableBean, JodConverter
+public class JodConverterSharedInstance implements JodConverter
 {
     private static final Log logger = LogFactory.getLog(JodConverterSharedInstance.class);
 
@@ -286,7 +289,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
      * (non-Javadoc)
      * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
      */
-    @Override
+    @PostConstruct
     public void afterPropertiesSet()
     {
     	// isAvailable defaults to false afterPropertiesSet. It only becomes true on successful completion of this method.
@@ -446,10 +449,9 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
     	}
 
     	File[] matchingFiles = searchRoot.listFiles((dir, name) -> name.startsWith("soffice"));
-        Arrays.stream(matchingFiles)
-              .forEach(results::add);
+        results.addAll(asList(matchingFiles));
 
-    	for (File dir : searchRoot.listFiles(File::isDirectory))
+        for (File dir : requireNonNull(searchRoot.listFiles(File::isDirectory)))
     	{
     		findSofficePrograms(dir, results, currentRecursionDepth + 1, maxRecursionDepth);
     	}
@@ -493,7 +495,7 @@ public class JodConverterSharedInstance implements InitializingBean, DisposableB
      * (non-Javadoc)
      * @see org.springframework.beans.factory.DisposableBean#destroy()
      */
-    @Override
+    @PreDestroy
     public void destroy()
     {
 	    this.isAvailable = false;

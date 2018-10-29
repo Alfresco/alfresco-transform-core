@@ -3,6 +3,8 @@ package org.alfresco.transformer.executors;
 import java.io.File;
 import java.io.IOException;
 
+import javax.annotation.PostConstruct;
+
 import org.alfresco.transformer.exceptions.TransformException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,7 +26,13 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
     private static final int JODCONVERTER_TRANSFORMATION_ERROR_CODE = 3088;
     private static final String OFFICE_HOME = "/opt/libreoffice5.4";
 
-    private JodConverter jodconverter = createJodConverter();
+    private JodConverter jodconverter;
+
+    @PostConstruct
+    public void init()
+    {
+        jodconverter = createJodConverter();
+    }
 
     private static JodConverter createJodConverter()
     {
@@ -36,7 +44,7 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
         jodconverter.setMaxTasksPerProcess("200");       // jodconverter.maxTasksPerProcess
         jodconverter.setTaskExecutionTimeout(timeout);   // jodconverter.maxTaskExecutionTimeout
         jodconverter.setTaskQueueTimeout("30000");       // jodconverter.taskQueueTimeout
-        jodconverter.setConnectTimeout("28000");         // jodconverter.connectTimeout
+        jodconverter.setConnectTimeout(timeout);         // jodconverter.connectTimeout
         jodconverter.setPortNumbers("8100");             // jodconverter.portNumbers
         jodconverter.setTemplateProfileDir("");          // jodconverter.templateProfileDir
         jodconverter.setEnabled("true");                 // jodconverter.enabled
