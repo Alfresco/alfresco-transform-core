@@ -7,6 +7,8 @@ import org.alfresco.util.exec.RuntimeExec;
 import org.springframework.stereotype.Component;
 
 /**
+ * CommandExecutor implementation for running ImageMagick transformations. It runs the 
+ * transformation logic as a separate Shell process.
  */
 @Component
 public class ImageMagickCommandExecutor extends AbstractCommandExecutor

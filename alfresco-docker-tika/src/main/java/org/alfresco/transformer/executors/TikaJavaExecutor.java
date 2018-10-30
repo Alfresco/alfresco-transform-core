@@ -15,6 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
+/**
+ * JavaExecutor implementation for running TIKA transformations. It loads the 
+ * transformation logic in the same JVM (check {@link Tika}).
+ */
 @Component
 public class TikaJavaExecutor implements JavaExecutor
 {
