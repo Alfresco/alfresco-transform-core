@@ -1,5 +1,8 @@
 package org.alfresco.transformer.executors;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
 import java.io.File;
 import java.util.Map;
 
@@ -34,12 +37,14 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
 
         if (result.getExitValue() != 0 && result.getStdErr() != null && result.getStdErr().length() > 0)
         {
-            throw new TransformException(400, "Transformer exit code was not 0: \n" + result.getStdErr());
+            throw new TransformException(BAD_REQUEST.value(),
+                "Transformer exit code was not 0: \n" + result.getStdErr());
         }
 
         if (!targetFile.exists() || targetFile.length() == 0)
         {
-            throw new TransformException(500, "Transformer failed to create an output file");
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                "Transformer failed to create an output file");
         }
     }
 
@@ -52,13 +57,15 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
             RuntimeExec.ExecutionResult result = checkCommand.execute();
             if (result.getExitValue() != 0 && result.getStdErr() != null && result.getStdErr().length() > 0)
             {
-                throw new TransformException(500, "Transformer version check exit code was not 0: \n" + result);
+                throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                    "Transformer version check exit code was not 0: \n" + result);
             }
 
             version = result.getStdOut().trim();
             if (version.isEmpty())
             {
-                throw new TransformException(500, "Transformer version check failed to create any output");
+                throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                    "Transformer version check failed to create any output");
             }
         }
 

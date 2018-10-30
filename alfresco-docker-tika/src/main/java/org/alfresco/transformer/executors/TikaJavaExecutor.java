@@ -1,6 +1,7 @@
 package org.alfresco.transformer.executors;
 
-import org.springframework.stereotype.Component;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import org.alfresco.transformer.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.apache.tika.exception.TikaException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
 @Component
@@ -35,15 +37,16 @@ public class TikaJavaExecutor implements JavaExecutor
         }
         catch (IllegalArgumentException e)
         {
-            throw new TransformException(400, getMessage(e));
+            throw new TransformException(BAD_REQUEST.value(), getMessage(e));
         }
         catch (Exception e)
         {
-            throw new TransformException(500, getMessage(e));
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), getMessage(e));
         }
         if (!targetFile.exists() || targetFile.length() == 0)
         {
-            throw new TransformException(500, "Transformer failed to create an output file");
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                "Transformer failed to create an output file");
         }
     }
 

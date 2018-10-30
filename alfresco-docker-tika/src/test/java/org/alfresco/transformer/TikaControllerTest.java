@@ -63,6 +63,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -236,7 +238,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
             ? mockMvcRequest("/transform", sourceFile, "targetExtension", this.targetExtension)
             : mockMvcRequest("/transform", sourceFile, "targetExtension", this.targetExtension, "includeContents", includeContents.toString());
         MvcResult result = mockMvc.perform(requestBuilder)
-                .andExpect(status().is(200))
+                .andExpect(status().is(OK.value()))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick." + this.targetExtension)).
                         andReturn();
         String content = result.getResponse().getContentAsString();
@@ -335,7 +337,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         targetEncoding = "rubbish";
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension))
-                .andExpect(status().is(500));
+                .andExpect(status().is(INTERNAL_SERVER_ERROR.value()));
     }
 
     // --- Archive ---
@@ -498,7 +500,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     {
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension).param("notExtractBookmarksText", "true"))
-                .andExpect(status().is(200))
+                .andExpect(status().is(OK.value()))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick." + targetExtension));
     }
 
@@ -538,7 +540,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
         ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
-            sourceFile), headers, HttpStatus.OK);
+            sourceFile), headers, OK);
 
         when(alfrescoSharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
         when(alfrescoSharedFileStoreClient.saveFile(any())).thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));

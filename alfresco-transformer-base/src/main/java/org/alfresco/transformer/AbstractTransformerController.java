@@ -29,6 +29,7 @@ import static org.alfresco.transformer.fs.FileManager.buildFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.fs.FileManager.getFilenameFromContentDisposition;
 import static org.alfresco.transformer.fs.FileManager.save;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.File;
@@ -151,7 +152,7 @@ public abstract class AbstractTransformerController implements TransformControll
         }
         catch (Exception e)
         {
-            reply.setStatus(500);
+            reply.setStatus(INTERNAL_SERVER_ERROR.value());
             reply.setErrorDetails("Failed at reading the source file. " + e.getMessage());
 
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
@@ -177,7 +178,7 @@ public abstract class AbstractTransformerController implements TransformControll
         }
         catch (Exception e)
         {
-            reply.setStatus(500);
+            reply.setStatus(INTERNAL_SERVER_ERROR.value());
             reply.setErrorDetails("Failed at processing transformation. " + e.getMessage());
 
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
@@ -205,7 +206,7 @@ public abstract class AbstractTransformerController implements TransformControll
         }
         catch (Exception e)
         {
-            reply.setStatus(500);
+            reply.setStatus(INTERNAL_SERVER_ERROR.value());
             reply.setErrorDetails("Failed at writing the transformed file. " + e.getMessage());
 
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));

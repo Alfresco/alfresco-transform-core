@@ -1,5 +1,7 @@
 package org.alfresco.transformer;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -92,7 +94,7 @@ public interface TransformController
         String transformerName = getTransformerName();
         String name = e.getParameterName();
         String message = "Request parameter " + name + " is of the wrong type";
-        int statusCode = 400;
+        int statusCode = BAD_REQUEST.value();
 
         logger.error(message);
 
@@ -108,7 +110,7 @@ public interface TransformController
         String transformerName = getTransformerName();
         String name = e.getParameterName();
         String message = "Request parameter " + name + " is missing";
-        int statusCode = 400;
+        int statusCode = BAD_REQUEST.value();
 
         logger.error(message);
 

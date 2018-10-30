@@ -32,6 +32,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -186,7 +188,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                     .file(sourceFile)
                     .param("targetExtension", targetExtension)
                     .param("cropGravity", value))
-                    .andExpect(status().is(200))
+                    .andExpect(status().is(OK.value()))
                     .andExpect(content().bytes(expectedTargetFileBytes))
                     .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
         }
@@ -199,7 +201,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
                 .param("cropGravity", "badValue"))
-                .andExpect(status().is(400));
+                .andExpect(status().is(BAD_REQUEST.value()));
     }
 
     @Test
@@ -231,7 +233,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                 .param("allowEnlargement", "true")
                 .param("maintainAspectRatio", "true"))
 
-                .andExpect(status().is(200))
+                .andExpect(status().is(OK.value()))
                 .andExpect(content().bytes(expectedTargetFileBytes))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
     }
@@ -265,7 +267,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                 .param("allowEnlargement", "false")
                 .param("maintainAspectRatio", "false"))
 
-                .andExpect(status().is(200))
+                .andExpect(status().is(OK.value()))
                 .andExpect(content().bytes(expectedTargetFileBytes))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
     }
@@ -282,7 +284,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                 .param("resizeWidth", "321")
                 .param("resizeHeight", "654")
                 .param("commandOptions", "( horrible command / );"))
-                .andExpect(status().is(200))
+                .andExpect(status().is(OK.value()))
                 .andExpect(content().bytes(expectedTargetFileBytes))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
     }
@@ -302,7 +304,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
         when(mockExecutionResult.getExitValue()).thenReturn(1);
 
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", "xxx"))
-               .andExpect(status().is(400))
+               .andExpect(status().is(BAD_REQUEST.value()))
                .andExpect(status().reason(containsString("Transformer exit code was not 0: \nSTDERR")));
     }
 
@@ -330,7 +332,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
         ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
-            sourceFile), headers, HttpStatus.OK);
+            sourceFile), headers, OK);
 
         when(alfrescoSharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
         when(alfrescoSharedFileStoreClient.saveFile(any())).thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));

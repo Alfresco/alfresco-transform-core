@@ -27,6 +27,10 @@ package org.alfresco.transformer.probes;
 
 import static org.alfresco.transformer.fs.FileManager.SOURCE_FILE;
 import static org.alfresco.transformer.fs.FileManager.TARGET_FILE;
+import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
 import java.io.File;
 import java.io.IOException;
@@ -187,7 +191,7 @@ public abstract class ProbeTestTransform
     {
         String probeMessage = getProbeMessage(isLiveProbe);
         String message = "Success - No transform.";
-        LogEntry.setStatusCodeAndMessage(200, probeMessage + message);
+        LogEntry.setStatusCodeAndMessage(OK.value(), probeMessage + message);
         if (!isLiveProbe && !readySent.getAndSet(true))
         {
             logger.info(probeMessage+message);
@@ -223,9 +227,10 @@ public abstract class ProbeTestTransform
 
         if (time > maxTime)
         {
-            throw new TransformException(500, getMessagePrefix(isLiveProbe) +
-                                              message + " which is more than " + livenessPercent +
-                                              "% slower than the normal value of " + normalTime + "ms");
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                getMessagePrefix(isLiveProbe) +
+                message + " which is more than " + livenessPercent +
+                "% slower than the normal value of " + normalTime + "ms");
         }
 
         // We don't care if the ready or live probe works out if we are 'ready' to take requests.
@@ -240,14 +245,14 @@ public abstract class ProbeTestTransform
     {
         if (die.get())
         {
-            throw new TransformException(429, getMessagePrefix(isLiveProbe) +
+            throw new TransformException(TOO_MANY_REQUESTS.value(), getMessagePrefix(isLiveProbe) +
                     "Transformer requested to die. A transform took longer than "+
                     (maxTransformTime *1000)+" seconds");
         }
 
         if (maxTransformCount > 0 && transformCount.get() > maxTransformCount)
         {
-            throw new TransformException(429, getMessagePrefix(isLiveProbe) +
+            throw new TransformException(TOO_MANY_REQUESTS.value(), getMessagePrefix(isLiveProbe) +
                     "Transformer requested to die. It has performed more than "+
                     maxTransformCount+" transformations");
         }
@@ -264,7 +269,7 @@ public abstract class ProbeTestTransform
         }
         catch (IOException e)
         {
-            throw new TransformException(507, getMessagePrefix(isLiveProbe)+
+            throw new TransformException(INSUFFICIENT_STORAGE.value(), getMessagePrefix(isLiveProbe)+
                     "Failed to store the source file", e);
         }
         long length = sourceFile.length();
@@ -320,17 +325,19 @@ public abstract class ProbeTestTransform
         String probeMessage = getProbeMessage(isLiveProbe);
         if (!targetFile.exists() || !targetFile.isFile())
         {
-            throw new TransformException(500, probeMessage +"Target File \""+targetFile.getAbsolutePath()+"\" did not exist");
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                probeMessage + "Target File \"" + targetFile.getAbsolutePath() + "\" did not exist");
         }
         long length = targetFile.length();
         if (length < minExpectedLength || length > maxExpectedLength)
         {
-            throw new TransformException(500, probeMessage +"Target File \""+targetFile.getAbsolutePath()+
-                    "\" was the wrong size ("+ length+"). Needed to be between "+minExpectedLength+" and "+
-                    maxExpectedLength);
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                probeMessage + "Target File \"" + targetFile.getAbsolutePath() +
+                "\" was the wrong size (" + length + "). Needed to be between " +
+                minExpectedLength + " and " + maxExpectedLength);
         }
         LogEntry.setTargetSize(length);
-        LogEntry.setStatusCodeAndMessage(200, probeMessage +"Success - "+message);
+        LogEntry.setStatusCodeAndMessage(OK.value(), probeMessage + "Success - " + message);
     }
 
     private String getMessagePrefix(boolean isLiveProbe)

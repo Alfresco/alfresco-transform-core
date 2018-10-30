@@ -28,6 +28,9 @@ package org.alfresco.transformer;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -158,7 +161,7 @@ public abstract class AbstractTransformerControllerTest
     public void simpleTransformTest() throws Exception
     {
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension))
-               .andExpect(status().is(200))
+               .andExpect(status().is(OK.value()))
                .andExpect(content().bytes(expectedTargetFileBytes))
                .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick." + targetExtension));
     }
@@ -168,7 +171,7 @@ public abstract class AbstractTransformerControllerTest
     {
         long start = System.currentTimeMillis();
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension, "testDelay", "400"))
-               .andExpect(status().is(200))
+               .andExpect(status().is(OK.value()))
                .andExpect(content().bytes(expectedTargetFileBytes))
                .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick." + targetExtension));
         long ms = System.currentTimeMillis() - start;
@@ -181,7 +184,7 @@ public abstract class AbstractTransformerControllerTest
     public void noTargetFileTest() throws Exception
     {
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", "xxx"))
-               .andExpect(status().is(500));
+               .andExpect(status().is(INTERNAL_SERVER_ERROR.value()));
     }
 
     @Test
@@ -191,7 +194,7 @@ public abstract class AbstractTransformerControllerTest
         sourceFile = new MockMultipartFile("file", "../quick." + sourceExtension, sourceMimetype, expectedSourceFileBytes);
 
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension))
-               .andExpect(status().is(200))
+               .andExpect(status().is(OK.value()))
                .andExpect(content().bytes(expectedTargetFileBytes))
                .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick." + targetExtension));
     }
@@ -203,7 +206,7 @@ public abstract class AbstractTransformerControllerTest
         sourceFile = new MockMultipartFile("file", "../quick", sourceMimetype, expectedSourceFileBytes);
 
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension))
-               .andExpect(status().is(200))
+               .andExpect(status().is(OK.value()))
                .andExpect(content().bytes(expectedTargetFileBytes))
                .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick." + targetExtension));
     }
@@ -215,7 +218,7 @@ public abstract class AbstractTransformerControllerTest
         sourceFile = new MockMultipartFile("file", "abc/", sourceMimetype, expectedSourceFileBytes);
 
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension))
-               .andExpect(status().is(400))
+               .andExpect(status().is(BAD_REQUEST.value()))
                .andExpect(status().reason(containsString("The source filename was not supplied")));
     }
 
@@ -225,7 +228,7 @@ public abstract class AbstractTransformerControllerTest
         sourceFile = new MockMultipartFile("file", "", sourceMimetype, expectedSourceFileBytes);
 
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension))
-               .andExpect(status().is(400))
+               .andExpect(status().is(BAD_REQUEST.value()))
                .andExpect(status().reason(containsString("The source filename was not supplied")));
     }
 
@@ -233,7 +236,7 @@ public abstract class AbstractTransformerControllerTest
     public void noTargetExtensionTest() throws Exception
     {
         mockMvc.perform(mockMvcRequest("/transform", sourceFile))
-               .andExpect(status().is(400))
+               .andExpect(status().is(BAD_REQUEST.value()))
                .andExpect(status().reason(containsString("Request parameter targetExtension is missing")));
     }
 
@@ -280,12 +283,12 @@ public abstract class AbstractTransformerControllerTest
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .content(tr))
-            .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))
+            .andExpect(status().is(BAD_REQUEST.value()))
             .andReturn().getResponse().getContentAsString();
 
         TransformReply transformReply = objectMapper.readValue(transformationReplyAsString, TransformReply.class);
 
         // Assert the reply
-        assertEquals(HttpStatus.BAD_REQUEST.value(), transformReply.getStatus());
+        assertEquals(BAD_REQUEST.value(), transformReply.getStatus());
     }
 }

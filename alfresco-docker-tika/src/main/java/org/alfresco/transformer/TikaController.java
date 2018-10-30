@@ -24,6 +24,8 @@ import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.logging.StandardMessages.ENTERPRISE_LICENCE;
 import static org.alfresco.transformer.util.Util.stringToBoolean;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.OK;
 
 import java.io.File;
 import java.util.Arrays;
@@ -129,7 +131,7 @@ public class TikaController extends AbstractTransformerController
     {
         if (!TRANSFORM_NAMES.contains(transform))
         {
-            throw new TransformException(400, "Invalid transform value");
+            throw new TransformException(BAD_REQUEST.value(), "Invalid transform value");
         }
 
         String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(), targetExtension);
@@ -148,7 +150,7 @@ public class TikaController extends AbstractTransformerController
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());
-        long time = LogEntry.setStatusCodeAndMessage(200, "Success");
+        long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
         time += LogEntry.addDelay(testDelay);
         getProbeTestTransform().recordTransformTime(time);
         return body;

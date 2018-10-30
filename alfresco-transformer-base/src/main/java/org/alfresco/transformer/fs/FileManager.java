@@ -1,5 +1,9 @@
 package org.alfresco.transformer.fs;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -64,7 +68,7 @@ public class FileManager
         if (filename == null || filename.isEmpty())
         {
             String sourceOrTarget = source ? "source" : "target";
-            int statusCode = source ? 400 : 500;
+            int statusCode = source ? BAD_REQUEST.value() : INTERNAL_SERVER_ERROR.value();
             throw new TransformException(statusCode, "The " + sourceOrTarget + " filename was not supplied");
         }
         return filename;
@@ -78,7 +82,8 @@ public class FileManager
         }
         catch (IOException e)
         {
-            throw new TransformException(507, "Failed to store the source file", e);
+            throw new TransformException(INSUFFICIENT_STORAGE.value(),
+                "Failed to store the source file", e);
         }
     }
 
@@ -90,7 +95,7 @@ public class FileManager
         }
         catch (IOException e)
         {
-            throw new TransformException(507, "Failed to store the source file", e);
+            throw new TransformException(INSUFFICIENT_STORAGE.value(), "Failed to store the source file", e);
         }
     }
 
@@ -105,12 +110,14 @@ public class FileManager
             }
             else
             {
-                throw new TransformException(500, "Could not read the target file: " + file.getPath());
+                throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                    "Could not read the target file: " + file.getPath());
             }
         }
         catch (MalformedURLException e)
         {
-            throw new TransformException(500, "The target filename was malformed: " + file.getPath(), e);
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                "The target filename was malformed: " + file.getPath(), e);
         }
     }
 

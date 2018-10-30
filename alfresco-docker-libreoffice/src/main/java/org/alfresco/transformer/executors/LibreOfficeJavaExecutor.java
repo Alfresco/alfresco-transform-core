@@ -1,5 +1,8 @@
 package org.alfresco.transformer.executors;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -62,9 +65,10 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
         }
         catch (OfficeException e)
         {
-            throw new TransformException(400, "LibreOffice server conversion failed: \n" +
-                                              "   from file: " + sourceFile + "\n" +
-                                              "   to file: " + targetFile, e);
+            throw new TransformException(BAD_REQUEST.value(),
+                "LibreOffice server conversion failed: \n" +
+                "   from file: " + sourceFile + "\n" +
+                "   to file: " + targetFile, e);
         }
         catch (Throwable throwable)
         {
@@ -86,7 +90,8 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
 
         if (!targetFile.exists() || targetFile.length() == 0L)
         {
-            throw new TransformException(500, "Transformer failed to create an output file");
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                "Transformer failed to create an output file");
         }
     }
 
@@ -120,7 +125,8 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
         }
         catch (IOException iox)
         {
-            throw new TransformException(500, "Error creating empty PDF file", iox);
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                "Error creating empty PDF file", iox);
         }
     }
 }

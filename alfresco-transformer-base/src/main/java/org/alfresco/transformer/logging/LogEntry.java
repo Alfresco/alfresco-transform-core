@@ -26,6 +26,7 @@
 package org.alfresco.transformer.logging;
 
 import static java.lang.Math.max;
+import static org.springframework.http.HttpStatus.OK;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -196,7 +197,7 @@ public final class LogEntry
     public static void complete()
     {
         LogEntry logEntry = currentLogEntry.get();
-        if (logEntry.statusCode == 200)
+        if (logEntry.statusCode == OK.value())
         {
             logEntry.durationStreamOut = System.currentTimeMillis() - logEntry.start -
                     logEntry.durationStreamIn - max(logEntry.durationTransform, 0) - max(logEntry.durationDelay, 0);

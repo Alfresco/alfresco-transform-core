@@ -18,6 +18,8 @@ import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.logging.StandardMessages.ENTERPRISE_LICENCE;
 import static org.alfresco.transformer.util.Util.stringToBoolean;
 import static org.alfresco.transformer.util.Util.stringToInteger;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.OK;
 
 import java.io.File;
 import java.util.Arrays;
@@ -166,7 +168,7 @@ public class ImageMagickController extends AbstractTransformerController
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());
-        long time = LogEntry.setStatusCodeAndMessage(200, "Success");
+        long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
         time += LogEntry.addDelay(testDelay);
         getProbeTestTransform().recordTransformTime(time);
         return body;
@@ -217,7 +219,7 @@ public class ImageMagickController extends AbstractTransformerController
             }
             else if (!GRAVITY_VALUES.contains(cropGravity))
             {
-                throw new TransformException(400, "Invalid cropGravity value");
+                throw new TransformException(BAD_REQUEST.value(), "Invalid cropGravity value");
             }
         }
 

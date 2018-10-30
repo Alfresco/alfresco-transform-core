@@ -16,6 +16,7 @@ import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.logging.StandardMessages.ENTERPRISE_LICENCE;
+import static org.springframework.http.HttpStatus.OK;
 
 import java.io.File;
 import java.util.Arrays;
@@ -155,7 +156,7 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
         
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());
-        long time = LogEntry.setStatusCodeAndMessage(200, "Success");
+        long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
         time += LogEntry.addDelay(testDelay);
         getProbeTestTransform().recordTransformTime(time);
         return body;
