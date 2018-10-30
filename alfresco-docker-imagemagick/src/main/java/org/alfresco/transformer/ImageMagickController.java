@@ -16,20 +16,15 @@ import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.logging.StandardMessages.ENTERPRISE_LICENCE;
-import static org.alfresco.transformer.util.Util.stringToBoolean;
 import static org.alfresco.transformer.util.Util.stringToInteger;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.transformer.exceptions.TransformException;
 import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
@@ -70,9 +65,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImageMagickController extends AbstractTransformerController
 {
     private static final Log logger = LogFactory.getLog(ImageMagickController.class);
-
-    private static final List<String> GRAVITY_VALUES = Arrays.asList(
-            "North", "NorthEast", "East", "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center");
 
     @Autowired
     private ImageMagickCommandExecutor commandExecutor;
@@ -159,8 +151,27 @@ public class ImageMagickController extends AbstractTransformerController
         File targetFile = createTargetFile(request, targetFilename);
         // Both files are deleted by TransformInterceptor.afterCompletion
 
-        String options = buildTransformOptions(startPage, endPage , alphaRemove, autoOrient, cropGravity, cropWidth, cropHeight, cropPercentage,
-            cropXOffset, cropYOffset, thumbnail, resizeWidth, resizeHeight, resizePercentage, allowEnlargement, maintainAspectRatio, commandOptions);
+        final String options = OptionsBuilder
+            .builder()
+            .withStartPage(startPage)
+            .withEndPage(endPage)
+            .withAlphaRemove(alphaRemove)
+            .withAutoOrient(autoOrient)
+            .withCropGravity(cropGravity)
+            .withCropWidth(cropWidth)
+            .withCropHeight(cropHeight)
+            .withCropPercentage(cropPercentage)
+            .withCropXOffset(cropXOffset)
+            .withCropYOffset(cropYOffset)
+            .withThumbnail(thumbnail)
+            .withResizeWidth(resizeWidth)
+            .withResizeHeight(resizeHeight)
+            .withResizePercentage(resizePercentage)
+            .withAllowEnlargement(allowEnlargement)
+            .withMaintainAspectRatio(maintainAspectRatio)
+            .withCommandOptions(commandOptions)
+            .build();
+
         String pageRange = calculatePageRange(startPage, endPage);
 
         commandExecutor.run(options, sourceFile, pageRange, targetFile,
@@ -178,143 +189,32 @@ public class ImageMagickController extends AbstractTransformerController
     public void processTransform(final File sourceFile, final File targetFile,
         final Map<String, String> transformOptions, final Long timeout)
     {
-        Integer startPage = stringToInteger(transformOptions.get("startPage"));
-        Integer endPage = stringToInteger(transformOptions.get("endPage"));
-        Boolean alphaRemove = stringToBoolean(transformOptions.get("alphaRemove"));
-        Boolean autoOrient = stringToBoolean(transformOptions.get("autoOrient"));
-        String cropGravity = transformOptions.get("cropGravity");
-        Integer cropWidth = stringToInteger(transformOptions.get("cropWidth"));
-        Integer cropHeight = stringToInteger(transformOptions.get("cropHeight"));
-        Boolean cropPercentage = stringToBoolean(transformOptions.get("cropPercentage"));
-        Integer cropXOffset = stringToInteger(transformOptions.get("cropXOffset"));
-        Integer cropYOffset = stringToInteger(transformOptions.get("cropYOffset"));
-        Boolean thumbnail = stringToBoolean(transformOptions.get("thumbnail"));
-        Integer resizeWidth = stringToInteger(transformOptions.get("resizeWidth"));
-        Integer resizeHeight = stringToInteger(transformOptions.get("resizeHeight"));
-        Boolean resizePercentage = stringToBoolean(transformOptions.get("resizePercentage"));
-        Boolean allowEnlargement = stringToBoolean(transformOptions.get("allowEnlargement"));
-        Boolean maintainAspectRatio = stringToBoolean(transformOptions.get("maintainAspectRatio"));
+        final String options = OptionsBuilder
+            .builder()
+            .withStartPage(transformOptions.get("startPage"))
+            .withEndPage(transformOptions.get("endPage"))
+            .withAlphaRemove(transformOptions.get("alphaRemove"))
+            .withAutoOrient(transformOptions.get("autoOrient"))
+            .withCropGravity(transformOptions.get("cropGravity"))
+            .withCropWidth(transformOptions.get("cropWidth"))
+            .withCropHeight(transformOptions.get("cropHeight"))
+            .withCropPercentage(transformOptions.get("cropPercentage"))
+            .withCropXOffset(transformOptions.get("cropXOffset"))
+            .withCropYOffset(transformOptions.get("cropYOffset"))
+            .withThumbnail(transformOptions.get("thumbnail"))
+            .withResizeWidth(transformOptions.get("resizeWidth"))
+            .withResizeHeight(transformOptions.get("resizeHeight"))
+            .withResizePercentage(transformOptions.get("resizePercentage"))
+            .withAllowEnlargement(transformOptions.get("allowEnlargement"))
+            .withMaintainAspectRatio(transformOptions.get("maintainAspectRatio"))
+            .build();
 
-        final String options = buildTransformOptions(startPage, endPage, alphaRemove, autoOrient,
-            cropGravity, cropWidth, cropHeight, cropPercentage,
-        cropXOffset, cropYOffset, thumbnail, resizeWidth, resizeHeight, resizePercentage, allowEnlargement, maintainAspectRatio, null);
-        final String pageRange = calculatePageRange(startPage, endPage);
+        final String pageRange = calculatePageRange(
+            stringToInteger(transformOptions.get("startPage")),
+            stringToInteger(transformOptions.get("endPage")));
 
         commandExecutor.run(options, sourceFile, pageRange, targetFile,
             timeout);
-    }
-
-    private static String buildTransformOptions(Integer startPage, Integer endPage, Boolean alphaRemove,
-        Boolean autoOrient, String cropGravity, Integer cropWidth, Integer cropHeight,
-        Boolean cropPercentage, Integer cropXOffset, Integer cropYOffset, Boolean thumbnail,
-        Integer resizeWidth, Integer resizeHeight, Boolean resizePercentage,
-        Boolean allowEnlargement, Boolean maintainAspectRatio, String commandOptions)
-    {
-        if (cropGravity != null)
-        {
-            cropGravity = cropGravity.trim();
-            if (cropGravity.isEmpty())
-            {
-                cropGravity = null;
-            }
-            else if (!GRAVITY_VALUES.contains(cropGravity))
-            {
-                throw new TransformException(BAD_REQUEST.value(), "Invalid cropGravity value");
-            }
-        }
-
-        StringJoiner args = new StringJoiner(" ");
-        if (alphaRemove != null && alphaRemove)
-        {
-            args.add("-alpha");
-            args.add(("remove"));
-        }
-        if (autoOrient != null && autoOrient)
-        {
-            args.add("-auto-orient");
-        }
-
-        if (cropGravity != null || cropWidth != null || cropHeight != null || cropPercentage != null ||
-            cropXOffset != null || cropYOffset != null)
-        {
-            if (cropGravity != null)
-            {
-                args.add("-gravity");
-                args.add(cropGravity);
-            }
-
-            StringBuilder crop = new StringBuilder();
-            if (cropWidth != null && cropWidth >= 0)
-            {
-                crop.append(cropWidth);
-            }
-            if (cropHeight != null && cropHeight >= 0)
-            {
-                crop.append('x');
-                crop.append(cropHeight);
-            }
-            if (cropPercentage != null && cropPercentage)
-            {
-                crop.append('%');
-            }
-            if (cropXOffset != null)
-            {
-                if (cropXOffset >= 0)
-                {
-                    crop.append('+');
-                }
-                crop.append(cropXOffset);
-            }
-            if (cropYOffset != null)
-            {
-                if (cropYOffset >= 0)
-                {
-                    crop.append('+');
-                }
-                crop.append(cropYOffset);
-            }
-            if (crop.length() > 1)
-            {
-                args.add("-crop");
-                args.add(crop);
-            }
-
-            args.add("+repage");
-        }
-
-        if (resizeHeight != null || resizeWidth != null || resizePercentage !=null || maintainAspectRatio != null)
-        {
-            args.add(thumbnail != null && thumbnail ? "-thumbnail" : "-resize");
-            StringBuilder resize = new StringBuilder();
-            if (resizeWidth != null && resizeWidth >= 0)
-            {
-                resize.append(resizeWidth);
-            }
-            if (resizeHeight != null && resizeHeight >= 0)
-            {
-                resize.append('x');
-                resize.append(resizeHeight);
-            }
-            if (resizePercentage != null && resizePercentage)
-            {
-                resize.append('%');
-            }
-            if (allowEnlargement == null || !allowEnlargement)
-            {
-                resize.append('>');
-            }
-            if (maintainAspectRatio != null && maintainAspectRatio)
-            {
-                resize.append('!');
-            }
-            if (resize.length() > 1)
-            {
-                args.add(resize);
-            }
-        }
-
-        return (commandOptions == null || "".equals(commandOptions.trim()) ? "" : commandOptions + ' ') +
-            args.toString();
     }
 
     private static String calculatePageRange(Integer startPage, Integer endPage)
@@ -327,5 +227,4 @@ public class ImageMagickController extends AbstractTransformerController
                 ? "["+startPage+']'
                 : "["+startPage+'-'+endPage+']';
     }
-
 }
