@@ -11,16 +11,24 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transformer.fs.FileManager.createAttachment;
+import static org.alfresco.transformer.fs.FileManager.createSourceFile;
+import static org.alfresco.transformer.fs.FileManager.createTargetFile;
+import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
+import static org.alfresco.transformer.logging.StandardMessages.ENTERPRISE_LICENCE;
+import static org.alfresco.transformer.util.Util.stringToInteger;
+import static org.springframework.http.HttpStatus.OK;
+
 import java.io.File;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.util.exec.RuntimeExec;
+import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
+import org.alfresco.transformer.logging.LogEntry;
+import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -56,73 +64,43 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 public class ImageMagickController extends AbstractTransformerController
 {
-    private static final String ROOT = "/usr/lib64/ImageMagick-7.0.7";
-    private static final String DYN = ROOT+"/lib";
-    private static final String EXE = "/usr/bin/convert";
-    private static final List<String> GRAVITY_VALUES = Arrays.asList(
-            "North", "NorthEast", "East", "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center");
+    private static final Log logger = LogFactory.getLog(ImageMagickController.class);
 
+    @Autowired
+    private ImageMagickCommandExecutor commandExecutor;
+    
     @Autowired
     public ImageMagickController()
     {
-        logger = LogFactory.getLog(ImageMagickController.class);
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-        logEnterpriseLicenseMessage();
+        Arrays.stream(ENTERPRISE_LICENCE.split("\\n")).forEach(logger::info);
         logger.info("This transformer uses ImageMagick from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt");
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-        setTransformCommand(createTransformCommand());
-        setCheckCommand(createCheckCommand());
     }
 
     @Override
-    protected String getTransformerName()
+    public String getTransformerName()
     {
         return "ImageMagick";
     }
 
-    private static RuntimeExec createTransformCommand()
+    @Override
+    public String version()
     {
-        RuntimeExec runtimeExec = new RuntimeExec();
-        Map<String, String[]> commandsAndArguments = new HashMap<>();
-        commandsAndArguments.put(".*", new String[]{EXE, "${source}", "SPLIT:${options}", "-strip", "-quiet", "${target}"});
-        runtimeExec.setCommandsAndArguments(commandsAndArguments);
-
-        Map<String, String> processProperties = new HashMap<>();
-        processProperties.put("MAGICK_HOME", ROOT);
-        processProperties.put("DYLD_FALLBACK_LIBRARY_PATH", DYN);
-        processProperties.put("LD_LIBRARY_PATH", DYN);
-        runtimeExec.setProcessProperties(processProperties);
-
-        Map<String, String> defaultProperties = new HashMap<>();
-        defaultProperties.put("options", null);
-        runtimeExec.setDefaultProperties(defaultProperties);
-
-        runtimeExec.setErrorCodes("1,2,255,400,405,410,415,420,425,430,435,440,450,455,460,465,470,475,480,485,490,495,499,700,705,710,715,720,725,730,735,740,750,755,760,765,770,775,780,785,790,795,799");
-
-        return runtimeExec;
-    }
-
-    private static RuntimeExec createCheckCommand()
-    {
-        RuntimeExec runtimeExec = new RuntimeExec();
-        Map<String, String[]> commandsAndArguments = new HashMap<>();
-        commandsAndArguments.put(".*", new String[]{EXE, "-version"});
-        runtimeExec.setCommandsAndArguments(commandsAndArguments);
-
-        return runtimeExec;
+        return commandExecutor.version();
     }
 
     @Override
-    protected ProbeTestTransform getProbeTestTransform()
+    public ProbeTestTransform getProbeTestTransform()
     {
         // See the Javadoc on this method and Probes.md for the choice of these values.
-        return new ProbeTestTransform(this, "quick.jpg", "quick.png",
-                35593, 1024, 150, 1024, 60*15+1,60*15+0)
+        return new ProbeTestTransform(this, logger, "quick.jpg", "quick.png",
+                35593, 1024, 150, 1024, 60*15+1,60*15)
         {
             @Override
             protected void executeTransformCommand(File sourceFile, File targetFile)
             {
-                ImageMagickController.this.executeTransformCommand("", sourceFile, "", targetFile, null);
+                commandExecutor.run("", sourceFile, "", targetFile, null);
             }
         };
     }
@@ -168,176 +146,80 @@ public class ImageMagickController extends AbstractTransformerController
     {
         String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(),
             targetExtension);
+        getProbeTestTransform().incrementTransformerCount();
         File sourceFile = createSourceFile(request, sourceMultipartFile);
         File targetFile = createTargetFile(request, targetFilename);
         // Both files are deleted by TransformInterceptor.afterCompletion
 
-        String options = buildTransformOptions(startPage, endPage , alphaRemove, autoOrient, cropGravity, cropWidth, cropHeight, cropPercentage,
-            cropXOffset, cropYOffset, thumbnail, resizeWidth, resizeHeight, resizePercentage, allowEnlargement, maintainAspectRatio, commandOptions);
+        final String options = OptionsBuilder
+            .builder()
+            .withStartPage(startPage)
+            .withEndPage(endPage)
+            .withAlphaRemove(alphaRemove)
+            .withAutoOrient(autoOrient)
+            .withCropGravity(cropGravity)
+            .withCropWidth(cropWidth)
+            .withCropHeight(cropHeight)
+            .withCropPercentage(cropPercentage)
+            .withCropXOffset(cropXOffset)
+            .withCropYOffset(cropYOffset)
+            .withThumbnail(thumbnail)
+            .withResizeWidth(resizeWidth)
+            .withResizeHeight(resizeHeight)
+            .withResizePercentage(resizePercentage)
+            .withAllowEnlargement(allowEnlargement)
+            .withMaintainAspectRatio(maintainAspectRatio)
+            .withCommandOptions(commandOptions)
+            .build();
+
         String pageRange = calculatePageRange(startPage, endPage);
 
-        executeTransformCommand(options, sourceFile, pageRange, targetFile, timeout);
+        commandExecutor.run(options, sourceFile, pageRange, targetFile,
+            timeout);
 
-        return createAttachment(targetFilename, targetFile, testDelay);
+        final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
+        LogEntry.setTargetSize(targetFile.length());
+        long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
+        time += LogEntry.addDelay(testDelay);
+        getProbeTestTransform().recordTransformTime(time);
+        return body;
     }
 
     @Override
-    protected void processTransform(File sourceFile, File targetFile,
-        Map<String, String> transformOptions, Long timeout)
+    public void processTransform(final File sourceFile, final File targetFile,
+        final Map<String, String> transformOptions, final Long timeout)
     {
-        Integer startPage = stringToInteger(transformOptions.get("startPage"));
-        Integer endPage = stringToInteger(transformOptions.get("endPage"));
-        Boolean alphaRemove = stringToBoolean(transformOptions.get("alphaRemove"));
-        Boolean autoOrient = stringToBoolean(transformOptions.get("autoOrient"));
-        String cropGravity = transformOptions.get("cropGravity");
-        Integer cropWidth = stringToInteger(transformOptions.get("cropWidth"));
-        Integer cropHeight = stringToInteger(transformOptions.get("cropHeight"));
-        Boolean cropPercentage = stringToBoolean(transformOptions.get("cropPercentage"));
-        Integer cropXOffset = stringToInteger(transformOptions.get("cropXOffset"));
-        Integer cropYOffset = stringToInteger(transformOptions.get("cropYOffset"));
-        Boolean thumbnail = stringToBoolean(transformOptions.get("thumbnail"));
-        Integer resizeWidth = stringToInteger(transformOptions.get("resizeWidth"));
-        Integer resizeHeight = stringToInteger(transformOptions.get("resizeHeight"));
-        Boolean resizePercentage = stringToBoolean(transformOptions.get("resizePercentage"));
-        Boolean allowEnlargement = stringToBoolean(transformOptions.get("allowEnlargement"));
-        Boolean maintainAspectRatio = stringToBoolean(transformOptions.get("maintainAspectRatio"));
+        final String options = OptionsBuilder
+            .builder()
+            .withStartPage(transformOptions.get("startPage"))
+            .withEndPage(transformOptions.get("endPage"))
+            .withAlphaRemove(transformOptions.get("alphaRemove"))
+            .withAutoOrient(transformOptions.get("autoOrient"))
+            .withCropGravity(transformOptions.get("cropGravity"))
+            .withCropWidth(transformOptions.get("cropWidth"))
+            .withCropHeight(transformOptions.get("cropHeight"))
+            .withCropPercentage(transformOptions.get("cropPercentage"))
+            .withCropXOffset(transformOptions.get("cropXOffset"))
+            .withCropYOffset(transformOptions.get("cropYOffset"))
+            .withThumbnail(transformOptions.get("thumbnail"))
+            .withResizeWidth(transformOptions.get("resizeWidth"))
+            .withResizeHeight(transformOptions.get("resizeHeight"))
+            .withResizePercentage(transformOptions.get("resizePercentage"))
+            .withAllowEnlargement(transformOptions.get("allowEnlargement"))
+            .withMaintainAspectRatio(transformOptions.get("maintainAspectRatio"))
+            .build();
 
-        String options = buildTransformOptions(startPage, endPage , alphaRemove, autoOrient, cropGravity, cropWidth, cropHeight, cropPercentage,
-        cropXOffset, cropYOffset, thumbnail, resizeWidth, resizeHeight, resizePercentage, allowEnlargement, maintainAspectRatio, null);
-        String pageRange = calculatePageRange(startPage, endPage);
+        final String pageRange = calculatePageRange(
+            stringToInteger(transformOptions.get("startPage")),
+            stringToInteger(transformOptions.get("endPage")));
 
-        executeTransformCommand(options, sourceFile, pageRange, targetFile, timeout);
+        commandExecutor.run(options, sourceFile, pageRange, targetFile,
+            timeout);
     }
 
-    private void executeTransformCommand(String options, File sourceFile, String pageRange, File targetFile, Long timeout)
+    private static String calculatePageRange(Integer startPage, Integer endPage)
     {
-        LogEntry.setOptions(pageRange+(pageRange.isEmpty() ? "" : " ")+options);
-
-        Map<String, String> properties = new HashMap<String, String>(5);
-        properties.put("options", options);
-        properties.put("source", sourceFile.getAbsolutePath()+pageRange);
-        properties.put("target", targetFile.getAbsolutePath());
-
-        executeTransformCommand(properties, targetFile, timeout);
-    }
-
-    private String buildTransformOptions(Integer startPage, Integer endPage, Boolean alphaRemove,
-        Boolean autoOrient, String cropGravity, Integer cropWidth, Integer cropHeight,
-        Boolean cropPercentage, Integer cropXOffset, Integer cropYOffset, Boolean thumbnail,
-        Integer resizeWidth, Integer resizeHeight, Boolean resizePercentage,
-        Boolean allowEnlargement, Boolean maintainAspectRatio, String commandOptions)
-    {
-        if (cropGravity != null)
-        {
-            cropGravity = cropGravity.trim();
-            if (cropGravity.isEmpty())
-            {
-                cropGravity = null;
-            }
-            else if (!GRAVITY_VALUES.contains(cropGravity))
-            {
-                throw new TransformException(400, "Invalid cropGravity value");
-            }
-        }
-
-        StringJoiner args = new StringJoiner(" ");
-        if (alphaRemove != null && alphaRemove)
-        {
-            args.add("-alpha");
-            args.add(("remove"));
-        }
-        if (autoOrient != null && autoOrient)
-        {
-            args.add("-auto-orient");
-        }
-
-        if (cropGravity != null || cropWidth != null || cropHeight != null || cropPercentage != null ||
-            cropXOffset != null || cropYOffset != null)
-        {
-            if (cropGravity != null)
-            {
-                args.add("-gravity");
-                args.add(cropGravity);
-            }
-
-            StringBuilder crop = new StringBuilder("");
-            if (cropWidth != null && cropWidth >= 0)
-            {
-                crop.append(cropWidth);
-            }
-            if (cropHeight != null && cropHeight >= 0)
-            {
-                crop.append('x');
-                crop.append(cropHeight);
-            }
-            if (cropPercentage != null && cropPercentage)
-            {
-                crop.append('%');
-            }
-            if (cropXOffset != null)
-            {
-                if (cropXOffset >= 0)
-                {
-                    crop.append('+');
-                }
-                crop.append(cropXOffset);
-            }
-            if (cropYOffset != null)
-            {
-                if (cropYOffset >= 0)
-                {
-                    crop.append('+');
-                }
-                crop.append(cropYOffset);
-            }
-            if (crop.length() > 1)
-            {
-                args.add("-crop");
-                args.add(crop);
-            }
-
-            args.add("+repage");
-        }
-
-        if (resizeHeight != null || resizeWidth != null || resizePercentage !=null || maintainAspectRatio != null)
-        {
-            args.add(thumbnail != null && thumbnail ? "-thumbnail" : "-resize");
-            StringBuilder resize = new StringBuilder("");
-            if (resizeWidth != null && resizeWidth >= 0)
-            {
-                resize.append(resizeWidth);
-            }
-            if (resizeHeight != null && resizeHeight >= 0)
-            {
-                resize.append('x');
-                resize.append(resizeHeight);
-            }
-            if (resizePercentage != null && resizePercentage)
-            {
-                resize.append('%');
-            }
-            if (allowEnlargement == null || !allowEnlargement)
-            {
-                resize.append('>');
-            }
-            if (maintainAspectRatio != null && maintainAspectRatio)
-            {
-                resize.append('!');
-            }
-            if (resize.length() > 1)
-            {
-                args.add(resize);
-            }
-        }
-
-        return (commandOptions == null || "".equals(commandOptions.trim()) ? "" : commandOptions + ' ') +
-            args.toString();
-    }
-
-    private String calculatePageRange(Integer startPage, Integer endPage)
-    {
-        return
-            startPage == null
+        return startPage == null
                 ? endPage == null
                 ? ""
                 : "["+endPage+']'
@@ -345,5 +227,4 @@ public class ImageMagickController extends AbstractTransformerController
                 ? "["+startPage+']'
                 : "["+startPage+'-'+endPage+']';
     }
-
 }

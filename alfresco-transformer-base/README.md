@@ -94,7 +94,7 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
             String options = args.toString();
             LogEntry.setOptions(options);
 
-            Map<String, String> properties = new HashMap<String, String>(5);
+            Map<String, String> properties = new HashMap<>();
             properties.put("options", options);
             properties.put("source", sourceFile.getAbsolutePath());
             properties.put("target", targetFile.getAbsolutePath());

@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer;
+package org.alfresco.transformer.executors;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +43,7 @@ import org.apache.tika.parser.microsoft.ooxml.OOXMLParser;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
-///////// THIS FILE IS A COPY OF THE CODE IN alfresco-repository /////////////
+///////// THIS FILE WAS A COPY OF THE CODE IN alfresco-repository /////////////
 
 /**
  * <a href="http://tika.apache.org/Apache Tika">Apache Tika</a> assumes that
@@ -58,11 +58,11 @@ import org.xml.sax.SAXException;
  * @author Nick Burch
  */
 public class TikaOfficeDetectParser implements Parser {
-    private Parser ole2Parser = new OfficeParser();
-    private Parser ooxmlParser = new OOXMLParser();
+    private final Parser ole2Parser = new OfficeParser();
+    private final Parser ooxmlParser = new OOXMLParser();
 
     public Set<MediaType> getSupportedTypes(ParseContext parseContext) {
-        Set<MediaType> types = new HashSet<MediaType>();
+        Set<MediaType> types = new HashSet<>();
         types.addAll(ole2Parser.getSupportedTypes(parseContext));
         types.addAll(ooxmlParser.getSupportedTypes(parseContext));
         return types;

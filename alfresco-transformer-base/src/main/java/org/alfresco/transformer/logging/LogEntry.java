@@ -23,7 +23,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer;
+package org.alfresco.transformer.logging;
+
+import static java.lang.Math.max;
+import static org.springframework.http.HttpStatus.OK;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -32,7 +35,8 @@ import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.lang.Math.max;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Provides setter and getter methods to allow the current Thread to set various log properties and for these
@@ -40,8 +44,9 @@ import static java.lang.Math.max;
  * current entry to an internal log Collection of the latest entries. The {@link #getLog()} method is used to obtain
  * access to this collection.
  */
-public class LogEntry
+public final class LogEntry
 {
+    private static final Log logger = LogFactory.getLog(LogEntry.class);
     // TODO allow ProbeTestTransform to find out if there are any transforms running longer than the max time.
 
     private static final AtomicInteger count = new AtomicInteger(0);
@@ -49,20 +54,15 @@ public class LogEntry
     private static final int MAX_LOG_SIZE = 10;
     private static final SimpleDateFormat HH_MM_SS = new SimpleDateFormat("HH:mm:ss");
 
-    private static ThreadLocal<LogEntry> currentLogEntry = new ThreadLocal<LogEntry>()
-    {
-        @Override
-        protected LogEntry initialValue()
+    private static final ThreadLocal<LogEntry> currentLogEntry = ThreadLocal.withInitial(() -> {
+        LogEntry logEntry = new LogEntry();
+        if (log.size() >= MAX_LOG_SIZE)
         {
-            LogEntry logEntry = new LogEntry();
-            if (log.size() >= MAX_LOG_SIZE)
-            {
-                log.removeLast();
-            }
-            log.addFirst(logEntry);
-            return logEntry;
+            log.removeLast();
         }
-    };
+        log.addFirst(logEntry);
+        return logEntry;
+    });
 
     private final int id = count.incrementAndGet();
     private final long start = System.currentTimeMillis();
@@ -197,16 +197,16 @@ public class LogEntry
     public static void complete()
     {
         LogEntry logEntry = currentLogEntry.get();
-        if (logEntry.statusCode == 200)
+        if (logEntry.statusCode == OK.value())
         {
             logEntry.durationStreamOut = System.currentTimeMillis() - logEntry.start -
                     logEntry.durationStreamIn - max(logEntry.durationTransform, 0) - max(logEntry.durationDelay, 0);
         }
         currentLogEntry.remove();
 
-        if (AbstractTransformerController.logger != null && AbstractTransformerController.logger.isDebugEnabled())
+        if (logger.isDebugEnabled())
         {
-            AbstractTransformerController.logger.debug(logEntry.toString());
+            logger.debug(logEntry.toString());
         }
     }
 
@@ -279,6 +279,7 @@ public class LogEntry
 
     private String size(long size)
     {
+        // TODO fix numeric overflow in TB expression
         return size == -1 ? "" : size(size, "1 byte",
             new String[] { "bytes", " KB",      " MB",           " GB",                " TB" },
             new long[]   {          1024, 1024*1024, 1024*1024*1024, 1024*1024*1024*1024, Long.MAX_VALUE });

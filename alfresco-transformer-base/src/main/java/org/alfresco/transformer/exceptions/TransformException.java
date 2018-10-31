@@ -23,11 +23,11 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer;
+package org.alfresco.transformer.exceptions;
 
 public class TransformException extends RuntimeException
 {
-    private int statusCode;
+    private final int statusCode;
 
     public TransformException(int statusCode, String message)
     {

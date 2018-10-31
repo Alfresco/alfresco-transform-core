@@ -11,14 +11,24 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transformer.fs.FileManager.createAttachment;
+import static org.alfresco.transformer.fs.FileManager.createSourceFile;
+import static org.alfresco.transformer.fs.FileManager.createTargetFile;
+import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
+import static org.alfresco.transformer.logging.StandardMessages.ENTERPRISE_LICENCE;
+import static org.springframework.http.HttpStatus.OK;
+
 import java.io.File;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.StringJoiner;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.util.exec.RuntimeExec;
+import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
+import org.alfresco.transformer.logging.LogEntry;
+import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -52,69 +62,49 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 public class AlfrescoPdfRendererController extends AbstractTransformerController
 {
-    private static final String EXE = "/usr/bin/alfresco-pdf-renderer";
+    private static final Log logger = LogFactory.getLog(AlfrescoPdfRendererController.class);
+
+    @Autowired
+    private PdfRendererCommandExecutor commandExecutor;
 
     @Autowired
     public AlfrescoPdfRendererController()
     {
-        logger = LogFactory.getLog(AlfrescoPdfRendererController.class);
         logger.info("-----------------------------------------------------------------------------------------------------------------------------------------------------------");
-        logEnterpriseLicenseMessage();
+        Arrays.stream(ENTERPRISE_LICENCE.split("\\n")).forEach(logger::info);
         logger.info("alfresco-pdf-renderer uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt");
         logger.info("-----------------------------------------------------------------------------------------------------------------------------------------------------------");
-        setTransformCommand(createTransformCommand());
-        setCheckCommand(createCheckCommand());
     }
 
     @Override
-    protected String getTransformerName()
+    public String getTransformerName()
     {
         return "Alfresco PDF Renderer";
     }
 
-    private static RuntimeExec createTransformCommand()
+    @Override
+    public String version()
     {
-        RuntimeExec runtimeExec = new RuntimeExec();
-        Map<String, String[]> commandsAndArguments = new HashMap<>();
-        commandsAndArguments.put(".*", new String[]{EXE, "SPLIT:${options}", "${source}", "${target}"});
-        runtimeExec.setCommandsAndArguments(commandsAndArguments);
-
-        Map<String, String> defaultProperties = new HashMap<>();
-        defaultProperties.put("key", null);
-        runtimeExec.setDefaultProperties(defaultProperties);
-
-        runtimeExec.setErrorCodes("1");
-
-        return runtimeExec;
-    }
-
-    private static RuntimeExec createCheckCommand()
-    {
-        RuntimeExec runtimeExec = new RuntimeExec();
-        Map<String, String[]> commandsAndArguments = new HashMap<>();
-        commandsAndArguments.put(".*", new String[]{EXE, "--version"});
-        runtimeExec.setCommandsAndArguments(commandsAndArguments);
-
-        return runtimeExec;
+        return commandExecutor.version();
     }
 
     @Override
-    protected ProbeTestTransform getProbeTestTransform()
+    public ProbeTestTransform getProbeTestTransform()
     {
         // See the Javadoc on this method and Probes.md for the choice of these values.
-        return new ProbeTestTransform(this,"quick.pdf", "quick.png",
+        return new ProbeTestTransform(this, logger, "quick.pdf", "quick.png",
                 7455, 1024, 150, 10240, 60*20+1, 60*15-15)
         {
             @Override
             protected void executeTransformCommand(File sourceFile, File targetFile)
             {
-                AlfrescoPdfRendererController.this.executeTransformCommand("", sourceFile, targetFile, null);
+                commandExecutor.run("", sourceFile, targetFile, null);
             }
         };
     }
 
     @Override
-    protected void processTransform(File sourceFile, File targetFile,
+    public void processTransform(File sourceFile, File targetFile,
         Map<String, String> transformOptions, Long timeout)
     {
         String page = transformOptions.get("page");
@@ -137,7 +127,7 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
         String options = buildTransformOptions(pageOption, widthOption, heightOption,
             allowEnlargementOption, maintainAspectRatioOption);
 
-        executeTransformCommand(options, sourceFile, targetFile, timeout);
+        commandExecutor.run(options, sourceFile, targetFile, timeout);
     }
 
     @Deprecated
@@ -155,19 +145,26 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
                                               @RequestParam(value = "maintainAspectRatio", required = false) Boolean maintainAspectRatio)
     {
         String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(), targetExtension);
+        getProbeTestTransform().incrementTransformerCount();
         File sourceFile = createSourceFile(request, sourceMultipartFile);
         File targetFile = createTargetFile(request, targetFilename);
         // Both files are deleted by TransformInterceptor.afterCompletion
 
         String options = buildTransformOptions(page, width, height, allowEnlargement,
             maintainAspectRatio);
-        executeTransformCommand(options, sourceFile, targetFile, timeout);
-
-        return createAttachment(targetFilename, targetFile, testDelay);
+        commandExecutor.run(options, sourceFile, targetFile, timeout);
+        
+        final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
+        LogEntry.setTargetSize(targetFile.length());
+        long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
+        time += LogEntry.addDelay(testDelay);
+        getProbeTestTransform().recordTransformTime(time);
+        return body;
     }
 
 
-    public String buildTransformOptions(Integer page,Integer width,Integer height,Boolean allowEnlargement,Boolean maintainAspectRatio)
+    private static String buildTransformOptions(Integer page,Integer width,Integer height,Boolean 
+        allowEnlargement,Boolean maintainAspectRatio)
     {
         StringJoiner args = new StringJoiner(" ");
         if (width != null && width >= 0)
