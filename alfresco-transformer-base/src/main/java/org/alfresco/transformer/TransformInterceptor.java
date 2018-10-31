@@ -35,7 +35,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.transformer.logging.LogEntry;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-
+/**
+ * TransformInterceptor
+ * <br/>
+ * Handles ThreadLocal Log entries for each request.
+ */
 public class TransformInterceptor extends HandlerInterceptorAdapter
 {
     @Override

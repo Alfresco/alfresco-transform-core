@@ -26,6 +26,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+/**
+ * TransformController interface.
+ * <br/>
+ * It contains much of the common boilerplate code that each of
+ * its concrete implementations need as default methods.
+ */
 public interface TransformController
 {
     Log logger = LogFactory.getLog(TransformController.class);
