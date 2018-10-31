@@ -43,9 +43,9 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
 
     private static JodConverter createJodConverter()
     {
-        final String timeout = "120000";
+        final String timeout = "120000000";
 
-        JodConverterSharedInstance jodconverter = new JodConverterSharedInstance();
+        final JodConverterSharedInstance jodconverter = new JodConverterSharedInstance();
 
         jodconverter.setOfficeHome(OFFICE_HOME);         // jodconverter.officeHome
         jodconverter.setMaxTasksPerProcess("200");       // jodconverter.maxTasksPerProcess
