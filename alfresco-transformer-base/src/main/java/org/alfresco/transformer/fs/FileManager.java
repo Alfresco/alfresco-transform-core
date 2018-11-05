@@ -55,6 +55,14 @@ public class FileManager
         return TempFileProvider.createTempFile("target_", "_" + filename);
     }
 
+    public static void deleteFile(final File file) throws Exception
+    {
+        if (!file.delete())
+        {
+            throw new Exception("Failed to delete file");
+        }
+    }
+
     /**
      * Checks the filename is okay to uses in a temporary file name.
      *
