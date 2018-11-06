@@ -27,6 +27,7 @@ package org.alfresco.transformer;
 
 import static org.alfresco.transformer.fs.FileManager.buildFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
+import static org.alfresco.transformer.fs.FileManager.deleteFile;
 import static org.alfresco.transformer.fs.FileManager.getFilenameFromContentDisposition;
 import static org.alfresco.transformer.fs.FileManager.save;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -210,6 +211,15 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setErrorDetails("Failed at writing the transformed file. " + e.getMessage());
 
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+        }
+
+        try
+        {
+            deleteFile(targetFile);
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to delete target local temp file " + targetFile, e);
         }
 
         reply.setTargetReference(targetRef.getEntry().getFileRef());
