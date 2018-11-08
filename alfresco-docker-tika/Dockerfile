@@ -6,6 +6,7 @@
 FROM alfresco/alfresco-base-java:11-openjdk-centos-7-95536c8b599f
 
 ENV APACHE_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/Apache%202.0.txt
+ENV JAVA_OPTS="-Xms256M -Xmx2048M"
 
 COPY target/alfresco-docker-tika-${env.project_version}.jar /usr/bin
 
@@ -17,4 +18,4 @@ RUN ln /usr/bin/alfresco-docker-tika-${env.project_version}.jar /usr/bin/alfresc
 
 EXPOSE 8090
 
-ENTRYPOINT java -jar /usr/bin/alfresco-docker-tika.jar
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-docker-tika.jar

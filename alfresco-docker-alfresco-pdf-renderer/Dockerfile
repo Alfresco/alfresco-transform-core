@@ -7,7 +7,7 @@ FROM alfresco/alfresco-base-java:11-openjdk-centos-7-95536c8b599f
 
 ENV ALFRESCO_PDF_RENDERER_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-pdf-renderer/1.1/alfresco-pdf-renderer-1.1-linux.tgz
 ENV PDFIUM_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/pdfium.txt
-ENV JAVA_OPTS=""
+ENV JAVA_OPTS="-Xms256M -Xmx2048M"
 
 COPY target/alfresco-docker-alfresco-pdf-renderer-${env.project_version}.jar /usr/bin
 

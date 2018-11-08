@@ -8,7 +8,7 @@ FROM alfresco/alfresco-base-java:11-openjdk-centos-7-95536c8b599f
 ENV IMAGEMAGICK_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/7.0.7-27/imagemagick-distribution-7.0.7-27-linux.rpm
 ENV IMAGEMAGICK_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/7.0.7-27/imagemagick-distribution-7.0.7-27-libs-linux.rpm
 ENV IMAGEMAGICK_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/ImageMagick-license.txt
-ENV JAVA_OPTS=""
+ENV JAVA_OPTS="-Xms256M -Xmx2048M"
 
 COPY target/alfresco-docker-imagemagick-${env.project_version}.jar /usr/bin
 
