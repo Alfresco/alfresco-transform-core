@@ -50,7 +50,7 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
         jodconverter.setOfficeHome(OFFICE_HOME);         // jodconverter.officeHome
         jodconverter.setMaxTasksPerProcess("200");       // jodconverter.maxTasksPerProcess
         jodconverter.setTaskExecutionTimeout(timeout);   // jodconverter.maxTaskExecutionTimeout
-        jodconverter.setTaskQueueTimeout("30000");       // jodconverter.taskQueueTimeout
+        jodconverter.setTaskQueueTimeout(timeout);       // jodconverter.taskQueueTimeout
         jodconverter.setConnectTimeout(timeout);         // jodconverter.connectTimeout
         jodconverter.setPortNumbers("8100");             // jodconverter.portNumbers
         jodconverter.setTemplateProfileDir("");          // jodconverter.templateProfileDir
