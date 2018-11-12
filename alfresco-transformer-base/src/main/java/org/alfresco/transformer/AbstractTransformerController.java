@@ -221,6 +221,14 @@ public abstract class AbstractTransformerController implements TransformControll
         {
             logger.error("Failed to delete target local temp file " + targetFile, e);
         }
+        try
+        {
+            deleteFile(sourceFile);
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to delete source local temp file " + sourceFile, e);
+        }
 
         reply.setTargetReference(targetRef.getEntry().getFileRef());
         reply.setStatus(HttpStatus.CREATED.value());
