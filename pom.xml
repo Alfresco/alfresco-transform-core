@@ -23,7 +23,6 @@
         <dependency.alfresco-core.version>7.3</dependency.alfresco-core.version>
         <dependency.alfresco-data-model.version>8.8</dependency.alfresco-data-model.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
-        <dependency.ch-qos-logback.version>1.2.3</dependency.ch-qos-logback.version>
         <env.project_version>${project.version}</env.project_version>
         <alfresco-transform-data-model.version>0.0.7</alfresco-transform-data-model.version>
     </properties>
@@ -45,21 +44,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>${dependency.ch-qos-logback.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-access</artifactId>
-                <version>${dependency.ch-qos-logback.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${dependency.ch-qos-logback.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.alfresco</groupId>
                 <artifactId>alfresco-core</artifactId>

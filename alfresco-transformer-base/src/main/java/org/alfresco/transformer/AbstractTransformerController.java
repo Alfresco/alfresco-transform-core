@@ -44,8 +44,8 @@ import org.alfresco.transformer.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.model.FileRefResponse;
 import org.alfresco.util.TempFileProvider;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -91,7 +91,7 @@ import org.springframework.web.client.HttpClientErrorException;
  */
 public abstract class AbstractTransformerController implements TransformController
 {
-    private static final Log logger = LogFactory.getLog(AbstractTransformerController.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractTransformerController.class);
 
     @Autowired
     private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
@@ -114,6 +114,8 @@ public abstract class AbstractTransformerController implements TransformControll
     public ResponseEntity<TransformReply> transform(@RequestBody TransformRequest request,
         @RequestParam(value = "timeout", required = false) Long timeout)
     {
+        logger.info("Received {}, timeout {} ms", request, timeout);
+
         final TransformReply reply = new TransformReply();
         reply.setRequestId(request.getRequestId());
         reply.setSourceReference(request.getSourceReference());
@@ -127,8 +129,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setErrorDetails(errors.getAllErrors().stream().map(Object::toString)
                 .collect(Collectors.joining(", ")));
 
-            return new ResponseEntity<>(reply,
-                HttpStatus.valueOf(reply.getStatus()));
+            logger.error("Invalid request, sending {}", reply);
+            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
 
         // Load the source file
@@ -137,51 +139,56 @@ public abstract class AbstractTransformerController implements TransformControll
         {
             sourceFile = loadSourceFile(request.getSourceReference());
         }
-        catch (TransformException te)
+        catch (TransformException e)
         {
-            reply.setStatus(te.getStatusCode());
-            reply .setErrorDetails("Failed at reading the source file. " + te.getMessage());
+            reply.setStatus(e.getStatusCode());
+            reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
 
+            logger.error("Failed to load source file (TransformException), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
-        catch (HttpClientErrorException hcee)
+        catch (HttpClientErrorException e)
         {
-            reply.setStatus(hcee.getStatusCode().value());
-            reply .setErrorDetails("Failed at reading the source file. " + hcee.getMessage());
+            reply.setStatus(e.getStatusCode().value());
+            reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
 
+            logger.error("Failed to load source file (HttpClientErrorException), sending " +
+                         reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (Exception e)
         {
             reply.setStatus(INTERNAL_SERVER_ERROR.value());
-            reply.setErrorDetails("Failed at reading the source file. " + e.getMessage());
+            reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
 
+            logger.error("Failed to load source file (Exception), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
 
         // Create local temp target file in order to run the transformation
-        String targetFilename = createTargetFileName(sourceFile.getName(),
+        final String targetFilename = createTargetFileName(sourceFile.getName(),
             request.getTargetExtension());
-        File targetFile = buildFile(targetFilename);
+        final File targetFile = buildFile(targetFilename);
 
         // Run the transformation
         try
         {
-            processTransform(sourceFile, targetFile,
-                request.getTransformRequestOptions(), timeout);
+            processTransform(sourceFile, targetFile, request.getTransformRequestOptions(), timeout);
         }
-        catch (TransformException te)
+        catch (TransformException e)
         {
-            reply.setStatus(te.getStatusCode());
-            reply.setErrorDetails("Failed at processing transformation. " + te.getMessage());
+            reply.setStatus(e.getStatusCode());
+            reply.setErrorDetails(messageWithCause("Failed at processing transformation", e));
 
+            logger.error("Failed to perform transform (TransformException), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (Exception e)
         {
             reply.setStatus(INTERNAL_SERVER_ERROR.value());
-            reply.setErrorDetails("Failed at processing transformation. " + e.getMessage());
+            reply.setErrorDetails(messageWithCause("Failed at processing transformation", e));
 
+            logger.error("Failed to perform transform (Exception), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
 
@@ -191,25 +198,29 @@ public abstract class AbstractTransformerController implements TransformControll
         {
             targetRef = alfrescoSharedFileStoreClient.saveFile(targetFile);
         }
-        catch (TransformException te)
+        catch (TransformException e)
         {
-            reply.setStatus(te.getStatusCode());
-            reply.setErrorDetails("Failed at writing the transformed file. " + te.getMessage());
+            reply.setStatus(e.getStatusCode());
+            reply.setErrorDetails(messageWithCause("Failed at writing the transformed file", e));
 
+            logger.error("Failed to save target file (TransformException), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
-        catch (HttpClientErrorException hcee)
+        catch (HttpClientErrorException e)
         {
-            reply.setStatus(hcee.getStatusCode().value());
-            reply.setErrorDetails("Failed at writing the transformed file. " + hcee.getMessage());
+            reply.setStatus(e.getStatusCode().value());
+            reply.setErrorDetails(messageWithCause("Failed at writing the transformed file. ", e));
 
+            logger.error("Failed to save target file (HttpClientErrorException), sending {}" +
+                         reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (Exception e)
         {
             reply.setStatus(INTERNAL_SERVER_ERROR.value());
-            reply.setErrorDetails("Failed at writing the transformed file. " + e.getMessage());
+            reply.setErrorDetails(messageWithCause("Failed at writing the transformed file. ", e));
 
+            logger.error("Failed to save target file (Exception), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
 
@@ -219,7 +230,8 @@ public abstract class AbstractTransformerController implements TransformControll
         }
         catch (Exception e)
         {
-            logger.error("Failed to delete target local temp file " + targetFile, e);
+            logger.error("Failed to delete local temp target file '{}'. Error will be ignored ",
+                targetFile, e);
         }
         try
         {
@@ -233,6 +245,7 @@ public abstract class AbstractTransformerController implements TransformControll
         reply.setTargetReference(targetRef.getEntry().getFileRef());
         reply.setStatus(HttpStatus.CREATED.value());
 
+        logger.info("Sending successful {}, timeout {} ms", reply);
         return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
     }
 
@@ -249,7 +262,7 @@ public abstract class AbstractTransformerController implements TransformControll
      * @param sourceReference reference to the file in Alfresco Shared File Store
      * @return the file containing the source content for the transformation
      */
-    private File loadSourceFile(final String sourceReference)
+    private File loadSourceFile(final String sourceReference) throws Exception
     {
         ResponseEntity<Resource> responseEntity = alfrescoSharedFileStoreClient
             .retrieveFile(sourceReference);
@@ -262,17 +275,36 @@ public abstract class AbstractTransformerController implements TransformControll
         MediaType contentType = headers.getContentType();
         long size = headers.getContentLength();
 
-        Resource body = responseEntity.getBody();
+        final Resource body = responseEntity.getBody();
+        if (body == null)
+        {
+            throw new Exception("Failed to retrieve the file body from the request");
+        }
         File file = TempFileProvider.createTempFile("source_", "." + extension);
 
-        if (logger.isDebugEnabled())
-        {
-            logger.debug(
-                "Read source content " + sourceReference + " length="
-                    + size + " contentType=" + contentType);
-        }
+        logger.debug("Read source content {} length={} contentType={}",
+            sourceReference, size, contentType);
+        
         save(body, file);
         LogEntry.setSource(filename, size);
         return file;
+    }
+
+    private static String messageWithCause(final String prefix, Throwable e)
+    {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(prefix).append(" - ")
+          .append(e.getClass().getSimpleName()).append(": ")
+          .append(e.getMessage());
+
+        while (e.getCause() != null)
+        {
+            e = e.getCause();
+            sb.append(", cause ")
+              .append(e.getClass().getSimpleName()).append(": ")
+              .append(e.getMessage());
+        }
+
+        return sb.toString();
     }
 }

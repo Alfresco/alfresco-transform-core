@@ -37,11 +37,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.alfresco.error.AlfrescoRuntimeException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
 import org.artofsolving.jodconverter.office.OfficeException;
 import org.artofsolving.jodconverter.office.OfficeManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 ///////// THIS FILE WAS A COPY OF THE CODE IN alfresco-repository /////////////
 
@@ -53,7 +53,7 @@ import org.artofsolving.jodconverter.office.OfficeManager;
  */
 public class JodConverterSharedInstance implements JodConverter
 {
-    private static final Log logger = LogFactory.getLog(JodConverterSharedInstance.class);
+    private static final Logger logger = LoggerFactory.getLogger(JodConverterSharedInstance.class);
 
     private OfficeManager officeManager;
     private boolean isAvailable = false;
@@ -137,10 +137,7 @@ public class JodConverterSharedInstance implements JodConverter
                 {
                     // Logging this as an error as this property would prevent JodConverter & therefore
                     // OOo from starting as specified
-                    if (logger.isErrorEnabled())
-                    {
-                        logger.error("Unparseable value for property '" + sys + ".portNumbers': " + s);
-                    }
+                    logger.error("Unparseable value for property '{}.portNumbers': {}", sys, s);
                     // We'll not rethrow the exception, instead allowing the problem to be picked up
                     // when the OOoJodConverter subsystem is started.
                 }
@@ -268,10 +265,7 @@ public class JodConverterSharedInstance implements JodConverter
         }
         catch (NumberFormatException nfe)
         {
-            if (logger.isDebugEnabled())
-            {
-                logger.debug("Cannot parse numerical value from " + string);
-            }
+            logger.debug("Cannot parse numerical value from {}", string);
         }
         return null;
     }
@@ -300,20 +294,20 @@ public class JodConverterSharedInstance implements JodConverter
         if (logger.isDebugEnabled())
         {
             logger.debug("JodConverter settings (null settings will be replaced by jodconverter defaults):");
-            logger.debug("  officeHome = " + officeHome);
-            logger.debug("  enabled = " + isEnabled());
-            logger.debug("  portNumbers = " + getString(portNumbers));
-            logger.debug("    ooo.exe = " + deprecatedOooExe);
-            logger.debug("    ooo.enabled = " + deprecatedOooEnabled);
-            logger.debug("    ooo.port = " + getString(deprecatedOooPortNumbers));
-            logger.debug("    jodConverter.enabled = " + enabled);
-            logger.debug("    jodconverter.portNumbers = " + getString(this.portNumbers));
-            logger.debug("  jodconverter.officeHome = " + this.officeHome);
-            logger.debug("  jodconverter.maxTasksPerProcess = " + maxTasksPerProcess);
-            logger.debug("  jodconverter.taskExecutionTimeout = " + taskExecutionTimeout);
-            logger.debug("  jodconverter.taskQueueTimeout = " + taskQueueTimeout);
-            logger.debug("  jodconverter.connectTimeout = " + connectTimeout);
-            logger.debug("  jodconverter.url = " + url);
+            logger.debug("  officeHome = {}", officeHome);
+            logger.debug("  enabled = {}", isEnabled());
+            logger.debug("  portNumbers = {}", getString(portNumbers));
+            logger.debug("    ooo.exe = {}", deprecatedOooExe);
+            logger.debug("    ooo.enabled = {}", deprecatedOooEnabled);
+            logger.debug("    ooo.port = {}", getString(deprecatedOooPortNumbers));
+            logger.debug("    jodConverter.enabled = {}", enabled);
+            logger.debug("    jodconverter.portNumbers = {}", getString(this.portNumbers));
+            logger.debug("  jodconverter.officeHome = {}", this.officeHome);
+            logger.debug("  jodconverter.maxTasksPerProcess = {}", maxTasksPerProcess);
+            logger.debug("  jodconverter.taskExecutionTimeout = {}", taskExecutionTimeout);
+            logger.debug("  jodconverter.taskQueueTimeout = {}", taskQueueTimeout);
+            logger.debug("  jodconverter.connectTimeout = {}", connectTimeout);
+            logger.debug("  jodconverter.url = {}", url);
         }
 
         // Only start the JodConverter instance(s) if the subsystem is enabled.
@@ -362,33 +356,25 @@ public class JodConverterSharedInstance implements JodConverter
                 officeManager = defaultOfficeMgrConfig.buildOfficeManager();
                 officeManager.start();
             }
-            catch (IllegalStateException isx)
+            catch (IllegalStateException e)
             {
-                if (logger.isErrorEnabled())
-                {
-                    logger.error("Unable to pre-initialise JodConverter library. "
-                            + "The following error is shown for informational purposes only.", isx);
-                }
+                logger.error("Unable to pre-initialise JodConverter library. " +
+                             "The following error is shown for informational purposes only.", e);
                 return;
             }
-            catch (OfficeException ox)
+            catch (OfficeException e)
             {
-                if (logger.isErrorEnabled())
-                {
-                    logger.error("Unable to start JodConverter library. "
-                            + "The following error is shown for informational purposes only.", ox);
-                }
+                logger.error("Unable to start JodConverter library. " +
+                             "The following error is shown for informational purposes only.", e);
 
                 // We need to let it continue (comment-out return statement) even if an error occurs. See MNT-13706 and associated issues.
                 //return;
             }
-            catch (Exception x)
+            catch (Exception e)
             {
-                if (logger.isErrorEnabled())
-                {
-                    logger.error("Unexpected error in configuring or starting the JodConverter library."
-                            + "The following error is shown for informational purposes only.", x);
-                }
+                logger.error(
+                    "Unexpected error in configuring or starting the JodConverter library." +
+                    "The following error is shown for informational purposes only.", e);
                 return;
             }
         }

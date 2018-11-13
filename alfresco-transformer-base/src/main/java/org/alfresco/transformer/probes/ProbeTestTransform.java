@@ -46,7 +46,8 @@ import org.alfresco.transformer.AbstractTransformerController;
 import org.alfresco.transformer.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.util.TempFileProvider;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides the logic performing test transformations by the live and ready probes.
@@ -72,13 +73,13 @@ import org.apache.commons.logging.Log;
  */
 public abstract class ProbeTestTransform
 {
+    private final Logger logger = LoggerFactory.getLogger(ProbeTestTransform.class);
+
     private static final int AVERAGE_OVER_TRANSFORMS = 5;
     private final String sourceFilename;
     private final String targetFilename;
     private final long minExpectedLength;
     private final long maxExpectedLength;
-
-    private final Log logger;
 
     private int livenessPercent;
     private long probeCount;
@@ -117,13 +118,11 @@ public abstract class ProbeTestTransform
      * @param maxTransformSeconds default values normally supplied by helm. Not identical so we can be sure which value is used.
      * @param livenessTransformPeriodSeconds  default values normally supplied by helm. Not identical so we can be sure which value is used.
      */
-    public ProbeTestTransform(AbstractTransformerController controller, Log logger,
+    public ProbeTestTransform(AbstractTransformerController controller,
                               String sourceFilename, String targetFilename, long expectedLength, long plusOrMinus,
                               int livenessPercent, long maxTransforms, long maxTransformSeconds,
                               long livenessTransformPeriodSeconds)
     {
-        this.logger = logger;
-
         this.sourceFilename = sourceFilename;
         this.targetFilename = targetFilename;
         minExpectedLength = Math.max(0, expectedLength-plusOrMinus);

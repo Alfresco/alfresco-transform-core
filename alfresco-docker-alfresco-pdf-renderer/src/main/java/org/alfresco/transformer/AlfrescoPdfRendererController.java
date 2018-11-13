@@ -28,8 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -62,7 +62,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 public class AlfrescoPdfRendererController extends AbstractTransformerController
 {
-    private static final Log logger = LogFactory.getLog(AlfrescoPdfRendererController.class);
+    private static final Logger logger = LoggerFactory.getLogger(AlfrescoPdfRendererController.class);
 
     @Autowired
     private PdfRendererCommandExecutor commandExecutor;
@@ -92,8 +92,8 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
     public ProbeTestTransform getProbeTestTransform()
     {
         // See the Javadoc on this method and Probes.md for the choice of these values.
-        return new ProbeTestTransform(this, logger, "quick.pdf", "quick.png",
-                7455, 1024, 150, 10240, 60*20+1, 60*15-15)
+        return new ProbeTestTransform(this, "quick.pdf", "quick.png",
+            7455, 1024, 150, 10240, 60 * 20 + 1, 60 * 15 - 15)
         {
             @Override
             protected void executeTransformCommand(File sourceFile, File targetFile)
@@ -107,6 +107,9 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
     public void processTransform(File sourceFile, File targetFile,
         Map<String, String> transformOptions, Long timeout)
     {
+        logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
+                     " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
+
         String page = transformOptions.get("page");
         Integer pageOption = page == null ? null : Integer.parseInt(page);
 
@@ -153,7 +156,7 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
         String options = buildTransformOptions(page, width, height, allowEnlargement,
             maintainAspectRatio);
         commandExecutor.run(options, sourceFile, targetFile, timeout);
-        
+
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());
         long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
@@ -162,9 +165,8 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
         return body;
     }
 
-
-    private static String buildTransformOptions(Integer page,Integer width,Integer height,Boolean 
-        allowEnlargement,Boolean maintainAspectRatio)
+    private static String buildTransformOptions(Integer page, Integer width, Integer height, Boolean
+        allowEnlargement, Boolean maintainAspectRatio)
     {
         StringJoiner args = new StringJoiner(" ");
         if (width != null && width >= 0)

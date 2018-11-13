@@ -25,11 +25,11 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -64,7 +64,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 public class ImageMagickController extends AbstractTransformerController
 {
-    private static final Log logger = LogFactory.getLog(ImageMagickController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ImageMagickController.class);
 
     @Autowired
     private ImageMagickCommandExecutor commandExecutor;
@@ -94,7 +94,7 @@ public class ImageMagickController extends AbstractTransformerController
     public ProbeTestTransform getProbeTestTransform()
     {
         // See the Javadoc on this method and Probes.md for the choice of these values.
-        return new ProbeTestTransform(this, logger, "quick.jpg", "quick.png",
+        return new ProbeTestTransform(this, "quick.jpg", "quick.png",
                 35593, 1024, 150, 1024, 60*15+1,60*15)
         {
             @Override
@@ -189,6 +189,9 @@ public class ImageMagickController extends AbstractTransformerController
     public void processTransform(final File sourceFile, final File targetFile,
         final Map<String, String> transformOptions, final Long timeout)
     {
+        logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
+                     " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
+
         final String options = OptionsBuilder
             .builder()
             .withStartPage(transformOptions.get("startPage"))

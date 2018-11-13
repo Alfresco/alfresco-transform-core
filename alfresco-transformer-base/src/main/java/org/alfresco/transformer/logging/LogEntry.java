@@ -35,8 +35,8 @@ import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides setter and getter methods to allow the current Thread to set various log properties and for these
@@ -46,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class LogEntry
 {
-    private static final Log logger = LogFactory.getLog(LogEntry.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogEntry.class);
     // TODO allow ProbeTestTransform to find out if there are any transforms running longer than the max time.
 
     private static final AtomicInteger count = new AtomicInteger(0);
