@@ -27,8 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -62,7 +62,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 public class LibreOfficeController extends AbstractTransformerController
 {
-    private static final Log logger = LogFactory.getLog(LibreOfficeController.class);
+    private static final Logger logger = LoggerFactory.getLogger(LibreOfficeController.class);
 
     @Autowired
     private LibreOfficeJavaExecutor javaExecutor;
@@ -92,7 +92,7 @@ public class LibreOfficeController extends AbstractTransformerController
     public ProbeTestTransform getProbeTestTransform()
     {
         // See the Javadoc on this method and Probes.md for the choice of these values.
-        return new ProbeTestTransform(this, logger, "quick.doc", "quick.pdf",
+        return new ProbeTestTransform(this, "quick.doc", "quick.pdf",
                 11817, 1024, 150, 10240, 60*30+1, 60*15+20)
         {
             @Override
@@ -131,6 +131,9 @@ public class LibreOfficeController extends AbstractTransformerController
     public void processTransform(File sourceFile, File targetFile,
         Map<String, String> transformOptions, Long timeout)
     {
+        logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
+                     " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
+
         javaExecutor.call(sourceFile, targetFile);
     }
 }

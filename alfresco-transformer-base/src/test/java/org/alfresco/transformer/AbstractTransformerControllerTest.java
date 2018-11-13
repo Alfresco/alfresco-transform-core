@@ -237,7 +237,7 @@ public abstract class AbstractTransformerControllerTest
     {
         mockMvc.perform(mockMvcRequest("/transform", sourceFile))
                .andExpect(status().is(BAD_REQUEST.value()))
-               .andExpect(status().reason(containsString("Request parameter targetExtension is missing")));
+               .andExpect(status().reason(containsString("Request parameter 'targetExtension' is missing")));
     }
 
     @Test

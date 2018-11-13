@@ -95,7 +95,7 @@ public abstract class AbstractHttpRequestTest
     private void assertMissingParameter(String name)
     {
         assertTransformError(true,
-                getTransformerName() + " - Request parameter " + name + " is missing");
+                getTransformerName() + " - Request parameter '" + name + "' is missing");
     }
 
     private void assertTransformError(boolean addFile, String errorMessage)

@@ -1,5 +1,6 @@
 package org.alfresco.transformer;
 
+import static java.text.MessageFormat.format;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 import java.io.File;
@@ -15,8 +16,8 @@ import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transformer.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
@@ -34,7 +35,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 public interface TransformController
 {
-    Log logger = LogFactory.getLog(TransformController.class);
+    Logger logger = LoggerFactory.getLogger(TransformController.class);
 
     ResponseEntity<TransformReply> transform(TransformRequest transformRequest, Long timeout);
 
@@ -97,49 +98,44 @@ public interface TransformController
     default void handleParamsTypeMismatch(HttpServletResponse response,
         MissingServletRequestParameterException e) throws IOException
     {
-        String transformerName = getTransformerName();
-        String name = e.getParameterName();
-        String message = "Request parameter " + name + " is of the wrong type";
-        int statusCode = BAD_REQUEST.value();
+        final String message = format("Request parameter ''{0}'' is of the wrong type", e
+            .getParameterName());
+        final int statusCode = BAD_REQUEST.value();
 
-        logger.error(message);
+        logger.error(message, e);
 
         LogEntry.setStatusCodeAndMessage(statusCode, message);
 
-        response.sendError(statusCode, transformerName + " - " + message);
+        response.sendError(statusCode, getTransformerName() + " - " + message);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     default void handleMissingParams(HttpServletResponse response,
         MissingServletRequestParameterException e) throws IOException
     {
-        String transformerName = getTransformerName();
-        String name = e.getParameterName();
-        String message = "Request parameter " + name + " is missing";
-        int statusCode = BAD_REQUEST.value();
+        final String message = format("Request parameter ''{0}'' is missing", e.getParameterName());
+        final int statusCode = BAD_REQUEST.value();
 
-        logger.error(message);
+        logger.error(message, e);
 
         LogEntry.setStatusCodeAndMessage(statusCode, message);
 
-        response.sendError(statusCode, transformerName + " - " + message);
+        response.sendError(statusCode, getTransformerName() + " - " + message);
     }
 
     @ExceptionHandler(TransformException.class)
     default void transformExceptionWithMessage(HttpServletResponse response,
         TransformException e) throws IOException
     {
-        String transformerName = getTransformerName();
-        String message = e.getMessage();
-        int statusCode = e.getStatusCode();
+        final String message = e.getMessage();
+        final int statusCode = e.getStatusCode();
 
-        logger.error(message);
+        logger.error(message, e);
 
         long time = LogEntry.setStatusCodeAndMessage(statusCode, message);
         getProbeTestTransform().recordTransformTime(time);
 
-        // Forced to include the transformer name in the message (see commented out version of this method)
-        response.sendError(statusCode, transformerName + " - " + message);
+        response.sendError(statusCode, getTransformerName() + " - " + message);
     }
     //endregion
 }

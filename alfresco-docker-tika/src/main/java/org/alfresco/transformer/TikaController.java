@@ -37,8 +37,8 @@ import org.alfresco.transformer.exceptions.TransformException;
 import org.alfresco.transformer.executors.TikaJavaExecutor;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -72,7 +72,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 public class TikaController extends AbstractTransformerController
 {
-    private static final Log logger = LogFactory.getLog(TikaController.class);
+    private static final Logger logger = LoggerFactory.getLogger(TikaController.class);
 
     @Autowired
     private TikaJavaExecutor javaExecutor;
@@ -103,7 +103,7 @@ public class TikaController extends AbstractTransformerController
     {
         // See the Javadoc on this method and Probes.md for the choice of these values.
         // the livenessPercentage is a little large as Tika does tend to suffer from slow transforms that class with a gc.
-        return new ProbeTestTransform(this, logger, "quick.pdf", "quick.txt",
+        return new ProbeTestTransform(this, "quick.pdf", "quick.txt",
             60, 16, 400, 10240, 60 * 30 + 1, 60 * 15 + 20)
         {
             @Override
@@ -160,6 +160,8 @@ public class TikaController extends AbstractTransformerController
     public void processTransform(File sourceFile, File targetFile,
         Map<String, String> transformOptions, Long timeout)
     {
+        logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
+                     " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
 
         String transform = transformOptions.get("transform");
         Boolean includeContents = stringToBoolean("includeContents");

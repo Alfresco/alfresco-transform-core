@@ -9,8 +9,8 @@ import java.io.IOException;
 import javax.annotation.PostConstruct;
 
 import org.alfresco.transformer.exceptions.TransformException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -28,7 +28,7 @@ import com.sun.star.task.ErrorCodeIOException;
 @Component
 public class LibreOfficeJavaExecutor implements JavaExecutor
 {
-    private static final Log logger = LogFactory.getLog(LibreOfficeJavaExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(LibreOfficeJavaExecutor.class);
 
     private static final int JODCONVERTER_TRANSFORMATION_ERROR_CODE = 3088;
     private static final String OFFICE_HOME = "/opt/libreoffice5.4";
