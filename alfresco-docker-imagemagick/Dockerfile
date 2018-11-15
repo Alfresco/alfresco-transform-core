@@ -10,9 +10,28 @@ ENV IMAGEMAGICK_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repos
 ENV IMAGEMAGICK_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/ImageMagick-license.txt
 ENV JAVA_OPTS=""
 
-COPY target/alfresco-docker-imagemagick-${env.project_version}.jar /usr/bin
+# Image comparasion utils
+RUN yum -y install epel-release && \
+    curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -  && \
+    yum -y install nodejs && \
+    yum -y install gcc-c++ make && \
+    yum -y install libpng12 && \
+    node -v && \
+    npm -v && \
+    #https://www.npmjs.com/package/mz
+    npm i mz && \
+    #https://www.npmjs.com/package/resemblejs
+    npm i resemblejs && \
+    mkdir /cmp
 
-RUN ln /usr/bin/alfresco-docker-imagemagick-${env.project_version}.jar /usr/bin/alfresco-docker-imagemagick.jar && \
+# Image comparasion file
+COPY target/compare.js /cmp
+COPY target/red.png /cmp
+COPY target/blue.png /cmp
+
+COPY target/alfresco-docker-imagemagick-2.0.0-RC2-SNAPSHOT.jar /usr/bin
+
+RUN ln /usr/bin/alfresco-docker-imagemagick-2.0.0-RC2-SNAPSHOT.jar /usr/bin/alfresco-docker-imagemagick.jar && \
     yum install -y wget && \
     wget $IMAGEMAGICK_RPM_URL && \
     wget $IMAGEMAGICK_LIB_RPM_URL && \
