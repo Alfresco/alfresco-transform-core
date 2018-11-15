@@ -11,7 +11,7 @@
 
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-docker-transformers</artifactId>
-    <version>2.0.6-RC</version>
+    <version>2.0.7-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -39,7 +39,7 @@
         <connection>scm:git:https://git.alfresco.com/Repository/alfresco-docker-transformers.git</connection>
         <developerConnection>scm:git:https://git.alfresco.com/Repository/alfresco-docker-transformers.git</developerConnection>
         <url>https://git.alfresco.com/Repository/alfresco-docker-transformers</url>
-        <tag>alfresco-docker-transformers-2.0.6-RC</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencyManagement>
