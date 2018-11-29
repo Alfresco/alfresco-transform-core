@@ -65,6 +65,11 @@
                 <version>${dependency.pdfbox.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.pdfbox</groupId>
+                <artifactId>pdfbox-tools</artifactId>
+                <version>${dependency.pdfbox.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.alfresco</groupId>
                 <artifactId>alfresco-transform-data-model</artifactId>
                 <version>${alfresco-transform-data-model.version}</version>
