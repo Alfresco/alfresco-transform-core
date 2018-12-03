@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.0.5.RELEASE</version>
+        <version>2.1.1.RELEASE</version>
         <relativePath />
     </parent>
 
@@ -19,7 +19,7 @@
         <image.tag>latest</image.tag>
         <dependency.pdfbox.version>2.0.8</dependency.pdfbox.version>
         <dependency.fabric8.version>3.5.37</dependency.fabric8.version>
-        <dependency.spring-boot.version>2.0.5.RELEASE</dependency.spring-boot.version>
+        <dependency.spring-boot.version>2.1.1.RELEASE</dependency.spring-boot.version>
         <dependency.alfresco-core.version>7.3</dependency.alfresco-core.version>
         <dependency.alfresco-data-model.version>8.8</dependency.alfresco-data-model.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
@@ -74,16 +74,6 @@
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-rt-transports-http</artifactId>
                 <version>3.2.6</version>
-            </dependency>
-
-
-            <!-- ATS-71: override mockito & byte-buddy (for JDK 11) -->
-            <!-- Revisit (& remove if possible) when we upgrade Spring Boot Starter Parent (eg. 2.0.5 to 2.1) -->
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>2.22.0</version>
-                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
