@@ -165,7 +165,7 @@ public abstract class ProbeTestTransform
         {
             l = defaultValue;
         }
-        logger.info("Probe: "+name+"="+l);
+        logger.trace("Probe: {}={}", name, l);
         return l;
     }
 
@@ -193,7 +193,7 @@ public abstract class ProbeTestTransform
         LogEntry.setStatusCodeAndMessage(OK.value(), probeMessage + message);
         if (!isLiveProbe && !readySent.getAndSet(true))
         {
-            logger.info(probeMessage+message);
+            logger.trace("{}{}", probeMessage, message);
         }
         return message;
     }
@@ -307,12 +307,12 @@ public abstract class ProbeTestTransform
                 if ((!isLiveProbe && !readySent.getAndSet(true)) || transCount > AVERAGE_OVER_TRANSFORMS)
                 {
                     nextTransformTime = System.currentTimeMillis() + livenessTransformPeriod;
-                    logger.info(message + " - " + normalTime + "ms+" + livenessPercent + "%=" + maxTime + "ms");
+                    logger.trace("{} - {}ms+{}%={}ms", message,  normalTime, livenessPercent, maxTime);
                 }
             }
             else if (!isLiveProbe && !readySent.getAndSet(true))
             {
-                logger.info(message);
+                logger.trace(message);
             }
         }
     }
