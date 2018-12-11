@@ -15,7 +15,7 @@ import org.alfresco.transformer.exceptions.TransformException;
  *
  * @author Cezar Leahu
  */
-public final class OptionsBuilder
+final class OptionsBuilder
 {
     private static final List<String> GRAVITY_VALUES = asList("North", "NorthEast", "East",
         "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center");

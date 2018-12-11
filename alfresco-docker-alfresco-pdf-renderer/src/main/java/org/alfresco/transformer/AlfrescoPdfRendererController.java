@@ -21,7 +21,6 @@ import static org.springframework.http.HttpStatus.OK;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.StringJoiner;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -110,25 +109,14 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
         logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
                      " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
 
-        String page = transformOptions.get("page");
-        Integer pageOption = page == null ? null : Integer.parseInt(page);
-
-        String width = transformOptions.get("width");
-        Integer widthOption = width == null ? null : Integer.parseInt(width);
-
-        String height = transformOptions.get("height");
-        Integer heightOption = height == null ? null : Integer.parseInt(height);
-
-        String allowEnlargement = transformOptions.get("allowEnlargement");
-        Boolean allowEnlargementOption =
-            allowEnlargement == null ? null : Boolean.parseBoolean(allowEnlargement);
-
-        String maintainAspectRatio = transformOptions.get("maintainAspectRatio");
-        Boolean maintainAspectRatioOption =
-            maintainAspectRatio == null ? null : Boolean.parseBoolean(maintainAspectRatio);
-
-        String options = buildTransformOptions(pageOption, widthOption, heightOption,
-            allowEnlargementOption, maintainAspectRatioOption);
+        final String options = OptionsBuilder
+            .builder()
+            .withPage(transformOptions.get("page"))
+            .withWidth(transformOptions.get("width"))
+            .withHeight(transformOptions.get("height"))
+            .withAllowPdfEnlargement(transformOptions.get("allowPdfEnlargement"))
+            .withMaintainPdfAspectRatio(transformOptions.get("maintainPdfAspectRatio"))
+            .build();
 
         commandExecutor.run(options, sourceFile, targetFile, timeout);
     }
@@ -144,8 +132,8 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
                                               @RequestParam(value = "page", required = false) Integer page,
                                               @RequestParam(value = "width", required = false) Integer width,
                                               @RequestParam(value = "height", required = false) Integer height,
-                                              @RequestParam(value = "allowEnlargement", required = false) Boolean allowEnlargement,
-                                              @RequestParam(value = "maintainAspectRatio", required = false) Boolean maintainAspectRatio)
+                                              @RequestParam(value = "allowPdfEnlargement", required = false) Boolean allowPdfEnlargement,
+                                              @RequestParam(value = "maintainPdfAspectRatio", required = false) Boolean maintainPdfAspectRatio)
     {
         String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(), targetExtension);
         getProbeTestTransform().incrementTransformerCount();
@@ -153,8 +141,15 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
         File targetFile = createTargetFile(request, targetFilename);
         // Both files are deleted by TransformInterceptor.afterCompletion
 
-        String options = buildTransformOptions(page, width, height, allowEnlargement,
-            maintainAspectRatio);
+        final String options = OptionsBuilder
+            .builder()
+            .withPage(page)
+            .withWidth(width)
+            .withHeight(height)
+            .withAllowPdfEnlargement(allowPdfEnlargement)
+            .withMaintainPdfAspectRatio(maintainPdfAspectRatio)
+            .build();
+
         commandExecutor.run(options, sourceFile, targetFile, timeout);
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
@@ -163,32 +158,5 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
         time += LogEntry.addDelay(testDelay);
         getProbeTestTransform().recordTransformTime(time);
         return body;
-    }
-
-    private static String buildTransformOptions(Integer page, Integer width, Integer height, Boolean
-        allowEnlargement, Boolean maintainAspectRatio)
-    {
-        StringJoiner args = new StringJoiner(" ");
-        if (width != null && width >= 0)
-        {
-            args.add("--width=" + width);
-        }
-        if (height != null && height >= 0)
-        {
-            args.add("--height=" + height);
-        }
-        if (allowEnlargement != null && allowEnlargement)
-        {
-            args.add("--allow-enlargement");
-        }
-        if (maintainAspectRatio != null && maintainAspectRatio)
-        {
-            args.add("--maintain-aspect-ratio");
-        }
-        if (page != null && page >= 0)
-        {
-            args.add("--page=" + page);
-        }
-        return args.toString();
     }
 }

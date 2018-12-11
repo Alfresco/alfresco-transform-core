@@ -28,8 +28,8 @@ src/main/java/org/alfresco/transformer/Application.java
         <tr><td><div style="text-align:right">targetFilename *</div></td><td><input type="text" name="targetFilename" value="" /></td></tr>
         <tr><td><div style="text-align:right">width</div></td><td><input type="text" name="width" value="" /></td></tr>
         <tr><td><div style="text-align:right">height</div></td><td><input type="text" name="height" value="" /></td></tr>
-        <tr><td><div style="text-align:right">allowEnlargement</div></td><td><input type="checkbox" name="allowEnlargement" value="true" /></td></tr>
-        <tr><td><div style="text-align:right">maintainAspectRatio</div></td><td><input type="checkbox" name="maintainAspectRatio" value="true" /></td></tr>
+        <tr><td><div style="text-align:right">allowPdfEnlargement</div></td><td><input type="checkbox" name="allowPdfEnlargement" value="true" /></td></tr>
+        <tr><td><div style="text-align:right">maintainPdfAspectRatio</div></td><td><input type="checkbox" name="maintainPdfAspectRatio" value="true" /></td></tr>
         <tr><td><div style="text-align:right">page</div></td><td><input type="text" name="page" value="" /></td></tr>
         <tr><td><div style="text-align:right">timeout</div></td><td><input type="text" name="timeout" value="" /></td></tr>
         <tr><td></td><td><input type="submit" value="Transform" /></td></tr>
@@ -59,8 +59,8 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
                                               @RequestParam("targetFilename") String targetFilename,
                                               @RequestParam(value = "width", required = false) Integer width,
                                               @RequestParam(value = "height", required = false) Integer height,
-                                              @RequestParam(value = "allowEnlargement", required = false) Boolean allowEnlargement,
-                                              @RequestParam(value = "maintainAspectRatio", required = false) Boolean maintainAspectRatio,
+                                              @RequestParam(value = "allowPdfEnlargement", required = false) Boolean allowPdfEnlargement,
+                                              @RequestParam(value = "maintainPdfAspectRatio", required = false) Boolean maintainPdfAspectRatio,
                                               @RequestParam(value = "page", required = false) Integer page,
                                               @RequestParam(value = "timeout", required = false) Long timeout)
     {
@@ -79,11 +79,11 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
             {
                 args.add("--height=" + height);
             }
-            if (allowEnlargement != null && allowEnlargement)
+            if (allowPdfEnlargement != null && allowPdfEnlargement)
             {
                 args.add("--allow-enlargement");
             }
-            if (maintainAspectRatio != null && maintainAspectRatio)
+            if (maintainPdfAspectRatio != null && maintainPdfAspectRatio)
             {
                 args.add("--maintain-aspect-ratio");
             }
