@@ -67,6 +67,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.StringUtils;
 
@@ -96,8 +97,8 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     @Before
     public void before() throws IOException
     {
-        commandExecutor.setTransformCommand(mockTransformCommand);
-        commandExecutor.setCheckCommand(mockCheckCommand);
+        ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
+        ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
 
         mockTransformCommand("jpg", "png", "image/jpg", true);
     }

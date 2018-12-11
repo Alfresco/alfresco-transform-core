@@ -52,6 +52,7 @@ import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
 import org.alfresco.transformer.model.FileRefEntity;
 import org.alfresco.transformer.model.FileRefResponse;
 import org.alfresco.util.exec.RuntimeExec;
+import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,6 +68,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.StringUtils;
 
@@ -79,7 +81,7 @@ import org.springframework.util.StringUtils;
 public class AlfrescoPdfRendererControllerTest extends AbstractTransformerControllerTest
 {
     @Mock
-    private RuntimeExec.ExecutionResult mockExecutionResult;
+    private ExecutionResult mockExecutionResult;
 
     @Mock
     private RuntimeExec mockTransformCommand;
@@ -96,9 +98,9 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
     @Before
     public void before() throws IOException
     {
-        commandExecutor.setTransformCommand(mockTransformCommand);
-        commandExecutor.setCheckCommand(mockCheckCommand);
-        
+        ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
+        ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
+                           
         mockTransformCommand("pdf", "png", "application/pdf", true);
     }
 
@@ -190,8 +192,8 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
 
                 .param("width", "321")
                 .param("height", "654")
-                .param("allowEnlargement", "true")
-                .param("maintainAspectRatio", "true"))
+                .param("allowPdfEnlargement", "true")
+                .param("maintainPdfAspectRatio", "true"))
 
                 .andExpect(status().is(OK.value()))
                 .andExpect(content().bytes(expectedTargetFileBytes))
@@ -210,8 +212,8 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
 
                 .param("width", "321")
                 .param("height", "654")
-                .param("allowEnlargement", "false")
-                .param("maintainAspectRatio", "false"))
+                .param("allowPdfEnlargement", "false")
+                .param("maintainPdfAspectRatio", "false"))
 
                 .andExpect(status().is(OK.value()))
                 .andExpect(content().bytes(expectedTargetFileBytes))
