@@ -148,7 +148,7 @@ paths:
               name: transformOptions
               wrapped: true
             items:
-              $ref: '#/definitions/TransformOption'
+              $ref: '#/definitions/transformOption'
         404:
           description: Transformer not found
 definitions:
