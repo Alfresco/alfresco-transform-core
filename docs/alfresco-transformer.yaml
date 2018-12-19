@@ -131,7 +131,6 @@ paths:
       description: List transform options for specified transformer
       operationId: transformOptions
       produces:
-      - application/xml
       - application/json
       parameters:
       - name: transformer
