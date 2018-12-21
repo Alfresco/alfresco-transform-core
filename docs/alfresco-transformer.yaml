@@ -124,20 +124,14 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  '/transformer/{transformer}/options':
+  '/transformer/options':
     get:
       tags:
       - Transform
-      description: List transform options for specified transformer
+      description: List transform options
       operationId: transformOptions
       produces:
       - application/json
-      parameters:
-      - name: transformer
-        in: path
-        description: Name of the transformer
-        required: true
-        type: string
       responses:
         200:
           description: Successful response
@@ -148,8 +142,6 @@ paths:
               wrapped: true
             items:
               $ref: '#/definitions/transformOption'
-        404:
-          description: Transformer not found
 definitions:
   Error:
     type: object
