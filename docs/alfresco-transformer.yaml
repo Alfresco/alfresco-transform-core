@@ -124,6 +124,24 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  '/transformer/options':
+    get:
+      tags:
+      - Transform
+      description: List transform options
+      operationId: transformOptions
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            xml:
+              name: transformOptions
+              wrapped: true
+            items:
+              $ref: '#/definitions/transformOption'
 definitions:
   Error:
     type: object
@@ -193,4 +211,14 @@ definitions:
       schema:
         type: integer
       errorDetails:
+        type: string
+  transformOption:
+    type: object
+    required:
+    - required
+    - name
+    properties:
+      required:
+        type: boolean
+      name:
         type: string
