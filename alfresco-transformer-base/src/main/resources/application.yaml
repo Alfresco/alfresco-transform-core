@@ -9,7 +9,7 @@ spring:
     password: ${ACTIVEMQ_PASSWORD:admin}
     pool:
       enabled: true
-      max-connections: 10
+      max-connections: 20
 
 server:
   port: 8090
