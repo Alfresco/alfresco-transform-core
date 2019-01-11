@@ -3,6 +3,13 @@ spring:
     multipart:
       max-file-size: 8192MB
       max-request-size: 8192MB
+  activemq:
+    broker-url: ${ACTIVEMQ_URL:nio://localhost:61616}?jms.watchTopicAdvisories=false
+    user: ${ACTIVEMQ_USER:admin}
+    password: ${ACTIVEMQ_PASSWORD:admin}
+    pool:
+      enabled: true
+      max-connections: 10
 
 server:
   port: 8090
@@ -17,6 +24,9 @@ logging:
     org.alfresco.transformer.TikaController: debug
 
 fileStoreUrl: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
+
+jms-listener:
+  concurrency: ${JMS_LISTENER_CONCURRENCY:1-10}
 
 management:
   endpoints:

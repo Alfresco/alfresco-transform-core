@@ -24,7 +24,9 @@
         <dependency.alfresco-data-model.version>8.8</dependency.alfresco-data-model.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
-        <alfresco-transform-data-model.version>0.0.7</alfresco-transform-data-model.version>
+        <alfresco-transform-data-model.version>0.5.2</alfresco-transform-data-model.version>
+        <dependency.activemq.version>5.15.8</dependency.activemq.version>
+        <dependency.jackson.version>2.9.6</dependency.jackson.version>
     </properties>
 
     <modules>
@@ -79,6 +81,16 @@
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-rt-transports-http</artifactId>
                 <version>3.2.6</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${dependency.jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>activemq-client</artifactId>
+                <version>${dependency.activemq.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

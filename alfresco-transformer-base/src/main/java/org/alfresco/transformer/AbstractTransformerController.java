@@ -117,6 +117,7 @@ public abstract class AbstractTransformerController implements TransformControll
         logger.info("Received {}, timeout {} ms", request, timeout);
 
         final TransformReply reply = new TransformReply();
+        reply.setInternalContext(request.getInternalContext());
         reply.setRequestId(request.getRequestId());
         reply.setSourceReference(request.getSourceReference());
         reply.setSchema(request.getSchema());
