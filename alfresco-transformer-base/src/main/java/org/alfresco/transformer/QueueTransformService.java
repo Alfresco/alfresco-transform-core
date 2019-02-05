@@ -45,12 +45,25 @@ public class QueueTransformService
     @JmsListener(destination = "${queue.engineRequestQueue}", concurrency = "${jms-listener.concurrency}")
     public void receive(final Message msg)
     {
+        if (msg == null)
+        {
+            logger.error("Received null message!");
+            return;
+        }
+
         final String correlationId = tryRetrieveCorrelationId(msg);
         Destination replyToDestinationQueue;
 
         try
         {
             replyToDestinationQueue = msg.getJMSReplyTo();
+            if (replyToDestinationQueue == null)
+            {
+                logger.error(
+                    "Cannot find 'replyTo' destination queue for message with correlationID {}. Stopping. ",
+                    correlationId);
+                return;
+            }
         }
         catch (JMSException e)
         {
@@ -58,27 +71,46 @@ public class QueueTransformService
             return;
         }
 
-        logger.info("New T-Request from queue with correlationId: {0}");
+        logger.info("New T-Request from queue with correlationId: {0}", correlationId);
 
-        TransformReply reply = transformController.transform(convert(msg, correlationId, replyToDestinationQueue), null).getBody();
+
+        TransformRequest transformRequest = convert(msg, correlationId, replyToDestinationQueue);
+        if (transformRequest == null)
+        {
+            logger.error("Exception during T-Request deserialization! T-Reply with error has been "
+                + "sent to T-Router!");
+            return;
+        }
+
+        // Tries to convert and return the object. If it fails to convert, the method sends an error message and returns null.
+        TransformReply reply = transformController.transform(
+            transformRequest, null).getBody();
 
         transformReplySender.send(replyToDestinationQueue, reply);
     }
 
     /**
      * Tries to convert the JMS {@link Message} to a {@link TransformRequest}
-     * If any errors occur standard error {@link TransformReply} are sent back
+     * If any errors occur standard error {@link TransformReply} are sent back to T-Router
      *
      * @param msg Message to be deserialized
      * @param correlationId CorrelationId of the message
      * @param destination Needed in case deserialization fails. Passed here so we don't retrieve it again.
-     * @return The converted {@link TransformRequest} instance
+     * @return The converted {@link TransformRequest} instance or null in case of errors
      */
     private TransformRequest convert(final Message msg, final String correlationId, Destination destination)
     {
         try
         {
-            return (TransformRequest) transformMessageConverter.fromMessage(msg);
+            TransformRequest request = (TransformRequest) transformMessageConverter
+                .fromMessage(msg);
+            if (request == null)
+            {
+                logger.error("T-Request is null deserialization!");
+                replyWithInternalSvErr(destination,
+                    "JMS exception during T-Request deserialization: ", correlationId);
+            }
+            return request;
         }
         catch (MessageConversionException e)
         {
