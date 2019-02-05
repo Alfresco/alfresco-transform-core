@@ -132,7 +132,7 @@
             <url>https://artifacts.alfresco.com/nexus/content/repositories/enterprise-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
-
+    
     <build>
         <plugins>
             <plugin>
@@ -158,6 +158,24 @@
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>
                     <version>2.5.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>1.16</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>add-third-party</goal>
+                                <goal>download-licenses</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <useMissingFile>true</useMissingFile>
+                        <excludedScopes>provided,test</excludedScopes>
+                        <excludedGroups>org.alfresco</excludedGroups>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

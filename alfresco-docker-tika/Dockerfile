@@ -16,6 +16,10 @@ RUN ln /usr/bin/alfresco-docker-tika-${env.project_version}.jar /usr/bin/alfresc
     yum remove -y wget && \
     yum clean all
 
+ADD target/generated-resources/licenses              /licenses
+ADD target/generated-resources/licenses.xml          /licenses/
+ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
+
 EXPOSE 8090
 
 ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-docker-tika.jar
