@@ -1,10 +1,13 @@
 package org.alfresco.transformer.messaging;
 
 import javax.jms.ConnectionFactory;
+import javax.jms.Queue;
 
 import org.alfresco.transform.client.model.TransformRequestValidator;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.JmsListenerConfigurer;
@@ -60,6 +63,12 @@ public class MessagingConfig implements JmsListenerConfigurer
         final JmsTransactionManager transactionManager = new JmsTransactionManager();
         transactionManager.setConnectionFactory(connectionFactory);
         return transactionManager;
+    }
+
+    @Bean
+    public Queue engineRequestQueue(@Value("${queue.engineRequestQueue}") String engineRequestQueueValue)
+    {
+        return new ActiveMQQueue(engineRequestQueueValue);
     }
 }
 
