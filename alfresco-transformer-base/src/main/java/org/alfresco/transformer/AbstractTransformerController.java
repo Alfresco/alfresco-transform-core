@@ -30,6 +30,7 @@ import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.fs.FileManager.deleteFile;
 import static org.alfresco.transformer.fs.FileManager.getFilenameFromContentDisposition;
 import static org.alfresco.transformer.fs.FileManager.save;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -145,7 +146,7 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(e.getStatusCode());
             reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
 
-            logger.error("Failed to load source file (TransformException), sending " + reply, e);
+            logger.error("Failed to load source file (TransformException), sending " + reply);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (HttpClientErrorException e)
@@ -279,7 +280,10 @@ public abstract class AbstractTransformerController implements TransformControll
         final Resource body = responseEntity.getBody();
         if (body == null)
         {
-            throw new Exception("Failed to retrieve the file body from the request");
+            String message = "Source file with reference: " + sourceReference + " is null or empty. "
+                + "Transformation will fail and stop now as there is no content to be transformed.";
+            logger.warn(message);
+            throw new TransformException(BAD_REQUEST.value(), message);
         }
         File file = TempFileProvider.createTempFile("source_", "." + extension);
 
