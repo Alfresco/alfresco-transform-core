@@ -2,7 +2,7 @@ package org.alfresco.transformer.executors;
 
 import java.io.File;
 
-import org.alfresco.transformer.exceptions.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * Basic interface for executing transformations inside Java/JVM

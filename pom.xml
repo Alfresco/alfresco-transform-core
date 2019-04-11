@@ -24,7 +24,7 @@
         <dependency.alfresco-data-model.version>8.8</dependency.alfresco-data-model.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
-        <alfresco-transform-data-model.version>1.0.1</alfresco-transform-data-model.version>
+        <alfresco-transform-data-model.version>1.0.2</alfresco-transform-data-model.version>
         <dependency.activemq.version>5.15.9</dependency.activemq.version>
         <dependency.jackson.version>2.9.8</dependency.jackson.version>
     </properties>

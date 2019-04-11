@@ -9,7 +9,7 @@ package org.alfresco.transformer.clients;
 
 import java.io.File;
 
-import org.alfresco.transformer.exceptions.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.model.FileRefResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
