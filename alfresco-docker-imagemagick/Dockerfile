@@ -10,6 +10,12 @@ ENV IMAGEMAGICK_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repos
 ENV IMAGEMAGICK_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/ImageMagick-license.txt
 ENV JAVA_OPTS="-Xms256M -Xmx2048M"
 
+# Set default user information
+ARG GROUPNAME=Alfresco
+ARG GROUPID=1000
+ARG USERNAME=imagemagick
+ARG USERID=33002
+
 COPY target/alfresco-docker-imagemagick-${env.project_version}.jar /usr/bin
 
 RUN ln /usr/bin/alfresco-docker-imagemagick-${env.project_version}.jar /usr/bin/alfresco-docker-imagemagick.jar && \
@@ -26,6 +32,12 @@ ADD target/generated-resources/licenses              /licenses
 ADD target/generated-resources/licenses.xml          /licenses/
 ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
+RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
+    useradd -u ${USERID} -G ${GROUPNAME} ${USERNAME} && \
+    chgrp -R ${GROUPNAME} /usr/bin/alfresco-docker-imagemagick.jar
+
 EXPOSE 8090
+
+USER ${USERNAME}
 
 ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-docker-imagemagick.jar
