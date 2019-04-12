@@ -41,7 +41,7 @@ import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.client.model.TransformRequestValidator;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
-import org.alfresco.transformer.exceptions.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.model.FileRefResponse;
 import org.alfresco.util.TempFileProvider;

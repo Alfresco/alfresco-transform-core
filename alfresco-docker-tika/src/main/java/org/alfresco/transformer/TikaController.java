@@ -33,7 +33,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.transformer.exceptions.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.executors.TikaJavaExecutor;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;

@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import javax.annotation.PostConstruct;
 
-import org.alfresco.transformer.exceptions.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;

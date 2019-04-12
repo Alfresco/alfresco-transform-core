@@ -6,7 +6,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import java.io.File;
 import java.util.Map;
 
-import org.alfresco.transformer.exceptions.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.util.exec.RuntimeExec;
 import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
 

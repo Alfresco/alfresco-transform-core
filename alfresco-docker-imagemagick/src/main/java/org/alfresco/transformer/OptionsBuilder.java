@@ -8,7 +8,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import java.util.List;
 import java.util.StringJoiner;
 
-import org.alfresco.transformer.exceptions.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * ImageMagick options builder.
