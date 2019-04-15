@@ -9,6 +9,12 @@ ENV ALFRESCO_PDF_RENDERER_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/l
 ENV PDFIUM_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/pdfium.txt
 ENV JAVA_OPTS="-Xms256M -Xmx2048M"
 
+# Set default user information
+ARG GROUPNAME=Alfresco
+ARG GROUPID=1000
+ARG USERNAME=pdf
+ARG USERID=33001
+
 COPY target/alfresco-docker-alfresco-pdf-renderer-${env.project_version}.jar /usr/bin
 
 RUN ln /usr/bin/alfresco-docker-alfresco-pdf-renderer-${env.project_version}.jar /usr/bin/alfresco-docker-alfresco-pdf-renderer.jar && \
@@ -24,7 +30,13 @@ ADD target/generated-resources/licenses              /licenses
 ADD target/generated-resources/licenses.xml          /licenses/
 ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
+RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
+    useradd -u ${USERID} -G ${GROUPNAME} ${USERNAME} && \
+    chgrp -R ${GROUPNAME} /usr/bin/alfresco-docker-alfresco-pdf-renderer.jar
+
 EXPOSE 8090
+
+USER ${USERNAME}
 
 ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-docker-alfresco-pdf-renderer.jar
 
