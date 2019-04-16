@@ -7,7 +7,7 @@ FROM alfresco/alfresco-base-java:11.0.1-openjdk-centos-7-1fd3c4475374
 
 ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/5.4.6/libreoffice-dist-5.4.6-linux.gz
 ENV LIBREOFFICE_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/libreoffice.txt
-ENV JAVA_OPTS="-Xms256M -Xmx2048M"
+ENV JAVA_OPTS=""
 
 # Set default user information
 ARG GROUPNAME=Alfresco
