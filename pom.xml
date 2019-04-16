@@ -123,14 +123,14 @@
     </dependencyManagement>
 
     <distributionManagement>
-        <repository>
-            <id>alfresco-internal</id>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/internal-releases</url>
-        </repository>
         <snapshotRepository>
             <id>alfresco-internal-snapshots</id>
             <url>https://artifacts.alfresco.com/nexus/content/repositories/enterprise-snapshots</url>
         </snapshotRepository>
+        <repository>
+            <id>alfresco-internal</id>
+            <url>https://artifacts.alfresco.com/nexus/content/repositories/enterprise-releases</url>
+        </repository>
     </distributionManagement>
     
     <build>
