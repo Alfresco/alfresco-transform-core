@@ -4,12 +4,12 @@
     <parent>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-docker-transformers</artifactId>
-        <version>2.0.17-RC1</version>
+        <version>2.0.17-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>alfresco-transformer-base</artifactId>
-    <version>2.0.17-RC1</version>
+    <version>2.0.17-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
