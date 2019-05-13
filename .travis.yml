@@ -17,6 +17,7 @@ cache:
 branches:
   only:
     - master
+    - SP/1.3.N
     - release
     - company_release
     - /^ATS-.*$/
