@@ -1,0 +1,78 @@
+---
+language: java
+jdk: openjdk11
+dist: trusty
+
+git:
+  depth: false
+  quiet: true
+
+services:
+  - docker
+
+cache:
+  directories:
+    - ${HOME}/.m2/repository
+
+branches:
+  only:
+    - master
+    - release
+    - company_release
+    - /^ATS-.*$/
+
+stages:
+  - build
+  - tests
+  - release
+  - company_release
+
+jobs:
+  include:
+    - name: "Build"
+      stage: build
+      if: branch NOT IN (company_release)
+      before_install: bash _ci/init.sh
+      script: bash _ci/build.sh
+
+    - name: "WhiteSource"
+      stage: build
+      if: branch NOT IN (company_release)
+      before_install: bash _ci/init.sh
+      script: bash _ci/whitesource.sh
+
+    - name: "Release"
+      stage: release
+      if: branch = release
+      before_install: bash _ci/init.sh
+      script: bash _ci/release.sh
+      before_deploy: source _ci/prepare_staging_deploy.sh
+      deploy:
+        provider: s3
+        access_key_id: "${STAGING_AWS_ACCESS_KEY}"
+        secret_access_key: "${STAGING_AWS_SECRET_KEY}"
+        bucket: "alfresco-artefacts-staging"
+        skip_cleanup: true
+        region: "eu-west-1"
+        local_dir: "deploy_dir"
+        upload-dir: "enterprise/AlfrescoTransformServices/TransformEngines/${VERSION}"
+        on:
+          branch: release
+
+    - name: "Company Release"
+      stage: company_release
+      if: branch = company_release
+      before_install: bash _ci/init.sh
+      script: echo "NoOp"
+      before_deploy: source _ci/prepare_release_deploy.sh
+      deploy:
+        provider: s3
+        access_key_id: "${RELEASE_AWS_ACCESS_KEY}"
+        secret_access_key: "${RELEASE_AWS_SECRET_KEY}"
+        bucket: "eu.dl.alfresco.com"
+        skip_cleanup: true
+        region: "eu-west-1"
+        local_dir: "deploy_dir"
+        upload-dir: "release/enterprise/AlfrescoTransformServices/TransformEngines/${VERSION}"
+        on:
+          branch: company_release
