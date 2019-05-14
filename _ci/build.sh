@@ -11,7 +11,7 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 mvn -B -U \
     clean install \
     -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true \
-    "-P${PROFILE}
+    "-P${PROFILE}"
 
 docker ps -a -q | xargs -r -l docker stop ; docker ps -a -q | xargs -r -l docker rm
 
