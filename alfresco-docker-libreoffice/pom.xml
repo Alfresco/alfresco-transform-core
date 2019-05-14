@@ -125,7 +125,8 @@
                             <images>
                                 <!-- QuayIO image -->
                                 <image>
-                                    <name>${image.registry}/${image.name}:${image.tag}</name>
+                                    <name>${image.name}:${image.tag}</name>
+                                    <registry>${image.registry}</registry>
                                     <build>
                                         <dockerFileDir>${project.basedir}/</dockerFileDir>
                                     </build>
