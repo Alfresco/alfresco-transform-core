@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>org.alfresco</groupId>
-    <artifactId>alfresco-docker-transformers</artifactId>
+    <artifactId>alfresco-transform-core</artifactId>
     <version>2.0.19-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -38,9 +38,9 @@
     </modules>
 
     <scm>
-        <connection>scm:git:https://git.alfresco.com/Repository/alfresco-docker-transformers.git</connection>
-        <developerConnection>scm:git:https://git.alfresco.com/Repository/alfresco-docker-transformers.git</developerConnection>
-        <url>https://git.alfresco.com/Repository/alfresco-docker-transformers</url>
+        <connection>scm:git:https://github.com/Alfresco/alfresco-transform-core.git</connection>
+        <developerConnection>scm:git:https://github.com/Alfresco/alfresco-transform-core.git</developerConnection>
+        <url>https://github.com/Alfresco/alfresco-transform-core</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -132,7 +132,7 @@
             <url>https://artifacts.alfresco.com/nexus/content/repositories/public</url>
         </repository>
     </distributionManagement>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -180,5 +180,4 @@
             </plugins>
         </pluginManagement>
     </build>
-
 </project>

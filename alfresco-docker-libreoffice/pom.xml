@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>org.alfresco</groupId>
-        <artifactId>alfresco-docker-transformers</artifactId>
+        <artifactId>alfresco-transform-core</artifactId>
         <version>2.0.19-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
