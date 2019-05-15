@@ -19,13 +19,11 @@ ARG USERID=33002
 COPY target/alfresco-docker-imagemagick-${env.project_version}.jar /usr/bin
 
 RUN ln /usr/bin/alfresco-docker-imagemagick-${env.project_version}.jar /usr/bin/alfresco-docker-imagemagick.jar && \
-    yum install -y wget && \
-    wget $IMAGEMAGICK_RPM_URL && \
-    wget $IMAGEMAGICK_LIB_RPM_URL && \
-    wget $IMAGEMAGICK_LICENSE_FILE && \
-    yum localinstall -y imagemagick-distribution-*-linux.rpm && \
-    rm -f imagemagick-distribution-*-linux.rpm && \
-    yum remove -y wget && \
+    curl -s -S $IMAGEMAGICK_RPM_URL      -o imagemagick-distribution-linux.rpm && \
+    curl -s -S $IMAGEMAGICK_LIB_RPM_URL  -o imagemagick-distribution-libs-linux.rpm && \
+    curl -s -S $IMAGEMAGICK_LICENSE_FILE -o ImageMagick-license.txt && \
+    yum localinstall -y imagemagick-distribution-*linux.rpm && \
+    rm -f imagemagick-distribution-*.rpm && \
     yum clean all
 
 ADD target/generated-resources/licenses              /licenses
