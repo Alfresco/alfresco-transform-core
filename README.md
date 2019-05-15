@@ -23,3 +23,9 @@ The build plan in Bamboo is PLAT-TRANS
 
 Please use [this guide](https://github.com/Alfresco/alfresco-jodconverter/blob/master/CONTRIBUTING.md) to make a
 contribution to the project.
+
+## Release Process
+
+For a complete walk-through check out the
+[build-and-release.MD](https://github.com/Alfresco/alfresco-transform-core/tree/master/docs/build-and-release.md)
+under the `docs` folder.
