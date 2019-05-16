@@ -185,6 +185,9 @@
                                 <inceptionYear>2005</inceptionYear>
                                 <organizationName>Alfresco Software Limited</organizationName>
                                 <projectName>Alfresco Transform Core</projectName>
+                                <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+                                <canUpdateCopyright>true</canUpdateCopyright>
+                                <canUpdateDescription>true</canUpdateDescription>
                                 <excludes>
                                     <exclude>**/package-info.java</exclude>
                                     <exclude>**/*.properties</exclude>
@@ -195,7 +198,8 @@
                                     <exclude>**/*.html</exclude>
                                 </excludes>
                                 <failOnMissingHeader>true</failOnMissingHeader>
-                                <failOnNotUptodateHeader>true</failOnNotUptodateHeader>
+                                <licenseName>community</licenseName>
+                                <licenseResolver>file:${project.parent.basedir}/license</licenseResolver>
                             </configuration>
                         </execution>
                     </executions>
