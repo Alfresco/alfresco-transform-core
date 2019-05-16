@@ -164,17 +164,41 @@
                     <version>1.16</version>
                     <executions>
                         <execution>
+                            <id>third-party-licenses</id>
                             <goals>
                                 <goal>add-third-party</goal>
                                 <goal>download-licenses</goal>
                             </goals>
+                            <configuration>
+                                <useMissingFile>true</useMissingFile>
+                                <excludedScopes>provided,test</excludedScopes>
+                                <excludedGroups>org.alfresco</excludedGroups>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>project-license</id>
+                            <goals>
+                                <goal>check-file-header</goal>
+                            </goals>
+                            <phase>process-sources</phase>
+                            <configuration>
+                                <inceptionYear>2005</inceptionYear>
+                                <organizationName>Alfresco Software Limited</organizationName>
+                                <projectName>Alfresco Transform Core</projectName>
+                                <excludes>
+                                    <exclude>**/package-info.java</exclude>
+                                    <exclude>**/*.properties</exclude>
+                                    <exclude>**/*.css</exclude>
+                                    <exclude>**/*.xml</exclude>
+                                    <exclude>**/*.json</exclude>
+                                    <exclude>**/*.txt</exclude>
+                                    <exclude>**/*.html</exclude>
+                                </excludes>
+                                <failOnMissingHeader>true</failOnMissingHeader>
+                                <failOnNotUptodateHeader>true</failOnNotUptodateHeader>
+                            </configuration>
                         </execution>
                     </executions>
-                    <configuration>
-                        <useMissingFile>true</useMissingFile>
-                        <excludedScopes>provided,test</excludedScopes>
-                        <excludedGroups>org.alfresco</excludedGroups>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>io.fabric8</groupId>
