@@ -7,6 +7,7 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 
 mkdir -p ${HOME}/.m2 && cp -rf _ci/settings.xml ${HOME}/.m2/
 echo "${QUAY_PASSWORD}" | docker login -u="alfresco+bamboo" --password-stdin quay.io
+echo "${DOCKERHUB_PASSWORD}" | docker login -u=${DOCKERHUB_USERNAME} --password-stdin docker.io
 find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
 
 popd

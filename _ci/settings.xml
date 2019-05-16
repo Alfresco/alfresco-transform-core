@@ -70,5 +70,10 @@
             <username>alfresco+bamboo</username>
             <password>${env.QUAY_PASSWORD}</password>
         </server>
+        <server>
+            <id>docker.io</id>
+            <username>${env.DOCKERHUB_USERNAME}</username>
+            <password>${env.DOCKERHUB_PASSWORD}</password>
+        </server>
     </servers>
 </settings>
