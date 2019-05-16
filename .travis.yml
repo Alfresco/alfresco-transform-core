@@ -13,6 +13,7 @@ services:
 cache:
   directories:
     - ${HOME}/.m2/repository
+    - ${HOME}/artifacts
 
 branches:
   only:
