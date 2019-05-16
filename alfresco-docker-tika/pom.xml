@@ -139,7 +139,6 @@
                 <groupId>io.fabric8</groupId>
                 <artifactId>fabric8-maven-plugin</artifactId>
                 <configuration>
-                    <verbose>true</verbose>
                     <images>
                         <image>
                             <name>${image.name}:${image.tag}</name>
@@ -184,7 +183,6 @@
                         <groupId>io.fabric8</groupId>
                         <artifactId>fabric8-maven-plugin</artifactId>
                         <configuration>
-                            <verbose>true</verbose>
                             <images>
                                 <!-- QuayIO image -->
                                 <image>
@@ -226,7 +224,6 @@
                         <groupId>io.fabric8</groupId>
                         <artifactId>fabric8-maven-plugin</artifactId>
                         <configuration combine.self="override">
-                            <verbose>true</verbose>
                             <images>
                                 <!-- QuayIO image -->
                                 <image>

@@ -13,7 +13,7 @@ find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
 # build to fail (no output for more than 10 minutes)
 LIBREOFFICE_RPM_URL="https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/5.4.6/libreoffice-dist-5.4.6-linux.gz"
 if [ ! -f "${HOME}/.m2/repository/libreoffice-dist-5.4.6-linux.gz" ]; then
-    travis_wait curl -s -S ${LIBREOFFICE_RPM_URL} -o "${HOME}/.m2/repository/libreoffice-dist-5.4.6-linux.gz"
+    curl -s -S ${LIBREOFFICE_RPM_URL} -o "${HOME}/.m2/repository/libreoffice-dist-5.4.6-linux.gz"
 fi
 cp "${HOME}/.m2/repository/libreoffice-dist-5.4.6-linux.gz" alfresco-docker-libreoffice/
 
