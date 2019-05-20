@@ -20,12 +20,12 @@ COPY target/alfresco-docker-libreoffice-${env.project_version}.jar libreoffice-d
 RUN ln /alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin/alfresco-docker-libreoffice.jar && \
     yum install -y cairo cups-libs libSM && \
     test -f libreoffice-dist-5.4.6-linux.gz && \
-    mv libreoffice-dist-5.4.6-linux.gz libreoffice-dist-linux.gz || \
+    ln -s libreoffice-dist-5.4.6-linux.gz libreoffice-dist-linux.gz || \
     curl -s -S $LIBREOFFICE_RPM_URL      -o libreoffice-dist-linux.gz && \
     curl -s -S $LIBREOFFICE_LICENSE_FILE -o libreoffice.txt && \
     tar xzf libreoffice-dist-linux.gz && \
     yum localinstall -y LibreOffice*/RPMS/*.rpm && \
-    rm -rf libreoffice-dist-linux.gz LibreOffice_*_Linux_x86-64_rpm && \
+    rm -rf libreoffice-dist-*linux.gz LibreOffice_*_Linux_x86-64_rpm && \
     yum clean all
 
 ADD target/generated-resources/licenses              /licenses
