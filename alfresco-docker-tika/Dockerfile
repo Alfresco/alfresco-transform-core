@@ -17,9 +17,7 @@ ARG USERID=33004
 COPY target/alfresco-docker-tika-${env.project_version}.jar /usr/bin
 
 RUN ln /usr/bin/alfresco-docker-tika-${env.project_version}.jar /usr/bin/alfresco-docker-tika.jar && \
-    yum install -y wget && \
-    wget $APACHE_LICENSE_FILE && \
-    yum remove -y wget && \
+    curl -s -S $APACHE_LICENSE_FILE -o Apache\ 2.0.txt && \
     yum clean all
 
 ADD target/generated-resources/licenses              /licenses

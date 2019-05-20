@@ -15,17 +15,17 @@ ARG GROUPID=1000
 ARG USERNAME=libreoffice
 ARG USERID=33003
 
-COPY target/alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin
+COPY target/alfresco-docker-libreoffice-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
-RUN ln /usr/bin/alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin/alfresco-docker-libreoffice.jar && \
-    yum install -y wget && \
+RUN ln /alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin/alfresco-docker-libreoffice.jar && \
     yum install -y cairo cups-libs libSM && \
-    wget $LIBREOFFICE_RPM_URL && \
-    wget $LIBREOFFICE_LICENSE_FILE && \
-    tar xzf libreoffice-dist-*-linux.gz && \
+    test -f libreoffice-dist-5.4.6-linux.gz && \
+    mv libreoffice-dist-5.4.6-linux.gz libreoffice-dist-linux.gz || \
+    curl -s -S $LIBREOFFICE_RPM_URL      -o libreoffice-dist-linux.gz && \
+    curl -s -S $LIBREOFFICE_LICENSE_FILE -o libreoffice.txt && \
+    tar xzf libreoffice-dist-linux.gz && \
     yum localinstall -y LibreOffice*/RPMS/*.rpm && \
-    rm -rf libreoffice-dist-*-linux.gz LibreOffice_*_Linux_x86-64_rpm && \
-    yum remove -y wget && \
+    rm -rf libreoffice-dist-linux.gz LibreOffice_*_Linux_x86-64_rpm && \
     yum clean all
 
 ADD target/generated-resources/licenses              /licenses

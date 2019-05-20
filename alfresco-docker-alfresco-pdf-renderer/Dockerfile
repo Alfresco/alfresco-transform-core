@@ -18,12 +18,10 @@ ARG USERID=33001
 COPY target/alfresco-docker-alfresco-pdf-renderer-${env.project_version}.jar /usr/bin
 
 RUN ln /usr/bin/alfresco-docker-alfresco-pdf-renderer-${env.project_version}.jar /usr/bin/alfresco-docker-alfresco-pdf-renderer.jar && \
-    yum install -y wget && \
-    wget $ALFRESCO_PDF_RENDERER_LIB_RPM_URL && \
-    wget $PDFIUM_LICENSE_FILE && \
-    tar xf alfresco-pdf-renderer-*-linux.tgz -C /usr/bin && \
-	rm -f alfresco-pdf-renderer-*-linux.tgz && \
-    yum remove -y wget && \
+    curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz && \
+    curl -s -S $PDFIUM_LICENSE_FILE               -o pdfium.txt && \
+    tar xf alfresco-pdf-renderer-linux.tgz -C /usr/bin && \
+	rm -f alfresco-pdf-renderer-linux.tgz && \
     yum clean all
 
 ADD target/generated-resources/licenses              /licenses
