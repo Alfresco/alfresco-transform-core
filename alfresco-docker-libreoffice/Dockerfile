@@ -15,9 +15,9 @@ ARG GROUPID=1000
 ARG USERNAME=libreoffice
 ARG USERID=33003
 
-COPY target/alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin
+COPY target/alfresco-docker-libreoffice-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
-RUN ln /usr/bin/alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin/alfresco-docker-libreoffice.jar && \
+RUN ln /alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin/alfresco-docker-libreoffice.jar && \
     yum install -y cairo cups-libs libSM && \
     test -f libreoffice-dist-5.4.6-linux.gz && \
     mv libreoffice-dist-5.4.6-linux.gz libreoffice-dist-linux.gz || \
