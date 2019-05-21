@@ -11,7 +11,7 @@
 
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>2.0.19-SNAPSHOT</version>
+    <version>2.1.0-EA3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -124,11 +124,11 @@
     <distributionManagement>
         <snapshotRepository>
             <id>alfresco-public-snapshots</id>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/public-snapshots</url>
+            <url>https://artifacts.alfresco.com/nexus/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
             <id>alfresco-public</id>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/public</url>
+            <url>https://artifacts.alfresco.com/nexus/content/repositories/releases</url>
         </repository>
     </distributionManagement>
 
