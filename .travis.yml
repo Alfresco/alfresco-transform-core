@@ -2,6 +2,10 @@
 language: java
 jdk: openjdk11
 dist: xenial
+addons:
+  apt:
+    packages:
+      - docker-ce
 
 git:
   depth: false
