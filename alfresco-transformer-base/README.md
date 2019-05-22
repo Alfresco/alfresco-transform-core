@@ -221,9 +221,10 @@ and the Alfresco Maven repository:
 </repository>
 ~~~
 
-The build plan in Bamboo is PLAT-TB
+The build plan is available in [TravisCI](https://travis-ci.com/Alfresco/alfresco-transform-core).
 
 ## Contributing guide
 
-Please use [this guide](https://github.com/Alfresco/alfresco-jodconverter/blob/master/CONTRIBUTING.md) to make a
-contribution to the project.
+Please use [this guide](https://github.com/Alfresco/alfresco-repository/blob/master/CONTRIBUTING.md)
+to make a contribution to the project.
+
