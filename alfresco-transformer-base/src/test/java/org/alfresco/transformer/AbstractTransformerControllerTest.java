@@ -23,6 +23,7 @@ package org.alfresco.transformer;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -38,18 +39,21 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.util.*;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.client.model.config.*;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -286,5 +290,132 @@ public abstract class AbstractTransformerControllerTest
 
         // Assert the reply
         assertEquals(BAD_REQUEST.value(), transformReply.getStatus());
+    }
+
+    @Test
+    public void testGetTransformConfigInfo() throws Exception
+    {
+        TransformConfig expectedTransformConfig = objectMapper
+            .readValue(new ClassPathResource("engine_config.json").getFile(),
+                TransformConfig.class);
+
+        ReflectionTestUtils
+            .setField(AbstractTransformerController.class, "ENGINE_CONFIG", "engine_config.json");
+
+        String response = mockMvc.perform(MockMvcRequestBuilders.get("/info"))
+            .andExpect(status().is(OK.value())).andExpect(
+                header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andReturn().getResponse().getContentAsString();
+
+        TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
+
+        assertEquals(expectedTransformConfig, transformConfig);
+    }
+
+    @Test
+    public void testGetInfoFromConfigWithDuplicates() throws Exception
+    {
+        TransformConfig expectedResult = buildCompleteTransformConfig();
+
+        ReflectionTestUtils.setField(AbstractTransformerController.class, "ENGINE_CONFIG",
+            "engine_config_with_duplicates.json");
+
+        String response = mockMvc.perform(MockMvcRequestBuilders.get("/info"))
+            .andExpect(status().is(OK.value())).andExpect(
+                header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andReturn().getResponse().getContentAsString();
+
+        TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
+
+        assertNotNull(transformConfig);
+        assertEquals(expectedResult, transformConfig);
+        assertEquals(3, transformConfig.getTransformOptions().get("engineXOptions").size());
+    }
+
+    @Test
+    public void testGetInfoFromIncompleteConfig() throws Exception
+    {
+        TransformConfig expectedResult = new TransformConfig();
+
+        Transformer transformer = buildTransformer("application/pdf", "image/png");
+        List<Transformer> transformers = new ArrayList<>();
+        transformers.add(transformer);
+
+        expectedResult.setTransformers(transformers);
+
+        ReflectionTestUtils.setField(AbstractTransformerController.class, "ENGINE_CONFIG",
+            "engine_config_incomplete.json");
+
+        String response = mockMvc.perform(MockMvcRequestBuilders.get("/info"))
+            .andExpect(status().is(OK.value())).andExpect(
+                header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andReturn().getResponse().getContentAsString();
+
+        TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
+
+        assertNotNull(transformConfig);
+        assertEquals(expectedResult, transformConfig);
+    }
+
+    private TransformConfig buildCompleteTransformConfig()
+    {
+        TransformConfig expectedResult = new TransformConfig();
+
+        Set<TransformOption> transformOptions = new HashSet<>();
+        addTransformOptionValues(transformOptions, "page", "width");
+
+        Set<TransformOption> transformOptionGroup = new HashSet<>();
+        addTransformOptionValues(transformOptionGroup, "cropGravity");
+
+        TransformOptionGroup optionsGroup = new TransformOptionGroup(false, transformOptionGroup);
+        transformOptions.add(optionsGroup);
+
+        Map<String, Set<TransformOption>> transformOptionsMap = new HashMap<>();
+        transformOptionsMap.put("engineXOptions", transformOptions);
+
+        Transformer transformer = buildTransformer("application/pdf", "image/png", "engineXOptions",
+            "engineX");
+        List<Transformer> transformers = new ArrayList<>();
+        transformers.add(transformer);
+
+        expectedResult.setTransformOptions(transformOptionsMap);
+        expectedResult.setTransformers(transformers);
+
+        return expectedResult;
+    }
+
+    private Transformer buildTransformer(String sourceMediaType, String targetMediaType,
+        String transformOptions, String transformerName)
+    {
+        ArrayList<TransformStep> transformerPipeline = new ArrayList<>();
+        HashSet<String> transformOptionsSet = new HashSet<>();
+        transformOptionsSet.add(transformOptions);
+
+        Transformer transformer = buildTransformer(sourceMediaType, targetMediaType);
+        transformer.setTransformerName(transformerName);
+        transformer.setTransformerPipeline(transformerPipeline);
+        transformer.setTransformOptions(transformOptionsSet);
+
+        return transformer;
+    }
+
+    private Transformer buildTransformer(String sourceMediaType, String targetMediaType)
+    {
+        HashSet<SupportedSourceAndTarget> supportedSourceAndTargetList = new HashSet<>();
+        supportedSourceAndTargetList
+            .add(new SupportedSourceAndTarget(sourceMediaType, targetMediaType, -1));
+
+        Transformer transformer = new Transformer();
+        transformer.setSupportedSourceAndTargetList(supportedSourceAndTargetList);
+        return transformer;
+    }
+
+    private void addTransformOptionValues(Set<TransformOption> transformOptionSet,
+        String... optionValues)
+    {
+        for (String o : optionValues)
+        {
+            transformOptionSet.add(new TransformOptionValue(false, o));
+        }
     }
 }

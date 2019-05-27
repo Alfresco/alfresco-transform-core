@@ -96,7 +96,7 @@ import org.springframework.web.client.HttpClientErrorException;
 public abstract class AbstractTransformerController implements TransformController
 {
     private static final Logger logger = LoggerFactory.getLogger(AbstractTransformerController.class);
-    private static final String ENGINE_CONFIG = "engine_config.json";
+    private static String ENGINE_CONFIG = "engine_config.json";
 
     @Autowired
     private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;

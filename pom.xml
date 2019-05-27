@@ -26,7 +26,7 @@
         <!-- TODO: update after transform-model release -->
         <dependency.alfresco-transform-model.version>1.0.2.3-SNAPSHOT</dependency.alfresco-transform-model.version>
         <dependency.activemq.version>5.15.9</dependency.activemq.version>
-        <dependency.jackson.version>2.9.8</dependency.jackson.version>
+        <dependency.jackson.version>2.9.9</dependency.jackson.version>
     </properties>
 
     <modules>
