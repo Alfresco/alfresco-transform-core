@@ -22,9 +22,7 @@
 package org.alfresco.transformer;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
@@ -41,6 +39,9 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.util.*;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.client.model.config.*;
@@ -340,16 +341,34 @@ public abstract class AbstractTransformerControllerTest
     @Test
     public void testGetInfoFromIncompleteConfig() throws Exception
     {
-        TransformConfig expectedResult = new TransformConfig();
-
         Transformer transformer = buildTransformer("application/pdf", "image/png");
-        List<Transformer> transformers = new ArrayList<>();
-        transformers.add(transformer);
-
-        expectedResult.setTransformers(transformers);
+        TransformConfig expectedResult = new TransformConfig();
+        expectedResult.setTransformers(ImmutableList.of(transformer));
 
         ReflectionTestUtils.setField(AbstractTransformerController.class, "ENGINE_CONFIG",
             "engine_config_incomplete.json");
+
+        String response = mockMvc.perform(MockMvcRequestBuilders.get("/info"))
+            .andExpect(status().is(OK.value())).andExpect(
+                header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andReturn().getResponse().getContentAsString();
+
+        TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
+
+        assertNotNull(transformConfig);
+        assertEquals(expectedResult, transformConfig);
+    }
+
+    @Test
+    public void testGetInfoFromConfigWithNoTransformOptions() throws Exception
+    {
+        Transformer transformer = buildTransformer("application/pdf", "image/png");
+        transformer.setTransformerName("engineX");
+        TransformConfig expectedResult = new TransformConfig();
+        expectedResult.setTransformers(ImmutableList.of(transformer));
+
+        ReflectionTestUtils.setField(AbstractTransformerController.class, "ENGINE_CONFIG",
+            "engine_config_no_transform_options.json");
 
         String response = mockMvc.perform(MockMvcRequestBuilders.get("/info"))
             .andExpect(status().is(OK.value())).andExpect(
@@ -366,22 +385,17 @@ public abstract class AbstractTransformerControllerTest
     {
         TransformConfig expectedResult = new TransformConfig();
 
-        Set<TransformOption> transformOptions = new HashSet<>();
-        addTransformOptionValues(transformOptions, "page", "width");
-
-        Set<TransformOption> transformOptionGroup = new HashSet<>();
-        addTransformOptionValues(transformOptionGroup, "cropGravity");
-
-        TransformOptionGroup optionsGroup = new TransformOptionGroup(false, transformOptionGroup);
-        transformOptions.add(optionsGroup);
-
-        Map<String, Set<TransformOption>> transformOptionsMap = new HashMap<>();
-        transformOptionsMap.put("engineXOptions", transformOptions);
+        Set<TransformOption> transformOptionGroup = ImmutableSet.of(
+            new TransformOptionValue(false, "cropGravity"));
+        Set<TransformOption> transformOptions = ImmutableSet.of(
+            new TransformOptionValue(false, "page"),
+            new TransformOptionValue(false, "width"),
+            new TransformOptionGroup(false, transformOptionGroup));
+        Map<String, Set<TransformOption>> transformOptionsMap = ImmutableMap.of("engineXOptions", transformOptions);
 
         Transformer transformer = buildTransformer("application/pdf", "image/png", "engineXOptions",
             "engineX");
-        List<Transformer> transformers = new ArrayList<>();
-        transformers.add(transformer);
+        List<Transformer> transformers = ImmutableList.of(transformer);
 
         expectedResult.setTransformOptions(transformOptionsMap);
         expectedResult.setTransformers(transformers);
@@ -392,35 +406,20 @@ public abstract class AbstractTransformerControllerTest
     private Transformer buildTransformer(String sourceMediaType, String targetMediaType,
         String transformOptions, String transformerName)
     {
-        ArrayList<TransformStep> transformerPipeline = new ArrayList<>();
-        HashSet<String> transformOptionsSet = new HashSet<>();
-        transformOptionsSet.add(transformOptions);
-
         Transformer transformer = buildTransformer(sourceMediaType, targetMediaType);
         transformer.setTransformerName(transformerName);
-        transformer.setTransformerPipeline(transformerPipeline);
-        transformer.setTransformOptions(transformOptionsSet);
+        transformer.setTransformOptions(ImmutableSet.of(transformOptions));
 
         return transformer;
     }
 
     private Transformer buildTransformer(String sourceMediaType, String targetMediaType)
     {
-        HashSet<SupportedSourceAndTarget> supportedSourceAndTargetList = new HashSet<>();
-        supportedSourceAndTargetList
-            .add(new SupportedSourceAndTarget(sourceMediaType, targetMediaType, -1));
+        Set<SupportedSourceAndTarget> supportedSourceAndTargetList = ImmutableSet.of(
+            new SupportedSourceAndTarget(sourceMediaType, targetMediaType, -1));
 
         Transformer transformer = new Transformer();
         transformer.setSupportedSourceAndTargetList(supportedSourceAndTargetList);
         return transformer;
-    }
-
-    private void addTransformOptionValues(Set<TransformOption> transformOptionSet,
-        String... optionValues)
-    {
-        for (String o : optionValues)
-        {
-            transformOptionSet.add(new TransformOptionValue(false, o));
-        }
     }
 }
