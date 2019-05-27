@@ -330,6 +330,11 @@ public abstract class AbstractTransformerControllerTest
         assertNotNull(transformConfig);
         assertEquals(expectedResult, transformConfig);
         assertEquals(3, transformConfig.getTransformOptions().get("engineXOptions").size());
+        assertEquals(1,
+            transformConfig.getTransformers().get(0).getSupportedSourceAndTargetList().size());
+        assertEquals(1,
+            transformConfig.getTransformers().get(0).getTransformOptions().size());
+
     }
 
     @Test
