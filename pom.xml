@@ -34,6 +34,7 @@
         <module>alfresco-docker-alfresco-pdf-renderer</module>
         <module>alfresco-docker-imagemagick</module>
         <module>alfresco-docker-libreoffice</module>
+        <module>alfresco-docker-miscellaneous-transformers</module>
     </modules>
 
     <scm>
