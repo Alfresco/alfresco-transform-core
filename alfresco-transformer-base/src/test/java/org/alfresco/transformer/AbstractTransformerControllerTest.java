@@ -22,7 +22,9 @@
 package org.alfresco.transformer;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
@@ -41,9 +43,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.client.model.config.SupportedSourceAndTarget;
@@ -67,6 +66,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Super class for testing controllers without a server. Includes tests for the AbstractTransformerController itself.
@@ -346,7 +348,7 @@ public abstract class AbstractTransformerControllerTest
     }
 
     @Test
-    public void testGetInfoFromIncompleteConfig() throws Exception
+    public void testGetInfoFromConfigWithEmptyTransformOptions() throws Exception
     {
         Transformer transformer = buildTransformer("application/pdf", "image/png");
         TransformConfig expectedResult = new TransformConfig();
