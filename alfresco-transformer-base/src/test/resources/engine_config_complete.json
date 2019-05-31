@@ -1,0 +1,22 @@
+{
+  "transformOptions": {
+    "engineXOptions": [
+      {"value": {"name": "page"}},
+      {"value": {"name": "width"}},
+      {"group": {"transformOptions": [
+        {"value": {"name": "cropGravity"}}
+      ]}}
+    ]
+  },
+  "transformers": [
+    {
+      "transformerName": "engineX",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/pdf", "targetMediaType": "image/png" }
+      ],
+      "transformOptions": [
+        "engineXOptions"
+      ]
+    }
+  ]
+}

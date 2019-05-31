@@ -28,7 +28,6 @@ branches:
 
 stages:
   - build
-  - tests
   - release
   - company_release
 

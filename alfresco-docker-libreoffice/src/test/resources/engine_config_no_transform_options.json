@@ -1,0 +1,10 @@
+{
+  "transformers": [
+    {
+      "transformerName": "engineX",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/pdf", "targetMediaType": "image/png" }
+      ]
+    }
+  ]
+}
