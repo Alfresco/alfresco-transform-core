@@ -23,6 +23,7 @@ package org.alfresco.transformer;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -38,23 +39,36 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.client.model.config.SupportedSourceAndTarget;
+import org.alfresco.transform.client.model.config.TransformConfig;
+import org.alfresco.transform.client.model.config.TransformOption;
+import org.alfresco.transform.client.model.config.TransformOptionGroup;
+import org.alfresco.transform.client.model.config.TransformOptionValue;
+import org.alfresco.transform.client.model.config.Transformer;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Super class for testing controllers without a server. Includes tests for the AbstractTransformerController itself.
@@ -286,5 +300,135 @@ public abstract class AbstractTransformerControllerTest
 
         // Assert the reply
         assertEquals(BAD_REQUEST.value(), transformReply.getStatus());
+    }
+
+    @Test
+    public void testGetTransformConfigInfo() throws Exception
+    {
+        TransformConfig expectedTransformConfig = objectMapper
+            .readValue(new ClassPathResource("engine_config.json").getFile(),
+                TransformConfig.class);
+
+        ReflectionTestUtils
+            .setField(AbstractTransformerController.class, "ENGINE_CONFIG", "engine_config.json");
+
+        String response = mockMvc.perform(MockMvcRequestBuilders.get("/info"))
+            .andExpect(status().is(OK.value())).andExpect(
+                header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andReturn().getResponse().getContentAsString();
+
+        TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
+
+        assertEquals(expectedTransformConfig, transformConfig);
+    }
+
+    @Test
+    public void testGetInfoFromConfigWithDuplicates() throws Exception
+    {
+        TransformConfig expectedResult = buildCompleteTransformConfig();
+
+        ReflectionTestUtils.setField(AbstractTransformerController.class, "ENGINE_CONFIG",
+            "engine_config_with_duplicates.json");
+
+        String response = mockMvc.perform(MockMvcRequestBuilders.get("/info"))
+            .andExpect(status().is(OK.value())).andExpect(
+                header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andReturn().getResponse().getContentAsString();
+
+        TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
+
+        assertNotNull(transformConfig);
+        assertEquals(expectedResult, transformConfig);
+        assertEquals(3, transformConfig.getTransformOptions().get("engineXOptions").size());
+        assertEquals(1,
+            transformConfig.getTransformers().get(0).getSupportedSourceAndTargetList().size());
+        assertEquals(1,
+            transformConfig.getTransformers().get(0).getTransformOptions().size());
+
+    }
+
+    @Test
+    public void testGetInfoFromConfigWithEmptyTransformOptions() throws Exception
+    {
+        Transformer transformer = buildTransformer("application/pdf", "image/png");
+        TransformConfig expectedResult = new TransformConfig();
+        expectedResult.setTransformers(ImmutableList.of(transformer));
+
+        ReflectionTestUtils.setField(AbstractTransformerController.class, "ENGINE_CONFIG",
+            "engine_config_incomplete.json");
+
+        String response = mockMvc.perform(MockMvcRequestBuilders.get("/info"))
+            .andExpect(status().is(OK.value())).andExpect(
+                header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andReturn().getResponse().getContentAsString();
+
+        TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
+
+        assertNotNull(transformConfig);
+        assertEquals(expectedResult, transformConfig);
+    }
+
+    @Test
+    public void testGetInfoFromConfigWithNoTransformOptions() throws Exception
+    {
+        Transformer transformer = buildTransformer("application/pdf", "image/png");
+        transformer.setTransformerName("engineX");
+        TransformConfig expectedResult = new TransformConfig();
+        expectedResult.setTransformers(ImmutableList.of(transformer));
+
+        ReflectionTestUtils.setField(AbstractTransformerController.class, "ENGINE_CONFIG",
+            "engine_config_no_transform_options.json");
+
+        String response = mockMvc.perform(MockMvcRequestBuilders.get("/info"))
+            .andExpect(status().is(OK.value())).andExpect(
+                header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andReturn().getResponse().getContentAsString();
+
+        TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
+
+        assertNotNull(transformConfig);
+        assertEquals(expectedResult, transformConfig);
+    }
+
+    private TransformConfig buildCompleteTransformConfig()
+    {
+        TransformConfig expectedResult = new TransformConfig();
+
+        Set<TransformOption> transformOptionGroup = ImmutableSet.of(
+            new TransformOptionValue(false, "cropGravity"));
+        Set<TransformOption> transformOptions = ImmutableSet.of(
+            new TransformOptionValue(false, "page"),
+            new TransformOptionValue(false, "width"),
+            new TransformOptionGroup(false, transformOptionGroup));
+        Map<String, Set<TransformOption>> transformOptionsMap = ImmutableMap.of("engineXOptions", transformOptions);
+
+        Transformer transformer = buildTransformer("application/pdf", "image/png", "engineXOptions",
+            "engineX");
+        List<Transformer> transformers = ImmutableList.of(transformer);
+
+        expectedResult.setTransformOptions(transformOptionsMap);
+        expectedResult.setTransformers(transformers);
+
+        return expectedResult;
+    }
+
+    private Transformer buildTransformer(String sourceMediaType, String targetMediaType,
+        String transformOptions, String transformerName)
+    {
+        Transformer transformer = buildTransformer(sourceMediaType, targetMediaType);
+        transformer.setTransformerName(transformerName);
+        transformer.setTransformOptions(ImmutableSet.of(transformOptions));
+
+        return transformer;
+    }
+
+    private Transformer buildTransformer(String sourceMediaType, String targetMediaType)
+    {
+        Set<SupportedSourceAndTarget> supportedSourceAndTargetList = ImmutableSet.of(
+            new SupportedSourceAndTarget(sourceMediaType, targetMediaType, -1));
+
+        Transformer transformer = new Transformer();
+        transformer.setSupportedSourceAndTargetList(supportedSourceAndTargetList);
+        return transformer;
     }
 }
