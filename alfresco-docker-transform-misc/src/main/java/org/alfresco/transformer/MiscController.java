@@ -57,14 +57,14 @@ import static org.alfresco.transformer.logging.StandardMessages.ENTERPRISE_LICEN
 import static org.springframework.http.HttpStatus.OK;
 
 @Controller
-public class MiscellaneousTransformersController extends AbstractTransformerController
+public class MiscController extends AbstractTransformerController
 {
-    private static final Logger logger = LoggerFactory.getLogger(MiscellaneousTransformersController.class);
+    private static final Logger logger = LoggerFactory.getLogger(MiscController.class);
 
     @Autowired
     private SelectingTransformer transformer;
 
-    public MiscellaneousTransformersController()
+    public MiscController()
     {
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
         Arrays.stream(ENTERPRISE_LICENCE.split("\\n")).forEach(logger::info);

@@ -28,7 +28,7 @@ package org.alfresco.transformer;
 
 import static org.junit.Assert.*;
 
-public class MiscellaneousTransformersControllerTest
+public class MiscControllerTest
 {
     //TODO Write tests for all transformers.
 
