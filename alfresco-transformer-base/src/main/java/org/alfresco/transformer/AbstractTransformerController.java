@@ -34,6 +34,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -107,14 +108,14 @@ public abstract class AbstractTransformerController implements TransformControll
     @Autowired
     private ObjectMapper objectMapper;
 
-    @GetMapping(value = "/info")
+    @GetMapping(value = "/transform/config")
     public ResponseEntity<TransformConfig> info()
     {
         logger.info("GET Transform Config.");
         try
         {
             ClassPathResource classPathResource = new ClassPathResource(ENGINE_CONFIG);
-            File engineConfigFile = classPathResource.getFile();
+            InputStream engineConfigFile = classPathResource.getInputStream();
 
             TransformConfig transformConfig = objectMapper.setSerializationInclusion(NON_NULL)
                 .readValue(engineConfigFile, TransformConfig.class);
