@@ -21,7 +21,6 @@
  */
 package org.alfresco.transformer;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static org.alfresco.transformer.fs.FileManager.buildFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.fs.FileManager.deleteFile;
@@ -37,13 +36,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.client.model.TransformRequestValidator;
 import org.alfresco.transform.client.model.config.TransformConfig;
-import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.model.FileRefResponse;
 import org.alfresco.util.TempFileProvider;
@@ -59,12 +57,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * <p>Abstract Controller, provides structure and helper methods to sub-class transformer controllers.</p>
@@ -117,8 +117,8 @@ public abstract class AbstractTransformerController implements TransformControll
             ClassPathResource classPathResource = new ClassPathResource(ENGINE_CONFIG);
             InputStream engineConfigFile = classPathResource.getInputStream();
 
-            TransformConfig transformConfig = objectMapper.setSerializationInclusion(NON_NULL)
-                .readValue(engineConfigFile, TransformConfig.class);
+            TransformConfig transformConfig = objectMapper.readValue(engineConfigFile,
+                TransformConfig.class);
             return new ResponseEntity<>(transformConfig, OK);
         }
         catch (IOException e)

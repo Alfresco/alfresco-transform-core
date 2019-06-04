@@ -10,6 +10,8 @@ spring:
     pool:
       enabled: true
       max-connections: 20
+  jackson:
+    default-property-inclusion: non_empty
 
 server:
   port: 8090
