@@ -312,7 +312,7 @@ public abstract class AbstractTransformerControllerTest
         ReflectionTestUtils
             .setField(AbstractTransformerController.class, "ENGINE_CONFIG", "engine_config.json");
 
-        String response = mockMvc.perform(MockMvcRequestBuilders.get("/tconfig"))
+        String response = mockMvc.perform(MockMvcRequestBuilders.get("/transform/config"))
             .andExpect(status().is(OK.value())).andExpect(
                 header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andReturn().getResponse().getContentAsString();
@@ -330,7 +330,7 @@ public abstract class AbstractTransformerControllerTest
         ReflectionTestUtils.setField(AbstractTransformerController.class, "ENGINE_CONFIG",
             "engine_config_with_duplicates.json");
 
-        String response = mockMvc.perform(MockMvcRequestBuilders.get("/tconfig"))
+        String response = mockMvc.perform(MockMvcRequestBuilders.get("/transform/config"))
             .andExpect(status().is(OK.value())).andExpect(
                 header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andReturn().getResponse().getContentAsString();
@@ -357,7 +357,7 @@ public abstract class AbstractTransformerControllerTest
         ReflectionTestUtils.setField(AbstractTransformerController.class, "ENGINE_CONFIG",
             "engine_config_incomplete.json");
 
-        String response = mockMvc.perform(MockMvcRequestBuilders.get("/tconfig"))
+        String response = mockMvc.perform(MockMvcRequestBuilders.get("/transform/config"))
             .andExpect(status().is(OK.value())).andExpect(
                 header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andReturn().getResponse().getContentAsString();
@@ -379,7 +379,7 @@ public abstract class AbstractTransformerControllerTest
         ReflectionTestUtils.setField(AbstractTransformerController.class, "ENGINE_CONFIG",
             "engine_config_no_transform_options.json");
 
-        String response = mockMvc.perform(MockMvcRequestBuilders.get("/tconfig"))
+        String response = mockMvc.perform(MockMvcRequestBuilders.get("/transform/config"))
             .andExpect(status().is(OK.value())).andExpect(
                 header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andReturn().getResponse().getContentAsString();

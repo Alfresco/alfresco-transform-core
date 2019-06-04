@@ -108,7 +108,7 @@ public abstract class AbstractTransformerController implements TransformControll
     @Autowired
     private ObjectMapper objectMapper;
 
-    @GetMapping(value = "/tconfig")
+    @GetMapping(value = "/transform/config")
     public ResponseEntity<TransformConfig> info()
     {
         logger.info("GET Transform Config.");
