@@ -16,7 +16,7 @@
     </parent>
 
     <properties>
-        <image.name>alfresco/alfresco-miscellaneous-transformers</image.name>
+        <image.name>alfresco/alfresco-transform-misc</image.name>
         <image.registry>quay.io</image.registry>
     </properties>
 

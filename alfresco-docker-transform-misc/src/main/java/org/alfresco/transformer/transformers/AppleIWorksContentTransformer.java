@@ -32,7 +32,6 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -41,10 +40,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Content transformer which wraps the HTML Parser library for
@@ -75,21 +72,12 @@ import java.util.Set;
  * @author eknizat
  */
 @Component
-public class AppleIWorksContentTransformer extends AbstractJavaTransformer
+public class AppleIWorksContentTransformer implements JavaTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(AppleIWorksContentTransformer.class);
 
     public static final String SOURCE_MIMETYPE = "sourceMimetype";
-    public static final String SOURCE_EXTENSION = "sourceExtension";
     public static final String TARGET_MIMETYPE = "targetMimetype";
-    public static final String TARGET_EXTENSION = "targetExtension";
-
-    public static final List<String> REQUIRED_OPTIONS = Arrays.asList(
-            SOURCE_MIMETYPE,
-            SOURCE_EXTENSION,
-            TARGET_MIMETYPE,
-            TARGET_EXTENSION);
-
 
     // Apple's zip entry names for previews in iWorks have changed over time.
     private static final List<String> PDF_PATHS = Arrays.asList(
@@ -100,44 +88,20 @@ public class AppleIWorksContentTransformer extends AbstractJavaTransformer
     //                (225 x 173) preview-web.jpg
     //                 (53 x  41) preview-micro.jpg
 
-    private static final List<String> IWORKS_MIMETYPES = Arrays.asList(Mimetype.MIMETYPE_IWORK_KEYNOTE,
-            Mimetype.MIMETYPE_IWORK_NUMBERS,
-            Mimetype.MIMETYPE_IWORK_PAGES);
-    private static final List<String> TARGET_MIMETYPES = Arrays.asList(Mimetype.MIMETYPE_IMAGE_JPEG
-// Commented out rather than removed, in case we can get SHARE to fall back to using JPEG when a PDF is not available
-//                                                                    ,MimetypeMap.MIMETYPE_PDF
-    );
-
-    @Autowired
-    public AppleIWorksContentTransformer(SelectingTransformer miscTransformer)
-    {
-        super(miscTransformer);
-    }
-
     @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
-    {
-        // only support [iWorks] -> JPEG but only if these are embedded in the file.
-        // This is because iWorks 13+ files are zip files containing embedded jpeg previews.
-        return TARGET_MIMETYPES.contains(targetMimetype) && IWORKS_MIMETYPES.contains(sourceMimetype);
-    }
-
-    @Override
-    void transformInternal(File sourceFile, File targetFile, Map<String, String> parameters)
+    public void transform(File sourceFile, File targetFile, Map<String, String> parameters)
     {
         final String sourceMimetype = parameters.get(SOURCE_MIMETYPE);
-        final String sourceExtension = parameters.get(SOURCE_EXTENSION);
         final String targetMimetype = parameters.get(TARGET_MIMETYPE);
-        final String targetExtension = parameters.get(TARGET_EXTENSION);
 
-        if (logger.isDebugEnabled())
+        if(logger.isDebugEnabled())
         {
-            StringBuilder msg = new StringBuilder();
-            msg.append("Transforming from ").append(sourceMimetype)
-                    .append(" to ").append(targetMimetype);
-            logger.debug(msg.toString());
+            logger.debug("Performing IWorks to jpeg transform with sourceMimetype=" + sourceMimetype
+                    + " targetMimetype=" + targetMimetype);
         }
 
+        System.out.println("Performing IWorks to jpeg transform with sourceMimetype=" + sourceMimetype
+                + " targetMimetype=" + targetMimetype);
         // iWorks files are zip (or package) files.
         // If it's not a zip file, the resultant ZipException will be caught as an IOException below.
         try (ZipArchiveInputStream iWorksZip = new ZipArchiveInputStream(new FileInputStream(sourceFile)))
@@ -159,18 +123,12 @@ public class AppleIWorksContentTransformer extends AbstractJavaTransformer
 
             if (! found)
             {
-                throw new AlfrescoRuntimeException("The source " + sourceExtension + " file did not contain a " + targetExtension + " preview");
+                throw new AlfrescoRuntimeException("The source " + sourceMimetype + " file did not contain a " + targetMimetype + " preview");
             }
         }
         catch (IOException e)
         {
-            throw new AlfrescoRuntimeException("Unable to transform " + sourceExtension + " file. It should have been a zip format file.", e);
+            throw new AlfrescoRuntimeException("Unable to transform " + sourceMimetype + " file. It should have been a zip format file.", e);
         }
-    }
-
-    @Override
-    public Set<String> getRequiredOptionNames()
-    {
-        return new HashSet<>(REQUIRED_OPTIONS);
     }
 }

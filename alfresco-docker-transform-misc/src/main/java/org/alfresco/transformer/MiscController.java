@@ -101,8 +101,7 @@ public class MiscController extends AbstractTransformerController
                 Map<String, String> parameters = new HashMap<>();
                 parameters.put(SOURCE_ENCODING, "UTF-8");
                 parameters.put(TARGET_ENCODING, "UTF-8");
-                transformer.transform(sourceFile, targetFile, Mimetype.MIMETYPE_HTML,
-                        Mimetype.MIMETYPE_TEXT_PLAIN, parameters);
+                transformer.transform(sourceFile, targetFile, Mimetype.MIMETYPE_HTML, parameters);
             }
         };
     }
@@ -117,7 +116,7 @@ public class MiscController extends AbstractTransformerController
 
         String sourceMimetype = transformOptions.get("sourceMimetype");
         String targetMimetype = transformOptions.get("targetMimetype");
-        transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype,  transformOptions);
+        transformer.transform(sourceFile, targetFile, sourceMimetype,  transformOptions);
     }
 
     @PostMapping(value = "/transform", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -140,7 +139,7 @@ public class MiscController extends AbstractTransformerController
         File sourceFile = createSourceFile(request, sourceMultipartFile);
         File targetFile = createTargetFile(request, targetFilename);
 
-        transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, parameters);
+        transformer.transform(sourceFile, targetFile, sourceMimetype, parameters);
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());

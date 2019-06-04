@@ -26,11 +26,8 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.alfresco.transform.client.model.Mimetype;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,11 +38,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Converts any textual format to plain text.
@@ -61,63 +54,13 @@ import java.util.Set;
  * @author Derek Hulley
  * @author eknizat
  */
-@Component
-public class StringExtractingContentTransformer extends AbstractJavaTransformer
+public class StringExtractingContentTransformer implements JavaTransformer
 {
 
-    public static final String PREFIX_TEXT = "text/";
-
-    public static final String SOURCE_ENCODING = "sourceEncoding"; // Put all of these in the AbstractJavaTransformer?
+    public static final String SOURCE_ENCODING = "sourceEncoding";
     public static final String TARGET_ENCODING = "targetEncoding";
-    private static final List<String> REQUIRED_OPTIONS = Arrays.asList(SOURCE_ENCODING, TARGET_ENCODING); // Are these actually required?
 
     private static final Log logger = LogFactory.getLog(StringExtractingContentTransformer.class);
-
-    @Autowired
-    public StringExtractingContentTransformer(SelectingTransformer miscTransformer)
-    {
-        super(miscTransformer);
-    }
-
-    @Override
-    public Set<String> getRequiredOptionNames()
-    {
-        return new HashSet<>(REQUIRED_OPTIONS);
-    }
-
-    /**
-     * Gives a high reliability for all translations from <i>text/sometype</i> to
-     * <i>text/plain</i>.  As the text formats are already text, the characters
-     * are preserved and no actual conversion takes place.
-     * <p>
-     * Extraction of text from binary data is wholly unreliable.
-     */
-    @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
-    {
-        if (!targetMimetype.equals(Mimetype.MIMETYPE_TEXT_PLAIN))
-        {
-            // can only convert to plain text
-            return false;
-        }
-        else if (sourceMimetype.equals(Mimetype.MIMETYPE_TEXT_PLAIN) ||
-                sourceMimetype.equals(Mimetype.MIMETYPE_JAVASCRIPT))
-        {
-            // conversions from any plain text format are very reliable
-            return true;
-        }
-        else if (sourceMimetype.startsWith(PREFIX_TEXT) ||
-                sourceMimetype.equals(Mimetype.MIMETYPE_DITA))
-        {
-            // the source is text, but probably with some kind of markup
-            return true;
-        }
-        else
-        {
-            // extracting text from binary is not useful
-            return false;
-        }
-    }
 
     /**
      * Text to text conversions are done directly using the content reader and writer string
@@ -128,11 +71,27 @@ public class StringExtractingContentTransformer extends AbstractJavaTransformer
      * be unformatted but valid.
      */
     @Override
-    void transformInternal(File sourceFile, File targetFile, Map<String, String> parameters)
+    public void transform(File sourceFile, File targetFile, Map<String, String> parameters)
     {
 
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
         String targetEncoding = parameters.get(TARGET_ENCODING);
+
+        if (sourceEncoding == null || sourceEncoding.isEmpty())
+        {
+            throw new IllegalArgumentException("sourceEncoding must be specified.");
+        }
+
+        if (targetEncoding == null || targetEncoding.isEmpty())
+        {
+            throw new IllegalArgumentException("targetEncoding must be specified.");
+        }
+
+        if(logger.isDebugEnabled())
+        {
+            logger.debug("Performing String to String transform with sourceEncoding=" + sourceEncoding
+                    + " targetEncoding=" + targetEncoding);
+        }
 
         // get a char reader and writer
         Reader charReader = null;

@@ -26,9 +26,8 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.alfresco.transform.client.model.Mimetype;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -70,48 +69,37 @@ import java.util.Set;
  * @author Derek Hulley
  * @author eknizat
  */
-@Component
-public class HtmlParserContentTransformer extends AbstractJavaTransformer
+public class HtmlParserContentTransformer implements JavaTransformer
 {
+    private static final Logger logger = LoggerFactory.getLogger(HtmlParserContentTransformer.class);
+
     public static final String SOURCE_ENCODING = "sourceEncoding";
     public static final String TARGET_ENCODING = "targetEncoding";
-    public static final List<String> REQUIRED_OPTIONS = Arrays.asList(SOURCE_ENCODING, TARGET_ENCODING);
-
-    @Autowired
-    public HtmlParserContentTransformer(SelectingTransformer miscTransformer)
-    {
-        super(miscTransformer);
-    }
 
     @Override
-    public Set<String> getRequiredOptionNames()
+    public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws Exception
     {
-        return new HashSet<>(REQUIRED_OPTIONS);
-    }
-
-    @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
-    {
-        if (!Mimetype.MIMETYPE_HTML.equals(sourceMimetype) ||
-                !Mimetype.MIMETYPE_TEXT_PLAIN.equals(targetMimetype))
-        {
-            // only support HTML -> TEXT
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-
-    @Override
-    void transformInternal(File sourceFile, File targetFile, Map<String, String> parameters) throws Exception
-    {
-        // Fetch the encoding of the HTML, as set in the ContentReader
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
-
-        // Get the target encoding
         String targetEncoding = parameters.get(TARGET_ENCODING);
+
+        if (sourceEncoding == null || sourceEncoding.isEmpty())
+        {
+            throw new IllegalArgumentException("sourceEncoding must be specified.");
+        }
+
+        if (targetEncoding == null || targetEncoding.isEmpty())
+        {
+            throw new IllegalArgumentException("targetEncoding must be specified.");
+        }
+
+        if(logger.isDebugEnabled())
+        {
+            logger.debug("Performing HTML to text transform with sourceEncoding=" + sourceEncoding
+                    + " targetEncoding=" + targetEncoding);
+        }
+
+        System.out.println("Performing HTML to text transform with sourceEncoding=" + sourceEncoding
+                + " targetEncoding=" + targetEncoding);
 
         // Create the extractor
         EncodingAwareStringBean extractor = new EncodingAwareStringBean();
