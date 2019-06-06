@@ -131,6 +131,19 @@
 
     <profiles>
         <profile>
+            <id>docker-it-setup</id>
+            <!-- raises an ActiveMq container for the Integration Tests -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
             <id>local</id>
             <build>
                 <plugins>
