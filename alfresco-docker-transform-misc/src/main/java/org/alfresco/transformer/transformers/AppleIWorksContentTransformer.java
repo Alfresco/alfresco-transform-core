@@ -108,9 +108,6 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
             logger.debug("Performing IWorks to jpeg transform with sourceMimetype=" + sourceMimetype
                     + " targetMimetype=" + targetMimetype);
         }
-
-        System.out.println("Performing IWorks to jpeg transform with sourceMimetype=" + sourceMimetype
-                + " targetMimetype=" + targetMimetype);
         // iWorks files are zip (or package) files.
         // If it's not a zip file, the resultant ZipException will be caught as an IOException below.
         try (ZipArchiveInputStream iWorksZip = new ZipArchiveInputStream(new FileInputStream(sourceFile)))

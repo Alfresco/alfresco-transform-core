@@ -98,9 +98,6 @@ public class HtmlParserContentTransformer implements SelectableTransformer
                     + " targetEncoding=" + targetEncoding);
         }
 
-        System.out.println("Performing HTML to text transform with sourceEncoding=" + sourceEncoding
-                + " targetEncoding=" + targetEncoding);
-
         // Create the extractor
         EncodingAwareStringBean extractor = new EncodingAwareStringBean();
         extractor.setCollapse(false);

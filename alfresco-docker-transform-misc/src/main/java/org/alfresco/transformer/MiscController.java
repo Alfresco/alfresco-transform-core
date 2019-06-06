@@ -69,8 +69,9 @@ public class MiscController extends AbstractTransformerController
     {
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
         Arrays.stream(ENTERPRISE_LICENCE.split("\\n")).forEach(logger::info);
-        // TODO Set proper info message.
-        logger.info("Some message about the Miscellaneous Transformers");
+        logger.info("The transformers in this project use libraries from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\\\ 2.0.txt");
+        logger.info("Additional libraries used:");
+        logger.info("* htmlparser http://htmlparser.sourceforge.net/license.html");
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
     }
 
