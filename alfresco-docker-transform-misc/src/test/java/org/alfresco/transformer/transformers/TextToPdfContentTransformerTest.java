@@ -45,9 +45,6 @@ import static org.junit.Assert.*;
 @Import(TextToPdfContentTransformer.class)
 public class TextToPdfContentTransformerTest
 {
-    @MockBean
-    SelectingTransformer mockSelectingTransformer;
-
     @Autowired
     TextToPdfContentTransformer transformer;
 

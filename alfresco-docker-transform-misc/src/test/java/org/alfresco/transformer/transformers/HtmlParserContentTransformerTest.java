@@ -49,9 +49,6 @@ import static org.junit.Assert.*;
 @Import(HtmlParserContentTransformer.class)
 public class HtmlParserContentTransformerTest
 {
-    @MockBean
-    SelectingTransformer mockSelectingTransformer;
-
     @Autowired
     HtmlParserContentTransformer transformer;
 
