@@ -1,11 +1,25 @@
 {
-  "transformOptions":
-    {
-      "encodingOptions": [
-        {"value": {"name": "sourceEncoding"}},
-        {"value": {"name": "targetEncoding"}}
-      ]
-    },
+  "transformOptions": {
+    "textToPdfOptions": [
+      {
+        "value": {
+          "name": "pageLimit"
+        }
+      }
+    ],
+    "encodingOptions": [
+      {
+        "value": {
+          "name": "sourceEncoding"
+        }
+      },
+      {
+        "value": {
+          "name": "targetEncoding"
+        }
+      }
+    ]
+  },
   "transformers": [
     {
       "transformerName": "html",
@@ -78,6 +92,7 @@
         {"sourceMediaType": "text/xml",                                                                   "targetMediaType": "application/pdf"}
       ],
       "transformOptions": [
+        "textToPdfOptions"
       ]
     }
   ]
