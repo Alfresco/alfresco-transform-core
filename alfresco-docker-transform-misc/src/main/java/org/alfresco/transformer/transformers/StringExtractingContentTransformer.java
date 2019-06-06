@@ -40,6 +40,10 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.Map;
 
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_DITA;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_JAVASCRIPT;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
+
 /**
  * Converts any textual format to plain text.
  * <p>
@@ -54,13 +58,22 @@ import java.util.Map;
  * @author Derek Hulley
  * @author eknizat
  */
-public class StringExtractingContentTransformer implements JavaTransformer
+public class StringExtractingContentTransformer implements SelectableTransformer
 {
 
-    public static final String SOURCE_ENCODING = "sourceEncoding";
-    public static final String TARGET_ENCODING = "targetEncoding";
-
     private static final Log logger = LogFactory.getLog(StringExtractingContentTransformer.class);
+
+    private static final String DEFAULT_ENCODING = "UTF-8";
+
+    @Override
+    public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
+    {
+        boolean transformable =  (sourceMimetype.startsWith("text/")
+                || MIMETYPE_JAVASCRIPT.equals(sourceMimetype)
+                || MIMETYPE_DITA.equals(sourceMimetype))
+                && MIMETYPE_TEXT_PLAIN.equals(targetMimetype);
+        return transformable;
+    }
 
     /**
      * Text to text conversions are done directly using the content reader and writer string
@@ -75,21 +88,13 @@ public class StringExtractingContentTransformer implements JavaTransformer
     {
 
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
+        sourceEncoding = sourceEncoding == null ? DEFAULT_ENCODING : sourceEncoding;
         String targetEncoding = parameters.get(TARGET_ENCODING);
-
-        if (sourceEncoding == null || sourceEncoding.isEmpty())
-        {
-            throw new IllegalArgumentException("sourceEncoding must be specified.");
-        }
-
-        if (targetEncoding == null || targetEncoding.isEmpty())
-        {
-            throw new IllegalArgumentException("targetEncoding must be specified.");
-        }
+        targetEncoding = targetEncoding == null ? DEFAULT_ENCODING : targetEncoding;
 
         if(logger.isDebugEnabled())
         {
-            logger.debug("Performing String to String transform with sourceEncoding=" + sourceEncoding
+            logger.debug("Performing text to text transform with sourceEncoding=" + sourceEncoding
                     + " targetEncoding=" + targetEncoding);
         }
 

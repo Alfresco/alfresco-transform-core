@@ -26,6 +26,9 @@
  */
 package org.alfresco.transformer.transformers;
 
+import org.htmlparser.Parser;
+import org.htmlparser.beans.StringBean;
+import org.htmlparser.util.ParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +38,11 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.net.URLConnection;
 import java.util.Map;
-import java.util.Set;
+
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
 
 /**
  * Content transformer which wraps the HTML Parser library for
@@ -69,28 +72,25 @@ import java.util.Set;
  * @author Derek Hulley
  * @author eknizat
  */
-public class HtmlParserContentTransformer implements JavaTransformer
+public class HtmlParserContentTransformer implements SelectableTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(HtmlParserContentTransformer.class);
 
-    public static final String SOURCE_ENCODING = "sourceEncoding";
-    public static final String TARGET_ENCODING = "targetEncoding";
+    private static final String DEFAULT_ENCODING = "UTF-8";
+
+    @Override
+    public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
+    {
+        return MIMETYPE_HTML.equals(sourceMimetype) && MIMETYPE_TEXT_PLAIN.equals(targetMimetype);
+    }
 
     @Override
     public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws Exception
     {
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
+        sourceEncoding = sourceEncoding == null ? DEFAULT_ENCODING : sourceEncoding;
         String targetEncoding = parameters.get(TARGET_ENCODING);
-
-        if (sourceEncoding == null || sourceEncoding.isEmpty())
-        {
-            throw new IllegalArgumentException("sourceEncoding must be specified.");
-        }
-
-        if (targetEncoding == null || targetEncoding.isEmpty())
-        {
-            throw new IllegalArgumentException("targetEncoding must be specified.");
-        }
+        targetEncoding = targetEncoding == null ? DEFAULT_ENCODING : targetEncoding;
 
         if(logger.isDebugEnabled())
         {
@@ -116,6 +116,74 @@ public class HtmlParserContentTransformer implements JavaTransformer
         {
             writer.write(text);
             writer.flush();
+        }
+    }
+
+    /**
+     *
+     *  <p>
+     *  This code is based on a class of the same name, originally implemented in alfresco-repository.
+     *  </p>
+     *
+     * A version of {@link StringBean} which allows control of the
+     *  encoding in the underlying HTML Parser.
+     * Unfortunately, StringBean doesn't allow easy over-riding of
+     *  this, so we have to duplicate some code to control this.
+     * This allows us to correctly handle HTML files where the encoding
+     *  is specified against the content property (rather than in the
+     *  HTML Head Meta), see ALF-10466 for details.
+     *
+     *
+     */
+    private class EncodingAwareStringBean extends StringBean
+    {
+        private static final long serialVersionUID = -9033414360428669553L;
+
+        /**
+         * Sets the File to extract strings from, and the encoding
+         *  it's in (if known to Alfresco)
+         *
+         * @param file The File that text should be fetched from.
+         * @param encoding The encoding of the input
+         */
+        public void setURL(File file, String encoding)
+        {
+            String previousURL = getURL();
+            String newURL = file.getAbsolutePath();
+
+            if ( (previousURL == null) || (!newURL.equals(previousURL)) )
+            {
+                try
+                {
+                    URLConnection conn = getConnection();
+
+                    if (null == mParser)
+                    {
+                        mParser = new Parser(newURL);
+                    }
+                    else
+                    {
+                        mParser.setURL(newURL);
+                    }
+
+                    if (encoding != null)
+                    {
+                        mParser.setEncoding(encoding);
+                    }
+
+                    mPropertySupport.firePropertyChange(StringBean.PROP_URL_PROPERTY, previousURL, getURL());
+                    mPropertySupport.firePropertyChange(StringBean.PROP_CONNECTION_PROPERTY, conn, mParser.getConnection());
+                    setStrings();
+                }
+                catch (ParserException pe)
+                {
+                    updateStrings(pe.toString());
+                }
+            }
+        }
+
+        public String getEncoding(){
+            return mParser.getEncoding();
         }
     }
 }

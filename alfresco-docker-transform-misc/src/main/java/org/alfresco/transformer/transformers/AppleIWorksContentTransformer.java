@@ -43,6 +43,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_KEYNOTE;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_NUMBERS;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_PAGES;
+
 /**
  * Content transformer which wraps the HTML Parser library for
  * parsing HTML content.
@@ -71,13 +75,9 @@ import java.util.Map;
  * @author Derek Hulley
  * @author eknizat
  */
-@Component
-public class AppleIWorksContentTransformer implements JavaTransformer
+public class AppleIWorksContentTransformer implements SelectableTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(AppleIWorksContentTransformer.class);
-
-    public static final String SOURCE_MIMETYPE = "sourceMimetype";
-    public static final String TARGET_MIMETYPE = "targetMimetype";
 
     // Apple's zip entry names for previews in iWorks have changed over time.
     private static final List<String> PDF_PATHS = Arrays.asList(
@@ -87,6 +87,15 @@ public class AppleIWorksContentTransformer implements JavaTransformer
             "preview.jpg");            // iWorks 2013/14 (720 x 552) We use the best quality image. Others are:
     //                (225 x 173) preview-web.jpg
     //                 (53 x  41) preview-micro.jpg
+
+    @Override
+    public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
+    {
+        boolean transformable =  MIMETYPE_IWORK_KEYNOTE.equals(sourceMimetype)
+                || MIMETYPE_IWORK_NUMBERS.equals(sourceMimetype)
+                || MIMETYPE_IWORK_PAGES.equals(sourceMimetype);
+        return transformable;
+    }
 
     @Override
     public void transform(File sourceFile, File targetFile, Map<String, String> parameters)

@@ -1,6 +1,38 @@
+/*
+ * #%L
+ * Alfresco Transform Core
+ * %%
+ * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software.
+ * -
+ * If the software was purchased under a paid Alfresco license, the terms of
+ * the paid license agreement will prevail.  Otherwise, the software is
+ * provided under the following open source license terms:
+ * -
+ * Alfresco is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * -
+ * Alfresco is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * -
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
+ */
 package org.alfresco.transformer.transformers;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,11 +45,15 @@ import static org.alfresco.transformer.transformers.StringExtractingContentTrans
 import static org.alfresco.transformer.transformers.StringExtractingContentTransformer.TARGET_ENCODING;
 import static org.junit.Assert.*;
 
+@RunWith(SpringRunner.class)
+@Import(HtmlParserContentTransformer.class)
 public class HtmlParserContentTransformerTest
 {
+    @MockBean
+    SelectingTransformer mockSelectingTransformer;
 
-    HtmlParserContentTransformer transformer = new HtmlParserContentTransformer();
-
+    @Autowired
+    HtmlParserContentTransformer transformer;
 
     /**
      * Checks that we correctly handle text in different encodings,
@@ -48,10 +84,10 @@ public class HtmlParserContentTransformerTest
         try
         {
             // Content set to ISO 8859-1
-            tmpS = File.createTempFile("test", ".html");
+            tmpS = File.createTempFile("AlfrescoTestSource_", ".html");
             writeToFile(tmpS, partA+partB+partC, "ISO-8859-1");
 
-            tmpD = File.createTempFile("test", ".txt");
+            tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
 
             Map<String, String> parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
@@ -63,10 +99,10 @@ public class HtmlParserContentTransformerTest
             tmpD.delete();
 
             // Content set to UTF-8
-            tmpS = File.createTempFile("test", ".html");
+            tmpS = File.createTempFile("AlfrescoTestSource_", ".html");
             writeToFile(tmpS, partA+partB+partC, "UTF-8");
 
-            tmpD = File.createTempFile("test", ".txt");
+            tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
             parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "UTF-8");
             parameters.put(TARGET_ENCODING, "UTF-8");
@@ -77,10 +113,10 @@ public class HtmlParserContentTransformerTest
 
 
             // Content set to UTF-16
-            tmpS = File.createTempFile("test", ".html");
+            tmpS = File.createTempFile("AlfrescoTestSource_", ".html");
             writeToFile(tmpS, partA+partB+partC, "UTF-16");
 
-            tmpD = File.createTempFile("test", ".txt");
+            tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
             parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "UTF-16");
             parameters.put(TARGET_ENCODING, "UTF-8");
@@ -98,14 +134,14 @@ public class HtmlParserContentTransformerTest
             // takes effect.
 
             // Content set to ISO 8859-1, meta set to UTF-8
-            tmpS = File.createTempFile("test", ".html");
+            tmpS = File.createTempFile("AlfrescoTestSource_", ".html");
             String str = partA+
                     "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">" +
                     partB+partC;
 
             writeToFile(tmpS, str, "UTF-8");
 
-            tmpD = File.createTempFile("test", ".txt");
+            tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
 
             parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");

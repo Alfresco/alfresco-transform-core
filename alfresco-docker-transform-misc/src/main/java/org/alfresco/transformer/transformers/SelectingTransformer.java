@@ -34,43 +34,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_DITA;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_KEYNOTE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_NUMBERS;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_PAGES;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_JAVASCRIPT;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_ADDIN;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDE_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_TEMPLATE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_TEMPLATE_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_ADDIN_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_BINARY_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORD_TEMPLATE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORD_TEMPLATE_MACRO;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
  *
- * The SelectingTransformer selects a registered {@link JavaTransformer}
+ * The SelectingTransformer selects a registered {@link SelectableTransformer}
  * and delegates the transformation to its implementation.
+ *
+ * @author eknizat
  *
  */
 @Component
@@ -78,45 +55,30 @@ public class SelectingTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(SelectingTransformer.class);
 
-    JavaTransformer appleIWorksContentTransformer = new AppleIWorksContentTransformer();
-    JavaTransformer htmlParserContentTransformer = new HtmlParserContentTransformer();
-    JavaTransformer stringExtractingContentTransformer = new StringExtractingContentTransformer();
+    private List<SelectableTransformer> transformers = new LinkedList<>();
 
-    private static final List<String> OOXML_SOURCE_MIMETYPES = Arrays.asList(new String[]{
-            MIMETYPE_OPENXML_WORDPROCESSING,
-            MIMETYPE_OPENXML_WORDPROCESSING_MACRO,
-            MIMETYPE_OPENXML_WORD_TEMPLATE,
-            MIMETYPE_OPENXML_WORD_TEMPLATE_MACRO,
-            MIMETYPE_OPENXML_PRESENTATION,
-            MIMETYPE_OPENXML_PRESENTATION_MACRO,
-            MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW,
-            MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO,
-            MIMETYPE_OPENXML_PRESENTATION_TEMPLATE,
-            MIMETYPE_OPENXML_PRESENTATION_TEMPLATE_MACRO,
-            MIMETYPE_OPENXML_PRESENTATION_ADDIN,
-            MIMETYPE_OPENXML_PRESENTATION_SLIDE,
-            MIMETYPE_OPENXML_PRESENTATION_SLIDE_MACRO,
-            MIMETYPE_OPENXML_SPREADSHEET,
-            MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE,
-            MIMETYPE_OPENXML_SPREADSHEET_MACRO,
-            MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO,
-            MIMETYPE_OPENXML_SPREADSHEET_ADDIN_MACRO,
-            MIMETYPE_OPENXML_SPREADSHEET_BINARY_MACRO});
+    public SelectingTransformer()
+    {
+        transformers.add(new AppleIWorksContentTransformer());
+        transformers.add(new HtmlParserContentTransformer());
+        transformers.add(new StringExtractingContentTransformer());
+        transformers.add(new TextToPdfContentTransformer());
+        transformers.add(new OOXMLThumbnailContentTransformer());
+    }
 
     /**
-     * Performs a transform using a transformer selected based on the provided sourceMimetype
+     * Performs a transform using a transformer selected based on the provided sourceMimetype and targetMimetype
      * @param sourceFile File to transform from
      * @param targetFile File to transform to
      * @param sourceMimetype Mimetype of the source file
-     * @param parameters Additional parameters required for the transformation. See {@link AbstractJavaTransformer#getRequiredOptionNames()}
      * @throws TransformException
      */
-    public void transform(File sourceFile, File targetFile, String sourceMimetype,
+    public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
                           Map<String, String> parameters) throws TransformException
     {
         try
         {
-            JavaTransformer transformer = selectTransformer(sourceMimetype);
+            SelectableTransformer transformer = selectTransformer(sourceMimetype, targetMimetype, parameters);
             logOptions(sourceFile, targetFile, parameters);
             transformer.transform(sourceFile, targetFile, parameters);
         }
@@ -135,34 +97,18 @@ public class SelectingTransformer
         }
     }
 
-    private JavaTransformer selectTransformer(String sourceMimetype) throws Exception
+    private SelectableTransformer selectTransformer(String sourceMimetype, String targetMimetype,
+                                                    Map<String, String> parameters)
     {
-        // Note: consider moving the selection logic into each transformer if it gets more complex.
-
-        if ( MIMETYPE_IWORK_KEYNOTE.equals(sourceMimetype)
-                || MIMETYPE_IWORK_NUMBERS.equals(sourceMimetype)
-                || MIMETYPE_IWORK_PAGES.equals(sourceMimetype))
+        for (SelectableTransformer transformer : transformers)
         {
-            return appleIWorksContentTransformer;
+            if (transformer.isTransformable(sourceMimetype, targetMimetype, parameters))
+            {
+                return transformer;
+            }
         }
-        else if (MIMETYPE_HTML.equals(sourceMimetype))
-        {
-            return htmlParserContentTransformer;
-        }
-        else if ( sourceMimetype.startsWith("text/")
-                || MIMETYPE_JAVASCRIPT.equals(sourceMimetype)
-                || MIMETYPE_DITA.equals(sourceMimetype)
-        )
-        {
-            return stringExtractingContentTransformer;
-        }
-        else if (OOXML_SOURCE_MIMETYPES.contains(sourceMimetype))
-        {
-            throw new UnsupportedOperationException("Transform from OOXML types not implemented.");
-        }
-
-        throw new AlfrescoRuntimeException(
-                "Could not select a transformer for sourceMimetype=" + sourceMimetype);
+        throw new AlfrescoRuntimeException( "Could not select a transformer for sourceMimetype=" + sourceMimetype
+                + " targetMimetype=" + targetMimetype);
     }
 
     private static String getMessage(Exception e)
@@ -186,5 +132,4 @@ public class SelectingTransformer
         String ext = i == -1 ? "???" : name.substring(i + 1);
         return ext;
     }
-
 }

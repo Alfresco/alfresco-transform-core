@@ -28,18 +28,26 @@ package org.alfresco.transformer;
 
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transformer.transformers.AppleIWorksContentTransformer;
+import org.alfresco.transformer.transformers.HtmlParserContentTransformer;
 import org.alfresco.transformer.transformers.SelectingTransformer;
+import org.alfresco.transformer.transformers.StringExtractingContentTransformer;
+import org.alfresco.transformer.transformers.TextToPdfContentTransformer;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
@@ -47,7 +55,10 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_KEYNOTE;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_NUMBERS;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_PAGES;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -55,14 +66,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(MiscController.class)
+@Import({SelectingTransformer.class})
 public class MiscControllerTest extends AbstractTransformerControllerTest
 {
 
-    @SpyBean
+    @Autowired
     private MiscController controller;
-
-    @SpyBean
-    SelectingTransformer transformer;
 
     private String sourceEncoding = "UTF-8";
     private String targetEncoding = "UTF-8";
@@ -133,14 +142,16 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         String partC = "</body></html>";
         final String expected = TITLE + NEWLINE + TEXT_P1 + NEWLINE + TEXT_P2 + NEWLINE + TEXT_P3 + NEWLINE;
 
-        textBasedTransform("html",
+        MvcResult result = sendText("html",
                 "UTF-8",
                 MIMETYPE_HTML,
                 "txt",
                 MIMETYPE_TEXT_PLAIN,
                 "UTF-8",
-                expected.getBytes(),
-                expected);
+                expected.getBytes());
+
+        String contentResult = new String(result.getResponse().getContentAsByteArray(), targetEncoding);
+        assertTrue("The content did not include \""+expected, contentResult.contains(expected));
     }
 
     @Test
@@ -158,14 +169,50 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             throw new AlfrescoRuntimeException("Encoding not recognised", e);
         }
 
-        textBasedTransform("txt",
+        MvcResult result = sendText("txt",
                 "MacDingbat",
                 MIMETYPE_TEXT_PLAIN,
                 "txt",
                 MIMETYPE_TEXT_PLAIN,
                 "UTF-8",
-                content,
-                expected);
+                content);
+
+        String contentResult = new String(result.getResponse().getContentAsByteArray(), targetEncoding);
+        assertTrue("The content did not include \""+expected, contentResult.contains(expected));
+    }
+
+    @Test
+    public void textToPdf() throws Exception
+    {
+        StringBuilder sb = new StringBuilder();
+        String expected = null;
+        for (int i=1; i<=5; i++)
+        {
+            sb.append(i);
+            sb.append(" I must not talk in class or feed my homework to my cat.\n");
+        }
+        sb.append("\nBart\n");
+        expected = sb.toString();
+
+        MvcResult result = sendText("txt",
+                "UTF-8",
+                MIMETYPE_TEXT_PLAIN,
+                "pdf",
+                MIMETYPE_PDF,
+                "UTF-8",
+                expected.getBytes());
+
+        // Read back in the PDF and check it
+        PDDocument doc = PDDocument.load(result.getResponse().getContentAsByteArray());
+        PDFTextStripper textStripper = new PDFTextStripper();
+        StringWriter textWriter = new StringWriter();
+        textStripper.writeText(doc, textWriter);
+        doc.close();
+
+        expected = clean(expected);
+        String actual = clean(textWriter.toString());
+
+        assertEquals("The content did not match.", expected, actual);
     }
 
     @Test
@@ -186,6 +233,12 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         imageBasedTransform("key", MIMETYPE_IWORK_KEYNOTE, MIMETYPE_IMAGE_JPEG, "jpeg");
     }
 
+    @Test
+    public void testOOXML() throws Exception
+    {
+        imageBasedTransform("docx", MIMETYPE_OPENXML_WORDPROCESSING, MIMETYPE_IMAGE_JPEG, "jpeg");
+    }
+
     private void imageBasedTransform(String sourceExtension, String sourceMimetype, String targetMimetype, String targetExtension) throws Exception
     {
         MockMultipartFile sourceFilex = new MockMultipartFile("file", "test_file." + sourceExtension, sourceMimetype, readTestFile(sourceExtension));
@@ -203,14 +256,13 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     }
 
 
-    private void textBasedTransform(String sourceExtension,
+    private MvcResult sendText(String sourceExtension,
                            String sourceEncoding,
                            String sourceMimetype,
                            String targetExtension,
                            String targetMimetype,
                            String targetEncoding,
-                           byte[] content,
-                           String expectedContentContains) throws Exception
+                           byte[] content) throws Exception
     {
         MockMultipartFile sourceFilex = new MockMultipartFile("file", "test_file." + sourceExtension, sourceMimetype, content);
 
@@ -226,7 +278,16 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
                 .andExpect(status().is(OK.value()))
                 .andExpect(header().string("Content-Disposition", "attachment; filename*= "+targetEncoding+"''test_file." + targetExtension)).
                         andReturn();
-        String contentResult = new String(result.getResponse().getContentAsByteArray(), targetEncoding);
-        assertTrue("The content did not include \""+expectedContentContains, contentResult.contains(expectedContentContains));
+        return result;
     }
+
+    private String clean(String text)
+    {
+        text = text.replaceAll("\\s+\\r", "");
+        text = text.replaceAll("\\s+\\n", "");
+        text = text.replaceAll("\\r", "");
+        text = text.replaceAll("\\n", "");
+        return text;
+    }
+
 }
