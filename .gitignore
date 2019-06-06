@@ -35,3 +35,5 @@ hs_err_pid*
 alf_data
 /src/main/resources/alfresco-global.properties
 /src/main/resources/alfresco/extension/custom-log4j.properties
+
+libreoffice-dist-*-linux.gz

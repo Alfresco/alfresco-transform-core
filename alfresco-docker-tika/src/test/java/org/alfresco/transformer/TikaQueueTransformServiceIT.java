@@ -42,7 +42,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class TikaQueueTransformServiceTest extends AbstractQueueTransformServiceIT
+public class TikaQueueTransformServiceIT extends AbstractQueueTransformServiceIT
 {
     @Override
     protected TransformRequest buildRequest()
