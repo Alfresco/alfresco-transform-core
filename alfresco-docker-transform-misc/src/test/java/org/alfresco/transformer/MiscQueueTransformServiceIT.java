@@ -38,7 +38,7 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class MiscQueueTransformServiceTest extends AbstractQueueTransformServiceIT
+public class MiscQueueTransformServiceIT extends AbstractQueueTransformServiceIT
 {
     @Override
     protected TransformRequest buildRequest()
