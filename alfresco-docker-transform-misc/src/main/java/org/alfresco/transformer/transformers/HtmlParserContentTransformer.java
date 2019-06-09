@@ -32,13 +32,13 @@ import org.htmlparser.util.ParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
@@ -88,9 +88,10 @@ public class HtmlParserContentTransformer implements SelectableTransformer
     public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws Exception
     {
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
-        sourceEncoding = sourceEncoding == null ? DEFAULT_ENCODING : sourceEncoding;
+        sourceEncoding = sourceEncoding == null || sourceEncoding.isEmpty() ? DEFAULT_ENCODING : sourceEncoding;
+        checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
+
         String targetEncoding = parameters.get(TARGET_ENCODING);
-        targetEncoding = targetEncoding == null ? DEFAULT_ENCODING : targetEncoding;
 
         if(logger.isDebugEnabled())
         {
@@ -109,13 +110,42 @@ public class HtmlParserContentTransformer implements SelectableTransformer
 
         // write it to the writer
         try (OutputStream os = new FileOutputStream(targetFile);
-             Writer writer = new BufferedWriter(new OutputStreamWriter(os, targetEncoding)))
+             Writer writer = buildWriter(os, targetEncoding))
         {
             writer.write(text);
-            writer.flush();
         }
     }
 
+    private OutputStreamWriter buildWriter(OutputStream os, String encoding)
+    {
+        // If they gave an encoding, try to use it
+        if(encoding != null && !encoding.isEmpty())
+        {
+            try
+            {
+                return new OutputStreamWriter(os, encoding);
+            } catch(Exception e)
+            {
+                logger.warn("JVM doesn't understand encoding '" + encoding +
+                        "' when transforming html to text");
+            }
+        }
+
+        // Fall back on the system default
+        logger.debug("Processing plain text using system default encoding");
+        return new OutputStreamWriter(os);
+    }
+
+    private void checkEncodingParameter(String encoding, String paramterName)
+    {
+        try
+        {
+            Charset.forName(encoding);
+        } catch(Exception e)
+        {
+            throw new IllegalArgumentException(paramterName + "=" + encoding + " is not a valid encoding.");
+        }
+    }
     /**
      *
      *  <p>

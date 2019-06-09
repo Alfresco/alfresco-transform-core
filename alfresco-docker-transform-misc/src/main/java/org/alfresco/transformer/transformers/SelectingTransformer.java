@@ -113,7 +113,7 @@ public class SelectingTransformer
 
     private static String getMessage(Exception e)
     {
-        return e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
+        return e.getMessage() == null || e.getMessage().isEmpty() ? e.getClass().getSimpleName() : e.getMessage();
     }
 
     private void logOptions(File sourceFile, File targetFile, Map<String, String> parameters)

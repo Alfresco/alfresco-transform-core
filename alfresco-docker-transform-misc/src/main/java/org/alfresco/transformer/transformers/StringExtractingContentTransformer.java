@@ -38,6 +38,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_DITA;
@@ -63,8 +64,6 @@ public class StringExtractingContentTransformer implements SelectableTransformer
 
     private static final Log logger = LogFactory.getLog(StringExtractingContentTransformer.class);
 
-    private static final String DEFAULT_ENCODING = "UTF-8";
-
     @Override
     public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
     {
@@ -88,9 +87,7 @@ public class StringExtractingContentTransformer implements SelectableTransformer
     {
 
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
-        sourceEncoding = sourceEncoding == null ? DEFAULT_ENCODING : sourceEncoding;
         String targetEncoding = parameters.get(TARGET_ENCODING);
-        targetEncoding = targetEncoding == null ? DEFAULT_ENCODING : targetEncoding;
 
         if(logger.isDebugEnabled())
         {
@@ -103,20 +100,22 @@ public class StringExtractingContentTransformer implements SelectableTransformer
         Writer charWriter = null;
         try
         {
-            if (sourceEncoding == null)
+            if (sourceEncoding == null || sourceEncoding.isEmpty())
             {
                 charReader = new InputStreamReader(new FileInputStream(sourceFile));
             }
             else
             {
+                checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
                 charReader = new InputStreamReader(new FileInputStream(sourceFile), sourceEncoding);
             }
-            if (targetEncoding == null)
+            if (targetEncoding == null || targetEncoding.isEmpty())
             {
                 charWriter = new OutputStreamWriter(new FileOutputStream(targetFile));
             }
             else
             {
+                checkEncodingParameter(targetEncoding, TARGET_ENCODING);
                 charWriter = new OutputStreamWriter(new FileOutputStream(targetFile), targetEncoding);
             }
             // copy from the one to the other
@@ -147,5 +146,16 @@ public class StringExtractingContentTransformer implements SelectableTransformer
             }
         }
         // done
+    }
+
+    private void checkEncodingParameter(String encoding, String paramterName)
+    {
+        try
+        {
+            Charset.forName(encoding);
+        } catch(Exception e)
+        {
+            throw new IllegalArgumentException(paramterName + "=" + encoding + " is not a valid encoding.");
+        }
     }
 }
