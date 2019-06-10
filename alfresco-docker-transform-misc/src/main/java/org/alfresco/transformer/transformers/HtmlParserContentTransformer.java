@@ -32,6 +32,7 @@ import org.htmlparser.util.ParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -76,8 +77,6 @@ public class HtmlParserContentTransformer implements SelectableTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(HtmlParserContentTransformer.class);
 
-    private static final String DEFAULT_ENCODING = "UTF-8";
-
     @Override
     public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
     {
@@ -88,7 +87,7 @@ public class HtmlParserContentTransformer implements SelectableTransformer
     public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws Exception
     {
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
-        sourceEncoding = sourceEncoding == null || sourceEncoding.isEmpty() ? DEFAULT_ENCODING : sourceEncoding;
+        sourceEncoding = sourceEncoding != null && sourceEncoding.isEmpty() ? null : sourceEncoding;
         checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
 
         String targetEncoding = parameters.get(TARGET_ENCODING);
@@ -109,8 +108,7 @@ public class HtmlParserContentTransformer implements SelectableTransformer
         String text = extractor.getStrings();
 
         // write it to the writer
-        try (OutputStream os = new FileOutputStream(targetFile);
-             Writer writer = buildWriter(os, targetEncoding))
+        try ( Writer writer = new BufferedWriter(buildWriter(new FileOutputStream(targetFile), targetEncoding)))
         {
             writer.write(text);
         }

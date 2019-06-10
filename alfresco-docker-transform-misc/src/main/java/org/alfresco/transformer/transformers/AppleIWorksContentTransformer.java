@@ -32,8 +32,8 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -110,7 +110,7 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
         }
         // iWorks files are zip (or package) files.
         // If it's not a zip file, the resultant ZipException will be caught as an IOException below.
-        try (ZipArchiveInputStream iWorksZip = new ZipArchiveInputStream(new FileInputStream(sourceFile)))
+        try (ZipArchiveInputStream iWorksZip = new ZipArchiveInputStream( new BufferedInputStream( new FileInputStream(sourceFile))))
         {
             // Look through the zip file entries for the preview/thumbnail.
             List<String> paths = Mimetype.MIMETYPE_IMAGE_JPEG.equals(targetMimetype) ? JPG_PATHS : PDF_PATHS;

@@ -29,6 +29,8 @@ package org.alfresco.transformer.transformers;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -102,21 +104,21 @@ public class StringExtractingContentTransformer implements SelectableTransformer
         {
             if (sourceEncoding == null || sourceEncoding.isEmpty())
             {
-                charReader = new InputStreamReader(new FileInputStream(sourceFile));
+                charReader = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile)));
             }
             else
             {
                 checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
-                charReader = new InputStreamReader(new FileInputStream(sourceFile), sourceEncoding);
+                charReader = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile), sourceEncoding));
             }
             if (targetEncoding == null || targetEncoding.isEmpty())
             {
-                charWriter = new OutputStreamWriter(new FileOutputStream(targetFile));
+                charWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(targetFile)));
             }
             else
             {
                 checkEncodingParameter(targetEncoding, TARGET_ENCODING);
-                charWriter = new OutputStreamWriter(new FileOutputStream(targetFile), targetEncoding);
+                charWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(targetFile), targetEncoding));
             }
             // copy from the one to the other
             char[] buffer = new char[8192];

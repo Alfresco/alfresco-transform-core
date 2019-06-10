@@ -35,6 +35,7 @@ import org.apache.pdfbox.tools.TextToPDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -127,8 +128,8 @@ public class TextToPdfContentTransformer implements SelectableTransformer
 
         PDDocument pdf = null;
         try (InputStream is = new FileInputStream(sourceFile);
-             InputStreamReader ir = buildReader(is, sourceEncoding);
-             OutputStream os = new FileOutputStream(targetFile))
+             Reader ir = new BufferedReader(buildReader(is, sourceEncoding));
+             OutputStream os = new BufferedOutputStream(new FileOutputStream(targetFile)))
         {
             //TransformationOptionLimits limits = getLimits(reader, writer, options);
             //TransformationOptionPair pageLimits = limits.getPagesPair();

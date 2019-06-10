@@ -99,8 +99,7 @@ public class OOXMLThumbnailContentTransformer implements SelectableTransformer
                     + " targetMimetype=" + targetMimetype);
         }
 
-        try (OPCPackage pkg = OPCPackage.open(sourceFile.getPath());
-             FileOutputStream fo = new FileOutputStream(targetFile))
+        try (OPCPackage pkg = OPCPackage.open(sourceFile.getPath()))
         {
 
             // Does it have a thumbnail?
