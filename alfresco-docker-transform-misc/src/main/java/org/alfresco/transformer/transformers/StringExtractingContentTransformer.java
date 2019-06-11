@@ -37,8 +37,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -85,7 +87,7 @@ public class StringExtractingContentTransformer implements SelectableTransformer
      * be unformatted but valid.
      */
     @Override
-    public void transform(File sourceFile, File targetFile, Map<String, String> parameters)
+    public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws Exception
     {
 
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
@@ -97,12 +99,12 @@ public class StringExtractingContentTransformer implements SelectableTransformer
                     + " targetEncoding=" + targetEncoding);
         }
 
-        // get a char reader and writer
         Reader charReader = null;
         Writer charWriter = null;
         try
         {
-            if (sourceEncoding == null || sourceEncoding.isEmpty())
+            // Build reader
+            if (sourceEncoding == null)
             {
                 charReader = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile)));
             }
@@ -111,15 +113,18 @@ public class StringExtractingContentTransformer implements SelectableTransformer
                 checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
                 charReader = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile), sourceEncoding));
             }
-            if (targetEncoding == null || targetEncoding.isEmpty())
+
+            // Build writer
+            if (targetEncoding == null)
             {
                 charWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(targetFile)));
             }
             else
             {
-                checkEncodingParameter(targetEncoding, TARGET_ENCODING);
+                checkEncodingParameter( targetEncoding, TARGET_ENCODING);
                 charWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(targetFile), targetEncoding));
             }
+
             // copy from the one to the other
             char[] buffer = new char[8192];
             int readCount = 0;
@@ -130,13 +135,8 @@ public class StringExtractingContentTransformer implements SelectableTransformer
                 // fill the buffer again
                 readCount = charReader.read(buffer);
             }
-        } catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        } finally
+        }
+        finally
         {
             if (charReader != null)
             {
@@ -152,10 +152,7 @@ public class StringExtractingContentTransformer implements SelectableTransformer
 
     private void checkEncodingParameter(String encoding, String paramterName)
     {
-        try
-        {
-            Charset.forName(encoding);
-        } catch(Exception e)
+        if (!Charset.isSupported(encoding))
         {
             throw new IllegalArgumentException(paramterName + "=" + encoding + " is not a valid encoding.");
         }

@@ -326,7 +326,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
         }
         catch (NumberFormatException e)
         {
-            throw new IllegalArgumentException(paramName + "parameter must be an integer.");
+            throw new IllegalArgumentException(paramName + " parameter must be an integer.");
         }
     }
 }

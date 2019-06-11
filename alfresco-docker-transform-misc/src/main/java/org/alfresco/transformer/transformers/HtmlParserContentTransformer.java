@@ -87,10 +87,10 @@ public class HtmlParserContentTransformer implements SelectableTransformer
     public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws Exception
     {
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
-        sourceEncoding = sourceEncoding != null && sourceEncoding.isEmpty() ? null : sourceEncoding;
         checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
 
         String targetEncoding = parameters.get(TARGET_ENCODING);
+        checkEncodingParameter(targetEncoding, TARGET_ENCODING);
 
         if(logger.isDebugEnabled())
         {
@@ -117,7 +117,7 @@ public class HtmlParserContentTransformer implements SelectableTransformer
     private OutputStreamWriter buildWriter(OutputStream os, String encoding)
     {
         // If they gave an encoding, try to use it
-        if(encoding != null && !encoding.isEmpty())
+        if(encoding != null)
         {
             try
             {
@@ -136,14 +136,12 @@ public class HtmlParserContentTransformer implements SelectableTransformer
 
     private void checkEncodingParameter(String encoding, String paramterName)
     {
-        try
-        {
-            Charset.forName(encoding);
-        } catch(Exception e)
+        if (encoding != null && !Charset.isSupported(encoding))
         {
             throw new IllegalArgumentException(paramterName + "=" + encoding + " is not a valid encoding.");
         }
     }
+
     /**
      *
      *  <p>
