@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-transform-core</artifactId>
-        <version>2.1.0-CUSTOM</version>
+        <version>2.1.1-CUSTOM-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
