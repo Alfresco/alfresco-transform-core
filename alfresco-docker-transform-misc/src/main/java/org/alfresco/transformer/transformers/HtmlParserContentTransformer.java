@@ -40,6 +40,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.util.Map;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
@@ -89,13 +90,9 @@ public class HtmlParserContentTransformer implements SelectableTransformer
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
         checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
 
-        String targetEncoding = parameters.get(TARGET_ENCODING);
-        checkEncodingParameter(targetEncoding, TARGET_ENCODING);
-
         if(logger.isDebugEnabled())
         {
-            logger.debug("Performing HTML to text transform with sourceEncoding=" + sourceEncoding
-                    + " targetEncoding=" + targetEncoding);
+            logger.debug("Performing HTML to text transform with sourceEncoding=" + sourceEncoding);
         }
 
         // Create the extractor
@@ -108,35 +105,22 @@ public class HtmlParserContentTransformer implements SelectableTransformer
         String text = extractor.getStrings();
 
         // write it to the writer
-        try ( Writer writer = new BufferedWriter(buildWriter(new FileOutputStream(targetFile), targetEncoding)))
+        try ( Writer writer = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(targetFile))))
         {
             writer.write(text);
         }
     }
 
-    private OutputStreamWriter buildWriter(OutputStream os, String encoding)
-    {
-        // If they gave an encoding, try to use it
-        if(encoding != null)
-        {
-            try
-            {
-                return new OutputStreamWriter(os, encoding);
-            } catch(Exception e)
-            {
-                logger.warn("JVM doesn't understand encoding '" + encoding +
-                        "' when transforming html to text");
-            }
-        }
-
-        // Fall back on the system default
-        logger.debug("Processing plain text using system default encoding");
-        return new OutputStreamWriter(os);
-    }
-
     private void checkEncodingParameter(String encoding, String paramterName)
     {
-        if (encoding != null && !Charset.isSupported(encoding))
+        try
+        {
+            if (encoding != null && !Charset.isSupported(encoding))
+            {
+                throw new IllegalArgumentException(paramterName + "=" + encoding + " is not supported by the JVM.");
+            }
+        }
+        catch (IllegalCharsetNameException e)
         {
             throw new IllegalArgumentException(paramterName + "=" + encoding + " is not a valid encoding.");
         }

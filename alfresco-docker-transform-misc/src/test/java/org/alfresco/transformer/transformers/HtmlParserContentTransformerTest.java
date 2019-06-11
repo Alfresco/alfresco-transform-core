@@ -88,7 +88,6 @@ public class HtmlParserContentTransformerTest
 
             Map<String, String> parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
-            parameters.put(TARGET_ENCODING, "UTF-8");
             transformer.transform(tmpS, tmpD, parameters);
 
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
@@ -102,7 +101,6 @@ public class HtmlParserContentTransformerTest
             tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
             parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "UTF-8");
-            parameters.put(TARGET_ENCODING, "UTF-8");
             transformer.transform(tmpS, tmpD, parameters);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
@@ -116,7 +114,6 @@ public class HtmlParserContentTransformerTest
             tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
             parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "UTF-16");
-            parameters.put(TARGET_ENCODING, "UTF-8");
             transformer.transform(tmpS, tmpD, parameters);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
@@ -142,7 +139,6 @@ public class HtmlParserContentTransformerTest
 
             parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
-            parameters.put(TARGET_ENCODING, "UTF-8");
             transformer.transform(tmpS, tmpD, parameters);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();

@@ -43,6 +43,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.util.Map;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_DITA;
@@ -152,7 +153,14 @@ public class StringExtractingContentTransformer implements SelectableTransformer
 
     private void checkEncodingParameter(String encoding, String paramterName)
     {
-        if (!Charset.isSupported(encoding))
+        try
+        {
+            if (!Charset.isSupported(encoding))
+            {
+                throw new IllegalArgumentException(paramterName + "=" + encoding + " is not supported by the JVM.");
+            }
+        }
+        catch (IllegalCharsetNameException e)
         {
             throw new IllegalArgumentException(paramterName + "=" + encoding + " is not a valid encoding.");
         }
