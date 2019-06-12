@@ -5,13 +5,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.1.RELEASE</version>
+        <version>2.1.5.RELEASE</version>
         <relativePath />
     </parent>
 
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>2.1.1-CUSTOM-SNAPSHOT</version>
+    <version>2.1.0-CUSTOM2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -33,6 +33,7 @@
         <module>alfresco-docker-alfresco-pdf-renderer</module>
         <module>alfresco-docker-imagemagick</module>
         <module>alfresco-docker-libreoffice</module>
+        <module>alfresco-docker-transform-misc</module>
     </modules>
 
     <scm>
@@ -136,7 +137,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.1.0</version>
                 <configuration>
                     <doclint>none</doclint>
                 </configuration>
@@ -244,7 +245,7 @@
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
-                    <version>0.26.1</version>
+                    <version>0.30.0</version>
                     <extensions>true</extensions>
                     <configuration>
                         <apiVersion>1.29</apiVersion>

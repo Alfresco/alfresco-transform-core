@@ -26,6 +26,8 @@ branches:
     - company_release
     - /^ATS-.*$/
     - release_repo_4331
+    - /^feature.*$/
+#    TODO remove - /^feature.*$/ and - release_repo_4331
 
 stages:
   - build
