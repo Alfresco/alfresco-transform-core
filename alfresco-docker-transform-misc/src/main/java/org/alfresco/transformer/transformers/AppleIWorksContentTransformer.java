@@ -48,32 +48,15 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_NUMBER
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_PAGES;
 
 /**
- * Content transformer which wraps the HTML Parser library for
- * parsing HTML content.
+ * Converts Apple iWorks files to JPEGs for thumbnailing & previewing.
+ * The transformer will only work for iWorks 2013/14 files. Support for iWorks 2008/9 has been dropped as we cannot
+ * support both, because the newer format does not contain a PDF. If we say this transformer supports PDF, Share will
+ * assume incorrectly that we can convert to PDF and we would only get a preview for the older format and never the
+ * newer one. Both formats have the same mimetype.
  *
- * <p>
- * This code is based on a class of the same name originally implemented in alfresco-repository.
- * </p>
- *
- * <p>
- * Since HTML Parser was updated from v1.6 to v2.1, META tags
- * defining an encoding for the content via http-equiv=Content-Type
- * will ONLY be respected if the encoding of the content item
- * itself is set to ISO-8859-1.
- * </p>
- *
- * <p>
- * Tika Note - could be converted to use the Tika HTML parser,
- *  but we'd potentially need a custom text handler to replicate
- *  the current settings around links and non-breaking spaces.
- * </p>
- *
- * @see <a href="http://htmlparser.sourceforge.net/">http://htmlparser.sourceforge.net</a>
- * @see org.htmlparser.beans.StringBean
- * @see <a href="http://sourceforge.net/tracker/?func=detail&aid=1644504&group_id=24399&atid=381401">HTML Parser</a>
- *
- * @author Derek Hulley
+ * @author Neil Mc Erlean
  * @author eknizat
+ * @since 4.0
  */
 public class AppleIWorksContentTransformer implements SelectableTransformer
 {
@@ -85,8 +68,8 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
     private static final List<String> JPG_PATHS = Arrays.asList(
             "QuickLook/Thumbnail.jpg", // iWorks 2008/9
             "preview.jpg");            // iWorks 2013/14 (720 x 552) We use the best quality image. Others are:
-    //                (225 x 173) preview-web.jpg
-    //                 (53 x  41) preview-micro.jpg
+                                       //                (225 x 173) preview-web.jpg
+                                       //                 (53 x  41) preview-micro.jpg
 
     @Override
     public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
