@@ -89,19 +89,21 @@ public class QueueTransformServiceTest
     public void testConvertMessageReturnsNullThenReplyWithInternalServerError() throws JMSException
     {
         ActiveMQObjectMessage msg = new ActiveMQObjectMessage();
+        msg.setCorrelationId("1234");
         ActiveMQQueue destination = new ActiveMQQueue();
         msg.setJMSReplyTo(destination);
 
         TransformReply reply = TransformReply.builder()
-            .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
-            .withErrorDetails("JMS exception during T-Request deserialization: ").build();
+            .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()).withErrorDetails(
+                "JMS exception during T-Request deserialization of message with correlationID "
+                    + msg.getCorrelationId() + ": null").build();
 
         doReturn(null).when(transformMessageConverter).fromMessage(msg);
 
         queueTransformService.receive(msg);
 
         verify(transformMessageConverter).fromMessage(msg);
-        verify(transformReplySender).send(destination, reply, null);
+        verify(transformReplySender).send(destination, reply, msg.getCorrelationId());
 
         verifyNoMoreInteractions(transformController);
     }
@@ -111,19 +113,21 @@ public class QueueTransformServiceTest
         throws JMSException
     {
         ActiveMQObjectMessage msg = new ActiveMQObjectMessage();
+        msg.setCorrelationId("1234");
         ActiveMQQueue destination = new ActiveMQQueue();
         msg.setJMSReplyTo(destination);
 
         TransformReply reply = TransformReply.builder().withStatus(HttpStatus.BAD_REQUEST.value())
-            .withErrorDetails("Message conversion exception during T-Request deserialization: ")
-            .build();
+            .withErrorDetails(
+                "Message conversion exception during T-Request deserialization of message with correlationID"
+                    + msg.getCorrelationId() + ": null").build();
 
         doThrow(MessageConversionException.class).when(transformMessageConverter).fromMessage(msg);
 
         queueTransformService.receive(msg);
 
         verify(transformMessageConverter).fromMessage(msg);
-        verify(transformReplySender).send(destination, reply, reply.getRequestId());
+        verify(transformReplySender).send(destination, reply, msg.getCorrelationId());
 
         verifyNoMoreInteractions(transformController);
     }
@@ -133,18 +137,21 @@ public class QueueTransformServiceTest
         throws JMSException
     {
         ActiveMQObjectMessage msg = new ActiveMQObjectMessage();
+        msg.setCorrelationId("1234");
         ActiveMQQueue destination = new ActiveMQQueue();
         msg.setJMSReplyTo(destination);
 
-        TransformReply reply = TransformReply.builder().withStatus(HttpStatus.BAD_REQUEST.value())
-            .withErrorDetails("JMS exception during T-Request deserialization: ").build();
+        TransformReply reply = TransformReply.builder()
+            .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()).withErrorDetails(
+                "JMSException during T-Request deserialization of message with correlationID " + msg
+                    .getCorrelationId() + ": null").build();
 
         doThrow(JMSException.class).when(transformMessageConverter).fromMessage(msg);
 
         queueTransformService.receive(msg);
 
         verify(transformMessageConverter).fromMessage(msg);
-        verify(transformReplySender).send(destination, reply, reply.getRequestId());
+        verify(transformReplySender).send(destination, reply, msg.getCorrelationId());
 
         verifyNoMoreInteractions(transformController);
     }

@@ -95,12 +95,12 @@ public class QueueTransformService
             return;
         }
 
-        logger.info("New T-Request from queue with correlationId: {0}", correlationId);
+        logger.info("New T-Request from queue with correlationId: {}", correlationId);
 
         Optional<TransformRequest> transformRequest;
         try
         {
-            transformRequest = convert(msg);
+            transformRequest = convert(msg, correlationId);
         }
         catch (TransformException e)
         {
@@ -112,7 +112,7 @@ public class QueueTransformService
 
         if (!transformRequest.isPresent())
         {
-            logger.error("T-Request is null deserialization!");
+            logger.error("T-Request from message with correlationID {} is null!", correlationId);
             replyWithInternalSvErr(replyToDestinationQueue,
                 "JMS exception during T-Request deserialization: ", correlationId);
             return;
@@ -131,7 +131,7 @@ public class QueueTransformService
      * @param msg Message to be deserialized
      * @return The converted {@link TransformRequest} instance
      */
-    private Optional<TransformRequest> convert(final Message msg)
+    private Optional<TransformRequest> convert(final Message msg, String correlationId)
     {
         try
         {
@@ -141,18 +141,24 @@ public class QueueTransformService
         }
         catch (MessageConversionException e)
         {
-            String message = "Message conversion exception during T-Request deserialization: ";
+            String message =
+                "MessageConversionException during T-Request deserialization of message with correlationID "
+                    + correlationId + ": ";
             throw new TransformException(HttpStatus.BAD_REQUEST.value(), message + e.getMessage());
         }
         catch (JMSException e)
         {
-            String message = "JMS exception during T-Request deserialization: ";
+            String message =
+                "JMSException during T-Request deserialization of message with correlationID "
+                    + correlationId + ": ";
             throw new TransformException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 message + e.getMessage());
         }
         catch (Exception e)
         {
-            String message = "Exception during T-Request deserialization: ";
+            String message =
+                "Exception during T-Request deserialization of message with correlationID "
+                    + correlationId + ": ";
             throw new TransformException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 message + e.getMessage());
         }
