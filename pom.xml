@@ -17,7 +17,7 @@
     <properties>
         <java.version>1.8</java.version>
         <image.tag>latest</image.tag>
-        <dependency.pdfbox.version>2.0.12</dependency.pdfbox.version>
+        <dependency.pdfbox.version>2.0.15</dependency.pdfbox.version>
         <dependency.alfresco-core.version>7.3</dependency.alfresco-core.version>
         <dependency.alfresco-data-model.version>8.8</dependency.alfresco-data-model.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
@@ -78,7 +78,7 @@
             <dependency>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-rt-transports-http</artifactId>
-                <version>3.2.6</version>
+                <version>3.3.2</version>
             </dependency>
             <!-- Jackson -->
             <dependency>
@@ -136,7 +136,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.1.0</version>
                 <configuration>
                     <doclint>none</doclint>
                 </configuration>
@@ -160,7 +160,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>1.16</version>
+                    <version>1.20</version>
                     <executions>
                         <execution>
                             <id>third-party-licenses</id>
