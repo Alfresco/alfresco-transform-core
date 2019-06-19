@@ -25,9 +25,7 @@ branches:
     - release/SP/2.0.N
     - company_release
     - /^ATS-.*$/
-    - release_repo_4331
     - /^feature.*$/
-#    TODO remove - /^feature.*$/ and - release_repo_4331
 
 stages:
   - build
@@ -51,7 +49,7 @@ jobs:
 
     - name: "Release"
       stage: release
-      if: branch IN (release, release/SP/1.3.N, release/SP/2.0.N, release_repo_4331)
+      if: branch IN (release, release/SP/1.3.N, release/SP/2.0.N)
       before_install: bash _ci/init.sh
       before_script: travis_wait bash _ci/cache_artifacts.sh
       script: travis_wait 30 bash _ci/release.sh
