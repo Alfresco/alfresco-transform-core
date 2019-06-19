@@ -27,6 +27,7 @@ import javax.jms.Message;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.messaging.TransformMessageConverter;
 import org.alfresco.transformer.messaging.TransformReplySender;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 /**
  * Queue Transformer service.
@@ -92,77 +95,73 @@ public class QueueTransformService
             return;
         }
 
-        logger.info("New T-Request from queue with correlationId: {0}", correlationId);
+        logger.info("New T-Request from queue with correlationId: {}", correlationId);
 
-
-        TransformRequest transformRequest = convert(msg, correlationId, replyToDestinationQueue);
-        if (transformRequest == null)
+        Optional<TransformRequest> transformRequest;
+        try
         {
-            logger.error("Exception during T-Request deserialization! T-Reply with error has been "
-                + "sent to T-Router!");
+            transformRequest = convert(msg, correlationId);
+        }
+        catch (TransformException e)
+        {
+            logger.error(e.getMessage(), e);
+            replyWithError(replyToDestinationQueue, HttpStatus.valueOf(e.getStatusCode()),
+                e.getMessage(), correlationId);
             return;
         }
 
-        // Tries to convert and return the object. If it fails to convert, the method sends an error message and returns null.
-        TransformReply reply = transformController.transform(
-            transformRequest, null).getBody();
+        if (!transformRequest.isPresent())
+        {
+            logger.error("T-Request from message with correlationID {} is null!", correlationId);
+            replyWithInternalSvErr(replyToDestinationQueue,
+                "JMS exception during T-Request deserialization: ", correlationId);
+            return;
+        }
+
+        TransformReply reply = transformController.transform(transformRequest.get(), null)
+            .getBody();
 
         transformReplySender.send(replyToDestinationQueue, reply);
     }
 
     /**
      * Tries to convert the JMS {@link Message} to a {@link TransformRequest}
-     * If any errors occur standard error {@link TransformReply} are sent back to T-Router
+     * If any error occurs, a {@link TransformException} is thrown
      *
      * @param msg Message to be deserialized
-     * @param correlationId CorrelationId of the message
-     * @param destination Needed in case deserialization fails. Passed here so we don't retrieve it again.
-     * @return The converted {@link TransformRequest} instance or null in case of errors
+     * @return The converted {@link TransformRequest} instance
      */
-    private TransformRequest convert(final Message msg, final String correlationId, Destination destination)
+    private Optional<TransformRequest> convert(final Message msg, String correlationId)
     {
         try
         {
             TransformRequest request = (TransformRequest) transformMessageConverter
                 .fromMessage(msg);
-            if (request == null)
-            {
-                logger.error("T-Request is null deserialization!");
-                replyWithInternalSvErr(destination,
-                    "JMS exception during T-Request deserialization: ", correlationId);
-            }
-            return request;
+            return Optional.ofNullable(request);
         }
         catch (MessageConversionException e)
         {
-            String message = "Message conversion exception during T-Request deserialization: ";
-            logger.error(message + e.getMessage(), e);
-            replyWithBadRequest(destination, message + e.getMessage(), correlationId);
+            String message =
+                "MessageConversionException during T-Request deserialization of message with correlationID "
+                    + correlationId + ": ";
+            throw new TransformException(HttpStatus.BAD_REQUEST.value(), message + e.getMessage());
         }
         catch (JMSException e)
         {
-            String message = "JMS exception during T-Request deserialization: ";
-            logger.error(message + e.getMessage(), e);
-            replyWithInternalSvErr(destination, message + e.getMessage(), correlationId);
+            String message =
+                "JMSException during T-Request deserialization of message with correlationID "
+                    + correlationId + ": ";
+            throw new TransformException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                message + e.getMessage());
         }
         catch (Exception e)
         {
-            String message = "Exception during T-Request deserialization: ";
-            logger.error(message + e.getMessage(), e);
-            replyWithInternalSvErr(destination, message + e.getMessage(), correlationId);
+            String message =
+                "Exception during T-Request deserialization of message with correlationID "
+                    + correlationId + ": ";
+            throw new TransformException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                message + e.getMessage());
         }
-        catch (Throwable t)
-        {
-            logger.error("Error during T-Request deserialization" + t.getMessage(), t);
-            throw t;
-        }
-        return null;
-    }
-
-
-    private void replyWithBadRequest(final Destination destination, final String msg, final String correlationId)
-    {
-        replyWithError(destination, HttpStatus.BAD_REQUEST, msg, correlationId);
     }
 
     private void replyWithInternalSvErr(final Destination destination, final String msg, final String correlationId)
