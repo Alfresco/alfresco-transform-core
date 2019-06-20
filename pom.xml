@@ -18,7 +18,7 @@
         <java.version>1.8</java.version>
         <image.tag>latest</image.tag>
         <dependency.pdfbox.version>2.0.15</dependency.pdfbox.version>
-        <dependency.alfresco-core.version>7.3</dependency.alfresco-core.version>
+        <dependency.alfresco-core.version>7.14</dependency.alfresco-core.version>
         <dependency.alfresco-data-model.version>8.8</dependency.alfresco-data-model.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
@@ -78,7 +78,27 @@
             <!-- via Data Model / OpenCMIS Client -->
             <dependency>
                 <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-core</artifactId>
+                <version>3.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-rs-client</artifactId>
+                <version>3.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-frontend-jaxws</artifactId>
+                <version>3.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-rt-transports-http</artifactId>
+                <version>3.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-ws-policy</artifactId>
                 <version>3.3.2</version>
             </dependency>
             <!-- Jackson -->
@@ -117,6 +137,30 @@
                 <groupId>org.apache.activemq</groupId>
                 <artifactId>activemq-client</artifactId>
                 <version>${dependency.activemq.version}</version>
+            </dependency>
+            <!-- Misc -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>28.0-jre</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.junrar</groupId>
+                <artifactId>junrar</artifactId>
+                <version>1.0.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>1.18</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>1.12.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
