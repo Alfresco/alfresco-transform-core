@@ -25,6 +25,7 @@ branches:
     - release/SP/2.0.N
     - company_release
     - /^ATS-.*$/
+    - /^feature.*$/
 
 stages:
   - build
