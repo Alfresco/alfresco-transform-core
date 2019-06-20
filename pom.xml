@@ -33,6 +33,7 @@
         <module>alfresco-docker-alfresco-pdf-renderer</module>
         <module>alfresco-docker-imagemagick</module>
         <module>alfresco-docker-libreoffice</module>
+        <module>alfresco-docker-transform-misc</module>
     </modules>
 
     <scm>
@@ -161,6 +162,11 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
                     <version>1.20</version>
+                    <configuration>
+                        <inceptionYear>2005</inceptionYear>
+                        <organizationName>Alfresco Software Limited</organizationName>
+                        <projectName>Alfresco Transform Core</projectName>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>third-party-licenses</id>
@@ -181,9 +187,6 @@
                             </goals>
                             <phase>process-sources</phase>
                             <configuration>
-                                <inceptionYear>2005</inceptionYear>
-                                <organizationName>Alfresco Software Limited</organizationName>
-                                <projectName>Alfresco Transform Core</projectName>
                                 <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
                                 <canUpdateCopyright>true</canUpdateCopyright>
                                 <canUpdateDescription>true</canUpdateDescription>
