@@ -18,13 +18,14 @@
         <java.version>1.8</java.version>
         <image.tag>latest</image.tag>
         <dependency.pdfbox.version>2.0.15</dependency.pdfbox.version>
-        <dependency.alfresco-core.version>7.14</dependency.alfresco-core.version>
-        <dependency.alfresco-data-model.version>8.8</dependency.alfresco-data-model.version>
+        <dependency.alfresco-core.version>7.17</dependency.alfresco-core.version>
+        <dependency.alfresco-data-model.version>8.39</dependency.alfresco-data-model.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
         <dependency.alfresco-transform-model.version>1.0.2.3</dependency.alfresco-transform-model.version>
         <dependency.activemq.version>5.15.9</dependency.activemq.version>
         <dependency.jackson.version>2.9.9</dependency.jackson.version>
+        <dependency.cxf.version>3.2.9</dependency.cxf.version>
     </properties>
 
     <modules>
@@ -79,27 +80,27 @@
             <dependency>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-core</artifactId>
-                <version>3.3.2</version>
+                <version>${dependency.cxf.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-rt-rs-client</artifactId>
-                <version>3.3.2</version>
+                <version>${dependency.cxf.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-rt-frontend-jaxws</artifactId>
-                <version>3.3.2</version>
+                <version>${dependency.cxf.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-rt-transports-http</artifactId>
-                <version>3.3.2</version>
+                <version>${dependency.cxf.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-rt-ws-policy</artifactId>
-                <version>3.3.2</version>
+                <version>${dependency.cxf.version}</version>
             </dependency>
             <!-- Jackson -->
             <dependency>
