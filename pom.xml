@@ -139,25 +139,24 @@
                 <artifactId>activemq-client</artifactId>
                 <version>${dependency.activemq.version}</version>
             </dependency>
-            <!-- Misc -->
+            <!-- Google Guava -->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>28.0-jre</version>
             </dependency>
-
+            <!-- Junrar & compression -->
             <dependency>
                 <groupId>com.github.junrar</groupId>
                 <artifactId>junrar</artifactId>
                 <version>1.0.1</version>
             </dependency>
-
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>1.18</version>
             </dependency>
-
+            <!-- Jsoup -->
             <dependency>
                 <groupId>org.jsoup</groupId>
                 <artifactId>jsoup</artifactId>
