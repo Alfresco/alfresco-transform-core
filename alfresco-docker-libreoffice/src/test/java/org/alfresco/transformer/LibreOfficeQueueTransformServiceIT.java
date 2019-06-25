@@ -41,7 +41,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class LibreOfficeQueueTransformServiceTest extends AbstractQueueTransformServiceIT
+public class LibreOfficeQueueTransformServiceIT extends AbstractQueueTransformServiceIT
 {
     @Override
     protected TransformRequest buildRequest()

@@ -10,6 +10,8 @@ spring:
     pool:
       enabled: true
       max-connections: 20
+  jackson:
+    default-property-inclusion: non_empty
 
 server:
   port: 8090
@@ -22,6 +24,7 @@ logging:
     org.alfresco.transformer.AlfrescoPdfRendererController: debug
     org.alfresco.transformer.ImageMagickController: debug
     org.alfresco.transformer.TikaController: debug
+    org.alfresco.transformer.MiscellaneousTransformersController: debug
 
 fileStoreUrl: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
 

@@ -10,6 +10,10 @@ echo "${QUAY_PASSWORD}" | docker login -u="alfresco+bamboo" --password-stdin qua
 echo "${DOCKERHUB_PASSWORD}" | docker login -u=${DOCKERHUB_USERNAME} --password-stdin docker.io
 find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
 
+# Enable experimental docker features (e.g. squash options)
+echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
+sudo service docker restart
+
 popd
 set +vex
 echo "=========================== Finishing Init Script =========================="

@@ -39,6 +39,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin.external.google</groupId>
+                    <artifactId>android-json</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
@@ -79,12 +85,12 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.60</version>
+            <version>1.62</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcmail-jdk15on</artifactId>
-            <version>1.60</version>
+            <version>1.62</version>
         </dependency>
 
         <!-- Apache POI -->
@@ -122,7 +128,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${dependency.spring-boot.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -130,6 +135,14 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -144,6 +157,9 @@
                             <name>${image.name}:${image.tag}</name>
                             <build>
                                 <dockerFileDir>${project.basedir}/</dockerFileDir>
+                                <buildOptions>
+                                    <squash>true</squash>
+                                </buildOptions>
                             </build>
                         </image>
                     </images>
@@ -154,6 +170,19 @@
 
 
     <profiles>
+        <profile>
+            <id>docker-it-setup</id>
+            <!-- raises an ActiveMq container for the Integration Tests -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <profile>
             <id>local</id>
             <build>
@@ -190,6 +219,9 @@
                                     <registry>${image.registry}</registry>
                                     <build>
                                         <dockerFileDir>${project.basedir}/</dockerFileDir>
+                                        <buildOptions>
+                                            <squash>true</squash>
+                                        </buildOptions>
                                     </build>
                                 </image>
                                 <!-- DockerHub image -->
@@ -197,6 +229,9 @@
                                     <name>${image.name}:${image.tag}</name>
                                     <build>
                                         <dockerFileDir>${project.basedir}/</dockerFileDir>
+                                        <buildOptions>
+                                            <squash>true</squash>
+                                        </buildOptions>
                                     </build>
                                 </image>
                             </images>
@@ -231,6 +266,9 @@
                                     <registry>${image.registry}</registry>
                                     <build>
                                         <dockerFileDir>${project.basedir}/</dockerFileDir>
+                                        <buildOptions>
+                                            <squash>true</squash>
+                                        </buildOptions>
                                     </build>
                                 </image>
                                 <!-- DockerHub image -->
@@ -238,6 +276,9 @@
                                     <name>${image.name}:${project.version}</name>
                                     <build>
                                         <dockerFileDir>${project.basedir}/</dockerFileDir>
+                                        <buildOptions>
+                                            <squash>true</squash>
+                                        </buildOptions>
                                     </build>
                                 </image>
                             </images>

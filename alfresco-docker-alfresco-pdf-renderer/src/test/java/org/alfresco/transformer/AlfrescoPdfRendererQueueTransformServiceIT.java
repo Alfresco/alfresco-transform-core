@@ -26,8 +26,8 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_PNG;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
 
 import java.util.UUID;
 
@@ -42,16 +42,16 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ImageMagickQueueTransformServiceTest extends AbstractQueueTransformServiceIT
+public class AlfrescoPdfRendererQueueTransformServiceIT extends AbstractQueueTransformServiceIT
 {
     @Override
     protected TransformRequest buildRequest()
     {
         return TransformRequest.builder()
             .withRequestId(UUID.randomUUID().toString())
-            .withSourceMediaType(MIMETYPE_IMAGE_PNG)
-            .withTargetMediaType(MIMETYPE_IMAGE_JPEG)
-            .withTargetExtension("jpeg")
+            .withSourceMediaType(MIMETYPE_OPENXML_WORDPROCESSING)
+            .withTargetMediaType(MIMETYPE_PDF)
+            .withTargetExtension("pdf")
             .withSchema(1)
             .withClientData("ACS")
             .withSourceReference(UUID.randomUUID().toString())

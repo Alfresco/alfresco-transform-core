@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.1.RELEASE</version>
+        <version>2.1.6.RELEASE</version>
         <relativePath />
     </parent>
 
@@ -17,15 +17,15 @@
     <properties>
         <java.version>1.8</java.version>
         <image.tag>latest</image.tag>
-        <dependency.pdfbox.version>2.0.12</dependency.pdfbox.version>
-        <dependency.spring-boot.version>2.1.1.RELEASE</dependency.spring-boot.version>
-        <dependency.alfresco-core.version>7.3</dependency.alfresco-core.version>
-        <dependency.alfresco-data-model.version>8.8</dependency.alfresco-data-model.version>
+        <dependency.pdfbox.version>2.0.15</dependency.pdfbox.version>
+        <dependency.alfresco-core.version>7.17</dependency.alfresco-core.version>
+        <dependency.alfresco-data-model.version>8.39</dependency.alfresco-data-model.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
-        <dependency.alfresco-transform-model.version>1.0.2.2</dependency.alfresco-transform-model.version>
+        <dependency.alfresco-transform-model.version>1.0.2.3</dependency.alfresco-transform-model.version>
         <dependency.activemq.version>5.15.9</dependency.activemq.version>
-        <dependency.jackson.version>2.9.8</dependency.jackson.version>
+        <dependency.jackson.version>2.9.9</dependency.jackson.version>
+        <dependency.cxf.version>3.2.9</dependency.cxf.version>
     </properties>
 
     <modules>
@@ -34,6 +34,7 @@
         <module>alfresco-docker-alfresco-pdf-renderer</module>
         <module>alfresco-docker-imagemagick</module>
         <module>alfresco-docker-libreoffice</module>
+        <module>alfresco-docker-transform-misc</module>
     </modules>
 
     <scm>
@@ -78,8 +79,28 @@
             <!-- via Data Model / OpenCMIS Client -->
             <dependency>
                 <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-core</artifactId>
+                <version>${dependency.cxf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-rs-client</artifactId>
+                <version>${dependency.cxf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-frontend-jaxws</artifactId>
+                <version>${dependency.cxf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-rt-transports-http</artifactId>
-                <version>3.2.6</version>
+                <version>${dependency.cxf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-ws-policy</artifactId>
+                <version>${dependency.cxf.version}</version>
             </dependency>
             <!-- Jackson -->
             <dependency>
@@ -118,6 +139,29 @@
                 <artifactId>activemq-client</artifactId>
                 <version>${dependency.activemq.version}</version>
             </dependency>
+            <!-- Google Guava -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>28.0-jre</version>
+            </dependency>
+            <!-- Junrar & compression -->
+            <dependency>
+                <groupId>com.github.junrar</groupId>
+                <artifactId>junrar</artifactId>
+                <version>1.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>1.18</version>
+            </dependency>
+            <!-- Jsoup -->
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>1.12.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -137,7 +181,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.1.0</version>
                 <configuration>
                     <doclint>none</doclint>
                 </configuration>
@@ -161,7 +205,12 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>1.16</version>
+                    <version>1.20</version>
+                    <configuration>
+                        <inceptionYear>2005</inceptionYear>
+                        <organizationName>Alfresco Software Limited</organizationName>
+                        <projectName>Alfresco Transform Core</projectName>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>third-party-licenses</id>
@@ -182,9 +231,6 @@
                             </goals>
                             <phase>process-sources</phase>
                             <configuration>
-                                <inceptionYear>2005</inceptionYear>
-                                <organizationName>Alfresco Software Limited</organizationName>
-                                <projectName>Alfresco Transform Core</projectName>
                                 <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
                                 <canUpdateCopyright>true</canUpdateCopyright>
                                 <canUpdateDescription>true</canUpdateDescription>
@@ -205,9 +251,99 @@
                     </executions>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <forkCount>1</forkCount>
+                        <reuseForks>true</reuseForks>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>default-test</id>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <phase>test</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <configuration>
+                        <forkCount>1</forkCount>
+                        <reuseForks>true</reuseForks>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>fabric8-maven-plugin</artifactId>
-                    <version>3.5.42</version>
+                    <version>4.1.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>0.30.0</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <apiVersion>1.29</apiVersion>
+                        <imagePullPolicy>Always</imagePullPolicy>
+                        <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
+                        <!--<dockerHost>tcp://127.0.0.1:2376</dockerHost>-->
+                        <images>
+                            <image>
+                                <alias>activemq</alias>
+                                <name>alfresco/alfresco-activemq:5.15.6</name>
+                                <run>
+                                    <hostname>activemq</hostname>
+                                    <network>
+                                        <name>transform</name>
+                                        <alias>activemq</alias>
+                                    </network>
+                                    <ports>
+                                        <port>8161:8161</port>
+                                        <port>5672:5672</port>
+                                        <port>61616:61616</port>
+                                    </ports>
+                                    <wait>
+                                        <log>Apache ActiveMQ 5.15.6 .* started</log>
+                                        <time>20000</time>
+                                        <kill>500</kill>
+                                        <shutdown>100</shutdown>
+                                        <exec>
+                                            <preStop>kill 1</preStop>
+                                            <preStop>kill -9 1</preStop>
+                                        </exec>
+                                    </wait>
+                                </run>
+                            </image>
+                        </images>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>before-integration-tests</id>
+                            <phase>pre-integration-test</phase>
+                            <goals>
+                                <!--<goal>stop</goal>-->
+                                <goal>start</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>after-integration-tests</id>
+                            <phase>post-integration-test</phase>
+                            <goals>
+                                <goal>stop</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
