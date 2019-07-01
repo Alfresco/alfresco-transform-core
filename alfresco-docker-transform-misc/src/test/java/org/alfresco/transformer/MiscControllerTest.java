@@ -155,7 +155,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     }
 
     @Test
-    public void testStringtoString() throws Exception
+    public void testStringToString() throws Exception
     {
         String expected = null;
         byte[] content = null;
@@ -179,6 +179,23 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
 
         String contentResult = new String(result.getResponse().getContentAsByteArray(), targetEncoding);
         assertTrue("The content did not include \""+expected, contentResult.contains(expected));
+    }
+
+    @Test
+    public void testEmptyTextFileReturnsEmptyFile() throws Exception
+    {
+        // Use empty content to create an empty source file
+        byte[] content  = new byte[0];
+
+        MvcResult result = sendText("txt",
+                "UTF-8",
+                MIMETYPE_TEXT_PLAIN,
+                "txt",
+                MIMETYPE_TEXT_PLAIN,
+                "UTF-8",
+                content);
+
+        assertEquals("Returned content should be empty for an empty source file", 0, result.getResponse().getContentLength());
     }
 
     @Test
