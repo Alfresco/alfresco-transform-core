@@ -63,7 +63,7 @@ public class SelectingTransformer
         transformers.add(new HtmlParserContentTransformer());
         transformers.add(new StringExtractingContentTransformer());
         transformers.add(new TextToPdfContentTransformer());
-//        transformers.add(new OOXMLThumbnailContentTransformer()); // Doesn't work with java 11, comment put and disabled test
+//        transformers.add(new OOXMLThumbnailContentTransformer()); // Doesn't work with java 11, transformer and test disabled
     }
 
     /**
@@ -90,10 +90,15 @@ public class SelectingTransformer
         {
             throw new TransformException(INTERNAL_SERVER_ERROR.value(), getMessage(e));
         }
-        if (!targetFile.exists() || targetFile.length() == 0)
+        if (!targetFile.exists())
         {
             throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                    "Transformer failed to create an output file");
+                    "Transformer failed to create an output file. Target file does not exist.");
+        }
+        if (sourceFile.length() > 0 && targetFile.length() == 0)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                    "Transformer failed to create an output file. Target file is empty but source file was not empty.");
         }
     }
 
@@ -104,6 +109,11 @@ public class SelectingTransformer
         {
             if (transformer.isTransformable(sourceMimetype, targetMimetype, parameters))
             {
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Using " + transformer.getClass().getName()
+                            + " to transform from " + sourceMimetype + " to " + targetMimetype );
+                }
                 return transformer;
             }
         }
