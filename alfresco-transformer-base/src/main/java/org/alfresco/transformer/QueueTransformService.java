@@ -38,6 +38,7 @@ import org.alfresco.transformer.messaging.TransformReplySender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.support.converter.MessageConversionException;
@@ -55,6 +56,7 @@ import java.util.Optional;
  * created on 18/12/2018
  */
 @Component
+@ConditionalOnProperty(name="activemq.url")
 public class QueueTransformService
 {
     private static final Logger logger = LoggerFactory.getLogger(QueueTransformService.class);

@@ -40,7 +40,8 @@ import org.springframework.test.context.junit4.SpringRunner;
  * created on 15/01/2019
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+                properties = {"activemq.url=nio://localhost:61616"})
 public class LibreOfficeQueueTransformServiceIT extends AbstractQueueTransformServiceIT
 {
     @Override
