@@ -1,6 +1,5 @@
 # Image provides a container in which to run alfresco-pdf-renderer transformations for Alfresco Enterprise Content Services.
 
-# The container is only intended to be used with the Alfresco Enterprise editon which is covered by https://www.alfresco.com/legal/agreements and https://www.alfresco.com/terms-use.
 # alfresco-pdf-renderer uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt.
 
 FROM alfresco/alfresco-base-java:11.0.1-openjdk-centos-7-f410546b40ea
