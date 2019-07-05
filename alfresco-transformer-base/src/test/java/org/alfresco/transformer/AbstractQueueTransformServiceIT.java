@@ -26,11 +26,7 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
 import static org.junit.Assert.assertEquals;
-
-import java.util.UUID;
 
 import javax.jms.Queue;
 
@@ -49,7 +45,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * created on 15/01/2019
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(properties = {"activemq.url=nio://localhost:61616"})
 public abstract class AbstractQueueTransformServiceIT
 {
     @Autowired
