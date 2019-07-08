@@ -1,4 +1,4 @@
-# Image provides a container in which to run Tika transformations for Alfresco Enterprise Content Services.
+# Image provides a container in which to run Tika transformations for Alfresco Content Services.
 
 # Tika is from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0.
 

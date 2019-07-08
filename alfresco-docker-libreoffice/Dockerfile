@@ -1,4 +1,4 @@
-# Image provides a container in which to run LibreOffice transformations for Alfresco Enterprise Content Services.
+# Image provides a container in which to run LibreOffice transformations for Alfresco Content Services.
 
 # LibreOffice is from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt.
 
