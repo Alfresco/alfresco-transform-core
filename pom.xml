@@ -52,12 +52,12 @@
                 <artifactId>alfresco-core</artifactId>
                 <version>${dependency.alfresco-core.version}</version>
                 <!--
-                TODO temp workaround for ATS-481 / REPO-4514
+                TODO temp workaround for ATS-481 / REPO-4514 (exclude: dom4j.dom4j 1.6.1 / include org.dom4j.dom4j 2.1.1)
                 TODO remove this workaround once transitive dependencies have been fixed (surf-core-configservice -> alfresco-core)
                 -->
                 <exclusions>
                     <exclusion>
-                        <groupId>org</groupId>
+                        <groupId>dom4j</groupId>
                         <artifactId>dom4j</artifactId>
                     </exclusion>
                 </exclusions>
