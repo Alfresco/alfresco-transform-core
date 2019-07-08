@@ -1,3 +1,4 @@
+---
 spring:
   servlet:
     multipart:
@@ -18,7 +19,7 @@ server:
 
 logging:
   level:
-    #org.alfresco.util.exec.RuntimeExec: debug
+    # org.alfresco.util.exec.RuntimeExec: debug
     org.alfresco.transformer.LibreOfficeController: debug
     org.alfresco.transformer.JodConverterSharedInstance: debug
     org.alfresco.transformer.AlfrescoPdfRendererController: debug
@@ -36,9 +37,9 @@ management:
     web:
       exposure:
         include:
-        - metrics
-        - prometheus
-        - health
+          - metrics
+          - prometheus
+          - health
   metrics:
     enable[http]: false
     enable[logback]: false
