@@ -34,6 +34,7 @@ import org.apache.activemq.command.ActiveMQQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.JmsListenerConfigurer;
@@ -52,6 +53,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * created on 18/12/2018
  */
 @Configuration
+@ConditionalOnProperty(name = "activemq.url")
 public class MessagingConfig implements JmsListenerConfigurer
 {
     private static final Logger logger = LoggerFactory.getLogger(MessagingConfig.class);
@@ -63,6 +65,7 @@ public class MessagingConfig implements JmsListenerConfigurer
     }
 
     @Bean
+    @ConditionalOnProperty(name = "activemq.url")
     public DefaultMessageHandlerMethodFactory methodFactory()
     {
         DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
@@ -71,6 +74,7 @@ public class MessagingConfig implements JmsListenerConfigurer
     }
 
     @Bean
+    @ConditionalOnProperty(name = "activemq.url")
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(
         final ConnectionFactory connectionFactory,
         final TransformMessageConverter transformMessageConverter)
@@ -84,6 +88,7 @@ public class MessagingConfig implements JmsListenerConfigurer
     }
 
     @Bean
+    @ConditionalOnProperty(name = "activemq.url")
     public PlatformTransactionManager transactionManager(final ConnectionFactory connectionFactory)
     {
         final JmsTransactionManager transactionManager = new JmsTransactionManager();
@@ -92,6 +97,7 @@ public class MessagingConfig implements JmsListenerConfigurer
     }
 
     @Bean
+    @ConditionalOnProperty(name = "activemq.url")
     public Queue engineRequestQueue(@Value("${queue.engineRequestQueue}") String engineRequestQueueValue)
     {
         return new ActiveMQQueue(engineRequestQueueValue);
