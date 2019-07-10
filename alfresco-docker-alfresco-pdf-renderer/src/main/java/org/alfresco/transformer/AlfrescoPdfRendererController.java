@@ -30,7 +30,7 @@ import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
-import static org.alfresco.transformer.logging.StandardMessages.ENTERPRISE_LICENCE;
+import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.io.File;
@@ -85,7 +85,7 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
     public AlfrescoPdfRendererController()
     {
         logger.info("-----------------------------------------------------------------------------------------------------------------------------------------------------------");
-        Arrays.stream(ENTERPRISE_LICENCE.split("\\n")).forEach(logger::info);
+        Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
         logger.info("alfresco-pdf-renderer uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt");
         logger.info("-----------------------------------------------------------------------------------------------------------------------------------------------------------");
     }
