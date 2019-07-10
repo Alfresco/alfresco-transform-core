@@ -14,6 +14,7 @@
     <version>2.1.0-EA4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+
     <properties>
         <java.version>1.8</java.version>
         <image.tag>latest</image.tag>
