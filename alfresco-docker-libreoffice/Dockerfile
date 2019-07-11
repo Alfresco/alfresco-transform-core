@@ -1,9 +1,8 @@
-# Image provides a container in which to run LibreOffice transformations for Alfresco Enterprise Content Services.
+# Image provides a container in which to run LibreOffice transformations for Alfresco Content Services.
 
-# The container is only intended to be used with the Alfresco Enterprise editon which is covered by https://www.alfresco.com/legal/agreements and https://www.alfresco.com/terms-use.
 # LibreOffice is from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt.
 
-FROM alfresco/alfresco-base-java:11.0.1-openjdk-centos-7-3e4e9f4e5d6a
+FROM alfresco/alfresco-base-java:11.0.1-openjdk-centos-7-6784d76a7b81
 
 ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/5.4.6/libreoffice-dist-5.4.6-linux.gz
 ENV LIBREOFFICE_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/libreoffice.txt

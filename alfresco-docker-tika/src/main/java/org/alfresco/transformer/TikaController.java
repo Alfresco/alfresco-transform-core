@@ -37,7 +37,7 @@ import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
-import static org.alfresco.transformer.logging.StandardMessages.ENTERPRISE_LICENCE;
+import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
 import static org.alfresco.transformer.util.Util.stringToBoolean;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
@@ -96,7 +96,7 @@ public class TikaController extends AbstractTransformerController
     public TikaController()
     {
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-        Arrays.stream(ENTERPRISE_LICENCE.split("\\n")).forEach(logger::info);
+        Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
         logger.info("Tika is from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt");
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
     }

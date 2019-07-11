@@ -24,12 +24,33 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer.logging;
+package org.alfresco.transformer.messaging;
 
-public interface StandardMessages
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Prints JMS status information at application startup.
+ *
+ * @author Cezar Leahu
+ */
+@Configuration
+public class MessagingInfo
 {
-    String LICENCE =
-        "License rights for this program may be obtained from Alfresco Software, Ltd. pursuant to a written agreement\n" +
-        "and any use of this program without such an agreement is prohibited.\n" +
-        "\n" ;
+    private static final Logger logger = LoggerFactory.getLogger(MessagingInfo.class);
+
+    @Value("${activemq.url:}")
+    private String activemqUrl;
+
+    @PostConstruct
+    public void init()
+    {
+        final boolean jms = activemqUrl != null && !activemqUrl.isBlank();
+        logger.info("JMS client is {}, activemq.url: '{}'", jms ? "ENABLED" : "DISABLED",
+            activemqUrl);
+    }
 }

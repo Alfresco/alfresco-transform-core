@@ -30,7 +30,7 @@ import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
-import static org.alfresco.transformer.logging.StandardMessages.ENTERPRISE_LICENCE;
+import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
 import static org.alfresco.transformer.util.Util.stringToInteger;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -88,7 +88,7 @@ public class ImageMagickController extends AbstractTransformerController
     public ImageMagickController()
     {
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-        Arrays.stream(ENTERPRISE_LICENCE.split("\\n")).forEach(logger::info);
+        Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
         logger.info("This transformer uses ImageMagick from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt");
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
     }

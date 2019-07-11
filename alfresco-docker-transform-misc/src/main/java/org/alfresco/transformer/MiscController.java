@@ -26,9 +26,26 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transformer.transformers.SelectingTransformer;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transformer.fs.FileManager.createAttachment;
+import static org.alfresco.transformer.fs.FileManager.createSourceFile;
+import static org.alfresco.transformer.fs.FileManager.createTargetFile;
+import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
+import static org.alfresco.transformer.transformers.HtmlParserContentTransformer.SOURCE_ENCODING;
+import static org.alfresco.transformer.transformers.HtmlParserContentTransformer.TARGET_ENCODING;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.alfresco.transformer.transformers.SelectingTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,24 +55,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transformer.transformers.HtmlParserContentTransformer.SOURCE_ENCODING;
-import static org.alfresco.transformer.transformers.HtmlParserContentTransformer.TARGET_ENCODING;
-import static org.alfresco.transformer.fs.FileManager.createAttachment;
-import static org.alfresco.transformer.fs.FileManager.createSourceFile;
-import static org.alfresco.transformer.fs.FileManager.createTargetFile;
-import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
-import static org.alfresco.transformer.logging.StandardMessages.ENTERPRISE_LICENCE;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @Controller
 public class MiscController extends AbstractTransformerController
