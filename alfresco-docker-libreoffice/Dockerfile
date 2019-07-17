@@ -4,7 +4,7 @@
 
 FROM alfresco/alfresco-base-java:11.0.1-openjdk-centos-7-6784d76a7b81
 
-ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/5.4.6/libreoffice-dist-5.4.6-linux.gz
+ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/6.1.6/libreoffice-dist-6.1.6-linux.gz
 ENV LIBREOFFICE_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/libreoffice.txt
 ENV JAVA_OPTS=""
 
@@ -18,8 +18,8 @@ COPY target/alfresco-docker-libreoffice-${env.project_version}.jar libreoffice-d
 
 RUN ln /alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin/alfresco-docker-libreoffice.jar && \
     yum install -y cairo cups-libs libSM && \
-    test -f libreoffice-dist-5.4.6-linux.gz && \
-    ln -s libreoffice-dist-5.4.6-linux.gz libreoffice-dist-linux.gz || \
+    test -f libreoffice-dist-6.1.6-linux.gz && \
+    ln -s libreoffice-dist-6.1.6-linux.gz libreoffice-dist-linux.gz || \
     curl -s -S $LIBREOFFICE_RPM_URL      -o libreoffice-dist-linux.gz && \
     curl -s -S $LIBREOFFICE_LICENSE_FILE -o libreoffice.txt && \
     tar xzf libreoffice-dist-linux.gz && \

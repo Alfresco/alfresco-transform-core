@@ -16,7 +16,7 @@ Contains the common transformer (T-Engine) code, plus a few actual implementatio
 
 The project can be built by running the Maven command:
 ```bash
-mvn clean install -Plocal
+mvn clean install -DskipTests -Plocal
 ```
 > The `local` Maven profile builds local Docker images for each T-Engine.
 
