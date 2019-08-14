@@ -54,11 +54,12 @@ public abstract class AbstractQueueTransformServiceIT
     @Autowired
     private JmsTemplate jmsTemplate;
 
-    private final ActiveMQQueue testingQueue = new ActiveMQQueue("org.alfresco.transform.engine.IT");
+    private final ActiveMQQueue testingQueue = new ActiveMQQueue(
+        "org.alfresco.transform.engine.IT");
 
     @Test
-    public void queueTransformServiceIT() {
-
+    public void queueTransformServiceIT()
+    {
         TransformRequest request = buildRequest();
 
         jmsTemplate.convertAndSend(engineRequestQueue, request, m -> {

@@ -456,25 +456,25 @@ public class Tika
     public static final String TEXT_MINING = "TextMining";
 
     public static final List<String> TRANSFORM_NAMES = asList(
-            ARCHIVE, OUTLOOK_MSG, PDF_BOX, POI_OFFICE, POI, POI_OO_XML, TIKA_AUTO, TEXT_MINING);
+        ARCHIVE, OUTLOOK_MSG, PDF_BOX, POI_OFFICE, POI, POI_OO_XML, TIKA_AUTO, TEXT_MINING);
 
     public static final String TARGET_MIMETYPE = "--targetMimetype=";
     public static final String TARGET_ENCODING = "--targetEncoding=";
     public static final String INCLUDE_CONTENTS = "--includeContents";
     public static final String NOT_EXTRACT_BOOKMARKS_TEXT = "--notExtractBookmarksText";
 
-    public static final String CSV     = "csv";
-    public static final String DOC     = "doc";
-    public static final String DOCX    = "docx";
-    public static final String HTML    = "html";
-    public static final String MSG     = "msg";
-    public static final String PDF     = "pdf";
-    public static final String PPTX    = "pptx";
-    public static final String TXT     = "txt";
-    public static final String XHTML   = "xhtml";
-    public static final String XSLX    = "xslx";
-    public static final String XML     = "xml";
-    public static final String ZIP     = "zip";
+    public static final String CSV = "csv";
+    public static final String DOC = "doc";
+    public static final String DOCX = "docx";
+    public static final String HTML = "html";
+    public static final String MSG = "msg";
+    public static final String PDF = "pdf";
+    public static final String PPTX = "pptx";
+    public static final String TXT = "txt";
+    public static final String XHTML = "xhtml";
+    public static final String XSLX = "xslx";
+    public static final String XML = "xml";
+    public static final String ZIP = "zip";
 
     private final Parser packageParser = new PackageParser();
     private final Parser pdfParser = new PDFParser();
@@ -486,7 +486,8 @@ public class Tika
 
     private DocumentSelector pdfBoxEmbededDocumentSelector = new DocumentSelector()
     {
-        private final List<String> disabledMediaTypes = asList(MIMETYPE_IMAGE_JPEG, MIMETYPE_IMAGE_TIFF, MIMETYPE_IMAGE_PNG);
+        private final List<String> disabledMediaTypes = asList(MIMETYPE_IMAGE_JPEG,
+            MIMETYPE_IMAGE_TIFF, MIMETYPE_IMAGE_PNG);
 
         @Override
         public boolean select(Metadata metadata)
@@ -518,16 +519,16 @@ public class Tika
         }
         catch (IllegalArgumentException e)
         {
-            System.err.println("ERROR "+e.getMessage());
+            System.err.println("ERROR " + e.getMessage());
             System.exit(-1);
         }
         catch (IllegalStateException | TikaException | IOException | SAXException e)
         {
-            System.err.println("ERROR "+e.getMessage());
+            System.err.println("ERROR " + e.getMessage());
             e.printStackTrace();
             System.exit(-2);
         }
-        System.out.println("Finished in "+(System.currentTimeMillis()-start)+"ms");
+        System.out.println("Finished in " + (System.currentTimeMillis() - start) + "ms");
     }
 
     // Extracts parameters form args
@@ -541,7 +542,7 @@ public class Tika
         Boolean includeContents = null;
         Boolean notExtractBookmarksText = null;
 
-        for (String arg: args)
+        for (String arg : args)
         {
             if (arg.startsWith("--"))
             {
@@ -565,7 +566,7 @@ public class Tika
                 }
                 else
                 {
-                    throw new IllegalArgumentException("Unexpected argument "+arg);
+                    throw new IllegalArgumentException("Unexpected argument " + arg);
                 }
             }
             else
@@ -584,7 +585,7 @@ public class Tika
                 }
                 else
                 {
-                    throw new IllegalArgumentException("Unexpected argument "+arg);
+                    throw new IllegalArgumentException("Unexpected argument " + arg);
                 }
             }
         }
@@ -593,71 +594,73 @@ public class Tika
             throw new IllegalArgumentException("Missing arguments");
         }
         includeContents = includeContents == null ? false : includeContents;
-        notExtractBookmarksText = notExtractBookmarksText == null ? false : notExtractBookmarksText; 
+        notExtractBookmarksText = notExtractBookmarksText == null ? false : notExtractBookmarksText;
 
-        transform(transform, includeContents, notExtractBookmarksText, sourceFilename, targetFilename, targetMimetype, targetEncoding);
+        transform(transform, includeContents, notExtractBookmarksText, sourceFilename,
+            targetFilename, targetMimetype, targetEncoding);
     }
 
     private String getValue(String arg, boolean valueExpected, Object value, String optionName)
     {
         if (value != null)
         {
-            throw new IllegalArgumentException("Duplicate "+optionName);
+            throw new IllegalArgumentException("Duplicate " + optionName);
         }
         String stringValue = arg.substring(optionName.length()).trim();
         if (!valueExpected && stringValue.length() > 0)
         {
-            throw new IllegalArgumentException("Unexpected value with "+optionName);
+            throw new IllegalArgumentException("Unexpected value with " + optionName);
         }
         if (valueExpected && stringValue.length() == 0)
         {
-            throw new IllegalArgumentException("Expected value with "+optionName);
+            throw new IllegalArgumentException("Expected value with " + optionName);
         }
         return stringValue;
     }
 
     // Adds transform specific values such as parser and documentSelector.
     private void transform(String transform, Boolean includeContents,
-                           Boolean notExtractBookmarksText,
-                           String sourceFilename,
-                           String targetFilename, String targetMimetype, String targetEncoding)
+        Boolean notExtractBookmarksText,
+        String sourceFilename,
+        String targetFilename, String targetMimetype, String targetEncoding)
     {
         Parser parser = null;
         DocumentSelector documentSelector = null;
 
-        switch(transform)
+        switch (transform)
         {
-            case ARCHIVE:
-                parser = packageParser;
-                break;
-            case OUTLOOK_MSG:
-            case POI_OFFICE:
-            case TEXT_MINING:
-                parser = officeParser;
-                break;
-            case PDF_BOX:
-                parser = pdfParser;
-                documentSelector = pdfBoxEmbededDocumentSelector;
-                break;
-            case POI:
-                parser = tikaOfficeDetectParser;
-                break;
-            case POI_OO_XML:
-                parser = ooXmlParser;
-                break;
-            case TIKA_AUTO:
-                parser = autoDetectParser;
-                break;
+        case ARCHIVE:
+            parser = packageParser;
+            break;
+        case OUTLOOK_MSG:
+        case POI_OFFICE:
+        case TEXT_MINING:
+            parser = officeParser;
+            break;
+        case PDF_BOX:
+            parser = pdfParser;
+            documentSelector = pdfBoxEmbededDocumentSelector;
+            break;
+        case POI:
+            parser = tikaOfficeDetectParser;
+            break;
+        case POI_OO_XML:
+            parser = ooXmlParser;
+            break;
+        case TIKA_AUTO:
+            parser = autoDetectParser;
+            break;
         }
 
-        transform(parser, documentSelector, includeContents, notExtractBookmarksText, sourceFilename, targetFilename, targetMimetype, targetEncoding);
+        transform(parser, documentSelector, includeContents, notExtractBookmarksText,
+            sourceFilename, targetFilename, targetMimetype, targetEncoding);
     }
 
-
-    private void transform(Parser parser, DocumentSelector documentSelector, Boolean includeContents,
-                           Boolean notExtractBookmarksText,
-                           String sourceFilename,
-                           String targetFilename, String targetMimetype, String targetEncoding)
+    private void transform(Parser parser, DocumentSelector documentSelector,
+        Boolean includeContents,
+        Boolean notExtractBookmarksText,
+        String sourceFilename,
+        String targetFilename, String targetMimetype, String targetEncoding)
     {
 
         try (InputStream is = new BufferedInputStream(new FileInputStream(sourceFilename));
@@ -688,7 +691,7 @@ public class Tika
             }
             else
             {
-                SAXTransformerFactory factory = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
+                SAXTransformerFactory factory = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
                 TransformerHandler transformerHandler;
                 transformerHandler = factory.newTransformerHandler();
                 transformerHandler.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");
@@ -725,42 +728,52 @@ public class Tika
     /**
      * A wrapper around the normal Tika BodyContentHandler for CSV rather encoding than tab separated.
      */
-    protected static class CsvContentHandler extends BodyContentHandler {
-        private static final char[] comma = new char[]{ ',' };
+    protected static class CsvContentHandler extends BodyContentHandler
+    {
+        private static final char[] comma = new char[]{','};
         private static final Pattern all_nums = Pattern.compile("[\\d\\.\\-\\+]+");
 
         private boolean inCell = false;
         private boolean needsComma = false;
 
-        protected CsvContentHandler(Writer output) {
+        protected CsvContentHandler(Writer output)
+        {
             super(output);
         }
 
         @Override
         public void ignorableWhitespace(char[] ch, int start, int length)
-                throws SAXException {
-            if(length == 1 && ch[0] == '\t') {
+            throws SAXException
+        {
+            if (length == 1 && ch[0] == '\t')
+            {
                 // Ignore tabs, as they mess up the CSV output
-            } else {
+            }
+            else
+            {
                 super.ignorableWhitespace(ch, start, length);
             }
         }
 
         @Override
         public void characters(char[] ch, int start, int length)
-                throws SAXException {
-            if(inCell) {
-                StringBuffer t = new StringBuffer(new String(ch,start,length));
+            throws SAXException
+        {
+            if (inCell)
+            {
+                StringBuffer t = new StringBuffer(new String(ch, start, length));
 
                 // Quote if not all numbers
-                if(all_nums.matcher(t).matches())
+                if (all_nums.matcher(t).matches())
                 {
                     super.characters(ch, start, length);
                 }
                 else
                 {
-                    for(int i=t.length()-1; i>=0; i--) {
-                        if(t.charAt(i) == '\"') {
+                    for (int i = t.length() - 1; i >= 0; i--)
+                    {
+                        if (t.charAt(i) == '\"')
+                        {
                             // Double up double quotes
                             t.insert(i, '\"');
                             i--;
@@ -771,33 +784,45 @@ public class Tika
                     char[] c = t.toString().toCharArray();
                     super.characters(c, 0, c.length);
                 }
-            } else {
+            }
+            else
+            {
                 super.characters(ch, start, length);
             }
         }
 
         @Override
         public void startElement(String uri, String localName, String name,
-                                 Attributes atts) throws SAXException {
-            if(localName.equals("td")) {
+            Attributes atts) throws SAXException
+        {
+            if (localName.equals("td"))
+            {
                 inCell = true;
-                if(needsComma) {
+                if (needsComma)
+                {
                     super.characters(comma, 0, 1);
                     needsComma = true;
                 }
-            } else {
+            }
+            else
+            {
                 super.startElement(uri, localName, name, atts);
             }
         }
 
         @Override
         public void endElement(String uri, String localName, String name)
-                throws SAXException {
-            if(localName.equals("td")) {
+            throws SAXException
+        {
+            if (localName.equals("td"))
+            {
                 needsComma = true;
                 inCell = false;
-            } else {
-                if(localName.equals("tr")) {
+            }
+            else
+            {
+                if (localName.equals("tr"))
+                {
                     needsComma = false;
                 }
                 super.endElement(uri, localName, name);
@@ -830,5 +855,4 @@ public class Tika
 
         return context;
     }
-
 }

@@ -37,18 +37,18 @@ public class FileRefEntity
 {
     private String fileRef;
 
-    public FileRefEntity()
-    {
-    }
+    public FileRefEntity() {}
 
     public FileRefEntity(String fileRef)
     {
         this.fileRef = fileRef;
     }
 
-    public void setFileRef(String fileRef){
+    public void setFileRef(String fileRef)
+    {
         this.fileRef = fileRef;
     }
+
     public String getFileRef()
     {
         return fileRef;

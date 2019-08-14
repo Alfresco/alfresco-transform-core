@@ -95,10 +95,13 @@ public class TikaController extends AbstractTransformerController
     @Autowired
     public TikaController()
     {
-        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        logger.info(
+            "--------------------------------------------------------------------------------------------------------------------------------------------------------------");
         Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
-        logger.info("Tika is from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt");
-        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        logger.info(
+            "Tika is from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt");
+        logger.info(
+            "--------------------------------------------------------------------------------------------------------------------------------------------------------------");
     }
 
     @Override
@@ -149,7 +152,8 @@ public class TikaController extends AbstractTransformerController
             throw new TransformException(BAD_REQUEST.value(), "Invalid transform value");
         }
 
-        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(), targetExtension);
+        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(),
+            targetExtension);
         getProbeTestTransform().incrementTransformerCount();
         File sourceFile = createSourceFile(request, sourceMultipartFile);
         File targetFile = createTargetFile(request, targetFilename);

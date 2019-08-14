@@ -56,7 +56,8 @@ public class TransformReplySender
         send(destination, reply, reply.getRequestId());
     }
 
-    public void send(final Destination destination, final TransformReply reply, final String correlationId)
+    public void send(final Destination destination, final TransformReply reply,
+        final String correlationId)
     {
         try
         {

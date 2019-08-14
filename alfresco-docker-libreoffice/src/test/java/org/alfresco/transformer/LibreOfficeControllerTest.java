@@ -94,15 +94,19 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
         // The following is based on super.mockTransformCommand(...)
         // This is because LibreOffice used JodConverter rather than a RuntimeExec
 
-        expectedSourceFileBytes = Files.readAllBytes(getTestFile("quick." + sourceExtension, true).toPath());
-        expectedTargetFileBytes = Files.readAllBytes(getTestFile("quick." + targetExtension, true).toPath());
-        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, expectedSourceFileBytes);
+        expectedSourceFileBytes = Files.readAllBytes(
+            getTestFile("quick." + sourceExtension, true).toPath());
+        expectedTargetFileBytes = Files.readAllBytes(
+            getTestFile("quick." + targetExtension, true).toPath());
+        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
+            expectedSourceFileBytes);
 
         doAnswer(invocation ->
         {
             File sourceFile = invocation.getArgument(0);
             File targetFile = invocation.getArgument(1);
-            String actualTargetExtension = StringUtils.getFilenameExtension(targetFile.getAbsolutePath());
+            String actualTargetExtension = StringUtils.getFilenameExtension(
+                targetFile.getAbsolutePath());
 
             assertNotNull(sourceFile);
             assertNotNull(targetFile);
@@ -119,7 +123,8 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 
             // Check the supplied source file has not been changed.
             byte[] actualSourceFileBytes = Files.readAllBytes(sourceFile.toPath());
-            assertTrue("Source file is not the same", Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes));
+            assertTrue("Source file is not the same",
+                Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes));
 
             return null;
         }).when(javaExecutor).convert(any(), any());
@@ -143,11 +148,14 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
     {
         doThrow(OfficeException.class).when(javaExecutor).convert(any(), any());
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/transform")
-                                              .file(sourceFile)
-                                              .param("targetExtension", "xxx"))
-               .andExpect(status().is(400))
-               .andExpect(status().reason(containsString("LibreOffice - LibreOffice server conversion failed:")));
+        mockMvc
+            .perform(MockMvcRequestBuilders
+                .multipart("/transform")
+                .file(sourceFile)
+                .param("targetExtension", "xxx"))
+            .andExpect(status().is(400))
+            .andExpect(status().reason(
+                containsString("LibreOffice - LibreOffice server conversion failed:")));
     }
 
     @Override

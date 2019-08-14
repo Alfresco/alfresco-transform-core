@@ -26,15 +26,10 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.alfresco.transformer.logging.LogEntry;
-
 import java.io.File;
 import java.util.Map;
-import java.util.Set;
-import java.util.StringJoiner;
 
 /**
- *
  * Implemented by transformers used by {@link SelectingTransformer}.
  *
  * @author eknizat
@@ -48,21 +43,23 @@ public interface SelectableTransformer
 
     /**
      * Implementation of the actual transformation.
+     *
      * @param sourceFile
      * @param targetFile
      * @param parameters
      * @throws Exception
      */
-    public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws Exception;
-
+    void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws
+        Exception;
 
     /**
      * Determine whether this transformer is applicable for the given MIME types.
+     *
      * @param sourceMimetype
      * @param targetMimetype
      * @param parameters
      * @return
      */
-    public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters);
-
+    boolean isTransformable(String sourceMimetype, String targetMimetype,
+        Map<String, String> parameters);
 }

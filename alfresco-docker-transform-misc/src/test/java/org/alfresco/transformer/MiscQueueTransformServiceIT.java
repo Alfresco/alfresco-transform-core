@@ -26,15 +26,15 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
+
+import java.util.UUID;
+
 import org.alfresco.transform.client.model.TransformRequest;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.UUID;
-
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -44,14 +44,15 @@ public class MiscQueueTransformServiceIT extends AbstractQueueTransformServiceIT
     @Override
     protected TransformRequest buildRequest()
     {
-        return TransformRequest.builder()
-                .withRequestId(UUID.randomUUID().toString())
-                .withSourceMediaType(MIMETYPE_HTML)
-                .withTargetMediaType(MIMETYPE_TEXT_PLAIN)
-                .withTargetExtension("txt")
-                .withSchema(1)
-                .withClientData("ACS")
-                .withSourceReference(UUID.randomUUID().toString())
-                .withSourceSize(32L).build();
+        return TransformRequest
+            .builder()
+            .withRequestId(UUID.randomUUID().toString())
+            .withSourceMediaType(MIMETYPE_HTML)
+            .withTargetMediaType(MIMETYPE_TEXT_PLAIN)
+            .withTargetExtension("txt")
+            .withSchema(1)
+            .withClientData("ACS")
+            .withSourceReference(UUID.randomUUID().toString())
+            .withSourceSize(32L).build();
     }
 }

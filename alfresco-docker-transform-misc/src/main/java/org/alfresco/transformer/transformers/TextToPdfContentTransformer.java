@@ -26,14 +26,11 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.alfresco.error.AlfrescoRuntimeException;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.tools.TextToPDF;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_DITA;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_CSV;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_XML;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -49,14 +46,16 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_DITA;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_CSV;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_XML;
+import org.alfresco.error.AlfrescoRuntimeException;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.tools.TextToPDF;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
  * <p>
  * This code is based on a class of the same name originally implemented in alfresco-repository.
  * </p>
@@ -65,7 +64,7 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_XML;
  *
  * @author Derek Hulley
  * @author eknizat
-*/
+ */
 public class TextToPdfContentTransformer implements SelectableTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(TextToPdfContentTransformer.class);
@@ -83,11 +82,12 @@ public class TextToPdfContentTransformer implements SelectableTransformer
     {
         try
         {
-            transformer.setFont(transformer.getStandardFont(fontName));
+            transformer.setFont(PagedTextToPDF.getStandardFont(fontName));
         }
         catch (Throwable e)
         {
-            throw new AlfrescoRuntimeException("Unable to set Standard Font for PDF generation: " + fontName, e);
+            throw new AlfrescoRuntimeException(
+                "Unable to set Standard Font for PDF generation: " + fontName, e);
         }
     }
 
@@ -99,29 +99,32 @@ public class TextToPdfContentTransformer implements SelectableTransformer
         }
         catch (Throwable e)
         {
-            throw new AlfrescoRuntimeException("Unable to set Font Size for PDF generation: " + fontSize);
+            throw new AlfrescoRuntimeException(
+                "Unable to set Font Size for PDF generation: " + fontSize);
         }
     }
 
     @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
+    public boolean isTransformable(String sourceMimetype, String targetMimetype,
+        Map<String, String> parameters)
     {
-        boolean transformable =  ( (MIMETYPE_TEXT_PLAIN.equals(sourceMimetype)
-                || MIMETYPE_TEXT_CSV.equals(sourceMimetype)
-                || MIMETYPE_DITA.equals(sourceMimetype)
-                || MIMETYPE_XML.equals(sourceMimetype) )
-                && MIMETYPE_PDF.equals(targetMimetype));
+        boolean transformable = ((MIMETYPE_TEXT_PLAIN.equals(sourceMimetype)
+                                  || MIMETYPE_TEXT_CSV.equals(sourceMimetype)
+                                  || MIMETYPE_DITA.equals(sourceMimetype)
+                                  || MIMETYPE_XML.equals(sourceMimetype))
+                                 && MIMETYPE_PDF.equals(targetMimetype));
 
         return transformable;
     }
 
     @Override
-    public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws Exception
+    public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws
+        Exception
     {
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
         String stringPageLimit = parameters.get(PAGE_LIMIT);
         int pageLimit = -1;
-        if ( stringPageLimit != null)
+        if (stringPageLimit != null)
         {
             pageLimit = parseInt(stringPageLimit, PAGE_LIMIT);
         }
@@ -148,18 +151,19 @@ public class TextToPdfContentTransformer implements SelectableTransformer
     protected InputStreamReader buildReader(InputStream is, String encoding)
     {
         // If they gave an encoding, try to use it
-        if(encoding != null)
+        if (encoding != null)
         {
             Charset charset = null;
             try
             {
                 charset = Charset.forName(encoding);
-            } catch(Exception e)
+            }
+            catch (Exception e)
             {
                 logger.warn("JVM doesn't understand encoding '" + encoding +
-                        "' when transforming text to pdf");
+                            "' when transforming text to pdf");
             }
-            if(charset != null)
+            if (charset != null)
             {
                 logger.debug("Processing plain text in encoding " + charset.displayName());
                 return new InputStreamReader(is, charset);
@@ -175,24 +179,31 @@ public class TextToPdfContentTransformer implements SelectableTransformer
     {
         // REPO-1066: duplicating the following lines from org.apache.pdfbox.tools.TextToPDF because they made them private
         // before the upgrade to pdfbox 2.0.8, in pdfbox 1.8, this piece of code was public in org.apache.pdfbox.pdmodel.font.PDType1Font
-        static PDType1Font getStandardFont(String name) {
-            return (PDType1Font)STANDARD_14.get(name);
+        static PDType1Font getStandardFont(String name)
+        {
+            return STANDARD_14.get(name);
         }
+
         private static final Map<String, PDType1Font> STANDARD_14 = new HashMap<String, PDType1Font>();
+
         static
         {
             STANDARD_14.put(PDType1Font.TIMES_ROMAN.getBaseFont(), PDType1Font.TIMES_ROMAN);
             STANDARD_14.put(PDType1Font.TIMES_BOLD.getBaseFont(), PDType1Font.TIMES_BOLD);
             STANDARD_14.put(PDType1Font.TIMES_ITALIC.getBaseFont(), PDType1Font.TIMES_ITALIC);
-            STANDARD_14.put(PDType1Font.TIMES_BOLD_ITALIC.getBaseFont(), PDType1Font.TIMES_BOLD_ITALIC);
+            STANDARD_14.put(PDType1Font.TIMES_BOLD_ITALIC.getBaseFont(),
+                PDType1Font.TIMES_BOLD_ITALIC);
             STANDARD_14.put(PDType1Font.HELVETICA.getBaseFont(), PDType1Font.HELVETICA);
             STANDARD_14.put(PDType1Font.HELVETICA_BOLD.getBaseFont(), PDType1Font.HELVETICA_BOLD);
-            STANDARD_14.put(PDType1Font.HELVETICA_OBLIQUE.getBaseFont(), PDType1Font.HELVETICA_OBLIQUE);
-            STANDARD_14.put(PDType1Font.HELVETICA_BOLD_OBLIQUE.getBaseFont(), PDType1Font.HELVETICA_BOLD_OBLIQUE);
+            STANDARD_14.put(PDType1Font.HELVETICA_OBLIQUE.getBaseFont(),
+                PDType1Font.HELVETICA_OBLIQUE);
+            STANDARD_14.put(PDType1Font.HELVETICA_BOLD_OBLIQUE.getBaseFont(),
+                PDType1Font.HELVETICA_BOLD_OBLIQUE);
             STANDARD_14.put(PDType1Font.COURIER.getBaseFont(), PDType1Font.COURIER);
             STANDARD_14.put(PDType1Font.COURIER_BOLD.getBaseFont(), PDType1Font.COURIER_BOLD);
             STANDARD_14.put(PDType1Font.COURIER_OBLIQUE.getBaseFont(), PDType1Font.COURIER_OBLIQUE);
-            STANDARD_14.put(PDType1Font.COURIER_BOLD_OBLIQUE.getBaseFont(), PDType1Font.COURIER_BOLD_OBLIQUE);
+            STANDARD_14.put(PDType1Font.COURIER_BOLD_OBLIQUE.getBaseFont(),
+                PDType1Font.COURIER_BOLD_OBLIQUE);
             STANDARD_14.put(PDType1Font.SYMBOL.getBaseFont(), PDType1Font.SYMBOL);
             STANDARD_14.put(PDType1Font.ZAPF_DINGBATS.getBaseFont(), PDType1Font.ZAPF_DINGBATS);
         }
@@ -202,7 +213,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
         // checks for page limits.
         // The calling code must close the PDDocument once finished with it.
         public PDDocument createPDFFromText(Reader text, int pageLimit)
-                throws IOException
+            throws IOException
         {
             //int pageLimit = (int)pageLimits.getValue();
             PDDocument doc = null;
@@ -210,23 +221,23 @@ public class TextToPdfContentTransformer implements SelectableTransformer
             try
             {
                 final int margin = 40;
-                float height = getFont().getFontDescriptor().getFontBoundingBox().getHeight()/1000;
+                float height = getFont().getFontDescriptor().getFontBoundingBox().getHeight() / 1000;
 
                 //calculate font height and increase by 5 percent.
-                height = height*getFontSize()*1.05f;
+                height = height * getFontSize() * 1.05f;
                 doc = new PDDocument();
-                BufferedReader data = new BufferedReader( text );
+                BufferedReader data = new BufferedReader(text);
                 String nextLine = null;
                 PDPage page = new PDPage();
                 PDPageContentStream contentStream = null;
                 float y = -1;
-                float maxStringLength = page.getMediaBox().getWidth() - 2*margin;
+                float maxStringLength = page.getMediaBox().getWidth() - 2 * margin;
 
                 // There is a special case of creating a PDF document from an empty string.
                 boolean textIsEmpty = true;
 
                 outer:
-                while( (nextLine = data.readLine()) != null )
+                while ((nextLine = data.readLine()) != null)
                 {
 
                     // The input text is nonEmpty. New pages will be created and added
@@ -234,29 +245,30 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                     // the text.
                     textIsEmpty = false;
 
-                    String[] lineWords = nextLine.trim().split( " " );
+                    String[] lineWords = nextLine.trim().split(" ");
                     int lineIndex = 0;
-                    while( lineIndex < lineWords.length )
+                    while (lineIndex < lineWords.length)
                     {
                         StringBuffer nextLineToDraw = new StringBuffer();
                         float lengthIfUsingNextWord = 0;
                         do
                         {
-                            nextLineToDraw.append( lineWords[lineIndex] );
-                            nextLineToDraw.append( " " );
+                            nextLineToDraw.append(lineWords[lineIndex]);
+                            nextLineToDraw.append(" ");
                             lineIndex++;
-                            if( lineIndex < lineWords.length )
+                            if (lineIndex < lineWords.length)
                             {
                                 String lineWithNextWord = nextLineToDraw.toString() + lineWords[lineIndex];
                                 lengthIfUsingNextWord =
-                                        (getFont().getStringWidth( lineWithNextWord )/1000) * getFontSize();
+                                    (getFont().getStringWidth(
+                                        lineWithNextWord) / 1000) * getFontSize();
                             }
                         }
-                        while( lineIndex < lineWords.length &&
-                                lengthIfUsingNextWord < maxStringLength );
-                        if( y < margin )
+                        while (lineIndex < lineWords.length &&
+                               lengthIfUsingNextWord < maxStringLength);
+                        if (y < margin)
                         {
-                            int test = pageCount +1;
+                            int test = pageCount + 1;
                             if (pageLimit > 0 && (pageCount++ >= pageLimit))
                             {
 //                                pageLimits.getAction().throwIOExceptionIfRequired("Page limit ("+pageLimit+
@@ -267,8 +279,8 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                             // We have crossed the end-of-page boundary and need to extend the
                             // document by another page.
                             page = new PDPage();
-                            doc.addPage( page );
-                            if( contentStream != null )
+                            doc.addPage(page);
+                            if (contentStream != null)
                             {
                                 contentStream.endText();
                                 contentStream.close();
@@ -278,17 +290,17 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                             contentStream.beginText();
                             y = page.getMediaBox().getHeight() - margin + height;
                             contentStream.moveTextPositionByAmount(
-                                    margin, y );
+                                margin, y);
                         }
                         //System.out.println( "Drawing string at " + x + "," + y );
 
-                        if( contentStream == null )
+                        if (contentStream == null)
                         {
-                            throw new IOException( "Error:Expected non-null content stream." );
+                            throw new IOException("Error:Expected non-null content stream.");
                         }
-                        contentStream.moveTextPositionByAmount( 0, -height);
+                        contentStream.moveTextPositionByAmount(0, -height);
                         y -= height;
-                        contentStream.drawString( nextLineToDraw.toString() );
+                        contentStream.drawString(nextLineToDraw.toString());
                     }
                 }
 
@@ -300,15 +312,15 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                     doc.addPage(page);
                 }
 
-                if( contentStream != null )
+                if (contentStream != null)
                 {
                     contentStream.endText();
                     contentStream.close();
                 }
             }
-            catch( IOException io )
+            catch (IOException io)
             {
-                if( doc != null )
+                if (doc != null)
                 {
                     doc.close();
                 }
