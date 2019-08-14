@@ -48,21 +48,23 @@ import org.xml.sax.SAXException;
 
 /**
  * <a href="http://tika.apache.org/Apache Tika">Apache Tika</a> assumes that
- *  you either know exactly what your content is, or that
- *  you'll leave it to auto-detection.
+ * you either know exactly what your content is, or that
+ * you'll leave it to auto-detection.
  * Within Alfresco, we usually do know. However, from time
- *  to time, we don't know if we have one of the old or one
- *  of the new office files (eg .xls and .xlsx).
+ * to time, we don't know if we have one of the old or one
+ * of the new office files (eg .xls and .xlsx).
  * This class allows automatically selects the appropriate
- *  old (OLE2) or new (OOXML) Tika parser as required.
+ * old (OLE2) or new (OOXML) Tika parser as required.
  *
  * @author Nick Burch
  */
-public class TikaOfficeDetectParser implements Parser {
+public class TikaOfficeDetectParser implements Parser
+{
     private final Parser ole2Parser = new OfficeParser();
     private final Parser ooxmlParser = new OOXMLParser();
 
-    public Set<MediaType> getSupportedTypes(ParseContext parseContext) {
+    public Set<MediaType> getSupportedTypes(ParseContext parseContext)
+    {
         Set<MediaType> types = new HashSet<>();
         types.addAll(ole2Parser.getSupportedTypes(parseContext));
         types.addAll(ooxmlParser.getSupportedTypes(parseContext));
@@ -70,9 +72,9 @@ public class TikaOfficeDetectParser implements Parser {
     }
 
     public void parse(InputStream stream,
-                      ContentHandler handler, Metadata metadata,
-                      ParseContext parseContext) throws IOException, SAXException,
-            TikaException
+        ContentHandler handler, Metadata metadata,
+        ParseContext parseContext) throws IOException, SAXException,
+        TikaException
     {
         byte[] initial4 = new byte[4];
         InputStream wrapped;
@@ -93,10 +95,10 @@ public class TikaOfficeDetectParser implements Parser {
         }
 
         // Which is it?
-        if(initial4[0] == POIFSConstants.OOXML_FILE_HEADER[0] &&
-                initial4[1] == POIFSConstants.OOXML_FILE_HEADER[1] &&
-                initial4[2] == POIFSConstants.OOXML_FILE_HEADER[2] &&
-                initial4[3] == POIFSConstants.OOXML_FILE_HEADER[3])
+        if (initial4[0] == POIFSConstants.OOXML_FILE_HEADER[0] &&
+            initial4[1] == POIFSConstants.OOXML_FILE_HEADER[1] &&
+            initial4[2] == POIFSConstants.OOXML_FILE_HEADER[2] &&
+            initial4[3] == POIFSConstants.OOXML_FILE_HEADER[3])
         {
             ooxmlParser.parse(wrapped, handler, metadata, parseContext);
         }
@@ -110,8 +112,8 @@ public class TikaOfficeDetectParser implements Parser {
      * @deprecated This method will be removed in Apache Tika 1.0.
      */
     public void parse(InputStream stream,
-                      ContentHandler handler, Metadata metadata)
-            throws IOException, SAXException, TikaException
+        ContentHandler handler, Metadata metadata)
+        throws IOException, SAXException, TikaException
     {
         parse(stream, handler, metadata, new ParseContext());
     }

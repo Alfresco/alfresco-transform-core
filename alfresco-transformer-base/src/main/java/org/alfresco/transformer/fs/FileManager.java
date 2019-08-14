@@ -51,6 +51,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
 /**
+ *
  */
 public class FileManager
 {
@@ -76,7 +77,7 @@ public class FileManager
 
     public static File buildFile(String filename)
     {
-        filename = checkFilename( false, filename);
+        filename = checkFilename(false, filename);
         LogEntry.setTarget(filename);
         return TempFileProvider.createTempFile("target_", "_" + filename);
     }
@@ -103,7 +104,8 @@ public class FileManager
         {
             String sourceOrTarget = source ? "source" : "target";
             int statusCode = source ? BAD_REQUEST.value() : INTERNAL_SERVER_ERROR.value();
-            throw new TransformException(statusCode, "The " + sourceOrTarget + " filename was not supplied");
+            throw new TransformException(statusCode,
+                "The " + sourceOrTarget + " filename was not supplied");
         }
         return filename;
     }
@@ -112,7 +114,8 @@ public class FileManager
     {
         try
         {
-            Files.copy(multipartFile.getInputStream(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(multipartFile.getInputStream(), file.toPath(),
+                StandardCopyOption.REPLACE_EXISTING);
         }
         catch (IOException e)
         {
@@ -129,7 +132,8 @@ public class FileManager
         }
         catch (IOException e)
         {
-            throw new TransformException(INSUFFICIENT_STORAGE.value(), "Failed to store the source file", e);
+            throw new TransformException(INSUFFICIENT_STORAGE.value(),
+                "Failed to store the source file", e);
         }
     }
 
@@ -171,28 +175,31 @@ public class FileManager
         return filename;
     }
 
-
     /**
      * Returns the file name for the target file
      *
-     * @param fileName Desired file name
+     * @param fileName        Desired file name
      * @param targetExtension File extension
      * @return Target file name
      */
-    public static String createTargetFileName(String fileName, String targetExtension)
+    public static String createTargetFileName(final String fileName, final String targetExtension)
     {
-        String targetFilename = null;
-        String sourceFilename = fileName;
-        sourceFilename = StringUtils.getFilename(sourceFilename);
-        if (sourceFilename != null && !sourceFilename.isEmpty())
+        final String sourceFilename = StringUtils.getFilename(fileName);
+
+        if (sourceFilename == null || sourceFilename.isEmpty())
         {
-            String ext = StringUtils.getFilenameExtension(sourceFilename);
-            targetFilename = (ext != null && !ext.isEmpty()
-                              ? sourceFilename.substring(0, sourceFilename.length()-ext.length()-1)
-                              : sourceFilename)+
-                             '.'+targetExtension;
+            return null;
         }
-        return targetFilename;
+
+        final String ext = StringUtils.getFilenameExtension(sourceFilename);
+
+        if (ext == null || ext.isEmpty())
+        {
+            return sourceFilename + '.' + targetExtension;
+        }
+
+        return sourceFilename.substring(0, sourceFilename.length() - ext.length() - 1) +
+               '.' + targetExtension;
     }
 
     /**
@@ -207,7 +214,7 @@ public class FileManager
     {
         String filename = multipartFile.getOriginalFilename();
         long size = multipartFile.getSize();
-        filename = checkFilename(  true, filename);
+        filename = checkFilename(true, filename);
         File file = TempFileProvider.createTempFile("source_", "_" + filename);
         request.setAttribute(SOURCE_FILE, file);
         save(multipartFile, file);
@@ -229,7 +236,7 @@ public class FileManager
     {
         Resource targetResource = load(targetFile);
         targetFilename = UriUtils.encodePath(StringUtils.getFilename(targetFilename), "UTF-8");
-        return  ResponseEntity.ok().header(HttpHeaders
+        return ResponseEntity.ok().header(HttpHeaders
                 .CONTENT_DISPOSITION,
             "attachment; filename*= UTF-8''" + targetFilename).body(targetResource);
     }

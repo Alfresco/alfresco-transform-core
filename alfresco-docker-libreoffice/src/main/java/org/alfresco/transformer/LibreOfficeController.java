@@ -59,20 +59,20 @@ import org.springframework.web.multipart.MultipartFile;
  *
  * Status Codes:
  *
- *   200 Success
- *   400 Bad Request: Request parameter <name> is missing (missing mandatory parameter)
- *   400 Bad Request: Request parameter <name> is of the wrong type
- *   400 Bad Request: Transformer exit code was not 0 (possible problem with the source file)
- *   400 Bad Request: The source filename was not supplied
- *   500 Internal Server Error: (no message with low level IO problems)
- *   500 Internal Server Error: The target filename was not supplied (should not happen as targetExtension is checked)
- *   500 Internal Server Error: Transformer version check exit code was not 0
- *   500 Internal Server Error: Transformer version check failed to create any output
- *   500 Internal Server Error: Could not read the target file
- *   500 Internal Server Error: The target filename was malformed (should not happen because of other checks)
- *   500 Internal Server Error: Transformer failed to create an output file (the exit code was 0, so there should be some content)
- *   500 Internal Server Error: Filename encoding error
- *   507 Insufficient Storage: Failed to store the source file
+ * 200 Success
+ * 400 Bad Request: Request parameter <name> is missing (missing mandatory parameter)
+ * 400 Bad Request: Request parameter <name> is of the wrong type
+ * 400 Bad Request: Transformer exit code was not 0 (possible problem with the source file)
+ * 400 Bad Request: The source filename was not supplied
+ * 500 Internal Server Error: (no message with low level IO problems)
+ * 500 Internal Server Error: The target filename was not supplied (should not happen as targetExtension is checked)
+ * 500 Internal Server Error: Transformer version check exit code was not 0
+ * 500 Internal Server Error: Transformer version check failed to create any output
+ * 500 Internal Server Error: Could not read the target file
+ * 500 Internal Server Error: The target filename was malformed (should not happen because of other checks)
+ * 500 Internal Server Error: Transformer failed to create an output file (the exit code was 0, so there should be some content)
+ * 500 Internal Server Error: Filename encoding error
+ * 507 Insufficient Storage: Failed to store the source file
  */
 @Controller
 public class LibreOfficeController extends AbstractTransformerController
@@ -81,14 +81,17 @@ public class LibreOfficeController extends AbstractTransformerController
 
     @Autowired
     private LibreOfficeJavaExecutor javaExecutor;
-    
+
     @Autowired
     public LibreOfficeController()
     {
-        logger.info("-------------------------------------------------------------------------------------------------------------------------------------------------------");
+        logger.info(
+            "-------------------------------------------------------------------------------------------------------------------------------------------------------");
         Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
-        logger.info("This transformer uses LibreOffice from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt");
-        logger.info("-------------------------------------------------------------------------------------------------------------------------------------------------------");
+        logger.info(
+            "This transformer uses LibreOffice from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt");
+        logger.info(
+            "-------------------------------------------------------------------------------------------------------------------------------------------------------");
     }
 
     @Override
@@ -108,7 +111,7 @@ public class LibreOfficeController extends AbstractTransformerController
     {
         // See the Javadoc on this method and Probes.md for the choice of these values.
         return new ProbeTestTransform(this, "quick.doc", "quick.pdf",
-                11817, 1024, 150, 10240, 60*30+1, 60*15+20)
+            11817, 1024, 150, 10240, 60 * 30 + 1, 60 * 15 + 20)
         {
             @Override
             protected void executeTransformCommand(File sourceFile, File targetFile)
@@ -121,12 +124,13 @@ public class LibreOfficeController extends AbstractTransformerController
     //todo: the "timeout" request parameter is ignored; the timeout is preset at JodConverter creation
     @PostMapping(value = "/transform", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
-                                              @RequestParam("file") MultipartFile sourceMultipartFile,
-                                              @RequestParam("targetExtension") String targetExtension,
-                                              @RequestParam(value = "timeout", required = false) Long timeout,
-                                              @RequestParam(value = "testDelay", required = false) Long testDelay)
+        @RequestParam("file") MultipartFile sourceMultipartFile,
+        @RequestParam("targetExtension") String targetExtension,
+        @RequestParam(value = "timeout", required = false) Long timeout,
+        @RequestParam(value = "testDelay", required = false) Long testDelay)
     {
-        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(), targetExtension);
+        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(),
+            targetExtension);
         getProbeTestTransform().incrementTransformerCount();
         File sourceFile = createSourceFile(request, sourceMultipartFile);
         File targetFile = createTargetFile(request, targetFilename);

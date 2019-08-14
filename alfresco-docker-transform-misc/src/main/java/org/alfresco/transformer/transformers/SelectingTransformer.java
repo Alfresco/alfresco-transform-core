@@ -26,12 +26,8 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.alfresco.error.AlfrescoRuntimeException;
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.logging.LogEntry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -39,16 +35,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import org.alfresco.error.AlfrescoRuntimeException;
+import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transformer.logging.LogEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
- *
  * The SelectingTransformer selects a registered {@link SelectableTransformer}
  * and delegates the transformation to its implementation.
  *
  * @author eknizat
- *
  */
 @Component
 public class SelectingTransformer
@@ -68,17 +66,19 @@ public class SelectingTransformer
 
     /**
      * Performs a transform using a transformer selected based on the provided sourceMimetype and targetMimetype
-     * @param sourceFile File to transform from
-     * @param targetFile File to transform to
+     *
+     * @param sourceFile     File to transform from
+     * @param targetFile     File to transform to
      * @param sourceMimetype Mimetype of the source file
      * @throws TransformException
      */
-    public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-                          Map<String, String> parameters) throws TransformException
+    public void transform(File sourceFile, File targetFile, String sourceMimetype,
+        String targetMimetype, Map<String, String> parameters) throws TransformException
     {
         try
         {
-            SelectableTransformer transformer = selectTransformer(sourceMimetype, targetMimetype, parameters);
+            SelectableTransformer transformer = selectTransformer(sourceMimetype, targetMimetype,
+                parameters);
             logOptions(sourceFile, targetFile, parameters);
             transformer.transform(sourceFile, targetFile, parameters);
         }
@@ -93,17 +93,17 @@ public class SelectingTransformer
         if (!targetFile.exists())
         {
             throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                    "Transformer failed to create an output file. Target file does not exist.");
+                "Transformer failed to create an output file. Target file does not exist.");
         }
         if (sourceFile.length() > 0 && targetFile.length() == 0)
         {
             throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                    "Transformer failed to create an output file. Target file is empty but source file was not empty.");
+                "Transformer failed to create an output file. Target file is empty but source file was not empty.");
         }
     }
 
     private SelectableTransformer selectTransformer(String sourceMimetype, String targetMimetype,
-                                                    Map<String, String> parameters)
+        Map<String, String> parameters)
     {
         for (SelectableTransformer transformer : transformers)
         {
@@ -112,13 +112,14 @@ public class SelectingTransformer
                 if (logger.isDebugEnabled())
                 {
                     logger.debug("Using " + transformer.getClass().getName()
-                            + " to transform from " + sourceMimetype + " to " + targetMimetype );
+                                 + " to transform from " + sourceMimetype + " to " + targetMimetype);
                 }
                 return transformer;
             }
         }
-        throw new AlfrescoRuntimeException( "Could not select a transformer for sourceMimetype=" + sourceMimetype
-                + " targetMimetype=" + targetMimetype);
+        throw new AlfrescoRuntimeException(
+            "Could not select a transformer for sourceMimetype=" + sourceMimetype
+            + " targetMimetype=" + targetMimetype);
     }
 
     private static String getMessage(Exception e)
@@ -129,7 +130,8 @@ public class SelectingTransformer
     private void logOptions(File sourceFile, File targetFile, Map<String, String> parameters)
     {
         StringJoiner sj = new StringJoiner(" ");
-        parameters.forEach( (k, v) -> sj.add("--" + k + "=" + v)); // keeping the existing style used in other T-Engines
+        parameters.forEach((k, v) -> sj.add(
+            "--" + k + "=" + v)); // keeping the existing style used in other T-Engines
         sj.add(getExtension(sourceFile));
         sj.add(getExtension(targetFile));
         LogEntry.setOptions(sj.toString());

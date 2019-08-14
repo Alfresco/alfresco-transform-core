@@ -27,11 +27,15 @@
 
 package org.alfresco.transformer;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
@@ -47,10 +51,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jms.support.converter.MessageConversionException;
-
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
 
 public class QueueTransformServiceTest
 {
@@ -98,10 +98,13 @@ public class QueueTransformServiceTest
         ActiveMQQueue destination = new ActiveMQQueue();
         msg.setJMSReplyTo(destination);
 
-        TransformReply reply = TransformReply.builder()
-            .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()).withErrorDetails(
+        TransformReply reply = TransformReply
+            .builder()
+            .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .withErrorDetails(
                 "JMS exception during T-Request deserialization of message with correlationID "
-                    + msg.getCorrelationId() + ": null").build();
+                + msg.getCorrelationId() + ": null")
+            .build();
 
         doReturn(null).when(transformMessageConverter).fromMessage(msg);
 
@@ -122,10 +125,13 @@ public class QueueTransformServiceTest
         ActiveMQQueue destination = new ActiveMQQueue();
         msg.setJMSReplyTo(destination);
 
-        TransformReply reply = TransformReply.builder().withStatus(HttpStatus.BAD_REQUEST.value())
+        TransformReply reply = TransformReply
+            .builder()
+            .withStatus(HttpStatus.BAD_REQUEST.value())
             .withErrorDetails(
                 "Message conversion exception during T-Request deserialization of message with correlationID"
-                    + msg.getCorrelationId() + ": null").build();
+                + msg.getCorrelationId() + ": null")
+            .build();
 
         doThrow(MessageConversionException.class).when(transformMessageConverter).fromMessage(msg);
 
@@ -146,10 +152,12 @@ public class QueueTransformServiceTest
         ActiveMQQueue destination = new ActiveMQQueue();
         msg.setJMSReplyTo(destination);
 
-        TransformReply reply = TransformReply.builder()
+        TransformReply reply = TransformReply
+            .builder()
             .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()).withErrorDetails(
                 "JMSException during T-Request deserialization of message with correlationID " + msg
-                    .getCorrelationId() + ": null").build();
+                    .getCorrelationId() + ": null")
+            .build();
 
         doThrow(JMSException.class).when(transformMessageConverter).fromMessage(msg);
 
@@ -169,7 +177,9 @@ public class QueueTransformServiceTest
         msg.setJMSReplyTo(destination);
 
         TransformRequest request = new TransformRequest();
-        TransformReply reply = TransformReply.builder().withStatus(HttpStatus.CREATED.value())
+        TransformReply reply = TransformReply
+            .builder()
+            .withStatus(HttpStatus.CREATED.value())
             .build();
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
@@ -208,8 +218,9 @@ public class QueueTransformServiceTest
         doReturn(destination).when(msg).getJMSReplyTo();
 
         TransformRequest request = new TransformRequest();
-        TransformReply reply = TransformReply.builder().withStatus(HttpStatus.CREATED.value())
-            .build();
+        TransformReply reply = TransformReply.builder()
+                                             .withStatus(HttpStatus.CREATED.value())
+                                             .build();
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
         doReturn(new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus())))

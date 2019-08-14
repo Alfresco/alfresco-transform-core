@@ -14,7 +14,6 @@
     <version>2.1.0-EA5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-
     <properties>
         <java.version>1.8</java.version>
         <image.tag>latest</image.tag>
@@ -47,7 +46,6 @@
     </scm>
 
     <dependencyManagement>
-
         <dependencies>
             <dependency>
                 <groupId>org.alfresco</groupId>
@@ -69,7 +67,6 @@
                 <artifactId>dom4j</artifactId>
                 <version>2.1.1</version>
             </dependency>
-
             <dependency>
                 <groupId>org.alfresco</groupId>
                 <artifactId>alfresco-data-model</artifactId>

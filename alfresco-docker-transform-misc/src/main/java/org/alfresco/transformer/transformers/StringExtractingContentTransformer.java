@@ -26,29 +26,25 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_DITA;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_JAVASCRIPT;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.util.Map;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_DITA;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_JAVASCRIPT;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Converts any textual format to plain text.
@@ -60,7 +56,6 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
  * This code is based on a class of the same name originally implemented in alfresco-repository.
  * </p>
  *
- *
  * @author Derek Hulley
  * @author eknizat
  */
@@ -70,12 +65,13 @@ public class StringExtractingContentTransformer implements SelectableTransformer
     private static final Log logger = LogFactory.getLog(StringExtractingContentTransformer.class);
 
     @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
+    public boolean isTransformable(String sourceMimetype, String targetMimetype,
+        Map<String, String> parameters)
     {
-        boolean transformable =  (sourceMimetype.startsWith("text/")
-                || MIMETYPE_JAVASCRIPT.equals(sourceMimetype)
-                || MIMETYPE_DITA.equals(sourceMimetype))
-                && MIMETYPE_TEXT_PLAIN.equals(targetMimetype);
+        boolean transformable = (sourceMimetype.startsWith("text/")
+                                 || MIMETYPE_JAVASCRIPT.equals(sourceMimetype)
+                                 || MIMETYPE_DITA.equals(sourceMimetype))
+                                && MIMETYPE_TEXT_PLAIN.equals(targetMimetype);
         return transformable;
     }
 
@@ -88,16 +84,17 @@ public class StringExtractingContentTransformer implements SelectableTransformer
      * be unformatted but valid.
      */
     @Override
-    public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws Exception
+    public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws
+        Exception
     {
 
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
         String targetEncoding = parameters.get(TARGET_ENCODING);
 
-        if(logger.isDebugEnabled())
+        if (logger.isDebugEnabled())
         {
             logger.debug("Performing text to text transform with sourceEncoding=" + sourceEncoding
-                    + " targetEncoding=" + targetEncoding);
+                         + " targetEncoding=" + targetEncoding);
         }
 
         Reader charReader = null;
@@ -107,23 +104,27 @@ public class StringExtractingContentTransformer implements SelectableTransformer
             // Build reader
             if (sourceEncoding == null)
             {
-                charReader = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile)));
+                charReader = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(sourceFile)));
             }
             else
             {
                 checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
-                charReader = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile), sourceEncoding));
+                charReader = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(sourceFile), sourceEncoding));
             }
 
             // Build writer
             if (targetEncoding == null)
             {
-                charWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(targetFile)));
+                charWriter = new BufferedWriter(
+                    new OutputStreamWriter(new FileOutputStream(targetFile)));
             }
             else
             {
-                checkEncodingParameter( targetEncoding, TARGET_ENCODING);
-                charWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(targetFile), targetEncoding));
+                checkEncodingParameter(targetEncoding, TARGET_ENCODING);
+                charWriter = new BufferedWriter(
+                    new OutputStreamWriter(new FileOutputStream(targetFile), targetEncoding));
             }
 
             // copy from the one to the other
@@ -157,12 +158,14 @@ public class StringExtractingContentTransformer implements SelectableTransformer
         {
             if (!Charset.isSupported(encoding))
             {
-                throw new IllegalArgumentException(paramterName + "=" + encoding + " is not supported by the JVM.");
+                throw new IllegalArgumentException(
+                    paramterName + "=" + encoding + " is not supported by the JVM.");
             }
         }
         catch (IllegalCharsetNameException e)
         {
-            throw new IllegalArgumentException(paramterName + "=" + encoding + " is not a valid encoding.");
+            throw new IllegalArgumentException(
+                paramterName + "=" + encoding + " is not a valid encoding.");
         }
     }
 }

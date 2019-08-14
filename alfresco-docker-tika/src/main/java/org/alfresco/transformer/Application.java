@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Bean;
 import io.micrometer.core.instrument.MeterRegistry;
 
 @SpringBootApplication
-@EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 public class Application
 {
     @Value("${container.name}")

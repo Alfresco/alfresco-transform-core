@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import static java.util.stream.Collectors.joining;
 import static org.alfresco.transformer.fs.FileManager.buildFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.fs.FileManager.deleteFile;
@@ -39,7 +40,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.stream.Collectors;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
@@ -76,32 +76,34 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * <p>Status Codes:</p>
  * <ul>
- *   <li>200 Success</li>
- *   <li>400 Bad Request: Request parameter <name> is missing (missing mandatory parameter)</li>
- *   <li>400 Bad Request: Request parameter <name> is of the wrong type</li>
- *   <li>400 Bad Request: Transformer exit code was not 0 (possible problem with the source file)</li>
- *   <li>400 Bad Request: The source filename was not supplied</li>
- *   <li>500 Internal Server Error: (no message with low level IO problems)</li>
- *   <li>500 Internal Server Error: The target filename was not supplied (should not happen as targetExtension is checked)</li>
- *   <li>500 Internal Server Error: Transformer version check exit code was not 0</li>
- *   <li>500 Internal Server Error: Transformer version check failed to create any output</li>
- *   <li>500 Internal Server Error: Could not read the target file</li>
- *   <li>500 Internal Server Error: The target filename was malformed (should not happen because of other checks)</li>
- *   <li>500 Internal Server Error: Transformer failed to create an output file (the exit code was 0, so there should be some content)</li>
- *   <li>500 Internal Server Error: Filename encoding error</li>
- *   <li>507 Insufficient Storage: Failed to store the source file</li>
+ * <li>200 Success</li>
+ * <li>400 Bad Request: Request parameter <name> is missing (missing mandatory parameter)</li>
+ * <li>400 Bad Request: Request parameter <name> is of the wrong type</li>
+ * <li>400 Bad Request: Transformer exit code was not 0 (possible problem with the source file)</li>
+ * <li>400 Bad Request: The source filename was not supplied</li>
+ * <li>500 Internal Server Error: (no message with low level IO problems)</li>
+ * <li>500 Internal Server Error: The target filename was not supplied (should not happen as targetExtension is checked)</li>
+ * <li>500 Internal Server Error: Transformer version check exit code was not 0</li>
+ * <li>500 Internal Server Error: Transformer version check failed to create any output</li>
+ * <li>500 Internal Server Error: Could not read the target file</li>
+ * <li>500 Internal Server Error: The target filename was malformed (should not happen because of other checks)</li>
+ * <li>500 Internal Server Error: Transformer failed to create an output file (the exit code was 0, so there should be some content)</li>
+ * <li>500 Internal Server Error: Filename encoding error</li>
+ * <li>507 Insufficient Storage: Failed to store the source file</li>
  *
- *   <li>408 Request Timeout         -- TODO implement general timeout mechanism rather than depend on transformer timeout
- *                                  (might be possible for external processes)</li>
- *   <li>415 Unsupported Media Type  -- TODO possibly implement a check on supported source and target mimetypes (probably not)</li>
- *   <li>429 Too Many Requests: Returned by liveness probe</li>
+ * <li>408 Request Timeout         -- TODO implement general timeout mechanism rather than depend on transformer timeout
+ * (might be possible for external processes)</li>
+ * <li>415 Unsupported Media Type  -- TODO possibly implement a check on supported source and target mimetypes (probably not)</li>
+ * <li>429 Too Many Requests: Returned by liveness probe</li>
  * </ul>
  * <p>Provides methods to help super classes perform /transform requests. Also responses to /version, /ready and /live
  * requests.</p>
  */
 public abstract class AbstractTransformerController implements TransformController
 {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractTransformerController.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        AbstractTransformerController.class);
+
     private static String ENGINE_CONFIG = "engine_config.json";
 
     @Autowired
@@ -161,8 +163,11 @@ public abstract class AbstractTransformerController implements TransformControll
         if (!errors.getAllErrors().isEmpty())
         {
             reply.setStatus(HttpStatus.BAD_REQUEST.value());
-            reply.setErrorDetails(errors.getAllErrors().stream().map(Object::toString)
-                .collect(Collectors.joining(", ")));
+            reply.setErrorDetails(errors
+                .getAllErrors()
+                .stream()
+                .map(Object::toString)
+                .collect(joining(", ")));
 
             logger.error("Invalid request, sending {}", reply);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
@@ -246,7 +251,7 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(e.getStatusCode().value());
             reply.setErrorDetails(messageWithCause("Failed at writing the transformed file. ", e));
 
-            logger.error("Failed to save target file (HttpClientErrorException), sending {}" +
+            logger.error("Failed to save target file (HttpClientErrorException), sending " +
                          reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
@@ -314,7 +319,7 @@ public abstract class AbstractTransformerController implements TransformControll
         if (body == null)
         {
             String message = "Source file with reference: " + sourceReference + " is null or empty. "
-                + "Transformation will fail and stop now as there is no content to be transformed.";
+                             + "Transformation will fail and stop now as there is no content to be transformed.";
             logger.warn(message);
             throw new TransformException(BAD_REQUEST.value(), message);
         }
@@ -322,7 +327,7 @@ public abstract class AbstractTransformerController implements TransformControll
 
         logger.debug("Read source content {} length={} contentType={}",
             sourceReference, size, contentType);
-        
+
         save(body, file);
         LogEntry.setSource(filename, size);
         return file;

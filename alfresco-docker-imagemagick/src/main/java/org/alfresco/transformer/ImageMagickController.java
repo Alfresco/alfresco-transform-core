@@ -40,11 +40,11 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -60,21 +60,21 @@ import org.springframework.web.multipart.MultipartFile;
  *
  * Status Codes:
  *
- *   200 Success
- *   400 Bad Request: Invalid cropGravity value (North, NorthEast, East, SouthEast, South, SouthWest, West, NorthWest, Center)
- *   400 Bad Request: Request parameter <name> is missing (missing mandatory parameter)
- *   400 Bad Request: Request parameter <name> is of the wrong type
- *   400 Bad Request: Transformer exit code was not 0 (possible problem with the source file)
- *   400 Bad Request: The source filename was not supplied
- *   500 Internal Server Error: (no message with low level IO problems)
- *   500 Internal Server Error: The target filename was not supplied (should not happen as targetExtension is checked)
- *   500 Internal Server Error: Transformer version check exit code was not 0
- *   500 Internal Server Error: Transformer version check failed to create any output
- *   500 Internal Server Error: Could not read the target file
- *   500 Internal Server Error: The target filename was malformed (should not happen because of other checks)
- *   500 Internal Server Error: Transformer failed to create an output file (the exit code was 0, so there should be some content)
- *   500 Internal Server Error: Filename encoding error
- *   507 Insufficient Storage: Failed to store the source file
+ * 200 Success
+ * 400 Bad Request: Invalid cropGravity value (North, NorthEast, East, SouthEast, South, SouthWest, West, NorthWest, Center)
+ * 400 Bad Request: Request parameter <name> is missing (missing mandatory parameter)
+ * 400 Bad Request: Request parameter <name> is of the wrong type
+ * 400 Bad Request: Transformer exit code was not 0 (possible problem with the source file)
+ * 400 Bad Request: The source filename was not supplied
+ * 500 Internal Server Error: (no message with low level IO problems)
+ * 500 Internal Server Error: The target filename was not supplied (should not happen as targetExtension is checked)
+ * 500 Internal Server Error: Transformer version check exit code was not 0
+ * 500 Internal Server Error: Transformer version check failed to create any output
+ * 500 Internal Server Error: Could not read the target file
+ * 500 Internal Server Error: The target filename was malformed (should not happen because of other checks)
+ * 500 Internal Server Error: Transformer failed to create an output file (the exit code was 0, so there should be some content)
+ * 500 Internal Server Error: Filename encoding error
+ * 507 Insufficient Storage: Failed to store the source file
  */
 @Controller
 public class ImageMagickController extends AbstractTransformerController
@@ -83,14 +83,17 @@ public class ImageMagickController extends AbstractTransformerController
 
     @Autowired
     private ImageMagickCommandExecutor commandExecutor;
-    
+
     @Autowired
     public ImageMagickController()
     {
-        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        logger.info(
+            "--------------------------------------------------------------------------------------------------------------------------------------------------------------");
         Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
-        logger.info("This transformer uses ImageMagick from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt");
-        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        logger.info(
+            "This transformer uses ImageMagick from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt");
+        logger.info(
+            "--------------------------------------------------------------------------------------------------------------------------------------------------------------");
     }
 
     @Override
@@ -110,7 +113,7 @@ public class ImageMagickController extends AbstractTransformerController
     {
         // See the Javadoc on this method and Probes.md for the choice of these values.
         return new ProbeTestTransform(this, "quick.jpg", "quick.png",
-                35593, 1024, 150, 1024, 60*15+1,60*15)
+            35593, 1024, 150, 1024, 60 * 15 + 1, 60 * 15)
         {
             @Override
             protected void executeTransformCommand(File sourceFile, File targetFile)
@@ -122,42 +125,42 @@ public class ImageMagickController extends AbstractTransformerController
 
     @PostMapping(value = "/transform", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
-                                              @RequestParam("file") MultipartFile sourceMultipartFile,
-                                              @RequestParam("targetExtension") String targetExtension,
-                                              @RequestParam(value = "timeout", required = false) Long timeout,
-                                              @RequestParam(value = "testDelay", required = false) Long testDelay,
+        @RequestParam("file") MultipartFile sourceMultipartFile,
+        @RequestParam("targetExtension") String targetExtension,
+        @RequestParam(value = "timeout", required = false) Long timeout,
+        @RequestParam(value = "testDelay", required = false) Long testDelay,
 
-                                              @RequestParam(value = "startPage", required = false) Integer startPage,
-                                              @RequestParam(value = "endPage", required = false) Integer endPage,
+        @RequestParam(value = "startPage", required = false) Integer startPage,
+        @RequestParam(value = "endPage", required = false) Integer endPage,
 
-                                              @RequestParam(value = "alphaRemove", required = false) Boolean alphaRemove,
-                                              @RequestParam(value = "autoOrient", required = false) Boolean autoOrient,
+        @RequestParam(value = "alphaRemove", required = false) Boolean alphaRemove,
+        @RequestParam(value = "autoOrient", required = false) Boolean autoOrient,
 
-                                              @RequestParam(value = "cropGravity", required = false) String cropGravity,
-                                              @RequestParam(value = "cropWidth", required = false) Integer cropWidth,
-                                              @RequestParam(value = "cropHeight", required = false) Integer cropHeight,
-                                              @RequestParam(value = "cropPercentage", required = false) Boolean cropPercentage,
-                                              @RequestParam(value = "cropXOffset", required = false) Integer cropXOffset,
-                                              @RequestParam(value = "cropYOffset", required = false) Integer cropYOffset,
+        @RequestParam(value = "cropGravity", required = false) String cropGravity,
+        @RequestParam(value = "cropWidth", required = false) Integer cropWidth,
+        @RequestParam(value = "cropHeight", required = false) Integer cropHeight,
+        @RequestParam(value = "cropPercentage", required = false) Boolean cropPercentage,
+        @RequestParam(value = "cropXOffset", required = false) Integer cropXOffset,
+        @RequestParam(value = "cropYOffset", required = false) Integer cropYOffset,
 
-                                              @RequestParam(value = "thumbnail", required = false) Boolean thumbnail,
-                                              @RequestParam(value = "resizeWidth", required = false) Integer resizeWidth,
-                                              @RequestParam(value = "resizeHeight", required = false) Integer resizeHeight,
-                                              @RequestParam(value = "resizePercentage", required = false) Boolean resizePercentage,
-                                              @RequestParam(value = "allowEnlargement", required = false) Boolean allowEnlargement,
-                                              @RequestParam(value = "maintainAspectRatio", required = false) Boolean maintainAspectRatio,
+        @RequestParam(value = "thumbnail", required = false) Boolean thumbnail,
+        @RequestParam(value = "resizeWidth", required = false) Integer resizeWidth,
+        @RequestParam(value = "resizeHeight", required = false) Integer resizeHeight,
+        @RequestParam(value = "resizePercentage", required = false) Boolean resizePercentage,
+        @RequestParam(value = "allowEnlargement", required = false) Boolean allowEnlargement,
+        @RequestParam(value = "maintainAspectRatio", required = false) Boolean maintainAspectRatio,
 
-                                              // The commandOptions parameter is supported in ACS 6.0.1 because there may be
-                                              // custom renditions that use it. However the Transform service should
-                                              // not support it as it provides the option to specify arbitrary command
-                                              // options or even the option to run something else on the command line.
-                                              // All Transform service options should be checked as is done for the other
-                                              // request parameters. Setting this option in the rendition's
-                                              // ImageTransformationOptions object is being deprecated for the point where
-                                              // The Transform service is being used for all transforms. In the case of
-                                              // ACS 6.0, this is relatively safe as it requires an AMP to be installed
-                                              // which supplies the commandOptions.
-                                              @RequestParam(value = "commandOptions", required = false) String commandOptions)
+        // The commandOptions parameter is supported in ACS 6.0.1 because there may be
+        // custom renditions that use it. However the Transform service should
+        // not support it as it provides the option to specify arbitrary command
+        // options or even the option to run something else on the command line.
+        // All Transform service options should be checked as is done for the other
+        // request parameters. Setting this option in the rendition's
+        // ImageTransformationOptions object is being deprecated for the point where
+        // The Transform service is being used for all transforms. In the case of
+        // ACS 6.0, this is relatively safe as it requires an AMP to be installed
+        // which supplies the commandOptions.
+        @RequestParam(value = "commandOptions", required = false) String commandOptions)
     {
         String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(),
             targetExtension);
@@ -238,11 +241,11 @@ public class ImageMagickController extends AbstractTransformerController
     private static String calculatePageRange(Integer startPage, Integer endPage)
     {
         return startPage == null
-                ? endPage == null
-                ? ""
-                : "["+endPage+']'
-                : endPage == null || startPage.equals(endPage)
-                ? "["+startPage+']'
-                : "["+startPage+'-'+endPage+']';
+               ? endPage == null
+                 ? ""
+                 : "[" + endPage + ']'
+               : endPage == null || startPage.equals(endPage)
+                 ? "[" + startPage + ']'
+                 : "[" + startPage + '-' + endPage + ']';
     }
 }

@@ -26,15 +26,19 @@
  */
 package org.alfresco.transformer;
 
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.*;
-import org.springframework.util.LinkedMultiValueMap;
-
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
+
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
 
 /**
  * Super class for testing controllers with a server. Includes tests for the AbstractTransformerController itself.
@@ -64,7 +68,8 @@ public abstract class AbstractHttpRequestTest
     @Test
     public void logPageExists()
     {
-        String result = restTemplate.getForObject("http://localhost:" + port + "/log", String.class);
+        String result = restTemplate.getForObject("http://localhost:" + port + "/log",
+            String.class);
 
         String title = getTransformerName() + ' ' + "Log";
         assertTrue("\"" + title + "\" should be part of the page title", result.contains(title));
@@ -73,10 +78,12 @@ public abstract class AbstractHttpRequestTest
     @Test
     public void errorPageExists()
     {
-        String result = restTemplate.getForObject("http://localhost:" + port + "/error", String.class);
+        String result = restTemplate.getForObject("http://localhost:" + port + "/error",
+            String.class);
 
         String title = getTransformerName() + ' ' + "Error Page";
-        assertTrue("\"" + title + "\" should be part of the page title", result.contains("Error Page"));
+        assertTrue("\"" + title + "\" should be part of the page title",
+            result.contains("Error Page"));
     }
 
     @Test
@@ -84,7 +91,7 @@ public abstract class AbstractHttpRequestTest
     {
         // Transformer name is not part of the title as this is checked by another handler
         assertTransformError(false,
-                "Required request part 'file' is not present");
+            "Required request part 'file' is not present");
     }
 
     @Test
@@ -96,7 +103,7 @@ public abstract class AbstractHttpRequestTest
     private void assertMissingParameter(String name)
     {
         assertTransformError(true,
-                getTransformerName() + " - Request parameter '" + name + "' is missing");
+            getTransformerName() + " - Request parameter '" + name + "' is missing");
     }
 
     private void assertTransformError(boolean addFile, String errorMessage)
@@ -104,12 +111,15 @@ public abstract class AbstractHttpRequestTest
         LinkedMultiValueMap<String, Object> parameters = new LinkedMultiValueMap<>();
         if (addFile)
         {
-            parameters.add("file", new org.springframework.core.io.ClassPathResource("quick."+getSourceExtension()));
+            parameters.add("file",
+                new org.springframework.core.io.ClassPathResource("quick." + getSourceExtension()));
         }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        HttpEntity<LinkedMultiValueMap<String, Object>> entity = new HttpEntity<>(parameters, headers);
-        ResponseEntity<String> response = restTemplate.exchange("/transform", HttpMethod.POST, entity, String.class, "");
+        HttpEntity<LinkedMultiValueMap<String, Object>> entity = new HttpEntity<>(parameters,
+            headers);
+        ResponseEntity<String> response = restTemplate.exchange("/transform", HttpMethod.POST,
+            entity, String.class, "");
         assertEquals(errorMessage, getErrorMessage(response.getBody()));
     }
 
@@ -125,7 +135,7 @@ public abstract class AbstractHttpRequestTest
             int j = content.indexOf("\",\"path\":", i);
             if (j != -1)
             {
-                message = content.substring(i+11, j);
+                message = content.substring(i + 11, j);
             }
         }
         return message;

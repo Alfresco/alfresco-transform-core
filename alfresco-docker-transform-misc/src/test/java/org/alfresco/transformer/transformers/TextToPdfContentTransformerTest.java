@@ -26,15 +26,8 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
+import static org.alfresco.transformer.transformers.TextToPdfContentTransformer.PAGE_LIMIT;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,8 +36,14 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.alfresco.transformer.transformers.TextToPdfContentTransformer.PAGE_LIMIT;
-import static org.junit.Assert.*;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @Import(TextToPdfContentTransformer.class)
@@ -59,7 +58,6 @@ public class TextToPdfContentTransformerTest
         transformer.setStandardFont("Times-Roman");
         transformer.setFontSize(20);
     }
-
 
     @Test
     public void testUnlimitedPages() throws Exception
@@ -88,11 +86,11 @@ public class TextToPdfContentTransformerTest
     private void transformTextAndCheckPageLength(int pageLimit) throws Exception
     {
         int pageLength = 32;
-        int lines = (pageLength+10) * ((pageLimit > 0) ? pageLimit : 1);
+        int lines = (pageLength + 10) * ((pageLimit > 0) ? pageLimit : 1);
         StringBuilder sb = new StringBuilder();
         String checkText = null;
         int cutoff = pageLimit * pageLength;
-        for (int i=1; i<=lines; i++)
+        for (int i = 1; i <= lines; i++)
         {
             sb.append(i);
             sb.append(" I must not talk in class or feed my homework to my cat.\n");
@@ -105,12 +103,12 @@ public class TextToPdfContentTransformerTest
         transformTextAndCheck(text, "UTF-8", checkText, String.valueOf(pageLimit));
     }
 
-    private void transformTextAndCheck(String text, String encoding, String checkText, String pageLimit) throws Exception
+    private void transformTextAndCheck(String text, String encoding, String checkText,
+        String pageLimit) throws Exception
     {
         // Get a reader for the text
         File sourceFile = File.createTempFile("AlfrescoTestSource_", ".txt");
-        writeToFile(sourceFile,text, encoding);
-
+        writeToFile(sourceFile, text, encoding);
 
         // And a temp writer
         File targetFile = File.createTempFile("AlfrescoTestTarget_", ".pdf");
@@ -130,8 +128,8 @@ public class TextToPdfContentTransformerTest
         String roundTrip = clean(textWriter.toString());
 
         assertEquals(
-                "Incorrect text in PDF when starting from text in " + encoding,
-                checkText, roundTrip
+            "Incorrect text in PDF when starting from text in " + encoding,
+            checkText, roundTrip
         );
 
         sourceFile.delete();
