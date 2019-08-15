@@ -65,7 +65,6 @@
             <artifactId>dom4j</artifactId>
             <version>2.1.1</version>
         </dependency>
-
     </dependencies>
 
     <build>

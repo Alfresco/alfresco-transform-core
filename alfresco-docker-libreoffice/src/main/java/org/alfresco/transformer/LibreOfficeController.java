@@ -30,11 +30,9 @@ import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
-import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -81,18 +79,6 @@ public class LibreOfficeController extends AbstractTransformerController
 
     @Autowired
     private LibreOfficeJavaExecutor javaExecutor;
-
-    @Autowired
-    public LibreOfficeController()
-    {
-        logger.info(
-            "-------------------------------------------------------------------------------------------------------------------------------------------------------");
-        Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
-        logger.info(
-            "This transformer uses LibreOffice from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt");
-        logger.info(
-            "-------------------------------------------------------------------------------------------------------------------------------------------------------");
-    }
 
     @Override
     public String getTransformerName()

@@ -484,7 +484,7 @@ public class Tika
     private final Parser tikaOfficeDetectParser = new TikaOfficeDetectParser();
     private final PDFParserConfig pdfParserConfig = new PDFParserConfig();
 
-    private DocumentSelector pdfBoxEmbededDocumentSelector = new DocumentSelector()
+    private final DocumentSelector pdfBoxEmbededDocumentSelector = new DocumentSelector()
     {
         private final List<String> disabledMediaTypes = asList(MIMETYPE_IMAGE_JPEG,
             MIMETYPE_IMAGE_TIFF, MIMETYPE_IMAGE_PNG);

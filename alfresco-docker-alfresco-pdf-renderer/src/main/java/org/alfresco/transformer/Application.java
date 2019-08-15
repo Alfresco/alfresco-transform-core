@@ -26,13 +26,21 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
+
+import java.util.Arrays;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.EventListener;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
@@ -40,6 +48,8 @@ import io.micrometer.core.instrument.MeterRegistry;
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 public class Application
 {
+    private static final Logger logger = LoggerFactory.getLogger(Application.class);
+
     @Value("${container.name}")
     private String containerName;
 
@@ -52,5 +62,16 @@ public class Application
     public static void main(String[] args)
     {
         SpringApplication.run(Application.class, args);
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void startup()
+    {
+        logger.info("-----------------------------------------------------------------------------------------------------------------------------------------------------------");
+        Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
+        logger.info("alfresco-pdf-renderer uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt");
+        logger.info("-----------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+        logger.info("Starting application components... Done");
     }
 }

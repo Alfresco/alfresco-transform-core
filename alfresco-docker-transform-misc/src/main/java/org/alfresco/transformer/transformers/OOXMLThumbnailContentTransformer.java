@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +43,8 @@ import org.apache.poi.openxml4j.opc.PackageRelationshipCollection;
 import org.apache.poi.openxml4j.opc.PackageRelationshipTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Extracts out Thumbnail JPEGs from OOXML files for thumbnailing & previewing.
@@ -58,7 +59,8 @@ public class OOXMLThumbnailContentTransformer implements SelectableTransformer
     private static final Logger logger = LoggerFactory.getLogger(
         OOXMLThumbnailContentTransformer.class);
 
-    private static final List<String> OOXML_MIMETYPES = Arrays.asList(Mimetype.MIMETYPE_OPENXML_WORDPROCESSING,
+    private static final List<String> OOXML_MIMETYPES = ImmutableList.of(
+        Mimetype.MIMETYPE_OPENXML_WORDPROCESSING,
         Mimetype.MIMETYPE_OPENXML_WORDPROCESSING_MACRO,
         Mimetype.MIMETYPE_OPENXML_WORD_TEMPLATE,
         Mimetype.MIMETYPE_OPENXML_WORD_TEMPLATE_MACRO,

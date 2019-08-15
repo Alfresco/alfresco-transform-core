@@ -76,10 +76,9 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
     public boolean isTransformable(String sourceMimetype, String targetMimetype,
         Map<String, String> parameters)
     {
-        boolean transformable = MIMETYPE_IWORK_KEYNOTE.equals(sourceMimetype)
-                                || MIMETYPE_IWORK_NUMBERS.equals(sourceMimetype)
-                                || MIMETYPE_IWORK_PAGES.equals(sourceMimetype);
-        return transformable;
+        return MIMETYPE_IWORK_KEYNOTE.equals(sourceMimetype) ||
+               MIMETYPE_IWORK_NUMBERS.equals(sourceMimetype) ||
+               MIMETYPE_IWORK_PAGES.equals(sourceMimetype);
     }
 
     @Override
@@ -88,11 +87,9 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
         final String sourceMimetype = parameters.get(SOURCE_MIMETYPE);
         final String targetMimetype = parameters.get(TARGET_MIMETYPE);
 
-        if (logger.isDebugEnabled())
-        {
-            logger.debug("Performing IWorks to jpeg transform with sourceMimetype=" + sourceMimetype
-                         + " targetMimetype=" + targetMimetype);
-        }
+        logger.debug("Performing IWorks to jpeg transform with sourceMimetype={} targetMimetype={}",
+            sourceMimetype, targetMimetype);
+
         // iWorks files are zip (or package) files.
         // If it's not a zip file, the resultant ZipException will be caught as an IOException below.
         try (ZipArchiveInputStream iWorksZip = new ZipArchiveInputStream(

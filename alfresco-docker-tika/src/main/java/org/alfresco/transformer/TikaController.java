@@ -37,13 +37,11 @@ import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
-import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
 import static org.alfresco.transformer.util.Util.stringToBoolean;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -69,9 +67,9 @@ import org.springframework.web.multipart.MultipartFile;
  * Status Codes:
  *
  * 200 Success
- * 400 Bad Request: Invalid target mimetype &lt;mimetype>
- * 400 Bad Request: Request parameter &lt;name> is missing (missing mandatory parameter)
- * 400 Bad Request: Request parameter &lt;name> is of the wrong type
+ * 400 Bad Request: Invalid target mimetype <mimetype>
+ * 400 Bad Request: Request parameter <name> is missing (missing mandatory parameter)
+ * 400 Bad Request: Request parameter <name> is of the wrong type
  * 400 Bad Request: Transformer exit code was not 0 (possible problem with the source file)
  * 400 Bad Request: The source filename was not supplied
  * 500 Internal Server Error: (no message with low level IO problems)
@@ -91,18 +89,6 @@ public class TikaController extends AbstractTransformerController
 
     @Autowired
     private TikaJavaExecutor javaExecutor;
-
-    @Autowired
-    public TikaController()
-    {
-        logger.info(
-            "--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-        Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
-        logger.info(
-            "Tika is from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt");
-        logger.info(
-            "--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-    }
 
     @Override
     public String getTransformerName()

@@ -159,7 +159,7 @@ public class HtmlParserContentTransformer implements SelectableTransformer
             String previousURL = getURL();
             String newURL = file.getAbsolutePath();
 
-            if ((previousURL == null) || (!newURL.equals(previousURL)))
+            if (previousURL == null || !newURL.equals(previousURL))
             {
                 try
                 {

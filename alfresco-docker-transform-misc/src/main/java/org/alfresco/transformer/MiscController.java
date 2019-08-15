@@ -64,18 +64,6 @@ public class MiscController extends AbstractTransformerController
     @Autowired
     private SelectingTransformer transformer;
 
-    public MiscController()
-    {
-        logger.info(
-            "--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-        logger.info(
-            "The transformers in this project use libraries from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\\\ 2.0.txt");
-        logger.info("Additional libraries used:");
-        logger.info("* htmlparser http://htmlparser.sourceforge.net/license.html");
-        logger.info(
-            "--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-    }
-
     @Override
     public String getTransformerName()
     {

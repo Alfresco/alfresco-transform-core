@@ -251,8 +251,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(e.getStatusCode().value());
             reply.setErrorDetails(messageWithCause("Failed at writing the transformed file. ", e));
 
-            logger.error("Failed to save target file (HttpClientErrorException), sending " +
-                         reply, e);
+            logger.error("Failed to save target file (HttpClientErrorException), sending " + reply,
+                e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (Exception e)
@@ -302,7 +302,7 @@ public abstract class AbstractTransformerController implements TransformControll
      * @param sourceReference reference to the file in Alfresco Shared File Store
      * @return the file containing the source content for the transformation
      */
-    private File loadSourceFile(final String sourceReference) throws Exception
+    private File loadSourceFile(final String sourceReference)
     {
         ResponseEntity<Resource> responseEntity = alfrescoSharedFileStoreClient
             .retrieveFile(sourceReference);

@@ -218,9 +218,10 @@ public class QueueTransformServiceTest
         doReturn(destination).when(msg).getJMSReplyTo();
 
         TransformRequest request = new TransformRequest();
-        TransformReply reply = TransformReply.builder()
-                                             .withStatus(HttpStatus.CREATED.value())
-                                             .build();
+        TransformReply reply = TransformReply
+            .builder()
+            .withStatus(HttpStatus.CREATED.value())
+            .build();
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
         doReturn(new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus())))
