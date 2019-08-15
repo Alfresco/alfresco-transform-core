@@ -29,6 +29,8 @@ package org.alfresco.transformer.fs;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.util.StringUtils.getFilename;
+import static org.springframework.util.StringUtils.getFilenameExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +48,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
@@ -99,7 +100,7 @@ public class FileManager
      */
     private static String checkFilename(boolean source, String filename)
     {
-        filename = StringUtils.getFilename(filename);
+        filename = getFilename(filename);
         if (filename == null || filename.isEmpty())
         {
             String sourceOrTarget = source ? "source" : "target";
@@ -184,14 +185,14 @@ public class FileManager
      */
     public static String createTargetFileName(final String fileName, final String targetExtension)
     {
-        final String sourceFilename = StringUtils.getFilename(fileName);
+        final String sourceFilename = getFilename(fileName);
 
         if (sourceFilename == null || sourceFilename.isEmpty())
         {
             return null;
         }
 
-        final String ext = StringUtils.getFilenameExtension(sourceFilename);
+        final String ext = getFilenameExtension(sourceFilename);
 
         if (ext == null || ext.isEmpty())
         {
@@ -235,7 +236,7 @@ public class FileManager
         targetFile)
     {
         Resource targetResource = load(targetFile);
-        targetFilename = UriUtils.encodePath(StringUtils.getFilename(targetFilename), "UTF-8");
+        targetFilename = UriUtils.encodePath(getFilename(targetFilename), "UTF-8");
         return ResponseEntity.ok().header(HttpHeaders
                 .CONTENT_DISPOSITION,
             "attachment; filename*= UTF-8''" + targetFilename).body(targetResource);

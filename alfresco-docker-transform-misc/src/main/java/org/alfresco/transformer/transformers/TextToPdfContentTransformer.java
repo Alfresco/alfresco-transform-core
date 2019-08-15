@@ -116,8 +116,8 @@ public class TextToPdfContentTransformer implements SelectableTransformer
     }
 
     @Override
-    public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws
-        Exception
+    public void transform(File sourceFile, File targetFile, Map<String, String> parameters)
+        throws Exception
     {
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
         String stringPageLimit = parameters.get(PAGE_LIMIT);

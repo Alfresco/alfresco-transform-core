@@ -26,7 +26,6 @@
  */
 package org.alfresco.transformer;
 
-import static java.util.Arrays.asList;
 import static org.alfresco.transformer.util.Util.stringToBoolean;
 import static org.alfresco.transformer.util.Util.stringToInteger;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -36,6 +35,8 @@ import java.util.StringJoiner;
 
 import org.alfresco.transform.exceptions.TransformException;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * ImageMagick options builder.
  *
@@ -43,8 +44,8 @@ import org.alfresco.transform.exceptions.TransformException;
  */
 final class OptionsBuilder
 {
-    private static final List<String> GRAVITY_VALUES = asList("North", "NorthEast", "East",
-        "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center");
+    private static final List<String> GRAVITY_VALUES = ImmutableList.of("North", "NorthEast",
+        "East", "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center");
 
     private Integer startPage;
     private Integer endPage;

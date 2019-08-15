@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer.transformers;
 
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_KEYNOTE;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_NUMBERS;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_PAGES;
@@ -36,16 +37,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.alfresco.error.AlfrescoRuntimeException;
-import org.alfresco.transform.client.model.Mimetype;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Converts Apple iWorks files to JPEGs for thumbnailing & previewing.
@@ -64,9 +65,9 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
         AppleIWorksContentTransformer.class);
 
     // Apple's zip entry names for previews in iWorks have changed over time.
-    private static final List<String> PDF_PATHS = Arrays.asList(
+    private static final List<String> PDF_PATHS = ImmutableList.of(
         "QuickLook/Preview.pdf");  // iWorks 2008/9
-    private static final List<String> JPG_PATHS = Arrays.asList(
+    private static final List<String> JPG_PATHS = ImmutableList.of(
         "QuickLook/Thumbnail.jpg", // iWorks 2008/9
         "preview.jpg");            // iWorks 2013/14 (720 x 552) We use the best quality image. Others are:
     //                (225 x 173) preview-web.jpg
@@ -96,8 +97,7 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
             new BufferedInputStream(new FileInputStream(sourceFile))))
         {
             // Look through the zip file entries for the preview/thumbnail.
-            List<String> paths = Mimetype.MIMETYPE_IMAGE_JPEG.equals(
-                targetMimetype) ? JPG_PATHS : PDF_PATHS;
+            List<String> paths = MIMETYPE_IMAGE_JPEG.equals(targetMimetype) ? JPG_PATHS : PDF_PATHS;
             ZipArchiveEntry entry;
             boolean found = false;
             while ((entry = iWorksZip.getNextZipEntry()) != null)

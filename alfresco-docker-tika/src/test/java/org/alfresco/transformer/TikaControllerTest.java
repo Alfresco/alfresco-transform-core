@@ -68,6 +68,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.StringUtils.getFilenameExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -101,7 +102,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.util.StringUtils;
 
 /**
  * Test the TikaController without a server.
@@ -169,7 +169,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
                 String actualOptions = actualProperties.get("options");
                 String actualSource = actualProperties.get("source");
                 String actualTarget = actualProperties.get("target");
-                String actualTargetExtension = StringUtils.getFilenameExtension(actualTarget);
+                String actualTargetExtension = getFilenameExtension(actualTarget);
 
                 assertNotNull(actualSource);
                 assertNotNull(actualTarget);
@@ -568,8 +568,8 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
             sourceFile), headers, OK);
 
         when(alfrescoSharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
-        when(alfrescoSharedFileStoreClient.saveFile(any())).thenReturn(
-            new FileRefResponse(new FileRefEntity(targetFileRef)));
+        when(alfrescoSharedFileStoreClient.saveFile(any()))
+            .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
         when(mockExecutionResult.getExitValue()).thenReturn(0);
 
         // Update the Transformation Request with any specific params before sending it

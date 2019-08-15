@@ -26,7 +26,6 @@
  */
 package org.alfresco.transformer.executors;
 
-import static java.util.Arrays.asList;
 import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_HTML;
 import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_IMAGE_PNG;
@@ -73,6 +72,8 @@ import org.apache.tika.sax.ExpandedTitleContentHandler;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Stripped down command line Tika transformers. Not actually run as a separate process, but the code fits the patten
@@ -455,7 +456,7 @@ public class Tika
     public static final String TIKA_AUTO = "TikaAuto";
     public static final String TEXT_MINING = "TextMining";
 
-    public static final List<String> TRANSFORM_NAMES = asList(
+    public static final List<String> TRANSFORM_NAMES = ImmutableList.of(
         ARCHIVE, OUTLOOK_MSG, PDF_BOX, POI_OFFICE, POI, POI_OO_XML, TIKA_AUTO, TEXT_MINING);
 
     public static final String TARGET_MIMETYPE = "--targetMimetype=";
@@ -486,7 +487,7 @@ public class Tika
 
     private final DocumentSelector pdfBoxEmbededDocumentSelector = new DocumentSelector()
     {
-        private final List<String> disabledMediaTypes = asList(MIMETYPE_IMAGE_JPEG,
+        private final List<String> disabledMediaTypes = ImmutableList.of(MIMETYPE_IMAGE_JPEG,
             MIMETYPE_IMAGE_TIFF, MIMETYPE_IMAGE_PNG);
 
         @Override

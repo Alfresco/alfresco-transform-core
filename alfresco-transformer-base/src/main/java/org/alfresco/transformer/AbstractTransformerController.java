@@ -36,6 +36,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.util.StringUtils.getFilenameExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +60,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -311,7 +311,7 @@ public abstract class AbstractTransformerController implements TransformControll
         HttpHeaders headers = responseEntity.getHeaders();
         String filename = getFilenameFromContentDisposition(headers);
 
-        String extension = StringUtils.getFilenameExtension(filename);
+        String extension = getFilenameExtension(filename);
         MediaType contentType = headers.getContentType();
         long size = headers.getContentLength();
 

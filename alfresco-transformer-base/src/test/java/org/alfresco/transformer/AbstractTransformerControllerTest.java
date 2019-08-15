@@ -383,10 +383,11 @@ public abstract class AbstractTransformerControllerTest
         ReflectionTestUtils.setField(AbstractTransformerController.class, "ENGINE_CONFIG",
             "engine_config_incomplete.json");
 
-        String response = mockMvc.perform(MockMvcRequestBuilders.get("/transform/config"))
-                                 .andExpect(status().is(OK.value())).andExpect(
-                header().string(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
-                                 .andReturn().getResponse().getContentAsString();
+        String response = mockMvc
+            .perform(MockMvcRequestBuilders.get("/transform/config"))
+            .andExpect(status().is(OK.value()))
+            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
+            .andReturn().getResponse().getContentAsString();
 
         TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
 

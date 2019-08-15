@@ -26,6 +26,27 @@
  */
 package org.alfresco.transformer.transformers;
 
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_ADDIN;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_MACRO;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDE;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDE_MACRO;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_TEMPLATE;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_TEMPLATE_MACRO;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_ADDIN_MACRO;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_BINARY_MACRO;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_MACRO;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING_MACRO;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORD_TEMPLATE;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORD_TEMPLATE_MACRO;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.alfresco.error.AlfrescoRuntimeException;
-import org.alfresco.transform.client.model.Mimetype;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.openxml4j.opc.PackageRelationship;
@@ -60,38 +80,38 @@ public class OOXMLThumbnailContentTransformer implements SelectableTransformer
         OOXMLThumbnailContentTransformer.class);
 
     private static final List<String> OOXML_MIMETYPES = ImmutableList.of(
-        Mimetype.MIMETYPE_OPENXML_WORDPROCESSING,
-        Mimetype.MIMETYPE_OPENXML_WORDPROCESSING_MACRO,
-        Mimetype.MIMETYPE_OPENXML_WORD_TEMPLATE,
-        Mimetype.MIMETYPE_OPENXML_WORD_TEMPLATE_MACRO,
-        Mimetype.MIMETYPE_OPENXML_PRESENTATION,
-        Mimetype.MIMETYPE_OPENXML_PRESENTATION_MACRO,
-        Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW,
-        Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO,
-        Mimetype.MIMETYPE_OPENXML_PRESENTATION_TEMPLATE,
-        Mimetype.MIMETYPE_OPENXML_PRESENTATION_TEMPLATE_MACRO,
-        Mimetype.MIMETYPE_OPENXML_PRESENTATION_ADDIN,
-        Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDE,
-        Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDE_MACRO,
-        Mimetype.MIMETYPE_OPENXML_SPREADSHEET,
-        Mimetype.MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE,
-        Mimetype.MIMETYPE_OPENXML_SPREADSHEET_MACRO,
-        Mimetype.MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO,
-        Mimetype.MIMETYPE_OPENXML_SPREADSHEET_ADDIN_MACRO,
-        Mimetype.MIMETYPE_OPENXML_SPREADSHEET_BINARY_MACRO);
+        MIMETYPE_OPENXML_WORDPROCESSING,
+        MIMETYPE_OPENXML_WORDPROCESSING_MACRO,
+        MIMETYPE_OPENXML_WORD_TEMPLATE,
+        MIMETYPE_OPENXML_WORD_TEMPLATE_MACRO,
+        MIMETYPE_OPENXML_PRESENTATION,
+        MIMETYPE_OPENXML_PRESENTATION_MACRO,
+        MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW,
+        MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO,
+        MIMETYPE_OPENXML_PRESENTATION_TEMPLATE,
+        MIMETYPE_OPENXML_PRESENTATION_TEMPLATE_MACRO,
+        MIMETYPE_OPENXML_PRESENTATION_ADDIN,
+        MIMETYPE_OPENXML_PRESENTATION_SLIDE,
+        MIMETYPE_OPENXML_PRESENTATION_SLIDE_MACRO,
+        MIMETYPE_OPENXML_SPREADSHEET,
+        MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE,
+        MIMETYPE_OPENXML_SPREADSHEET_MACRO,
+        MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO,
+        MIMETYPE_OPENXML_SPREADSHEET_ADDIN_MACRO,
+        MIMETYPE_OPENXML_SPREADSHEET_BINARY_MACRO);
 
     @Override
     public boolean isTransformable(String sourceMimetype, String targetMimetype,
         Map<String, String> parameters)
     {
         // only support [OOXML] -> JPEG
-        return Mimetype.MIMETYPE_IMAGE_JPEG.equals(targetMimetype) && OOXML_MIMETYPES.contains(
-            sourceMimetype);
+        return MIMETYPE_IMAGE_JPEG.equals(targetMimetype) &&
+               OOXML_MIMETYPES.contains(sourceMimetype);
     }
 
     @Override
-    public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws
-        Exception
+    public void transform(File sourceFile, File targetFile, Map<String, String> parameters)
+        throws Exception
     {
         final String sourceMimetype = parameters.get(SOURCE_MIMETYPE);
         final String targetMimetype = parameters.get(TARGET_MIMETYPE);

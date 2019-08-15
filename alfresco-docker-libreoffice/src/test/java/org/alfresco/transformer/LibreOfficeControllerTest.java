@@ -34,7 +34,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.StringUtils.getFilenameExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +67,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.util.StringUtils;
 
 /**
  * Test the LibreOfficeController without a server.
@@ -105,8 +106,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
         {
             File sourceFile = invocation.getArgument(0);
             File targetFile = invocation.getArgument(1);
-            String actualTargetExtension = StringUtils.getFilenameExtension(
-                targetFile.getAbsolutePath());
+            String actualTargetExtension = getFilenameExtension(targetFile.getAbsolutePath());
 
             assertNotNull(sourceFile);
             assertNotNull(targetFile);
@@ -194,8 +194,8 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
             sourceFile), headers, HttpStatus.OK);
 
         when(alfrescoSharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
-        when(alfrescoSharedFileStoreClient.saveFile(any())).thenReturn(
-            new FileRefResponse(new FileRefEntity(targetFileRef)));
+        when(alfrescoSharedFileStoreClient.saveFile(any()))
+            .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
         when(mockExecutionResult.getExitValue()).thenReturn(0);
 
         // Update the Transformation Request with any specific params before sending it
@@ -203,14 +203,14 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 
         // Serialize and call the transformer
         String tr = objectMapper.writeValueAsString(transformRequest);
-        String transformationReplyAsString = mockMvc.perform(
-            MockMvcRequestBuilders.post("/transform")
-                                  .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                                  .header(HttpHeaders.CONTENT_TYPE,
-                                      MediaType.APPLICATION_JSON_VALUE).content(tr))
-                                                    .andExpect(
-                                                        status().is(HttpStatus.CREATED.value()))
-                                                    .andReturn().getResponse().getContentAsString();
+        String transformationReplyAsString = mockMvc
+            .perform(MockMvcRequestBuilders
+                .post("/transform")
+                .header(HttpHeaders.ACCEPT, APPLICATION_JSON_VALUE)
+                .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .content(tr))
+            .andExpect(status().is(HttpStatus.CREATED.value()))
+            .andReturn().getResponse().getContentAsString();
 
         TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,
             TransformReply.class);
