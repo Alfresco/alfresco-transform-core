@@ -55,29 +55,23 @@ public class FileRefEntity
     }
 
     @Override
-    public String toString()
-    {
-        return fileRef;
-    }
-
-    @Override
     public boolean equals(Object o)
     {
-        if (this == o)
-        {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass())
-        {
-            return false;
-        }
-        FileRefEntity fileRef = (FileRefEntity) o;
-        return Objects.equals(this.fileRef, fileRef.fileRef);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FileRefEntity that = (FileRefEntity) o;
+        return Objects.equals(fileRef, that.fileRef);
     }
 
     @Override
     public int hashCode()
     {
         return Objects.hash(fileRef);
+    }
+
+    @Override
+    public String toString()
+    {
+        return fileRef;
     }
 }

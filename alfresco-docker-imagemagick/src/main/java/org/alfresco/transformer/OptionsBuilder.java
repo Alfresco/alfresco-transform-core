@@ -64,9 +64,7 @@ final class OptionsBuilder
     private Boolean maintainAspectRatio;
     private String commandOptions;
 
-    private OptionsBuilder()
-    {
-    }
+    private OptionsBuilder() {}
 
     public OptionsBuilder withStartPage(final String startPage)
     {

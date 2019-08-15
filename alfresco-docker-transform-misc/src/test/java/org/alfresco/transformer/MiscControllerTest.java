@@ -66,13 +66,12 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 @Import({SelectingTransformer.class})
 public class MiscControllerTest extends AbstractTransformerControllerTest
 {
-
     @Autowired
     private MiscController controller;
 
-    private String sourceEncoding = "UTF-8";
-    private String targetEncoding = "UTF-8";
-    private String targetMimetype = MIMETYPE_TEXT_PLAIN;
+    private final String sourceEncoding = "UTF-8";
+    private final String targetEncoding = "UTF-8";
+    private final String targetMimetype = MIMETYPE_TEXT_PLAIN;
 
     @Before
     public void before() throws Exception
