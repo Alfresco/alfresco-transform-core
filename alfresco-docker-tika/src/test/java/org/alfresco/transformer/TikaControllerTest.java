@@ -64,8 +64,15 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.util.StringUtils.getFilenameExtension;
@@ -94,8 +101,6 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -533,11 +538,10 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     {
         transformRequest.setSourceExtension(sourceExtension);
         transformRequest.setTargetExtension(targetExtension);
-        transformRequest.setSourceMediaType(MediaType.APPLICATION_PDF_VALUE);
-        transformRequest.setTargetMediaType(MediaType.TEXT_PLAIN_VALUE);
+        transformRequest.setSourceMediaType(APPLICATION_PDF_VALUE);
+        transformRequest.setTargetMediaType(TEXT_PLAIN_VALUE);
         transformRequest.getTransformRequestOptions().put("transform", "PdfBox");
-        transformRequest.getTransformRequestOptions().put("targetMimetype",
-            MediaType.TEXT_PLAIN_VALUE);
+        transformRequest.getTransformRequestOptions().put("targetMimetype", TEXT_PLAIN_VALUE);
         transformRequest.getTransformRequestOptions().put("targetEncoding", "UTF-8");
     }
 
@@ -562,8 +566,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
 
         // HTTP Request
         HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=quick." + sourceExtension);
+        headers.set(CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
         ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
             sourceFile), headers, OK);
 
@@ -577,14 +580,14 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
 
         // Serialize and call the transformer
         String tr = objectMapper.writeValueAsString(transformRequest);
-        String transformationReplyAsString = mockMvc.perform(
-            MockMvcRequestBuilders.post("/transform")
-                                  .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                                  .header(HttpHeaders.CONTENT_TYPE,
-                                      MediaType.APPLICATION_JSON_VALUE).content(tr))
-                                                    .andExpect(
-                                                        status().is(HttpStatus.CREATED.value()))
-                                                    .andReturn().getResponse().getContentAsString();
+        String transformationReplyAsString = mockMvc
+            .perform(MockMvcRequestBuilders
+                .post("/transform")
+                .header(ACCEPT, APPLICATION_JSON_VALUE)
+                .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .content(tr))
+            .andExpect(status().is(CREATED.value()))
+            .andReturn().getResponse().getContentAsString();
 
         TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,
             TransformReply.class);

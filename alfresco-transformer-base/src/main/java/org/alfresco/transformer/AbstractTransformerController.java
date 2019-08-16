@@ -33,6 +33,7 @@ import static org.alfresco.transformer.fs.FileManager.deleteFile;
 import static org.alfresco.transformer.fs.FileManager.getFilenameFromContentDisposition;
 import static org.alfresco.transformer.fs.FileManager.save;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -104,7 +105,7 @@ public abstract class AbstractTransformerController implements TransformControll
     private static final Logger logger = LoggerFactory.getLogger(
         AbstractTransformerController.class);
 
-    private static final String ENGINE_CONFIG = "engine_config.json";
+    private static String ENGINE_CONFIG = "engine_config.json";
 
     @Autowired
     private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
@@ -162,7 +163,7 @@ public abstract class AbstractTransformerController implements TransformControll
         final Errors errors = validateTransformRequest(request);
         if (!errors.getAllErrors().isEmpty())
         {
-            reply.setStatus(HttpStatus.BAD_REQUEST.value());
+            reply.setStatus(BAD_REQUEST.value());
             reply.setErrorDetails(errors
                 .getAllErrors()
                 .stream()
@@ -283,9 +284,9 @@ public abstract class AbstractTransformerController implements TransformControll
         }
 
         reply.setTargetReference(targetRef.getEntry().getFileRef());
-        reply.setStatus(HttpStatus.CREATED.value());
+        reply.setStatus(CREATED.value());
 
-        logger.info("Sending successful {}, timeout {} ms", reply);
+        logger.info("Sending successful {}, timeout {} ms", reply, timeout);
         return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
     }
 

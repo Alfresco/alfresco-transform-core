@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer.fs;
 
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -163,7 +164,7 @@ public class FileManager
     public static String getFilenameFromContentDisposition(HttpHeaders headers)
     {
         String filename = "";
-        String contentDisposition = headers.getFirst(HttpHeaders.CONTENT_DISPOSITION);
+        String contentDisposition = headers.getFirst(CONTENT_DISPOSITION);
         if (contentDisposition != null)
         {
             String[] strings = contentDisposition.split("; *");
@@ -237,8 +238,7 @@ public class FileManager
     {
         Resource targetResource = load(targetFile);
         targetFilename = UriUtils.encodePath(getFilename(targetFilename), "UTF-8");
-        return ResponseEntity.ok().header(HttpHeaders
-                .CONTENT_DISPOSITION,
+        return ResponseEntity.ok().header(CONTENT_DISPOSITION,
             "attachment; filename*= UTF-8''" + targetFilename).body(targetResource);
     }
 }

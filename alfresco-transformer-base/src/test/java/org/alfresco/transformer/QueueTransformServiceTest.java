@@ -32,6 +32,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -100,7 +103,7 @@ public class QueueTransformServiceTest
 
         TransformReply reply = TransformReply
             .builder()
-            .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .withStatus(INTERNAL_SERVER_ERROR.value())
             .withErrorDetails(
                 "JMS exception during T-Request deserialization of message with correlationID "
                 + msg.getCorrelationId() + ": null")
@@ -127,7 +130,7 @@ public class QueueTransformServiceTest
 
         TransformReply reply = TransformReply
             .builder()
-            .withStatus(HttpStatus.BAD_REQUEST.value())
+            .withStatus(BAD_REQUEST.value())
             .withErrorDetails(
                 "Message conversion exception during T-Request deserialization of message with correlationID"
                 + msg.getCorrelationId() + ": null")
@@ -154,9 +157,10 @@ public class QueueTransformServiceTest
 
         TransformReply reply = TransformReply
             .builder()
-            .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()).withErrorDetails(
-                "JMSException during T-Request deserialization of message with correlationID " + msg
-                    .getCorrelationId() + ": null")
+            .withStatus(INTERNAL_SERVER_ERROR.value())
+            .withErrorDetails(
+                "JMSException during T-Request deserialization of message with correlationID " +
+                msg.getCorrelationId() + ": null")
             .build();
 
         doThrow(JMSException.class).when(transformMessageConverter).fromMessage(msg);
@@ -179,7 +183,7 @@ public class QueueTransformServiceTest
         TransformRequest request = new TransformRequest();
         TransformReply reply = TransformReply
             .builder()
-            .withStatus(HttpStatus.CREATED.value())
+            .withStatus(CREATED.value())
             .build();
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
@@ -220,7 +224,7 @@ public class QueueTransformServiceTest
         TransformRequest request = new TransformRequest();
         TransformReply reply = TransformReply
             .builder()
-            .withStatus(HttpStatus.CREATED.value())
+            .withStatus(CREATED.value())
             .build();
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);

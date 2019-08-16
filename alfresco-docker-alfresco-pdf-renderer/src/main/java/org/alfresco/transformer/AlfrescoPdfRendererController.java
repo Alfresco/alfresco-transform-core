@@ -31,6 +31,7 @@ import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 import java.io.File;
 import java.util.Map;
@@ -44,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -127,7 +127,7 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
     }
 
     @Deprecated
-    @PostMapping(value = "/transform", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
         @RequestParam("file") MultipartFile sourceMultipartFile,
         @RequestParam("targetExtension") String targetExtension,

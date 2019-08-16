@@ -113,20 +113,20 @@ public class HtmlParserContentTransformer implements SelectableTransformer
         }
     }
 
-    private void checkEncodingParameter(String encoding, String paramterName)
+    private void checkEncodingParameter(String encoding, String parameterName)
     {
         try
         {
             if (encoding != null && !Charset.isSupported(encoding))
             {
                 throw new IllegalArgumentException(
-                    paramterName + "=" + encoding + " is not supported by the JVM.");
+                    parameterName + "=" + encoding + " is not supported by the JVM.");
             }
         }
         catch (IllegalCharsetNameException e)
         {
             throw new IllegalArgumentException(
-                paramterName + "=" + encoding + " is not a valid encoding.");
+                parameterName + "=" + encoding + " is not a valid encoding.");
         }
     }
 

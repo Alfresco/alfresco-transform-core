@@ -225,7 +225,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                 height = height * getFontSize() * 1.05f;
                 doc = new PDDocument();
                 BufferedReader data = new BufferedReader(text);
-                String nextLine = null;
+                String nextLine;
                 PDPage page = new PDPage();
                 PDPageContentStream contentStream = null;
                 float y = -1;
@@ -287,8 +287,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                             contentStream.setFont(getFont(), getFontSize());
                             contentStream.beginText();
                             y = page.getMediaBox().getHeight() - margin + height;
-                            contentStream.moveTextPositionByAmount(
-                                margin, y);
+                            contentStream.moveTextPositionByAmount(margin, y);
                         }
                         //System.out.println( "Drawing string at " + x + "," + y );
 

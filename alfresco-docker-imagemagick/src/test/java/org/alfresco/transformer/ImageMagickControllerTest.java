@@ -33,8 +33,14 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -64,8 +70,6 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -312,8 +316,8 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     {
         transformRequest.setSourceExtension("png");
         transformRequest.setTargetExtension("png");
-        transformRequest.setSourceMediaType(MediaType.IMAGE_PNG_VALUE);
-        transformRequest.setTargetMediaType(MediaType.IMAGE_PNG_VALUE);
+        transformRequest.setSourceMediaType(IMAGE_PNG_VALUE);
+        transformRequest.setTargetMediaType(IMAGE_PNG_VALUE);
     }
 
     @Test
@@ -348,8 +352,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
 
         // HTTP Request
         HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=quick." + sourceExtension);
+        headers.set(CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
         ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
             sourceFile), headers, OK);
 
@@ -366,10 +369,10 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
         String transformationReplyAsString = mockMvc
             .perform(MockMvcRequestBuilders
                 .post("/transform")
-                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                .header(HttpHeaders.CONTENT_TYPE,
-                    MediaType.APPLICATION_JSON_VALUE).content(tr))
-            .andExpect(status().is(HttpStatus.CREATED.value()))
+                .header(ACCEPT, APPLICATION_JSON_VALUE)
+                .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .content(tr))
+            .andExpect(status().is(CREATED.value()))
             .andReturn().getResponse().getContentAsString();
 
         TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,

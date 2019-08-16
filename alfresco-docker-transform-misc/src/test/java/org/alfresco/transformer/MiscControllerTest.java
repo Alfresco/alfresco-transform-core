@@ -156,8 +156,8 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     @Test
     public void testStringToString() throws Exception
     {
-        String expected = null;
-        byte[] content = null;
+        String expected;
+        byte[] content;
         try
         {
             content = "azAz10!�$%^&*()\t\r\n".getBytes(UTF_8);
@@ -203,14 +203,13 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     public void textToPdf() throws Exception
     {
         StringBuilder sb = new StringBuilder();
-        String expected = null;
         for (int i = 1; i <= 5; i++)
         {
             sb.append(i);
             sb.append(" I must not talk in class or feed my homework to my cat.\n");
         }
         sb.append("\nBart\n");
-        expected = sb.toString();
+        String expected = sb.toString();
 
         MvcResult result = sendText("txt",
             "UTF-8",
@@ -300,13 +299,12 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             .param("sourceEncoding", sourceEncoding)
             .param("sourceMimetype", sourceMimetype);
 
-        MvcResult result = mockMvc
+        return mockMvc
             .perform(requestBuilder)
             .andExpect(status().is(OK.value()))
             .andExpect(header().string("Content-Disposition",
                 "attachment; filename*= " + targetEncoding + "''test_file." + targetExtension))
             .andReturn();
-        return result;
     }
 
     private String clean(String text)
