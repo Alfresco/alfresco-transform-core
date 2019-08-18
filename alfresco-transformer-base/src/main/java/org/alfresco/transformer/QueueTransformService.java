@@ -26,6 +26,9 @@
  */
 package org.alfresco.transformer;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
 import java.util.Optional;
 
 import javax.jms.Destination;
@@ -152,14 +155,14 @@ public class QueueTransformService
             String message =
                 "MessageConversionException during T-Request deserialization of message with correlationID "
                 + correlationId + ": ";
-            throw new TransformException(HttpStatus.BAD_REQUEST.value(), message + e.getMessage());
+            throw new TransformException(BAD_REQUEST.value(), message + e.getMessage());
         }
         catch (JMSException e)
         {
             String message =
                 "JMSException during T-Request deserialization of message with correlationID "
                 + correlationId + ": ";
-            throw new TransformException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
                 message + e.getMessage());
         }
         catch (Exception e)
@@ -167,7 +170,7 @@ public class QueueTransformService
             String message =
                 "Exception during T-Request deserialization of message with correlationID "
                 + correlationId + ": ";
-            throw new TransformException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
                 message + e.getMessage());
         }
     }
@@ -175,7 +178,7 @@ public class QueueTransformService
     private void replyWithInternalSvErr(final Destination destination, final String msg,
         final String correlationId)
     {
-        replyWithError(destination, HttpStatus.INTERNAL_SERVER_ERROR, msg, correlationId);
+        replyWithError(destination, INTERNAL_SERVER_ERROR, msg, correlationId);
     }
 
     private void replyWithError(final Destination destination, final HttpStatus status,

@@ -26,13 +26,17 @@
  */
 package org.alfresco.transformer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.EventListener;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
@@ -40,6 +44,8 @@ import io.micrometer.core.instrument.MeterRegistry;
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 public class Application
 {
+    private static final Logger logger = LoggerFactory.getLogger(Application.class);
+
     @Value("${container.name}")
     private String containerName;
 
@@ -52,5 +58,17 @@ public class Application
     public static void main(String[] args)
     {
         SpringApplication.run(Application.class, args);
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void startup()
+    {
+        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        logger.info("The transformers in this project use libraries from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\\\ 2.0.txt");
+        logger.info("Additional libraries used:");
+        logger.info("* htmlparser http://htmlparser.sourceforge.net/license.html");
+        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+        logger.info("Starting application components... Done");
     }
 }

@@ -68,11 +68,10 @@ public class StringExtractingContentTransformer implements SelectableTransformer
     public boolean isTransformable(String sourceMimetype, String targetMimetype,
         Map<String, String> parameters)
     {
-        boolean transformable = (sourceMimetype.startsWith("text/")
-                                 || MIMETYPE_JAVASCRIPT.equals(sourceMimetype)
-                                 || MIMETYPE_DITA.equals(sourceMimetype))
-                                && MIMETYPE_TEXT_PLAIN.equals(targetMimetype);
-        return transformable;
+        return (sourceMimetype.startsWith("text/")
+                || MIMETYPE_JAVASCRIPT.equals(sourceMimetype)
+                || MIMETYPE_DITA.equals(sourceMimetype))
+               && MIMETYPE_TEXT_PLAIN.equals(targetMimetype);
     }
 
     /**
@@ -84,8 +83,8 @@ public class StringExtractingContentTransformer implements SelectableTransformer
      * be unformatted but valid.
      */
     @Override
-    public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws
-        Exception
+    public void transform(File sourceFile, File targetFile, Map<String, String> parameters)
+        throws Exception
     {
 
         String sourceEncoding = parameters.get(SOURCE_ENCODING);

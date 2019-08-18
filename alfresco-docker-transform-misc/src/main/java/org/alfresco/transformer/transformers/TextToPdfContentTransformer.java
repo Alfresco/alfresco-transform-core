@@ -71,7 +71,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
 
     public static final String PAGE_LIMIT = "pageLimit";
 
-    private PagedTextToPDF transformer;
+    private final PagedTextToPDF transformer;
 
     public TextToPdfContentTransformer()
     {
@@ -108,18 +108,16 @@ public class TextToPdfContentTransformer implements SelectableTransformer
     public boolean isTransformable(String sourceMimetype, String targetMimetype,
         Map<String, String> parameters)
     {
-        boolean transformable = ((MIMETYPE_TEXT_PLAIN.equals(sourceMimetype)
-                                  || MIMETYPE_TEXT_CSV.equals(sourceMimetype)
-                                  || MIMETYPE_DITA.equals(sourceMimetype)
-                                  || MIMETYPE_XML.equals(sourceMimetype))
-                                 && MIMETYPE_PDF.equals(targetMimetype));
-
-        return transformable;
+        return (MIMETYPE_TEXT_PLAIN.equals(sourceMimetype) ||
+                MIMETYPE_TEXT_CSV.equals(sourceMimetype) ||
+                MIMETYPE_DITA.equals(sourceMimetype) ||
+                MIMETYPE_XML.equals(sourceMimetype)) &&
+               MIMETYPE_PDF.equals(targetMimetype);
     }
 
     @Override
-    public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws
-        Exception
+    public void transform(File sourceFile, File targetFile, Map<String, String> parameters)
+        throws Exception
     {
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
         String stringPageLimit = parameters.get(PAGE_LIMIT);
@@ -184,7 +182,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
             return STANDARD_14.get(name);
         }
 
-        private static final Map<String, PDType1Font> STANDARD_14 = new HashMap<String, PDType1Font>();
+        private static final Map<String, PDType1Font> STANDARD_14 = new HashMap<>();
 
         static
         {
@@ -227,7 +225,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                 height = height * getFontSize() * 1.05f;
                 doc = new PDDocument();
                 BufferedReader data = new BufferedReader(text);
-                String nextLine = null;
+                String nextLine;
                 PDPage page = new PDPage();
                 PDPageContentStream contentStream = null;
                 float y = -1;
@@ -249,7 +247,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                     int lineIndex = 0;
                     while (lineIndex < lineWords.length)
                     {
-                        StringBuffer nextLineToDraw = new StringBuffer();
+                        final StringBuilder nextLineToDraw = new StringBuilder();
                         float lengthIfUsingNextWord = 0;
                         do
                         {
@@ -289,8 +287,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                             contentStream.setFont(getFont(), getFontSize());
                             contentStream.beginText();
                             y = page.getMediaBox().getHeight() - margin + height;
-                            contentStream.moveTextPositionByAmount(
-                                margin, y);
+                            contentStream.moveTextPositionByAmount(margin, y);
                         }
                         //System.out.println( "Drawing string at " + x + "," + y );
 

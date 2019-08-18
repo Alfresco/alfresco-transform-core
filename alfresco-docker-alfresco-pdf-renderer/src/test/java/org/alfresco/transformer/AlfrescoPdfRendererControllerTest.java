@@ -33,11 +33,19 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.StringUtils.getFilenameExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,14 +72,11 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.util.StringUtils;
 
 /**
  * Test the AlfrescoPdfRendererController without a server.
@@ -129,7 +134,7 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
                 String actualOptions = actualProperties.get("options");
                 String actualSource = actualProperties.get("source");
                 String actualTarget = actualProperties.get("target");
-                String actualTargetExtension = StringUtils.getFilenameExtension(actualTarget);
+                String actualTargetExtension = getFilenameExtension(actualTarget);
 
                 assertNotNull(actualSource);
                 assertNotNull(actualTarget);
@@ -234,8 +239,8 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
     {
         transformRequest.setSourceExtension("pdf");
         transformRequest.setTargetExtension("png");
-        transformRequest.setSourceMediaType(MediaType.APPLICATION_PDF_VALUE);
-        transformRequest.setTargetMediaType(MediaType.IMAGE_PNG_VALUE);
+        transformRequest.setSourceMediaType(APPLICATION_PDF_VALUE);
+        transformRequest.setTargetMediaType(IMAGE_PNG_VALUE);
     }
 
     @Test
@@ -270,14 +275,13 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
 
         // HTTP Request
         HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=quick." + sourceExtension);
+        headers.set(CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
         ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
             sourceFile), headers, OK);
 
         when(alfrescoSharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
-        when(alfrescoSharedFileStoreClient.saveFile(any())).thenReturn(
-            new FileRefResponse(new FileRefEntity(targetFileRef)));
+        when(alfrescoSharedFileStoreClient.saveFile(any()))
+            .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
         when(mockExecutionResult.getExitValue()).thenReturn(0);
 
         // Update the Transformation Request with any specific params before sending it
@@ -288,9 +292,10 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
         String transformationReplyAsString = mockMvc
             .perform(MockMvcRequestBuilders
                 .post("/transform")
-                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).content(tr))
-            .andExpect(status().is(HttpStatus.CREATED.value()))
+                .header(ACCEPT, APPLICATION_JSON_VALUE)
+                .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .content(tr))
+            .andExpect(status().is(CREATED.value()))
             .andReturn().getResponse().getContentAsString();
 
         TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,

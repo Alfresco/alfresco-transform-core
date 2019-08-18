@@ -30,11 +30,10 @@ import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
-import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -46,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -81,18 +79,6 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
 
     @Autowired
     private PdfRendererCommandExecutor commandExecutor;
-
-    @Autowired
-    public AlfrescoPdfRendererController()
-    {
-        logger.info(
-            "-----------------------------------------------------------------------------------------------------------------------------------------------------------");
-        Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
-        logger.info(
-            "alfresco-pdf-renderer uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt");
-        logger.info(
-            "-----------------------------------------------------------------------------------------------------------------------------------------------------------");
-    }
 
     @Override
     public String getTransformerName()
@@ -141,7 +127,7 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
     }
 
     @Deprecated
-    @PostMapping(value = "/transform", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
         @RequestParam("file") MultipartFile sourceMultipartFile,
         @RequestParam("targetExtension") String targetExtension,

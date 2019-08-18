@@ -159,10 +159,8 @@ public class HtmlParserContentTransformerTest
         }
     }
 
-    private String readFromFile(File file, String encoding) throws Exception
+    private String readFromFile(File file, final String encoding) throws Exception
     {
-        String content = "wrong content";
-        content = new String(Files.readAllBytes(file.toPath()), encoding);
-        return content;
+        return new String(Files.readAllBytes(file.toPath()), encoding);
     }
 }

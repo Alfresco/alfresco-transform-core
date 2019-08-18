@@ -27,6 +27,8 @@
 package org.alfresco.transformer;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 import org.junit.Test;
@@ -35,8 +37,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 
@@ -115,11 +115,11 @@ public abstract class AbstractHttpRequestTest
                 new org.springframework.core.io.ClassPathResource("quick." + getSourceExtension()));
         }
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.setContentType(MULTIPART_FORM_DATA);
         HttpEntity<LinkedMultiValueMap<String, Object>> entity = new HttpEntity<>(parameters,
             headers);
-        ResponseEntity<String> response = restTemplate.exchange("/transform", HttpMethod.POST,
-            entity, String.class, "");
+        ResponseEntity<String> response = restTemplate.exchange("/transform", POST, entity,
+            String.class, "");
         assertEquals(errorMessage, getErrorMessage(response.getBody()));
     }
 

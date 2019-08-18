@@ -57,6 +57,7 @@ public class ImageMagickQueueTransformServiceIT extends AbstractQueueTransformSe
             .withSchema(1)
             .withClientData("ACS")
             .withSourceReference(UUID.randomUUID().toString())
-            .withSourceSize(32L).build();
+            .withSourceSize(32L)
+            .build();
     }
 }

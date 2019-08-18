@@ -49,8 +49,8 @@ public interface SelectableTransformer
      * @param parameters
      * @throws Exception
      */
-    void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws
-        Exception;
+    void transform(File sourceFile, File targetFile, Map<String, String> parameters)
+        throws Exception;
 
     /**
      * Determine whether this transformer is applicable for the given MIME types.
