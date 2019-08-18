@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2019 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -49,7 +49,7 @@ import org.springframework.web.client.RestTemplate;
  */
 public class AlfrescoSharedFileStoreClient
 {
-    @Value ("${fileStoreUrl}")
+    @Value("${fileStoreUrl}")
     private String fileStoreUrl;
 
     @Autowired
@@ -66,8 +66,9 @@ public class AlfrescoSharedFileStoreClient
         try
         {
             return restTemplate.getForEntity(fileStoreUrl + "/" + fileRef,
-                    org.springframework.core.io.Resource.class);
-        } catch (HttpClientErrorException e)
+                org.springframework.core.io.Resource.class);
+        }
+        catch (HttpClientErrorException e)
         {
             throw new TransformException(e.getStatusCode().value(), e.getMessage(), e);
         }
@@ -89,29 +90,12 @@ public class AlfrescoSharedFileStoreClient
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MULTIPART_FORM_DATA);
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map,
-                    headers);
+                headers);
             ResponseEntity<FileRefResponse> responseEntity = restTemplate
-                    .exchange(fileStoreUrl, POST, requestEntity, FileRefResponse.class);
+                .exchange(fileStoreUrl, POST, requestEntity, FileRefResponse.class);
             return responseEntity.getBody();
-        } catch (HttpClientErrorException e)
-        {
-            throw new TransformException(e.getStatusCode().value(), e.getMessage(), e);
         }
-    }
-
-    /**
-     * Sending get request for a file via Direct Access Url.
-     *
-     * @param directUrl Direct Access Url
-     * @return ResponseEntity<Resource>
-     */
-    public ResponseEntity<Resource> getContentViaDirectUrl(String directUrl)
-    {
-        try
-        {
-            return restTemplate.getForEntity(directUrl,
-                    org.springframework.core.io.Resource.class);
-        } catch (HttpClientErrorException e)
+        catch (HttpClientErrorException e)
         {
             throw new TransformException(e.getStatusCode().value(), e.getMessage(), e);
         }
