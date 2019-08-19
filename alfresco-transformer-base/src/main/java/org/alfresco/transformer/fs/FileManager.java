@@ -44,7 +44,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
-import org.alfresco.util.TempFileProvider;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -240,5 +239,45 @@ public class FileManager
         targetFilename = UriUtils.encodePath(getFilename(targetFilename), "UTF-8");
         return ResponseEntity.ok().header(CONTENT_DISPOSITION,
             "attachment; filename*= UTF-8''" + targetFilename).body(targetResource);
+    }
+
+    /**
+     * TempFileProvider - Duplicated and adapted from alfresco-core.
+     */
+    public static class TempFileProvider
+    {
+        public static File createTempFile(final String prefix, final String suffix)
+        {
+            final File directory = getTempDir();
+            try
+            {
+                return File.createTempFile(prefix, suffix, directory);
+            }
+            catch (IOException e)
+            {
+                throw new RuntimeException(
+                    "Failed to created temp file: \n   prefix: " + prefix +
+                    "\n   suffix: " + suffix + "\n   directory: " + directory, e);
+            }
+        }
+
+        private static File getTempDir()
+        {
+            final String dirName = "Alfresco";
+            final String systemTempDirPath = System.getProperty("java.io.tmpdir");
+            if (systemTempDirPath == null)
+            {
+                throw new RuntimeException("System property not available: java.io.tmpdir");
+            }
+
+            final File systemTempDir = new File(systemTempDirPath);
+            final File tempDir = new File(systemTempDir, dirName);
+            if (!tempDir.exists() && !tempDir.mkdirs() && !tempDir.exists())
+            {
+                throw new RuntimeException("Failed to create temp directory: " + tempDir);
+            }
+
+            return tempDir;
+        }
     }
 }

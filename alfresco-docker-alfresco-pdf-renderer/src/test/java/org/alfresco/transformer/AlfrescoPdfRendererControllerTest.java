@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -58,10 +59,9 @@ import java.util.UUID;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
+import org.alfresco.transformer.executors.RuntimeExec;
 import org.alfresco.transformer.model.FileRefEntity;
 import org.alfresco.transformer.model.FileRefResponse;
-import org.alfresco.util.exec.RuntimeExec;
-import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

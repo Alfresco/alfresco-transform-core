@@ -45,7 +45,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 
-import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transformer.transformers.SelectingTransformer;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -165,7 +164,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         }
         catch (UnsupportedEncodingException e)
         {
-            throw new AlfrescoRuntimeException("Encoding not recognised", e);
+            throw new RuntimeException("Encoding not recognised", e);
         }
 
         MvcResult result = sendText("txt",

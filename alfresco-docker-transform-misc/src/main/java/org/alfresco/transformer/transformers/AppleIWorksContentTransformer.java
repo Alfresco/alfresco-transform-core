@@ -40,7 +40,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 
-import org.alfresco.error.AlfrescoRuntimeException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.slf4j.Logger;
@@ -113,13 +112,13 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
 
             if (!found)
             {
-                throw new AlfrescoRuntimeException(
+                throw new RuntimeException(
                     "The source " + sourceMimetype + " file did not contain a " + targetMimetype + " preview");
             }
         }
         catch (IOException e)
         {
-            throw new AlfrescoRuntimeException(
+            throw new RuntimeException(
                 "Unable to transform " + sourceMimetype + " file. It should have been a zip format file.",
                 e);
         }
