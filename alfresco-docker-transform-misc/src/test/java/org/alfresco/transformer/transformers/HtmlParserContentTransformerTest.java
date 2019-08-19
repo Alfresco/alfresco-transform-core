@@ -26,13 +26,8 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
+import static org.alfresco.transformer.transformers.StringExtractingContentTransformer.SOURCE_ENCODING;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,9 +36,11 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.alfresco.transformer.transformers.StringExtractingContentTransformer.SOURCE_ENCODING;
-import static org.alfresco.transformer.transformers.StringExtractingContentTransformer.TARGET_ENCODING;
-import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @Import(HtmlParserContentTransformer.class)
@@ -54,24 +51,24 @@ public class HtmlParserContentTransformerTest
 
     /**
      * Checks that we correctly handle text in different encodings,
-     *  no matter if the encoding is specified on the Content Property
-     *  or in a meta tag within the HTML itself. (ALF-10466)
+     * no matter if the encoding is specified on the Content Property
+     * or in a meta tag within the HTML itself. (ALF-10466)
      *
-     *  On Windows, org.htmlparser.beans.StringBean.carriageReturn() appends a new system dependent new line
-     *  so we must be careful when checking the returned text
+     * On Windows, org.htmlparser.beans.StringBean.carriageReturn() appends a new system dependent new line
+     * so we must be careful when checking the returned text
      */
     @Test
     public void testEncodingHandling() throws Exception
     {
-        final String NEWLINE = System.getProperty ("line.separator");
+        final String NEWLINE = System.getProperty("line.separator");
         final String TITLE = "Testing!";
         final String TEXT_P1 = "This is some text in English";
         final String TEXT_P2 = "This is more text in English";
         final String TEXT_P3 = "C'est en Fran\u00e7ais et Espa\u00f1ol";
         String partA = "<html><head><title>" + TITLE + "</title></head>" + NEWLINE;
         String partB = "<body><p>" + TEXT_P1 + "</p>" + NEWLINE +
-                "<p>" + TEXT_P2 + "</p>" + NEWLINE +
-                "<p>" + TEXT_P3 + "</p>" + NEWLINE;
+                       "<p>" + TEXT_P2 + "</p>" + NEWLINE +
+                       "<p>" + TEXT_P3 + "</p>" + NEWLINE;
         String partC = "</body></html>";
         final String expected = TITLE + NEWLINE + TEXT_P1 + NEWLINE + TEXT_P2 + NEWLINE + TEXT_P3 + NEWLINE;
 
@@ -82,7 +79,7 @@ public class HtmlParserContentTransformerTest
         {
             // Content set to ISO 8859-1
             tmpS = File.createTempFile("AlfrescoTestSource_", ".html");
-            writeToFile(tmpS, partA+partB+partC, "ISO-8859-1");
+            writeToFile(tmpS, partA + partB + partC, "ISO-8859-1");
 
             tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
 
@@ -96,7 +93,7 @@ public class HtmlParserContentTransformerTest
 
             // Content set to UTF-8
             tmpS = File.createTempFile("AlfrescoTestSource_", ".html");
-            writeToFile(tmpS, partA+partB+partC, "UTF-8");
+            writeToFile(tmpS, partA + partB + partC, "UTF-8");
 
             tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
             parameters = new HashMap<>();
@@ -106,10 +103,9 @@ public class HtmlParserContentTransformerTest
             tmpS.delete();
             tmpD.delete();
 
-
             // Content set to UTF-16
             tmpS = File.createTempFile("AlfrescoTestSource_", ".html");
-            writeToFile(tmpS, partA+partB+partC, "UTF-16");
+            writeToFile(tmpS, partA + partB + partC, "UTF-16");
 
             tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
             parameters = new HashMap<>();
@@ -129,9 +125,9 @@ public class HtmlParserContentTransformerTest
 
             // Content set to ISO 8859-1, meta set to UTF-8
             tmpS = File.createTempFile("AlfrescoTestSource_", ".html");
-            String str = partA+
-                    "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">" +
-                    partB+partC;
+            String str = partA +
+                         "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">" +
+                         partB + partC;
 
             writeToFile(tmpS, str, "UTF-8");
 
@@ -143,7 +139,6 @@ public class HtmlParserContentTransformerTest
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
-
 
             // Note - we can't test UTF-16 with only a meta encoding,
             //  because without that the parser won't know about the
@@ -164,10 +159,8 @@ public class HtmlParserContentTransformerTest
         }
     }
 
-    private String readFromFile(File file, String encoding) throws Exception
+    private String readFromFile(File file, final String encoding) throws Exception
     {
-        String content =  "wrong content";
-        content = new String(Files.readAllBytes(file.toPath()), encoding);
-        return content;
+        return new String(Files.readAllBytes(file.toPath()), encoding);
     }
 }

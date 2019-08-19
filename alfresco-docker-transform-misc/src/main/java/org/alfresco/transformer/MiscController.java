@@ -64,15 +64,6 @@ public class MiscController extends AbstractTransformerController
     @Autowired
     private SelectingTransformer transformer;
 
-    public MiscController()
-    {
-        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-        logger.info("The transformers in this project use libraries from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\\\ 2.0.txt");
-        logger.info("Additional libraries used:");
-        logger.info("* htmlparser http://htmlparser.sourceforge.net/license.html");
-        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-    }
-
     @Override
     public String getTransformerName()
     {
@@ -91,8 +82,8 @@ public class MiscController extends AbstractTransformerController
         // HtmlParserContentTransformer html -> text
         // See the Javadoc on this method and Probes.md for the choice of these values.
         return new ProbeTestTransform(this, "quick.html", "quick.txt",
-                119, 30, 150, 1024,
-                60*2+1,60*2)
+            119, 30, 150, 1024,
+            60 * 2 + 1, 60 * 2)
         {
             @Override
             protected void executeTransformCommand(File sourceFile, File targetFile)
@@ -100,40 +91,47 @@ public class MiscController extends AbstractTransformerController
                 Map<String, String> parameters = new HashMap<>();
                 parameters.put(SOURCE_ENCODING, "UTF-8");
                 parameters.put(TARGET_ENCODING, "UTF-8");
-                transformer.transform(sourceFile, targetFile, MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, parameters);
+                transformer.transform(sourceFile, targetFile, MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN,
+                    parameters);
             }
         };
     }
+
     @Override
-    public void processTransform(File sourceFile, File targetFile, Map<String, String> transformOptions, Long timeout)
+    public void processTransform(File sourceFile, File targetFile,
+        Map<String, String> transformOptions, Long timeout)
     {
         if (logger.isDebugEnabled())
         {
-            logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
-                    " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
+            logger.debug(
+                "Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
+                " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
         }
 
         String sourceMimetype = transformOptions.get("sourceMimetype");
         String targetMimetype = transformOptions.get("targetMimetype");
-        transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype,  transformOptions);
+        transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype,
+            transformOptions);
     }
 
     @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
-                                              @RequestParam("file") MultipartFile sourceMultipartFile,
-                                              @RequestParam(value = "targetExtension") String targetExtension,
-                                              @RequestParam(value = "targetMimetype") String targetMimetype,
-                                              @RequestParam(value = "sourceMimetype") String sourceMimetype,
-                                              @RequestParam(value = "testDelay", required = false) Long testDelay,
-                                              @RequestParam Map<String, String> parameters)
+        @RequestParam("file") MultipartFile sourceMultipartFile,
+        @RequestParam(value = "targetExtension") String targetExtension,
+        @RequestParam(value = "targetMimetype") String targetMimetype,
+        @RequestParam(value = "sourceMimetype") String sourceMimetype,
+        @RequestParam(value = "testDelay", required = false) Long testDelay,
+        @RequestParam Map<String, String> parameters)
     {
         if (logger.isDebugEnabled())
         {
-            logger.debug("Processing request with: sourceMimetype '{}', targetMimetype '{}' , targetExtension '{}' " +
-                    ", parameters '{}'", sourceMimetype, targetMimetype, targetExtension, parameters);
+            logger.debug(
+                "Processing request with: sourceMimetype '{}', targetMimetype '{}' , targetExtension '{}' " +
+                ", parameters '{}'", sourceMimetype, targetMimetype, targetExtension, parameters);
         }
 
-        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(), targetExtension);
+        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(),
+            targetExtension);
         getProbeTestTransform().incrementTransformerCount();
         File sourceFile = createSourceFile(request, sourceMultipartFile);
         File targetFile = createTargetFile(request, targetFilename);

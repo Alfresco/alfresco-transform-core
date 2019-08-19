@@ -33,11 +33,19 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.StringUtils.getFilenameExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,14 +72,11 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.util.StringUtils;
 
 /**
  * Test the AlfrescoPdfRendererController without a server.
@@ -101,7 +106,7 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
     {
         ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
-                           
+
         mockTransformCommand("pdf", "png", "application/pdf", true);
     }
 
@@ -118,7 +123,8 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
         expectedSourceSuffix = null;
         expectedSourceFileBytes = readTestFile(sourceExtension);
         expectedTargetFileBytes = readTargetFileBytes ? readTestFile(targetExtension) : null;
-        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, expectedSourceFileBytes);
+        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
+            expectedSourceFileBytes);
 
         when(mockTransformCommand.execute(any(), anyLong())).thenAnswer(
             (Answer<RuntimeExec.ExecutionResult>) invocation -> {
@@ -128,14 +134,17 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
                 String actualOptions = actualProperties.get("options");
                 String actualSource = actualProperties.get("source");
                 String actualTarget = actualProperties.get("target");
-                String actualTargetExtension = StringUtils.getFilenameExtension(actualTarget);
+                String actualTargetExtension = getFilenameExtension(actualTarget);
 
                 assertNotNull(actualSource);
                 assertNotNull(actualTarget);
                 if (expectedSourceSuffix != null)
                 {
-                    assertTrue("The source file \""+actualSource+"\" should have ended in \""+expectedSourceSuffix+"\"", actualSource.endsWith(expectedSourceSuffix));
-                    actualSource = actualSource.substring(0, actualSource.length()-expectedSourceSuffix.length());
+                    assertTrue("The source file \"" + actualSource +
+                               "\" should have ended in \"" + expectedSourceSuffix + "\"",
+                        actualSource.endsWith(expectedSourceSuffix));
+                    actualSource = actualSource.substring(0,
+                        actualSource.length() - expectedSourceSuffix.length());
                 }
 
                 assertNotNull(actualOptions);
@@ -155,7 +164,7 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
                 int i = actualTarget.lastIndexOf('_');
                 if (i >= 0)
                 {
-                    String testFilename = actualTarget.substring(i+1);
+                    String testFilename = actualTarget.substring(i + 1);
                     File testFile = getTestFile(testFilename, false);
                     File targetFile = new File(actualTarget);
                     generateTargetFileFromResourceFile(actualTargetExtension, testFile,
@@ -164,7 +173,8 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
 
                 // Check the supplied source file has not been changed.
                 byte[] actualSourceFileBytes = Files.readAllBytes(new File(actualSource).toPath());
-                assertTrue("Source file is not the same", Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes));
+                assertTrue("Source file is not the same",
+                    Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes));
 
                 return mockExecutionResult;
             });
@@ -173,7 +183,6 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
         when(mockExecutionResult.getStdErr()).thenReturn("STDERROR");
         when(mockExecutionResult.getStdOut()).thenReturn("STDOUT");
     }
-
 
     @Override
     protected AbstractTransformerController getController()
@@ -185,7 +194,9 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
     public void optionsTest() throws Exception
     {
         expectedOptions = "--width=321 --height=654 --allow-enlargement --maintain-aspect-ratio --page=2";
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/transform")
+        mockMvc
+            .perform(MockMvcRequestBuilders
+                .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
 
@@ -195,17 +206,19 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
                 .param("height", "654")
                 .param("allowPdfEnlargement", "true")
                 .param("maintainPdfAspectRatio", "true"))
-
-                .andExpect(status().is(OK.value()))
-                .andExpect(content().bytes(expectedTargetFileBytes))
-                .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
+            .andExpect(status().is(OK.value()))
+            .andExpect(content().bytes(expectedTargetFileBytes))
+            .andExpect(header().string("Content-Disposition",
+                "attachment; filename*= UTF-8''quick." + targetExtension));
     }
 
     @Test
     public void optionsNegateBooleansTest() throws Exception
     {
         expectedOptions = "--width=321 --height=654 --page=2";
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/transform")
+        mockMvc
+            .perform(MockMvcRequestBuilders
+                .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
 
@@ -215,10 +228,10 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
                 .param("height", "654")
                 .param("allowPdfEnlargement", "false")
                 .param("maintainPdfAspectRatio", "false"))
-
-                .andExpect(status().is(OK.value()))
-                .andExpect(content().bytes(expectedTargetFileBytes))
-                .andExpect(header().string("Content-Disposition", "attachment; filename*= UTF-8''quick."+targetExtension));
+            .andExpect(status().is(OK.value()))
+            .andExpect(content().bytes(expectedTargetFileBytes))
+            .andExpect(header().string("Content-Disposition",
+                "attachment; filename*= UTF-8''quick." + targetExtension));
     }
 
     @Override
@@ -226,8 +239,8 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
     {
         transformRequest.setSourceExtension("pdf");
         transformRequest.setTargetExtension("png");
-        transformRequest.setSourceMediaType(MediaType.APPLICATION_PDF_VALUE);
-        transformRequest.setTargetMediaType(MediaType.IMAGE_PNG_VALUE);
+        transformRequest.setSourceMediaType(APPLICATION_PDF_VALUE);
+        transformRequest.setTargetMediaType(IMAGE_PNG_VALUE);
     }
 
     @Test
@@ -237,7 +250,8 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
 
         mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", "xxx"))
                .andExpect(status().is(BAD_REQUEST.value()))
-               .andExpect(status().reason(containsString("Transformer exit code was not 0: \nSTDERR")));
+               .andExpect(status()
+                   .reason(containsString("Transformer exit code was not 0: \nSTDERR")));
     }
 
     @Test
@@ -247,7 +261,6 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
         String sourceFileRef = UUID.randomUUID().toString();
         File sourceFile = getTestFile("quick." + sourceExtension, true);
         String targetFileRef = UUID.randomUUID().toString();
-
 
         // Transformation Request POJO
         TransformRequest transformRequest = new TransformRequest();
@@ -262,12 +275,13 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
 
         // HTTP Request
         HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
+        headers.set(CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
         ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
             sourceFile), headers, OK);
 
         when(alfrescoSharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
-        when(alfrescoSharedFileStoreClient.saveFile(any())).thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
+        when(alfrescoSharedFileStoreClient.saveFile(any()))
+            .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
         when(mockExecutionResult.getExitValue()).thenReturn(0);
 
         // Update the Transformation Request with any specific params before sending it
@@ -275,18 +289,21 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
 
         // Serialize and call the transformer
         String tr = objectMapper.writeValueAsString(transformRequest);
-        String transformationReplyAsString = mockMvc.perform(MockMvcRequestBuilders.post("/transform")
-                                                                                   .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                                                                                   .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).content(tr))
-                                                    .andExpect(status().is(HttpStatus.CREATED.value()))
-                                                    .andReturn().getResponse().getContentAsString();
+        String transformationReplyAsString = mockMvc
+            .perform(MockMvcRequestBuilders
+                .post("/transform")
+                .header(ACCEPT, APPLICATION_JSON_VALUE)
+                .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .content(tr))
+            .andExpect(status().is(CREATED.value()))
+            .andReturn().getResponse().getContentAsString();
 
-        TransformReply transformReply = objectMapper.readValue(transformationReplyAsString, TransformReply.class);
+        TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,
+            TransformReply.class);
 
         // Assert the reply
         assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
         assertEquals(transformRequest.getClientData(), transformReply.getClientData());
         assertEquals(transformRequest.getSchema(), transformReply.getSchema());
     }
-
 }

@@ -26,12 +26,10 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.alfresco.error.AlfrescoRuntimeException;
-import org.alfresco.transform.client.model.Mimetype;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_KEYNOTE;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_NUMBERS;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_PAGES;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -39,13 +37,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_KEYNOTE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_NUMBERS;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_PAGES;
+import org.alfresco.error.AlfrescoRuntimeException;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Converts Apple iWorks files to JPEGs for thumbnailing & previewing.
@@ -60,24 +61,25 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_PAGES;
  */
 public class AppleIWorksContentTransformer implements SelectableTransformer
 {
-    private static final Logger logger = LoggerFactory.getLogger(AppleIWorksContentTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        AppleIWorksContentTransformer.class);
 
     // Apple's zip entry names for previews in iWorks have changed over time.
-    private static final List<String> PDF_PATHS = Arrays.asList(
-            "QuickLook/Preview.pdf");  // iWorks 2008/9
-    private static final List<String> JPG_PATHS = Arrays.asList(
-            "QuickLook/Thumbnail.jpg", // iWorks 2008/9
-            "preview.jpg");            // iWorks 2013/14 (720 x 552) We use the best quality image. Others are:
-                                       //                (225 x 173) preview-web.jpg
-                                       //                 (53 x  41) preview-micro.jpg
+    private static final List<String> PDF_PATHS = ImmutableList.of(
+        "QuickLook/Preview.pdf");  // iWorks 2008/9
+    private static final List<String> JPG_PATHS = ImmutableList.of(
+        "QuickLook/Thumbnail.jpg", // iWorks 2008/9
+        "preview.jpg");            // iWorks 2013/14 (720 x 552) We use the best quality image. Others are:
+    //                (225 x 173) preview-web.jpg
+    //                 (53 x  41) preview-micro.jpg
 
     @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
+    public boolean isTransformable(String sourceMimetype, String targetMimetype,
+        Map<String, String> parameters)
     {
-        boolean transformable =  MIMETYPE_IWORK_KEYNOTE.equals(sourceMimetype)
-                || MIMETYPE_IWORK_NUMBERS.equals(sourceMimetype)
-                || MIMETYPE_IWORK_PAGES.equals(sourceMimetype);
-        return transformable;
+        return MIMETYPE_IWORK_KEYNOTE.equals(sourceMimetype) ||
+               MIMETYPE_IWORK_NUMBERS.equals(sourceMimetype) ||
+               MIMETYPE_IWORK_PAGES.equals(sourceMimetype);
     }
 
     @Override
@@ -86,20 +88,19 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
         final String sourceMimetype = parameters.get(SOURCE_MIMETYPE);
         final String targetMimetype = parameters.get(TARGET_MIMETYPE);
 
-        if(logger.isDebugEnabled())
-        {
-            logger.debug("Performing IWorks to jpeg transform with sourceMimetype=" + sourceMimetype
-                    + " targetMimetype=" + targetMimetype);
-        }
+        logger.debug("Performing IWorks to jpeg transform with sourceMimetype={} targetMimetype={}",
+            sourceMimetype, targetMimetype);
+
         // iWorks files are zip (or package) files.
         // If it's not a zip file, the resultant ZipException will be caught as an IOException below.
-        try (ZipArchiveInputStream iWorksZip = new ZipArchiveInputStream( new BufferedInputStream( new FileInputStream(sourceFile))))
+        try (ZipArchiveInputStream iWorksZip = new ZipArchiveInputStream(
+            new BufferedInputStream(new FileInputStream(sourceFile))))
         {
             // Look through the zip file entries for the preview/thumbnail.
-            List<String> paths = Mimetype.MIMETYPE_IMAGE_JPEG.equals(targetMimetype) ? JPG_PATHS : PDF_PATHS;
+            List<String> paths = MIMETYPE_IMAGE_JPEG.equals(targetMimetype) ? JPG_PATHS : PDF_PATHS;
             ZipArchiveEntry entry;
             boolean found = false;
-            while ((entry=iWorksZip.getNextZipEntry()) != null)
+            while ((entry = iWorksZip.getNextZipEntry()) != null)
             {
                 String name = entry.getName();
                 if (paths.contains(name))
@@ -110,14 +111,17 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
                 }
             }
 
-            if (! found)
+            if (!found)
             {
-                throw new AlfrescoRuntimeException("The source " + sourceMimetype + " file did not contain a " + targetMimetype + " preview");
+                throw new AlfrescoRuntimeException(
+                    "The source " + sourceMimetype + " file did not contain a " + targetMimetype + " preview");
             }
         }
         catch (IOException e)
         {
-            throw new AlfrescoRuntimeException("Unable to transform " + sourceMimetype + " file. It should have been a zip format file.", e);
+            throw new AlfrescoRuntimeException(
+                "Unable to transform " + sourceMimetype + " file. It should have been a zip format file.",
+                e);
         }
     }
 }

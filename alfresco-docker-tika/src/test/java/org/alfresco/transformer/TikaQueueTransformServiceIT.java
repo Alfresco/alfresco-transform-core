@@ -48,7 +48,8 @@ public class TikaQueueTransformServiceIT extends AbstractQueueTransformServiceIT
     @Override
     protected TransformRequest buildRequest()
     {
-        return TransformRequest.builder()
+        return TransformRequest
+            .builder()
             .withRequestId(UUID.randomUUID().toString())
             .withSourceMediaType(MIMETYPE_OPENXML_WORDPROCESSING)
             .withTargetMediaType(MIMETYPE_TEXT_PLAIN)

@@ -35,20 +35,20 @@ import java.io.IOException;
 import javax.annotation.PostConstruct;
 
 import org.alfresco.transform.exceptions.TransformException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.artofsolving.jodconverter.OfficeDocumentConverter;
 import org.artofsolving.jodconverter.office.OfficeException;
 import org.artofsolving.jodconverter.office.OfficeManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sun.star.task.ErrorCodeIOException;
 
 /**
- * JavaExecutor implementation for running LibreOffice transformations. It loads the 
+ * JavaExecutor implementation for running LibreOffice transformations. It loads the
  * transformation logic in the same JVM (check the {@link JodConverter} implementation).
  */
 @Component

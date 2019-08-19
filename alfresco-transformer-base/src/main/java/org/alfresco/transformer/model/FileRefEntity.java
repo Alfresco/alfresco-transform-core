@@ -37,25 +37,19 @@ public class FileRefEntity
 {
     private String fileRef;
 
-    public FileRefEntity()
-    {
-    }
+    public FileRefEntity() {}
 
     public FileRefEntity(String fileRef)
     {
         this.fileRef = fileRef;
     }
 
-    public void setFileRef(String fileRef){
+    public void setFileRef(String fileRef)
+    {
         this.fileRef = fileRef;
     }
-    public String getFileRef()
-    {
-        return fileRef;
-    }
 
-    @Override
-    public String toString()
+    public String getFileRef()
     {
         return fileRef;
     }
@@ -63,21 +57,21 @@ public class FileRefEntity
     @Override
     public boolean equals(Object o)
     {
-        if (this == o)
-        {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass())
-        {
-            return false;
-        }
-        FileRefEntity fileRef = (FileRefEntity) o;
-        return Objects.equals(this.fileRef, fileRef.fileRef);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FileRefEntity that = (FileRefEntity) o;
+        return Objects.equals(fileRef, that.fileRef);
     }
 
     @Override
     public int hashCode()
     {
         return Objects.hash(fileRef);
+    }
+
+    @Override
+    public String toString()
+    {
+        return fileRef;
     }
 }

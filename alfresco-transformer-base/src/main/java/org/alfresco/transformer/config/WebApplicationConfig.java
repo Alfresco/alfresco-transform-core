@@ -26,12 +26,12 @@
  */
 package org.alfresco.transformer.config;
 
+import org.alfresco.transform.client.model.TransformRequestValidator;
 import org.alfresco.transformer.TransformInterceptor;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
-import org.alfresco.transform.client.model.TransformRequestValidator;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -40,15 +40,17 @@ public class WebApplicationConfig implements WebMvcConfigurer
 {
 
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(transformInterceptor()).addPathPatterns("/transform", "/live", "/ready");
+    public void addInterceptors(InterceptorRegistry registry)
+    {
+        registry.addInterceptor(transformInterceptor()).addPathPatterns("/transform", "/live",
+            "/ready");
     }
 
     @Bean
-    public TransformInterceptor transformInterceptor() {
+    public TransformInterceptor transformInterceptor()
+    {
         return new TransformInterceptor();
     }
-
 
     @Bean
     public RestTemplate restTemplate()
@@ -57,7 +59,8 @@ public class WebApplicationConfig implements WebMvcConfigurer
     }
 
     @Bean
-    public AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient(){
+    public AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient()
+    {
         return new AlfrescoSharedFileStoreClient();
     }
 

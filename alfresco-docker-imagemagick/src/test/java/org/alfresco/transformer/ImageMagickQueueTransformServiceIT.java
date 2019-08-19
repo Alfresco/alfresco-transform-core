@@ -48,7 +48,8 @@ public class ImageMagickQueueTransformServiceIT extends AbstractQueueTransformSe
     @Override
     protected TransformRequest buildRequest()
     {
-        return TransformRequest.builder()
+        return TransformRequest
+            .builder()
             .withRequestId(UUID.randomUUID().toString())
             .withSourceMediaType(MIMETYPE_IMAGE_PNG)
             .withTargetMediaType(MIMETYPE_IMAGE_JPEG)
@@ -56,6 +57,7 @@ public class ImageMagickQueueTransformServiceIT extends AbstractQueueTransformSe
             .withSchema(1)
             .withClientData("ACS")
             .withSourceReference(UUID.randomUUID().toString())
-            .withSourceSize(32L).build();
+            .withSourceSize(32L)
+            .build();
     }
 }

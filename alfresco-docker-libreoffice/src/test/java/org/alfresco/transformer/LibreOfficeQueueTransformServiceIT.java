@@ -47,7 +47,8 @@ public class LibreOfficeQueueTransformServiceIT extends AbstractQueueTransformSe
     @Override
     protected TransformRequest buildRequest()
     {
-        return TransformRequest.builder()
+        return TransformRequest
+            .builder()
             .withRequestId(UUID.randomUUID().toString())
             .withSourceMediaType(MIMETYPE_OPENXML_WORDPROCESSING)
             .withTargetMediaType(MIMETYPE_OPENXML_WORDPROCESSING)
@@ -55,6 +56,7 @@ public class LibreOfficeQueueTransformServiceIT extends AbstractQueueTransformSe
             .withSchema(1)
             .withClientData("ACS")
             .withSourceReference(UUID.randomUUID().toString())
-            .withSourceSize(32L).build();
+            .withSourceSize(32L)
+            .build();
     }
 }

@@ -37,13 +37,12 @@ import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
-import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
 import static org.alfresco.transformer.util.Util.stringToBoolean;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -56,7 +55,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -69,9 +67,9 @@ import org.springframework.web.multipart.MultipartFile;
  * Status Codes:
  *
  * 200 Success
- * 400 Bad Request: Invalid target mimetype &lt;mimetype>
- * 400 Bad Request: Request parameter &lt;name> is missing (missing mandatory parameter)
- * 400 Bad Request: Request parameter &lt;name> is of the wrong type
+ * 400 Bad Request: Invalid target mimetype <mimetype>
+ * 400 Bad Request: Request parameter <name> is missing (missing mandatory parameter)
+ * 400 Bad Request: Request parameter <name> is of the wrong type
  * 400 Bad Request: Transformer exit code was not 0 (possible problem with the source file)
  * 400 Bad Request: The source filename was not supplied
  * 500 Internal Server Error: (no message with low level IO problems)
@@ -91,15 +89,6 @@ public class TikaController extends AbstractTransformerController
 
     @Autowired
     private TikaJavaExecutor javaExecutor;
-
-    @Autowired
-    public TikaController()
-    {
-        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-        Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
-        logger.info("Tika is from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt");
-        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-    }
 
     @Override
     public String getTransformerName()
@@ -130,7 +119,7 @@ public class TikaController extends AbstractTransformerController
         };
     }
 
-    @PostMapping(value = "/transform", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
         @RequestParam("file") MultipartFile sourceMultipartFile,
         @RequestParam("targetExtension") String targetExtension,
@@ -149,7 +138,8 @@ public class TikaController extends AbstractTransformerController
             throw new TransformException(BAD_REQUEST.value(), "Invalid transform value");
         }
 
-        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(), targetExtension);
+        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(),
+            targetExtension);
         getProbeTestTransform().incrementTransformerCount();
         File sourceFile = createSourceFile(request, sourceMultipartFile);
         File targetFile = createTargetFile(request, targetFilename);

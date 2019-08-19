@@ -135,7 +135,7 @@ public final class LogEntry
         int i = filename.lastIndexOf('.');
         if (i != -1)
         {
-            filename = filename.substring(i+1);
+            filename = filename.substring(i + 1);
         }
         return filename;
     }
@@ -201,7 +201,8 @@ public final class LogEntry
         if (logEntry.statusCode == OK.value())
         {
             logEntry.durationStreamOut = System.currentTimeMillis() - logEntry.start -
-                    logEntry.durationStreamIn - max(logEntry.durationTransform, 0) - max(logEntry.durationDelay, 0);
+                                         logEntry.durationStreamIn - max(logEntry.durationTransform,
+                0) - max(logEntry.durationDelay, 0);
         }
         currentLogEntry.remove();
 
@@ -228,17 +229,19 @@ public final class LogEntry
 
     public String getDuration()
     {
-        long duration = durationStreamIn + max(durationTransform, 0) + max(durationDelay, 0) + max(durationStreamOut, 0);
+        long duration = durationStreamIn + max(durationTransform, 0) + max(durationDelay, 0) + max(
+            durationStreamOut, 0);
         return duration <= 5
                ? ""
-               : time(duration)+
-                " ("+
-                (time(durationStreamIn)+' '+
-                 time(durationTransform)+' '+
-                 (durationDelay > 0
-                 ? time(durationDelay)+' '+(durationStreamOut < 0 ? "-" : time(durationStreamOut))
-                 : time(durationStreamOut))).trim()+
-                ")";
+               : time(duration) +
+                 " (" +
+                 (time(durationStreamIn) + ' ' +
+                  time(durationTransform) + ' ' +
+                  (durationDelay > 0
+                   ? time(durationDelay) + ' ' + (durationStreamOut < 0 ? "-" : time(
+                      durationStreamOut))
+                   : time(durationStreamOut))).trim() +
+                 ")";
     }
 
     public String getSource()
@@ -274,16 +277,16 @@ public final class LogEntry
     private String time(long ms)
     {
         return ms == -1 ? "" : size(ms, "1ms",
-            new String[] { "ms",  "s",   "min",       "hr" },
-            new long[]   {       1000, 60*1000, 60*60*1000, Long.MAX_VALUE});
+            new String[]{"ms", "s", "min", "hr"},
+            new long[]{1000, 60 * 1000, 60 * 60 * 1000, Long.MAX_VALUE});
     }
 
     private String size(long size)
     {
         // TODO fix numeric overflow in TB expression
         return size == -1 ? "" : size(size, "1 byte",
-            new String[] { "bytes", " KB",      " MB",           " GB",                " TB" },
-            new long[]   {          1024, 1024*1024, 1024*1024*1024, 1024*1024*1024*1024, Long.MAX_VALUE });
+            new String[]{"bytes", " KB", " MB", " GB", " TB"},
+            new long[]{1024, 1024 * 1024, 1024 * 1024 * 1024, 1024 * 1024 * 1024 * 1024, Long.MAX_VALUE});
     }
 
     private String size(long size, String singleValue, String[] units, long[] dividers)
@@ -293,16 +296,16 @@ public final class LogEntry
             return singleValue;
         }
         long divider = 1;
-        for(int i = 0; i < units.length-1; i++)
+        for (int i = 0; i < units.length - 1; i++)
         {
             long nextDivider = dividers[i];
-            if(size < nextDivider)
+            if (size < nextDivider)
             {
                 return unitFormat(size, divider, units[i]);
             }
             divider = nextDivider;
         }
-        return unitFormat(size, divider, units[units.length-1]);
+        return unitFormat(size, divider, units[units.length - 1]);
     }
 
     private String unitFormat(long size, long divider, String unit)
@@ -311,7 +314,7 @@ public final class LogEntry
         int decimalPoint = (int) size % 10;
 
         StringBuilder sb = new StringBuilder();
-        sb.append(size/10);
+        sb.append(size / 10);
         if (decimalPoint != 0)
         {
             sb.append(".");

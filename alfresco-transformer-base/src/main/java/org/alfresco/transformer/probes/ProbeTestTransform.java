@@ -43,8 +43,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.transformer.AbstractTransformerController;
 import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transformer.AbstractTransformerController;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.util.TempFileProvider;
 import org.slf4j.Logger;
@@ -65,11 +65,11 @@ import org.slf4j.LoggerFactory;
  * code resulting in the k8s pod being terminated, after a predefined number of transformations have been performed or
  * if any transformation takes a long time. These are controlled by environment variables:</p>
  * <ul>
- *     <li>livenessPercent - The percentage slower the small test transform must be to indicate there is a problem.</li>
- *     <li>livenessTransformPeriodSeconds - As liveness probes should be frequent, not every request should result in
- *         a test transformation. This value defines the gap between transformations.</li>
- *     <li>maxTransforms - the maximum number of transformation to be performed before a restart.</li>
- *     <li>maxTransformSeconds - the maximum time for a transformation, including failed ones.</li>
+ * <li>livenessPercent - The percentage slower the small test transform must be to indicate there is a problem.</li>
+ * <li>livenessTransformPeriodSeconds - As liveness probes should be frequent, not every request should result in
+ * a test transformation. This value defines the gap between transformations.</li>
+ * <li>maxTransforms - the maximum number of transformation to be performed before a restart.</li>
+ * <li>maxTransformSeconds - the maximum time for a transformation, including failed ones.</li>
  * </ul>
  */
 public abstract class ProbeTestTransform
@@ -111,28 +111,30 @@ public abstract class ProbeTestTransform
 
     /**
      * See Probes.md for more info.
-     * @param expectedLength was the length of the target file during testing
-     * @param plusOrMinus simply allows for some variation in the transformed size caused by new versions of dates
-     * @param livenessPercent indicates that for this type of transform a variation up to 2 and a half times is not
-     *                       unreasonable under load
-     * @param maxTransforms default values normally supplied by helm. Not identical so we can be sure which value is used.
-     * @param maxTransformSeconds default values normally supplied by helm. Not identical so we can be sure which value is used.
-     * @param livenessTransformPeriodSeconds  default values normally supplied by helm. Not identical so we can be sure which value is used.
+     *
+     * @param expectedLength                 was the length of the target file during testing
+     * @param plusOrMinus                    simply allows for some variation in the transformed size caused by new versions of dates
+     * @param livenessPercent                indicates that for this type of transform a variation up to 2 and a half times is not
+     *                                       unreasonable under load
+     * @param maxTransforms                  default values normally supplied by helm. Not identical so we can be sure which value is used.
+     * @param maxTransformSeconds            default values normally supplied by helm. Not identical so we can be sure which value is used.
+     * @param livenessTransformPeriodSeconds default values normally supplied by helm. Not identical so we can be sure which value is used.
      */
     public ProbeTestTransform(AbstractTransformerController controller,
-                              String sourceFilename, String targetFilename, long expectedLength, long plusOrMinus,
-                              int livenessPercent, long maxTransforms, long maxTransformSeconds,
-                              long livenessTransformPeriodSeconds)
+        String sourceFilename, String targetFilename, long expectedLength, long plusOrMinus,
+        int livenessPercent, long maxTransforms, long maxTransformSeconds,
+        long livenessTransformPeriodSeconds)
     {
         this.sourceFilename = sourceFilename;
         this.targetFilename = targetFilename;
-        minExpectedLength = Math.max(0, expectedLength-plusOrMinus);
-        maxExpectedLength = expectedLength+plusOrMinus;
+        minExpectedLength = Math.max(0, expectedLength - plusOrMinus);
+        maxExpectedLength = expectedLength + plusOrMinus;
 
         this.livenessPercent = (int) getPositiveLongEnv("livenessPercent", livenessPercent);
         maxTransformCount = getPositiveLongEnv("maxTransforms", maxTransforms);
-        maxTransformTime = getPositiveLongEnv("maxTransformSeconds", maxTransformSeconds)*1000;
-        livenessTransformPeriod = getPositiveLongEnv("livenessTransformPeriodSeconds", livenessTransformPeriodSeconds)*1000;
+        maxTransformTime = getPositiveLongEnv("maxTransformSeconds", maxTransformSeconds) * 1000;
+        livenessTransformPeriod = getPositiveLongEnv("livenessTransformPeriodSeconds",
+            livenessTransformPeriodSeconds) * 1000;
         livenessTransformEnabled = getBooleanEnvVar("livenessTransformEnabled", false);
     }
 
@@ -182,9 +184,9 @@ public abstract class ProbeTestTransform
         }
         return (isLiveProbe && livenessTransformPeriod > 0 &&
                 (transCount <= AVERAGE_OVER_TRANSFORMS || nextTransformTime < System.currentTimeMillis()))
-                || !initialised.get()
-                ? doTransform(request, isLiveProbe)
-                : doNothing(isLiveProbe);
+               || !initialised.get()
+               ? doTransform(request, isLiveProbe)
+               : doNothing(isLiveProbe);
     }
 
     private String doNothing(boolean isLiveProbe)
@@ -238,39 +240,39 @@ public abstract class ProbeTestTransform
 
         checkMaxTransformTimeAndCount(isLiveProbe);
 
-        return getProbeMessage(isLiveProbe)+message;
+        return getProbeMessage(isLiveProbe) + message;
     }
 
     private void checkMaxTransformTimeAndCount(boolean isLiveProbe)
     {
         if (die.get())
         {
-            throw new TransformException(TOO_MANY_REQUESTS.value(), getMessagePrefix(isLiveProbe) +
-                    "Transformer requested to die. A transform took longer than "+
-                    (maxTransformTime *1000)+" seconds");
+            throw new TransformException(TOO_MANY_REQUESTS.value(),
+                getMessagePrefix(isLiveProbe) + "Transformer requested to die. A transform took " +
+                "longer than " + (maxTransformTime * 1000) + " seconds");
         }
 
         if (maxTransformCount > 0 && transformCount.get() > maxTransformCount)
         {
-            throw new TransformException(TOO_MANY_REQUESTS.value(), getMessagePrefix(isLiveProbe) +
-                    "Transformer requested to die. It has performed more than "+
-                    maxTransformCount+" transformations");
+            throw new TransformException(TOO_MANY_REQUESTS.value(),
+                getMessagePrefix(isLiveProbe) + "Transformer requested to die. It has performed " +
+                "more than " + maxTransformCount + " transformations");
         }
     }
 
     private File getSourceFile(HttpServletRequest request, boolean isLiveProbe)
     {
         incrementTransformerCount();
-        File sourceFile = TempFileProvider.createTempFile("source_", "_"+ sourceFilename);
+        File sourceFile = TempFileProvider.createTempFile("source_", "_" + sourceFilename);
         request.setAttribute(SOURCE_FILE, sourceFile);
-        try (InputStream inputStream = this.getClass().getResourceAsStream('/'+sourceFilename))
+        try (InputStream inputStream = this.getClass().getResourceAsStream('/' + sourceFilename))
         {
             Files.copy(inputStream, sourceFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
         catch (IOException e)
         {
-            throw new TransformException(INSUFFICIENT_STORAGE.value(), getMessagePrefix(isLiveProbe)+
-                    "Failed to store the source file", e);
+            throw new TransformException(INSUFFICIENT_STORAGE.value(),
+                getMessagePrefix(isLiveProbe) + "Failed to store the source file", e);
         }
         long length = sourceFile.length();
         LogEntry.setSource(sourceFilename, length);
@@ -279,7 +281,7 @@ public abstract class ProbeTestTransform
 
     private File getTargetFile(HttpServletRequest request)
     {
-        File targetFile = TempFileProvider.createTempFile("target_", "_"+targetFilename);
+        File targetFile = TempFileProvider.createTempFile("target_", "_" + targetFilename);
         request.setAttribute(TARGET_FILE, targetFile);
         LogEntry.setTarget(targetFilename);
         return targetFile;
@@ -302,13 +304,15 @@ public abstract class ProbeTestTransform
             String message = getMessagePrefix(isLiveProbe) + "Success - Transform " + time + "ms";
             if (++transCount > 1)
             {
-                normalTime = (normalTime * (transCount-2) + time) / (transCount-1);
+                normalTime = (normalTime * (transCount - 2) + time) / (transCount - 1);
                 maxTime = (normalTime * (livenessPercent + 100)) / 100;
 
-                if ((!isLiveProbe && !readySent.getAndSet(true)) || transCount > AVERAGE_OVER_TRANSFORMS)
+                if ((!isLiveProbe && !readySent.getAndSet(
+                    true)) || transCount > AVERAGE_OVER_TRANSFORMS)
                 {
                     nextTransformTime = System.currentTimeMillis() + livenessTransformPeriod;
-                    logger.trace("{} - {}ms+{}%={}ms", message,  normalTime, livenessPercent, maxTime);
+                    logger.trace("{} - {}ms+{}%={}ms", message, normalTime, livenessPercent,
+                        maxTime);
                 }
             }
             else if (!isLiveProbe && !readySent.getAndSet(true))
@@ -362,7 +366,6 @@ public abstract class ProbeTestTransform
 
     public long getNormalTime()
     {
-    
         return normalTime;
     }
 }

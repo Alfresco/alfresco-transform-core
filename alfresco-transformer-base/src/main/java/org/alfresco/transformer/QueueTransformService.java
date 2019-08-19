@@ -26,6 +26,11 @@
  */
 package org.alfresco.transformer;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import java.util.Optional;
+
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -44,8 +49,6 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 /**
  * Queue Transformer service.
  * This service reads all the requests for the particular engine, forwards them to the worker
@@ -56,11 +59,10 @@ import java.util.Optional;
  * created on 18/12/2018
  */
 @Component
-@ConditionalOnProperty(name="activemq.url")
+@ConditionalOnProperty(name = "activemq.url")
 public class QueueTransformService
 {
     private static final Logger logger = LoggerFactory.getLogger(QueueTransformService.class);
-
 
     // TODO: I know this is not smart but all the the transformation logic is in the Controller.
     // The controller also manages the probes. There's tons of refactoring needed there, hence this. Sorry.
@@ -98,7 +100,9 @@ public class QueueTransformService
         }
         catch (JMSException e)
         {
-            logger.error("Cannot find 'replyTo' destination queue for message with correlationID {}. Stopping. ", correlationId);
+            logger.error(
+                "Cannot find 'replyTo' destination queue for message with correlationID {}. Stopping. ",
+                correlationId);
             return;
         }
 
@@ -126,7 +130,7 @@ public class QueueTransformService
         }
 
         TransformReply reply = transformController.transform(transformRequest.get(), null)
-            .getBody();
+                                                  .getBody();
 
         transformReplySender.send(replyToDestinationQueue, reply);
     }
@@ -150,36 +154,39 @@ public class QueueTransformService
         {
             String message =
                 "MessageConversionException during T-Request deserialization of message with correlationID "
-                    + correlationId + ": ";
-            throw new TransformException(HttpStatus.BAD_REQUEST.value(), message + e.getMessage());
+                + correlationId + ": ";
+            throw new TransformException(BAD_REQUEST.value(), message + e.getMessage());
         }
         catch (JMSException e)
         {
             String message =
                 "JMSException during T-Request deserialization of message with correlationID "
-                    + correlationId + ": ";
-            throw new TransformException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                + correlationId + ": ";
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
                 message + e.getMessage());
         }
         catch (Exception e)
         {
             String message =
                 "Exception during T-Request deserialization of message with correlationID "
-                    + correlationId + ": ";
-            throw new TransformException(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                + correlationId + ": ";
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
                 message + e.getMessage());
         }
     }
 
-    private void replyWithInternalSvErr(final Destination destination, final String msg, final String correlationId)
-    {
-        replyWithError(destination, HttpStatus.INTERNAL_SERVER_ERROR, msg, correlationId);
-    }
-
-    private void replyWithError(final Destination destination, final HttpStatus status, final String msg,
+    private void replyWithInternalSvErr(final Destination destination, final String msg,
         final String correlationId)
     {
-        final TransformReply reply = TransformReply.builder()
+        replyWithError(destination, INTERNAL_SERVER_ERROR, msg, correlationId);
+    }
+
+    private void replyWithError(final Destination destination, final HttpStatus status,
+        final String msg,
+        final String correlationId)
+    {
+        final TransformReply reply = TransformReply
+            .builder()
             .withStatus(status.value())
             .withErrorDetails(msg)
             .build();

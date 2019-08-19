@@ -26,6 +26,9 @@
  */
 package org.alfresco.transformer.clients;
 
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
+
 import java.io.File;
 
 import org.alfresco.transform.exceptions.TransformException;
@@ -36,8 +39,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
@@ -87,11 +88,11 @@ public class AlfrescoSharedFileStoreClient
             LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
             map.add("file", value);
             HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            headers.setContentType(MULTIPART_FORM_DATA);
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map,
                 headers);
             ResponseEntity<FileRefResponse> responseEntity = restTemplate
-                .exchange(fileStoreUrl, HttpMethod.POST, requestEntity, FileRefResponse.class);
+                .exchange(fileStoreUrl, POST, requestEntity, FileRefResponse.class);
             return responseEntity.getBody();
         }
         catch (HttpClientErrorException e)
