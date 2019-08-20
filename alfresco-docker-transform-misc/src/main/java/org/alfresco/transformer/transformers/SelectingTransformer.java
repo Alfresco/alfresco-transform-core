@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.slf4j.Logger;
@@ -117,7 +116,7 @@ public class SelectingTransformer
                 return transformer;
             }
         }
-        throw new AlfrescoRuntimeException(
+        throw new RuntimeException(
             "Could not select a transformer for sourceMimetype=" + sourceMimetype
             + " targetMimetype=" + targetMimetype);
     }

@@ -55,7 +55,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 
-import org.alfresco.error.AlfrescoRuntimeException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.openxml4j.opc.PackageRelationship;
@@ -148,7 +147,7 @@ public class OOXMLThumbnailContentTransformer implements SelectableTransformer
         }
         catch (IOException e)
         {
-            throw new AlfrescoRuntimeException("Unable to transform file.", e);
+            throw new RuntimeException("Unable to transform file.", e);
         }
     }
 

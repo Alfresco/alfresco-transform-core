@@ -26,14 +26,14 @@
  */
 package org.alfresco.transformer.executors;
 
-import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_HTML;
-import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_IMAGE_PNG;
-import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_IMAGE_TIFF;
-import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_TEXT_CSV;
-import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_XHTML;
-import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_XML;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_HTML;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_PNG;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_TIFF;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_CSV;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XHTML;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;

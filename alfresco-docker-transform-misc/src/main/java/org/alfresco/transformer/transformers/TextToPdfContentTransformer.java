@@ -46,7 +46,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.alfresco.error.AlfrescoRuntimeException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -86,7 +85,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
         }
         catch (Throwable e)
         {
-            throw new AlfrescoRuntimeException(
+            throw new RuntimeException(
                 "Unable to set Standard Font for PDF generation: " + fontName, e);
         }
     }
@@ -99,7 +98,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
         }
         catch (Throwable e)
         {
-            throw new AlfrescoRuntimeException(
+            throw new RuntimeException(
                 "Unable to set Font Size for PDF generation: " + fontSize);
         }
     }
