@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import static java.nio.file.Files.readAllBytes;
 import static org.alfresco.transformer.executors.Tika.ARCHIVE;
 import static org.alfresco.transformer.executors.Tika.CSV;
 import static org.alfresco.transformer.executors.Tika.DOC;
@@ -58,6 +59,7 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORD;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XHTML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_ZIP;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -79,8 +81,6 @@ import static org.springframework.util.StringUtils.getFilenameExtension;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -212,9 +212,9 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
                 }
 
                 // Check the supplied source file has not been changed.
-                byte[] actualSourceFileBytes = Files.readAllBytes(new File(actualSource).toPath());
-                assertTrue("Source file is not the same",
-                    Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes));
+                byte[] actualSourceFileBytes = readAllBytes(new File(actualSource).toPath());
+                assertArrayEquals("Source file is not the same", expectedSourceFileBytes,
+                    actualSourceFileBytes);
 
                 return mockExecutionResult;
             });
