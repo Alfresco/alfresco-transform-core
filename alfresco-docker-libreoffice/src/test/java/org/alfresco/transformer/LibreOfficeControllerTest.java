@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -56,7 +57,6 @@ import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
 import org.alfresco.transformer.model.FileRefEntity;
 import org.alfresco.transformer.model.FileRefResponse;
-import org.alfresco.util.exec.RuntimeExec;
 import org.artofsolving.jodconverter.office.OfficeException;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,7 +81,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 {
     @Mock
-    private RuntimeExec.ExecutionResult mockExecutionResult;
+    private ExecutionResult mockExecutionResult;
 
     @SpyBean
     private LibreOfficeJavaExecutor javaExecutor;

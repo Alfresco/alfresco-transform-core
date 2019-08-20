@@ -26,7 +26,6 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.repo.content.MimetypeMap.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transformer.executors.Tika.INCLUDE_CONTENTS;
 import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
 import static org.alfresco.transformer.executors.Tika.PDF_BOX;
@@ -37,6 +36,7 @@ import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transformer.util.Util.stringToBoolean;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;

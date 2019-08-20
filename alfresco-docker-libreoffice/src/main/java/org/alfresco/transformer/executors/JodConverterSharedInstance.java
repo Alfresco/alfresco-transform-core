@@ -37,7 +37,6 @@ import java.util.StringTokenizer;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.alfresco.error.AlfrescoRuntimeException;
 import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
 import org.artofsolving.jodconverter.office.OfficeException;
 import org.artofsolving.jodconverter.office.OfficeManager;
@@ -163,7 +162,7 @@ public class JodConverterSharedInstance implements JodConverter
             File tmp = new File(templateProfileDir);
             if (!tmp.isDirectory())
             {
-                throw new AlfrescoRuntimeException(
+                throw new RuntimeException(
                     "OpenOffice template profile directory " + templateProfileDir + " does not exist.");
             }
             this.templateProfileDir = tmp;

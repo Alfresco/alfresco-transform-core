@@ -27,6 +27,7 @@
 package org.alfresco.transformer;
 
 import static java.util.stream.Collectors.joining;
+import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTempFile;
 import static org.alfresco.transformer.fs.FileManager.buildFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.fs.FileManager.deleteFile;
@@ -51,7 +52,6 @@ import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.model.FileRefResponse;
-import org.alfresco.util.TempFileProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -324,7 +324,7 @@ public abstract class AbstractTransformerController implements TransformControll
             logger.warn(message);
             throw new TransformException(BAD_REQUEST.value(), message);
         }
-        File file = TempFileProvider.createTempFile("source_", "." + extension);
+        final File file = createTempFile("source_", "." + extension);
 
         logger.debug("Read source content {} length={} contentType={}",
             sourceReference, size, contentType);

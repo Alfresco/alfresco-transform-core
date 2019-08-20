@@ -28,6 +28,7 @@ package org.alfresco.transformer.probes;
 
 import static org.alfresco.transformer.fs.FileManager.SOURCE_FILE;
 import static org.alfresco.transformer.fs.FileManager.TARGET_FILE;
+import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTempFile;
 import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
@@ -46,7 +47,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.AbstractTransformerController;
 import org.alfresco.transformer.logging.LogEntry;
-import org.alfresco.util.TempFileProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -263,7 +263,7 @@ public abstract class ProbeTestTransform
     private File getSourceFile(HttpServletRequest request, boolean isLiveProbe)
     {
         incrementTransformerCount();
-        File sourceFile = TempFileProvider.createTempFile("source_", "_" + sourceFilename);
+        File sourceFile = createTempFile("source_", "_" + sourceFilename);
         request.setAttribute(SOURCE_FILE, sourceFile);
         try (InputStream inputStream = this.getClass().getResourceAsStream('/' + sourceFilename))
         {
@@ -281,7 +281,7 @@ public abstract class ProbeTestTransform
 
     private File getTargetFile(HttpServletRequest request)
     {
-        File targetFile = TempFileProvider.createTempFile("target_", "_" + targetFilename);
+        File targetFile = createTempFile("target_", "_" + targetFilename);
         request.setAttribute(TARGET_FILE, targetFile);
         LogEntry.setTarget(targetFilename);
         return targetFile;
