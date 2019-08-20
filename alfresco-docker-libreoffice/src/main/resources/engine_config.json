@@ -312,15 +312,15 @@
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",                                         "targetMediaType": "application/vnd.ms-excel" },
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",          "maxSourceSizeBytes": 1572864, "targetMediaType": "application/pdf" },
 
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                         "targetMediaType": "text/html" },
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                         "targetMediaType": "application/vnd.oasis.opendocument.spreadsheet" },
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                         "targetMediaType": "application/vnd.oasis.opendocument.spreadsheet-template" },
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                         "targetMediaType": "text/csv" },
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                         "targetMediaType": "application/vnd.sun.xml.calc.template" },
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                         "targetMediaType": "application/vnd.sun.xml.calc" },
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                         "targetMediaType": "text/tab-separated-values" },
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                         "targetMediaType": "application/vnd.ms-excel" },
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",          "maxSourceSizeBytes": 1572864, "targetMediaType": "application/pdf" }
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                      "targetMediaType": "text/html" },
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                      "targetMediaType": "application/vnd.oasis.opendocument.spreadsheet" },
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                      "targetMediaType": "application/vnd.oasis.opendocument.spreadsheet-template" },
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                      "targetMediaType": "text/csv" },
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                      "targetMediaType": "application/vnd.sun.xml.calc.template" },
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                      "targetMediaType": "application/vnd.sun.xml.calc" },
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                      "targetMediaType": "text/tab-separated-values" },
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                      "targetMediaType": "application/vnd.ms-excel" },
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",       "maxSourceSizeBytes": 1572864, "targetMediaType": "application/pdf" }
       ]
     }
   ]
