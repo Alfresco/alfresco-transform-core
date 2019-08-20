@@ -49,7 +49,7 @@ public class MessagingInfo
     @PostConstruct
     public void init()
     {
-        final boolean jms = activemqUrl != null && !activemqUrl.isBlank();
+        final boolean jms = activemqUrl != null && !activemqUrl.trim().isEmpty();
         logger.info("JMS client is {}, activemq.url: '{}'", jms ? "ENABLED" : "DISABLED",
             activemqUrl);
     }
