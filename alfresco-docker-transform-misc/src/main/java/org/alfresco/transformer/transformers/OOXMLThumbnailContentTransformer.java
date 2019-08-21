@@ -51,6 +51,10 @@ import java.util.Map;
  * This transformer will only work for OOXML files where thumbnailing was enabled,
  *  which isn't on by default on Windows, but is more common on Mac.
  *
+ * <p>
+ * This code is based on a class of the same name originally implemented in alfresco-repository.
+ * </p>
+ *
  * @author Nick Burch
  * @author eknizat
  *

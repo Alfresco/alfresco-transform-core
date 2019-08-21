@@ -142,7 +142,7 @@ public class HtmlParserContentTransformer implements SelectableTransformer
      *
      *
      */
-    private class EncodingAwareStringBean extends StringBean
+    public static class EncodingAwareStringBean extends StringBean
     {
         private static final long serialVersionUID = -9033414360428669553L;
 

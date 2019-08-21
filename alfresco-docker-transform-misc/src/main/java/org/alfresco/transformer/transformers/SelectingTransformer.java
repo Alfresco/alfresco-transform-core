@@ -63,6 +63,7 @@ public class SelectingTransformer
         transformers.add(new HtmlParserContentTransformer());
         transformers.add(new StringExtractingContentTransformer());
         transformers.add(new TextToPdfContentTransformer());
+        transformers.add(new EMLTransformer());
 //        transformers.add(new OOXMLThumbnailContentTransformer()); // Doesn't work with java 11, transformer and test disabled
     }
 
