@@ -75,6 +75,11 @@
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcmail-jdk15on</artifactId>
                 </exclusion>
+                <!-- TODO ATS-534 check transformations not affected by this missing quartz lib -->
+                <exclusion>
+                    <groupId>org.quartz-scheduler</groupId>
+                    <artifactId>quartz</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
