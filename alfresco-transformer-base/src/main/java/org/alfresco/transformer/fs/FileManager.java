@@ -26,9 +26,12 @@
  */
 package org.alfresco.transformer.fs;
 
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.util.StringUtils.getFilename;
+import static org.springframework.util.StringUtils.getFilenameExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,16 +44,15 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
-import org.alfresco.util.TempFileProvider;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
 /**
+ *
  */
 public class FileManager
 {
@@ -76,7 +78,7 @@ public class FileManager
 
     public static File buildFile(String filename)
     {
-        filename = checkFilename( false, filename);
+        filename = checkFilename(false, filename);
         LogEntry.setTarget(filename);
         return TempFileProvider.createTempFile("target_", "_" + filename);
     }
@@ -98,12 +100,13 @@ public class FileManager
      */
     private static String checkFilename(boolean source, String filename)
     {
-        filename = StringUtils.getFilename(filename);
+        filename = getFilename(filename);
         if (filename == null || filename.isEmpty())
         {
             String sourceOrTarget = source ? "source" : "target";
             int statusCode = source ? BAD_REQUEST.value() : INTERNAL_SERVER_ERROR.value();
-            throw new TransformException(statusCode, "The " + sourceOrTarget + " filename was not supplied");
+            throw new TransformException(statusCode,
+                "The " + sourceOrTarget + " filename was not supplied");
         }
         return filename;
     }
@@ -112,7 +115,8 @@ public class FileManager
     {
         try
         {
-            Files.copy(multipartFile.getInputStream(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(multipartFile.getInputStream(), file.toPath(),
+                StandardCopyOption.REPLACE_EXISTING);
         }
         catch (IOException e)
         {
@@ -129,7 +133,8 @@ public class FileManager
         }
         catch (IOException e)
         {
-            throw new TransformException(INSUFFICIENT_STORAGE.value(), "Failed to store the source file", e);
+            throw new TransformException(INSUFFICIENT_STORAGE.value(),
+                "Failed to store the source file", e);
         }
     }
 
@@ -158,7 +163,7 @@ public class FileManager
     public static String getFilenameFromContentDisposition(HttpHeaders headers)
     {
         String filename = "";
-        String contentDisposition = headers.getFirst(HttpHeaders.CONTENT_DISPOSITION);
+        String contentDisposition = headers.getFirst(CONTENT_DISPOSITION);
         if (contentDisposition != null)
         {
             String[] strings = contentDisposition.split("; *");
@@ -171,28 +176,31 @@ public class FileManager
         return filename;
     }
 
-
     /**
      * Returns the file name for the target file
      *
-     * @param fileName Desired file name
+     * @param fileName        Desired file name
      * @param targetExtension File extension
      * @return Target file name
      */
-    public static String createTargetFileName(String fileName, String targetExtension)
+    public static String createTargetFileName(final String fileName, final String targetExtension)
     {
-        String targetFilename = null;
-        String sourceFilename = fileName;
-        sourceFilename = StringUtils.getFilename(sourceFilename);
-        if (sourceFilename != null && !sourceFilename.isEmpty())
+        final String sourceFilename = getFilename(fileName);
+
+        if (sourceFilename == null || sourceFilename.isEmpty())
         {
-            String ext = StringUtils.getFilenameExtension(sourceFilename);
-            targetFilename = (ext != null && !ext.isEmpty()
-                              ? sourceFilename.substring(0, sourceFilename.length()-ext.length()-1)
-                              : sourceFilename)+
-                             '.'+targetExtension;
+            return null;
         }
-        return targetFilename;
+
+        final String ext = getFilenameExtension(sourceFilename);
+
+        if (ext == null || ext.isEmpty())
+        {
+            return sourceFilename + '.' + targetExtension;
+        }
+
+        return sourceFilename.substring(0, sourceFilename.length() - ext.length() - 1) +
+               '.' + targetExtension;
     }
 
     /**
@@ -207,7 +215,7 @@ public class FileManager
     {
         String filename = multipartFile.getOriginalFilename();
         long size = multipartFile.getSize();
-        filename = checkFilename(  true, filename);
+        filename = checkFilename(true, filename);
         File file = TempFileProvider.createTempFile("source_", "_" + filename);
         request.setAttribute(SOURCE_FILE, file);
         save(multipartFile, file);
@@ -228,9 +236,48 @@ public class FileManager
         targetFile)
     {
         Resource targetResource = load(targetFile);
-        targetFilename = UriUtils.encodePath(StringUtils.getFilename(targetFilename), "UTF-8");
-        return  ResponseEntity.ok().header(HttpHeaders
-                .CONTENT_DISPOSITION,
+        targetFilename = UriUtils.encodePath(getFilename(targetFilename), "UTF-8");
+        return ResponseEntity.ok().header(CONTENT_DISPOSITION,
             "attachment; filename*= UTF-8''" + targetFilename).body(targetResource);
+    }
+
+    /**
+     * TempFileProvider - Duplicated and adapted from alfresco-core.
+     */
+    public static class TempFileProvider
+    {
+        public static File createTempFile(final String prefix, final String suffix)
+        {
+            final File directory = getTempDir();
+            try
+            {
+                return File.createTempFile(prefix, suffix, directory);
+            }
+            catch (IOException e)
+            {
+                throw new RuntimeException(
+                    "Failed to created temp file: \n   prefix: " + prefix +
+                    "\n   suffix: " + suffix + "\n   directory: " + directory, e);
+            }
+        }
+
+        private static File getTempDir()
+        {
+            final String dirName = "Alfresco";
+            final String systemTempDirPath = System.getProperty("java.io.tmpdir");
+            if (systemTempDirPath == null)
+            {
+                throw new RuntimeException("System property not available: java.io.tmpdir");
+            }
+
+            final File systemTempDir = new File(systemTempDirPath);
+            final File tempDir = new File(systemTempDir, dirName);
+            if (!tempDir.exists() && !tempDir.mkdirs() && !tempDir.exists())
+            {
+                throw new RuntimeException("Failed to create temp directory: " + tempDir);
+            }
+
+            return tempDir;
+        }
     }
 }

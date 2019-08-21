@@ -98,7 +98,8 @@ public class MessagingConfig implements JmsListenerConfigurer
 
     @Bean
     @ConditionalOnProperty(name = "activemq.url")
-    public Queue engineRequestQueue(@Value("${queue.engineRequestQueue}") String engineRequestQueueValue)
+    public Queue engineRequestQueue(
+        @Value("${queue.engineRequestQueue}") String engineRequestQueueValue)
     {
         return new ActiveMQQueue(engineRequestQueueValue);
     }

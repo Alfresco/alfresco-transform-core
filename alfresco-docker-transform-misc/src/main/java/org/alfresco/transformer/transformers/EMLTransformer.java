@@ -26,6 +26,13 @@
  */
 package org.alfresco.transformer.transformers;
 
+import org.alfresco.transformer.fs.FileManager;
+
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_MULTIPART_ALTERNATIVE;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_RFC822;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -45,13 +52,6 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
-
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_MULTIPART_ALTERNATIVE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_RFC822;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
-
-import org.alfresco.util.TempFileProvider;
 
 
 /**
@@ -205,7 +205,7 @@ public class EMLTransformer implements SelectableTransformer
             String mailPartContent = part.getContent().toString();
 
             //create a temporary html file with same mail part content and encoding
-            File tempHtmlFile = TempFileProvider.createTempFile("EMLTransformer_", ".html");
+            File tempHtmlFile = FileManager.TempFileProvider.createTempFile("EMLTransformer_", ".html");
             String encoding = getMailPartContentEncoding(part);
             try (OutputStreamWriter osWriter = new OutputStreamWriter( new FileOutputStream( tempHtmlFile), encoding))
             {

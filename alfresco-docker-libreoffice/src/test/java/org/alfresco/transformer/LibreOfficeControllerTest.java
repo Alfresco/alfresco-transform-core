@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -34,7 +35,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.StringUtils.getFilenameExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +57,6 @@ import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
 import org.alfresco.transformer.model.FileRefEntity;
 import org.alfresco.transformer.model.FileRefResponse;
-import org.alfresco.util.exec.RuntimeExec;
 import org.artofsolving.jodconverter.office.OfficeException;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,13 +67,10 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.util.StringUtils;
 
 /**
  * Test the LibreOfficeController without a server.
@@ -76,7 +81,7 @@ import org.springframework.util.StringUtils;
 public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 {
     @Mock
-    private RuntimeExec.ExecutionResult mockExecutionResult;
+    private ExecutionResult mockExecutionResult;
 
     @SpyBean
     private LibreOfficeJavaExecutor javaExecutor;
@@ -94,15 +99,18 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
         // The following is based on super.mockTransformCommand(...)
         // This is because LibreOffice used JodConverter rather than a RuntimeExec
 
-        expectedSourceFileBytes = Files.readAllBytes(getTestFile("quick." + sourceExtension, true).toPath());
-        expectedTargetFileBytes = Files.readAllBytes(getTestFile("quick." + targetExtension, true).toPath());
-        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, expectedSourceFileBytes);
+        expectedSourceFileBytes = Files.readAllBytes(
+            getTestFile("quick." + sourceExtension, true).toPath());
+        expectedTargetFileBytes = Files.readAllBytes(
+            getTestFile("quick." + targetExtension, true).toPath());
+        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
+            expectedSourceFileBytes);
 
         doAnswer(invocation ->
         {
             File sourceFile = invocation.getArgument(0);
             File targetFile = invocation.getArgument(1);
-            String actualTargetExtension = StringUtils.getFilenameExtension(targetFile.getAbsolutePath());
+            String actualTargetExtension = getFilenameExtension(targetFile.getAbsolutePath());
 
             assertNotNull(sourceFile);
             assertNotNull(targetFile);
@@ -119,7 +127,8 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 
             // Check the supplied source file has not been changed.
             byte[] actualSourceFileBytes = Files.readAllBytes(sourceFile.toPath());
-            assertTrue("Source file is not the same", Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes));
+            assertTrue("Source file is not the same",
+                Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes));
 
             return null;
         }).when(javaExecutor).convert(any(), any());
@@ -143,11 +152,14 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
     {
         doThrow(OfficeException.class).when(javaExecutor).convert(any(), any());
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/transform")
-                                              .file(sourceFile)
-                                              .param("targetExtension", "xxx"))
-               .andExpect(status().is(400))
-               .andExpect(status().reason(containsString("LibreOffice - LibreOffice server conversion failed:")));
+        mockMvc
+            .perform(MockMvcRequestBuilders
+                .multipart("/transform")
+                .file(sourceFile)
+                .param("targetExtension", "xxx"))
+            .andExpect(status().is(400))
+            .andExpect(status().reason(
+                containsString("LibreOffice - LibreOffice server conversion failed:")));
     }
 
     @Override
@@ -156,7 +168,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
         transformRequest.setSourceExtension("doc");
         transformRequest.setTargetExtension("pdf");
         transformRequest.setSourceMediaType("application/msword");
-        transformRequest.setTargetMediaType(MediaType.IMAGE_PNG_VALUE);
+        transformRequest.setTargetMediaType(IMAGE_PNG_VALUE);
     }
 
     @Test
@@ -180,14 +192,13 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 
         // HTTP Request
         HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=quick." + sourceExtension);
+        headers.set(CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
         ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
-            sourceFile), headers, HttpStatus.OK);
+            sourceFile), headers, OK);
 
         when(alfrescoSharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
-        when(alfrescoSharedFileStoreClient.saveFile(any())).thenReturn(
-            new FileRefResponse(new FileRefEntity(targetFileRef)));
+        when(alfrescoSharedFileStoreClient.saveFile(any()))
+            .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
         when(mockExecutionResult.getExitValue()).thenReturn(0);
 
         // Update the Transformation Request with any specific params before sending it
@@ -195,14 +206,14 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 
         // Serialize and call the transformer
         String tr = objectMapper.writeValueAsString(transformRequest);
-        String transformationReplyAsString = mockMvc.perform(
-            MockMvcRequestBuilders.post("/transform")
-                                  .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                                  .header(HttpHeaders.CONTENT_TYPE,
-                                      MediaType.APPLICATION_JSON_VALUE).content(tr))
-                                                    .andExpect(
-                                                        status().is(HttpStatus.CREATED.value()))
-                                                    .andReturn().getResponse().getContentAsString();
+        String transformationReplyAsString = mockMvc
+            .perform(MockMvcRequestBuilders
+                .post("/transform")
+                .header(ACCEPT, APPLICATION_JSON_VALUE)
+                .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .content(tr))
+            .andExpect(status().is(CREATED.value()))
+            .andReturn().getResponse().getContentAsString();
 
         TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,
             TransformReply.class);

@@ -26,16 +26,12 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.htmlparser.Parser;
-import org.htmlparser.beans.StringBean;
-import org.htmlparser.util.ParserException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URLConnection;
@@ -43,8 +39,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.util.Map;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
+import org.htmlparser.Parser;
+import org.htmlparser.beans.StringBean;
+import org.htmlparser.util.ParserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Content transformer which wraps the HTML Parser library for
@@ -63,34 +62,36 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
  *
  * <p>
  * Tika Note - could be converted to use the Tika HTML parser,
- *  but we'd potentially need a custom text handler to replicate
- *  the current settings around links and non-breaking spaces.
+ * but we'd potentially need a custom text handler to replicate
+ * the current settings around links and non-breaking spaces.
  * </p>
- *
- * @see <a href="http://htmlparser.sourceforge.net/">http://htmlparser.sourceforge.net</a>
- * @see org.htmlparser.beans.StringBean
- * @see <a href="http://sourceforge.net/tracker/?func=detail&aid=1644504&group_id=24399&atid=381401">HTML Parser</a>
  *
  * @author Derek Hulley
  * @author eknizat
+ * @see <a href="http://htmlparser.sourceforge.net/">http://htmlparser.sourceforge.net</a>
+ * @see org.htmlparser.beans.StringBean
+ * @see <a href="http://sourceforge.net/tracker/?func=detail&aid=1644504&group_id=24399&atid=381401">HTML Parser</a>
  */
 public class HtmlParserContentTransformer implements SelectableTransformer
 {
-    private static final Logger logger = LoggerFactory.getLogger(HtmlParserContentTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        HtmlParserContentTransformer.class);
 
     @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
+    public boolean isTransformable(String sourceMimetype, String targetMimetype,
+        Map<String, String> parameters)
     {
         return MIMETYPE_HTML.equals(sourceMimetype) && MIMETYPE_TEXT_PLAIN.equals(targetMimetype);
     }
 
     @Override
-    public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws Exception
+    public void transform(File sourceFile, File targetFile, Map<String, String> parameters)
+        throws Exception
     {
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
         checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
 
-        if(logger.isDebugEnabled())
+        if (logger.isDebugEnabled())
         {
             logger.debug("Performing HTML to text transform with sourceEncoding=" + sourceEncoding);
         }
@@ -105,42 +106,42 @@ public class HtmlParserContentTransformer implements SelectableTransformer
         String text = extractor.getStrings();
 
         // write it to the writer
-        try ( Writer writer = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(targetFile))))
+        try (Writer writer = new BufferedWriter(
+            new OutputStreamWriter(new FileOutputStream(targetFile))))
         {
             writer.write(text);
         }
     }
 
-    private void checkEncodingParameter(String encoding, String paramterName)
+    private void checkEncodingParameter(String encoding, String parameterName)
     {
         try
         {
             if (encoding != null && !Charset.isSupported(encoding))
             {
-                throw new IllegalArgumentException(paramterName + "=" + encoding + " is not supported by the JVM.");
+                throw new IllegalArgumentException(
+                    parameterName + "=" + encoding + " is not supported by the JVM.");
             }
         }
         catch (IllegalCharsetNameException e)
         {
-            throw new IllegalArgumentException(paramterName + "=" + encoding + " is not a valid encoding.");
+            throw new IllegalArgumentException(
+                parameterName + "=" + encoding + " is not a valid encoding.");
         }
     }
 
     /**
-     *
-     *  <p>
-     *  This code is based on a class of the same name, originally implemented in alfresco-repository.
-     *  </p>
+     * <p>
+     * This code is based on a class of the same name, originally implemented in alfresco-repository.
+     * </p>
      *
      * A version of {@link StringBean} which allows control of the
-     *  encoding in the underlying HTML Parser.
+     * encoding in the underlying HTML Parser.
      * Unfortunately, StringBean doesn't allow easy over-riding of
-     *  this, so we have to duplicate some code to control this.
+     * this, so we have to duplicate some code to control this.
      * This allows us to correctly handle HTML files where the encoding
-     *  is specified against the content property (rather than in the
-     *  HTML Head Meta), see ALF-10466 for details.
-     *
-     *
+     * is specified against the content property (rather than in the
+     * HTML Head Meta), see ALF-10466 for details.
      */
     public static class EncodingAwareStringBean extends StringBean
     {
@@ -148,9 +149,9 @@ public class HtmlParserContentTransformer implements SelectableTransformer
 
         /**
          * Sets the File to extract strings from, and the encoding
-         *  it's in (if known to Alfresco)
+         * it's in (if known to Alfresco)
          *
-         * @param file The File that text should be fetched from.
+         * @param file     The File that text should be fetched from.
          * @param encoding The encoding of the input
          */
         public void setURL(File file, String encoding)
@@ -158,7 +159,7 @@ public class HtmlParserContentTransformer implements SelectableTransformer
             String previousURL = getURL();
             String newURL = file.getAbsolutePath();
 
-            if ( (previousURL == null) || (!newURL.equals(previousURL)) )
+            if (previousURL == null || !newURL.equals(previousURL))
             {
                 try
                 {
@@ -178,8 +179,10 @@ public class HtmlParserContentTransformer implements SelectableTransformer
                         mParser.setEncoding(encoding);
                     }
 
-                    mPropertySupport.firePropertyChange(StringBean.PROP_URL_PROPERTY, previousURL, getURL());
-                    mPropertySupport.firePropertyChange(StringBean.PROP_CONNECTION_PROPERTY, conn, mParser.getConnection());
+                    mPropertySupport.firePropertyChange(StringBean.PROP_URL_PROPERTY, previousURL,
+                        getURL());
+                    mPropertySupport.firePropertyChange(StringBean.PROP_CONNECTION_PROPERTY, conn,
+                        mParser.getConnection());
                     setStrings();
                 }
                 catch (ParserException pe)
@@ -189,7 +192,8 @@ public class HtmlParserContentTransformer implements SelectableTransformer
             }
         }
 
-        public String getEncoding(){
+        public String getEncoding()
+        {
             return mParser.getEncoding();
         }
     }

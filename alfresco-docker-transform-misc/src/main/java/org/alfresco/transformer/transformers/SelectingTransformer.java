@@ -26,60 +26,62 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.alfresco.error.AlfrescoRuntimeException;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
+
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
-
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import com.google.common.collect.ImmutableList;
 
 /**
- *
  * The SelectingTransformer selects a registered {@link SelectableTransformer}
  * and delegates the transformation to its implementation.
  *
  * @author eknizat
- *
  */
 @Component
 public class SelectingTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(SelectingTransformer.class);
 
-    private List<SelectableTransformer> transformers = new LinkedList<>();
+    private final List<SelectableTransformer> transformers;
 
     public SelectingTransformer()
     {
-        transformers.add(new AppleIWorksContentTransformer());
-        transformers.add(new HtmlParserContentTransformer());
-        transformers.add(new StringExtractingContentTransformer());
-        transformers.add(new TextToPdfContentTransformer());
-        transformers.add(new EMLTransformer());
-//        transformers.add(new OOXMLThumbnailContentTransformer()); // Doesn't work with java 11, transformer and test disabled
+        transformers = ImmutableList.of(
+            new AppleIWorksContentTransformer(),
+            new HtmlParserContentTransformer(),
+            new StringExtractingContentTransformer(),
+            new TextToPdfContentTransformer(),
+            new EMLTransformer()
+            // new OOXMLThumbnailContentTransformer()); // Doesn't work with java 11, transformer and test disabled
+        );
     }
 
     /**
      * Performs a transform using a transformer selected based on the provided sourceMimetype and targetMimetype
-     * @param sourceFile File to transform from
-     * @param targetFile File to transform to
+     *
+     * @param sourceFile     File to transform from
+     * @param targetFile     File to transform to
      * @param sourceMimetype Mimetype of the source file
      * @throws TransformException
      */
-    public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-                          Map<String, String> parameters) throws TransformException
+    public void transform(File sourceFile, File targetFile, String sourceMimetype,
+        String targetMimetype, Map<String, String> parameters) throws TransformException
     {
         try
         {
-            SelectableTransformer transformer = selectTransformer(sourceMimetype, targetMimetype, parameters);
+            final SelectableTransformer transformer = selectTransformer(sourceMimetype,
+                targetMimetype, parameters);
             logOptions(sourceFile, targetFile, parameters);
             transformer.transform(sourceFile, targetFile, parameters);
         }
@@ -94,32 +96,30 @@ public class SelectingTransformer
         if (!targetFile.exists())
         {
             throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                    "Transformer failed to create an output file. Target file does not exist.");
+                "Transformer failed to create an output file. Target file does not exist.");
         }
         if (sourceFile.length() > 0 && targetFile.length() == 0)
         {
             throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                    "Transformer failed to create an output file. Target file is empty but source file was not empty.");
+                "Transformer failed to create an output file. Target file is empty but source file was not empty.");
         }
     }
 
     private SelectableTransformer selectTransformer(String sourceMimetype, String targetMimetype,
-                                                    Map<String, String> parameters)
+        Map<String, String> parameters)
     {
         for (SelectableTransformer transformer : transformers)
         {
             if (transformer.isTransformable(sourceMimetype, targetMimetype, parameters))
             {
-                if (logger.isDebugEnabled())
-                {
-                    logger.debug("Using " + transformer.getClass().getName()
-                            + " to transform from " + sourceMimetype + " to " + targetMimetype );
-                }
+                logger.debug("Using {} to transform from {} to {}",
+                    transformer.getClass().getName(), sourceMimetype, targetMimetype);
                 return transformer;
             }
         }
-        throw new AlfrescoRuntimeException( "Could not select a transformer for sourceMimetype=" + sourceMimetype
-                + " targetMimetype=" + targetMimetype);
+        throw new RuntimeException(
+            "Could not select a transformer for sourceMimetype=" + sourceMimetype
+            + " targetMimetype=" + targetMimetype);
     }
 
     private static String getMessage(Exception e)
@@ -130,7 +130,8 @@ public class SelectingTransformer
     private void logOptions(File sourceFile, File targetFile, Map<String, String> parameters)
     {
         StringJoiner sj = new StringJoiner(" ");
-        parameters.forEach( (k, v) -> sj.add("--" + k + "=" + v)); // keeping the existing style used in other T-Engines
+        parameters.forEach((k, v) -> sj.add(
+            "--" + k + "=" + v)); // keeping the existing style used in other T-Engines
         sj.add(getExtension(sourceFile));
         sj.add(getExtension(targetFile));
         LogEntry.setOptions(sj.toString());
@@ -138,9 +139,8 @@ public class SelectingTransformer
 
     private String getExtension(File file)
     {
-        String name = file.getName();
+        final String name = file.getName();
         int i = name.lastIndexOf('.');
-        String ext = i == -1 ? "???" : name.substring(i + 1);
-        return ext;
+        return i == -1 ? "???" : name.substring(i + 1);
     }
 }

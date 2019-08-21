@@ -30,11 +30,10 @@ import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
-import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -46,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,37 +56,29 @@ import org.springframework.web.multipart.MultipartFile;
  *
  * Status Codes:
  *
- *   200 Success
- *   400 Bad Request: Request parameter <name> is missing (missing mandatory parameter)
- *   400 Bad Request: Request parameter <name> is of the wrong type
- *   400 Bad Request: Transformer exit code was not 0 (possible problem with the source file)
- *   400 Bad Request: The source filename was not supplied
- *   500 Internal Server Error: (no message with low level IO problems)
- *   500 Internal Server Error: The target filename was not supplied (should not happen as targetExtension is checked)
- *   500 Internal Server Error: Transformer version check exit code was not 0
- *   500 Internal Server Error: Transformer version check failed to create any output
- *   500 Internal Server Error: Could not read the target file
- *   500 Internal Server Error: The target filename was malformed (should not happen because of other checks)
- *   500 Internal Server Error: Transformer failed to create an output file (the exit code was 0, so there should be some content)
- *   500 Internal Server Error: Filename encoding error
- *   507 Insufficient Storage: Failed to store the source file
+ * 200 Success
+ * 400 Bad Request: Request parameter <name> is missing (missing mandatory parameter)
+ * 400 Bad Request: Request parameter <name> is of the wrong type
+ * 400 Bad Request: Transformer exit code was not 0 (possible problem with the source file)
+ * 400 Bad Request: The source filename was not supplied
+ * 500 Internal Server Error: (no message with low level IO problems)
+ * 500 Internal Server Error: The target filename was not supplied (should not happen as targetExtension is checked)
+ * 500 Internal Server Error: Transformer version check exit code was not 0
+ * 500 Internal Server Error: Transformer version check failed to create any output
+ * 500 Internal Server Error: Could not read the target file
+ * 500 Internal Server Error: The target filename was malformed (should not happen because of other checks)
+ * 500 Internal Server Error: Transformer failed to create an output file (the exit code was 0, so there should be some content)
+ * 500 Internal Server Error: Filename encoding error
+ * 507 Insufficient Storage: Failed to store the source file
  */
 @Controller
 public class AlfrescoPdfRendererController extends AbstractTransformerController
 {
-    private static final Logger logger = LoggerFactory.getLogger(AlfrescoPdfRendererController.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        AlfrescoPdfRendererController.class);
 
     @Autowired
     private PdfRendererCommandExecutor commandExecutor;
-
-    @Autowired
-    public AlfrescoPdfRendererController()
-    {
-        logger.info("-----------------------------------------------------------------------------------------------------------------------------------------------------------");
-        Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
-        logger.info("alfresco-pdf-renderer uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt");
-        logger.info("-----------------------------------------------------------------------------------------------------------------------------------------------------------");
-    }
 
     @Override
     public String getTransformerName()
@@ -137,20 +127,21 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
     }
 
     @Deprecated
-    @PostMapping(value = "/transform", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
-                                              @RequestParam("file") MultipartFile sourceMultipartFile,
-                                              @RequestParam("targetExtension") String targetExtension,
-                                              @RequestParam(value = "timeout", required = false) Long timeout,
-                                              @RequestParam(value = "testDelay", required = false) Long testDelay,
+        @RequestParam("file") MultipartFile sourceMultipartFile,
+        @RequestParam("targetExtension") String targetExtension,
+        @RequestParam(value = "timeout", required = false) Long timeout,
+        @RequestParam(value = "testDelay", required = false) Long testDelay,
 
-                                              @RequestParam(value = "page", required = false) Integer page,
-                                              @RequestParam(value = "width", required = false) Integer width,
-                                              @RequestParam(value = "height", required = false) Integer height,
-                                              @RequestParam(value = "allowPdfEnlargement", required = false) Boolean allowPdfEnlargement,
-                                              @RequestParam(value = "maintainPdfAspectRatio", required = false) Boolean maintainPdfAspectRatio)
+        @RequestParam(value = "page", required = false) Integer page,
+        @RequestParam(value = "width", required = false) Integer width,
+        @RequestParam(value = "height", required = false) Integer height,
+        @RequestParam(value = "allowPdfEnlargement", required = false) Boolean allowPdfEnlargement,
+        @RequestParam(value = "maintainPdfAspectRatio", required = false) Boolean maintainPdfAspectRatio)
     {
-        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(), targetExtension);
+        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(),
+            targetExtension);
         getProbeTestTransform().incrementTransformerCount();
         File sourceFile = createSourceFile(request, sourceMultipartFile);
         File targetFile = createTargetFile(request, targetFilename);

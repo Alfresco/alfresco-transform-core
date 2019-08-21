@@ -31,5 +31,5 @@ public interface StandardMessages
     String LICENCE =
         "License rights for this program may be obtained from Alfresco Software, Ltd. pursuant to a written agreement\n" +
         "and any use of this program without such an agreement is prohibited.\n" +
-        "\n" ;
+        "\n";
 }

@@ -34,12 +34,14 @@ public interface JodConverter
 {
     /**
      * Gets the JodConverter OfficeManager.
+     *
      * @return
      */
     OfficeManager getOfficeManager();
 
     /**
      * This method returns a boolean indicating whether the JodConverter connection to OOo is available.
+     *
      * @return <code>true</code> if available, else <code>false</code>
      */
     boolean isAvailable();

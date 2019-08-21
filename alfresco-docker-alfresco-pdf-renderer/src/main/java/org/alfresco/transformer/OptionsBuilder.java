@@ -44,9 +44,7 @@ final class OptionsBuilder
     private Boolean allowPdfEnlargement;
     private Boolean maintainPdfAspectRatio;
 
-    private OptionsBuilder()
-    {
-    }
+    private OptionsBuilder() {}
 
     public OptionsBuilder withPage(final String page)
     {

@@ -26,14 +26,28 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.error.AlfrescoRuntimeException;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_KEYNOTE;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_NUMBERS;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_RFC822;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transformer.transformers.AppleIWorksContentTransformer;
-import org.alfresco.transformer.transformers.HtmlParserContentTransformer;
 import org.alfresco.transformer.transformers.SelectingTransformer;
-import org.alfresco.transformer.transformers.StringExtractingContentTransformer;
-import org.alfresco.transformer.transformers.TextToPdfContentTransformer;
-import org.alfresco.util.TempFileProvider;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.Before;
@@ -47,40 +61,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.sql.SQLOutput;
-
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_KEYNOTE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_NUMBERS;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_PAGES;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_RFC822;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @RunWith(SpringRunner.class)
 @WebMvcTest(MiscController.class)
 @Import({SelectingTransformer.class})
 public class MiscControllerTest extends AbstractTransformerControllerTest
 {
-
     @Autowired
     private MiscController controller;
 
-    private String sourceEncoding = "UTF-8";
-    private String targetEncoding = "UTF-8";
-    private String targetMimetype = MIMETYPE_TEXT_PLAIN;
+    private final String sourceEncoding = "UTF-8";
+    private final String targetEncoding = "UTF-8";
+    private final String targetMimetype = MIMETYPE_TEXT_PLAIN;
 
     @Before
     public void before() throws Exception
@@ -93,12 +84,13 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         expectedSourceFileBytes = readTestFile(sourceExtension);
         expectedTargetFileBytes = readTestFile(targetExtension);
         //expectedTargetFileBytes = null;
-        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, expectedSourceFileBytes);
-
+        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
+            expectedSourceFileBytes);
     }
 
     @Override
-    protected void mockTransformCommand(String sourceExtension, String targetExtension, String sourceMimetype, boolean readTargetFileBytes) throws IOException
+    protected void mockTransformCommand(String sourceExtension, String targetExtension,
+        String sourceMimetype, boolean readTargetFileBytes) throws IOException
     {
     }
 
@@ -114,14 +106,14 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     }
 
     @Override
-    // Add extra required parameters to the request.
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
+    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
+        String... params)
     {
         return super.mockMvcRequest(url, sourceFile, params)
-                .param("targetEncoding", targetEncoding)
-                .param("sourceEncoding", sourceEncoding)
-                .param("targetMimetype", targetMimetype)
-                .param("sourceMimetype", sourceMimetype);
+                    .param("targetEncoding", targetEncoding)
+                    .param("sourceEncoding", sourceEncoding)
+                    .param("targetMimetype", targetMimetype)
+                    .param("sourceMimetype", sourceMimetype);
     }
 
     @Test
@@ -245,94 +237,96 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     @Test
     public void testHTMLtoString() throws Exception
     {
-        final String NEWLINE = System.getProperty ("line.separator");
+        final String NEWLINE = System.getProperty("line.separator");
         final String TITLE = "Testing!";
         final String TEXT_P1 = "This is some text in English";
         final String TEXT_P2 = "This is more text in English";
         final String TEXT_P3 = "C'est en Fran\u00e7ais et Espa\u00f1ol";
         String partA = "<html><head><title>" + TITLE + "</title></head>" + NEWLINE;
         String partB = "<body><p>" + TEXT_P1 + "</p>" + NEWLINE +
-                "<p>" + TEXT_P2 + "</p>" + NEWLINE +
-                "<p>" + TEXT_P3 + "</p>" + NEWLINE;
+                       "<p>" + TEXT_P2 + "</p>" + NEWLINE +
+                       "<p>" + TEXT_P3 + "</p>" + NEWLINE;
         String partC = "</body></html>";
         final String expected = TITLE + NEWLINE + TEXT_P1 + NEWLINE + TEXT_P2 + NEWLINE + TEXT_P3 + NEWLINE;
 
         MvcResult result = sendRequest("html",
-                "UTF-8",
-                MIMETYPE_HTML,
-                "txt",
-                MIMETYPE_TEXT_PLAIN,
-                "UTF-8",
-                expected.getBytes());
+            "UTF-8",
+            MIMETYPE_HTML,
+            "txt",
+            MIMETYPE_TEXT_PLAIN,
+            "UTF-8",
+            expected.getBytes());
 
-        String contentResult = new String(result.getResponse().getContentAsByteArray(), targetEncoding);
-        assertTrue("The content did not include \""+expected, contentResult.contains(expected));
+        String contentResult = new String(result.getResponse().getContentAsByteArray(),
+            targetEncoding);
+        assertTrue("The content did not include \"" + expected, contentResult.contains(expected));
     }
 
     @Test
     public void testStringToString() throws Exception
     {
-        String expected = null;
-        byte[] content = null;
+        String expected;
+        byte[] content;
         try
         {
-            content = "azAz10!�$%^&*()\t\r\n".getBytes("UTF-8");
+            content = "azAz10!�$%^&*()\t\r\n".getBytes(UTF_8);
             expected = new String(content, "MacDingbat");
         }
         catch (UnsupportedEncodingException e)
         {
-            throw new AlfrescoRuntimeException("Encoding not recognised", e);
+            throw new RuntimeException("Encoding not recognised", e);
         }
 
         MvcResult result = sendRequest("txt",
-                "MacDingbat",
-                MIMETYPE_TEXT_PLAIN,
-                "txt",
-                MIMETYPE_TEXT_PLAIN,
-                "UTF-8",
-                content);
+            "MacDingbat",
+            MIMETYPE_TEXT_PLAIN,
+            "txt",
+            MIMETYPE_TEXT_PLAIN,
+            "UTF-8",
+            content);
 
-        String contentResult = new String(result.getResponse().getContentAsByteArray(), targetEncoding);
-        assertTrue("The content did not include \""+expected, contentResult.contains(expected));
+        String contentResult = new String(result.getResponse().getContentAsByteArray(),
+            targetEncoding);
+        assertTrue("The content did not include \"" + expected, contentResult.contains(expected));
     }
 
     @Test
     public void testEmptyTextFileReturnsEmptyFile() throws Exception
     {
         // Use empty content to create an empty source file
-        byte[] content  = new byte[0];
+        byte[] content = new byte[0];
 
         MvcResult result = sendRequest("txt",
-                "UTF-8",
-                MIMETYPE_TEXT_PLAIN,
-                "txt",
-                MIMETYPE_TEXT_PLAIN,
-                "UTF-8",
-                content);
+            "UTF-8",
+            MIMETYPE_TEXT_PLAIN,
+            "txt",
+            MIMETYPE_TEXT_PLAIN,
+            "UTF-8",
+            content);
 
-        assertEquals("Returned content should be empty for an empty source file", 0, result.getResponse().getContentLength());
+        assertEquals("Returned content should be empty for an empty source file", 0,
+            result.getResponse().getContentLength());
     }
 
     @Test
     public void textToPdf() throws Exception
     {
         StringBuilder sb = new StringBuilder();
-        String expected = null;
-        for (int i=1; i<=5; i++)
+        for (int i = 1; i <= 5; i++)
         {
             sb.append(i);
             sb.append(" I must not talk in class or feed my homework to my cat.\n");
         }
         sb.append("\nBart\n");
-        expected = sb.toString();
+        String expected = sb.toString();
 
         MvcResult result = sendRequest("txt",
-                "UTF-8",
-                MIMETYPE_TEXT_PLAIN,
-                "pdf",
-                MIMETYPE_PDF,
-                "UTF-8",
-                expected.getBytes());
+            "UTF-8",
+            MIMETYPE_TEXT_PLAIN,
+            "pdf",
+            MIMETYPE_PDF,
+            "UTF-8",
+            expected.getBytes());
 
         // Read back in the PDF and check it
         PDDocument doc = PDDocument.load(result.getResponse().getContentAsByteArray());
@@ -371,8 +365,8 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         assertTrue("Expected image content but content is empty.",result.getResponse().getContentLengthLong() > 0L);
     }
 
-    // TODO Doesn't wotk with java 11, enable when fixed
 //    @Test
+// TODO Doesn't work with java 11, enable when fixed
     public void testOOXML() throws Exception
     {
         MvcResult result = sendRequest("docx",null, MIMETYPE_OPENXML_WORDPROCESSING,
@@ -412,6 +406,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         return result;
     }
 
+
     private String clean(String text)
     {
         text = text.replaceAll("\\s+\\r", "");
@@ -420,5 +415,4 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         text = text.replaceAll("\\n", "");
         return text;
     }
-
 }

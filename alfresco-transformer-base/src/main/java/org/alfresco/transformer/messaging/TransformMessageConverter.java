@@ -90,13 +90,13 @@ public class TransformMessageConverter implements MessageConverter
         @NonNull final Object object,
         @NonNull final Session session) throws JMSException, MessageConversionException
     {
-            return converter.toMessage(object, session);
+        return converter.toMessage(object, session);
     }
 
     @Override
     @NonNull
     public Object fromMessage(@NonNull final Message message) throws JMSException
     {
-            return converter.fromMessage(message);
+        return converter.fromMessage(message);
     }
 }

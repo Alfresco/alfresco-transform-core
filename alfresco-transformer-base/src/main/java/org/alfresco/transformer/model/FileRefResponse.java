@@ -35,9 +35,7 @@ public class FileRefResponse
 {
     private FileRefEntity entry;
 
-    public FileRefResponse()
-    {
-    }
+    public FileRefResponse() {}
 
     public FileRefResponse(FileRefEntity entry)
     {

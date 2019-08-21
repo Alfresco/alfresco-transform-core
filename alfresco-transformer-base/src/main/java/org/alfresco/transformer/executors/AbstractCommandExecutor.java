@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer.executors;
 
+import static org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -33,16 +34,15 @@ import java.io.File;
 import java.util.Map;
 
 import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.util.exec.RuntimeExec;
-import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
 
 /**
+ *
  */
 public abstract class AbstractCommandExecutor implements CommandExecutor
 {
     private final RuntimeExec transformCommand = createTransformCommand();
     private final RuntimeExec checkCommand = createCheckCommand();
-    
+
     protected abstract RuntimeExec createTransformCommand();
 
     protected abstract RuntimeExec createCheckCommand();

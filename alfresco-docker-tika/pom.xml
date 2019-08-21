@@ -14,7 +14,7 @@
     <properties>
         <image.name>alfresco/alfresco-tika</image.name>
         <image.registry>quay.io</image.registry>
-        <dependency.poi.version>3.17</dependency.poi.version>
+        <dependency.poi.version>4.0.1</dependency.poi.version>
     </properties>
 
     <dependencies>
@@ -48,40 +48,20 @@
         </dependency>
 
         <dependency>
-            <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-core</artifactId>
-            <!--
-            TODO temp workaround for ATS-481 / REPO-4514 (exclude: dom4j.dom4j 1.6.1 / include org.dom4j.dom4j 2.1.1)
-            TODO remove this workaround once transitive dependencies have been fixed (surf-core-configservice -> alfresco-core)
-            -->
-            <exclusions>
-                <exclusion>
-                    <groupId>dom4j</groupId>
-                    <artifactId>dom4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
-            <version>2.1.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-data-model</artifactId>
         </dependency>
 
         <!-- Tika -->
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
-            <version>1.17-20180201-alfresco-patched</version>
+            <version>1.21-20190624-alfresco-patched</version>
         </dependency>
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-parsers</artifactId>
-            <version>1.17-20180201-alfresco-patched</version>
+            <version>1.21-20190624-alfresco-patched</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.tdunning</groupId>
@@ -94,6 +74,11 @@
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcmail-jdk15on</artifactId>
+                </exclusion>
+                <!-- TODO ATS-534 check transformations not affected by this missing quartz lib -->
+                <exclusion>
+                    <groupId>org.quartz-scheduler</groupId>
+                    <artifactId>quartz</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

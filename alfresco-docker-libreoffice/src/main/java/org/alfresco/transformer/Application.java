@@ -26,30 +26,52 @@
  */
 package org.alfresco.transformer;
 
-import io.micrometer.core.instrument.MeterRegistry;
+import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
 
+import java.util.Arrays;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.EventListener;
+
+import io.micrometer.core.instrument.MeterRegistry;
 
 @SpringBootApplication
-@EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 public class Application
 {
+    private static final Logger logger = LoggerFactory.getLogger(Application.class);
+
     @Value("${container.name}")
     private String containerName;
 
     @Bean
-    MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
+    MeterRegistryCustomizer<MeterRegistry> metricsCommonTags()
+    {
         return registry -> registry.config().commonTags("containerName", containerName);
     }
-    
+
     public static void main(String[] args)
     {
         SpringApplication.run(Application.class, args);
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void startup()
+    {
+        logger.info("-------------------------------------------------------------------------------------------------------------------------------------------------------");
+        Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
+        logger.info("This transformer uses LibreOffice from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt");
+        logger.info("-------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+        logger.info("Starting application components... Done");
     }
 }

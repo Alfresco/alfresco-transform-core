@@ -34,7 +34,7 @@ import org.alfresco.transformer.logging.LogEntry;
 
 /**
  * Basic interface for executing transformations via Shell commands
- * 
+ *
  * @author Cezar Leahu
  */
 public interface CommandExecutor

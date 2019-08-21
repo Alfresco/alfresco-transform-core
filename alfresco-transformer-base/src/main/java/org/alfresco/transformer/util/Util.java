@@ -27,6 +27,7 @@
 package org.alfresco.transformer.util;
 
 /**
+ *
  */
 public class Util
 {
@@ -49,6 +50,6 @@ public class Util
      */
     public static Boolean stringToBoolean(String param)
     {
-        return param == null? null : Boolean.parseBoolean(param);
+        return param == null ? null : Boolean.parseBoolean(param);
     }
 }
