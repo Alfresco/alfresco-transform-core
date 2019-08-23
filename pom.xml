@@ -340,7 +340,7 @@
                             <id>after-integration-tests</id>
                             <phase>post-integration-test</phase>
                             <goals>
-                                <goal>stop</goal>
+<!--                                <goal>stop</goal>-->
                             </goals>
                         </execution>
                     </executions>
