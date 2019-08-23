@@ -26,22 +26,18 @@
  */
 package org.alfresco.transformer;
 
-import static java.nio.file.Files.readAllBytes;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
-
-import java.io.File;
 
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -55,10 +51,10 @@ public class TransformationIT
     @Test
     public void testPdfToPng() throws Exception
     {
-        sendTRequest2(ResourceUtils.getFile("classpath:quick.pdf"), "png");
+        sendTRequest("quick.pdf", "png");
     }
 
-    private static void sendTRequest2(final File sourceFile, final String targetExtension) throws Exception
+    private static void sendTRequest(final String sourceFile, final String targetExtension)
     {
         final RestTemplate restTemplate = new RestTemplate();
         final HttpHeaders headers = new HttpHeaders();
@@ -66,15 +62,13 @@ public class TransformationIT
         //headers.setAccept(MULTIPART_FORM_DATA_VALUE);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", new ByteArrayResource(readAllBytes(sourceFile.toPath())));
-//        body.add("targetExtension", targetExtension);
+        body.add("file", new ClassPathResource(sourceFile));
+        body.add("targetExtension", targetExtension);
 
         final HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
 
-//        final ResponseEntity<Resource> response = restTemplate.exchange(ENGINE_URL + "/transform",
-//            POST, entity, Resource.class);
-
-        final ResponseEntity<Resource> response = restTemplate.postForEntity(ENGINE_URL + "/transform",
+        final ResponseEntity<Resource> response = restTemplate.postForEntity(
+            ENGINE_URL + "/transform",
             entity, Resource.class);
 
         logger.info("Response: {}", response);
