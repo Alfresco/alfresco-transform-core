@@ -119,21 +119,18 @@
                                     <alias>alfresco-pdf-renderer</alias>
                                     <name>${image.name}:${image.tag}</name>
                                     <run>
-                                        <hostname>alfresco-pdf-renderer</hostname>
                                         <ports>
-                                            <!--<port>5005:5005</port>-->
                                             <port>8090:8090</port>
                                         </ports>
-                                        <env>
-                                            <!--<ACTIVEMQ_URL>nio://activemq:61616</ACTIVEMQ_URL>-->
-                                            <!--<FILE_STORE_URL>http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file</FILE_STORE_URL>-->
-                                            <!--<JAVA_OPTS>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</JAVA_OPTS>-->
-                                        </env>
                                         <wait>
                                             <log>Starting application components... Done</log>
                                             <time>300000</time>
                                             <kill>500</kill>
                                             <shutdown>100</shutdown>
+                                            <exec>
+                                                <preStop>kill 1</preStop>
+                                                <preStop>kill -9 1</preStop>
+                                            </exec>
                                         </wait>
                                     </run>
                                 </image>
