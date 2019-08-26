@@ -131,7 +131,7 @@
                                         </env>
                                         <wait>
                                             <log>Starting application components... Done</log>
-                                            <time>120000</time>
+                                            <time>300000</time>
                                             <kill>500</kill>
                                             <shutdown>100</shutdown>
                                         </wait>
