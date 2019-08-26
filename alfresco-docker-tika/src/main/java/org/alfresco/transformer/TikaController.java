@@ -162,17 +162,17 @@ public class TikaController extends AbstractTransformerController
     }
 
     @Override
-    public void processTransform(File sourceFile, File targetFile,
-        Map<String, String> transformOptions, Long timeout)
+    public void processTransform(final File sourceFile, final File targetFile,
+        final String sourceMimetype, final String targetMimetype,
+        final Map<String, String> transformOptions, final Long timeout)
     {
         logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
                      " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
 
-        String transform = transformOptions.get("transform");
-        Boolean includeContents = stringToBoolean("includeContents");
-        Boolean notExtractBookmarksText = stringToBoolean("notExtractBookmarksText");
-        String targetMimetype = transformOptions.get("targetMimetype");
-        String targetEncoding = transformOptions.get("targetEncoding");
+        final String transform = transformOptions.get("transform");
+        final Boolean includeContents = stringToBoolean("includeContents");
+        final Boolean notExtractBookmarksText = stringToBoolean("notExtractBookmarksText");
+        final String targetEncoding = transformOptions.get("targetEncoding");
 
         javaExecutor.call(sourceFile, targetFile, transform,
             includeContents != null && includeContents ? INCLUDE_CONTENTS : null,

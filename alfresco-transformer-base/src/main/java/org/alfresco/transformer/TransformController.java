@@ -65,8 +65,9 @@ public interface TransformController
 
     ResponseEntity<TransformReply> transform(TransformRequest transformRequest, Long timeout);
 
-    void processTransform(File sourceFile, File targetFile, Map<String, String> transformOptions,
-        Long timeout);
+    void processTransform(final File sourceFile, final File targetFile,
+        final String sourceMimetype, final String targetMimetype,
+        final Map<String, String> transformOptions, final Long timeout);
 
     String getTransformerName();
 
