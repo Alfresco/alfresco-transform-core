@@ -38,8 +38,6 @@ public interface SelectableTransformer
 {
     String SOURCE_ENCODING = "sourceEncoding";
     String TARGET_ENCODING = "targetEncoding";
-    String SOURCE_MIMETYPE = "sourceMimetype";
-    String TARGET_MIMETYPE = "targetMimetype";
 
     /**
      * Implementation of the actual transformation.
@@ -49,8 +47,8 @@ public interface SelectableTransformer
      * @param parameters
      * @throws Exception
      */
-    void transform(File sourceFile, File targetFile, Map<String, String> parameters)
-        throws Exception;
+    void transform(File sourceFile, File targetFile, String sourceMimetype,
+        String targetMimetype, Map<String, String> parameters) throws Exception;
 
     /**
      * Determine whether this transformer is applicable for the given MIME types.

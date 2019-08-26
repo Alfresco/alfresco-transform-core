@@ -109,12 +109,9 @@ public class OOXMLThumbnailContentTransformer implements SelectableTransformer
     }
 
     @Override
-    public void transform(File sourceFile, File targetFile, Map<String, String> parameters)
-        throws Exception
+    public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
+        final String targetMimetype, final Map<String, String> parameters) throws Exception
     {
-        final String sourceMimetype = parameters.get(SOURCE_MIMETYPE);
-        final String targetMimetype = parameters.get(TARGET_MIMETYPE);
-
         if (logger.isDebugEnabled())
         {
             logger.debug("Performing OOXML to jpeg transform with sourceMimetype=" + sourceMimetype

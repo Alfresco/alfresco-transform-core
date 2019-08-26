@@ -97,10 +97,6 @@
                                     <name>alfresco/alfresco-activemq:5.15.6</name>
                                     <run>
                                         <hostname>activemq</hostname>
-                                        <network>
-                                            <name>transform</name>
-                                            <alias>activemq</alias>
-                                        </network>
                                         <ports>
                                             <port>8161:8161</port>
                                             <port>5672:5672</port>
@@ -124,12 +120,8 @@
                                     <name>${image.name}:${image.tag}</name>
                                     <run>
                                         <hostname>alfresco-pdf-renderer</hostname>
-                                        <network>
-                                            <name>transform</name>
-                                            <alias>alfresco-pdf-renderer</alias>
-                                        </network>
                                         <ports>
-                                            <!--<port>5006:5005</port>-->
+                                            <!--<port>5005:5005</port>-->
                                             <port>8090:8090</port>
                                         </ports>
                                         <env>

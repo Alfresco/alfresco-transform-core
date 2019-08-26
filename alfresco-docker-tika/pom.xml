@@ -170,10 +170,6 @@
                                     <name>alfresco/alfresco-activemq:5.15.6</name>
                                     <run>
                                         <hostname>activemq</hostname>
-                                        <network>
-                                            <name>transform</name>
-                                            <alias>activemq</alias>
-                                        </network>
                                         <ports>
                                             <port>8161:8161</port>
                                             <port>5672:5672</port>
@@ -197,13 +193,9 @@
                                     <name>${image.name}:${image.tag}</name>
                                     <run>
                                         <hostname>tika</hostname>
-                                        <network>
-                                            <name>transform</name>
-                                            <alias>tika</alias>
-                                        </network>
                                         <ports>
-                                            <!--<port>5009:5005</port>-->
-                                            <port>8093:8090</port>
+                                            <!--<port>5005:5005</port>-->
+                                            <port>8090:8090</port>
                                         </ports>
                                         <env>
                                             <!--<ACTIVEMQ_URL>nio://activemq:61616</ACTIVEMQ_URL>-->
