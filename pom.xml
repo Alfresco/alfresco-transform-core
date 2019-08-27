@@ -30,6 +30,7 @@
         <dependency.cxf.version>3.2.9</dependency.cxf.version>
     </properties>
 
+
     <modules>
         <module>alfresco-transformer-base</module>
         <module>alfresco-docker-tika</module>
