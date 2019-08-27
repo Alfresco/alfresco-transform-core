@@ -1,0 +1,4 @@
+:ID,name,joined:date,active:boolean,points:int
+user01,Joe Soap,2017-05-05,true,10
+user02,Jane Doe,2017-08-21,true,15
+user03,Moe Know,2018-02-17,false,7

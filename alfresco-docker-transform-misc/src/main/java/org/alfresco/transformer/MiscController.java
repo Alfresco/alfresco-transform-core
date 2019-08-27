@@ -98,8 +98,9 @@ public class MiscController extends AbstractTransformerController
     }
 
     @Override
-    public void processTransform(File sourceFile, File targetFile,
-        Map<String, String> transformOptions, Long timeout)
+    public void processTransform(final File sourceFile, final File targetFile,
+        final String sourceMimetype, final String targetMimetype,
+        final Map<String, String> transformOptions, final Long timeout)
     {
         if (logger.isDebugEnabled())
         {
@@ -108,8 +109,6 @@ public class MiscController extends AbstractTransformerController
                 " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
         }
 
-        String sourceMimetype = transformOptions.get("sourceMimetype");
-        String targetMimetype = transformOptions.get("targetMimetype");
         transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype,
             transformOptions);
     }
@@ -117,9 +116,9 @@ public class MiscController extends AbstractTransformerController
     @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
         @RequestParam("file") MultipartFile sourceMultipartFile,
-        @RequestParam(value = "targetExtension") String targetExtension,
-        @RequestParam(value = "targetMimetype") String targetMimetype,
-        @RequestParam(value = "sourceMimetype") String sourceMimetype,
+        @RequestParam("targetExtension") String targetExtension,
+        @RequestParam("targetMimetype") String targetMimetype,
+        @RequestParam("sourceMimetype") String sourceMimetype,
         @RequestParam(value = "testDelay", required = false) Long testDelay,
         @RequestParam Map<String, String> parameters)
     {
@@ -130,11 +129,11 @@ public class MiscController extends AbstractTransformerController
                 ", parameters '{}'", sourceMimetype, targetMimetype, targetExtension, parameters);
         }
 
-        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(),
-            targetExtension);
+        final String targetFilename = createTargetFileName(
+            sourceMultipartFile.getOriginalFilename(), targetExtension);
         getProbeTestTransform().incrementTransformerCount();
-        File sourceFile = createSourceFile(request, sourceMultipartFile);
-        File targetFile = createTargetFile(request, targetFilename);
+        final File sourceFile = createSourceFile(request, sourceMultipartFile);
+        final File targetFile = createTargetFile(request, targetFilename);
 
         transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, parameters);
 

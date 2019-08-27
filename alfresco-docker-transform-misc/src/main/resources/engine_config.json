@@ -49,9 +49,9 @@
     {
       "transformerName": "appleIWorks",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "application/vnd.apple.keynote",                                              "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.apple.numbers",                                              "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.apple.pages",                                                "targetMediaType": "image/jpeg"}
+        {"sourceMediaType": "application/vnd.apple.keynote", "targetMediaType": "image/jpeg"},
+        {"sourceMediaType": "application/vnd.apple.numbers", "targetMediaType": "image/jpeg"},
+        {"sourceMediaType": "application/vnd.apple.pages",   "targetMediaType": "image/jpeg"}
       ],
       "transformOptions": [
       ]
@@ -59,9 +59,10 @@
     {
       "transformerName": "textToPdf",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "text/csv",                                                                   "targetMediaType": "application/pdf"},
-        {"sourceMediaType": "application/dita+xml",                                                       "targetMediaType": "application/pdf"},
-        {"sourceMediaType": "text/xml",                                                                   "targetMediaType": "application/pdf"}
+        {"sourceMediaType": "text/plain",                    "targetMediaType": "application/pdf"},
+        {"sourceMediaType": "text/csv",                      "targetMediaType": "application/pdf"},
+        {"sourceMediaType": "application/dita+xml",          "targetMediaType": "application/pdf"},
+        {"sourceMediaType": "text/xml",                      "targetMediaType": "application/pdf"}
       ],
       "transformOptions": [
         "textToPdfOptions"

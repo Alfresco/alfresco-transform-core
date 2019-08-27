@@ -191,6 +191,7 @@ public class ImageMagickController extends AbstractTransformerController
 
     @Override
     public void processTransform(final File sourceFile, final File targetFile,
+        final String sourceMimetype, final String targetMimetype,
         final Map<String, String> transformOptions, final Long timeout)
     {
         logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
