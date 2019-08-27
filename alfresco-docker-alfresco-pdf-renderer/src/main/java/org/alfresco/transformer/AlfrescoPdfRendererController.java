@@ -108,8 +108,9 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
     }
 
     @Override
-    public void processTransform(File sourceFile, File targetFile,
-        Map<String, String> transformOptions, Long timeout)
+    public void processTransform(final File sourceFile, final File targetFile,
+        final String sourceMimetype, final String targetMimetype,
+        final Map<String, String> transformOptions, final Long timeout)
     {
         logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
                      " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);

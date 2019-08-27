@@ -27,6 +27,8 @@
 package org.alfresco.transformer.transformers;
 
 import org.alfresco.transformer.fs.FileManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_MULTIPART_ALTERNATIVE;
@@ -70,6 +72,8 @@ import javax.mail.internet.MimeMessage;
 public class EMLTransformer implements SelectableTransformer
 
 {
+    private static final Logger logger = LoggerFactory.getLogger( EMLTransformer.class);
+
     private static final String CHARSET = "charset";
     private static final String DEFAULT_ENCODING = "UTF-8";
 
@@ -89,8 +93,10 @@ public class EMLTransformer implements SelectableTransformer
     }
 
     @Override
-    public void transform(File sourceFile, File targetFile, Map<String, String> parameters) throws Exception
+    public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
+                          final String targetMimetype, final Map<String, String> parameters) throws Exception
     {
+        logger.debug("Performing RFC822 to text transform.");
         // Use try with resource
         try (InputStream contentInputStream = new BufferedInputStream( new FileInputStream(sourceFile));
              Writer bufferedFileWriter = new BufferedWriter(new FileWriter(targetFile)))

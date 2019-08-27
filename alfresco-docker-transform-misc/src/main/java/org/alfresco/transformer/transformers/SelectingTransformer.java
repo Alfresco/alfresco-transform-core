@@ -83,7 +83,8 @@ public class SelectingTransformer
             final SelectableTransformer transformer = selectTransformer(sourceMimetype,
                 targetMimetype, parameters);
             logOptions(sourceFile, targetFile, parameters);
-            transformer.transform(sourceFile, targetFile, parameters);
+            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype,
+                parameters);
         }
         catch (IllegalArgumentException e)
         {
@@ -127,7 +128,7 @@ public class SelectingTransformer
         return e.getMessage() == null || e.getMessage().isEmpty() ? e.getClass().getSimpleName() : e.getMessage();
     }
 
-    private void logOptions(File sourceFile, File targetFile, Map<String, String> parameters)
+    private static void logOptions(File sourceFile, File targetFile, Map<String, String> parameters)
     {
         StringJoiner sj = new StringJoiner(" ");
         parameters.forEach((k, v) -> sj.add(
@@ -137,7 +138,7 @@ public class SelectingTransformer
         LogEntry.setOptions(sj.toString());
     }
 
-    private String getExtension(File file)
+    private static String getExtension(File file)
     {
         final String name = file.getName();
         int i = name.lastIndexOf('.');
