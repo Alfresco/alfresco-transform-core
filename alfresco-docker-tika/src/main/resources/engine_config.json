@@ -88,7 +88,6 @@
         {"sourceMediaType": "text/x-java-source",                                                          "targetMediaType": "text/xml"},
 
         {"sourceMediaType": "application/vnd.apple.keynote",                                               "targetMediaType": "text/html"},
-        {"sourceMediaType": "application/vnd.apple.keynote",                                               "targetMediaType": "text/plain"},
         {"sourceMediaType": "application/vnd.apple.keynote",                                               "targetMediaType": "application/xhtml+xml"},
         {"sourceMediaType": "application/vnd.apple.keynote",                                               "targetMediaType": "text/xml"},
 
@@ -98,7 +97,6 @@
         {"sourceMediaType": "application/vnd.ms-project",                                                  "targetMediaType": "text/xml"},
 
         {"sourceMediaType": "application/vnd.apple.numbers",                                               "targetMediaType": "text/html"},
-        {"sourceMediaType": "application/vnd.apple.numbers",                                               "targetMediaType": "text/plain"},
         {"sourceMediaType": "application/vnd.apple.numbers",                                               "targetMediaType": "application/xhtml+xml"},
         {"sourceMediaType": "application/vnd.apple.numbers",                                               "targetMediaType": "text/xml"},
 
@@ -158,7 +156,6 @@
         {"sourceMediaType": "application/vnd.oasis.opendocument.text-template",                            "targetMediaType": "text/xml"},
 
         {"sourceMediaType": "application/vnd.apple.pages",                                                 "targetMediaType": "text/html"},
-        {"sourceMediaType": "application/vnd.apple.pages",                                                 "targetMediaType": "text/plain"},
         {"sourceMediaType": "application/vnd.apple.pages",                                                 "targetMediaType": "application/xhtml+xml"},
         {"sourceMediaType": "application/vnd.apple.pages",                                                 "targetMediaType": "text/xml"},
 
@@ -295,7 +292,12 @@
         {"sourceMediaType": "application/x-compress",                                                      "targetMediaType": "text/html"},
         {"sourceMediaType": "application/x-compress",                                                      "targetMediaType": "text/plain"},
         {"sourceMediaType": "application/x-compress",                                                      "targetMediaType": "application/xhtml+xml"},
-        {"sourceMediaType": "application/x-compress",                                                      "targetMediaType": "text/xml"}
+        {"sourceMediaType": "application/x-compress",                                                      "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "text/xml"}
       ],
       "transformOptions": [
         "tikaOptions"

@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import static org.junit.Assert.assertEquals;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import org.junit.Test;
@@ -35,6 +36,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -49,9 +51,17 @@ public class TransformationIT
     private static final String ENGINE_URL = "http://localhost:8090";
 
     @Test
-    public void testPdfToPng() throws Exception
+    public void testPdfToPng()
     {
         sendTRequest("quick.pdf", "png");
+    }
+
+    @Test
+    public void testAiToPng()
+    {
+        sendTRequest("quickCS3.ai", "png");
+
+        sendTRequest("quickCS5.ai", "png");
     }
 
     private static void sendTRequest(final String sourceFile, final String targetExtension)
@@ -59,7 +69,7 @@ public class TransformationIT
         final RestTemplate restTemplate = new RestTemplate();
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MULTIPART_FORM_DATA);
-        //headers.setAccept(MULTIPART_FORM_DATA_VALUE);
+
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file", new ClassPathResource(sourceFile));
@@ -72,5 +82,6 @@ public class TransformationIT
             entity, Resource.class);
 
         logger.info("Response: {}", response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 }
