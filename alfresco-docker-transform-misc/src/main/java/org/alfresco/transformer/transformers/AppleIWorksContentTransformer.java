@@ -54,6 +54,10 @@ import com.google.common.collect.ImmutableList;
  * assume incorrectly that we can convert to PDF and we would only get a preview for the older format and never the
  * newer one. Both formats have the same mimetype.
  *
+ * <p>
+ * This code is based on a class of the same name originally implemented in alfresco-repository.
+ * </p>
+ *
  * @author Neil Mc Erlean
  * @author eknizat
  * @since 4.0

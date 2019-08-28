@@ -46,6 +46,7 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORD
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OUTLOOK_MSG;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PPT;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_RFC822;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_CSS;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_CSV;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_JAVASCRIPT;
@@ -111,7 +112,8 @@ public class MiscTransformsIT
         testFile(MIMETYPE_DITA, "dita", "quickConcept.dita", false),
         testFile(MIMETYPE_IWORK_KEYNOTE, "key", "quick.key", false),
         testFile(MIMETYPE_IWORK_NUMBERS, "number", "quick.numbers", false),
-        testFile(MIMETYPE_IWORK_PAGES, "pages", "quick.pages", false)
+        testFile(MIMETYPE_IWORK_PAGES, "pages", "quick.pages", false),
+        testFile(MIMETYPE_RFC822, "eml", "quick.eml", false)
     ).collect(toMap(TestFileInfo::getMimeType, identity()));
 
     private final String sourceMimetype;
@@ -143,7 +145,8 @@ public class MiscTransformsIT
             SourceTarget.of("text/plain", "application/pdf"),
             SourceTarget.of("text/csv", "application/pdf"),
             SourceTarget.of("application/dita+xml", "application/pdf"),
-            SourceTarget.of("text/xml", "application/pdf")
+            SourceTarget.of("text/xml", "application/pdf"),
+            SourceTarget.of("message/rfc822", "text/plain")
         ).collect(toSet());
     }
 
