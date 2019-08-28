@@ -61,7 +61,8 @@ public class SelectingTransformer
             new AppleIWorksContentTransformer(),
             new HtmlParserContentTransformer(),
             new StringExtractingContentTransformer(),
-            new TextToPdfContentTransformer()
+            new TextToPdfContentTransformer(),
+            new EMLTransformer()
             // new OOXMLThumbnailContentTransformer()); // Doesn't work with java 11, transformer and test disabled
         );
     }

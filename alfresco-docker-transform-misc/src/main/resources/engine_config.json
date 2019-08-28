@@ -60,6 +60,14 @@
       "transformOptions": [
         "textToPdfOptions"
       ]
+    },
+    {
+      "transformerName": "rfc822",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "message/rfc822",                           "targetMediaType": "text/plain"}
+      ],
+      "transformOptions": [
+      ]
     }
   ]
 }
