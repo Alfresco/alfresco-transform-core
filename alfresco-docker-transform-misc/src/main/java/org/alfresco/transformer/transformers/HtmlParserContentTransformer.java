@@ -143,7 +143,7 @@ public class HtmlParserContentTransformer implements SelectableTransformer
      * is specified against the content property (rather than in the
      * HTML Head Meta), see ALF-10466 for details.
      */
-    private class EncodingAwareStringBean extends StringBean
+    public static class EncodingAwareStringBean extends StringBean
     {
         private static final long serialVersionUID = -9033414360428669553L;
 
