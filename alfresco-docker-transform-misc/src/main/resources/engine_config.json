@@ -16,7 +16,7 @@
     {
       "transformerName": "html",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "text/html",                                                                  "targetMediaType": "text/plain"}
+        {"sourceMediaType": "text/html",                     "targetMediaType": "text/plain"}
       ],
       "transformOptions": [
         "htmlOptions"
@@ -25,22 +25,23 @@
     {
       "transformerName": "string",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "text/calendar",                                                              "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/css",                                                                   "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/csv",                                                                   "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/plain",                                                                 "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/richtext",                                                              "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/sgml",                                                                  "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/tab-separated-values",                                                  "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/mediawiki",                                                             "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/html",                                                                  "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/xml",                                                                   "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/x-setext",                                                              "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/x-java-source",                                                         "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/x-jsp",                                                                 "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/x-markdown",                                                            "targetMediaType": "text/plain"},
-        {"sourceMediaType": "application/x-javascript",                                                   "targetMediaType": "text/plain"},
-        {"sourceMediaType": "application/dita+xml",                                                       "targetMediaType": "text/plain"}
+        {"sourceMediaType": "text/plain",                    "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/mediawiki",                "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/css",                      "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/csv",                      "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/javascript",               "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/xml",                      "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/html",                     "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/richtext",                 "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/sgml",                     "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/tab-separated-values",     "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/x-setext",                 "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/x-java-source",            "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/x-jsp",                    "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/x-markdown",               "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/calendar",                 "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/x-javascript",      "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/dita+xml",          "targetMediaType": "text/plain"}
       ],
       "transformOptions": [
         "stringOptions"
