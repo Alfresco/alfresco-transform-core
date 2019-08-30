@@ -136,7 +136,7 @@ public class TikaTransformationIT
                 allTargets("quick.xml", "TikaAuto"),
                 allTargets("sample.xhtml.txt", "TikaAuto"),
                 allTargets("sample.rss", "TikaAuto"),
-                allTargets("quick.rar", "Archive"),
+                //allTargets("quick.rar", "TikaAuto"),
                 allTargets("quick.tar.gz", "TikaAuto"))
             .flatMap(identity())
             .collect(toSet());

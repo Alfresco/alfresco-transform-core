@@ -26,44 +26,65 @@
  */
 package org.alfresco.transformer;
 
+import static java.text.MessageFormat.format;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.springframework.http.HttpStatus.OK;
 
+import java.util.Set;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * @author Cezar Leahu
  */
-public class TransformationIT
+@RunWith(Parameterized.class)
+public class AlfrescoPdfRendererTransformationIT
 {
-    private static final Logger logger = LoggerFactory.getLogger(TransformationIT.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        AlfrescoPdfRendererTransformationIT.class);
     private static final String ENGINE_URL = "http://localhost:8090";
 
-    @Test
-    public void testPdfToPng()
+    private final String sourceFile;
+
+    public AlfrescoPdfRendererTransformationIT(String sourceFile)
     {
-        checkTRequest("quick.pdf", "png");
+        this.sourceFile = sourceFile;
+    }
+
+    @Parameterized.Parameters
+    public static Set<String> engineTransformations()
+    {
+        return ImmutableSet.of(
+            "quick.pdf",
+            "quickCS3.ai",
+            "quickCS5.ai"
+        );
     }
 
     @Test
-    public void testAiToPng()
+    public void testTransformation()
     {
-        checkTRequest("quickCS3.ai", "png");
+        final String descriptor = format("Transform ({0} -> png)", sourceFile);
 
-        checkTRequest("quickCS5.ai", "png");
-    }
-
-    private static void checkTRequest(final String sourceFile, final String targetExtension)
-    {
-        final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL,
-            sourceFile, null, null, targetExtension);
-
-        logger.info("Response: {}", response);
-        assertEquals(OK, response.getStatusCode());
+        try
+        {
+            final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, null,
+                null, "png");
+            assertEquals(descriptor, OK, response.getStatusCode());
+        }
+        catch (Exception e)
+        {
+            fail(descriptor + " exception: " + e.getMessage());
+        }
     }
 }

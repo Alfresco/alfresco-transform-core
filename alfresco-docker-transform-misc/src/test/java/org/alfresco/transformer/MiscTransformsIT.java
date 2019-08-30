@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -56,8 +57,9 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_WORD;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_XML;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
 import static org.alfresco.transformer.TestFileInfo.testFile;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.springframework.http.HttpStatus.OK;
 
 import java.util.Map;
 import java.util.Set;
@@ -94,7 +96,7 @@ public class MiscTransformsIT
         testFile(MIMETYPE_OUTLOOK_MSG, "msg", "quick.msg"),
         testFile(MIMETYPE_PDF, "pdf", "quick.pdf"),
         testFile(MIMETYPE_TEXT_PLAIN, "txt", "quick.txt"),
-        
+
         testFile("text/richtext", "rtf", "sample.rtf"),
         testFile("text/sgml", "sgml", "sample.sgml"),
         testFile("text/tab-separated-values", "tsv", "sample.tsv"),
@@ -167,17 +169,21 @@ public class MiscTransformsIT
     @Test
     public void testTransformation()
     {
-        final TestFileInfo sourceFile = TEST_FILES.get(sourceMimetype);
-        final TestFileInfo targetFile = TEST_FILES.get(targetMimetype);
-        assertNotNull(sourceFile);
-        assertNotNull(targetFile);
+        final String sourceFile = TEST_FILES.get(sourceMimetype).getPath();
+        final String targetExtension = TEST_FILES.get(targetMimetype).getExtension();
 
-        final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile.getPath(),
-            sourceMimetype, targetMimetype, targetFile.getExtension());
+        final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
+            sourceFile, sourceMimetype, targetMimetype, targetExtension);
 
-        logger.info("Response: {}", response);
-
-        final int status = response.getStatusCode().value();
-        assertTrue("Transformation failed", status >= 200 && status < 300);
+        try
+        {
+            final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile,
+                sourceMimetype, targetMimetype, targetExtension);
+            assertEquals(descriptor, OK, response.getStatusCode());
+        }
+        catch (Exception e)
+        {
+            fail(descriptor + " exception: " + e.getMessage());
+        }
     }
 }
