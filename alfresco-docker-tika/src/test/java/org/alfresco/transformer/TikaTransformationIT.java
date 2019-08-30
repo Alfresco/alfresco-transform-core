@@ -39,9 +39,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Triple;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
@@ -64,9 +62,6 @@ public class TikaTransformationIT
         "txt", "text/plain",
         "xhtml", "application/xhtml+xml",
         "xml", "text/xml");
-
-    @Rule
-    public ExpectedException expectedEx = ExpectedException.none();
 
     private final String sourceFile;
     private final String targetExtension;
