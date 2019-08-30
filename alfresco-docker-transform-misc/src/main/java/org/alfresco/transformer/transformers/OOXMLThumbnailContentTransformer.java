@@ -70,6 +70,10 @@ import com.google.common.collect.ImmutableList;
  * This transformer will only work for OOXML files where thumbnailing was enabled,
  * which isn't on by default on Windows, but is more common on Mac.
  *
+ * <p>
+ * This code is based on a class of the same name originally implemented in alfresco-repository.
+ * </p>
+ *
  * @author Nick Burch
  * @author eknizat
  */
@@ -109,12 +113,9 @@ public class OOXMLThumbnailContentTransformer implements SelectableTransformer
     }
 
     @Override
-    public void transform(File sourceFile, File targetFile, Map<String, String> parameters)
-        throws Exception
+    public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
+        final String targetMimetype, final Map<String, String> parameters) throws Exception
     {
-        final String sourceMimetype = parameters.get(SOURCE_MIMETYPE);
-        final String targetMimetype = parameters.get(TARGET_MIMETYPE);
-
         if (logger.isDebugEnabled())
         {
             logger.debug("Performing OOXML to jpeg transform with sourceMimetype=" + sourceMimetype

@@ -54,6 +54,10 @@ import com.google.common.collect.ImmutableList;
  * assume incorrectly that we can convert to PDF and we would only get a preview for the older format and never the
  * newer one. Both formats have the same mimetype.
  *
+ * <p>
+ * This code is based on a class of the same name originally implemented in alfresco-repository.
+ * </p>
+ *
  * @author Neil Mc Erlean
  * @author eknizat
  * @since 4.0
@@ -82,11 +86,9 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
     }
 
     @Override
-    public void transform(File sourceFile, File targetFile, Map<String, String> parameters)
+    public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
+        final String targetMimetype, final Map<String, String> parameters)
     {
-        final String sourceMimetype = parameters.get(SOURCE_MIMETYPE);
-        final String targetMimetype = parameters.get(TARGET_MIMETYPE);
-
         logger.debug("Performing IWorks to jpeg transform with sourceMimetype={} targetMimetype={}",
             sourceMimetype, targetMimetype);
 

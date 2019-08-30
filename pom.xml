@@ -11,7 +11,7 @@
 
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>2.1.0-EA5-SNAPSHOT</version>
+    <version>2.1.0-RC1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -26,7 +26,7 @@
         <dependency.alfresco-transform-model.version>1.0.2.6</dependency.alfresco-transform-model.version>
         <dependency.activemq.version>5.15.9</dependency.activemq.version>
         <dependency.jackson.version>2.9.9</dependency.jackson.version>
-        <dependency.jackson-databind.version>2.9.9.2</dependency.jackson-databind.version>
+        <dependency.jackson-databind.version>2.9.9.3</dependency.jackson-databind.version>
         <dependency.cxf.version>3.2.9</dependency.cxf.version>
     </properties>
 
@@ -293,40 +293,6 @@
                     <artifactId>docker-maven-plugin</artifactId>
                     <version>0.31.0</version>
                     <extensions>true</extensions>
-                    <configuration>
-                        <apiVersion>1.29</apiVersion>
-                        <imagePullPolicy>Always</imagePullPolicy>
-                        <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
-                        <!--<dockerHost>tcp://127.0.0.1:2376</dockerHost>-->
-                        <images>
-                            <image>
-                                <alias>activemq</alias>
-                                <name>alfresco/alfresco-activemq:5.15.6</name>
-                                <run>
-                                    <hostname>activemq</hostname>
-                                    <network>
-                                        <name>transform</name>
-                                        <alias>activemq</alias>
-                                    </network>
-                                    <ports>
-                                        <port>8161:8161</port>
-                                        <port>5672:5672</port>
-                                        <port>61616:61616</port>
-                                    </ports>
-                                    <wait>
-                                        <log>Apache ActiveMQ 5.15.6 .* started</log>
-                                        <time>20000</time>
-                                        <kill>500</kill>
-                                        <shutdown>100</shutdown>
-                                        <exec>
-                                            <preStop>kill 1</preStop>
-                                            <preStop>kill -9 1</preStop>
-                                        </exec>
-                                    </wait>
-                                </run>
-                            </image>
-                        </images>
-                    </configuration>
                     <executions>
                         <execution>
                             <id>before-integration-tests</id>

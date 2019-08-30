@@ -214,7 +214,8 @@ public abstract class AbstractTransformerController implements TransformControll
         // Run the transformation
         try
         {
-            processTransform(sourceFile, targetFile, request.getTransformRequestOptions(), timeout);
+            processTransform(sourceFile, targetFile, request.getSourceMediaType(),
+                request.getTargetMediaType(), request.getTransformRequestOptions(), timeout);
         }
         catch (TransformException e)
         {
