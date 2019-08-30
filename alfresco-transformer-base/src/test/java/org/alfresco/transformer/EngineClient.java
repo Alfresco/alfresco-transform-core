@@ -46,8 +46,14 @@ public class EngineClient
 
         final MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file", new ClassPathResource(sourceFile));
-        body.add("sourceMimetype", sourceMimetype);
-        body.add("targetMimetype", targetMimetype);
+        if (sourceMimetype != null && !sourceMimetype.trim().isEmpty())
+        {
+            body.add("sourceMimetype", sourceMimetype);
+        }
+        if (targetMimetype != null && !targetMimetype.trim().isEmpty())
+        {
+            body.add("targetMimetype", targetMimetype);
+        }
         if (targetExtension != null && !targetExtension.trim().isEmpty())
         {
             body.add("targetExtension", targetExtension);

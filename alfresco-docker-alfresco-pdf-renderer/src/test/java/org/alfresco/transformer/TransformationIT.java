@@ -26,21 +26,15 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transformer.EngineClient.sendTRequest;
 import static org.junit.Assert.assertEquals;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * @author Cezar Leahu
@@ -53,33 +47,21 @@ public class TransformationIT
     @Test
     public void testPdfToPng()
     {
-        sendTRequest("quick.pdf", "png");
+        checkTRequest("quick.pdf", "png");
     }
 
     @Test
     public void testAiToPng()
     {
-        sendTRequest("quickCS3.ai", "png");
+        checkTRequest("quickCS3.ai", "png");
 
-        sendTRequest("quickCS5.ai", "png");
+        checkTRequest("quickCS5.ai", "png");
     }
 
-    private static void sendTRequest(final String sourceFile, final String targetExtension)
+    private static void checkTRequest(final String sourceFile, final String targetExtension)
     {
-        final RestTemplate restTemplate = new RestTemplate();
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MULTIPART_FORM_DATA);
-
-
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", new ClassPathResource(sourceFile));
-        body.add("targetExtension", targetExtension);
-
-        final HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
-
-        final ResponseEntity<Resource> response = restTemplate.postForEntity(
-            ENGINE_URL + "/transform",
-            entity, Resource.class);
+        final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL,
+            sourceFile, null, null, targetExtension);
 
         logger.info("Response: {}", response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
