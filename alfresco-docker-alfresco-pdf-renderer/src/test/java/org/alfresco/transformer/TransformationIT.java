@@ -28,12 +28,12 @@ package org.alfresco.transformer;
 
 import static org.alfresco.transformer.EngineClient.sendTRequest;
 import static org.junit.Assert.assertEquals;
+import static org.springframework.http.HttpStatus.OK;
 
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -64,6 +64,6 @@ public class TransformationIT
             sourceFile, null, null, targetExtension);
 
         logger.info("Response: {}", response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(OK, response.getStatusCode());
     }
 }

@@ -26,25 +26,20 @@
  */
 package org.alfresco.transformer;
 
-import com.google.common.collect.ImmutableMap;
+import static java.text.MessageFormat.format;
+import static org.alfresco.transformer.EngineClient.sendTRequest;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.http.HttpStatus.OK;
+
+import java.util.Map;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.Map;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * @author Cezar Leahu
@@ -53,254 +48,238 @@ public class TransformationIT
 {
     private static final Logger logger = LoggerFactory.getLogger(TransformationIT.class);
     private static final String ENGINE_URL = "http://localhost:8090";
-    private static final Map<String,String> extensionMimetype = ImmutableMap.of("html", "text/html",
-                                                                                "txt", "text/plain",
-                                                                                "xhtml", "application/xhtml+xml",
-                                                                                "xml", "text/xml");
+    private static final Map<String, String> extensionMimetype = ImmutableMap.of(
+        "html", "text/html",
+        "txt", "text/plain",
+        "xhtml", "application/xhtml+xml",
+        "xml", "text/xml");
+
+// TODO unit tests for the following file types (for which is difficult to find file samples):
+//  *.ogx (application/ogg)
+//  *.cpio (application/x-cpio)
+//  *.cdf (application/x-netcdf) 
+//  *.hdf (application/x-hdf)
 
     @Test
     public void testDoc()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.doc", em, extensionMimetype.get(em), "Office");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.doc", k, v, "Office"));
     }
 
     @Test
     public void testDocx()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.docx", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.docx", k, v, "TikaAuto"));
     }
 
     @Test
     public void testHtml()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.html", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.html", k, v, "TikaAuto"));
     }
 
     @Test
     public void testJar()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.jar", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.jar", k, v, "TikaAuto"));
     }
 
     @Test
     public void testJava()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.java", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.java", k, v, "TikaAuto"));
     }
 
     @Test
     public void testKey()
     {
-        sendTRequest("quick.key", "html", "text/html", "TikaAuto");
+        checkTRequest("quick.key", "html", "text/html", "TikaAuto");
         // Does not work, alfresco-docker-transform-misc can handle this target mimetype, removed from engine_config.json
-        // sendTRequest("quick.key", "txt", "text/plain", "TikaAuto");
-        sendTRequest("quick.key", "xhtml", "application/xhtml+xml", "TikaAuto");
-        sendTRequest("quick.key", "xml", "text/xml", "TikaAuto");
-
+        // checkTRequest("quick.key", "txt", "text/plain", "TikaAuto");
+        checkTRequest("quick.key", "xhtml", "application/xhtml+xml", "TikaAuto");
+        checkTRequest("quick.key", "xml", "text/xml", "TikaAuto");
     }
 
     @Test
     public void testMsg()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.msg", em, extensionMimetype.get(em), "OutlookMsg");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.msg", k, v, "OutlookMsg"));
     }
 
     @Test
     public void testNumbers()
     {
-        sendTRequest("quick.numbers", "html", "text/html", "TikaAuto");
+        checkTRequest("quick.numbers", "html", "text/html", "TikaAuto");
         // Does not work, alfresco-docker-transform-misc can handle this target mimetype, removed from engine_config.json
-        // sendTRequest("quick.numbers", "txt", "text/plain", "TikaAuto");
-        sendTRequest("quick.numbers", "xhtml", "application/xhtml+xml", "TikaAuto");
-        sendTRequest("quick.numbers", "xml", "text/xml", "TikaAuto");
+        // checkTRequest("quick.numbers", "txt", "text/plain", "TikaAuto");
+        checkTRequest("quick.numbers", "xhtml", "application/xhtml+xml", "TikaAuto");
+        checkTRequest("quick.numbers", "xml", "text/xml", "TikaAuto");
     }
 
     @Test
     public void testOdp()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.odp", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.odp", k, v, "TikaAuto"));
     }
 
     @Test
     public void testOds()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.ods", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.ods", k, v, "TikaAuto"));
     }
 
     @Test
     public void testOdt()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.odt", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.odt", k, v, "TikaAuto"));
     }
 
     @Test
     public void testOtp()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.otp", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.otp", k, v, "TikaAuto"));
     }
 
     @Test
     public void testOts()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.ots", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.ots", k, v, "TikaAuto"));
     }
 
     @Test
     public void testOtt()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.ott", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.ott", k, v, "TikaAuto"));
     }
 
     @Test
     public void testPages()
     {
-        sendTRequest("quick.pages", "html", "text/html", "TikaAuto");
+        checkTRequest("quick.pages", "html", "text/html", "TikaAuto");
         // Does not work, alfresco-docker-transform-misc can handle this target mimetype, removed from engine_config.json
-        // sendTRequest("quick.pages", "txt", "text/plain", "TikaAuto");
-        sendTRequest("quick.pages", "xhtml", "application/xhtml+xml", "TikaAuto");
-        sendTRequest("quick.pages", "xml", "text/xml", "TikaAuto");
+        // checkTRequest("quick.pages", "txt", "text/plain", "TikaAuto");
+        checkTRequest("quick.pages", "xhtml", "application/xhtml+xml", "TikaAuto");
+        checkTRequest("quick.pages", "xml", "text/xml", "TikaAuto");
     }
 
     @Test
     public void testPdf()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.pdf", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.pdf", k, v, "TikaAuto"));
     }
 
     @Test
     public void testPpt()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.ppt", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.ppt", k, v, "TikaAuto"));
     }
 
     @Test
     public void testPptx()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.pptx", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.pptx", k, v, "TikaAuto"));
     }
 
     @Test
     public void testSxw()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.sxw", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.sxw", k, v, "TikaAuto"));
     }
 
     @Test
     public void testTxt()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.txt", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.txt", k, v, "TikaAuto"));
     }
 
     @Test
     public void testVsd()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.vsd", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.vsd", k, v, "TikaAuto"));
     }
 
     @Test
     public void testXls()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.xls", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.xls", k, v, "TikaAuto"));
     }
 
     @Test
     public void testXslx()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.xslx", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.xslx", k, v, "TikaAuto"));
     }
 
     @Test
     public void testZip()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.zip", em, extensionMimetype.get(em), "TikaAuto");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.zip", k, v, "TikaAuto"));
     }
 
     @Test
     public void testZipArchive()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.zip", em, extensionMimetype.get(em), "Archive");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.zip", k, v, "Archive"));
     }
 
     @Test
     public void testJarArchive()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.jar", em, extensionMimetype.get(em), "Archive");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.jar", k, v, "Archive"));
     }
 
     @Test
     public void testTarArchive()
     {
-        Set<String> keySet = extensionMimetype.keySet();
-        for (String em : keySet)
-            sendTRequest("quick.tar", em, extensionMimetype.get(em), "Archive");
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.tar", k, v, "Archive"));
     }
 
-    private static void sendTRequest(final String sourceFile, final String targetExtension, final String targetMimetype, final String transform)
+    @Test
+    public void testRTF()
     {
-        final RestTemplate restTemplate = new RestTemplate();
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MULTIPART_FORM_DATA);
+        extensionMimetype.forEach((k, v) -> checkTRequest("sample.rtf", k, v, "TikaAuto"));
+    }
 
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", new ClassPathResource(sourceFile));
-        body.add("targetExtension", targetExtension);
-        body.add("targetMimetype", targetMimetype);
-        body.add("targetEncoding", "UTF-8");
-        body.add("transform", transform);
+    @Test
+    public void testXML()
+    {
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.xml", k, v, "TikaAuto"));
+    }
 
-        final HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
+    @Test
+    public void testXHTML()
+    {
+        extensionMimetype.forEach((k, v) -> checkTRequest("sample.xhtml.txt", k, v, "TikaAuto"));
+    }
 
-        final ResponseEntity<Resource> response = restTemplate.postForEntity(
-            ENGINE_URL + "/transform",
-            entity, Resource.class);
+    @Test
+    public void testRSS()
+    {
+        extensionMimetype.forEach((k, v) -> checkTRequest("sample.rss", k, v, "TikaAuto"));
+    }
 
-        logger.info("Response: {}", response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+    @Test
+    public void testRAR()
+    {
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.rar", k, v, "TikaAuto"));
+    }
+
+    @Test
+    public void testTarGz()
+    {
+        extensionMimetype.forEach((k, v) -> checkTRequest("quick.tar.gz", k, v, "TikaAuto"));
+    }
+
+    private static void checkTRequest(final String sourceFile, final String targetExtension,
+        final String targetMimetype, final String transform)
+    {
+        final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, null,
+            targetMimetype, targetExtension, ImmutableMap.of(
+                "targetEncoding", "UTF-8",
+                "transform", transform
+            ));
+        final String descriptor = format("Transform ({0} -> {1}, {2}, transform={3}) failed",
+            sourceFile, targetMimetype, targetExtension, transform);
+        assertEquals(descriptor, OK, response.getStatusCode());
     }
 }

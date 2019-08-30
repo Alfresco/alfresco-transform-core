@@ -26,6 +26,13 @@
  */
 package org.alfresco.transformer;
 
+import static org.junit.Assert.assertEquals;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,17 +40,10 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 /**
  * @author Cezar Leahu
@@ -52,10 +52,14 @@ public class TransformationIT
 {
     private static final Logger logger = LoggerFactory.getLogger(TransformationIT.class);
     private static final String ENGINE_URL = "http://localhost:8090";
-    private static final List<String> spreadsheetTargetMimetypes = Arrays.asList( new String[] {"csv", "html", "ods", "pdf", "tsv", "xls"});
-    private static final List<String> documentsTargetMimetypes = Arrays.asList( new String[] {"doc", "html", "odt", "pdf", "rtf"});
-    private static final List<String> graphicTargetMimetypes = Arrays.asList( new String[] {"pdf", "svg"});
-    private static final List<String> presentationTargetMimetypes = Arrays.asList( new String[] {"html", "odp", "ppt", "pdf"});
+    private static final List<String> spreadsheetTargetMimetypes = Arrays.asList(
+        new String[]{"csv", "html", "ods", "pdf", "tsv", "xls"});
+    private static final List<String> documentsTargetMimetypes = Arrays.asList(
+        new String[]{"doc", "html", "odt", "pdf", "rtf"});
+    private static final List<String> graphicTargetMimetypes = Arrays.asList(
+        new String[]{"pdf", "svg"});
+    private static final List<String> presentationTargetMimetypes = Arrays.asList(
+        new String[]{"html", "odp", "ppt", "pdf"});
 
     @Test
     public void testDoc()
@@ -165,6 +169,6 @@ public class TransformationIT
             entity, Resource.class);
 
         logger.info("Response: {}", response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(OK, response.getStatusCode());
     }
 }
