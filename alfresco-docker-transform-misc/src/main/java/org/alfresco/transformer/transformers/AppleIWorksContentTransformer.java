@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableList;
 
 /**
- * Converts Apple iWorks files to JPEGs for thumbnailing & previewing.
+ * Converts Apple iWorks files to JPEGs for thumbnailing and previewing.
  * The transformer will only work for iWorks 2013/14 files. Support for iWorks 2008/9 has been dropped as we cannot
  * support both, because the newer format does not contain a PDF. If we say this transformer supports PDF, Share will
  * assume incorrectly that we can convert to PDF and we would only get a preview for the older format and never the
