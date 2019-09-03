@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableList;
 
 /**
- * Extracts out Thumbnail JPEGs from OOXML files for thumbnailing & previewing.
+ * Extracts out Thumbnail JPEGs from OOXML files for thumbnailing and previewing.
  * This transformer will only work for OOXML files where thumbnailing was enabled,
  * which isn't on by default on Windows, but is more common on Mac.
  *
