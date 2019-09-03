@@ -1,0 +1,51 @@
+package org.alfresco.transformer;
+
+public class Sample
+{
+    private final String mimeType;
+    private final String extension;
+    private final String path;
+    private final boolean exactMimeType;
+
+    public Sample(final String mimeType, final String extension, final String path,
+        final boolean exactMimeType)
+    {
+        this.mimeType = mimeType;
+        this.extension = extension;
+        this.path = path;
+        this.exactMimeType = exactMimeType;
+    }
+
+    public String getMimeType()
+    {
+        return mimeType;
+    }
+
+    public String getExtension()
+    {
+        return extension;
+    }
+
+    public String getPath()
+    {
+        return path;
+    }
+
+    public boolean isExactMimeType()
+    {
+        return exactMimeType;
+    }
+
+    public static Sample testFile(final String mimeType, final String extension,
+        final String path, final boolean exactMimeType)
+    {
+        return new Sample(mimeType, extension, path, exactMimeType);
+    }
+
+    public static Sample testFile(final String mimeType, final String extension,
+        final String path)
+    {
+        return new Sample(mimeType, extension, path, false);
+    }
+}
+

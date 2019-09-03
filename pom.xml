@@ -26,7 +26,7 @@
         <dependency.alfresco-transform-model.version>1.0.2.6</dependency.alfresco-transform-model.version>
         <dependency.activemq.version>5.15.9</dependency.activemq.version>
         <dependency.jackson.version>2.9.9</dependency.jackson.version>
-        <dependency.jackson-databind.version>2.9.9.2</dependency.jackson-databind.version>
+        <dependency.jackson-databind.version>2.9.9.3</dependency.jackson-databind.version>
         <dependency.cxf.version>3.2.9</dependency.cxf.version>
     </properties>
 
@@ -141,7 +141,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>28.0-jre</version>
+                <version>28.1-jre</version>
             </dependency>
             <!-- Junrar & compression -->
             <dependency>
@@ -292,7 +292,7 @@
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
-                    <version>0.30.0</version>
+                    <version>0.31.0</version>
                     <extensions>true</extensions>
                     <executions>
                         <execution>
