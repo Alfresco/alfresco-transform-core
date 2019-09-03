@@ -26,6 +26,8 @@ import org.springframework.web.client.RestTemplate;
  */
 public class EngineClient
 {
+    private static final RestTemplate REST_TEMPLATE = new RestTemplate();
+    
     public static ResponseEntity<Resource> sendTRequest(
         final String engineUrl, final String sourceFile,
         final String sourceMimetype, final String targetMimetype, final String targetExtension)
@@ -39,7 +41,6 @@ public class EngineClient
         final String sourceMimetype, final String targetMimetype, final String targetExtension,
         final Map<String, String> transformOptions)
     {
-        final RestTemplate restTemplate = new RestTemplate();
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MULTIPART_FORM_DATA);
         //headers.setAccept(ImmutableList.of(MULTIPART_FORM_DATA));
@@ -62,6 +63,6 @@ public class EngineClient
 
         final HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
 
-        return restTemplate.postForEntity(engineUrl + "/transform", entity, Resource.class);
+        return REST_TEMPLATE.postForEntity(engineUrl + "/transform", entity, Resource.class);
     }
 }
