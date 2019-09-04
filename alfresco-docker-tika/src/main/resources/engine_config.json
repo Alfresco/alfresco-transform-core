@@ -1,16 +1,16 @@
 {
   "transformOptions": {
     "tikaOptions": [
-      {"value": {"name": "transform"}},
+      {"value": {"required":true, "name": "transform" }},
       {"value": {"name": "includeContents"}},
       {"value": {"name": "notExtractBookmarksText"}},
-      {"value": {"name": "targetMimetype"}},
-      {"value": {"name": "targetEncoding"}}
+      {"value": {"required":true, "name": "targetMimetype"}},
+      {"value": {"required":true, "name": "targetEncoding"}}
     ]
   },
   "transformers": [
     {
-      "transformerName": "tika",
+      "transformerName": "archive",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "application/x-cpio",                                                          "targetMediaType": "text/html"},
         {"sourceMediaType": "application/x-cpio",                                                          "targetMediaType": "text/plain"},
@@ -30,7 +30,201 @@
         {"sourceMediaType": "application/zip",                                                             "targetMediaType": "text/html"},
         {"sourceMediaType": "application/zip",                                                             "targetMediaType": "text/plain"},
         {"sourceMediaType": "application/zip",                                                             "targetMediaType": "application/xhtml+xml"},
-        {"sourceMediaType": "application/zip",                                                             "targetMediaType": "text/xml"},
+        {"sourceMediaType": "application/zip",                                                             "targetMediaType": "text/xml"}
+      ],
+      "transformOptions": [
+        "tikaOptions"
+      ]
+    },
+    {
+      "transformerName": "outlookMsg",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "text/xml"}
+      ],
+      "transformOptions": [
+        "tikaOptions"
+      ]
+    },
+    {
+      "transformerName": "pdfbox",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/pdf",                                                             "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/pdf",                             "maxSourceSizeBytes": 26214400, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/pdf",                                                             "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/pdf",                                                             "targetMediaType": "text/xml"}
+      ],
+      "transformOptions": [
+        "tikaOptions"
+      ]
+    },
+    {
+      "transformerName": "office",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/msword",                                                          "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/msword",                                                          "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/msword",                                                          "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/msword",                                                          "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-project",                                                  "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-project",                                                  "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-project",                                                  "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-project",                                                  "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint",                                               "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint",                                               "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint",                                               "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint",                                               "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.visio",                                                       "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.visio",                                                       "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.visio",                                                       "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.visio",                                                       "targetMediaType": "text/xml"}
+      ],
+      "transformOptions": [
+        "tikaOptions"
+      ]
+    },
+    {
+      "transformerName": "poi",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/vnd.ms-excel",                                                    "targetMediaType": "text/csv"},
+        {"sourceMediaType": "application/vnd.ms-excel",                                                    "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel",                                                    "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel",                                                    "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel",                                                    "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "targetMediaType": "text/csv"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "targetMediaType": "text/xml"}
+      ],
+      "transformOptions": [
+        "tikaOptions"
+      ]
+    },
+    {
+      "transformerName": "ooxml",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                            "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                            "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                            "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                            "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",     "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",     "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",     "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",     "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                            "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                            "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                            "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                            "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",     "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",     "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",     "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",     "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.template.macroenabled.12",                      "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.template.macroenabled.12",                      "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.template.macroenabled.12",                      "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.template.macroenabled.12",                      "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.template",       "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.template",       "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.template",       "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.template",       "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.addin.macroenabled.12",                         "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.addin.macroenabled.12",                         "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.addin.macroenabled.12",                         "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.addin.macroenabled.12",                         "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12",                     "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12",                     "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12",                     "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12",                     "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",      "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",      "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",      "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",      "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.presentation.macroenabled.12",                  "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.presentation.macroenabled.12",                  "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.presentation.macroenabled.12",                  "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.presentation.macroenabled.12",                  "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",   "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",   "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",   "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",   "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slide.macroenabled.12",                         "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slide.macroenabled.12",                         "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slide.macroenabled.12",                         "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slide.macroenabled.12",                         "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",          "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",          "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",          "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",          "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12",                              "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12",                              "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12",                              "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12",                              "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                       "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                       "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                       "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                       "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                              "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                              "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                              "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                              "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                           "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                           "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                           "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                           "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",        "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",        "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",        "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",        "targetMediaType": "text/xml"}
+      ],
+      "transformOptions": [
+        "tikaOptions"
+      ]
+    },
+    {
+      "transformerName": "tikaAuto",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/x-cpio",                                                          "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/x-cpio",                                                          "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/x-cpio",                                                          "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/x-cpio",                                                          "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/java-archive",                                                    "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/java-archive",                                                    "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/java-archive",                                                    "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/java-archive",                                                    "targetMediaType": "text/xml"},
 
         {"sourceMediaType": "application/x-netcdf",                                                        "targetMediaType": "text/html"},
         {"sourceMediaType": "application/x-netcdf",                                                        "targetMediaType": "text/plain"},
@@ -282,12 +476,19 @@
         {"sourceMediaType": "application/x-compress",                                                      "targetMediaType": "text/html"},
         {"sourceMediaType": "application/x-compress",                                                      "targetMediaType": "text/plain"},
         {"sourceMediaType": "application/x-compress",                                                      "targetMediaType": "application/xhtml+xml"},
-        {"sourceMediaType": "application/x-compress",                                                      "targetMediaType": "text/xml"},
-
-        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "text/html"},
-        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "text/plain"},
-        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "application/xhtml+xml"},
-        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "text/xml"}
+        {"sourceMediaType": "application/x-compress",                                                      "targetMediaType": "text/xml"}
+      ],
+      "transformOptions": [
+        "tikaOptions"
+      ]
+    },
+    {
+      "transformerName": "textMining",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/msword",                                                          "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/msword",                                                          "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/msword",                                                          "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/msword",                                                          "targetMediaType": "text/xml"}
       ],
       "transformOptions": [
         "tikaOptions"
