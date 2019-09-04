@@ -26,6 +26,24 @@
  */
 package org.alfresco.transformer;
 
+import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transformer.executors.TikaJavaExecutor;
+import org.alfresco.transformer.logging.LogEntry;
+import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.util.Map;
+
 import static org.alfresco.transformer.executors.Tika.INCLUDE_CONTENTS;
 import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
 import static org.alfresco.transformer.executors.Tika.PDF_BOX;
@@ -41,25 +59,6 @@ import static org.alfresco.transformer.util.Util.stringToBoolean;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
-
-import java.io.File;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.executors.TikaJavaExecutor;
-import org.alfresco.transformer.logging.LogEntry;
-import org.alfresco.transformer.probes.ProbeTestTransform;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Controller for the Docker based Tika transformers.
@@ -122,6 +121,7 @@ public class TikaController extends AbstractTransformerController
     @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
         @RequestParam("file") MultipartFile sourceMultipartFile,
+        @RequestParam("sourceMimetype") String sourceMimetype,
         @RequestParam("targetExtension") String targetExtension,
         @RequestParam("targetMimetype") String targetMimetype,
         @RequestParam("targetEncoding") String targetEncoding,
@@ -129,15 +129,9 @@ public class TikaController extends AbstractTransformerController
         @RequestParam(value = "timeout", required = false) Long timeout,
         @RequestParam(value = "testDelay", required = false) Long testDelay,
 
-        @RequestParam(value = "transform") String transform,
         @RequestParam(value = "includeContents", required = false) Boolean includeContents,
         @RequestParam(value = "notExtractBookmarksText", required = false) Boolean notExtractBookmarksText)
     {
-        if (!TRANSFORM_NAMES.contains(transform))
-        {
-            throw new TransformException(BAD_REQUEST.value(), "Invalid transform value");
-        }
-
         String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(),
             targetExtension);
         getProbeTestTransform().incrementTransformerCount();
@@ -148,6 +142,11 @@ public class TikaController extends AbstractTransformerController
         // TODO Consider streaming the request and response rather than using temporary files
         // https://www.logicbig.com/tutorials/spring-framework/spring-web-mvc/streaming-response-body.html
 
+        Map<String, String> transformOptions = createTransformOptions(
+                "includeContents", includeContents,
+                "notExtractBookmarksText", notExtractBookmarksText,
+                "targetEncoding", targetEncoding);
+        String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         javaExecutor.call(sourceFile, targetFile, transform,
             includeContents != null && includeContents ? INCLUDE_CONTENTS : null,
             notExtractBookmarksText != null && notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
@@ -169,11 +168,11 @@ public class TikaController extends AbstractTransformerController
         logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
                      " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
 
-        final String transform = transformOptions.get("transform");
         final Boolean includeContents = stringToBoolean("includeContents");
         final Boolean notExtractBookmarksText = stringToBoolean("notExtractBookmarksText");
         final String targetEncoding = transformOptions.get("targetEncoding");
 
+        String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         javaExecutor.call(sourceFile, targetFile, transform,
             includeContents != null && includeContents ? INCLUDE_CONTENTS : null,
             notExtractBookmarksText != null && notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,

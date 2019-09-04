@@ -1,16 +1,20 @@
 {
   "transformOptions": {
     "tikaOptions": [
-      {"value": {"required":true, "name": "transform" }},
+      {"value": {"name": "targetEncoding"}}
+    ],
+    "archiveOptions": [
       {"value": {"name": "includeContents"}},
+      {"value": {"name": "targetEncoding"}}
+    ],
+    "pdfboxOptions": [
       {"value": {"name": "notExtractBookmarksText"}},
-      {"value": {"required":true, "name": "targetMimetype"}},
-      {"value": {"required":true, "name": "targetEncoding"}}
+      {"value": {"name": "targetEncoding"}}
     ]
   },
   "transformers": [
     {
-      "transformerName": "archive",
+      "transformerName": "Archive",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "application/x-cpio",                                                          "targetMediaType": "text/html"},
         {"sourceMediaType": "application/x-cpio",                                                          "targetMediaType": "text/plain"},
@@ -33,11 +37,11 @@
         {"sourceMediaType": "application/zip",                                                             "targetMediaType": "text/xml"}
       ],
       "transformOptions": [
-        "tikaOptions"
+        "archiveOptions"
       ]
     },
     {
-      "transformerName": "outlookMsg",
+      "transformerName": "OutlookMsg",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "text/html"},
         {"sourceMediaType": "application/vnd.ms-outlook",                                                  "targetMediaType": "text/plain"},
@@ -49,7 +53,7 @@
       ]
     },
     {
-      "transformerName": "pdfbox",
+      "transformerName": "PdfBox",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "application/pdf",                                                             "targetMediaType": "text/html"},
         {"sourceMediaType": "application/pdf",                             "maxSourceSizeBytes": 26214400, "targetMediaType": "text/plain"},
@@ -57,11 +61,11 @@
         {"sourceMediaType": "application/pdf",                                                             "targetMediaType": "text/xml"}
       ],
       "transformOptions": [
-        "tikaOptions"
+        "pdfboxOptions"
       ]
     },
     {
-      "transformerName": "office",
+      "transformerName": "Office",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "application/msword",                                                          "targetMediaType": "text/html"},
         {"sourceMediaType": "application/msword",                                                          "targetMediaType": "text/plain"},
@@ -93,7 +97,7 @@
       ]
     },
     {
-      "transformerName": "poi",
+      "transformerName": "Poi",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "application/vnd.ms-excel",                                                    "targetMediaType": "text/csv"},
         {"sourceMediaType": "application/vnd.ms-excel",                                                    "targetMediaType": "text/html"},
@@ -112,7 +116,7 @@
       ]
     },
     {
-      "transformerName": "ooxml",
+      "transformerName": "OOXML",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                            "targetMediaType": "text/html"},
         {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                            "targetMediaType": "text/plain"},
@@ -214,7 +218,7 @@
       ]
     },
     {
-      "transformerName": "tikaAuto",
+      "transformerName": "TikaAuto",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "application/x-cpio",                                                          "targetMediaType": "text/html"},
         {"sourceMediaType": "application/x-cpio",                                                          "targetMediaType": "text/plain"},
@@ -483,7 +487,7 @@
       ]
     },
     {
-      "transformerName": "textMining",
+      "transformerName": "TextMining",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "application/msword",                                                          "targetMediaType": "text/html"},
         {"sourceMediaType": "application/msword",                                                          "targetMediaType": "text/plain"},
