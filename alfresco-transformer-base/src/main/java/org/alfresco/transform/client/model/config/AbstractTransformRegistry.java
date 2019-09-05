@@ -19,7 +19,7 @@ public abstract class AbstractTransformRegistry implements TransformRegistry
 {
     private static final String TIMEOUT = "timeout";
 
-    protected static class Data
+    public static class Data
     {
         ConcurrentMap<String, ConcurrentMap<String, List<SupportedTransform>>> transformers = new ConcurrentHashMap<>();
         ConcurrentMap<String, ConcurrentMap<String, List<SupportedTransform>>> cachedSupportedTransformList = new ConcurrentHashMap<>();
@@ -101,12 +101,9 @@ public abstract class AbstractTransformRegistry implements TransformRegistry
             list.add(transformOptionGroup);
         }
 
-        Set<TransformOption> set =
-                  list.isEmpty() ? Collections.emptySet()
-                : list.size() == 1 ? list.get(0).getTransformOptions()
-                : new HashSet<>(list);
-
-        return set;
+        return list.isEmpty() ? Collections.emptySet()
+               : list.size() == 1 ? list.get(0).getTransformOptions()
+               : new HashSet<>(list);
     }
 
     @Override
@@ -120,7 +117,7 @@ public abstract class AbstractTransformRegistry implements TransformRegistry
     /**
      * Works out the name of the transformer (might not map to an actual transformer) that will be used to transform
      * content of a given source mimetype and size into a target mimetype given a list of actual transform option names
-     * and values (Strings) plus the data contained in the {@Transform} objects registered with this class.
+     * and values (Strings) plus the data contained in the Transform objects registered with this class.
      * @param sourceMimetype the mimetype of the source content
      * @param sourceSizeInBytes the size in bytes of the source content. Ignored if negative.
      * @param targetMimetype the mimetype of the target
@@ -160,7 +157,7 @@ public abstract class AbstractTransformRegistry implements TransformRegistry
     {
         if (actualOptions == null)
         {
-            actualOptions = Collections.EMPTY_MAP;
+            actualOptions = Collections.emptyMap();
         }
         if (renditionName != null && renditionName.trim().isEmpty())
         {

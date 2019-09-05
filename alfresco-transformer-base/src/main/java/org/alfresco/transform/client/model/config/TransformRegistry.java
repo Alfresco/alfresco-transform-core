@@ -27,9 +27,6 @@ package org.alfresco.transform.client.model.config;
 
 import java.util.Map;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-
 /**
  * Used by clients work out if a transformation is supported by a Transform Service.
  */

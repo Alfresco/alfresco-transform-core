@@ -23,9 +23,11 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.client.model.config;
+package org.alfresco.transformer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alfresco.transform.client.model.config.AbstractTransformRegistry;
+import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.exceptions.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +38,6 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.Map;
-import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -50,20 +50,19 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
     private static final Logger log = LoggerFactory.getLogger(TransformRegistryImpl.class);
 
     @Value("classpath:engine_config.json")
-    Resource engineConfig;
+    private Resource engineConfig;
 
     // Holds the structures used by AbstractTransformRegistry to look up what is supported.
     // Unlike other sub classes this class does not extend Data or replace it at run time.
-    Data data = new Data();
+    private Data data = new Data();
 
     private ObjectMapper jsonObjectMapper = new ObjectMapper();
 
-    public TransformConfig getTransformConfig()
+    TransformConfig getTransformConfig()
     {
         try (Reader reader = new InputStreamReader(engineConfig.getInputStream(), UTF_8))
         {
-            TransformConfig transformConfig = jsonObjectMapper.readValue(reader, TransformConfig.class);
-            return transformConfig;
+            return jsonObjectMapper.readValue(reader, TransformConfig.class);
         }
         catch (IOException e)
         {
