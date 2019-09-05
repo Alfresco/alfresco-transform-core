@@ -26,7 +26,6 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.executors.TikaJavaExecutor;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
@@ -49,14 +48,12 @@ import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT
 import static org.alfresco.transformer.executors.Tika.PDF_BOX;
 import static org.alfresco.transformer.executors.Tika.TARGET_ENCODING;
 import static org.alfresco.transformer.executors.Tika.TARGET_MIMETYPE;
-import static org.alfresco.transformer.executors.Tika.TRANSFORM_NAMES;
 import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transformer.util.Util.stringToBoolean;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 

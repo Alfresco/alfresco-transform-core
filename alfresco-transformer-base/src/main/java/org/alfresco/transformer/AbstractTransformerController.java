@@ -109,8 +109,6 @@ public abstract class AbstractTransformerController implements TransformControll
     private static final Logger logger = LoggerFactory.getLogger(
         AbstractTransformerController.class);
 
-    private static String ENGINE_CONFIG = "engine_config.json";
-
     @Autowired
     private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
 
@@ -118,29 +116,13 @@ public abstract class AbstractTransformerController implements TransformControll
     private TransformRequestValidator transformRequestValidator;
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
     private TransformRegistry transformRegistry;
 
     @GetMapping(value = "/transform/config")
     public ResponseEntity<TransformConfig> info()
     {
-        logger.info("GET Transform Config.");
-        try
-        {
-            ClassPathResource classPathResource = new ClassPathResource(ENGINE_CONFIG);
-            InputStream engineConfigFile = classPathResource.getInputStream();
-
-            TransformConfig transformConfig = objectMapper.readValue(engineConfigFile,
-                TransformConfig.class);
-            return new ResponseEntity<>(transformConfig, OK);
-        }
-        catch (IOException e)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                "Could not read Transform Config file.", e);
-        }
+        TransformConfig transformConfig = transformRegistry.getTransformConfig();
+        return new ResponseEntity<>(transformConfig, OK);
     }
 
     /**

@@ -25,25 +25,37 @@
  */
 package org.alfresco.transform.client.model.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alfresco.transform.exceptions.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
 /**
  * Used by clients to work out if a transformation is supported based on the engine_config.json.
  */
 public class TransformRegistry
 {
-    private static final Logger logger = LoggerFactory.getLogger(TransformRegistry.class);
+    private static final Logger log = LoggerFactory.getLogger(TransformRegistry.class);
+
     private static final String TIMEOUT = "timeout";
 
     private static class SupportedTransform
@@ -67,28 +79,67 @@ public class TransformRegistry
     ConcurrentMap<String, ConcurrentMap<String, List<SupportedTransform>>> transformers = new ConcurrentHashMap<>();
     ConcurrentMap<String, ConcurrentMap<String, List<SupportedTransform>>> cachedSupportedTransformList = new ConcurrentHashMap<>();
 
-    public TransformRegistry()
+    @Value("classpath:engine_config.json")
+    Resource engineConfig;
+
+    private ObjectMapper jsonObjectMapper = new ObjectMapper();
+
+    public TransformConfig getTransformConfig()
     {
-        try
+        log.info("GET Transform Config.");
+        try (Reader reader = new InputStreamReader(engineConfig.getInputStream(), UTF_8))
         {
-            CombinedConfig combinedConfig = new CombinedConfig(logger);
-            combinedConfig.addLocalConfig("engine_config.json");
-            combinedConfig.register(this);
+            TransformConfig transformConfig = jsonObjectMapper.readValue(reader, TransformConfig.class);
+            return transformConfig;
         }
         catch (IOException e)
         {
-            logger.error("Failed to read engine_config.json.", e);
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                    "Could not read Transform Config file.", e);
         }
     }
 
-    public void register(InlineTransformer transformer)
+    @PostConstruct
+    public void afterPropertiesSet()
+    {
+        TransformConfig transformConfig = getTransformConfig();
+        Map<String, Set<TransformOption>> transformOptions = transformConfig.getTransformOptions();
+        transformConfig.getTransformers().forEach(t->register(t, transformOptions));
+    }
+
+    public void register(Transformer transformer, Map<String, Set<TransformOption>> transformOptions)
     {
         transformer.getSupportedSourceAndTargetList().forEach(
                 e -> transformers.computeIfAbsent(e.getSourceMediaType(),
                         k -> new ConcurrentHashMap<>()).computeIfAbsent(e.getTargetMediaType(),
                         k -> new ArrayList<>()).add(
                         new SupportedTransform(transformer.getTransformerName(),
-                                transformer.getTransformOptions(), e.getMaxSourceSizeBytes(), e.getPriority())));
+                                lookupTransformOptions(transformer.getTransformOptions(), transformOptions),
+                                e.getMaxSourceSizeBytes(), e.getPriority())));
+    }
+
+    private Set<TransformOption> lookupTransformOptions(Set<String> transformOptionNames, Map<String, Set<TransformOption>> transformOptions)
+    {
+        List<TransformOptionGroup> list = new ArrayList<>();
+
+        for (String name : transformOptionNames)
+        {
+            Set<TransformOption> oneSetOfTransformOptions = transformOptions.get(name);
+            if (oneSetOfTransformOptions == null)
+            {
+                log.error("transformOptions with the name "+name+" does not exist. Ignored");
+                continue;
+            }
+            TransformOptionGroup transformOptionGroup = new TransformOptionGroup(true, oneSetOfTransformOptions);
+            list.add(transformOptionGroup);
+        }
+
+        Set<TransformOption> set =
+                  list.isEmpty() ? Collections.emptySet()
+                : list.size() == 1 ? list.get(0).getTransformOptions()
+                : new HashSet<>(list);
+
+        return set;
     }
 
     public boolean isSupported(String sourceMimetype, long sourceSizeInBytes, String targetMimetype,
