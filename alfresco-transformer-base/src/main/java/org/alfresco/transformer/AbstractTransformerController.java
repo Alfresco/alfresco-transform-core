@@ -41,9 +41,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.util.StringUtils.getFilenameExtension;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,6 +49,7 @@ import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.client.model.TransformRequestValidator;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.model.config.TransformRegistry;
+import org.alfresco.transform.client.model.config.TransformRegistryImpl;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.logging.LogEntry;
@@ -59,7 +57,6 @@ import org.alfresco.transformer.model.FileRefResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -73,8 +70,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * <p>Abstract Controller, provides structure and helper methods to sub-class transformer controllers.</p>
@@ -121,7 +116,8 @@ public abstract class AbstractTransformerController implements TransformControll
     @GetMapping(value = "/transform/config")
     public ResponseEntity<TransformConfig> info()
     {
-        TransformConfig transformConfig = transformRegistry.getTransformConfig();
+        logger.info("GET Transform Config.");
+        TransformConfig transformConfig = ((TransformRegistryImpl)transformRegistry).getTransformConfig();
         return new ResponseEntity<>(transformConfig, OK);
     }
 
