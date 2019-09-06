@@ -59,7 +59,7 @@ import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.model.config.TransformOption;
 import org.alfresco.transform.client.model.config.TransformOptionGroup;
 import org.alfresco.transform.client.model.config.TransformOptionValue;
-import org.alfresco.transform.client.model.config.TransformRegistry;
+import org.alfresco.transform.client.model.config.TransformServiceRegistry;
 import org.alfresco.transform.client.model.config.Transformer;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.probes.ProbeTestTransform;
@@ -95,7 +95,7 @@ public abstract class AbstractTransformerControllerTest
     protected AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
 
     @SpyBean
-    protected TransformRegistry transformRegistry;
+    protected TransformServiceRegistry transformRegistry;
 
     protected String sourceExtension;
     protected String targetExtension;

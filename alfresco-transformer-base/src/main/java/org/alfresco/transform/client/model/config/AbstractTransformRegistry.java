@@ -42,7 +42,8 @@ public abstract class AbstractTransformRegistry implements TransformServiceRegis
         private String name;
         private int priority;
 
-        public SupportedTransform(Data data, String name, Set<TransformOption> transformOptions, long maxSourceSizeBytes, int priority)
+        public SupportedTransform(Data data, String name, Set<TransformOption> transformOptions,
+                                  long maxSourceSizeBytes, int priority)
         {
             // Logically the top level TransformOptionGroup is required, so that child options are optional or required
             // based on their own setting.
@@ -56,7 +57,7 @@ public abstract class AbstractTransformRegistry implements TransformServiceRegis
 
     /**
      * Logs an error message if there is an error in the configuration supplied to the
-     * {@link #register(Transformer, Map, String)}.
+     * {@link #register(Transformer, Map, String, String)}.
      */
     protected abstract void logError(String msg);
 
@@ -65,14 +66,21 @@ public abstract class AbstractTransformRegistry implements TransformServiceRegis
      */
     protected abstract Data getData();
 
-    public void register(TransformConfig transformConfig, String readFrom)
+    /**
+     * Registers all the transformer in the transformConfig.
+     * @param transformConfig which contains the transformers and their options
+     * @param baseUrl where the config can be read from. Only needed when it is remote. Is null when local.
+     * @param readFrom debug message for log messages.
+     */
+    public void register(TransformConfig transformConfig, String baseUrl, String readFrom)
     {
         Map<String, Set<TransformOption>> transformOptions = transformConfig.getTransformOptions();
         List<Transformer> transformers = transformConfig.getTransformers();
-        transformers.forEach(transformer ->register(transformer, transformOptions, readFrom));
+        transformers.forEach(transformer ->register(transformer, transformOptions, baseUrl, readFrom));
     }
 
-    protected void register(Transformer transformer, Map<String, Set<TransformOption>> transformOptions, String readFrom)
+    protected void register(Transformer transformer, Map<String, Set<TransformOption>> transformOptions,
+                            String baseUrl, String readFrom)
     {
         Data data = getData();
         data.transformerCount++;
