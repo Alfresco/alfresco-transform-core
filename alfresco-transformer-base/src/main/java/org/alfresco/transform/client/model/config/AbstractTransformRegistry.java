@@ -70,7 +70,7 @@ public abstract class AbstractTransformRegistry implements TransformServiceRegis
      * Registers all the transformer in the transformConfig.
      * @param transformConfig which contains the transformers and their options
      * @param baseUrl where the config can be read from. Only needed when it is remote. Is null when local.
-     * @param readFrom debug message for log messages.
+     * @param readFrom debug message for log messages, indicating what type of config was read.
      */
     public void register(TransformConfig transformConfig, String baseUrl, String readFrom)
     {
@@ -79,6 +79,13 @@ public abstract class AbstractTransformRegistry implements TransformServiceRegis
         transformers.forEach(transformer ->register(transformer, transformOptions, baseUrl, readFrom));
     }
 
+    /**
+     * Registers a single transformer.
+     * @param transformer to be registered
+     * @param transformOptions all the transform options
+     * @param baseUrl where the transformer was read from when remote.
+     * @param readFrom debug message for log messages, indicating what type of config was read.
+     */
     protected void register(Transformer transformer, Map<String, Set<TransformOption>> transformOptions,
                             String baseUrl, String readFrom)
     {
@@ -185,7 +192,7 @@ public abstract class AbstractTransformRegistry implements TransformServiceRegis
         // Remove the "timeout" property from the actualOptions as it is not used to select a transformer.
         if (actualOptions.containsKey(TIMEOUT))
         {
-            actualOptions = new HashMap(actualOptions);
+            actualOptions = new HashMap<>(actualOptions);
             actualOptions.remove(TIMEOUT);
         }
 
