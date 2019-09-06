@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentMap;
  * instance of the {@link Data} class. This allows sub classes to periodically replace the registry's data with newer
  * values. They may also extend the Data class to include extra fields and methods.
  */
-public abstract class AbstractTransformRegistry implements TransformRegistry
+public abstract class AbstractTransformRegistry implements TransformServiceRegistry
 {
     private static final String TIMEOUT = "timeout";
 
@@ -23,8 +23,8 @@ public abstract class AbstractTransformRegistry implements TransformRegistry
     {
         ConcurrentMap<String, ConcurrentMap<String, List<SupportedTransform>>> transformers = new ConcurrentHashMap<>();
         ConcurrentMap<String, ConcurrentMap<String, List<SupportedTransform>>> cachedSupportedTransformList = new ConcurrentHashMap<>();
-        private int transformerCount = 0;
-        private int transformCount = 0;
+        protected int transformerCount = 0;
+        protected int transformCount = 0;
 
         @Override
         public String toString()
@@ -56,7 +56,7 @@ public abstract class AbstractTransformRegistry implements TransformRegistry
 
     /**
      * Logs an error message if there is an error in the configuration supplied to the
-     * {@link #register(Transformer, Map)}.
+     * {@link #register(Transformer, Map, String)}.
      */
     protected abstract void logError(String msg);
 
@@ -65,27 +65,29 @@ public abstract class AbstractTransformRegistry implements TransformRegistry
      */
     protected abstract Data getData();
 
-    public void register(TransformConfig transformConfig)
+    public void register(TransformConfig transformConfig, String readFrom)
     {
         Map<String, Set<TransformOption>> transformOptions = transformConfig.getTransformOptions();
         List<Transformer> transformers = transformConfig.getTransformers();
-        transformers.forEach(transformer ->register(transformer, transformOptions));
+        transformers.forEach(transformer ->register(transformer, transformOptions, readFrom));
     }
 
-    private void register(Transformer transformer, Map<String, Set<TransformOption>> transformOptions)
+    protected void register(Transformer transformer, Map<String, Set<TransformOption>> transformOptions, String readFrom)
     {
         Data data = getData();
         data.transformerCount++;
         transformer.getSupportedSourceAndTargetList().forEach(
-            e -> data.transformers.computeIfAbsent(e.getSourceMediaType(),
-                k -> new ConcurrentHashMap<>()).computeIfAbsent(e.getTargetMediaType(),
-                k -> new ArrayList<>()).add(
-                    new SupportedTransform(data, transformer.getTransformerName(),
-                        lookupTransformOptions(transformer.getTransformOptions(), transformOptions),
-                            e.getMaxSourceSizeBytes(), e.getPriority())));
+                e -> data.transformers.computeIfAbsent(e.getSourceMediaType(),
+                        k -> new ConcurrentHashMap<>()).computeIfAbsent(e.getTargetMediaType(),
+                        k -> new ArrayList<>()).add(
+                        new SupportedTransform(data, transformer.getTransformerName(),
+                                lookupTransformOptions(transformer.getTransformOptions(), transformOptions, readFrom),
+                                e.getMaxSourceSizeBytes(), e.getPriority())));
     }
 
-    private Set<TransformOption> lookupTransformOptions(Set<String> transformOptionNames, Map<String, Set<TransformOption>> transformOptions)
+    private Set<TransformOption> lookupTransformOptions(Set<String> transformOptionNames,
+                                                        Map<String, Set<TransformOption>> transformOptions,
+                                                        String readFrom)
     {
         List<TransformOptionGroup> list = new ArrayList<>();
 
@@ -94,7 +96,7 @@ public abstract class AbstractTransformRegistry implements TransformRegistry
             Set<TransformOption> oneSetOfTransformOptions = transformOptions.get(name);
             if (oneSetOfTransformOptions == null)
             {
-                logError("transformOptions with the name "+name+" does not exist. Ignored");
+                logError("transformOptions in "+readFrom+" with the name "+name+" does not exist. Ignored");
                 continue;
             }
             TransformOptionGroup transformOptionGroup = new TransformOptionGroup(true, oneSetOfTransformOptions);
@@ -102,8 +104,8 @@ public abstract class AbstractTransformRegistry implements TransformRegistry
         }
 
         return list.isEmpty() ? Collections.emptySet()
-               : list.size() == 1 ? list.get(0).getTransformOptions()
-               : new HashSet<>(list);
+                : list.size() == 1 ? list.get(0).getTransformOptions()
+                : new HashSet<>(list);
     }
 
     @Override

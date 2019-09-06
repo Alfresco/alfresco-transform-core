@@ -49,7 +49,9 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
 {
     private static final Logger log = LoggerFactory.getLogger(TransformRegistryImpl.class);
 
-    @Value("classpath:engine_config.json")
+    private static final String ENGINE_CONFIG_JSON = "classpath:engine_config.json";
+
+    @Value(ENGINE_CONFIG_JSON)
     private Resource engineConfig;
 
     // Holds the structures used by AbstractTransformRegistry to look up what is supported.
@@ -67,7 +69,7 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
         catch (IOException e)
         {
             throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                    "Could not read Transform Config file.", e);
+                    "Could not read "+ ENGINE_CONFIG_JSON, e);
         }
     }
 
@@ -75,7 +77,7 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
     public void afterPropertiesSet()
     {
         TransformConfig transformConfig = getTransformConfig();
-        register(transformConfig);
+        register(transformConfig, ENGINE_CONFIG_JSON);
     }
 
     @Override

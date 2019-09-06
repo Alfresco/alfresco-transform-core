@@ -30,7 +30,7 @@ import java.util.Map;
 /**
  * Used by clients work out if a transformation is supported by a Transform Service.
  */
-public interface TransformRegistry
+public interface TransformServiceRegistry
 {
     /**
      * Works out if the Transform Server should be able to transform content of a given source mimetype and size into a
