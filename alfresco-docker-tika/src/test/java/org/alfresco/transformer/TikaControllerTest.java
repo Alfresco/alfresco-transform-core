@@ -92,6 +92,7 @@ import org.alfresco.transformer.executors.TikaJavaExecutor;
 import org.alfresco.transformer.model.FileRefEntity;
 import org.alfresco.transformer.model.FileRefResponse;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -236,7 +237,6 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     {
         // We don't use targetFileBytes as some of the transforms contain different date text based on the os being used.
         mockTransformCommand(sourceExtension, targetExtension, sourceMimetype, false);
-        this.transform = transform;
         this.targetMimetype = targetMimetype;
 
         System.out.println("Test " + transform + " " + sourceExtension + " to " + targetExtension);
@@ -261,9 +261,9 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         String... params)
     {
         return super.mockMvcRequest(url, sourceFile, params)
-                    .param("transform", transform)
                     .param("targetEncoding", targetEncoding)
-                    .param("targetMimetype", targetMimetype);
+                    .param("targetMimetype", targetMimetype)
+                    .param("sourceMimetype", sourceMimetype);
     }
 
     @Test
@@ -300,6 +300,9 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         super.dotDotSourceFilenameTest();
     }
 
+
+//  Ignore test as source/target extension si mandatory parameter for Tika.
+    @Ignore
     @Test
     @Override
     public void noExtensionSourceFilenameTest() throws Exception
