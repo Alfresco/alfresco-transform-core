@@ -56,7 +56,7 @@ import com.google.common.collect.ImmutableMap;
 public class TikaTransformationIT
 {
     private static final Logger logger = LoggerFactory.getLogger(TikaTransformationIT.class);
-    private static final String ENGINE_URL = "http://localhost:8093";
+    private static final String ENGINE_URL = "http://localhost:8090";
     private static final Map<String, String> extensionMimetype = ImmutableMap.of(
         "html", "text/html",
         "txt", "text/plain",
