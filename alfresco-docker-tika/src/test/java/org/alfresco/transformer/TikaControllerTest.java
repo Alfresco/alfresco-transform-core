@@ -543,8 +543,6 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         transformRequest.setTargetExtension(targetExtension);
         transformRequest.setSourceMediaType(APPLICATION_PDF_VALUE);
         transformRequest.setTargetMediaType(TEXT_PLAIN_VALUE);
-        transformRequest.getTransformRequestOptions().put("transform", "PdfBox");
-        transformRequest.getTransformRequestOptions().put("targetMimetype", TEXT_PLAIN_VALUE);
         transformRequest.getTransformRequestOptions().put("targetEncoding", "UTF-8");
     }
 
@@ -566,6 +564,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         transformRequest.setSourceExtension(sourceExtension);
         transformRequest.setSourceSize(sourceFile.length());
         transformRequest.setTargetExtension(targetExtension);
+        transformRequest.setSourceMediaType(sourceMimetype);
 
         // HTTP Request
         HttpHeaders headers = new HttpHeaders();

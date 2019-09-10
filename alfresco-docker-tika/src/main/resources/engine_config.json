@@ -428,10 +428,10 @@
         {"sourceMediaType": "application/vnd.sun.xml.writer",                                                              "targetMediaType": "application/xhtml+xml"},
         {"sourceMediaType": "application/vnd.sun.xml.writer",                                                              "targetMediaType": "text/xml"},
 
-        {"sourceMediaType": "application/plain",                                                              "targetMediaType": "text/html"},
-        {"sourceMediaType": "application/plain",                                                              "targetMediaType": "text/plain"},
-        {"sourceMediaType": "application/plain",                                                              "targetMediaType": "application/xhtml+xml"},
-        {"sourceMediaType": "application/plain",                                                              "targetMediaType": "text/xml"},
+        {"sourceMediaType": "text/plain",                                                                  "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "text/plain",                                                                  "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/plain",                                                                  "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "text/plain",                                                                  "priority": 55, "targetMediaType": "text/xml"},
 
         {"sourceMediaType": "text/xml",                                                                                    "targetMediaType": "text/html"},
         {"sourceMediaType": "text/xml",                                                                                    "targetMediaType": "text/plain"},

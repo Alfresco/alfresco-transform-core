@@ -106,7 +106,7 @@ public abstract class AbstractHttpRequestTest
             getTransformerName() + " - Request parameter '" + name + "' is missing");
     }
 
-    private void assertTransformError(boolean addFile, String errorMessage)
+    protected void assertTransformError(boolean addFile, String errorMessage)
     {
         LinkedMultiValueMap<String, Object> parameters = new LinkedMultiValueMap<>();
         if (addFile)
@@ -118,8 +118,14 @@ public abstract class AbstractHttpRequestTest
         headers.setContentType(MULTIPART_FORM_DATA);
         HttpEntity<LinkedMultiValueMap<String, Object>> entity = new HttpEntity<>(parameters,
             headers);
+
+        sendTranformationRequest(entity, errorMessage);
+    }
+
+    protected void sendTranformationRequest(HttpEntity<LinkedMultiValueMap<String, Object>> entity, String errorMessage)
+    {
         ResponseEntity<String> response = restTemplate.exchange("/transform", POST, entity,
-            String.class, "");
+                String.class, "");
         assertEquals(errorMessage, getErrorMessage(response.getBody()));
     }
 
