@@ -59,10 +59,10 @@
     {
       "transformerName": "textToPdf",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "text/plain",                   "priority": 55,  "targetMediaType": "application/pdf"},
-        {"sourceMediaType": "text/csv",                     "priority": 50, "targetMediaType": "application/pdf"},
-        {"sourceMediaType": "application/dita+xml",         "priority": 50, "targetMediaType": "application/pdf"},
-        {"sourceMediaType": "text/xml",                     "priority": 50, "targetMediaType": "application/pdf"}
+        {"sourceMediaType": "text/plain",                    "priority": 55, "targetMediaType": "application/pdf"},
+        {"sourceMediaType": "text/csv",                      "priority": 50, "targetMediaType": "application/pdf"},
+        {"sourceMediaType": "application/dita+xml",          "priority": 50, "targetMediaType": "application/pdf"},
+        {"sourceMediaType": "text/xml",                      "priority": 50, "targetMediaType": "application/pdf"}
       ],
       "transformOptions": [
         "textToPdfOptions"
