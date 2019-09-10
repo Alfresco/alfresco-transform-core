@@ -78,13 +78,6 @@ public class HtmlParserContentTransformer implements SelectableTransformer
         HtmlParserContentTransformer.class);
 
     @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype,
-        Map<String, String> parameters)
-    {
-        return MIMETYPE_HTML.equals(sourceMimetype) && MIMETYPE_TEXT_PLAIN.equals(targetMimetype);
-    }
-
-    @Override
     public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
         final String targetMimetype, final Map<String, String> parameters) throws Exception
     {

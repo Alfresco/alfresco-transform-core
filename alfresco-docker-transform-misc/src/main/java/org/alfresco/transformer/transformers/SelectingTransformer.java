@@ -30,10 +30,12 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import com.google.common.collect.ImmutableMap;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.slf4j.Logger;
@@ -53,35 +55,35 @@ public class SelectingTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(SelectingTransformer.class);
 
-    private final List<SelectableTransformer> transformers;
+    private final Map<String, SelectableTransformer> transformers;
 
     public SelectingTransformer()
     {
-        transformers = ImmutableList.of(
-            new AppleIWorksContentTransformer(),
-            new HtmlParserContentTransformer(),
-            new StringExtractingContentTransformer(),
-            new TextToPdfContentTransformer(),
-            new EMLTransformer()
-            // new OOXMLThumbnailContentTransformer()); // Doesn't work with java 11, transformer and test disabled
-        );
+        transformers = new HashMap<>();
+        transformers.put("appleIWorks", new AppleIWorksContentTransformer());
+        transformers.put("html", new HtmlParserContentTransformer());
+        transformers.put("string", new StringExtractingContentTransformer());
+        transformers.put("textToPdf", new TextToPdfContentTransformer());
+        transformers.put("rfc822", new EMLTransformer());
+        transformers.put("ooXmlThumbnail", new OOXMLThumbnailContentTransformer());
     }
 
     /**
      * Performs a transform using a transformer selected based on the provided sourceMimetype and targetMimetype
      *
+     *
+     * @param transform      the name of the transformer
      * @param sourceFile     File to transform from
      * @param targetFile     File to transform to
      * @param sourceMimetype Mimetype of the source file
-     * @throws TransformException
+     * @throws TransformException if there was a problem internally
      */
-    public void transform(File sourceFile, File targetFile, String sourceMimetype,
-        String targetMimetype, Map<String, String> parameters) throws TransformException
+    public void transform(String transform, File sourceFile, File targetFile, String sourceMimetype,
+                          String targetMimetype, Map<String, String> parameters) throws TransformException
     {
         try
         {
-            final SelectableTransformer transformer = selectTransformer(sourceMimetype,
-                targetMimetype, parameters);
+            final SelectableTransformer transformer = transformers.get(transform);
             logOptions(sourceFile, targetFile, parameters);
             transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype,
                 parameters);
@@ -104,23 +106,6 @@ public class SelectingTransformer
             throw new TransformException(INTERNAL_SERVER_ERROR.value(),
                 "Transformer failed to create an output file. Target file is empty but source file was not empty.");
         }
-    }
-
-    private SelectableTransformer selectTransformer(String sourceMimetype, String targetMimetype,
-        Map<String, String> parameters)
-    {
-        for (SelectableTransformer transformer : transformers)
-        {
-            if (transformer.isTransformable(sourceMimetype, targetMimetype, parameters))
-            {
-                logger.debug("Using {} to transform from {} to {}",
-                    transformer.getClass().getName(), sourceMimetype, targetMimetype);
-                return transformer;
-            }
-        }
-        throw new RuntimeException(
-            "Could not select a transformer for sourceMimetype=" + sourceMimetype
-            + " targetMimetype=" + targetMimetype);
     }
 
     private static String getMessage(Exception e)

@@ -109,11 +109,18 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
         String... params)
     {
-        return super.mockMvcRequest(url, sourceFile, params)
-                    .param("targetEncoding", targetEncoding)
-                    .param("sourceEncoding", sourceEncoding)
-                    .param("targetMimetype", targetMimetype)
-                    .param("sourceMimetype", sourceMimetype);
+
+        MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
+                .param("sourceEncoding", sourceEncoding)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype);
+
+        // Only the 'string' transformer should have the targetEncoding.
+        if ("text/plain".equals(targetMimetype) && !"message/rfc822".equals(sourceMimetype) && !"text/html".equals(sourceMimetype))
+        {
+            builder.param("targetEncoding", targetEncoding);
+        }
+        return builder;
     }
 
     @Test
@@ -254,7 +261,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_HTML,
             "txt",
             MIMETYPE_TEXT_PLAIN,
-            "UTF-8",
+            null,
             expected.getBytes());
 
         String contentResult = new String(result.getResponse().getContentAsByteArray(),
@@ -325,7 +332,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_TEXT_PLAIN,
             "pdf",
             MIMETYPE_PDF,
-            "UTF-8",
+            null,
             expected.getBytes());
 
         // Read back in the PDF and check it

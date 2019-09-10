@@ -77,15 +77,6 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
     //                 (53 x  41) preview-micro.jpg
 
     @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype,
-        Map<String, String> parameters)
-    {
-        return MIMETYPE_IWORK_KEYNOTE.equals(sourceMimetype) ||
-               MIMETYPE_IWORK_NUMBERS.equals(sourceMimetype) ||
-               MIMETYPE_IWORK_PAGES.equals(sourceMimetype);
-    }
-
-    @Override
     public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
         final String targetMimetype, final Map<String, String> parameters)
     {

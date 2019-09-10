@@ -82,36 +82,6 @@ public class OOXMLThumbnailContentTransformer implements SelectableTransformer
     private static final Logger logger = LoggerFactory.getLogger(
         OOXMLThumbnailContentTransformer.class);
 
-    private static final List<String> OOXML_MIMETYPES = ImmutableList.of(
-        MIMETYPE_OPENXML_WORDPROCESSING,
-        MIMETYPE_OPENXML_WORDPROCESSING_MACRO,
-        MIMETYPE_OPENXML_WORD_TEMPLATE,
-        MIMETYPE_OPENXML_WORD_TEMPLATE_MACRO,
-        MIMETYPE_OPENXML_PRESENTATION,
-        MIMETYPE_OPENXML_PRESENTATION_MACRO,
-        MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW,
-        MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO,
-        MIMETYPE_OPENXML_PRESENTATION_TEMPLATE,
-        MIMETYPE_OPENXML_PRESENTATION_TEMPLATE_MACRO,
-        MIMETYPE_OPENXML_PRESENTATION_ADDIN,
-        MIMETYPE_OPENXML_PRESENTATION_SLIDE,
-        MIMETYPE_OPENXML_PRESENTATION_SLIDE_MACRO,
-        MIMETYPE_OPENXML_SPREADSHEET,
-        MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE,
-        MIMETYPE_OPENXML_SPREADSHEET_MACRO,
-        MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO,
-        MIMETYPE_OPENXML_SPREADSHEET_ADDIN_MACRO,
-        MIMETYPE_OPENXML_SPREADSHEET_BINARY_MACRO);
-
-    @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype,
-        Map<String, String> parameters)
-    {
-        // only support [OOXML] -> JPEG
-        return MIMETYPE_IMAGE_JPEG.equals(targetMimetype) &&
-               OOXML_MIMETYPES.contains(sourceMimetype);
-    }
-
     @Override
     public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
         final String targetMimetype, final Map<String, String> parameters) throws Exception

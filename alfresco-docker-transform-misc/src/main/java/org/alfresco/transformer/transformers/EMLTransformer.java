@@ -78,21 +78,6 @@ public class EMLTransformer implements SelectableTransformer
     private static final String DEFAULT_ENCODING = "UTF-8";
 
     @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
-    {
-        if (!MIMETYPE_RFC822.equals(sourceMimetype)
-                || !MIMETYPE_TEXT_PLAIN.equals(targetMimetype))
-        {
-            // only support RFC822 -> TEXT
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-
-    @Override
     public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
                           final String targetMimetype, final Map<String, String> parameters) throws Exception
     {
