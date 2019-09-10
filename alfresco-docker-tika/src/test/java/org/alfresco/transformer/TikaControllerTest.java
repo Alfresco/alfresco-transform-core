@@ -299,18 +299,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         super.dotDotSourceFilenameTest();
     }
-
-
-//  Ignore test as source/target extension si mandatory parameter for Tika.
-    @Ignore
-    @Test
-    @Override
-    public void noExtensionSourceFilenameTest() throws Exception
-    {
-        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
-        super.noExtensionSourceFilenameTest();
-    }
-
+    
     @Test
     @Override
     public void badSourceFilenameTest() throws Exception
