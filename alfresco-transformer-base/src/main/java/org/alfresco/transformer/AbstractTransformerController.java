@@ -48,7 +48,7 @@ import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.client.model.TransformRequestValidator;
 import org.alfresco.transform.client.model.config.TransformConfig;
-import org.alfresco.transform.client.model.config.TransformServiceRegistry;
+import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.logging.LogEntry;

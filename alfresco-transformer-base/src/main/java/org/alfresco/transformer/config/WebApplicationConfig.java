@@ -27,7 +27,7 @@
 package org.alfresco.transformer.config;
 
 import org.alfresco.transform.client.model.TransformRequestValidator;
-import org.alfresco.transform.client.model.config.TransformServiceRegistry;
+import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transformer.TransformRegistryImpl;
 import org.alfresco.transformer.TransformInterceptor;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;

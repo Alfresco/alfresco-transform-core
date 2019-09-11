@@ -26,8 +26,9 @@
 package org.alfresco.transformer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.alfresco.transform.client.model.config.AbstractTransformRegistry;
 import org.alfresco.transform.client.model.config.TransformConfig;
+import org.alfresco.transform.client.registry.AbstractTransformRegistry;
+import org.alfresco.transform.client.registry.TransformCache;
 import org.alfresco.transform.exceptions.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
 
     // Holds the structures used by AbstractTransformRegistry to look up what is supported.
     // Unlike other sub classes this class does not extend Data or replace it at run time.
-    private Data data = new Data();
+    private TransformCache data = new TransformCache();
 
     private ObjectMapper jsonObjectMapper = new ObjectMapper();
 
@@ -81,7 +82,7 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
     }
 
     @Override
-    protected Data getData()
+    public TransformCache getData()
     {
         return data;
     }
