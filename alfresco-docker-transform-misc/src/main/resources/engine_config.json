@@ -16,7 +16,7 @@
     {
       "transformerName": "html",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "text/html",                     "priority": 50, "targetMediaType": "text/plain"}
+        {"sourceMediaType": "text/html",                                     "targetMediaType": "text/plain"}
       ],
       "transformOptions": [
         "htmlOptions"
@@ -25,22 +25,22 @@
     {
       "transformerName": "string",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "text/plain",                    "priority": 50, "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/mediawiki",                "priority": 50, "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/css",                      "priority": 50, "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/csv",                      "priority": 50, "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/xml",                      "priority": 50, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/plain",                                    "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/mediawiki",                                "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/css",                                      "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/csv",                                      "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/xml",                                      "targetMediaType": "text/plain"},
         {"sourceMediaType": "text/html",                     "priority": 55, "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/richtext",                 "priority": 50, "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/sgml",                     "priority": 50, "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/tab-separated-values",     "priority": 50, "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/x-setext",                 "priority": 50, "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/x-java-source",            "priority": 50, "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/x-jsp",                    "priority": 50, "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/x-markdown",               "priority": 50, "targetMediaType": "text/plain"},
-        {"sourceMediaType": "text/calendar",                 "priority": 50, "targetMediaType": "text/plain"},
-        {"sourceMediaType": "application/x-javascript",      "priority": 50, "targetMediaType": "text/plain"},
-        {"sourceMediaType": "application/dita+xml",          "priority": 50, "targetMediaType": "text/plain"}
+        {"sourceMediaType": "text/richtext",                                 "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/sgml",                                     "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/tab-separated-values",                     "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/x-setext",                                 "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/x-java-source",                            "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/x-jsp",                                    "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/x-markdown",                               "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/calendar",                                 "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/x-javascript",                      "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/dita+xml",                          "targetMediaType": "text/plain"}
       ],
       "transformOptions": [
         "stringOptions"
@@ -49,9 +49,9 @@
     {
       "transformerName": "appleIWorks",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "application/vnd.apple.keynote", "priority": 50, "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.apple.numbers", "priority": 50, "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.apple.pages",   "priority": 50, "targetMediaType": "image/jpeg"}
+        {"sourceMediaType": "application/vnd.apple.keynote",                 "targetMediaType": "image/jpeg"},
+        {"sourceMediaType": "application/vnd.apple.numbers",                 "targetMediaType": "image/jpeg"},
+        {"sourceMediaType": "application/vnd.apple.pages",                   "targetMediaType": "image/jpeg"}
       ],
       "transformOptions": [
       ]
@@ -60,9 +60,9 @@
       "transformerName": "textToPdf",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "text/plain",                    "priority": 55, "targetMediaType": "application/pdf"},
-        {"sourceMediaType": "text/csv",                      "priority": 50, "targetMediaType": "application/pdf"},
-        {"sourceMediaType": "application/dita+xml",          "priority": 50, "targetMediaType": "application/pdf"},
-        {"sourceMediaType": "text/xml",                      "priority": 50, "targetMediaType": "application/pdf"}
+        {"sourceMediaType": "text/csv",                                      "targetMediaType": "application/pdf"},
+        {"sourceMediaType": "application/dita+xml",                          "targetMediaType": "application/pdf"},
+        {"sourceMediaType": "text/xml",                                      "targetMediaType": "application/pdf"}
       ],
       "transformOptions": [
         "textToPdfOptions"
@@ -71,7 +71,7 @@
     {
       "transformerName": "rfc822",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "message/rfc822",                "priority": 50, "targetMediaType": "text/plain"}
+        {"sourceMediaType": "message/rfc822",                                "targetMediaType": "text/plain"}
       ],
       "transformOptions": [
       ]
