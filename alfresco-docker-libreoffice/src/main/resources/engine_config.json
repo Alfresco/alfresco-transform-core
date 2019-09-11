@@ -40,7 +40,7 @@
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",   "maxSourceSizeBytes": 786432,   "priority": 50, "targetMediaType": "application/pdf" },
 
         {"sourceMediaType": "text/html",                                                                                                 "priority": 50, "targetMediaType": "application/msword" },
-        {"sourceMediaType": "text/html",                                                                                                 "priority": 50, "targetMediaType": "text/html" },
+        {"sourceMediaType": "text/html",                                                                                                 "priority": 55, "targetMediaType": "text/html" },
         {"sourceMediaType": "text/html",                                                                                                 "priority": 50, "targetMediaType": "application/vnd.oasis.opendocument.text" },
         {"sourceMediaType": "text/html",                                                                                                 "priority": 50, "targetMediaType": "application/rtf" },
 
