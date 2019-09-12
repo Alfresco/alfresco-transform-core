@@ -95,7 +95,7 @@ public abstract class AbstractHttpRequestTest
     }
 
     @Test
-    public void noTargetExtensionError() throws Exception
+    public void noTargetExtensionError()
     {
         assertMissingParameter("targetExtension");
     }
@@ -122,10 +122,11 @@ public abstract class AbstractHttpRequestTest
         sendTranformationRequest(entity, errorMessage);
     }
 
-    protected void sendTranformationRequest(HttpEntity<LinkedMultiValueMap<String, Object>> entity, String errorMessage)
+    protected void sendTranformationRequest(
+        final HttpEntity<LinkedMultiValueMap<String, Object>> entity, final String errorMessage)
     {
-        ResponseEntity<String> response = restTemplate.exchange("/transform", POST, entity,
-                String.class, "");
+        final ResponseEntity<String> response = restTemplate.exchange("/transform", POST, entity,
+            String.class, "");
         assertEquals(errorMessage, getErrorMessage(response.getBody()));
     }
 

@@ -30,7 +30,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -39,6 +38,8 @@ import org.alfresco.transformer.logging.LogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * The SelectingTransformer selects a registered {@link SelectableTransformer}
@@ -51,22 +52,18 @@ public class SelectingTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(SelectingTransformer.class);
 
-    private final Map<String, SelectableTransformer> transformers;
-
-    public SelectingTransformer()
-    {
-        transformers = new HashMap<>();
-        transformers.put("appleIWorks", new AppleIWorksContentTransformer());
-        transformers.put("html", new HtmlParserContentTransformer());
-        transformers.put("string", new StringExtractingContentTransformer());
-        transformers.put("textToPdf", new TextToPdfContentTransformer());
-        transformers.put("rfc822", new EMLTransformer());
-        transformers.put("ooXmlThumbnail", new OOXMLThumbnailContentTransformer());
-    }
+    private final Map<String, SelectableTransformer> transformers = ImmutableMap
+        .<String, SelectableTransformer>builder()
+        .put("appleIWorks", new AppleIWorksContentTransformer())
+        .put("html", new HtmlParserContentTransformer())
+        .put("string", new StringExtractingContentTransformer())
+        .put("textToPdf", new TextToPdfContentTransformer())
+        .put("rfc822", new EMLTransformer())
+        .put("ooXmlThumbnail", new OOXMLThumbnailContentTransformer())
+        .build();
 
     /**
      * Performs a transform using a transformer selected based on the provided sourceMimetype and targetMimetype
-     *
      *
      * @param transform      the name of the transformer
      * @param sourceFile     File to transform from
@@ -75,7 +72,7 @@ public class SelectingTransformer
      * @throws TransformException if there was a problem internally
      */
     public void transform(String transform, File sourceFile, File targetFile, String sourceMimetype,
-                          String targetMimetype, Map<String, String> parameters) throws TransformException
+        String targetMimetype, Map<String, String> parameters) throws TransformException
     {
         try
         {

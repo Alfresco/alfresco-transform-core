@@ -25,7 +25,15 @@
  */
 package org.alfresco.transformer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+
+import javax.annotation.PostConstruct;
+
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.registry.AbstractTransformRegistry;
 import org.alfresco.transform.client.registry.TransformCache;
@@ -35,13 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Used by clients to work out if a transformation is supported based on the engine_config.json.
@@ -70,7 +72,7 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
         catch (IOException e)
         {
             throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                    "Could not read "+ ENGINE_CONFIG_JSON, e);
+                "Could not read " + ENGINE_CONFIG_JSON, e);
         }
     }
 

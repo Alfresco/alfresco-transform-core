@@ -116,7 +116,8 @@ public abstract class AbstractTransformerController implements TransformControll
     public ResponseEntity<TransformConfig> info()
     {
         logger.info("GET Transform Config.");
-        TransformConfig transformConfig = ((TransformRegistryImpl)transformRegistry).getTransformConfig();
+        final TransformConfig transformConfig =
+            ((TransformRegistryImpl) transformRegistry).getTransformConfig();
         return new ResponseEntity<>(transformConfig, OK);
     }
 
@@ -337,15 +338,16 @@ public abstract class AbstractTransformerController implements TransformControll
         return sb.toString();
     }
 
-    protected String getTransformerName(File sourceFile, String sourceMimetype, String targetMimetype,
-                                      Map<String, String> transformOptions)
+    protected String getTransformerName(final File sourceFile, final String sourceMimetype,
+        final String targetMimetype, final Map<String, String> transformOptions)
     {
-        long sourceSizeInBytes = sourceFile.length();
-        String transformerName = transformRegistry.findTransformerName(sourceMimetype, sourceSizeInBytes,
-                targetMimetype, transformOptions, null);
+        final long sourceSizeInBytes = sourceFile.length();
+        final String transformerName = transformRegistry.findTransformerName(sourceMimetype,
+            sourceSizeInBytes, targetMimetype, transformOptions, null);
         if (transformerName == null)
         {
-            throw new TransformException(BAD_REQUEST.value(), "No transforms were able to handle the request");
+            throw new TransformException(BAD_REQUEST.value(),
+                "No transforms were able to handle the request");
         }
         return transformerName;
     }
@@ -354,11 +356,12 @@ public abstract class AbstractTransformerController implements TransformControll
     {
         if (namesAndValues.length % 2 != 0)
         {
-            logger.error("Incorrect number of parameters. Should have an even number as they are names and values.");
+            logger.error(
+                "Incorrect number of parameters. Should have an even number as they are names and values.");
         }
 
         Map<String, String> transformOptions = new HashMap<>();
-        for (int i=0; i<namesAndValues.length; i+=2)
+        for (int i = 0; i < namesAndValues.length; i += 2)
         {
             String name = namesAndValues[i].toString();
             Object value = namesAndValues[i + 1];
