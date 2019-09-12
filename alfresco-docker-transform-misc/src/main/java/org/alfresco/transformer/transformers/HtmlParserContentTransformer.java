@@ -26,9 +26,6 @@
  */
 package org.alfresco.transformer.transformers;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;

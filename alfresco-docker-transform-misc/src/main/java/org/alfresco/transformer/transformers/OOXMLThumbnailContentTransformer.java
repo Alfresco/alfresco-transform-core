@@ -26,33 +26,11 @@
  */
 package org.alfresco.transformer.transformers;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_ADDIN;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_SLIDE_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_TEMPLATE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION_TEMPLATE_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_ADDIN_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_BINARY_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING_MACRO;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORD_TEMPLATE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORD_TEMPLATE_MACRO;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -62,8 +40,6 @@ import org.apache.poi.openxml4j.opc.PackageRelationshipCollection;
 import org.apache.poi.openxml4j.opc.PackageRelationshipTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * Extracts out Thumbnail JPEGs from OOXML files for thumbnailing and previewing.

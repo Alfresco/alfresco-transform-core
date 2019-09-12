@@ -27,9 +27,6 @@
 package org.alfresco.transformer.transformers;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_KEYNOTE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_NUMBERS;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_PAGES;
 
 import java.io.BufferedInputStream;
 import java.io.File;

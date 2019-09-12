@@ -26,12 +26,6 @@
  */
 package org.alfresco.transformer.transformers;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_DITA;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_CSV;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_XML;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;

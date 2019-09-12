@@ -33,7 +33,6 @@ import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.transformers.HtmlParserContentTransformer.SOURCE_ENCODING;
-import static org.alfresco.transformer.transformers.HtmlParserContentTransformer.TARGET_ENCODING;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
