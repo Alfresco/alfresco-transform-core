@@ -33,7 +33,6 @@ import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.transformers.HtmlParserContentTransformer.SOURCE_ENCODING;
-import static org.alfresco.transformer.transformers.HtmlParserContentTransformer.TARGET_ENCODING;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -90,8 +89,7 @@ public class MiscController extends AbstractTransformerController
             {
                 Map<String, String> parameters = new HashMap<>();
                 parameters.put(SOURCE_ENCODING, "UTF-8");
-                parameters.put(TARGET_ENCODING, "UTF-8");
-                transformer.transform(sourceFile, targetFile, MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN,
+                transformer.transform("html", sourceFile, targetFile, MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN,
                     parameters);
             }
         };
@@ -109,8 +107,8 @@ public class MiscController extends AbstractTransformerController
                 " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
         }
 
-        transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype,
-            transformOptions);
+        String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
+        transformer.transform(transform, sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
     }
 
     @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
@@ -118,15 +116,18 @@ public class MiscController extends AbstractTransformerController
         @RequestParam("file") MultipartFile sourceMultipartFile,
         @RequestParam("targetExtension") String targetExtension,
         @RequestParam("targetMimetype") String targetMimetype,
+        @RequestParam(value = "targetEncoding", required = false) String targetEncoding,
         @RequestParam("sourceMimetype") String sourceMimetype,
-        @RequestParam(value = "testDelay", required = false) Long testDelay,
-        @RequestParam Map<String, String> parameters)
+        @RequestParam(value = "sourceEncoding", required = false) String sourceEncoding,
+        @RequestParam(value = "pageLimit", required = false) String pageLimit,
+        @RequestParam(value = "testDelay", required = false) Long testDelay)
     {
         if (logger.isDebugEnabled())
         {
             logger.debug(
-                "Processing request with: sourceMimetype '{}', targetMimetype '{}' , targetExtension '{}' " +
-                ", parameters '{}'", sourceMimetype, targetMimetype, targetExtension, parameters);
+                "Processing request with: sourceMimetype '{}', sourceEncoding '{}', " +
+                "targetMimetype '{}', targetExtension '{}', targetEncoding '{}', pageLimit '{}'",
+                sourceMimetype, sourceEncoding, targetMimetype, targetExtension, targetEncoding, pageLimit);
         }
 
         final String targetFilename = createTargetFileName(
@@ -135,7 +136,13 @@ public class MiscController extends AbstractTransformerController
         final File sourceFile = createSourceFile(request, sourceMultipartFile);
         final File targetFile = createTargetFile(request, targetFilename);
 
-        transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, parameters);
+        Map<String, String> transformOptions = createTransformOptions(
+                "sourceEncoding", sourceEncoding,
+                "targetEncoding", targetEncoding,
+                "pageLimit", pageLimit);
+
+        String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
+        transformer.transform(transform, sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());

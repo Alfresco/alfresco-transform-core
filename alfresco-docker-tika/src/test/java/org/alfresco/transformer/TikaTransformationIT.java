@@ -66,14 +66,14 @@ public class TikaTransformationIT
     private final String sourceFile;
     private final String targetExtension;
     private final String targetMimetype;
-    private final String transform;
+    private final String sourceMimetype;
 
     public TikaTransformationIT(final Triple<String, String, String> entry)
     {
         sourceFile = entry.getLeft();
         targetExtension = entry.getMiddle();
         targetMimetype = extensionMimetype.get(entry.getMiddle());
-        transform = entry.getRight();
+        sourceMimetype = entry.getRight();
     }
 
     // TODO unit tests for the following file types (for which is difficult to find file samples):
@@ -87,57 +87,55 @@ public class TikaTransformationIT
     {
         return Stream
             .of(
-                allTargets("quick.doc", "Office"),
-                allTargets("quick.docx", "TikaAuto"),
-                allTargets("quick.html", "TikaAuto"),
-                allTargets("quick.jar", "TikaAuto"),
-                allTargets("quick.java", "TikaAuto"),
+                allTargets("quick.doc", "application/msword"),
+                allTargets("quick.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+                allTargets("quick.html", "text/html"),
+                allTargets("quick.jar", "application/java-archive"),
+                allTargets("quick.java", "text/x-java-source"),
                 Stream.of(
-                    Triple.of("quick.key", "html", "TikaAuto"),
-                    // Does not work, alfresco-docker-transform-misc can handle this target mimetype, removed from engine_config.json
+                    Triple.of("quick.key", "html", "application/vnd.apple.keynote"),
+                    // Does not work, alfresco-docker-sourceMimetype-misc can handle this target mimetype, removed from engine_config.json
                     // Triple.of("quick.key", "txt", "TikaAuto"),
-                    Triple.of("quick.key", "xhtml", "TikaAuto"),
-                    Triple.of("quick.key", "xml", "TikaAuto")
+                    Triple.of("quick.key", "xhtml", "application/vnd.apple.keynote"),
+                    Triple.of("quick.key", "xml", "application/vnd.apple.keynote")
                 ),
-                allTargets("quick.msg", "OutlookMsg"),
+                allTargets("quick.msg", "application/vnd.ms-outlook"),
                 Stream.of(
-                    Triple.of("quick.numbers", "html", "TikaAuto"),
-                    // Does not work, alfresco-docker-transform-misc can handle this target mimetype, removed from engine_config.json
+                    Triple.of("quick.numbers", "html", "application/vnd.apple.numbers"),
+                    // Does not work, alfresco-docker-sourceMimetype-misc can handle this target mimetype, removed from engine_config.json
                     // Triple.of("quick.numbers", "txt", "TikaAuto"),
-                    Triple.of("quick.numbers", "xhtml", "TikaAuto"),
-                    Triple.of("quick.numbers", "xml", "TikaAuto")
+                    Triple.of("quick.numbers", "xhtml", "application/vnd.apple.numbers"),
+                    Triple.of("quick.numbers", "xml", "application/vnd.apple.numbers")
                 ),
-                allTargets("quick.odp", "TikaAuto"),
-                allTargets("quick.ods", "TikaAuto"),
-                allTargets("quick.odt", "TikaAuto"),
-                allTargets("quick.otp", "TikaAuto"),
-                allTargets("quick.ots", "TikaAuto"),
-                allTargets("quick.ott", "TikaAuto"),
+                allTargets("quick.odp", "application/vnd.oasis.opendocument.presentation"),
+                allTargets("quick.ods", "application/vnd.oasis.opendocument.spreadsheet"),
+                allTargets("quick.odt", "application/vnd.oasis.opendocument.text"),
+                allTargets("quick.otp", "application/vnd.oasis.opendocument.presentation-template"),
+                allTargets("quick.ots", "application/vnd.oasis.opendocument.spreadsheet-template"),
+                allTargets("quick.ott", "application/vnd.oasis.opendocument.text-template"),
                 Stream.of(
-                    Triple.of("quick.pages", "html", "TikaAuto"),
-                    // Does not work, alfresco-docker-transform-misc can handle this target mimetype, removed from engine_config.json
+                    Triple.of("quick.pages", "html", "application/vnd.apple.pages"),
+                    // Does not work, alfresco-docker-sourceMimetype-misc can handle this target mimetype, removed from engine_config.json
                     // Triple.of("quick.pages", "txt", "TikaAuto"),
-                    Triple.of("quick.pages", "xhtml", "TikaAuto"),
-                    Triple.of("quick.pages", "xml", "TikaAuto")
+                    Triple.of("quick.pages", "xhtml", "application/vnd.apple.pages"),
+                    Triple.of("quick.pages", "xml", "application/vnd.apple.pages")
                 ),
-                allTargets("quick.pdf", "TikaAuto"),
-                allTargets("quick.ppt", "TikaAuto"),
-                allTargets("quick.pptx", "TikaAuto"),
-                allTargets("quick.sxw", "TikaAuto"),
-                allTargets("quick.txt", "TikaAuto"),
-                allTargets("quick.vsd", "TikaAuto"),
-                allTargets("quick.xls", "TikaAuto"),
-                allTargets("quick.xslx", "TikaAuto"),
-                allTargets("quick.zip", "TikaAuto"),
-                allTargets("quick.zip", "Archive"),
-                allTargets("quick.jar", "Archive"),
-                allTargets("quick.tar", "Archive"),
-                allTargets("sample.rtf", "TikaAuto"),
-                allTargets("quick.xml", "TikaAuto"),
-                allTargets("sample.xhtml.txt", "TikaAuto"),
-                allTargets("sample.rss", "TikaAuto"),
-                //allTargets("quick.rar", "TikaAuto"),
-                allTargets("quick.tar.gz", "TikaAuto"))
+                allTargets("quick.pdf", "application/pdf"),
+                allTargets("quick.ppt", "application/vnd.ms-powerpoint"),
+                allTargets("quick.pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"),
+                allTargets("quick.sxw", "application/vnd.sun.xml.writer"),
+                allTargets("quick.txt", "text/plain"),
+                allTargets("quick.vsd", "application/vnd.visio"),
+                allTargets("quick.xls", "application/vnd.ms-excel"),
+                allTargets("quick.xslx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+                allTargets("quick.zip", "application/zip"),
+                allTargets("quick.tar", "application/x-tar"),
+                allTargets("sample.rtf", "application/rtf"),
+                allTargets("quick.xml", "text/xml"),
+                allTargets("sample.xhtml.txt", "application/xhtml+xml"),
+                allTargets("sample.rss", "application/rss+xml"),
+                //allTargets("quick.rar", "application/x-rar-compressed"),
+                allTargets("quick.tar.gz", "application/x-gzip"))
             .flatMap(identity())
             .collect(toSet());
     }
@@ -145,15 +143,15 @@ public class TikaTransformationIT
     @Test
     public void testTransformation()
     {
-        final String descriptor = format("Transform ({0} -> {1}, {2}, transform={3})",
-            sourceFile, targetMimetype, targetExtension, transform);
+        final String descriptor = format("Transform ({0} -> {1}, {2}, sourceMimetype={3})",
+            sourceFile, targetMimetype, targetExtension, sourceMimetype);
 
         try
         {
             final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, null,
                 targetMimetype, targetExtension, ImmutableMap.of(
                     "targetEncoding", "UTF-8",
-                    "transform", transform));
+                    "sourceMimetype", sourceMimetype));
             assertEquals(descriptor, OK, response.getStatusCode());
         }
         catch (Exception e)
@@ -163,11 +161,11 @@ public class TikaTransformationIT
     }
 
     private static Stream<Triple<String, String, String>> allTargets(final String sourceFile,
-        final String transform)
+        final String sourceMimetype)
     {
         return extensionMimetype
             .keySet()
             .stream()
-            .map(k -> Triple.of(sourceFile, k, transform));
+            .map(k -> Triple.of(sourceFile, k, sourceMimetype));
     }
 }
