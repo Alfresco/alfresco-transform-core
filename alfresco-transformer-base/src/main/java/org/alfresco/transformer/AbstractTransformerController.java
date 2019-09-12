@@ -41,13 +41,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.util.StringUtils.getFilenameExtension;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.client.model.TransformRequestValidator;
 import org.alfresco.transform.client.model.config.TransformConfig;
+import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.logging.LogEntry;
@@ -55,7 +56,6 @@ import org.alfresco.transformer.model.FileRefResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -69,8 +69,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * <p>Abstract Controller, provides structure and helper methods to sub-class transformer controllers.</p>
@@ -105,8 +103,6 @@ public abstract class AbstractTransformerController implements TransformControll
     private static final Logger logger = LoggerFactory.getLogger(
         AbstractTransformerController.class);
 
-    private static String ENGINE_CONFIG = "engine_config.json";
-
     @Autowired
     private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
 
@@ -114,26 +110,14 @@ public abstract class AbstractTransformerController implements TransformControll
     private TransformRequestValidator transformRequestValidator;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private TransformServiceRegistry transformRegistry;
 
     @GetMapping(value = "/transform/config")
     public ResponseEntity<TransformConfig> info()
     {
         logger.info("GET Transform Config.");
-        try
-        {
-            ClassPathResource classPathResource = new ClassPathResource(ENGINE_CONFIG);
-            InputStream engineConfigFile = classPathResource.getInputStream();
-
-            TransformConfig transformConfig = objectMapper.readValue(engineConfigFile,
-                TransformConfig.class);
-            return new ResponseEntity<>(transformConfig, OK);
-        }
-        catch (IOException e)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                "Could not read Transform Config file.", e);
-        }
+        TransformConfig transformConfig = ((TransformRegistryImpl)transformRegistry).getTransformConfig();
+        return new ResponseEntity<>(transformConfig, OK);
     }
 
     /**
@@ -351,5 +335,38 @@ public abstract class AbstractTransformerController implements TransformControll
         }
 
         return sb.toString();
+    }
+
+    protected String getTransformerName(File sourceFile, String sourceMimetype, String targetMimetype,
+                                      Map<String, String> transformOptions)
+    {
+        long sourceSizeInBytes = sourceFile.length();
+        String transformerName = transformRegistry.findTransformerName(sourceMimetype, sourceSizeInBytes,
+                targetMimetype, transformOptions, null);
+        if (transformerName == null)
+        {
+            throw new TransformException(BAD_REQUEST.value(), "No transforms were able to handle the request");
+        }
+        return transformerName;
+    }
+
+    protected Map<String, String> createTransformOptions(Object... namesAndValues)
+    {
+        if (namesAndValues.length % 2 != 0)
+        {
+            logger.error("Incorrect number of parameters. Should have an even number as they are names and values.");
+        }
+
+        Map<String, String> transformOptions = new HashMap<>();
+        for (int i=0; i<namesAndValues.length; i+=2)
+        {
+            String name = namesAndValues[i].toString();
+            Object value = namesAndValues[i + 1];
+            if (value != null)
+            {
+                transformOptions.put(name, value.toString());
+            }
+        }
+        return transformOptions;
     }
 }

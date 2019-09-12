@@ -12,8 +12,8 @@
     {
       "transformerName": "pdfrenderer",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "application/pdf",             "targetMediaType": "image/png" },
-        {"sourceMediaType": "application/illustrator",     "targetMediaType": "image/png" }
+        {"sourceMediaType": "application/pdf",                            "targetMediaType": "image/png" },
+        {"sourceMediaType": "application/illustrator",                    "targetMediaType": "image/png" }
       ],
       "transformOptions": [
         "pdfRendererOptions"

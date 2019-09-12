@@ -26,10 +26,6 @@
  */
 package org.alfresco.transformer.transformers;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_DITA;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_JAVASCRIPT;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -63,16 +59,6 @@ public class StringExtractingContentTransformer implements SelectableTransformer
 {
 
     private static final Log logger = LogFactory.getLog(StringExtractingContentTransformer.class);
-
-    @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype,
-        Map<String, String> parameters)
-    {
-        return (sourceMimetype.startsWith("text/")
-                || MIMETYPE_JAVASCRIPT.equals(sourceMimetype)
-                || MIMETYPE_DITA.equals(sourceMimetype))
-               && MIMETYPE_TEXT_PLAIN.equals(targetMimetype);
-    }
 
     /**
      * Text to text conversions are done directly using the content reader and writer string

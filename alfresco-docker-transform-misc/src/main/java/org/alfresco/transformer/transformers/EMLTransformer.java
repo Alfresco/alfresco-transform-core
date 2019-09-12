@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_MULTIPART_ALTERNATIVE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_RFC822;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
 
 import java.io.BufferedInputStream;
@@ -55,7 +54,6 @@ import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
-
 /**
  * Uses javax.mail.MimeMessage to generate plain text versions of RFC822 email
  * messages. Searches for all text content parts, and returns them. Any
@@ -76,21 +74,6 @@ public class EMLTransformer implements SelectableTransformer
 
     private static final String CHARSET = "charset";
     private static final String DEFAULT_ENCODING = "UTF-8";
-
-    @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype, Map<String, String> parameters)
-    {
-        if (!MIMETYPE_RFC822.equals(sourceMimetype)
-                || !MIMETYPE_TEXT_PLAIN.equals(targetMimetype))
-        {
-            // only support RFC822 -> TEXT
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
 
     @Override
     public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
