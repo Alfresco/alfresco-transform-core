@@ -25,6 +25,7 @@ branches:
     - release/SP/2.0.N
     - company_release
     - /^ATS-.*$/
+    - REPO-4639_custom_release
 
 stages:
   - build
@@ -48,7 +49,7 @@ jobs:
 
     - name: "Release"
       stage: release
-      if: branch IN (release, release/SP/1.3.N, release/SP/2.0.N)
+      if: branch IN (release, release/SP/1.3.N, release/SP/2.0.N, REPO-4639_custom_release)
       before_install: bash _ci/init.sh
       before_script: travis_wait bash _ci/cache_artifacts.sh
       script: travis_wait 30 bash _ci/release.sh
