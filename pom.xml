@@ -27,7 +27,7 @@
         <dependency.activemq.version>5.15.9</dependency.activemq.version>
         <dependency.jackson.version>2.9.9</dependency.jackson.version>
         <dependency.jackson-databind.version>2.9.9.3</dependency.jackson-databind.version>
-        <dependency.cxf.version>3.2.9</dependency.cxf.version>
+        <dependency.cxf.version>3.3.3</dependency.cxf.version>
     </properties>
 
     <modules>
