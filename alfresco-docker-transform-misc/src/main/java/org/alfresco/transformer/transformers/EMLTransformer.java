@@ -26,10 +26,6 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.alfresco.transformer.fs.FileManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_MULTIPART_ALTERNATIVE;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
@@ -37,7 +33,6 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -54,6 +49,10 @@ import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
+import org.alfresco.transformer.fs.FileManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Uses javax.mail.MimeMessage to generate plain text versions of RFC822 email
  * messages. Searches for all text content parts, and returns them. Any
@@ -65,32 +64,33 @@ import javax.mail.internet.MimeMessage;
  * <p>
  * This code is based on a class of the same name originally implemented in alfresco-repository.
  * </p>
- *
  */
 public class EMLTransformer implements SelectableTransformer
 
 {
-    private static final Logger logger = LoggerFactory.getLogger( EMLTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(EMLTransformer.class);
 
     private static final String CHARSET = "charset";
     private static final String DEFAULT_ENCODING = "UTF-8";
 
     @Override
     public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
-                          final String targetMimetype, final Map<String, String> parameters) throws Exception
+        final String targetMimetype, final Map<String, String> parameters) throws Exception
     {
         logger.debug("Performing RFC822 to text transform.");
         // Use try with resource
-        try (InputStream contentInputStream = new BufferedInputStream( new FileInputStream(sourceFile));
+        try (InputStream contentInputStream = new BufferedInputStream(
+            new FileInputStream(sourceFile));
              Writer bufferedFileWriter = new BufferedWriter(new FileWriter(targetFile)))
         {
-            MimeMessage mimeMessage = new MimeMessage(Session.getDefaultInstance(new Properties()), contentInputStream);
+            MimeMessage mimeMessage = new MimeMessage(Session.getDefaultInstance(new Properties()),
+                contentInputStream);
 
             final StringBuilder sb = new StringBuilder();
             Object content = mimeMessage.getContent();
             if (content instanceof Multipart)
             {
-                processMultiPart((Multipart) content,sb);
+                processMultiPart((Multipart) content, sb);
             }
             else
             {
@@ -104,13 +104,15 @@ public class EMLTransformer implements SelectableTransformer
      * Find "text" parts of message recursively and appends it to sb StringBuilder
      *
      * @param multipart Multipart to process
-     * @param sb StringBuilder
+     * @param sb        StringBuilder
      * @throws MessagingException
      * @throws IOException
      */
-    private void processMultiPart(Multipart multipart, StringBuilder sb) throws MessagingException, IOException
+    private void processMultiPart(Multipart multipart, StringBuilder sb) throws MessagingException,
+        IOException
     {
-        boolean isAlternativeMultipart = multipart.getContentType().contains(MIMETYPE_MULTIPART_ALTERNATIVE);
+        boolean isAlternativeMultipart = multipart.getContentType().contains(
+            MIMETYPE_MULTIPART_ALTERNATIVE);
         if (isAlternativeMultipart)
         {
             processAlternativeMultipart(multipart, sb);
@@ -140,7 +142,8 @@ public class EMLTransformer implements SelectableTransformer
      * @throws IOException
      * @throws MessagingException
      */
-    private void processAlternativeMultipart(Multipart multipart, StringBuilder sb) throws IOException, MessagingException
+    private void processAlternativeMultipart(Multipart multipart, StringBuilder sb) throws
+        IOException, MessagingException
     {
         Part partToUse = null;
         for (int i = 0, n = multipart.getCount(); i < n; i++)
@@ -151,7 +154,7 @@ public class EMLTransformer implements SelectableTransformer
                 partToUse = part;
                 break;
             }
-            else if  (part.getContentType().contains(MIMETYPE_HTML))
+            else if (part.getContentType().contains(MIMETYPE_HTML))
             {
                 partToUse = part;
             }
@@ -194,9 +197,11 @@ public class EMLTransformer implements SelectableTransformer
             String mailPartContent = part.getContent().toString();
 
             //create a temporary html file with same mail part content and encoding
-            File tempHtmlFile = FileManager.TempFileProvider.createTempFile("EMLTransformer_", ".html");
+            File tempHtmlFile = FileManager.TempFileProvider.createTempFile("EMLTransformer_",
+                ".html");
             String encoding = getMailPartContentEncoding(part);
-            try (OutputStreamWriter osWriter = new OutputStreamWriter( new FileOutputStream( tempHtmlFile), encoding))
+            try (OutputStreamWriter osWriter = new OutputStreamWriter(
+                new FileOutputStream(tempHtmlFile), encoding))
             {
                 osWriter.write(mailPartContent);
             }
@@ -220,9 +225,9 @@ public class EMLTransformer implements SelectableTransformer
         int startIndex = contentType.indexOf(CHARSET);
         if (startIndex > 0)
         {
-            encoding = contentType.substring(startIndex + CHARSET.length() + 1).replaceAll("\"", "");
+            encoding = contentType.substring(startIndex + CHARSET.length() + 1)
+                                  .replaceAll("\"", "");
         }
         return encoding;
     }
-
 }

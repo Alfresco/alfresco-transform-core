@@ -89,8 +89,8 @@ public class MiscController extends AbstractTransformerController
             {
                 Map<String, String> parameters = new HashMap<>();
                 parameters.put(SOURCE_ENCODING, "UTF-8");
-                transformer.transform("html", sourceFile, targetFile, MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN,
-                    parameters);
+                transformer.transform("html", sourceFile, targetFile, MIMETYPE_HTML,
+                    MIMETYPE_TEXT_PLAIN, parameters);
             }
         };
     }
@@ -107,8 +107,10 @@ public class MiscController extends AbstractTransformerController
                 " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
         }
 
-        String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
-        transformer.transform(transform, sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
+        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype,
+            transformOptions);
+        transformer.transform(transform, sourceFile, targetFile, sourceMimetype, targetMimetype,
+            transformOptions);
     }
 
     @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
@@ -127,7 +129,8 @@ public class MiscController extends AbstractTransformerController
             logger.debug(
                 "Processing request with: sourceMimetype '{}', sourceEncoding '{}', " +
                 "targetMimetype '{}', targetExtension '{}', targetEncoding '{}', pageLimit '{}'",
-                sourceMimetype, sourceEncoding, targetMimetype, targetExtension, targetEncoding, pageLimit);
+                sourceMimetype, sourceEncoding, targetMimetype, targetExtension, targetEncoding,
+                pageLimit);
         }
 
         final String targetFilename = createTargetFileName(
@@ -136,13 +139,15 @@ public class MiscController extends AbstractTransformerController
         final File sourceFile = createSourceFile(request, sourceMultipartFile);
         final File targetFile = createTargetFile(request, targetFilename);
 
-        Map<String, String> transformOptions = createTransformOptions(
-                "sourceEncoding", sourceEncoding,
-                "targetEncoding", targetEncoding,
-                "pageLimit", pageLimit);
+        final Map<String, String> transformOptions = createTransformOptions(
+            "sourceEncoding", sourceEncoding,
+            "targetEncoding", targetEncoding,
+            "pageLimit", pageLimit);
 
-        String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
-        transformer.transform(transform, sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
+        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype,
+            transformOptions);
+        transformer.transform(transform, sourceFile, targetFile, sourceMimetype, targetMimetype,
+            transformOptions);
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());

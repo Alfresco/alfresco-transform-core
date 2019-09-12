@@ -59,8 +59,8 @@ import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.model.config.TransformOption;
 import org.alfresco.transform.client.model.config.TransformOptionGroup;
 import org.alfresco.transform.client.model.config.TransformOptionValue;
-import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.client.model.config.Transformer;
+import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.junit.Test;
@@ -68,7 +68,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -111,7 +110,7 @@ public abstract class AbstractTransformerControllerTest
      * The expected result. Taken resting target quick file's bytes.
      *
      * Note: These checks generally don't work on Windows (Mac and Linux are okay). Possibly to do with byte order
-     *       loading.
+     * loading.
      */
     protected byte[] expectedTargetFileBytes;
 
@@ -347,8 +346,8 @@ public abstract class AbstractTransformerControllerTest
             .readValue(new ClassPathResource("engine_config.json").getFile(),
                 TransformConfig.class);
 
-        ReflectionTestUtils.setField(transformRegistry,"engineConfig",
-                new ClassPathResource("engine_config.json"));
+        ReflectionTestUtils.setField(transformRegistry, "engineConfig",
+            new ClassPathResource("engine_config.json"));
 
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get("/transform/config"))
@@ -366,8 +365,8 @@ public abstract class AbstractTransformerControllerTest
     {
         TransformConfig expectedResult = buildCompleteTransformConfig();
 
-        ReflectionTestUtils.setField(transformRegistry,"engineConfig",
-                new ClassPathResource("engine_config_with_duplicates.json"));
+        ReflectionTestUtils.setField(transformRegistry, "engineConfig",
+            new ClassPathResource("engine_config_with_duplicates.json"));
 
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get("/transform/config"))
@@ -393,8 +392,8 @@ public abstract class AbstractTransformerControllerTest
         TransformConfig expectedResult = new TransformConfig();
         expectedResult.setTransformers(ImmutableList.of(transformer));
 
-        ReflectionTestUtils.setField(transformRegistry,"engineConfig",
-                new ClassPathResource("engine_config_incomplete.json"));
+        ReflectionTestUtils.setField(transformRegistry, "engineConfig",
+            new ClassPathResource("engine_config_incomplete.json"));
 
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get("/transform/config"))
@@ -416,8 +415,8 @@ public abstract class AbstractTransformerControllerTest
         TransformConfig expectedResult = new TransformConfig();
         expectedResult.setTransformers(ImmutableList.of(transformer));
 
-        ReflectionTestUtils.setField(transformRegistry,"engineConfig",
-                new ClassPathResource("engine_config_no_transform_options.json"));
+        ReflectionTestUtils.setField(transformRegistry, "engineConfig",
+            new ClassPathResource("engine_config_no_transform_options.json"));
 
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get("/transform/config"))
