@@ -341,7 +341,7 @@ public abstract class AbstractTransformerController implements TransformControll
                                       Map<String, String> transformOptions)
     {
         long sourceSizeInBytes = sourceFile.length();
-        String transformerName = transformRegistry.getTransformerName(sourceMimetype, sourceSizeInBytes,
+        String transformerName = transformRegistry.findTransformerName(sourceMimetype, sourceSizeInBytes,
                 targetMimetype, transformOptions, null);
         if (transformerName == null)
         {

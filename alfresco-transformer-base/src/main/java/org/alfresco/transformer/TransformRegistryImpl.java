@@ -78,7 +78,7 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
     public void afterPropertiesSet()
     {
         TransformConfig transformConfig = getTransformConfig();
-        register(transformConfig, null, ENGINE_CONFIG_JSON);
+        registerAll(transformConfig, null, ENGINE_CONFIG_JSON);
     }
 
     @Override
