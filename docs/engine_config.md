@@ -1,9 +1,11 @@
 ## T-Engine configuration
 
-T-Engines provides a */transform/config* end point for clients (e.g. Transform-Router or Alfresco-Repository) to
-determine what it supported. T-engine stores this configuration as a JSON file named *engine_config.json*.
+T-Engines provide a */transform/config* end point for clients (e.g. Transform-Router or 
+Alfresco-Repository) that indicate what is supported. T-Engines store this 
+configuration as a JSON resource file named *engine_config.json*.
 
-This can be found under *alfresco-transform-core\t-engine-name\src\main\resources\engine_config.json*, current configuration files are:
+The config can be found under `alfresco-transform-core\<t-engine-name>\src\main\resources
+\engine_config.json`; current configuration files are:
 * [Pdf-Renderer T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-docker-alfresco-pdf-renderer/src/main/resources/engine_config.json).
 * [ImageMagick T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-docker-imagemagick/src/main/resources/engine_config.json).
 * [Libreoffice T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-docker-libreoffice/src/main/resources/engine_config.json).
@@ -54,6 +56,7 @@ This can be found under *alfresco-transform-core\t-engine-name\src\main\resource
   ]
 }
 ```
+
 ### Transform Options
 *  **transformOptions** provides a list of transform options that may be
   referenced for use in different transformers. This way common options
@@ -81,10 +84,11 @@ This can be found under *alfresco-transform-core\t-engine-name\src\main\resource
       ]
     },
 ```
-*  There are two types of transformOptions, *transformOptionsValue* and *transformOptionsGroup*.
-   *  The transformOptionsValue is used to represent a single transformation option, it is defined by a **name**
-   and an optional **required** field.
-   *  TransformOptionGroup represents a group of one or more options, it is used to group options that define a
+*  There are two types of transformOptions, *transformOptionsValue* and *transformOptionsGroup*:
+   *  _TransformOptionsValue_ is used to represent a single transformation option, it is defined 
+   by a **name** and an optional **required** field.
+   *  _TransformOptionGroup_ represents a group of one or more options, it is used to group 
+   options that define a
    characteristic. In the above snippet all the options for crop are defined under a group, it is recommended to
    use this approach as it is easier to read. A transformOptionsGroup can contain one or more transformOptionsValue 
    and transformOptionsGroup. 
@@ -98,8 +102,8 @@ This can be found under *alfresco-transform-core\t-engine-name\src\main\resource
 * **transformers** - A list of transformer definitions.
   Each transformer definition should have a unique **transformerName**,
   specify a **supportedSourceAndTargetList** and indicate which
-  options it supports. As is shown in the Tika snippet, in an *engine_config*
-  there can be one or multiple transformers defined, this is because a T-engine can have
+  options it supports. As it is shown in the Tika snippet, an *engine_config*
+  can describe one or more transformers, as a T-engine can have
   multiple transformers (e.g. Tika, Misc). A transformer configuration may 
   specify references to 0 or more transformOptions.
 
@@ -115,7 +119,8 @@ This can be found under *alfresco-transform-core\t-engine-name\src\main\resource
     into *"text/xml"*, the transformer containing the source-target media type with higher priority will be chosen by the
     T-engine as the one to execute the transformation, in this case it will be *TextMining*, because:
    * If not specified, the default value for priority is **50**.
-   * Note: priority values are like a order in a queue, the **lower** the number the **higher the priority** is.
+   * Note: priority values are like the order in a queue, the **lower** the number the **higher the
+    priority** is.
    
 ## Transformer selection strategy
 The ACS repository will use the T-Engine configuration to choose which T-Engine will perform a transform.
@@ -158,6 +163,6 @@ Transformer 2 defines options: Op1, Op2, Op3, priority2
 ```
 Rendition provides values for options: Op1, Op2
 ```
-If we assume both transformers support the required source and target Media Types, and *priority1* < *priority2*
-,Transformer 1 will be selected because it the priority is higher.
+If we assume both transformers support the required source and target Media Types and
+ *priority1* < *priority2*, Transformer 1 will be selected because its priority is higher.
  
