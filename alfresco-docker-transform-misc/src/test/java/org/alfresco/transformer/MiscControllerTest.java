@@ -33,8 +33,8 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_KEYNOT
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_NUMBERS;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_RFC822;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -42,7 +42,6 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 
@@ -90,7 +89,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
 
     @Override
     protected void mockTransformCommand(String sourceExtension, String targetExtension,
-        String sourceMimetype, boolean readTargetFileBytes) throws IOException
+        String sourceMimetype, boolean readTargetFileBytes)
     {
     }
 
@@ -109,11 +108,18 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
         String... params)
     {
-        return super.mockMvcRequest(url, sourceFile, params)
-                    .param("targetEncoding", targetEncoding)
-                    .param("sourceEncoding", sourceEncoding)
-                    .param("targetMimetype", targetMimetype)
-                    .param("sourceMimetype", sourceMimetype);
+        final MockHttpServletRequestBuilder builder = super
+            .mockMvcRequest(url, sourceFile, params)
+            .param("sourceEncoding", sourceEncoding)
+            .param("targetMimetype", targetMimetype)
+            .param("sourceMimetype", sourceMimetype);
+
+        // Only the 'string' transformer should have the targetEncoding.
+        if (!"message/rfc822".equals(sourceMimetype) && !"text/html".equals(sourceMimetype))
+        {
+            builder.param("targetEncoding", targetEncoding);
+        }
+        return builder;
     }
 
     @Test
@@ -132,14 +138,14 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     {
         String expected = "Gym class featuring a brown fox and lazy dog";
         MvcResult result = sendRequest("eml",
-                null,
-                MIMETYPE_RFC822,
-                "txt",
-                MIMETYPE_TEXT_PLAIN,
-                null,
-                readTestFile("eml"));
+            null,
+            MIMETYPE_RFC822,
+            "txt",
+            MIMETYPE_TEXT_PLAIN,
+            null,
+            readTestFile("eml"));
         assertTrue("Content from eml transform didn't contain expected value. ",
-                result.getResponse().getContentAsString().contains(expected));
+            result.getResponse().getContentAsString().contains(expected));
     }
 
     /**
@@ -150,15 +156,16 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     {
         String expected = "El r\u00E1pido zorro marr\u00F3n salta sobre el perro perezoso";
         MvcResult result = sendRequest("eml",
-                null,
-                MIMETYPE_RFC822,
-                "txt",
-                MIMETYPE_TEXT_PLAIN,
-                null,
-                readTestFile("spanish.eml"));
+            null,
+            MIMETYPE_RFC822,
+            "txt",
+            MIMETYPE_TEXT_PLAIN,
+            null,
+            readTestFile("spanish.eml"));
 
-        String contentResult = new String(result.getResponse().getContentAsByteArray(), "UTF-8");
-        assertTrue("Content from eml transform didn't contain expected value. ", contentResult.contains(expected));
+        String contentResult = new String(result.getResponse().getContentAsByteArray(), UTF_8);
+        assertTrue("Content from eml transform didn't contain expected value. ",
+            contentResult.contains(expected));
     }
 
     /**
@@ -167,17 +174,17 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     @Test
     public void testRFC822WithAttachmentToText() throws Exception
     {
-        String expected =  "Mail with attachment content";
-        String notExpected =  "File attachment content";
+        String expected = "Mail with attachment content";
+        String notExpected = "File attachment content";
         MvcResult result = sendRequest("eml",
-                null,
-                MIMETYPE_RFC822,
-                "txt",
-                MIMETYPE_TEXT_PLAIN,
-                null,
-                readTestFile("attachment.eml"));
+            null,
+            MIMETYPE_RFC822,
+            "txt",
+            MIMETYPE_TEXT_PLAIN,
+            null,
+            readTestFile("attachment.eml"));
         assertTrue("Content from eml transform didn't contain expected value. ",
-                result.getResponse().getContentAsString().contains(expected));
+            result.getResponse().getContentAsString().contains(expected));
         assertFalse(result.getResponse().getContentAsString().contains(notExpected));
     }
 
@@ -187,16 +194,16 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     @Test
     public void testRFC822AlternativeToText() throws Exception
     {
-        String expected =  "alternative plain text";
+        String expected = "alternative plain text";
         MvcResult result = sendRequest("eml",
-                null,
-                MIMETYPE_RFC822,
-                "txt",
-                MIMETYPE_TEXT_PLAIN,
-                null,
-                readTestFile("alternative.eml"));
+            null,
+            MIMETYPE_RFC822,
+            "txt",
+            MIMETYPE_TEXT_PLAIN,
+            null,
+            readTestFile("alternative.eml"));
         assertTrue("Content from eml transform didn't contain expected value. ",
-                result.getResponse().getContentAsString().contains(expected));
+            result.getResponse().getContentAsString().contains(expected));
     }
 
     /**
@@ -207,14 +214,14 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     {
         String expected = "nested alternative plain text";
         MvcResult result = sendRequest("eml",
-                null,
-                MIMETYPE_RFC822,
-                "txt",
-                MIMETYPE_TEXT_PLAIN,
-                null,
-                readTestFile("nested.alternative.eml"));
+            null,
+            MIMETYPE_RFC822,
+            "txt",
+            MIMETYPE_TEXT_PLAIN,
+            null,
+            readTestFile("nested.alternative.eml"));
         assertTrue("Content from eml transform didn't contain expected value. ",
-                result.getResponse().getContentAsString().contains(expected));
+            result.getResponse().getContentAsString().contains(expected));
     }
 
     /**
@@ -225,12 +232,12 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     {
         String expected = "&nbsp;";
         MvcResult result = sendRequest("eml",
-                null,
-                MIMETYPE_RFC822,
-                "txt",
-                MIMETYPE_TEXT_PLAIN,
-                null,
-                readTestFile("htmlChars.eml"));
+            null,
+            MIMETYPE_RFC822,
+            "txt",
+            MIMETYPE_TEXT_PLAIN,
+            null,
+            readTestFile("htmlChars.eml"));
         assertFalse(result.getResponse().getContentAsString().contains(expected));
     }
 
@@ -254,7 +261,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_HTML,
             "txt",
             MIMETYPE_TEXT_PLAIN,
-            "UTF-8",
+            null,
             expected.getBytes());
 
         String contentResult = new String(result.getResponse().getContentAsByteArray(),
@@ -325,7 +332,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_TEXT_PLAIN,
             "pdf",
             MIMETYPE_PDF,
-            "UTF-8",
+            null,
             expected.getBytes());
 
         // Read back in the PDF and check it
@@ -345,67 +352,73 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     public void testAppleIWorksPages() throws Exception
     {
         MvcResult result = sendRequest("numbers", null, MIMETYPE_IWORK_NUMBERS,
-                "jpeg", MIMETYPE_IMAGE_JPEG, null, readTestFile("pages"));
-        assertTrue("Expected image content but content is empty.",result.getResponse().getContentLengthLong() > 0L);
+            "jpeg", MIMETYPE_IMAGE_JPEG, null, readTestFile("pages"));
+        assertTrue("Expected image content but content is empty.",
+            result.getResponse().getContentLengthLong() > 0L);
     }
 
     @Test
     public void testAppleIWorksNumbers() throws Exception
     {
         MvcResult result = sendRequest("numbers", null, MIMETYPE_IWORK_NUMBERS,
-                "jpeg", MIMETYPE_IMAGE_JPEG, null, readTestFile("numbers"));
-        assertTrue("Expected image content but content is empty.",result.getResponse().getContentLengthLong() > 0L);
+            "jpeg", MIMETYPE_IMAGE_JPEG, null, readTestFile("numbers"));
+        assertTrue("Expected image content but content is empty.",
+            result.getResponse().getContentLengthLong() > 0L);
     }
 
     @Test
     public void testAppleIWorksKey() throws Exception
     {
         MvcResult result = sendRequest("key", null, MIMETYPE_IWORK_KEYNOTE,
-                "jpeg", MIMETYPE_IMAGE_JPEG, null, readTestFile("key"));
-        assertTrue("Expected image content but content is empty.",result.getResponse().getContentLengthLong() > 0L);
+            "jpeg", MIMETYPE_IMAGE_JPEG, null, readTestFile("key"));
+        assertTrue("Expected image content but content is empty.",
+            result.getResponse().getContentLengthLong() > 0L);
     }
 
-//    @Test
+    //    @Test
 // TODO Doesn't work with java 11, enable when fixed
     public void testOOXML() throws Exception
     {
-        MvcResult result = sendRequest("docx",null, MIMETYPE_OPENXML_WORDPROCESSING,
-                "jpeg", MIMETYPE_IMAGE_JPEG, null, readTestFile("docx"));
-        assertTrue("Expected image content but content is empty.",result.getResponse().getContentLengthLong() > 0L);
+        MvcResult result = sendRequest("docx", null, MIMETYPE_OPENXML_WORDPROCESSING,
+            "jpeg", MIMETYPE_IMAGE_JPEG, null, readTestFile("docx"));
+        assertTrue("Expected image content but content is empty.",
+            result.getResponse().getContentLengthLong() > 0L);
     }
 
     private MvcResult sendRequest(String sourceExtension,
-                           String sourceEncoding,
-                           String sourceMimetype,
-                           String targetExtension,
-                           String targetMimetype,
-                           String targetEncoding,
-                           byte[] content) throws Exception
+        String sourceEncoding,
+        String sourceMimetype,
+        String targetExtension,
+        String targetMimetype,
+        String targetEncoding,
+        byte[] content) throws Exception
     {
-        MockMultipartFile sourceFile = new MockMultipartFile("file", "test_file." + sourceExtension, sourceMimetype, content);
+        final MockMultipartFile sourceFile = new MockMultipartFile("file",
+            "test_file." + sourceExtension, sourceMimetype, content);
 
-        MockHttpServletRequestBuilder requestBuilder = super.mockMvcRequest("/transform", sourceFile)
-                .param("targetExtension", targetExtension)
-                .param("targetMimetype", targetMimetype)
-                .param("sourceMimetype", sourceMimetype);
+        final MockHttpServletRequestBuilder requestBuilder = super
+            .mockMvcRequest("/transform", sourceFile)
+            .param("targetExtension", targetExtension)
+            .param("targetMimetype", targetMimetype)
+            .param("sourceMimetype", sourceMimetype);
 
-        if (sourceEncoding!=null)
+        if (sourceEncoding != null)
         {
             requestBuilder.param("sourceEncoding", sourceEncoding);
         }
-        if (targetEncoding!=null)
+        if (targetEncoding != null)
         {
             requestBuilder.param("targetEncoding", targetEncoding);
         }
 
-        MvcResult result = mockMvc.perform(requestBuilder)
-                .andExpect(status().is(OK.value()))
-                .andExpect(header().string("Content-Disposition", "attachment; filename*= "
-                        +(targetEncoding==null ? "UTF-8" : targetEncoding)+"''test_file." + targetExtension)).
-                        andReturn();
-        return result;
+        return mockMvc.perform(requestBuilder)
+                      .andExpect(status().is(OK.value()))
+                      .andExpect(header().string("Content-Disposition",
+                          "attachment; filename*= " +
+                          (targetEncoding == null ? "UTF-8" : targetEncoding) +
+                          "''test_file." + targetExtension))
+                      .andReturn();
     }
-
 
     private String clean(String text)
     {
