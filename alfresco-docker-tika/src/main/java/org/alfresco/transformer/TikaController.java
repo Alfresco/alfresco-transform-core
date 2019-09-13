@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import static java.lang.Boolean.parseBoolean;
 import static org.alfresco.transformer.executors.Tika.INCLUDE_CONTENTS;
 import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
 import static org.alfresco.transformer.executors.Tika.PDF_BOX;
@@ -36,7 +37,6 @@ import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transformer.util.Util.stringToBoolean;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -173,16 +173,18 @@ public class TikaController extends AbstractTransformerController
         logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
                      " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
 
-        final Boolean includeContents = stringToBoolean(transformOptions.get("includeContents"));
-        final Boolean notExtractBookmarksText = stringToBoolean(
-            transformOptions.get("notExtractBookmarksText"));
-        final String targetEncoding = transformOptions.get("targetEncoding");
+        final boolean includeContents = parseBoolean(
+            transformOptions.getOrDefault("includeContents", "false"));
+        final boolean notExtractBookmarksText = parseBoolean(
+            transformOptions.getOrDefault("notExtractBookmarksText", "false"));
+        final String targetEncoding = transformOptions.getOrDefault("targetEncoding", "UTF-8");
 
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype,
             transformOptions);
+        
         javaExecutor.call(sourceFile, targetFile, transform,
-            includeContents != null && includeContents ? INCLUDE_CONTENTS : null,
-            notExtractBookmarksText != null && notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
+            includeContents ? INCLUDE_CONTENTS : null,
+            notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
             TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);
     }
 }
