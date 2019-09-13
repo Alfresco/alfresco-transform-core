@@ -122,7 +122,7 @@ public class TikaController extends AbstractTransformerController
         @RequestParam("sourceMimetype") final String sourceMimetype,
         @RequestParam("targetExtension") final String targetExtension,
         @RequestParam("targetMimetype") final String targetMimetype,
-        @RequestParam("targetEncoding") final String targetEncoding,
+        @RequestParam(value = "targetEncoding", required = false, defaultValue = "UTF-8") final String targetEncoding,
 
         @RequestParam(value = "timeout", required = false) final Long timeout,
         @RequestParam(value = "testDelay", required = false) final Long testDelay,
@@ -181,7 +181,7 @@ public class TikaController extends AbstractTransformerController
 
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype,
             transformOptions);
-        
+
         javaExecutor.call(sourceFile, targetFile, transform,
             includeContents ? INCLUDE_CONTENTS : null,
             notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
