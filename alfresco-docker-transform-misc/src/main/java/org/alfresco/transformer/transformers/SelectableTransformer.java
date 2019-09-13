@@ -49,15 +49,4 @@ public interface SelectableTransformer
      */
     void transform(File sourceFile, File targetFile, String sourceMimetype,
         String targetMimetype, Map<String, String> parameters) throws Exception;
-
-    /**
-     * Determine whether this transformer is applicable for the given MIME types.
-     *
-     * @param sourceMimetype
-     * @param targetMimetype
-     * @param parameters
-     * @return
-     */
-    boolean isTransformable(String sourceMimetype, String targetMimetype,
-        Map<String, String> parameters);
 }

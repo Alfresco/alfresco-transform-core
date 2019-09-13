@@ -37,18 +37,18 @@ public class Util
      * @param param String to be converted
      * @return Null if param is null or converted value as {@link Integer}
      */
-    public static Integer stringToInteger(String param)
+    public static Integer stringToInteger(final String param)
     {
         return param == null ? null : Integer.parseInt(param);
     }
 
     /**
-     * Safely converts a {@link String} to an {@link Integer}
+     * Safely converts a {@link String} to a {@link Boolean}
      *
      * @param param String to be converted
      * @return Null if param is null or converted value as {@link Boolean}
      */
-    public static Boolean stringToBoolean(String param)
+    public static Boolean stringToBoolean(final String param)
     {
         return param == null ? null : Boolean.parseBoolean(param);
     }

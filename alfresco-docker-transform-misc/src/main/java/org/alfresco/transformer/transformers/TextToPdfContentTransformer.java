@@ -26,12 +26,6 @@
  */
 package org.alfresco.transformer.transformers;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_DITA;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_CSV;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_XML;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -101,17 +95,6 @@ public class TextToPdfContentTransformer implements SelectableTransformer
             throw new RuntimeException(
                 "Unable to set Font Size for PDF generation: " + fontSize);
         }
-    }
-
-    @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype,
-        Map<String, String> parameters)
-    {
-        return (MIMETYPE_TEXT_PLAIN.equals(sourceMimetype) ||
-                MIMETYPE_TEXT_CSV.equals(sourceMimetype) ||
-                MIMETYPE_DITA.equals(sourceMimetype) ||
-                MIMETYPE_XML.equals(sourceMimetype)) &&
-               MIMETYPE_PDF.equals(targetMimetype);
     }
 
     @Override
