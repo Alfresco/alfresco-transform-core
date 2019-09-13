@@ -139,7 +139,6 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @SpyBean
     private TikaController controller;
 
-    private String transform = PDF_BOX;
     private String targetEncoding = "UTF-8";
     private String targetMimetype = MIMETYPE_TEXT_PLAIN;
 
