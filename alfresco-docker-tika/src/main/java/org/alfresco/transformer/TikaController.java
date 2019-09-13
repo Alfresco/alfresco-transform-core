@@ -31,14 +31,12 @@ import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT
 import static org.alfresco.transformer.executors.Tika.PDF_BOX;
 import static org.alfresco.transformer.executors.Tika.TARGET_ENCODING;
 import static org.alfresco.transformer.executors.Tika.TARGET_MIMETYPE;
-import static org.alfresco.transformer.executors.Tika.TRANSFORM_NAMES;
 import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transformer.util.Util.stringToBoolean;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -47,7 +45,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.executors.TikaJavaExecutor;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
@@ -121,32 +118,37 @@ public class TikaController extends AbstractTransformerController
 
     @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
-        @RequestParam("file") MultipartFile sourceMultipartFile,
-        @RequestParam("targetExtension") String targetExtension,
-        @RequestParam("targetMimetype") String targetMimetype,
-        @RequestParam("targetEncoding") String targetEncoding,
+        @RequestParam("file") final MultipartFile sourceMultipartFile,
+        @RequestParam("sourceMimetype") final String sourceMimetype,
+        @RequestParam("targetExtension") final String targetExtension,
+        @RequestParam("targetMimetype") final String targetMimetype,
+        @RequestParam("targetEncoding") final String targetEncoding,
 
-        @RequestParam(value = "timeout", required = false) Long timeout,
-        @RequestParam(value = "testDelay", required = false) Long testDelay,
+        @RequestParam(value = "timeout", required = false) final Long timeout,
+        @RequestParam(value = "testDelay", required = false) final Long testDelay,
 
-        @RequestParam(value = "transform") String transform,
-        @RequestParam(value = "includeContents", required = false) Boolean includeContents,
-        @RequestParam(value = "notExtractBookmarksText", required = false) Boolean notExtractBookmarksText)
+        @RequestParam(value = "includeContents", required = false) final Boolean includeContents,
+        @RequestParam(value = "notExtractBookmarksText", required = false) final Boolean notExtractBookmarksText)
     {
-        if (!TRANSFORM_NAMES.contains(transform))
-        {
-            throw new TransformException(BAD_REQUEST.value(), "Invalid transform value");
-        }
+        final String targetFilename = createTargetFileName(
+            sourceMultipartFile.getOriginalFilename(), targetExtension);
 
-        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(),
-            targetExtension);
         getProbeTestTransform().incrementTransformerCount();
-        File sourceFile = createSourceFile(request, sourceMultipartFile);
-        File targetFile = createTargetFile(request, targetFilename);
+
+        final File sourceFile = createSourceFile(request, sourceMultipartFile);
+        final File targetFile = createTargetFile(request, targetFilename);
         // Both files are deleted by TransformInterceptor.afterCompletion
 
         // TODO Consider streaming the request and response rather than using temporary files
         // https://www.logicbig.com/tutorials/spring-framework/spring-web-mvc/streaming-response-body.html
+
+        final Map<String, String> transformOptions = createTransformOptions(
+            "includeContents", includeContents,
+            "notExtractBookmarksText", notExtractBookmarksText,
+            "targetEncoding", targetEncoding);
+
+        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype,
+            transformOptions);
 
         javaExecutor.call(sourceFile, targetFile, transform,
             includeContents != null && includeContents ? INCLUDE_CONTENTS : null,
@@ -154,10 +156,12 @@ public class TikaController extends AbstractTransformerController
             TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
+
         LogEntry.setTargetSize(targetFile.length());
         long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
         time += LogEntry.addDelay(testDelay);
         getProbeTestTransform().recordTransformTime(time);
+
         return body;
     }
 
@@ -169,11 +173,13 @@ public class TikaController extends AbstractTransformerController
         logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
                      " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
 
-        final String transform = transformOptions.get("transform");
-        final Boolean includeContents = stringToBoolean("includeContents");
-        final Boolean notExtractBookmarksText = stringToBoolean("notExtractBookmarksText");
+        final Boolean includeContents = stringToBoolean(transformOptions.get("includeContents"));
+        final Boolean notExtractBookmarksText = stringToBoolean(
+            transformOptions.get("notExtractBookmarksText"));
         final String targetEncoding = transformOptions.get("targetEncoding");
 
+        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype,
+            transformOptions);
         javaExecutor.call(sourceFile, targetFile, transform,
             includeContents != null && includeContents ? INCLUDE_CONTENTS : null,
             notExtractBookmarksText != null && notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,

@@ -139,7 +139,6 @@ public class MiscTransformsIT
             SourceTarget.of("text/mediawiki", "text/plain"),
             SourceTarget.of("text/css", "text/plain"),
             SourceTarget.of("text/csv", "text/plain"),
-            SourceTarget.of("text/javascript", "text/plain"),
             SourceTarget.of("text/xml", "text/plain"),
             SourceTarget.of("text/html", "text/plain"),
             SourceTarget.of("text/richtext", "text/plain"),

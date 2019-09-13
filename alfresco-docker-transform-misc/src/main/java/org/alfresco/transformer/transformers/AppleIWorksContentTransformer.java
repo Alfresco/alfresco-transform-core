@@ -27,9 +27,6 @@
 package org.alfresco.transformer.transformers;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_KEYNOTE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_NUMBERS;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_PAGES;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -75,15 +72,6 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
         "preview.jpg");            // iWorks 2013/14 (720 x 552) We use the best quality image. Others are:
     //                (225 x 173) preview-web.jpg
     //                 (53 x  41) preview-micro.jpg
-
-    @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype,
-        Map<String, String> parameters)
-    {
-        return MIMETYPE_IWORK_KEYNOTE.equals(sourceMimetype) ||
-               MIMETYPE_IWORK_NUMBERS.equals(sourceMimetype) ||
-               MIMETYPE_IWORK_PAGES.equals(sourceMimetype);
-    }
 
     @Override
     public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
