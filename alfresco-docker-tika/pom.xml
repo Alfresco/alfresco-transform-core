@@ -14,7 +14,6 @@
     <properties>
         <image.name>alfresco/alfresco-tika</image.name>
         <image.registry>quay.io</image.registry>
-        <dependency.poi.version>4.1.0</dependency.poi.version>
     </properties>
 
     <dependencies>
