@@ -28,7 +28,7 @@
         <dependency.jackson.version>2.9.9</dependency.jackson.version>
         <dependency.jackson-databind.version>2.9.9.3</dependency.jackson-databind.version>
         <dependency.cxf.version>3.3.3</dependency.cxf.version>
-        <dependency.poi.version>4.0.1</dependency.poi.version>
+        <dependency.poi.version>4.1.0</dependency.poi.version>
     </properties>
 
     <modules>
