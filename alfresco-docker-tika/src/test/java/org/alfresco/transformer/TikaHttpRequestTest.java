@@ -26,10 +26,16 @@
  */
 package org.alfresco.transformer;
 
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
+
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.LinkedMultiValueMap;
 
 /**
  * Tests TikaController with a server test harness.
@@ -48,5 +54,23 @@ public class TikaHttpRequestTest extends AbstractHttpRequestTest
     protected String getSourceExtension()
     {
         return "pdf";
+    }
+
+    // Override method as Tika requires sourceMimetype
+    // If not provided then sourceMimetype request parameter error will be thrown.
+    @Override
+    protected void assertTransformError(boolean addFile, String errorMessage)
+    {
+        LinkedMultiValueMap<String, Object> parameters = new LinkedMultiValueMap<>();
+        if (addFile)
+        {
+            parameters.add("file", new ClassPathResource("quick." + getSourceExtension()));
+        }
+        parameters.add("sourceMimetype", "application/pdf");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MULTIPART_FORM_DATA);
+        HttpEntity<LinkedMultiValueMap<String, Object>> entity = new HttpEntity<>(parameters,
+            headers);
+        super.sendTranformationRequest(entity, errorMessage);
     }
 }

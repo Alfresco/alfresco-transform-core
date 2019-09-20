@@ -26,9 +26,6 @@
  */
 package org.alfresco.transformer.transformers;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -76,13 +73,6 @@ public class HtmlParserContentTransformer implements SelectableTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(
         HtmlParserContentTransformer.class);
-
-    @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype,
-        Map<String, String> parameters)
-    {
-        return MIMETYPE_HTML.equals(sourceMimetype) && MIMETYPE_TEXT_PLAIN.equals(targetMimetype);
-    }
 
     @Override
     public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
@@ -143,7 +133,7 @@ public class HtmlParserContentTransformer implements SelectableTransformer
      * is specified against the content property (rather than in the
      * HTML Head Meta), see ALF-10466 for details.
      */
-    private class EncodingAwareStringBean extends StringBean
+    public static class EncodingAwareStringBean extends StringBean
     {
         private static final long serialVersionUID = -9033414360428669553L;
 

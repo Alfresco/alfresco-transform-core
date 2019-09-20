@@ -27,9 +27,6 @@
 package org.alfresco.transformer.transformers;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_KEYNOTE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_NUMBERS;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_PAGES;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -48,11 +45,15 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableList;
 
 /**
- * Converts Apple iWorks files to JPEGs for thumbnailing & previewing.
+ * Converts Apple iWorks files to JPEGs for thumbnailing and previewing.
  * The transformer will only work for iWorks 2013/14 files. Support for iWorks 2008/9 has been dropped as we cannot
  * support both, because the newer format does not contain a PDF. If we say this transformer supports PDF, Share will
  * assume incorrectly that we can convert to PDF and we would only get a preview for the older format and never the
  * newer one. Both formats have the same mimetype.
+ *
+ * <p>
+ * This code is based on a class of the same name originally implemented in alfresco-repository.
+ * </p>
  *
  * @author Neil Mc Erlean
  * @author eknizat
@@ -71,15 +72,6 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
         "preview.jpg");            // iWorks 2013/14 (720 x 552) We use the best quality image. Others are:
     //                (225 x 173) preview-web.jpg
     //                 (53 x  41) preview-micro.jpg
-
-    @Override
-    public boolean isTransformable(String sourceMimetype, String targetMimetype,
-        Map<String, String> parameters)
-    {
-        return MIMETYPE_IWORK_KEYNOTE.equals(sourceMimetype) ||
-               MIMETYPE_IWORK_NUMBERS.equals(sourceMimetype) ||
-               MIMETYPE_IWORK_PAGES.equals(sourceMimetype);
-    }
 
     @Override
     public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,

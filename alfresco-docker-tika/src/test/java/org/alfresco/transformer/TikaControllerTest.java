@@ -139,7 +139,6 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @SpyBean
     private TikaController controller;
 
-    private String transform = PDF_BOX;
     private String targetEncoding = "UTF-8";
     private String targetMimetype = MIMETYPE_TEXT_PLAIN;
 
@@ -236,7 +235,6 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     {
         // We don't use targetFileBytes as some of the transforms contain different date text based on the os being used.
         mockTransformCommand(sourceExtension, targetExtension, sourceMimetype, false);
-        this.transform = transform;
         this.targetMimetype = targetMimetype;
 
         System.out.println("Test " + transform + " " + sourceExtension + " to " + targetExtension);
@@ -261,9 +259,9 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         String... params)
     {
         return super.mockMvcRequest(url, sourceFile, params)
-                    .param("transform", transform)
                     .param("targetEncoding", targetEncoding)
-                    .param("targetMimetype", targetMimetype);
+                    .param("targetMimetype", targetMimetype)
+                    .param("sourceMimetype", sourceMimetype);
     }
 
     @Test
@@ -540,8 +538,6 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         transformRequest.setTargetExtension(targetExtension);
         transformRequest.setSourceMediaType(APPLICATION_PDF_VALUE);
         transformRequest.setTargetMediaType(TEXT_PLAIN_VALUE);
-        transformRequest.getTransformRequestOptions().put("transform", "PdfBox");
-        transformRequest.getTransformRequestOptions().put("targetMimetype", TEXT_PLAIN_VALUE);
         transformRequest.getTransformRequestOptions().put("targetEncoding", "UTF-8");
     }
 
@@ -563,6 +559,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         transformRequest.setSourceExtension(sourceExtension);
         transformRequest.setSourceSize(sourceFile.length());
         transformRequest.setTargetExtension(targetExtension);
+        transformRequest.setSourceMediaType(sourceMimetype);
 
         // HTTP Request
         HttpHeaders headers = new HttpHeaders();

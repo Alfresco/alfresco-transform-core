@@ -1,25 +1,504 @@
 {
   "transformOptions": {
     "tikaOptions": [
-      {"value": {"name": "transform"}},
+      {"value": {"name": "targetEncoding"}}
+    ],
+    "archiveOptions": [
       {"value": {"name": "includeContents"}},
+      {"value": {"name": "targetEncoding"}}
+    ],
+    "pdfboxOptions": [
       {"value": {"name": "notExtractBookmarksText"}},
-      {"value": {"name": "targetMimetype"}},
       {"value": {"name": "targetEncoding"}}
     ]
   },
   "transformers": [
     {
-      "transformerName": "tika",
+      "transformerName": "Archive",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "application/pdf",                           "maxSourceSizeBytes": 26214400, "targetMediaType": "text/plain" },
-        {"sourceMediaType": "application/msword",                                                        "targetMediaType": "text/plain"},
-        {"sourceMediaType": "application/vnd.ms-excel",                                                  "targetMediaType": "text/plain" },
-        {"sourceMediaType": "application/vnd.ms-powerpoint",                                             "targetMediaType": "text/plain" },
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",   "targetMediaType": "text/plain"},
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",         "targetMediaType": "text/plain" },
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation", "targetMediaType": "text/plain" },
-        {"sourceMediaType": "application/vnd.ms-outlook",                                                "targetMediaType": "text/plain"}
+        {"sourceMediaType": "application/x-cpio",                                                                          "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/x-cpio",                                                                          "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/x-cpio",                                                                          "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/x-cpio",                                                                          "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/java-archive",                                                                    "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/java-archive",                                                                    "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/java-archive",                                                                    "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/java-archive",                                                                    "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/x-tar",                                                                           "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/x-tar",                                                                           "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/x-tar",                                                                           "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/x-tar",                                                                           "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/zip",                                                                             "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/zip",                                                                             "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/zip",                                                                             "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/zip",                                                                             "targetMediaType": "text/xml"}
+      ],
+      "transformOptions": [
+        "archiveOptions"
+      ]
+    },
+    {
+      "transformerName": "OutlookMsg",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                                  "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                                  "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                                  "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                                  "targetMediaType": "text/xml"}
+      ],
+      "transformOptions": [
+        "tikaOptions"
+      ]
+    },
+    {
+      "transformerName": "PdfBox",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/pdf",                                                                             "targetMediaType": "text/csv"},
+        {"sourceMediaType": "application/pdf",                                                                             "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/pdf",                             "maxSourceSizeBytes": 26214400,                 "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/pdf",                                                                             "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/pdf",                                                                             "targetMediaType": "text/xml"}
+      ],
+      "transformOptions": [
+        "pdfboxOptions"
+      ]
+    },
+    {
+      "transformerName": "Office",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/msword",                                                          "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/msword",                                                          "priority": 60, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/msword",                                                          "priority": 60, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/msword",                                                          "priority": 60, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-project",                                                  "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-project",                                                  "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-project",                                                  "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-project",                                                  "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                  "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint",                                               "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint",                                               "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint",                                               "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint",                                               "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.visio",                                                       "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.visio",                                                       "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.visio",                                                       "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.visio",                                                       "priority": 55, "targetMediaType": "text/xml"}
+      ],
+      "transformOptions": [
+        "tikaOptions"
+      ]
+    },
+    {
+      "transformerName": "Poi",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/vnd.ms-excel",                                                    "priority": 55, "targetMediaType": "text/csv"},
+        {"sourceMediaType": "application/vnd.ms-excel",                                                    "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel",                                                    "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel",                                                    "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel",                                                    "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "priority": 55, "targetMediaType": "text/csv"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "priority": 65, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "priority": 60, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "priority": 60, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "priority": 60, "targetMediaType": "text/xml"}
+      ],
+      "transformOptions": [
+        "tikaOptions"
+      ]
+    },
+    {
+      "transformerName": "OOXML",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                            "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                            "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                            "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                            "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",     "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",     "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",     "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",     "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                            "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                            "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                            "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                            "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",     "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",     "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",     "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",     "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.template.macroenabled.12",                      "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.template.macroenabled.12",                      "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.template.macroenabled.12",                      "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.template.macroenabled.12",                      "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.template",       "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.template",       "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.template",       "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.template",       "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.addin.macroenabled.12",                         "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.addin.macroenabled.12",                         "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.addin.macroenabled.12",                         "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.addin.macroenabled.12",                         "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12",                     "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12",                     "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12",                     "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12",                     "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",      "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",      "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",      "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",      "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.presentation.macroenabled.12",                  "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.presentation.macroenabled.12",                  "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.presentation.macroenabled.12",                  "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.presentation.macroenabled.12",                  "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",   "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",   "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",   "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",   "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slide.macroenabled.12",                         "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slide.macroenabled.12",                         "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slide.macroenabled.12",                         "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slide.macroenabled.12",                         "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",          "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",          "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",          "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",          "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12",                              "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12",                              "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12",                              "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12",                              "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                       "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                       "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                       "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                       "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                              "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                              "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                              "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                              "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                           "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                           "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                           "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                           "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",        "priority": 60, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",        "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",        "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",        "priority": 55, "targetMediaType": "text/xml"}
+      ],
+      "transformOptions": [
+        "tikaOptions"
+      ]
+    },
+    {
+      "transformerName": "TikaAuto",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/x-cpio",                                                          "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/x-cpio",                                                          "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/x-cpio",                                                          "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/x-cpio",                                                          "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/java-archive",                                                    "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/java-archive",                                                    "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/java-archive",                                                    "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/java-archive",                                                    "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/x-netcdf",                                                                        "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/x-netcdf",                                                                        "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/x-netcdf",                                                                        "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/x-netcdf",                                                                        "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/msword",                                                          "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/msword",                                                          "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/msword",                                                          "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/msword",                                                          "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                            "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                                            "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                                            "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                                            "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"    , "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",                     "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",                     "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",                     "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                            "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                                            "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                                            "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                                            "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",     "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",                     "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",                     "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",                     "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/x-gzip",                                                                          "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/x-gzip",                                                                          "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/x-gzip",                                                                          "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/x-gzip",                                                                          "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/x-hdf",                                                                           "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/x-hdf",                                                                           "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/x-hdf",                                                                           "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/x-hdf",                                                                           "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "text/html",                                                                                   "targetMediaType": "text/html"},
+        {"sourceMediaType": "text/html",                                                                   "priority": 60, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/html",                                                                                   "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "text/html",                                                                                   "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "text/x-java-source",                                                                          "targetMediaType": "text/html"},
+        {"sourceMediaType": "text/x-java-source",                                                          "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/x-java-source",                                                                          "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "text/x-java-source",                                                                          "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.apple.keynote",                                                               "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.apple.keynote",                                                               "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.apple.keynote",                                                               "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-project",                                                                  "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-project",                                                                  "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-project",                                                                  "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-project",                                                                  "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.apple.numbers",                                                               "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.apple.numbers",                                                               "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.apple.numbers",                                                               "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.oasis.opendocument.chart",                                                    "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.chart",                                                    "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.chart",                                                    "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.chart",                                                    "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.oasis.opendocument.image",                                                    "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.image",                                                    "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.image",                                                    "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.image",                                                    "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text-master",                                              "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text-master",                                              "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text-master",                                              "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text-master",                                              "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.oasis.opendocument.presentation",                             "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.presentation",                                             "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.presentation",                                             "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.presentation",                                             "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet",                              "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet",                                              "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet",                                              "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet",                                              "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text",                                     "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text",                                                     "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text",                                                     "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text",                                                     "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/ogg",                                                                             "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/ogg",                                                                             "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/ogg",                                                                             "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/ogg",                                                                             "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text-web",                                                 "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text-web",                                                 "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text-web",                                                 "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text-web",                                                 "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.oasis.opendocument.presentation-template",                    "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.presentation-template",                                    "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.presentation-template",                                    "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.presentation-template",                                    "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet-template",                     "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet-template",                                     "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet-template",                                     "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet-template",                                     "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text-template",                            "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text-template",                                            "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text-template",                                            "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text-template",                                            "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.apple.pages",                                                                 "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.apple.pages",                                                                 "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.apple.pages",                                                                 "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/pdf",                                                             "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/pdf",                             "maxSourceSizeBytes": 26214400, "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/pdf",                                                             "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/pdf",                                                             "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.template.macroenabled.12",                      "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.template.macroenabled.12",                                      "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.template.macroenabled.12",                                      "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.template.macroenabled.12",                                      "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.template",       "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.template",                       "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.template",                       "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.template",                       "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.addin.macroenabled.12",                         "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.addin.macroenabled.12",                                         "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.addin.macroenabled.12",                                         "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.addin.macroenabled.12",                                         "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12",                                     "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12",                                     "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12",                                     "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12",                                     "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",                      "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",                      "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",                      "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",                      "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint",                                               "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint",                                                               "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint",                                                               "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint",                                                               "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.presentation.macroenabled.12",                  "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.presentation.macroenabled.12",                                  "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.presentation.macroenabled.12",                                  "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.presentation.macroenabled.12",                                  "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",   "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",                   "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",                   "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",                   "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/x-rar-compressed",                                                                "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/x-rar-compressed",                                                                "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/x-rar-compressed",                                                                "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/x-rar-compressed",                                                                "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/rss+xml",                                                                         "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/rss+xml",                                                                         "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/rss+xml",                                                                         "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/rss+xml",                                                                         "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/rtf",                                                             "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/rtf",                                                                             "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/rtf",                                                                             "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/rtf",                                                                             "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slide.macroenabled.12",                         "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slide.macroenabled.12",                                         "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slide.macroenabled.12",                                         "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slide.macroenabled.12",                                         "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",          "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",                          "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",                          "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",                          "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.sun.xml.writer",                                              "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.sun.xml.writer",                                                              "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.sun.xml.writer",                                                              "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.sun.xml.writer",                                                              "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "text/plain",                                                                  "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "text/plain",                                                                  "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/plain",                                                                  "priority": 55, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "text/plain",                                                                  "priority": 55, "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "text/xml",                                                                    "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "text/xml",                                                                    "priority": 55, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "text/xml",                                                                                    "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "text/xml",                                                                                    "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.visio",                                                                       "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.visio",                                                                       "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.visio",                                                                       "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.visio",                                                                       "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/xhtml+xml",                                                                       "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/xhtml+xml",                                                                       "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/xhtml+xml",                                                                       "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/xhtml+xml",                                                                       "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12",                                              "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12",                                              "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12",                                              "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12",                                              "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-excel",                                                    "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel",                                                                    "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel",                                                                    "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel",                                                                    "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                       "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                                       "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                                       "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                                       "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                              "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                                              "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                                              "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                                              "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",                           "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",                           "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",                           "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                                           "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                                           "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                                           "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                                           "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",        "priority": 55, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                        "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                        "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                        "targetMediaType": "text/xml"},
+
+        {"sourceMediaType": "application/x-compress",                                                                      "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/x-compress",                                                                      "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/x-compress",                                                                      "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/x-compress",                                                                      "targetMediaType": "text/xml"}
+      ],
+      "transformOptions": [
+        "tikaOptions"
+      ]
+    },
+    {
+      "transformerName": "TextMining",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/msword",                                                          "priority": 65, "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/msword",                                                          "priority": 65, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/msword",                                                          "priority": 65, "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/msword",                                                                          "targetMediaType": "text/xml"}
       ],
       "transformOptions": [
         "tikaOptions"
