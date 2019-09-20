@@ -31,7 +31,6 @@
         <dependency.poi.version>4.0.1</dependency.poi.version>
     </properties>
 
-
     <modules>
         <module>alfresco-transformer-base</module>
         <module>alfresco-docker-tika</module>
