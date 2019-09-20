@@ -319,7 +319,7 @@
         {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet",                                              "targetMediaType": "application/xhtml+xml"},
         {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet",                                              "targetMediaType": "text/xml"},
 
-        {"sourceMediaType": "application/vnd.oasis.opendocument.text",                                                     "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text",                                     "priority": 55, "targetMediaType": "text/html"},
         {"sourceMediaType": "application/vnd.oasis.opendocument.text",                                                     "targetMediaType": "text/plain"},
         {"sourceMediaType": "application/vnd.oasis.opendocument.text",                                                     "targetMediaType": "application/xhtml+xml"},
         {"sourceMediaType": "application/vnd.oasis.opendocument.text",                                                     "targetMediaType": "text/xml"},
@@ -339,12 +339,12 @@
         {"sourceMediaType": "application/vnd.oasis.opendocument.presentation-template",                                    "targetMediaType": "application/xhtml+xml"},
         {"sourceMediaType": "application/vnd.oasis.opendocument.presentation-template",                                    "targetMediaType": "text/xml"},
 
-        {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet-template",                                     "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet-template",                     "priority": 55, "targetMediaType": "text/html"},
         {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet-template",                                     "targetMediaType": "text/plain"},
         {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet-template",                                     "targetMediaType": "application/xhtml+xml"},
         {"sourceMediaType": "application/vnd.oasis.opendocument.spreadsheet-template",                                     "targetMediaType": "text/xml"},
 
-        {"sourceMediaType": "application/vnd.oasis.opendocument.text-template",                                            "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text-template",                            "priority": 55, "targetMediaType": "text/html"},
         {"sourceMediaType": "application/vnd.oasis.opendocument.text-template",                                            "targetMediaType": "text/plain"},
         {"sourceMediaType": "application/vnd.oasis.opendocument.text-template",                                            "targetMediaType": "application/xhtml+xml"},
         {"sourceMediaType": "application/vnd.oasis.opendocument.text-template",                                            "targetMediaType": "text/xml"},
@@ -408,7 +408,7 @@
         {"sourceMediaType": "application/rss+xml",                                                                         "targetMediaType": "application/xhtml+xml"},
         {"sourceMediaType": "application/rss+xml",                                                                         "targetMediaType": "text/xml"},
 
-        {"sourceMediaType": "application/rtf",                                                                             "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/rtf",                                                             "priority": 55, "targetMediaType": "text/html"},
         {"sourceMediaType": "application/rtf",                                                                             "targetMediaType": "text/plain"},
         {"sourceMediaType": "application/rtf",                                                                             "targetMediaType": "application/xhtml+xml"},
         {"sourceMediaType": "application/rtf",                                                                             "targetMediaType": "text/xml"},
@@ -423,7 +423,7 @@
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",                          "targetMediaType": "application/xhtml+xml"},
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",                          "targetMediaType": "text/xml"},
 
-        {"sourceMediaType": "application/vnd.sun.xml.writer",                                                              "targetMediaType": "text/html"},
+        {"sourceMediaType": "application/vnd.sun.xml.writer",                                              "priority": 55, "targetMediaType": "text/html"},
         {"sourceMediaType": "application/vnd.sun.xml.writer",                                                              "targetMediaType": "text/plain"},
         {"sourceMediaType": "application/vnd.sun.xml.writer",                                                              "targetMediaType": "application/xhtml+xml"},
         {"sourceMediaType": "application/vnd.sun.xml.writer",                                                              "targetMediaType": "text/xml"},
