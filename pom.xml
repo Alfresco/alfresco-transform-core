@@ -23,13 +23,14 @@
         <dependency.pdfbox.version>2.0.16</dependency.pdfbox.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
-        <dependency.alfresco-transform-model.version>1.0.2.8-SNAPSHOT</dependency.alfresco-transform-model.version>
+        <dependency.alfresco-transform-model.version>1.0.2.7</dependency.alfresco-transform-model.version>
         <dependency.activemq.version>5.15.9</dependency.activemq.version>
         <dependency.jackson.version>2.9.9</dependency.jackson.version>
         <dependency.jackson-databind.version>2.9.9.3</dependency.jackson-databind.version>
         <dependency.cxf.version>3.3.3</dependency.cxf.version>
         <dependency.poi.version>4.0.1</dependency.poi.version>
     </properties>
+
 
     <modules>
         <module>alfresco-transformer-base</module>
