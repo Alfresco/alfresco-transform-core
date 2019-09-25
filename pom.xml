@@ -25,8 +25,7 @@
         <env.project_version>${project.version}</env.project_version>
         <dependency.alfresco-transform-model.version>1.0.2.7</dependency.alfresco-transform-model.version>
         <dependency.activemq.version>5.15.9</dependency.activemq.version>
-        <dependency.jackson.version>2.9.9</dependency.jackson.version>
-        <dependency.jackson-databind.version>2.9.9.3</dependency.jackson-databind.version>
+        <dependency.jackson.version>2.9.10</dependency.jackson.version>
         <dependency.cxf.version>3.3.3</dependency.cxf.version>
         <dependency.poi.version>4.0.1</dependency.poi.version>
     </properties>
@@ -109,7 +108,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${dependency.jackson-databind.version}</version>
+                <version>${dependency.jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
