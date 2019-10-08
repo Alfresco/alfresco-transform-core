@@ -47,6 +47,7 @@ The core T-Engine images are available on Docker Hub:
 * [alfresco/alfresco-pdf-renderer](https://hub.docker.com/r/alfresco/alfresco-pdf-renderer)
 * [alfresco/alfresco-libreoffice](https://hub.docker.com/r/alfresco/alfresco-libreoffice)
 * [alfresco/alfresco-tika](https://hub.docker.com/r/alfresco/alfresco-tika)
+* [alfresco/alfresco-transform-misc](https://hub.docker.com/r/alfresco/alfresco-transform-misc)
 
 ### Release Process
 
@@ -59,3 +60,4 @@ under the `docs` folder.
 
 Please use [this guide](https://github.com/Alfresco/alfresco-repository/blob/master/CONTRIBUTING.md)
 to make a contribution to the project.
+
