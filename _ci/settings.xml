@@ -64,6 +64,12 @@
             <username>bamboo</username>
             <password>${env.NEXUS_PASSWORD}</password>
         </server>
+        <server>
+            <id>alfresco-thirdparty</id>
+            <username>bamboo</username>
+            <password>${env.NEXUS_PASSWORD}</password>
+        </server>
+        
         <!-- private docker registry-->
         <server>
             <id>quay.io</id>
