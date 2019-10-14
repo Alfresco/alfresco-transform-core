@@ -18,11 +18,9 @@ cache:
 branches:
   only:
     - master
-    - SP/1.3.N
-    - SP/2.0.N
+    - /^SP\/.+$/
     - release
-    - release/SP/1.3.N
-    - release/SP/2.0.N
+    - /^release\/SP\/.+$/
     - company_release
     - /^ATS-.*$/
 
@@ -48,7 +46,7 @@ jobs:
 
     - name: "Release"
       stage: release
-      if: branch IN (release, release/SP/1.3.N, release/SP/2.0.N)
+      if: branch = release OR branch =~ /^release\/SP\/.+$/
       before_install: bash _ci/init.sh
       before_script: travis_wait bash _ci/cache_artifacts.sh
       script: travis_wait 30 bash _ci/release.sh
@@ -63,12 +61,13 @@ jobs:
         local_dir: "deploy_dir"
         upload-dir: "enterprise/AlfrescoTransformServices/TransformEngines/${VERSION}"
         on:
-          branch: release
+          all_branches: true
 
     - name: "Company Release"
       stage: company_release
       if: branch = company_release
       before_install: bash _ci/init.sh
+      install: echo "NoOp"
       script: echo "NoOp"
       before_deploy: source _ci/prepare_release_deploy.sh
       deploy:
