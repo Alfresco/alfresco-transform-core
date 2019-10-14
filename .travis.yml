@@ -46,7 +46,7 @@ jobs:
 
     - name: "Release"
       stage: release
-      if: branch IN (release, release/SP/1.3.N, release/SP/2.0.N)
+      if: branch = release OR branch =~ /^release\/SP\/.+$/
       before_install: bash _ci/init.sh
       before_script: travis_wait bash _ci/cache_artifacts.sh
       script: travis_wait 30 bash _ci/release.sh
