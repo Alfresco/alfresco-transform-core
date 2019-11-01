@@ -15,9 +15,9 @@
     <packaging>pom</packaging>
 
     <properties>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>11</java.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         
         <image.tag>latest</image.tag>
         <dependency.pdfbox.version>2.0.17</dependency.pdfbox.version>
@@ -304,7 +304,7 @@
                             <id>before-integration-tests</id>
                             <phase>pre-integration-test</phase>
                             <goals>
-                                <!--<goal>stop</goal>-->
+                                <goal>stop</goal>
                                 <goal>start</goal>
                             </goals>
                         </execution>
