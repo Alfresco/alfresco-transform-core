@@ -292,7 +292,7 @@
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>fabric8-maven-plugin</artifactId>
-                    <version>4.2.0</version>
+                    <version>4.3.1</version>
                 </plugin>
                 <plugin>
                     <groupId>io.fabric8</groupId>
