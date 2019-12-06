@@ -35,7 +35,6 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -352,7 +351,7 @@ public abstract class AbstractTransformerControllerTest
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get("/transform/config"))
             .andExpect(status().is(OK.value()))
-            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
             .andReturn().getResponse().getContentAsString();
 
         TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
@@ -371,7 +370,7 @@ public abstract class AbstractTransformerControllerTest
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get("/transform/config"))
             .andExpect(status().is(OK.value()))
-            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
             .andReturn().getResponse().getContentAsString();
 
         TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
@@ -398,7 +397,7 @@ public abstract class AbstractTransformerControllerTest
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get("/transform/config"))
             .andExpect(status().is(OK.value()))
-            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
             .andReturn().getResponse().getContentAsString();
 
         TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
@@ -421,7 +420,7 @@ public abstract class AbstractTransformerControllerTest
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get("/transform/config"))
             .andExpect(status().is(OK.value()))
-            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
             .andReturn().getResponse().getContentAsString();
 
         TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
