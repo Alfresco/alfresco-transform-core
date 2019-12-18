@@ -2,7 +2,7 @@
 
 # ImageMagick is from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt.
 
-FROM alfresco/alfresco-base-java:11.0.1-openjdk-centos-7-7a6031154417
+FROM alfresco/alfresco-base-java:11.0.1-openjdk-centos-7-4c75291884e5
 
 ARG IMAGEMAGICK_VERSION=7.0.7-27
 
