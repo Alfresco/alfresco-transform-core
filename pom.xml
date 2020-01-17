@@ -26,7 +26,7 @@
         <dependency.alfresco-transform-model.version>1.0.2.7</dependency.alfresco-transform-model.version>
         <dependency.activemq.version>5.15.9</dependency.activemq.version>
         <dependency.jackson.version>2.10.1</dependency.jackson.version>
-        <dependency.cxf.version>3.3.4</dependency.cxf.version>
+        <dependency.cxf.version>3.3.5</dependency.cxf.version>
         <dependency.poi.version>4.1.1</dependency.poi.version>
     </properties>
 
