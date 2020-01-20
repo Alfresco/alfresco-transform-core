@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.8.RELEASE</version>
+        <version>2.2.3.RELEASE</version>
         <relativePath />
     </parent>
 
@@ -15,19 +15,19 @@
     <packaging>pom</packaging>
 
     <properties>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>11</java.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         
         <image.tag>latest</image.tag>
-        <dependency.pdfbox.version>2.0.17</dependency.pdfbox.version>
+        <dependency.pdfbox.version>2.0.18</dependency.pdfbox.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
         <dependency.alfresco-transform-model.version>1.0.2.7</dependency.alfresco-transform-model.version>
         <dependency.activemq.version>5.15.9</dependency.activemq.version>
-        <dependency.jackson.version>2.10.0</dependency.jackson.version>
-        <dependency.cxf.version>3.3.3</dependency.cxf.version>
-        <dependency.poi.version>4.0.1</dependency.poi.version>
+        <dependency.jackson.version>2.10.2</dependency.jackson.version>
+        <dependency.cxf.version>3.3.5</dependency.cxf.version>
+        <dependency.poi.version>4.1.1</dependency.poi.version>
     </properties>
 
     <modules>
@@ -43,7 +43,7 @@
         <connection>scm:git:https://github.com/Alfresco/alfresco-transform-core.git</connection>
         <developerConnection>scm:git:https://github.com/Alfresco/alfresco-transform-core.git</developerConnection>
         <url>https://github.com/Alfresco/alfresco-transform-core</url>
-        <tag>2.1.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencyManagement>
@@ -140,7 +140,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>28.1-jre</version>
+                <version>28.2-jre</version>
             </dependency>
             <!-- Junrar & compression -->
             <dependency>
@@ -163,7 +163,7 @@
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.13</version>
+                <version>1.14</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -292,19 +292,19 @@
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>fabric8-maven-plugin</artifactId>
-                    <version>4.2.0</version>
+                    <version>4.3.1</version>
                 </plugin>
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
-                    <version>0.31.0</version>
+                    <version>0.32.0</version>
                     <extensions>true</extensions>
                     <executions>
                         <execution>
                             <id>before-integration-tests</id>
                             <phase>pre-integration-test</phase>
                             <goals>
-                                <!--<goal>stop</goal>-->
+                                <goal>stop</goal>
                                 <goal>start</goal>
                             </goals>
                         </execution>
