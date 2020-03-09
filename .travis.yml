@@ -46,6 +46,7 @@ jobs:
     - name: "Source Clear Scan"
       stage: build
       if: branch NOT IN (company_release)
+      before_install: bash _ci/init.sh
       script: skip
       addons:
         srcclr: true
