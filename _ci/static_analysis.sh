@@ -5,10 +5,13 @@ PS4="\[\e[35m\]+ \[\e[m\]"
 set -vex
 pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 
+# Run in a sandbox for every branch, run normally on master
+[ "${TRAVIS_BRANCH}" != "master" ] && RUN_IN_SANDBOX="-sandboxname Transformers" || RUN_IN_SANDBOX=""
+
 java -jar vosp-api-wrappers-java-$VERACODE_WRAPPER_VERSION.jar -vid $VERACODE_API_ID \
      -vkey $VERACODE_API_KEY -action uploadandscan -appname "Transform Service" \
-     -sandboxname "Transformers Sandbox" \
-     -createprofile false -filepath \
+     ${RUN_IN_SANDBOX} -createprofile false \
+     -filepath \
      alfresco-transformer-base/target/alfresco-transformer-base-*.jar \
      alfresco-docker-alfresco-pdf-renderer/target/alfresco-docker-alfresco-pdf-renderer-*.jar \
      alfresco-docker-imagemagick/target/alfresco-docker-imagemagick-*.jar \
