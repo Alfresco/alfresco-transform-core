@@ -47,9 +47,8 @@ jobs:
       stage: build
       if: branch NOT IN (company_release)
       before_install: bash _ci/init.sh
-      script: skip
-      addons:
-        srcclr: true
+      install: skip
+      script: travis_wait 30 bash _ci/sourceclear.sh
 
     - name: "Static Analysis (SAST)"
       stage: build
