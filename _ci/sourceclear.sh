@@ -15,8 +15,8 @@ SUCCESS=$?   # this will read exit code of the previous command
 
 cat scan.log | grep -e 'Full Report Details' -e 'Failed'
 
-exit ${SUCCESS}
-
 popd
 set +vex
 echo "=========================== Finishing SourceClear Script =========================="
+
+exit ${SUCCESS}
