@@ -43,6 +43,21 @@ jobs:
       before_install: bash _ci/init.sh
       script: bash _ci/whitesource.sh
 
+    - name: "Source Clear Scan (SCA)"
+      stage: build
+      if: branch NOT IN (company_release)
+      before_install: bash _ci/init.sh
+      install: skip
+      script: travis_wait 30 bash _ci/sourceclear.sh
+
+    - name: "Static Analysis (SAST)"
+      stage: build
+      if: branch NOT IN (company_release) AND type != pull_request
+      before_install:
+      - bash _ci/static_analysis_init.sh
+      - bash _ci/init.sh
+      script: bash _ci/static_analysis.sh
+
     - name: "Release"
       stage: release
       if: commit_message ~= /\[trigger release\]/ AND branch ~= /^(master|SP\/.+|HF\/.+)$/
