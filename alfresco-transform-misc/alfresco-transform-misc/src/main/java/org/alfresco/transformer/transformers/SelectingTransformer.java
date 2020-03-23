@@ -47,7 +47,6 @@ import com.google.common.collect.ImmutableMap;
  *
  * @author eknizat
  */
-@Component
 public class SelectingTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(SelectingTransformer.class);

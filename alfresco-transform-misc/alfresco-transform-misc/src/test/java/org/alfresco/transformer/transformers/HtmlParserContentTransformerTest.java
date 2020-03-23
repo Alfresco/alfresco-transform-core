@@ -26,8 +26,11 @@
  */
 package org.alfresco.transformer.transformers;
 
-import static org.alfresco.transformer.transformers.StringExtractingContentTransformer.SOURCE_ENCODING;
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+//import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,21 +39,18 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
+import static org.alfresco.transformer.transformers.StringExtractingContentTransformer.SOURCE_ENCODING;
+import static org.junit.Assert.assertEquals;
 
-@RunWith(SpringRunner.class)
-@Import(HtmlParserContentTransformer.class)
+//@RunWith(SpringRunner.class)
+//@Import(HtmlParserContentTransformer.class)
 public class HtmlParserContentTransformerTest
 {
     private static final String SOURCE_MIMETYPE = "text/html";
     private static final String TARGET_MIMETYPE = "text/plain";
 
-    @Autowired
-    HtmlParserContentTransformer transformer;
+//    @Autowired
+    HtmlParserContentTransformer transformer = new HtmlParserContentTransformer();
 
     /**
      * Checks that we correctly handle text in different encodings,
