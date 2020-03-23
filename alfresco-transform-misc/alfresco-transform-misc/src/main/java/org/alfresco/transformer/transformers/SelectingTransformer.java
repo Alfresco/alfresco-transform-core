@@ -37,7 +37,6 @@ import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
 

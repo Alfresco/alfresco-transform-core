@@ -60,7 +60,7 @@ jobs:
 
     - name: "Release"
       stage: release
-      if: commit_message ~= /\[trigger release\]/ AND branch ~= /^(master|SP\/.+|HF\/.+)$/
+      if: commit_message ~= /\[trigger release\]/ AND branch ~= /^(ATS-671_skinny_jars_in_modules|master|SP\/.+|HF\/.+)$/
       before_install: bash _ci/init.sh
       before_script: travis_wait bash _ci/cache_artifacts.sh
       script: travis_wait 30 bash _ci/release.sh

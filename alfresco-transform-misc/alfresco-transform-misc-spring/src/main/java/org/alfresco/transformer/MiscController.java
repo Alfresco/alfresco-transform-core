@@ -60,8 +60,7 @@ public class MiscController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(MiscController.class);
 
-    @Autowired
-    private SelectingTransformer transformer;
+    private SelectingTransformer transformer = new SelectingTransformer();
 
     @Override
     public String getTransformerName()

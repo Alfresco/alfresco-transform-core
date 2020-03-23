@@ -62,7 +62,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(MiscController.class)
-@Import({SelectingTransformer.class})
 public class MiscControllerTest extends AbstractTransformerControllerTest
 {
     @Autowired
