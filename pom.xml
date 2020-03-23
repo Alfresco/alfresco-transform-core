@@ -37,6 +37,7 @@
         <module>alfresco-docker-imagemagick</module>
         <module>alfresco-docker-libreoffice</module>
         <module>alfresco-docker-transform-misc</module>
+        <module>alfresco-transform-misc/alfresco-transform-misc</module>
     </modules>
 
     <scm>
