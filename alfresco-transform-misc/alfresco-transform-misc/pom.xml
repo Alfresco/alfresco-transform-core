@@ -15,6 +15,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-transformer-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
         </dependency>
