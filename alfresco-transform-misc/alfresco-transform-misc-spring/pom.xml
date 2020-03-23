@@ -58,40 +58,6 @@
             <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
         </dependency>
-
-        <!-- HtmlParserContentTransformer -->
-        <dependency>
-            <groupId>org.htmlparser</groupId>
-            <artifactId>htmlparser</artifactId>
-            <version>2.1</version>
-        </dependency>
-
-        <!-- AppleIWorksContentTransformer -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-        </dependency>
-
-        <!-- TextToPdfContentTransformer -->
-        <dependency>
-            <groupId>org.apache.pdfbox</groupId>
-            <artifactId>pdfbox-tools</artifactId>
-            <version>2.0.19</version>
-        </dependency>
-
-        <!-- OOXMLThumbnailContentTransformer -->
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>${dependency.poi.version}</version>
-        </dependency>
-
-        <!-- EMLTransformer -->
-        <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-            <version>1.6.2</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -312,7 +278,7 @@
                                 <phase>deploy</phase>
                                 <goals>
                                     <goal>build</goal>
-                                    <goal>push</goal>
+                                    <!--<goal>push</goal>-->
                                 </goals>
                             </execution>
                         </executions>

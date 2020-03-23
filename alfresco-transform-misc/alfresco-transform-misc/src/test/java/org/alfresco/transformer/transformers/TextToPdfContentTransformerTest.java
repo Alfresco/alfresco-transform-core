@@ -30,9 +30,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 
 
 import java.io.File;
@@ -45,11 +42,8 @@ import java.util.Map;
 import static org.alfresco.transformer.transformers.TextToPdfContentTransformer.PAGE_LIMIT;
 import static org.junit.Assert.assertEquals;
 
-//@RunWith(SpringRunner.class)
-//@Import(TextToPdfContentTransformer.class)
 public class TextToPdfContentTransformerTest
 {
-//    @Autowired
     TextToPdfContentTransformer transformer = new TextToPdfContentTransformer();
 
     @Before

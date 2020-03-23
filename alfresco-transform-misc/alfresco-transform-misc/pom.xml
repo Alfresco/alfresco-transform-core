@@ -15,21 +15,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-transformer-base</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-transformer-base</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- needed? -->
-        <dependency>
             <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
         </dependency>
@@ -97,6 +82,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>
