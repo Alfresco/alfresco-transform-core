@@ -11,9 +11,9 @@ ARG GROUPID=1000
 ARG USERNAME=transform-misc
 ARG USERID=33004
 
-COPY target/alfresco-docker-transform-misc-${env.project_version}.jar /usr/bin
+COPY target/alfresco-transform-misc-spring-${env.project_version}.jar /usr/bin
 
-RUN ln /usr/bin/alfresco-docker-transform-misc-${env.project_version}.jar /usr/bin/alfresco-docker-transform-misc.jar && \
+RUN ln /usr/bin/alfresco-transform-misc-spring-${env.project_version}.jar /usr/bin/alfresco-transform-misc-spring.jar && \
     curl -s -S $APACHE_LICENSE_FILE -o Apache\ 2.0.txt && \
     yum clean all
 
@@ -23,10 +23,10 @@ ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
     useradd -u ${USERID} -G ${GROUPNAME} ${USERNAME} && \
-    chgrp -R ${GROUPNAME} /usr/bin/alfresco-docker-transform-misc.jar
+    chgrp -R ${GROUPNAME} /usr/bin/alfresco-transform-misc-spring.jar
 
 EXPOSE 8090
 
 USER ${USERNAME}
 
-ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-docker-transform-misc.jar
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-transform-misc-spring.jar
