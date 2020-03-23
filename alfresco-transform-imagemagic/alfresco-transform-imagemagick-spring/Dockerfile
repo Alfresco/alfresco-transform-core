@@ -17,9 +17,9 @@ ARG GROUPID=1000
 ARG USERNAME=imagemagick
 ARG USERID=33002
 
-COPY target/alfresco-docker-imagemagick-${env.project_version}.jar /usr/bin
+COPY target/alfresco-transform-imagemagick-spring-${env.project_version}.jar /usr/bin
 
-RUN ln /usr/bin/alfresco-docker-imagemagick-${env.project_version}.jar /usr/bin/alfresco-docker-imagemagick.jar && \
+RUN ln /usr/bin/alfresco-transform-imagemagick-spring-${env.project_version}.jar /usr/bin/alfresco-transform-imagemagick-spring.jar && \
     curl -s -S $IMAGEMAGICK_RPM_URL      -o imagemagick-distribution-linux.rpm && \
     curl -s -S $IMAGEMAGICK_LIB_RPM_URL  -o imagemagick-distribution-libs-linux.rpm && \
     curl -s -S $IMAGEMAGICK_LICENSE_FILE -o ImageMagick-license.txt && \
@@ -33,10 +33,10 @@ ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
     useradd -u ${USERID} -G ${GROUPNAME} ${USERNAME} && \
-    chgrp -R ${GROUPNAME} /usr/bin/alfresco-docker-imagemagick.jar
+    chgrp -R ${GROUPNAME} /usr/bin/alfresco-transform-imagemagick-spring.jar
 
 EXPOSE 8090
 
 USER ${USERNAME}
 
-ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-docker-imagemagick.jar
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-transform-imagemagick-spring.jar

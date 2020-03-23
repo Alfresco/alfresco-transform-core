@@ -26,10 +26,10 @@
  */
 package org.alfresco.transformer.executors;
 
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.springframework.stereotype.Component;
 
 /**
  * CommandExecutor implementation for running ImageMagick transformations. It runs the

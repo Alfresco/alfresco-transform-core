@@ -14,7 +14,8 @@ java -jar vosp-api-wrappers-java-$VERACODE_WRAPPER_VERSION.jar -vid $VERACODE_AP
      -filepath \
      alfresco-transformer-base/target/alfresco-transformer-base-*.jar \
      alfresco-docker-alfresco-pdf-renderer/target/alfresco-docker-alfresco-pdf-renderer-*.jar \
-     alfresco-docker-imagemagick/target/alfresco-docker-imagemagick-*.jar \
+     alfresco-transform-imagemagick/alfresco-transform-imagemagick/target/alfresco-transform-imagemagick-*.jar \
+     alfresco-transform-imagemagick/alfresco-transform-imagemagick-spring/target/alfresco-transform-imagemagick-spring-*.jar \
      alfresco-docker-libreoffice/target/alfresco-docker-libreoffice-*.jar \
      alfresco-docker-tika/target/alfresco-docker-tika-*.jar \
      alfresco-transform-misc/alfresco-transform-misc/target/alfresco-transform-misc-*.jar \
