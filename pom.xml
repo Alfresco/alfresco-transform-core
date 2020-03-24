@@ -35,8 +35,8 @@
         <module>alfresco-docker-tika</module>
         <module>alfresco-docker-alfresco-pdf-renderer</module>
         <module>alfresco-docker-libreoffice</module>
-        <module>alfresco-transform-imagemagic/alfresco-transform-imagemagick-spring</module>
-        <module>alfresco-transform-imagemagic/alfresco-transform-imagemagic</module>
+        <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-spring</module>
+        <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick</module>
         <module>alfresco-transform-misc/alfresco-transform-misc-spring</module>
         <module>alfresco-transform-misc/alfresco-transform-misc</module>
     </modules>
