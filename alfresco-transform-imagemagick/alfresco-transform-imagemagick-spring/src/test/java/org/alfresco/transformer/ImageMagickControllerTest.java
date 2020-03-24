@@ -94,8 +94,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     @Mock
     private RuntimeExec mockCheckCommand;
 
-    @SpyBean
-    private ImageMagickCommandExecutor commandExecutor;
+    private ImageMagickCommandExecutor commandExecutor = new ImageMagickCommandExecutor();
 
     @SpyBean
     private ImageMagickController controller;
@@ -105,6 +104,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     {
         ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
+        ReflectionTestUtils.setField(controller, "commandExecutor", commandExecutor);
 
         mockTransformCommand("jpg", "png", "image/jpg", true);
     }

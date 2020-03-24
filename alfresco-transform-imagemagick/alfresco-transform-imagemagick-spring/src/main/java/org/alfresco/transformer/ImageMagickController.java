@@ -79,8 +79,7 @@ public class ImageMagickController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(ImageMagickController.class);
 
-    @Autowired
-    private ImageMagickCommandExecutor commandExecutor;
+    private ImageMagickCommandExecutor commandExecutor = new ImageMagickCommandExecutor();
 
     @Override
     public String getTransformerName()
