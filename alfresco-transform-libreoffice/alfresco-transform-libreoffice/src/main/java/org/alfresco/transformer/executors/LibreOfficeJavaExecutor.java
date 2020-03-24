@@ -59,8 +59,7 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
 
     private JodConverter jodconverter;
 
-    @PostConstruct
-    public void init()
+    public LibreOfficeJavaExecutor()
     {
         jodconverter = createJodConverter();
     }
@@ -125,6 +124,10 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
 
     public void convert(File sourceFile, File targetFile)
     {
+        if (jodconverter == null)
+        {
+            System.out.println("NULL!!!!");
+        }
         OfficeManager officeManager = jodconverter.getOfficeManager();
         OfficeDocumentConverter converter = new OfficeDocumentConverter(officeManager);
         converter.convert(sourceFile, targetFile);
