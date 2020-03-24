@@ -84,8 +84,7 @@ public class TikaController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(TikaController.class);
 
-    @Autowired
-    private TikaJavaExecutor javaExecutor;
+    private TikaJavaExecutor javaExecutor = new TikaJavaExecutor();
 
     @Override
     public String getTransformerName()

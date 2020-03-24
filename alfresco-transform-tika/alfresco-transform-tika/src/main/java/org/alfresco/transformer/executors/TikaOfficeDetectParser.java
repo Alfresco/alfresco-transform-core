@@ -26,12 +26,6 @@
  */
 package org.alfresco.transformer.executors;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PushbackInputStream;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.poi.poifs.common.POIFSConstants;
 import org.apache.poi.util.IOUtils;
 import org.apache.tika.exception.TikaException;
@@ -43,6 +37,12 @@ import org.apache.tika.parser.microsoft.OfficeParser;
 import org.apache.tika.parser.microsoft.ooxml.OOXMLParser;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 ///////// THIS FILE WAS A COPY OF THE CODE IN alfresco-repository /////////////
 

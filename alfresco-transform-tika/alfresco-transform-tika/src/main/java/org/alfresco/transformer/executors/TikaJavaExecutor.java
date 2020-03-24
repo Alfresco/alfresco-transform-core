@@ -26,20 +26,20 @@
  */
 package org.alfresco.transformer.executors;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.StringJoiner;
-
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.apache.tika.exception.TikaException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.StringJoiner;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
  * JavaExecutor implementation for running TIKA transformations. It loads the
@@ -50,10 +50,16 @@ public class TikaJavaExecutor implements JavaExecutor
 {
     private final Tika tika;
 
-    @Autowired
-    public TikaJavaExecutor() throws TikaException, IOException, SAXException
+    public TikaJavaExecutor()
     {
-        tika = new Tika();
+        try
+        {
+            tika = new Tika();
+        }
+        catch (SAXException | IOException | TikaException e)
+        {
+            throw new RuntimeException("Unable to instantiate Tika:  " + e.getMessage());
+        }
     }
 
     @Override

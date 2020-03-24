@@ -32,7 +32,8 @@
 
     <modules>
         <module>alfresco-transformer-base</module>
-        <module>alfresco-docker-tika</module>
+        <module>alfresco-transform-tika/alfresco-transform-tika</module>
+        <module>alfresco-transform-tika/alfresco-transform-tika-spring</module>
         <module>alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer</module>
         <module>alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer-boot</module>
         <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice</module>

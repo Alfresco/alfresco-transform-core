@@ -134,9 +134,6 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     private RuntimeExec mockCheckCommand;
 
     @SpyBean
-    private TikaJavaExecutor javaExecutor;
-
-    @SpyBean
     private TikaController controller;
 
     private String targetEncoding = "UTF-8";
