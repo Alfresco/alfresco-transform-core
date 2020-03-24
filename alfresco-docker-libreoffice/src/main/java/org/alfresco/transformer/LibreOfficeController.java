@@ -77,7 +77,8 @@ public class LibreOfficeController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeController.class);
 
-    private LibreOfficeJavaExecutor javaExecutor = new LibreOfficeJavaExecutor();
+    @Autowired
+    private LibreOfficeJavaExecutor javaExecutor;
 
     @Override
     public String getTransformerName()

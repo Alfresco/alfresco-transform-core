@@ -26,6 +26,8 @@
  */
 package org.alfresco.transformer.executors;
 
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +35,7 @@ import java.util.Map;
  * CommandExecutor implementation for running ImageMagick transformations. It runs the
  * transformation logic as a separate Shell process.
  */
+@Component
 public class ImageMagickCommandExecutor extends AbstractCommandExecutor
 {
     private static final String ROOT = "/usr/lib64/ImageMagick-7.0.7";

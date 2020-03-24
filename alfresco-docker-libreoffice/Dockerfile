@@ -16,9 +16,9 @@ ARG GROUPID=1000
 ARG USERNAME=libreoffice
 ARG USERID=33003
 
-COPY target/alfresco-transform-libreoffice-spring-${env.project_version}.jar libreoffice-dist-*-linux.gz /
+COPY target/alfresco-docker-libreoffice-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
-RUN ln /alfresco-transform-libreoffice-spring-${env.project_version}.jar /usr/bin/alfresco-transform-libreoffice-spring.jar && \
+RUN ln /alfresco-docker-libreoffice-${env.project_version}.jar /usr/bin/alfresco-docker-libreoffice.jar && \
     yum install -y cairo cups-libs libSM && \
     test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
     ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
@@ -35,10 +35,10 @@ ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
     useradd -u ${USERID} -G ${GROUPNAME} ${USERNAME} && \
-    chgrp -R ${GROUPNAME} /usr/bin/alfresco-transform-libreoffice-spring.jar
+    chgrp -R ${GROUPNAME} /usr/bin/alfresco-docker-libreoffice.jar
 
 EXPOSE 8090
 
 USER ${USERNAME}
 
-ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-transform-libreoffice-spring.jar
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-docker-libreoffice.jar

@@ -16,7 +16,7 @@ else
     echo "Downloading LibreOffice distribution..."
     curl -s -S ${LIBREOFFICE_RPM_URL} -o "${HOME}/artifacts/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz"
 fi
-cp "${HOME}/artifacts/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz" alfresco-transform-libreoffice-spring/
+cp "${HOME}/artifacts/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz" alfresco-docker-libreoffice/
 
 
 popd
