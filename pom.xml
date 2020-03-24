@@ -41,6 +41,7 @@
         <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-spring</module>
         <module>alfresco-transform-misc/alfresco-transform-misc</module>
         <module>alfresco-transform-misc/alfresco-transform-misc-spring</module>
+        <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice</module>
     </modules>
 
     <scm>
