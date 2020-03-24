@@ -11,12 +11,13 @@ ENV JAVA_OPTS=""
 # Set default user information
 ARG GROUPNAME=Alfresco
 ARG GROUPID=1000
-ARG USERNAME=pdf
+ARG IMAGEUSERNAME=pdf
 ARG USERID=33001
+ARG ARTIFACT=${env.project_artifactId}-${env.project_version}.jar
 
-COPY target/alfresco-docker-alfresco-pdf-renderer-${env.project_version}.jar /usr/bin
+COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 
-RUN ln /usr/bin/alfresco-docker-alfresco-pdf-renderer-${env.project_version}.jar /usr/bin/alfresco-docker-alfresco-pdf-renderer.jar && \
+RUN ln /usr/bin/${ARTIFACT} /usr/bin/${env.project_artifactId}.jar && \
     curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz && \
     curl -s -S $PDFIUM_LICENSE_FILE               -o pdfium.txt && \
     tar xf alfresco-pdf-renderer-linux.tgz -C /usr/bin && \
@@ -28,12 +29,12 @@ ADD target/generated-resources/licenses.xml          /licenses/
 ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
-    useradd -u ${USERID} -G ${GROUPNAME} ${USERNAME} && \
-    chgrp -R ${GROUPNAME} /usr/bin/alfresco-docker-alfresco-pdf-renderer.jar
+    useradd -u ${USERID} -G ${GROUPNAME} ${IMAGEUSERNAME} && \
+    chgrp -R ${GROUPNAME} /usr/bin/${env.project_artifactId}.jar
 
 EXPOSE 8090
 
-USER ${USERNAME}
+USER ${IMAGEUSERNAME}
 
-ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-docker-alfresco-pdf-renderer.jar
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/${env.project_artifactId}.jar
 

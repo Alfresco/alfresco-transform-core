@@ -10,12 +10,13 @@
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-transform-core</artifactId>
         <version>2.1.2-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <properties>
         <image.name>alfresco/alfresco-pdf-renderer</image.name>
         <image.registry>quay.io</image.registry>
+        <env.project_artifactId>${artifactId}</env.project_artifactId>
     </properties>
 
     <dependencies>
