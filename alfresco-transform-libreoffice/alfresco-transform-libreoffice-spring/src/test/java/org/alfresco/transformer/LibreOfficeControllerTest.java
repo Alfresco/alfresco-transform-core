@@ -70,6 +70,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
@@ -95,6 +96,8 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
         sourceExtension = "doc";
         targetExtension = "pdf";
         sourceMimetype = "application/msword";
+
+        ReflectionTestUtils.setField(controller, "javaExecutor", javaExecutor);
 
         // The following is based on super.mockTransformCommand(...)
         // This is because LibreOffice used JodConverter rather than a RuntimeExec
