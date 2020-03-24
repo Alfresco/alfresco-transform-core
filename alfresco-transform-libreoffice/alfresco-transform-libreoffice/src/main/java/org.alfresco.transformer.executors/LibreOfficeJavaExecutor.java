@@ -51,7 +51,6 @@ import com.sun.star.task.ErrorCodeIOException;
  * JavaExecutor implementation for running LibreOffice transformations. It loads the
  * transformation logic in the same JVM (check the {@link JodConverter} implementation).
  */
-@Component
 public class LibreOfficeJavaExecutor implements JavaExecutor
 {
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeJavaExecutor.class);
