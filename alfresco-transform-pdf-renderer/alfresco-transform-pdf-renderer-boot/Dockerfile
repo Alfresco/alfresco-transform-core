@@ -15,7 +15,7 @@ ARG IMAGEUSERNAME=pdf
 ARG USERID=33001
 ARG ARTIFACT=${env.project_artifactId}-${env.project_version}.jar
 
-COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
+COPY target/${ARTIFACT}.jar /usr/bin
 
 RUN ln /usr/bin/${ARTIFACT} /usr/bin/${env.project_artifactId}.jar && \
     curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz && \
