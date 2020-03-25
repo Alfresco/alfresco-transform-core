@@ -95,7 +95,8 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
     @Mock
     private RuntimeExec mockCheckCommand;
 
-    private PdfRendererCommandExecutor commandExecutor = new PdfRendererCommandExecutor();
+    @SpyBean
+    private PdfRendererCommandExecutor commandExecutor;
 
     @SpyBean
     private AlfrescoPdfRendererController controller;
