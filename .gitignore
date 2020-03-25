@@ -29,6 +29,7 @@ target
 # Package Files #
 
 *.jar
+!quick.jar
 *.war
 *.ear
 
