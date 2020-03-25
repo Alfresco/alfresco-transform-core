@@ -13,9 +13,9 @@ ARG GROUPID=1000
 ARG USERNAME=tika
 ARG USERID=33004
 
-COPY target/alfresco-docker-tika-${env.project_version}.jar /usr/bin
+COPY target/alfresco-transform-tika-spring-${env.project_version}.jar /usr/bin
 
-RUN ln /usr/bin/alfresco-docker-tika-${env.project_version}.jar /usr/bin/alfresco-docker-tika.jar && \
+RUN ln /usr/bin/alfresco-transform-tika-spring-${env.project_version}.jar /usr/bin/alfresco-transform-tika-spring.jar && \
     curl -s -S $APACHE_LICENSE_FILE -o Apache\ 2.0.txt && \
     yum clean all
 
@@ -25,10 +25,10 @@ ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
     useradd -u ${USERID} -G ${GROUPNAME} ${USERNAME} && \
-    chgrp -R ${GROUPNAME} /usr/bin/alfresco-docker-tika.jar
+    chgrp -R ${GROUPNAME} /usr/bin/alfresco-transform-tika-spring.jar
 
 EXPOSE 8090
 
 USER ${USERNAME}
 
-ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-docker-tika.jar
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-transform-tika-spring.jar

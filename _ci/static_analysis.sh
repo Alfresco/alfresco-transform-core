@@ -19,7 +19,8 @@ java -jar vosp-api-wrappers-java-$VERACODE_WRAPPER_VERSION.jar -vid $VERACODE_AP
      alfresco-transform-imagemagick/alfresco-transform-imagemagick-spring/target/alfresco-transform-imagemagick-spring-*.jar \
      alfresco-transform-libreoffice/alfresco-transform-libreoffice/target/alfresco-transform-libreoffice-*.jar \
      alfresco-transform-libreoffice/alfresco-transform-libreoffice-spring/target/alfresco-transform-libreoffice-spring-*.jar \
-     alfresco-docker-tika/target/alfresco-docker-tika-*.jar \
+     alfresco-transform-tika/alfresco-transform-tika/target/alfresco-transform-tika-*.jar \
+     alfresco-transform-tika/alfresco-transform-tika-spring/target/alfresco-transform-tika-spring-*.jar \
      alfresco-transform-misc/alfresco-transform-misc/target/alfresco-transform-misc-*.jar \
      alfresco-transform-misc/alfresco-transform-misc-spring/target/alfresco-transform-misc-spring*.jar \
      -version "$TRAVIS_JOB_ID - $TRAVIS_JOB_NUMBER" -scantimeout 3600
