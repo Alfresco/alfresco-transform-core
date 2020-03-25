@@ -77,8 +77,7 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
     private static final Logger logger = LoggerFactory.getLogger(
         AlfrescoPdfRendererController.class);
 
-    @Autowired
-    private PdfRendererCommandExecutor commandExecutor;
+    private PdfRendererCommandExecutor commandExecutor = new PdfRendererCommandExecutor();
 
     @Override
     public String getTransformerName()
