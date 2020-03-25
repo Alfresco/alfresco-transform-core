@@ -29,8 +29,6 @@ package org.alfresco.transformer.executors;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.apache.tika.exception.TikaException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -45,7 +43,6 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
  * JavaExecutor implementation for running TIKA transformations. It loads the
  * transformation logic in the same JVM (check {@link Tika}).
  */
-@Component
 public class TikaJavaExecutor implements JavaExecutor
 {
     private final Tika tika;
