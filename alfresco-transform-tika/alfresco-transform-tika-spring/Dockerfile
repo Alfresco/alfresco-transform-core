@@ -10,7 +10,7 @@ ENV JAVA_OPTS=""
 # Set default user information
 ARG GROUPNAME=Alfresco
 ARG GROUPID=1000
-ARG USERNAME=tika
+ARG IMAGEUSERNAME=tika
 ARG USERID=33004
 
 COPY target/alfresco-transform-tika-spring-${env.project_version}.jar /usr/bin
@@ -24,11 +24,11 @@ ADD target/generated-resources/licenses.xml          /licenses/
 ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
-    useradd -u ${USERID} -G ${GROUPNAME} ${USERNAME} && \
+    useradd -u ${USERID} -G ${GROUPNAME} ${IMAGEUSERNAME} && \
     chgrp -R ${GROUPNAME} /usr/bin/alfresco-transform-tika-spring.jar
 
 EXPOSE 8090
 
-USER ${USERNAME}
+USER ${IMAGEUSERNAME}
 
 ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-transform-tika-spring.jar

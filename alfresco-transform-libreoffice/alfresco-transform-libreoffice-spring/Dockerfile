@@ -13,7 +13,7 @@ ENV JAVA_OPTS=""
 # Set default user information
 ARG GROUPNAME=Alfresco
 ARG GROUPID=1000
-ARG USERNAME=libreoffice
+ARG IMAGEUSERNAME=libreoffice
 ARG USERID=33003
 
 COPY target/alfresco-transform-libreoffice-spring-${env.project_version}.jar libreoffice-dist-*-linux.gz /
@@ -34,11 +34,11 @@ ADD target/generated-resources/licenses.xml          /licenses/
 ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
-    useradd -u ${USERID} -G ${GROUPNAME} ${USERNAME} && \
+    useradd -u ${USERID} -G ${GROUPNAME} ${IMAGEUSERNAME} && \
     chgrp -R ${GROUPNAME} /usr/bin/alfresco-transform-libreoffice-spring.jar
 
 EXPOSE 8090
 
-USER ${USERNAME}
+USER ${IMAGEUSERNAME}
 
 ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-transform-libreoffice-spring.jar

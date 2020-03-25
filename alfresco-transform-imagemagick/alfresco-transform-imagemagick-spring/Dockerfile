@@ -14,7 +14,7 @@ ENV JAVA_OPTS=""
 # Set default user information
 ARG GROUPNAME=Alfresco
 ARG GROUPID=1000
-ARG USERNAME=imagemagick
+ARG IMAGEUSERNAME=imagemagick
 ARG USERID=33002
 
 COPY target/alfresco-transform-imagemagick-spring-${env.project_version}.jar /usr/bin
@@ -32,11 +32,11 @@ ADD target/generated-resources/licenses.xml          /licenses/
 ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
-    useradd -u ${USERID} -G ${GROUPNAME} ${USERNAME} && \
+    useradd -u ${USERID} -G ${GROUPNAME} ${IMAGEUSERNAME} && \
     chgrp -R ${GROUPNAME} /usr/bin/alfresco-transform-imagemagick-spring.jar
 
 EXPOSE 8090
 
-USER ${USERNAME}
+USER ${IMAGEUSERNAME}
 
 ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-transform-imagemagick-spring.jar
