@@ -34,6 +34,7 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_CSV;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XHTML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
