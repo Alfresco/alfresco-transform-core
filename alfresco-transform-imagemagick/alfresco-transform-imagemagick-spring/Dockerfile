@@ -17,11 +17,11 @@ ARG GROUPID=1000
 ARG IMAGEUSERNAME=imagemagick
 ARG USERID=33002
 ARG VERSIONJAR=${env.project_artifactId}-${env.project_version}.jar
-ARG JAR=${env.project_artifactId}.jar
+ARG SHORTJAR=${env.project_artifactId}.jar
 
 COPY target/${VERSIONJAR} /usr/bin
 
-RUN ln /usr/bin/${VERSIONJAR} /usr/bin/${JAR} && \
+RUN ln /usr/bin/${VERSIONJAR} /usr/bin/${SHORTJAR} && \
     curl -s -S $IMAGEMAGICK_RPM_URL      -o imagemagick-distribution-linux.rpm && \
     curl -s -S $IMAGEMAGICK_LIB_RPM_URL  -o imagemagick-distribution-libs-linux.rpm && \
     curl -s -S $IMAGEMAGICK_LICENSE_FILE -o ImageMagick-license.txt && \
@@ -35,10 +35,10 @@ ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
     useradd -u ${USERID} -G ${GROUPNAME} ${IMAGEUSERNAME} && \
-    chgrp -R ${GROUPNAME} /usr/bin/${JAR}
+    chgrp -R ${GROUPNAME} /usr/bin/${SHORTJAR}
 
 EXPOSE 8090
 
 USER ${IMAGEUSERNAME}
 
-ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/${JAR}
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/${SHORTJAR}

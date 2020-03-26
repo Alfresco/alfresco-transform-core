@@ -10,14 +10,14 @@ ENV JAVA_OPTS=""
 # Set default user information
 ARG GROUPNAME=Alfresco
 ARG GROUPID=1000
-ARG TIKAUSER=tika
+ARG TIKAUSERNAME=tika
 ARG USERID=33004
 ARG VERSIONJAR=${env.project_artifactId}-${env.project_version}.jar
-ARG JAR=${env.project_artifactId}.jar
+ARG SHORTJAR=${env.project_artifactId}.jar
 
 COPY target/${VERSIONJAR} /usr/bin
 
-RUN ln /usr/bin/${VERSIONJAR} /usr/bin/${JAR} && \
+RUN ln /usr/bin/${VERSIONJAR} /usr/bin/${SHORTJAR} && \
     curl -s -S $APACHE_LICENSE_FILE -o Apache\ 2.0.txt && \
     yum clean all
 
@@ -26,11 +26,11 @@ ADD target/generated-resources/licenses.xml          /licenses/
 ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
-    useradd -u ${USERID} -G ${GROUPNAME} ${TIKAUSER} && \
-    chgrp -R ${GROUPNAME} /usr/bin/${JAR}
+    useradd -u ${USERID} -G ${GROUPNAME} ${TIKAUSERNAME} && \
+    chgrp -R ${GROUPNAME} /usr/bin/${SHORTJAR}
 
 EXPOSE 8090
 
-USER ${TIKAUSER}
+USER ${TIKAUSERNAME}
 
-ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/${JAR}
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/${SHORTJAR}

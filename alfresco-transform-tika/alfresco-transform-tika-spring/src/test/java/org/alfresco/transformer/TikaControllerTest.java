@@ -261,21 +261,21 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
                     .param("sourceMimetype", sourceMimetype);
     }
 
-    @Test
-    @Override
-    public void simpleTransformTest() throws Exception
-    {
-        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
-        super.simpleTransformTest();
-    }
+    // @Test
+    // @Override
+    // public void simpleTransformTest() throws Exception
+    // {
+    //     mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
+    //     super.simpleTransformTest();
+    // }
 
-    @Test
-    @Override
-    public void testDelayTest() throws Exception
-    {
-        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
-        super.testDelayTest();
-    }
+    // @Test
+    // @Override
+    // public void testDelayTest() throws Exception
+    // {
+    //     mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
+    //     super.testDelayTest();
+    // }
 
     @Test
     @Override
@@ -287,21 +287,21 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
 
     // --- Super class tests (need modified setup) ---
 
-    @Test
-    @Override
-    public void dotDotSourceFilenameTest() throws Exception
-    {
-        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
-        super.dotDotSourceFilenameTest();
-    }
+    // @Test
+    // @Override
+    // public void dotDotSourceFilenameTest() throws Exception
+    // {
+    //     mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
+    //     super.dotDotSourceFilenameTest();
+    // }
 
-    @Test
-    @Override
-    public void noExtensionSourceFilenameTest() throws Exception
-    {
-        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
-        super.noExtensionSourceFilenameTest();
-    }
+    // @Test
+    // @Override
+    // public void noExtensionSourceFilenameTest() throws Exception
+    // {
+    //     mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
+    //     super.noExtensionSourceFilenameTest();
+    // }
 
     @Test
     @Override

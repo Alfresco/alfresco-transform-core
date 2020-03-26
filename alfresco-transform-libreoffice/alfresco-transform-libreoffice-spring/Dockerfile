@@ -13,14 +13,14 @@ ENV JAVA_OPTS=""
 # Set default user information
 ARG GROUPNAME=Alfresco
 ARG GROUPID=1000
-ARG LIBREUSER=libreoffice
+ARG LIBREUSERNAME=libreoffice
 ARG USERID=33003
 ARG VERSIONJAR=${env.project_artifactId}-${env.project_version}.jar
-ARG JAR=${env.project_artifactId}.jar
+ARG SHORTJAR=${env.project_artifactId}.jar
 
 COPY target/${VERSIONJAR} libreoffice-dist-*-linux.gz /
 
-RUN ln /${VERSIONJAR} /usr/bin/${JAR} && \
+RUN ln /${VERSIONJAR} /usr/bin/${SHORTJAR} && \
     yum install -y cairo cups-libs libSM && \
     test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
     ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
@@ -36,11 +36,11 @@ ADD target/generated-resources/licenses.xml          /licenses/
 ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
-    useradd -u ${USERID} -G ${GROUPNAME} ${LIBREUSER} && \
-    chgrp -R ${GROUPNAME} /usr/bin/${JAR}
+    useradd -u ${USERID} -G ${GROUPNAME} ${LIBREUSERNAME} && \
+    chgrp -R ${GROUPNAME} /usr/bin/${SHORTJAR}
 
 EXPOSE 8090
 
-USER ${LIBREUSER}
+USER ${LIBREUSERNAME}
 
-ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/${JAR}
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/${SHORTJAR}

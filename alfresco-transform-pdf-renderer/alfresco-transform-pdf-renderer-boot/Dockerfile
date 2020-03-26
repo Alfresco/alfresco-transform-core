@@ -11,14 +11,14 @@ ENV JAVA_OPTS=""
 # Set default user information
 ARG GROUPNAME=Alfresco
 ARG GROUPID=1000
-ARG PDFUSER=pdf
+ARG PDFUSERNAME=pdf
 ARG USERID=33001
 ARG VERSIONJAR=${env.project_artifactId}-${env.project_version}.jar
-ARG JAR=${env.project_artifactId}.jar
+ARG SHORTJAR=${env.project_artifactId}.jar
 
 COPY target/${VERSIONJAR} /usr/bin
 
-RUN ln /usr/bin/${VERSIONJAR} /usr/bin/${JAR} && \
+RUN ln /usr/bin/${VERSIONJAR} /usr/bin/${SHORTJAR} && \
     curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz && \
     curl -s -S $PDFIUM_LICENSE_FILE               -o pdfium.txt && \
     tar xf alfresco-pdf-renderer-linux.tgz -C /usr/bin && \
@@ -30,12 +30,12 @@ ADD target/generated-resources/licenses.xml          /licenses/
 ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
-    useradd -u ${USERID} -G ${GROUPNAME} ${PDFUSER} && \
-    chgrp -R ${GROUPNAME} /usr/bin/${JAR}
+    useradd -u ${USERID} -G ${GROUPNAME} ${PDFUSERNAME} && \
+    chgrp -R ${GROUPNAME} /usr/bin/${SHORTJAR}
 
 EXPOSE 8090
 
-USER ${PDFUSER}
+USER ${PDFUSERNAME}
 
-ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/${JAR}
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/${SHORTJAR}
 
