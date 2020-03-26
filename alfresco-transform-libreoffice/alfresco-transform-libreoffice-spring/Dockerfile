@@ -13,12 +13,14 @@ ENV JAVA_OPTS=""
 # Set default user information
 ARG GROUPNAME=Alfresco
 ARG GROUPID=1000
-ARG IMAGEUSERNAME=libreoffice
+ARG LIBREUSER=libreoffice
 ARG USERID=33003
+ARG VERSIONJAR=${env.project_artifactId}-${env.project_version}.jar
+ARG JAR=${env.project_artifactId}.jar
 
-COPY target/alfresco-transform-libreoffice-spring-${env.project_version}.jar libreoffice-dist-*-linux.gz /
+COPY target/${VERSIONJAR} libreoffice-dist-*-linux.gz /
 
-RUN ln /alfresco-transform-libreoffice-spring-${env.project_version}.jar /usr/bin/alfresco-transform-libreoffice-spring.jar && \
+RUN ln /${VERSIONJAR} /usr/bin/${JAR} && \
     yum install -y cairo cups-libs libSM && \
     test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
     ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
@@ -34,11 +36,11 @@ ADD target/generated-resources/licenses.xml          /licenses/
 ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
-    useradd -u ${USERID} -G ${GROUPNAME} ${IMAGEUSERNAME} && \
-    chgrp -R ${GROUPNAME} /usr/bin/alfresco-transform-libreoffice-spring.jar
+    useradd -u ${USERID} -G ${GROUPNAME} ${LIBREUSER} && \
+    chgrp -R ${GROUPNAME} /usr/bin/${JAR}
 
 EXPOSE 8090
 
-USER ${IMAGEUSERNAME}
+USER ${LIBREUSER}
 
-ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-transform-libreoffice-spring.jar
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/${JAR}

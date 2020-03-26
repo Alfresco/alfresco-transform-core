@@ -8,12 +8,14 @@ ENV JAVA_OPTS=""
 # Set default user information
 ARG GROUPNAME=Alfresco
 ARG GROUPID=1000
-ARG IMAGEUSERNAME=transform-misc
+ARG MISCUSER=transform-misc
 ARG USERID=33004
+ARG VERSIONJAR=${env.project_artifactId}-${env.project_version}.jar
+ARG JAR=${env.project_artifactId}.jar
 
-COPY target/alfresco-transform-misc-spring-${env.project_version}.jar /usr/bin
+COPY target/${VERSIONJAR} /usr/bin
 
-RUN ln /usr/bin/alfresco-transform-misc-spring-${env.project_version}.jar /usr/bin/alfresco-transform-misc-spring.jar && \
+RUN ln /usr/bin/${VERSIONJAR} /usr/bin/${JAR} && \
     curl -s -S $APACHE_LICENSE_FILE -o Apache\ 2.0.txt && \
     yum clean all
 
@@ -22,11 +24,11 @@ ADD target/generated-resources/licenses.xml          /licenses/
 ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
-    useradd -u ${USERID} -G ${GROUPNAME} ${IMAGEUSERNAME} && \
-    chgrp -R ${GROUPNAME} /usr/bin/alfresco-transform-misc-spring.jar
+    useradd -u ${USERID} -G ${GROUPNAME} ${MISCUSER} && \
+    chgrp -R ${GROUPNAME} /usr/bin/${JAR}
 
 EXPOSE 8090
 
-USER ${IMAGEUSERNAME}
+USER ${MISCUSER}
 
-ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-transform-misc-spring.jar
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/${JAR}

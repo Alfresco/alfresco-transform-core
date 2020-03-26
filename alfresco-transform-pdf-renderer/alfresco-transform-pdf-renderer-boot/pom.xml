@@ -16,7 +16,7 @@
     <properties>
         <image.name>alfresco/alfresco-pdf-renderer</image.name>
         <image.registry>quay.io</image.registry>
-        <env.project_artifactId>${artifactId}</env.project_artifactId>
+        <env.project_artifactId>${project.artifactId}</env.project_artifactId>
     </properties>
 
     <dependencies>
