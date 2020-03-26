@@ -18,8 +18,6 @@ mvn -B \
     ${DRY_RUN} \
     -Prelease \
     "-Darguments=-Prelease -DskipTests -Dmaven.javadoc.skip -Dadditionalparam=-Xdoclint:none" \
-    -DreleaseVersion="2.1.2-test-0" \
-    -DdevelopmentVersion="2.1.2-SNAPSHOT" \
     release:clean release:prepare release:perform \
     -DscmCommentPrefix="[maven-release-plugin][skip ci] " \
     -Dusername=alfresco-build \
