@@ -26,7 +26,12 @@
  */
 package org.alfresco.transformer.executors;
 
-import com.sun.star.task.ErrorCodeIOException;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import java.io.File;
+import java.io.IOException;
+
 import org.alfresco.transform.exceptions.TransformException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -37,11 +42,7 @@ import org.artofsolving.jodconverter.office.OfficeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import com.sun.star.task.ErrorCodeIOException;
 
 /**
  * JavaExecutor implementation for running LibreOffice transformations. It loads the

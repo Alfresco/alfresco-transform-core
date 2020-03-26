@@ -26,18 +26,18 @@
  */
 package org.alfresco.transformer.executors;
 
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.logging.LogEntry;
-import org.apache.tika.exception.TikaException;
-import org.xml.sax.SAXException;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringJoiner;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transformer.logging.LogEntry;
+import org.apache.tika.exception.TikaException;
+import org.xml.sax.SAXException;
 
 /**
  * JavaExecutor implementation for running TIKA transformations. It loads the

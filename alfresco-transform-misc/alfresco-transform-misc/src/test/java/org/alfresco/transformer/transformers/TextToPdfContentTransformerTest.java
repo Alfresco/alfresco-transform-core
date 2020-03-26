@@ -26,11 +26,8 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
-import org.junit.Before;
-import org.junit.Test;
-
+import static org.alfresco.transformer.transformers.TextToPdfContentTransformer.PAGE_LIMIT;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,8 +36,10 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.alfresco.transformer.transformers.TextToPdfContentTransformer.PAGE_LIMIT;
-import static org.junit.Assert.assertEquals;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.junit.Before;
+import org.junit.Test;
 
 public class TextToPdfContentTransformerTest
 {
