@@ -26,21 +26,22 @@
  */
 package org.alfresco.transformer.executors;
 
-import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
-import org.artofsolving.jodconverter.office.OfficeException;
-import org.artofsolving.jodconverter.office.OfficeManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import static java.util.Arrays.asList;
-import static java.util.Objects.requireNonNull;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
+import org.artofsolving.jodconverter.office.OfficeException;
+import org.artofsolving.jodconverter.office.OfficeManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 ///////// THIS FILE WAS A COPY OF THE CODE IN alfresco-repository /////////////
 
