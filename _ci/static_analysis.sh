@@ -13,8 +13,8 @@ java -jar vosp-api-wrappers-java-$VERACODE_WRAPPER_VERSION.jar -vid $VERACODE_AP
      ${RUN_IN_SANDBOX} -createprofile false \
      -filepath \
      alfresco-transformer-base/target/alfresco-transformer-base-*.jar \
-     alfresco-transfrom-pdf-renderer/alfresco-transfrom-pdf-renderer/target/alfresco-transfrom-pdf-renderer-*.jar \
-     alfresco-transfrom-pdf-renderer/alfresco-transfrom-pdf-renderer-boot/target/alfresco-transfrom-pdf-renderer-*.jar \
+     alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer/target/alfresco-transfrom-pdf-renderer-*.jar \
+     alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer-boot/target/alfresco-transfrom-pdf-renderer-*.jar \
      alfresco-transform-imagemagick/alfresco-transform-imagemagick/target/alfresco-transform-imagemagick-*.jar \
      alfresco-transform-imagemagick/alfresco-transform-imagemagick-spring/target/alfresco-transform-imagemagick-spring-*.jar \
      alfresco-transform-libreoffice/alfresco-transform-libreoffice/target/alfresco-transform-libreoffice-*.jar \
