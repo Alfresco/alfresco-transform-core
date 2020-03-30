@@ -44,6 +44,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -161,14 +162,17 @@ public abstract class AbstractTransformerControllerTest
 
     protected File getTestFile(String testFilename, boolean required) throws IOException
     {
-        ClassLoader classLoader = getClass().getClassLoader();
-        URL testFileUrl = classLoader.getResource(testFilename);
-        if (required && testFileUrl == null)
-        {
-            throw new IOException("The test file " + testFilename +
-                                  " does not exist in the resources directory");
-        }
-        return testFileUrl == null ? null : new File(testFileUrl.getFile());
+            File testFileUrl = null;
+            try {
+                testFileUrl = new File(new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()) + "\\" + testFilename);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+            if (required && testFileUrl == null) {
+                throw new IOException("The test file " + testFilename +
+                        " does not exist in the resources directory");
+            }
+            return testFileUrl;
     }
 
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
