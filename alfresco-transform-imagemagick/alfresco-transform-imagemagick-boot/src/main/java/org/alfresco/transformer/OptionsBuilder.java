@@ -339,7 +339,7 @@ final class OptionsBuilder
             {
                 resize.append('>');
             }
-            if (maintainAspectRatio != null && maintainAspectRatio)
+            if (maintainAspectRatio != null && !maintainAspectRatio)
             {
                 resize.append('!');
             }
