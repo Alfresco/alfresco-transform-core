@@ -285,7 +285,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                 .param("resizeHeight", "654")
                 .param("resizePercentage", "false")
                 .param("allowEnlargement", "false")
-                .param("maintainAspectRatio", "false"))
+                .param("maintainAspectRatio", "true"))
             .andExpect(status().is(OK.value()))
             .andExpect(content().bytes(expectedTargetFileBytes))
             .andExpect(header().string("Content-Disposition",
