@@ -25,7 +25,7 @@
         <env.project_version>${project.version}</env.project_version>
         <dependency.alfresco-transform-model.version>1.0.2.8</dependency.alfresco-transform-model.version>
         <dependency.activemq.version>5.15.9</dependency.activemq.version>
-        <dependency.jackson.version>2.10.2</dependency.jackson.version>
+        <dependency.jackson.version>2.10.3</dependency.jackson.version>
         <dependency.cxf.version>3.3.5</dependency.cxf.version>
         <dependency.poi.version>4.1.1</dependency.poi.version>
     </properties>
