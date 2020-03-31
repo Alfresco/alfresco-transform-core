@@ -162,27 +162,17 @@ public abstract class AbstractTransformerControllerTest
 
     protected File getTestFile(String testFilename, boolean required) throws IOException
     {
-        ClassLoader classLoader = getClass().getClassLoader();
-        URL testFileUrl = classLoader.getResource(testFilename);
-        if (required && testFileUrl == null)
-        {
+        File testFileUrl = null;
+        try {
+            testFileUrl = new File(new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()) + "/" + testFilename);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        if (required && testFileUrl == null) {
             throw new IOException("The test file " + testFilename +
                     " does not exist in the resources directory");
         }
-        if(testFilename != null)
-        {
-            File testFile = null;
-            try
-            {
-                testFile = new File(testFileUrl.toURI());
-            }
-            catch (URISyntaxException e)
-            {
-                e.printStackTrace();
-            }
-            return testFile == null ? null : testFile;
-        }
-        return null;
+        return testFileUrl;
     }
 
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
