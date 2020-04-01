@@ -30,6 +30,7 @@ package org.alfresco.transformer;
 import java.io.IOException;
 
 import org.alfresco.transform.client.model.TransformRequest;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -55,6 +56,12 @@ public class AIOControllerTest //extends AbstractTransformerControllerTest
     //@Override
     protected void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest) {
         // TODO Auto-generated method stub
+
+    }
+
+    @Test
+    public void emptyTest()
+    {
 
     }
 }
