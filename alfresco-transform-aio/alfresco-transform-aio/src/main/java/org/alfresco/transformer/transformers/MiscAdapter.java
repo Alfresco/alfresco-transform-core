@@ -31,6 +31,7 @@ import java.util.Map;
 
 public class MiscAdapter extends AbstractTransformer
 {
+    private static final String CONFIG_PREFIX = "misc";
     private SelectingTransformer miscSelectingTransformer;
 
 
@@ -43,7 +44,7 @@ public class MiscAdapter extends AbstractTransformer
     @Override
     public String getTransformerConfigPrefix()
     {
-        return "misc";
+        return CONFIG_PREFIX;
     }
 
     @Override
