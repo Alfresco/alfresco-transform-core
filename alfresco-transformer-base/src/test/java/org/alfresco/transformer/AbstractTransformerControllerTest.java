@@ -184,7 +184,8 @@ public abstract class AbstractTransformerControllerTest
         {
             ClassLoader classLoader = getClass().getClassLoader();
             URL testFileUrl = classLoader.getResource(testFilename);
-            if (required && testFileUrl == null) {
+            if (required && testFileUrl == null)
+            {
                 throw new IOException("The test file " + testFilename +
                         " does not exist in the resources directory");
             }
