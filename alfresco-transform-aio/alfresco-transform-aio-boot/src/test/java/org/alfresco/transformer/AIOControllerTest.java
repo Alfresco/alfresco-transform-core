@@ -36,22 +36,23 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(AIOController.class)
-public class AIOControllerTest extends AbstractTransformerControllerTest {
+public class AIOControllerTest //extends AbstractTransformerControllerTest 
+{
 
-    @Override
+    //@Override
     protected void mockTransformCommand(String sourceExtension, String targetExtension, String sourceMimetype,
             boolean readTargetFileBytes) throws IOException {
         // TODO Auto-generated method stub
 
     }
 
-    @Override
+    //@Override
     protected AbstractTransformerController getController() {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
+    //@Override
     protected void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest) {
         // TODO Auto-generated method stub
 
