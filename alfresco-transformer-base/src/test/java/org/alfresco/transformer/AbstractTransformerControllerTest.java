@@ -164,11 +164,11 @@ public abstract class AbstractTransformerControllerTest
     {
         if (System.getProperty("os.name").substring(0, 3).equals("Win"))
         {
-            File testFileUrl = null;
+            File testFile = null;
             try
             {
-                testFileUrl = new File(new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()) + "\\" + testFilename);
-                if (required && !testFileUrl.exists())
+                testFile = new File(new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()) + "\\" + testFilename);
+                if (required && !testFile.exists())
                 {
                     throw new IOException("The test file " + testFilename +
                             " does not exist in the resources directory");
@@ -178,7 +178,7 @@ public abstract class AbstractTransformerControllerTest
             {
                 e.printStackTrace();
             }
-            return !testFileUrl.exists() ? null : testFileUrl;
+            return !testFile.exists() ? null : testFile;
         }
         else
         {
