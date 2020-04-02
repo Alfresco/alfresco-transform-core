@@ -42,7 +42,7 @@
         <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot</module>
         <module>alfresco-transform-misc/alfresco-transform-misc</module>
         <module>alfresco-transform-misc/alfresco-transform-misc-boot</module>
-        <module>alfresco-transform-aio/alfresco-transform-aio</module>
+        <module>alfresco-transform-core-aio/alfresco-transform-core-aio</module>
     </modules>
 
     <scm>

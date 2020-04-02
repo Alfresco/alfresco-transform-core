@@ -54,10 +54,15 @@ public abstract class AbstractTransformer implements Transformer
         this.jsonObjectMapper = objectMapper;
     }
 
+    public void setTransformConfig(TransformConfig transformConfig)
+    {
+        this.transformConfig = transformConfig;
+    }
+
     /**
-     * Used to search for a engine configuration file.
+     * Used to search for an engine configuration file.
      *
-     * @return A unique prefix which is used to load an &lt;prefix&gt; _engine_config.json
+     * @return A unique prefix which is used to load a &lt;prefix&gt; _engine_config.json file
      */
     abstract String getTransformerConfigPrefix();
 

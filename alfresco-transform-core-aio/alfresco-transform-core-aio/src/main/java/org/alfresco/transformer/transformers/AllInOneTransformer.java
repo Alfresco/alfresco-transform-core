@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -61,9 +62,10 @@ public class AllInOneTransformer implements Transformer
         {
             this.registerTransformer(new MiscAdapter());
             this.registerTransformer(new TikaAdapter());
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
-            // rethrow as runtime exception, nothing else cane be done
+            // Rethrow as runtime exception, nothing else can be done
             throw new RuntimeException("Failed to register all transformers.", e);
         }
     }
@@ -87,7 +89,7 @@ public class AllInOneTransformer implements Transformer
             }
 
             transformerTransformMapping.put(transformerName, transformer);
-            logger.debug("Registered transformer with name: '" + transformerName + "' ");
+            logger.debug("Registered transformer with name: '{}'.", transformerName);
         }
     }
 
@@ -98,7 +100,7 @@ public class AllInOneTransformer implements Transformer
         String transformName = transformOptions.get(TRANSFORM_NAME_PARAMETER);
         Transformer transformer = transformerTransformMapping.get(transformName);
 
-        if(transformer == null)
+        if (transformer == null)
         {
             throw new Exception("No transformer mapping for : transform:" + transformName + " sourceMimetype:"
                     + sourceMimetype + " targetMimetype:" + targetMimetype);
@@ -106,7 +108,7 @@ public class AllInOneTransformer implements Transformer
 
         if (logger.isDebugEnabled())
         {
-            logger.debug("Performing transform '" + transformName +"' using "+ transformer.getClass().getSimpleName());
+            logger.debug("Performing transform '{}' using {}", transformName, transformer.getClass().getSimpleName());
         }
         transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
     }
@@ -118,11 +120,13 @@ public class AllInOneTransformer implements Transformer
         // Merge the config for all sub transformers
         List<org.alfresco.transform.client.model.config.Transformer> transformerConfigs = new LinkedList<>();
         Map<String, Set<TransformOption>> transformOptions = new HashMap<>();
+        Set<Transformer> distinctTransformers = new HashSet<>(transformerTransformMapping.values());
         {
-            for (Transformer transformer: transformerTransformMapping.values().stream().distinct().collect(Collectors.toList()) )
+            for (Transformer transformer: distinctTransformers)
             {
-                transformerConfigs.addAll(transformer.getTransformConfig().getTransformers());
-                transformOptions.putAll(transformer.getTransformConfig().getTransformOptions());
+                TransformConfig transformConfig = transformer.getTransformConfig();
+                transformerConfigs.addAll(transformConfig.getTransformers());
+                transformOptions.putAll(transformConfig.getTransformOptions());
             }
         }
 
