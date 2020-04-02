@@ -9,7 +9,7 @@ ENV JAVA_OPTS=""
 ARG GROUPNAME=Alfresco
 ARG GROUPID=1000
 ARG MISCUSERNAME=transform-misc
-ARG USERID=33006
+ARG USERID=33004
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 
