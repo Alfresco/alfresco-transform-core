@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>alfresco-transform-aio-boot</artifactId>
+    <artifactId>alfresco-transform-core-aio-boot</artifactId>
     <name>Alfresco All in One Transformer Spring Boot</name>
     <packaging>jar</packaging>
 
@@ -23,6 +23,11 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transformer-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-transform-core-aio</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

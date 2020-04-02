@@ -47,6 +47,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.alfresco.transformer.transformers.AllInOneTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
