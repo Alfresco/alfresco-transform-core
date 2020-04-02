@@ -26,6 +26,8 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
 import java.io.File;
 import java.util.Map;
 
@@ -60,9 +62,23 @@ public class AIOController extends AbstractTransformerController
     }
 
     @Override
-    public ProbeTestTransform getProbeTestTransform() {
-        // TODO Auto-generated method stub
-        return null;
+    public ProbeTestTransform getProbeTestTransform() 
+    {
+        // HtmlParserContentTransformer html -> text
+        // See the Javadoc on this method and Probes.md for the choice of these values.
+        return new ProbeTestTransform(this, "quick.html", "quick.txt",
+            119, 30, 150, 1024,
+            60 * 2 + 1, 60 * 2)
+        {
+            @Override
+            protected void executeTransformCommand(File sourceFile, File targetFile)
+            {
+                Map<String, String> parameters = new HashMap<>();
+                parameters.put(SOURCE_ENCODING, "UTF-8");
+                transformer.transform("html", sourceFile, targetFile, MIMETYPE_HTML,
+                    MIMETYPE_TEXT_PLAIN, parameters);
+            }
+        };
     }
     
 }
