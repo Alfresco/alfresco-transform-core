@@ -60,13 +60,10 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 public class AIOController extends AbstractTransformerController
 {
-    //TODO remove TRANSFORM_NAME_PARAMETER once merged
-    private static final String TRANSFORM_NAME_PARAMETER = "alfresco.transform-name-parameter";
     private static final Logger logger = LoggerFactory.getLogger(AIOController.class);
 
     //TODO Should these be moved to the AbstractTransformerController or are they present in the transform.client? They are used by most controllers...
     private static final String SOURCE_ENCODING = "sourceEncoding";
-    private static final String TARGET_ENCODING = "targetEncoding";
     private static final String TARGET_EXTENSION = "targetExtension";
     private static final String TARGET_MIMETYPE = "targetMimetype";
     private static final String SOURCE_MIMETYPE = "sourceMimetype";
@@ -96,14 +93,16 @@ public class AIOController extends AbstractTransformerController
             Map<String, String> transformOptions, Long timeout) 
     {
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
+        transformOptions.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, transform);
         debugLogTransform(sourceMimetype,transformOptions);
 
         try 
         {
             transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
-        } catch (Exception e) 
+        } 
+        catch (Exception e) 
         {
-            //TODO: handle exception
+            logger.error(e.getMessage(), e);
         }
         
 
@@ -122,9 +121,18 @@ public class AIOController extends AbstractTransformerController
             protected void executeTransformCommand(File sourceFile, File targetFile)
             {
                 Map<String, String> parameters = new HashMap<>();
+                parameters.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, "misc");
                 parameters.put(SOURCE_ENCODING, "UTF-8");
-                transformer.transform("html", sourceFile, targetFile, MIMETYPE_HTML,
+                try
+                {
+                    transformer.transform(sourceFile, targetFile, MIMETYPE_HTML,
                     MIMETYPE_TEXT_PLAIN, parameters);
+                }
+                catch(Exception e)
+                {
+                    logger.error(e.getMessage(), e);
+                }
+                
             }
         };
     }
@@ -151,16 +159,16 @@ public class AIOController extends AbstractTransformerController
         // not all controllers take these from the request? Do requests intended for these transforms provide these?
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
 
-        // TODO remove above variable delaration for TRANSFORM_NAME_PARAMETER
-        transformOptions.put(TRANSFORM_NAME_PARAMETER, transform);
+        transformOptions.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, transform);
         debugLogTransform(sourceMimetype, transformOptions);
 
         try 
         {
             transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
-        } catch (Exception e) 
+        } 
+        catch (Exception e) 
         {
-            //TODO: handle exception
+            logger.error(e.getMessage(), e);
         }
         
 
@@ -200,7 +208,7 @@ public class AIOController extends AbstractTransformerController
                 iter.remove();
                 if (logger.isDebugEnabled())
                 {
-                    logger.debug("Key={} has been removed from the provided RequestParameters as it was passed value={}",
+                    logger.debug("Key={} has been removed from the provided RequestParameters and it was passed value={}",
                         entry.getKey(), entry.getValue()
                     );
                 }               
