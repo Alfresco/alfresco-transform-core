@@ -28,19 +28,55 @@ package org.alfresco.transformer;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transformer.fs.FileManager.createAttachment;
+import static org.alfresco.transformer.fs.FileManager.createSourceFile;
+import static org.alfresco.transformer.fs.FileManager.createTargetFile;
+import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+
 import java.io.File;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 public class AIOController extends AbstractTransformerController
 {
+    //TODO remove TRANSFORM_NAME_PARAMETER once merged
+    private static final String TRANSFORM_NAME_PARAMETER = "alfresco.transform-name-parameter";
     private static final Logger logger = LoggerFactory.getLogger(AIOController.class);
 
+    //TODO Should these be moved to the AbstractTransformerController or are they present in the transform.client? They are used by most controllers...
+    private static final String SOURCE_ENCODING = "sourceEncoding";
+    private static final String TARGET_ENCODING = "targetEncoding";
+    private static final String TARGET_EXTENSION = "targetExtension";
+    private static final String TARGET_MIMETYPE = "targetMimetype";
+    private static final String SOURCE_MIMETYPE = "sourceMimetype";
+    private static final String TEST_DELAY = "testDelay";    
+    private static final String[] UNWANTED_OPTIONS = {TARGET_EXTENSION,
+                                                    TARGET_MIMETYPE, 
+                                                    SOURCE_MIMETYPE, 
+                                                    TEST_DELAY                                         
+                                                    };
+
+    private AllInOneTransformer transformer = new AllInOneTransformer();
 
     @Override
     public String getTransformerName()
@@ -81,12 +117,81 @@ public class AIOController extends AbstractTransformerController
         };
     }
     
+    @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Resource> transform(HttpServletRequest request,
+        @RequestParam("file") MultipartFile sourceMultipartFile,
+        @RequestParam(TARGET_EXTENSION) String targetExtension,
+        @RequestParam(TARGET_MIMETYPE) String targetMimetype,
+        @RequestParam(SOURCE_MIMETYPE) String sourceMimetype,
+        @RequestParam Map<String, String> transformOptions,
+        @RequestParam (value = TEST_DELAY, required = false) Long testDelay)
+    {   
+        //Using @RequestParam Map<String, String> will gather all text params, including those specified seperately above.
+        removeUnwantedOptions(transformOptions, UNWANTED_OPTIONS, true);
+
+        final String targetFilename = createTargetFileName(
+            sourceMultipartFile.getOriginalFilename(), targetExtension);
+        getProbeTestTransform().incrementTransformerCount();
+        final File sourceFile = createSourceFile(request, sourceMultipartFile);
+        final File targetFile = createTargetFile(request, targetFilename);
+
+        // TODO Currently sourceMimetype and targetMimetype could be an empty string how does this affect getting the name?
+        // not all controllers take these from the request? Do requests intended for these transforms provide these?
+        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
+
+        // TODO remove above variable delaration for TRANSFORM_NAME_PARAMETER
+        transformOptions.put(TRANSFORM_NAME_PARAMETER, transform);
+        debugLogTransform(sourceMimetype, transformOptions);
+
+        try 
+        {
+            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
+        } catch (Exception e) 
+        {
+            //TODO: handle exception
+        }
+        
+
+        final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
+        LogEntry.setTargetSize(targetFile.length());
+        long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
+        time += LogEntry.addDelay(testDelay);
+        getProbeTestTransform().recordTransformTime(time);
+        return body;
+    }
     private void debugLogTransform(String sourceMimetype, Map<String, String> transformOptions) {
         if (logger.isDebugEnabled())
         {
             logger.debug(
                 "Processing request with: targetExtension '{}', transformOptions '{}'",
                 sourceMimetype, transformOptions);
+        }
+    }
+
+    /**
+     * Removes entries from transformOptions that have keys that match a value
+     * contained in unwantedStrings.
+     * Entries that contain empty strings can optionally be removed.
+     * 
+     * @param transformOptions
+     * @param unwantedStrings
+     * @param emptyStrings
+     */
+    private void removeUnwantedOptions(Map<String, String> transformOptions, String[] unwantedStrings, boolean emptyStrings) 
+    {
+        for (Iterator<Map.Entry<String, String>> iter = transformOptions.entrySet().iterator();iter.hasNext();) 
+        {
+            Map.Entry<String, String> entry = iter.next();
+            if (entry.getValue().isEmpty() || Arrays.asList(unwantedStrings).contains(entry.getKey())) 
+            {
+                iter.remove();
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Key={} has been removed from the provided RequestParameters as it was passed value={}",
+                        entry.getKey(), entry.getValue()
+                    );
+                }               
+            }
         }
     }
 }
