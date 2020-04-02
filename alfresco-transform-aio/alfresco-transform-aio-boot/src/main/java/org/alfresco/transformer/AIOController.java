@@ -81,4 +81,12 @@ public class AIOController extends AbstractTransformerController
         };
     }
     
+    private void debugLogTransform(String sourceMimetype, Map<String, String> transformOptions) {
+        if (logger.isDebugEnabled())
+        {
+            logger.debug(
+                "Processing request with: targetExtension '{}', transformOptions '{}'",
+                sourceMimetype, transformOptions);
+        }
+    }
 }
