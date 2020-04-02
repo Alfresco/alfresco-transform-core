@@ -92,8 +92,19 @@ public class AIOController extends AbstractTransformerController
 
     @Override
     public void processTransform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-            Map<String, String> transformOptions, Long timeout) {
-        // TODO Auto-generated method stub
+            Map<String, String> transformOptions, Long timeout) 
+    {
+        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
+        debugLogTransform(sourceMimetype,transformOptions);
+
+        try 
+        {
+            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
+        } catch (Exception e) 
+        {
+            //TODO: handle exception
+        }
+        
 
     }
 
@@ -159,6 +170,7 @@ public class AIOController extends AbstractTransformerController
         getProbeTestTransform().recordTransformTime(time);
         return body;
     }
+
     private void debugLogTransform(String sourceMimetype, Map<String, String> transformOptions) {
         if (logger.isDebugEnabled())
         {
