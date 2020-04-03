@@ -40,6 +40,11 @@
             <artifactId>alfresco-transform-libreoffice</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-transform-imagemagick</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>

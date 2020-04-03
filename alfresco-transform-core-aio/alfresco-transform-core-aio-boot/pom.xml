@@ -3,7 +3,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>alfresco-transform-core-aio-boot</artifactId>
-    <name>Alfresco All in One Transformer Spring Boot</name>
+    <name>Alfresco Core All in One Transformer Spring Boot</name>
     <packaging>jar</packaging>
 
     <parent>
