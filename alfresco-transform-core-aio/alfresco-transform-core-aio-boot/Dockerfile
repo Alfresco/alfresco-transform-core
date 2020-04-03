@@ -29,9 +29,9 @@ ARG GROUPID=1000
 ARG AIOUSERNAME=transform-all-in-one
 ARG USERID=33017
 
-COPY target/alfresco-transform-all-in-one-boot-${env.project_version}.jar /usr/bin
+COPY target/alfresco-transform-core-aio-boot-${env.project_version}.jar /usr/bin
 
-RUN ln /usr/bin/alfresco-transform-all-in-one-boot-${env.project_version}.jar /usr/bin/alfresco-transform-all-in-one-boot.jar && \
+RUN ln /usr/bin/alfresco-transform-core-aio-boot-${env.project_version}.jar /usr/bin/alfresco-transform-core-aio-boot.jar && \
     curl -s -S $IMAGEMAGICK_RPM_URL      -o imagemagick-distribution-linux.rpm && \
     curl -s -S $IMAGEMAGICK_LIB_RPM_URL  -o imagemagick-distribution-libs-linux.rpm && \
     curl -s -S $IMAGEMAGICK_LICENSE_FILE -o ImageMagick-license.txt && \
@@ -61,10 +61,10 @@ ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
     useradd -u ${USERID} -G ${GROUPNAME} ${AIOUSERNAME} && \
-    chgrp -R ${GROUPNAME} /usr/bin/alfresco-transform-all-in-one-boot.jar
+    chgrp -R ${GROUPNAME} /usr/bin/alfresco-transform-core-aio-boot.jar
 
 EXPOSE 8090
 
 USER ${AIOUSERNAME}
 
-ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-transform-all-in-one-boot.jar
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/alfresco-transform-core-aio-boot.jar
