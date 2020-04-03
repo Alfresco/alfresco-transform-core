@@ -114,7 +114,7 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
         logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
                      " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
 
-        final String options = OptionsBuilder
+        final String options = PdfRendererOptionsBuilder
             .builder()
             .withPage(transformOptions.get("page"))
             .withWidth(transformOptions.get("width"))
@@ -147,7 +147,7 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
         File targetFile = createTargetFile(request, targetFilename);
         // Both files are deleted by TransformInterceptor.afterCompletion
 
-        final String options = OptionsBuilder
+        final String options = PdfRendererOptionsBuilder
             .builder()
             .withPage(page)
             .withWidth(width)
