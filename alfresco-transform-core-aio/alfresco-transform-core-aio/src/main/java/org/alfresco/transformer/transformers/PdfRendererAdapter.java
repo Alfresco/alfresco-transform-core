@@ -37,7 +37,7 @@ import org.alfresco.transformer.PdfRendererOptionsBuilder;
 
 public class PdfRendererAdapter extends AbstractTransformer
 {
-    private static String CONFIG_PREFIX = "pdf-renderer";
+    private static String CONFIG_PREFIX = "pdfrenderer";
     private PdfRendererCommandExecutor pdfExecutor;
     
     //TODO move key strings to a central class

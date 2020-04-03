@@ -62,6 +62,9 @@ public class AllInOneTransformer implements Transformer
         {
             this.registerTransformer(new MiscAdapter());
             this.registerTransformer(new TikaAdapter());
+            this.registerTransformer(new ImageMagickAdapter());
+            this.registerTransformer(new LibreOfficeAdapter());
+            this.registerTransformer(new PdfRendererAdapter());
         }
         catch (Exception e)
         {

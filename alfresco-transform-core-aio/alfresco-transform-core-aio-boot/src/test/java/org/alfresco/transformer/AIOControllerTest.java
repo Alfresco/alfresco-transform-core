@@ -32,13 +32,19 @@ import java.io.IOException;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(AIOController.class)
+@Import(AIOCustomConfig.class)
 public class AIOControllerTest //extends AbstractTransformerControllerTest 
 {
+
+    @Autowired
+    AIOController aioController;
 
     //@Override
     protected void mockTransformCommand(String sourceExtension, String targetExtension, String sourceMimetype,
@@ -62,6 +68,6 @@ public class AIOControllerTest //extends AbstractTransformerControllerTest
     @Test
     public void emptyTest()
     {
-
+        aioController.info();
     }
 }

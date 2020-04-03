@@ -50,6 +50,7 @@ import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.alfresco.transformer.transformers.AllInOneTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -74,7 +75,8 @@ public class AIOController extends AbstractTransformerController
                                                     TEST_DELAY                                         
                                                     };
 
-    private AllInOneTransformer transformer = new AllInOneTransformer();
+    @Autowired
+    private AllInOneTransformer transformer;
 
     @Override
     public String getTransformerName()
