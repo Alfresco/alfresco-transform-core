@@ -35,7 +35,7 @@ import java.util.Map;
  */
 public class PdfRendererCommandExecutor extends AbstractCommandExecutor
 {
-    private static final String EXE = "/usr/bin/alfresco-pdf-renderer";
+    private static final String EXE = System.getProperty("PdfRenderEXE","/usr/bin/alfresco-pdf-renderer" );
 
     @Override
     protected RuntimeExec createTransformCommand()

@@ -35,13 +35,14 @@ import java.util.Map;
  */
 public class ImageMagickCommandExecutor extends AbstractCommandExecutor
 {
-    private static final String ROOT = "/usr/lib64/ImageMagick-7.0.7";
-    private static final String DYN = ROOT + "/lib";
-    private static final String EXE = "/usr/bin/convert";
+    private static final String ROOT = System.getProperty("ImageMagickROOT", "/usr/lib64/ImageMagick-7.0.7");
+    private static final String DYN = System.getProperty("ImageMagickDYN",ROOT + "/lib");
+    private static final String EXE = System.getProperty("ImageMagickEXE","/usr/bin/convert");
 
     @Override
     protected RuntimeExec createTransformCommand()
     {
+        System.out.println(System.getProperty("connezxcxzctionstring", "/usr/lib64/ImageMagick-7.0.7"));
         RuntimeExec runtimeExec = new RuntimeExec();
         Map<String, String[]> commandsAndArguments = new HashMap<>();
         commandsAndArguments.put(".*",
