@@ -350,12 +350,17 @@ public abstract class AbstractTransformerControllerTest
     @Test
     public void testGetTransformConfigInfo() throws Exception
     {
+        ClassPathResource resource = new ClassPathResource(getEngineConfigName());
+        System.out.println("** Resource description: " + resource.getDescription());
+
         TransformConfig expectedTransformConfig = objectMapper
-            .readValue(new ClassPathResource(getEngineConfigName()).getFile(),
+            .readValue(resource.getFile(),
                 TransformConfig.class);
 
         ReflectionTestUtils.setField(transformRegistry, "engineConfig",
             new ClassPathResource(getEngineConfigName()));
+
+        System.out.println("Sending request");
 
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get("/transform/config"))
@@ -364,6 +369,7 @@ public abstract class AbstractTransformerControllerTest
             .andReturn().getResponse().getContentAsString();
 
         TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
+
         assertEquals(expectedTransformConfig, transformConfig);
     }
 

@@ -133,7 +133,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     @Override
     public void noTargetFileTest()
     {
-        // Ignore the test in super class as the Misc transforms are real rather than mocked up.
+        // Ignore the test in super class as the Misc transforms perform Java transforms rather than mocked up ones.
         // It is the mock that returns a zero length file for other transformers, when we supply an invalid targetExtension.
     }
 
