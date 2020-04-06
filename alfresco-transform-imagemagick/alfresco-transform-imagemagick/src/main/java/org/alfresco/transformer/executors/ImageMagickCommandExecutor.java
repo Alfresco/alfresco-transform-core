@@ -42,7 +42,6 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
     @Override
     protected RuntimeExec createTransformCommand()
     {
-        System.out.println(System.getProperty("connezxcxzctionstring", "/usr/lib64/ImageMagick-7.0.7"));
         RuntimeExec runtimeExec = new RuntimeExec();
         Map<String, String[]> commandsAndArguments = new HashMap<>();
         commandsAndArguments.put(".*",
