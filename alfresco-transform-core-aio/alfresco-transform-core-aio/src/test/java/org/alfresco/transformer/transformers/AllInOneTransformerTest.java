@@ -26,8 +26,10 @@
  */
 package org.alfresco.transformer.transformers;
 
+import org.alfresco.transform.client.model.config.TransformConfig;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -35,8 +37,13 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.alfresco.transformer.transformers.TextToPdfContentTransformer.PAGE_LIMIT;
 import static org.alfresco.transformer.transformers.Transformer.TRANSFORM_NAME_PARAMETER;
@@ -49,7 +56,16 @@ public class AllInOneTransformerTest
     String SOURCE_ENCODING = "sourceEncoding";
     String TARGET_ENCODING = "targetEncoding";
 
-    AllInOneTransformer transformer = new AllInOneTransformer();
+    AllInOneTransformer aioTransformer = new AllInOneTransformer();
+
+
+    @Before
+    public void before() throws Exception
+    {
+        aioTransformer.registerTransformer(new MiscAdapter());
+        aioTransformer.registerTransformer(new TikaAdapter());
+
+    }
 
     private void writeToFile(File file, String content, String encoding) throws Exception
     {
@@ -64,18 +80,47 @@ public class AllInOneTransformerTest
         return new String(Files.readAllBytes(file.toPath()), encoding);
     }
 
+    // TODO - add more thorough test
     @Test
-    public void TestConfigAggregation()
+    public void testConfigAggregation() throws Exception
     {
-        transformer.getTransformConfig().getTransformers().forEach(t -> {System.out.println(t); System.out.println(" **");});
+        List<String> expectedTransformNames = Arrays.asList("html", "string", "appleIWorks", "textToPdf", "rfc822",
+                "Archive", "OutlookMsg", "PdfBox", "Office", "Poi", "OOXML", "TikaAuto", "TextMining");
 
+        List<String> expectedTransformOptionNames = Arrays.asList("tikaOptions", "archiveOptions", "pdfboxOptions",
+                "textToPdfOptions", "stringOptions", "htmlOptions");
 
+        TransformConfig miscConfig = (new MiscAdapter()).getTransformConfig();
+        TransformConfig tikaConfig = (new TikaAdapter()).getTransformConfig();
+
+        // check correct number of transformers
+        assertEquals("Number of expected transformers",
+                miscConfig.getTransformers().size() + tikaConfig.getTransformers().size(),
+                aioTransformer.getTransformConfig().getTransformers().size());
+
+        List<String> actualTransformerNames = aioTransformer.getTransformConfig().getTransformers()
+                .stream().map(t -> t.getTransformerName()).collect(Collectors.toList());
         // check all transformers are there
-        // check all options are there
+        for(String transformNames : expectedTransformNames)
+        {
+            assertTrue("Expected transformer missing.",  actualTransformerNames.contains(transformNames));
+        }
 
+        // check correct number of options
+        assertEquals("Number of expected transformers",
+                miscConfig.getTransformOptions().size() + tikaConfig.getTransformOptions().size(),
+                aioTransformer.getTransformConfig().getTransformOptions().size());
+
+        Set<String> actualOptionNames = aioTransformer.getTransformConfig().getTransformOptions().keySet();
+
+        // check all options are there
+        for (String optionName : expectedTransformOptionNames)
+        {
+            assertTrue("Expected transform option missing.",  actualOptionNames.contains(optionName));
+        }
     }
 
-    /// Test copied from Misc transformer - html
+    /// Test copied from Misc aioTransformer - html
     @Test
     public void testMiscHtml() throws Exception
     {
@@ -105,7 +150,7 @@ public class AllInOneTransformerTest
             Map<String, String> parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
             parameters.put(TRANSFORM_NAME_PARAMETER, "html");
-            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            aioTransformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
 
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
@@ -119,7 +164,7 @@ public class AllInOneTransformerTest
             parameters = new HashMap<>();
             parameters.put(TRANSFORM_NAME_PARAMETER, "html");
             parameters.put(SOURCE_ENCODING, "UTF-8");
-            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            aioTransformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
@@ -132,7 +177,7 @@ public class AllInOneTransformerTest
             parameters = new HashMap<>();
             parameters.put(TRANSFORM_NAME_PARAMETER, "html");
             parameters.put(SOURCE_ENCODING, "UTF-16");
-            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            aioTransformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
@@ -158,7 +203,7 @@ public class AllInOneTransformerTest
             parameters = new HashMap<>();
             parameters.put(TRANSFORM_NAME_PARAMETER, "html");
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
-            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            aioTransformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
@@ -174,7 +219,7 @@ public class AllInOneTransformerTest
         }
     }
 
-    /// Test copied from Misc transformer - pdf
+    /// Test copied from Misc aioTransformer - pdf
     @Test
     public void testMiscPdf() throws Exception
     {
@@ -215,7 +260,7 @@ public class AllInOneTransformerTest
         Map<String, String> parameters = new HashMap<>();
         parameters.put(TRANSFORM_NAME_PARAMETER, "textToPdf");
         parameters.put(PAGE_LIMIT, pageLimit);
-        transformer.transform(sourceFile, targetFile, "text/plain", "application/pdf", parameters);
+        aioTransformer.transform(sourceFile, targetFile, "text/plain", "application/pdf", parameters);
 
         // Read back in the PDF and check it
         PDDocument doc = PDDocument.load(targetFile);

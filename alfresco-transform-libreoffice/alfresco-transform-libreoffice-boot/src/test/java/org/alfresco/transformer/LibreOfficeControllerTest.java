@@ -81,6 +81,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @WebMvcTest(LibreOfficeControllerTest.class)
 public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 {
+
+    private static final String ENGINE_CONFIG_NAME = "libreoffice_engine_config.json";
+
     @Mock
     private ExecutionResult mockExecutionResult;
 
@@ -135,6 +138,12 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 
             return null;
         }).when(javaExecutor).convert(any(), any());
+    }
+
+    @Override
+    public String getEngineConfigName()
+    {
+        return ENGINE_CONFIG_NAME;
     }
 
     @Override
