@@ -1,2 +1,5 @@
 queue:
   engineRequestQueue: ${TRANSFORM_ENGINE_REQUEST_QUEUE:org.alfresco.transform.engine.tika.acs}
+transform:
+  config:
+    location: classpath:tika_engine_config.json
