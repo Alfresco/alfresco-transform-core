@@ -72,9 +72,6 @@ public abstract class AbstractTransformer implements Transformer
         return transformConfig;
     }
 
-    /*
-     * TODO - Override default config name by a configurable location defined by a property
-     */
     private TransformConfig loadTransformConfig() throws Exception
     {
         String configFileName = getTransformerConfigPrefix() + TRANSFORMER_CONFIG_SUFFIX;

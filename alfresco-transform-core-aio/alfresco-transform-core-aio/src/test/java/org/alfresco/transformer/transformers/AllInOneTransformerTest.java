@@ -80,7 +80,6 @@ public class AllInOneTransformerTest
         return new String(Files.readAllBytes(file.toPath()), encoding);
     }
 
-    // TODO - add more thorough test
     @Test
     public void testConfigAggregation() throws Exception
     {

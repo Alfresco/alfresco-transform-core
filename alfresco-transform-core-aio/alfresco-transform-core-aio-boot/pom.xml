@@ -3,7 +3,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>alfresco-transform-core-aio-boot</artifactId>
-    <name>Alfresco Core All in One Transformer Spring Boot</name>
+    <name>Alfresco Core All-In-One Transformer Spring Boot</name>
     <packaging>jar</packaging>
 
     <parent>
@@ -14,7 +14,7 @@
     </parent>
 
     <properties>
-        <image.name>alfresco/alfresco-transform-aio</image.name>
+        <image.name>alfresco/alfresco-transform-core-aio</image.name>
         <image.registry>quay.io</image.registry>
         <env.project_artifactId>${project.artifactId}</env.project_artifactId>
     </properties>
@@ -38,12 +38,6 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-        <!-- TODO add transform-aio dependency        
-        <dependency>
-            <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-transform-aio</artifactId>
-            <version>${project.version}</version>
-        </dependency> -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

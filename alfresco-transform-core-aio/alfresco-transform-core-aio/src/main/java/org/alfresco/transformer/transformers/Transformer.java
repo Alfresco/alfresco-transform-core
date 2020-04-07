@@ -35,11 +35,6 @@ import java.util.Map;
 
 /**
  * Interface for transformers which can perform transformations and specify their own supported configuration.
- *
- * TODO - This could be implemented by each individual Transform engine in its own module
- *        and used by controllers for simplicity and clarity. Controllers could be made generic
- *
- * @author eknizat
  */
 public interface Transformer
 {
@@ -50,10 +45,6 @@ public interface Transformer
 
     /**
      * Implementation of the actual transformation.
-     *
-     *
-     * TODO - Do we really need the sourceMimetype and targetMimetype as separate arguments?
-     *        they could be passed in parameters with predefined keys like TRANSFORM_NAME_PARAMETER
      *
      * @param sourceFile
      * @param targetFile
@@ -66,8 +57,6 @@ public interface Transformer
 
     /**
      * @return Supported config for the transformer implementation.
-     *
-     * TODO - maybe this does not have to be part of the common transform interface?
      *
      */
     TransformConfig getTransformConfig();
