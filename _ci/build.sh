@@ -14,9 +14,7 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 mvn -B -U \
     clean ${DEPLOY} \
     -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true \
-    "-P${PROFILE},docker-it-setup" -DskipTests
-
-mvn test -f "c:\Users\David_Edwards\Documents\GitHub\transforms\alfresco-transform-core\alfresco-transform-core-aio\alfresco-transform-core-aio-boot\pom.xml"
+    "-P${PROFILE},docker-it-setup"
 
 docker ps -a -q | xargs -r -l docker stop ; docker ps -a -q | xargs -r -l docker rm
 
