@@ -32,6 +32,7 @@ import java.io.File;
 import java.util.Map;
 
 import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.PdfRendererOptionsBuilder;
 
 
@@ -62,8 +63,8 @@ public class PdfRendererAdapter extends AbstractTransformer
 	}
 
 	@Override
-	public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-            Map<String, String> transformOptions) throws Exception 
+    public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype, 
+            Map<String, String> transformOptions) throws TransformException 
     {
        
         final String options = PdfRendererOptionsBuilder

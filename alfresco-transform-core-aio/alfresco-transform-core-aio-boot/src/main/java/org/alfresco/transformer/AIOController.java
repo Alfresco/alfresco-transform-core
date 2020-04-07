@@ -32,6 +32,7 @@ import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -45,6 +46,7 @@ import java.util.Iterator;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.alfresco.transformer.transformers.AllInOneTransformer;
@@ -175,16 +177,8 @@ public class AIOController extends AbstractTransformerController
         // TODO - remove this logginng
         debugLogTransform("After filtering props request with: ", sourceMimetype, targetMimetype,  transformOptions);
 
-        try 
-        {
-            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
-        } 
-        catch (Exception e) 
-        {
-            logger.error(e.getMessage(), e);
-        }
-        
-
+        transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
+    
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());
         long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");

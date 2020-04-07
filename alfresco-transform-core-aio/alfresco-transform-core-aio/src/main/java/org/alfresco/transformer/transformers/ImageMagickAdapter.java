@@ -32,6 +32,7 @@ import static org.alfresco.transformer.util.Util.stringToLong;
 import java.io.File;
 import java.util.Map;
 
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.ImageMagickOptionsBuilder;
 import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 
@@ -76,7 +77,7 @@ public class ImageMagickAdapter extends AbstractTransformer
 
     @Override
     public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-            Map<String, String> transformOptions) throws Exception 
+            Map<String, String> transformOptions) throws TransformException 
     {
         
         final String options = ImageMagickOptionsBuilder
