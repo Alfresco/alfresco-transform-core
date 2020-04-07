@@ -27,6 +27,7 @@
 package org.alfresco.transformer;
 
 import static org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
+import static org.alfresco.transformer.util.MimetypeMap.PREFIX_IMAGE;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -80,7 +81,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(ImageMagickController.class)
-public abstract class ImageMagickControllerTestBasePOC extends AbstractTransformerControllerTest
+public abstract class ImageMagickControllerTestBase extends AbstractTransformerControllerTest
 {
     private static final String ENGINE_CONFIG_NAME = "imagemagick_engine_config.json";
 
@@ -110,6 +111,7 @@ public abstract class ImageMagickControllerTestBasePOC extends AbstractTransform
         this.sourceExtension = sourceExtension;
         this.targetExtension = targetExtension;
         this.sourceMimetype = sourceMimetype;
+        this.targetMimetype = PREFIX_IMAGE + targetExtension;
 
         expectedOptions = null;
         expectedSourceSuffix = null;
@@ -188,6 +190,8 @@ public abstract class ImageMagickControllerTestBasePOC extends AbstractTransform
                     .multipart("/transform")
                     .file(sourceFile)
                     .param("targetExtension", targetExtension)
+                    .param("targetMimetype", targetMimetype)
+                    .param("sourceMimetype", sourceMimetype)
                     .param("cropGravity", value))
                 .andExpect(status().is(OK.value()))
                 .andExpect(content().bytes(expectedTargetFileBytes))
@@ -204,6 +208,8 @@ public abstract class ImageMagickControllerTestBasePOC extends AbstractTransform
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype)
                 .param("cropGravity", "badValue"))
             .andExpect(status().is(BAD_REQUEST.value()));
     }
@@ -218,6 +224,8 @@ public abstract class ImageMagickControllerTestBasePOC extends AbstractTransform
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype)
 
                 .param("startPage", "2")
                 .param("endPage", "3")
@@ -254,6 +262,8 @@ public abstract class ImageMagickControllerTestBasePOC extends AbstractTransform
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype)
 
                 .param("startPage", "2")
                 .param("endPage", "3")
@@ -290,6 +300,8 @@ public abstract class ImageMagickControllerTestBasePOC extends AbstractTransform
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype)
                 .param("thumbnail", "false")
                 .param("resizeWidth", "321")
                 .param("resizeHeight", "654")
@@ -336,8 +348,10 @@ public abstract class ImageMagickControllerTestBasePOC extends AbstractTransform
         transformRequest.setTransformRequestOptions(new HashMap<>());
         transformRequest.setSourceReference(sourceFileRef);
         transformRequest.setSourceExtension(sourceExtension);
+        transformRequest.setSourceMediaType(sourceMimetype);
         transformRequest.setSourceSize(sourceFile.length());
         transformRequest.setTargetExtension(targetExtension);
+        transformRequest.setTargetMediaType(targetMimetype);
 
         // HTTP Request
         HttpHeaders headers = new HttpHeaders();

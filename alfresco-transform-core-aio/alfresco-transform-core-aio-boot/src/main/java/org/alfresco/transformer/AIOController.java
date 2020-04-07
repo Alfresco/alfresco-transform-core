@@ -59,9 +59,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 @Controller
-public class AllInOneController extends AbstractTransformerController
+public class AIOController extends AbstractTransformerController
 {
-    private static final Logger logger = LoggerFactory.getLogger(AllInOneController.class);
+    private static final Logger logger = LoggerFactory.getLogger(AIOController.class);
 
     //TODO Should these be moved to the AbstractTransformerController or are they present in the transform.client? They are used by most controllers...
     private static final String SOURCE_ENCODING = "sourceEncoding";

@@ -38,13 +38,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(AllInOneController.class)
-@Import(AllInOneCustomConfig.class)
-public class AllInOneControllerTest //extends AbstractTransformerControllerTest 
+@WebMvcTest(AIOController.class)
+@Import(AIOCustomConfig.class)
+public class AIOControllerTest //extends AbstractTransformerControllerTest 
 {
 
     @Autowired
-    AllInOneController aioController;
+    AIOController aioController;
 
     //@Override
     protected void mockTransformCommand(String sourceExtension, String targetExtension, String sourceMimetype,

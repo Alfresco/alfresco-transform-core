@@ -33,7 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class AllInOneControllerHttpRequestTest extends  AbstractHttpRequestTest
+public class AIOControllerHttpRequestTest extends  AbstractHttpRequestTest
 {
 
     @Override

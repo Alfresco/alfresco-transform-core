@@ -28,6 +28,8 @@ package org.alfresco.transformer;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
 
 import org.alfresco.transformer.transformers.AllInOneTransformer;
 import org.alfresco.transformer.transformers.ImageMagickAdapter;
@@ -40,13 +42,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(AllInOneController.class)
-@Import(AllInOneCustomConfig.class)
-public class AllInOneControllerImageMagickTestPOC extends ImageMagickControllerTestBasePOC 
+@WebMvcTest(AIOController.class)
+@Import(AIOCustomConfig.class)
+public class AIOControllerImageMagickTest extends ImageMagickControllerTestBase 
 {
     
     static ImageMagickAdapter adapter;
@@ -55,7 +60,7 @@ public class AllInOneControllerImageMagickTestPOC extends ImageMagickControllerT
     AllInOneTransformer transformer;
 
     @SpyBean
-    AllInOneController controller;
+    AIOController controller;
 
     @BeforeClass
     public static void beforeClass() throws Exception
@@ -63,23 +68,22 @@ public class AllInOneControllerImageMagickTestPOC extends ImageMagickControllerT
         adapter = new ImageMagickAdapter();
     }
 
-    @Before @SuppressWarnings("unchecked")
-    public void before() throws IOException
+    @Before //@SuppressWarnings("unchecked")
+    public void before() throws IOException, Exception
     {
+        adapter = new ImageMagickAdapter();
         ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
         ReflectionTestUtils.setField(adapter, "commandExecutor", commandExecutor);
-        //Need to wire in the mocked adpater into the controller...
-        if (ReflectionTestUtils.getField(transformer,"transformerTransformMapping") instanceof Map)
-        {
-            Map<String,Transformer> transformers = (Map<String,Transformer>)ReflectionTestUtils.getField(transformer,"transformerTransformMapping");
-            transformers.replace("imagemagick", adapter);
-            ReflectionTestUtils.setField(transformer, "transformerTransformMapping", transformers);
-        }
+        // //Need to wire in the mocked adpater into the controller...
+        // if (ReflectionTestUtils.getField(transformer,"transformerTransformMapping") instanceof Map)
+        // {
+        //     Map<String,Transformer> transformers = (Map<String,Transformer>)ReflectionTestUtils.getField(transformer,"transformerTransformMapping");
+        //     transformers.replace("imagemagick", adapter);
+        //     ReflectionTestUtils.setField(transformer, "transformerTransformMapping", transformers);
+        // }
 
-        ReflectionTestUtils.setField(controller, "transformer",transformer);
-
-        mockTransformCommand("jpg", "png", "image/jpg", true);
+        mockTransformCommand("jpg", "png", "image/jpeg", true);
     }
 
     @Override
@@ -88,14 +92,23 @@ public class AllInOneControllerImageMagickTestPOC extends ImageMagickControllerT
         return controller;
     }
 
-    //There is currently a bug in the version of the surefire plugin that junit4 uses
-    //which means that inherited tests are not detected and run if there are no tests
-    //present in the super class, the below is a workaround.
-    @Test
-    public void emptyTest()
+    @Override
+    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
+        String... params)
     {
-        controller.info();
+        final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
+            .param("targetMimetype", targetMimetype)
+            .param("sourceMimetype", sourceMimetype);
+
+        return builder;
     }
 
+    @Test
+    @Override
+    public void noTargetFileTest()
+    {
+        // Ignore the test in super class as the AIO transforms we not be selected .
+        // It is the mock that returns a zero length file for other transformers, when we supply an invalid targetExtension.
+    }
    
 }

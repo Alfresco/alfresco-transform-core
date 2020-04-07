@@ -100,6 +100,7 @@ public abstract class AbstractTransformerControllerTest
     protected String sourceExtension;
     protected String targetExtension;
     protected String sourceMimetype;
+    protected String targetMimetype;
 
     protected MockMultipartFile sourceFile;
     protected String expectedOptions;
