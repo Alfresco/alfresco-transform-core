@@ -32,21 +32,17 @@ import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 import java.io.File;
 import java.util.Map;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.alfresco.transformer.transformers.AllInOneTransformer;

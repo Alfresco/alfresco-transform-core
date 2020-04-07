@@ -28,8 +28,6 @@ package org.alfresco.transformer;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Arrays;
-import java.util.List;
 
 import org.alfresco.transformer.transformers.AllInOneTransformer;
 import org.alfresco.transformer.transformers.ImageMagickAdapter;
@@ -46,7 +44,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(AIOController.class)
