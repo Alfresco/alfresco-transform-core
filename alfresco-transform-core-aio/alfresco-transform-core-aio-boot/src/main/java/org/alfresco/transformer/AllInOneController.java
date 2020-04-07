@@ -65,11 +65,13 @@ public class AllInOneController extends AbstractTransformerController
 
     //TODO Should these be moved to the AbstractTransformerController or are they present in the transform.client? They are used by most controllers...
     private static final String SOURCE_ENCODING = "sourceEncoding";
+    private static final String SOURCE_EXTENSION = "sourceExtension";
     private static final String TARGET_EXTENSION = "targetExtension";
     private static final String TARGET_MIMETYPE = "targetMimetype";
     private static final String SOURCE_MIMETYPE = "sourceMimetype";
     private static final String TEST_DELAY = "testDelay";    
-    private static final String[] UNWANTED_OPTIONS = {TARGET_EXTENSION,
+    private static final String[] UNWANTED_OPTIONS = {SOURCE_EXTENSION,
+                                                    TARGET_EXTENSION,
                                                     TARGET_MIMETYPE, 
                                                     SOURCE_MIMETYPE, 
                                                     TEST_DELAY                                         
@@ -94,9 +96,10 @@ public class AllInOneController extends AbstractTransformerController
     public void processTransform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
             Map<String, String> transformOptions, Long timeout) 
     {
+        debugLogTransform("Processing transform", sourceMimetype, targetMimetype, transformOptions);
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         transformOptions.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, transform);
-        debugLogTransform(sourceMimetype,transformOptions);
+
 
         try 
         {
@@ -148,7 +151,12 @@ public class AllInOneController extends AbstractTransformerController
         @RequestParam(SOURCE_MIMETYPE) String sourceMimetype,
         @RequestParam Map<String, String> transformOptions,
         @RequestParam (value = TEST_DELAY, required = false) Long testDelay)
-    {   
+    {
+
+        // TODO - remove this logginng
+        debugLogTransform("Entering request with: ", sourceMimetype, targetMimetype,  transformOptions);
+
+
         //Using @RequestParam Map<String, String> will gather all text params, including those specified seperately above.
         removeUnwantedOptions(transformOptions, UNWANTED_OPTIONS, true);
 
@@ -163,7 +171,9 @@ public class AllInOneController extends AbstractTransformerController
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
 
         transformOptions.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, transform);
-        debugLogTransform(sourceMimetype, transformOptions);
+
+        // TODO - remove this logginng
+        debugLogTransform("After filtering props request with: ", sourceMimetype, targetMimetype,  transformOptions);
 
         try 
         {
@@ -183,12 +193,12 @@ public class AllInOneController extends AbstractTransformerController
         return body;
     }
 
-    private void debugLogTransform(String sourceMimetype, Map<String, String> transformOptions) {
+    private void debugLogTransform(String message, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions) {
         if (logger.isDebugEnabled())
         {
             logger.debug(
-                "Processing request with: targetExtension '{}', transformOptions '{}'",
-                sourceMimetype, transformOptions);
+                "{} : sourceMimetype: '{}', targetMimetype: '{}', transformOptions: '{}'",
+                message, sourceMimetype, targetMimetype, transformOptions);
         }
     }
 
