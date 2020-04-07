@@ -29,11 +29,6 @@ package org.alfresco.transformer;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transformer.transformers.AllInOneTransformer;
-import org.alfresco.transformer.transformers.ImageMagickAdapter;
-import org.alfresco.transformer.transformers.LibreOfficeAdapter;
-import org.alfresco.transformer.transformers.MiscAdapter;
-import org.alfresco.transformer.transformers.PdfRendererAdapter;
-import org.alfresco.transformer.transformers.TikaAdapter;
 import org.alfresco.transformer.transformers.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,19 +37,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
-public class AIOCustomConfig
+public class AllInOneCustomConfig
 {
 
     @Bean("AllInOneTransformer")
-    public Transformer aioTransformer() throws Exception
+    public Transformer aioTransformer()
     {
-        AllInOneTransformer aioTransformer = new AllInOneTransformer();
-        aioTransformer.registerTransformer(new MiscAdapter());
-        aioTransformer.registerTransformer(new TikaAdapter());
-        aioTransformer.registerTransformer(new ImageMagickAdapter());
-        aioTransformer.registerTransformer(new LibreOfficeAdapter());
-        aioTransformer.registerTransformer(new PdfRendererAdapter());
-        return aioTransformer;
+        return new AllInOneTransformer();
     }
 
     /**
@@ -67,6 +56,7 @@ public class AIOCustomConfig
     {
         return new TransformRegistryImpl()
         {
+
             @Autowired
             @Qualifier("AllInOneTransformer")
             Transformer transformer;
