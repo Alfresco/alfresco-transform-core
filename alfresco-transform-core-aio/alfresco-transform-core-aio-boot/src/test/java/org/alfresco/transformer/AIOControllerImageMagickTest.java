@@ -141,4 +141,12 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTestBase
 
     }
     
+    @Test
+    @Override
+    public void deprecatedCommandOptionsTest() throws Exception
+    {
+        // Ignore test in super class as the CommandOptions is not within the imagemagick_engine_config.json
+        // as such it will not be considere a to have a valid transformer.
+
+    }
 }
