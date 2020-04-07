@@ -98,7 +98,16 @@ public class AIOController extends AbstractTransformerController
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         transformOptions.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, transform);
 
-        transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);        
+
+        try 
+        {
+            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
+        } 
+        catch (Exception e) 
+        {
+            logger.error(e.getMessage(), e);
+        }
+        
 
     }
 
@@ -118,8 +127,16 @@ public class AIOController extends AbstractTransformerController
                 Map<String, String> parameters = new HashMap<>();
                 parameters.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, "misc");
                 parameters.put(SOURCE_ENCODING, "UTF-8");
-                transformer.transform(sourceFile, targetFile, MIMETYPE_HTML,
-                MIMETYPE_TEXT_PLAIN, parameters);
+                try
+                {
+                    transformer.transform(sourceFile, targetFile, MIMETYPE_HTML,
+                    MIMETYPE_TEXT_PLAIN, parameters);
+                }
+                catch(Exception e)
+                {
+                    logger.error(e.getMessage(), e);
+                }
+                
             }
         };
     }
@@ -147,6 +164,8 @@ public class AIOController extends AbstractTransformerController
         final File sourceFile = createSourceFile(request, sourceMultipartFile);
         final File targetFile = createTargetFile(request, targetFilename);
 
+        // TODO Currently sourceMimetype and targetMimetype could be an empty string how does this affect getting the name?
+        // not all controllers take these from the request? Do requests intended for these transforms provide these?
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
 
         transformOptions.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, transform);
