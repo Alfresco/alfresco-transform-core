@@ -66,8 +66,6 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
     List<org.alfresco.transform.client.model.config.Transformer> transformerConfigs = new LinkedList<>();
     Map<String, Set<TransformOption>> transformOptions = new HashMap<>();
 
-    //private URL engineConfigUrl;
-
     // Holds the structures used by AbstractTransformRegistry to look up what is supported.
     // Unlike other sub classes this class does not extend Data or replace it at run time.
     private TransformCache data = new TransformCache();
@@ -125,8 +123,6 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
 
     public TransformConfig getTransformConfig() throws Exception
     {
-        //TransformConfig t = loadTransformConfig(locationFromProperty);
-
         TransformConfig t = new TransformConfig();
         t.setTransformOptions(transformOptions);
         t.setTransformers(transformerConfigs);

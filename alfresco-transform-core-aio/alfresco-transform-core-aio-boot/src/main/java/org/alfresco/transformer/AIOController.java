@@ -188,6 +188,7 @@ public class AIOController extends AbstractTransformerController
         }
     }
 
+    @Override
     public ResponseEntity<TransformConfig> info()
     {
         TransformConfig transformConfig = new TransformConfig();
