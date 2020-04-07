@@ -111,7 +111,6 @@ public class AIOController extends AbstractTransformerController
             protected void executeTransformCommand(File sourceFile, File targetFile)
             {
                 Map<String, String> parameters = new HashMap<>();
-                parameters.put(Transformer.TRANSFORM_NAME_PARAMETER, "misc"); // TODO - still need this?
                 parameters.put(SOURCE_ENCODING, "UTF-8");
                 try
                 {
@@ -211,7 +210,6 @@ public class AIOController extends AbstractTransformerController
         logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
                 " '{}', timeout {} ms", sourceFile, targetFile, transformOptions);
 
-        transformOptions.put(Transformer.TRANSFORM_NAME_PARAMETER, transformName);
         Transformer transformer = transformRegistry.getByTransformName(transformName);
 
 
@@ -228,7 +226,9 @@ public class AIOController extends AbstractTransformerController
 
         try
         {
-            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
+            Map<String, String> optionsWithTransformName = new HashMap<>(transformOptions);
+            optionsWithTransformName.put(Transformer.TRANSFORM_NAME_PARAMETER, transformName);
+            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, optionsWithTransformName);
 
         }
         catch (Exception e)

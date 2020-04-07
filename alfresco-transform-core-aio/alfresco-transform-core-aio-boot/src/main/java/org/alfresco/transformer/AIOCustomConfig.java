@@ -46,7 +46,6 @@ public class AIOCustomConfig
     @Primary
     public TransformServiceRegistry aioTransformRegistry() throws Exception
     {
-        System.out.println("****** Instanciating AIOTransformRegistry");
         AIOTransformRegistry aioTransformRegistry = new AIOTransformRegistry();
         aioTransformRegistry.registerTransformer(new MiscAdapter());
         aioTransformRegistry.registerTransformer(new TikaAdapter());

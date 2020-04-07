@@ -63,7 +63,7 @@ public class AllInOneTransformer implements Transformer
     public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
                           Map<String, String> transformOptions) throws Exception
     {
-        String transformName = transformOptions.get(TRANSFORM_NAME_PARAMETER);
+        String transformName = transformRegistry.getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         Transformer transformer = transformRegistry.getByTransformName(transformName);
 
         if (transformer == null)
