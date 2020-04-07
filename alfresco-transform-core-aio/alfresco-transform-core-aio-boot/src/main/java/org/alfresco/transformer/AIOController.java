@@ -32,17 +32,26 @@ import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
+import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
+import static org.alfresco.transformer.util.RequestParamMap.SOURCE_EXTENSION;
+import static org.alfresco.transformer.util.RequestParamMap.SOURCE_MIMETYPE;
+import static org.alfresco.transformer.util.RequestParamMap.TARGET_EXTENSION;
+import static org.alfresco.transformer.util.RequestParamMap.TARGET_MIMETYPE;
+import static org.alfresco.transformer.util.RequestParamMap.TEST_DELAY;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.alfresco.transformer.transformers.AllInOneTransformer;
@@ -60,20 +69,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class AIOController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(AIOController.class);
-
-    //TODO Should these be moved to the AbstractTransformerController or are they present in the transform.client? They are used by most controllers...
-    private static final String SOURCE_ENCODING = "sourceEncoding";
-    private static final String SOURCE_EXTENSION = "sourceExtension";
-    private static final String TARGET_EXTENSION = "targetExtension";
-    private static final String TARGET_MIMETYPE = "targetMimetype";
-    private static final String SOURCE_MIMETYPE = "sourceMimetype";
-    private static final String TEST_DELAY = "testDelay";    
-    private static final String[] UNWANTED_OPTIONS = {SOURCE_EXTENSION,
-                                                    TARGET_EXTENSION,
-                                                    TARGET_MIMETYPE, 
-                                                    SOURCE_MIMETYPE, 
-                                                    TEST_DELAY                                         
-                                                    };
 
     @Autowired
     private AllInOneTransformer transformer;
@@ -94,18 +89,23 @@ public class AIOController extends AbstractTransformerController
     public void processTransform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
             Map<String, String> transformOptions, Long timeout) 
     {
-        debugLogTransform("Processing transform", sourceMimetype, targetMimetype, transformOptions);
+        logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
+                " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
+
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         transformOptions.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, transform);
-
 
         try 
         {
             transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
-        } 
-        catch (Exception e) 
+        }
+        catch (IllegalArgumentException e)
         {
-            logger.error(e.getMessage(), e);
+            throw new TransformException(BAD_REQUEST.value(), e.getMessage(), e);
+        }
+        catch (Exception e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), e.getMessage(), e);
         }
         
 
@@ -134,7 +134,7 @@ public class AIOController extends AbstractTransformerController
                 }
                 catch(Exception e)
                 {
-                    logger.error(e.getMessage(), e);
+                    throw new TransformException(INTERNAL_SERVER_ERROR.value(), e.getMessage(), e);
                 }
                 
             }
@@ -144,19 +144,22 @@ public class AIOController extends AbstractTransformerController
     @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
         @RequestParam("file") MultipartFile sourceMultipartFile,
-        @RequestParam(TARGET_EXTENSION) String targetExtension,
-        @RequestParam(TARGET_MIMETYPE) String targetMimetype,
         @RequestParam(SOURCE_MIMETYPE) String sourceMimetype,
-        @RequestParam Map<String, String> transformOptions,
+        @RequestParam(TARGET_MIMETYPE) String targetMimetype,
+        @RequestParam(TARGET_EXTENSION) String targetExtension,
+        @RequestParam Map<String, String> requestParameters,
         @RequestParam (value = TEST_DELAY, required = false) Long testDelay)
     {
 
-        // TODO - remove this logginng
-        debugLogTransform("Entering request with: ", sourceMimetype, targetMimetype,  transformOptions);
+        debugLogTransform("Request parameters: ", sourceMimetype, targetMimetype, targetExtension, requestParameters);
 
+        //Remove all required parameters from request parameters to get the list of options
+        List<String> optionsToFilter = Arrays.asList(SOURCE_EXTENSION, TARGET_EXTENSION, TARGET_MIMETYPE,
+                SOURCE_MIMETYPE, TEST_DELAY);
+        Map<String, String> transformOptions = new HashMap<>(requestParameters);
+        transformOptions.keySet().removeAll(optionsToFilter);
+        transformOptions.values().removeIf(v -> v.isEmpty());
 
-        //Using @RequestParam Map<String, String> will gather all text params, including those specified seperately above.
-        removeUnwantedOptions(transformOptions, UNWANTED_OPTIONS, true);
 
         final String targetFilename = createTargetFileName(
             sourceMultipartFile.getOriginalFilename(), targetExtension);
@@ -164,24 +167,25 @@ public class AIOController extends AbstractTransformerController
         final File sourceFile = createSourceFile(request, sourceMultipartFile);
         final File targetFile = createTargetFile(request, targetFilename);
 
-        // TODO Currently sourceMimetype and targetMimetype could be an empty string how does this affect getting the name?
-        // not all controllers take these from the request? Do requests intended for these transforms provide these?
-        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
 
+        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         transformOptions.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, transform);
 
-        // TODO - remove this logginng
-        debugLogTransform("After filtering props request with: ", sourceMimetype, targetMimetype,  transformOptions);
+        debugLogTransform("Performing transform with parameters: ", sourceMimetype, targetMimetype,
+                targetExtension, requestParameters);
 
         try 
         {
             transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
         } 
-        catch (Exception e) 
+        catch (IllegalArgumentException e)
         {
-            logger.error(e.getMessage(), e);
+            throw new TransformException(BAD_REQUEST.value(), e.getMessage(), e);
         }
-        
+        catch (Exception e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), e.getMessage(), e);
+        }
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());
@@ -191,39 +195,13 @@ public class AIOController extends AbstractTransformerController
         return body;
     }
 
-    private void debugLogTransform(String message, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions) {
+    private void debugLogTransform(String message, String sourceMimetype, String targetMimetype, String targetExtension,
+                                   Map<String, String> transformOptions) {
         if (logger.isDebugEnabled())
         {
             logger.debug(
-                "{} : sourceMimetype: '{}', targetMimetype: '{}', transformOptions: '{}'",
-                message, sourceMimetype, targetMimetype, transformOptions);
-        }
-    }
-
-    /**
-     * Removes entries from transformOptions that have keys that match a value
-     * contained in unwantedStrings.
-     * Entries that contain empty strings can optionally be removed.
-     * 
-     * @param transformOptions
-     * @param unwantedStrings
-     * @param emptyStrings
-     */
-    private void removeUnwantedOptions(Map<String, String> transformOptions, String[] unwantedStrings, boolean emptyStrings) 
-    {
-        for (Iterator<Map.Entry<String, String>> iter = transformOptions.entrySet().iterator();iter.hasNext();) 
-        {
-            Map.Entry<String, String> entry = iter.next();
-            if (entry.getValue().isEmpty() || Arrays.asList(unwantedStrings).contains(entry.getKey())) 
-            {
-                iter.remove();
-                if (logger.isDebugEnabled())
-                {
-                    logger.debug("Key={} has been removed from the provided RequestParameters and it was passed value={}",
-                        entry.getKey(), entry.getValue()
-                    );
-                }               
-            }
+                "{} : sourceMimetype: '{}', targetMimetype: '{}', targetExtension: '{}', transformOptions: '{}'",
+                message, sourceMimetype, targetMimetype, targetExtension, transformOptions);
         }
     }
 }
