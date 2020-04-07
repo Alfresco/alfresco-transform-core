@@ -55,24 +55,6 @@ public class AllInOneTransformer implements Transformer
      */
     private Map<String, Transformer> transformerTransformMapping = new HashMap();
 
-    public AllInOneTransformer()
-    {
-        // TODO - use observer style registration?
-        try
-        {
-            this.registerTransformer(new MiscAdapter());
-            this.registerTransformer(new TikaAdapter());
-            this.registerTransformer(new ImageMagickAdapter());
-            this.registerTransformer(new LibreOfficeAdapter());
-            this.registerTransformer(new PdfRendererAdapter());
-        }
-        catch (Exception e)
-        {
-            // Rethrow as runtime exception, nothing else can be done
-            throw new RuntimeException("Failed to register all transformers.", e);
-        }
-    }
-
     /**
      * The registration will go through all supported sub transformers and map them to the transformer implementation.
      *
@@ -138,5 +120,15 @@ public class AllInOneTransformer implements Transformer
         allInOneConfig.setTransformOptions(transformOptions);
 
         return allInOneConfig;
+    }
+
+    public Map<String, Transformer> getTransformerTransformMapping()
+    {
+        return transformerTransformMapping;
+    }
+
+    public void setTransformerTransformMapping(Map<String, Transformer> transformerTransformMapping)
+    {
+        this.transformerTransformMapping = transformerTransformMapping;
     }
 }
