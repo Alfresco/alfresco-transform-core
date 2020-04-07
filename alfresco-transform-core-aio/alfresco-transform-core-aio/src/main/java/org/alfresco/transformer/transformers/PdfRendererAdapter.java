@@ -26,6 +26,12 @@
  */
 package org.alfresco.transformer.transformers;
 
+import static org.alfresco.transformer.util.RequestParamMap.ALLOW_PDF_ENLARGEMENT;
+import static org.alfresco.transformer.util.RequestParamMap.HEIGHT_REQUEST_PARAM;
+import static org.alfresco.transformer.util.RequestParamMap.MAINTAIN_PDF_ASPECT_RATIO;
+import static org.alfresco.transformer.util.RequestParamMap.PAGE_REQUEST_PARAM;
+import static org.alfresco.transformer.util.RequestParamMap.TIMEOUT;
+import static org.alfresco.transformer.util.RequestParamMap.WIDTH_REQUEST_PARAM;
 import static org.alfresco.transformer.util.Util.stringToLong;
 
 import java.io.File;
@@ -39,15 +45,6 @@ public class PdfRendererAdapter extends AbstractTransformer
 {
     private static String CONFIG_PREFIX = "pdfrenderer";
     private PdfRendererCommandExecutor pdfExecutor;
-    
-    //TODO move key strings to a central class
-    private final static String PAGE_REQUEST_PARAM = "page";    
-    private final static String WIDTH_REQUEST_PARAM = "width";
-    private final static String HEIGHT_REQUEST_PARAM = "height";
-    private final static String ALLOW_PDF_ENLARGEMENT = "allowPdfEnlargement";
-    private final static String MAINTAIN_PDF_ASPECT_RATIO = "maintainPdfAspectRatio";
-    private final static String TIMEOUT_REQUEST_PARAM = "timeout";
-
 
     public PdfRendererAdapter() throws Exception
     {
@@ -75,7 +72,7 @@ public class PdfRendererAdapter extends AbstractTransformer
             .withMaintainPdfAspectRatio(transformOptions.get(MAINTAIN_PDF_ASPECT_RATIO))
             .build();
 
-        Long timeout = stringToLong(transformOptions.get(TIMEOUT_REQUEST_PARAM));
+        Long timeout = stringToLong(transformOptions.get(TIMEOUT));
 
         pdfExecutor.run(options, sourceFile, targetFile, timeout);
 	}
