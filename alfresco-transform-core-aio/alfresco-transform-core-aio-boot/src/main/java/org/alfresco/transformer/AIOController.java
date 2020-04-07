@@ -173,8 +173,16 @@ public class AIOController extends AbstractTransformerController
         // TODO - remove this logginng
         debugLogTransform("After filtering props request with: ", sourceMimetype, targetMimetype,  transformOptions);
 
-        transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
-    
+        try 
+        {
+            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
+        } 
+        catch (Exception e) 
+        {
+            logger.error(e.getMessage(), e);
+        }
+        
+
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());
         long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");

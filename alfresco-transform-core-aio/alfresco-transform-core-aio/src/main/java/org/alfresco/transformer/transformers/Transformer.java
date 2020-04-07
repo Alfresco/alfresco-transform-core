@@ -28,7 +28,6 @@ package org.alfresco.transformer.transformers;
 
 
 import org.alfresco.transform.client.model.config.TransformConfig;
-import org.alfresco.transform.exceptions.TransformException;
 
 import java.io.File;
 import java.util.Map;
@@ -59,10 +58,10 @@ public interface Transformer
      * @param sourceFile
      * @param targetFile
      * @param transformOptions
-     * @throws TransformException - if there was a problem internally
+     * @throws Exception
      */
     void transform(File sourceFile, File targetFile, String sourceMimetype,
-                          String targetMimetype, Map<String, String> transformOptions) throws TransformException;
+                          String targetMimetype, Map<String, String> transformOptions) throws Exception;
 
 
     /**
