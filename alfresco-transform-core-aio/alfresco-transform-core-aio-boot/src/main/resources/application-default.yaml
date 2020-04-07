@@ -1,2 +1,6 @@
 queue:
   engineRequestQueue: ${TRANSFORM_ENGINE_REQUEST_QUEUE:org.alfresco.transform.engine.aio.acs}
+
+logging:
+  level:
+    org.alfresco.transformer: DEBUG

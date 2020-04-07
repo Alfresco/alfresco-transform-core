@@ -26,17 +26,11 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
-import org.alfresco.transformer.transformers.AllInOneTransformer;
 import org.alfresco.transformer.transformers.ImageMagickAdapter;
-import org.alfresco.transformer.transformers.LibreOfficeAdapter;
 import org.alfresco.transformer.transformers.MiscAdapter;
 import org.alfresco.transformer.transformers.PdfRendererAdapter;
 import org.alfresco.transformer.transformers.TikaAdapter;
-import org.alfresco.transformer.transformers.Transformer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -44,38 +38,22 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class AIOCustomConfig
 {
-
-    @Bean("AllInOneTransformer")
-    public Transformer aioTransformer() throws Exception
-    {
-        AllInOneTransformer aioTransformer = new AllInOneTransformer();
-        aioTransformer.registerTransformer(new MiscAdapter());
-        aioTransformer.registerTransformer(new TikaAdapter());
-        aioTransformer.registerTransformer(new ImageMagickAdapter());
-        aioTransformer.registerTransformer(new LibreOfficeAdapter());
-        aioTransformer.registerTransformer(new PdfRendererAdapter());
-        return aioTransformer;
-    }
-
     /**
      *
      * @return Override the TransformRegistryImpl used in {@link AbstractTransformerController}
      */
     @Bean
     @Primary
-    public TransformServiceRegistry transformRegistryOverride()
+    public TransformServiceRegistry aioTransformRegistry() throws Exception
     {
-        return new TransformRegistryImpl()
-        {
-            @Autowired
-            @Qualifier("AllInOneTransformer")
-            Transformer transformer;
-
-            @Override
-            TransformConfig getTransformConfig()
-            {
-                return transformer.getTransformConfig();
-            }
-        };
+        System.out.println("****** Instanciating AIOTransformRegistry");
+        AIOTransformRegistry aioTransformRegistry = new AIOTransformRegistry();
+        aioTransformRegistry.registerTransformer(new MiscAdapter());
+        aioTransformRegistry.registerTransformer(new TikaAdapter());
+        aioTransformRegistry.registerTransformer(new ImageMagickAdapter());
+        //aioTransformRegistry.registerTransformer(new LibreOfficeAdapter()); // TODO - why did this start throwing NPE - should we catch them?
+        aioTransformRegistry.registerTransformer(new PdfRendererAdapter());
+        return aioTransformRegistry;
     }
+
 }

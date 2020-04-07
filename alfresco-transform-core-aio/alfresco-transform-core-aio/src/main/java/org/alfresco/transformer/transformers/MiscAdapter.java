@@ -29,9 +29,9 @@ package org.alfresco.transformer.transformers;
 import java.io.File;
 import java.util.Map;
 
-public class MiscAdapter extends AbstractTransformer
+public class MiscAdapter implements Transformer
 {
-    private static final String CONFIG_PREFIX = "misc";
+    private static final String ID = "misc";
     private SelectingTransformer miscSelectingTransformer;
 
 
@@ -42,12 +42,6 @@ public class MiscAdapter extends AbstractTransformer
     }
 
     @Override
-    public String getTransformerConfigPrefix()
-    {
-        return CONFIG_PREFIX;
-    }
-
-    @Override
     public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype, Map<String,
             String> transformOptions) throws Exception
     {
@@ -55,6 +49,12 @@ public class MiscAdapter extends AbstractTransformer
         miscSelectingTransformer.transform(transformerName, sourceFile, targetFile,
                 sourceMimetype, targetMimetype, transformOptions);
 
+    }
+
+    @Override
+    public String getTransformerId()
+    {
+        return ID;
     }
 }
 

@@ -35,9 +35,9 @@ import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
 import org.alfresco.transformer.PdfRendererOptionsBuilder;
 
 
-public class PdfRendererAdapter extends AbstractTransformer
+public class PdfRendererAdapter implements Transformer
 {
-    private static String CONFIG_PREFIX = "pdfrenderer";
+    private static String ID = "pdfrenderer";
     private PdfRendererCommandExecutor pdfExecutor;
     
     //TODO move key strings to a central class
@@ -54,12 +54,6 @@ public class PdfRendererAdapter extends AbstractTransformer
         super();
         pdfExecutor = new PdfRendererCommandExecutor();
     }
-
-    @Override
-    String getTransformerConfigPrefix() 
-    {
-		return CONFIG_PREFIX;
-	}
 
 	@Override
 	public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
@@ -79,5 +73,11 @@ public class PdfRendererAdapter extends AbstractTransformer
 
         pdfExecutor.run(options, sourceFile, targetFile, timeout);
 	}
-	
+
+    @Override
+    public String getTransformerId()
+    {
+        return ID;
+    }
+
 }

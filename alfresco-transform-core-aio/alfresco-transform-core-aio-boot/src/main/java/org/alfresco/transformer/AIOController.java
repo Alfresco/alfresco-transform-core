@@ -45,10 +45,11 @@ import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
-import org.alfresco.transformer.transformers.AllInOneTransformer;
+import org.alfresco.transformer.transformers.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +73,7 @@ public class AIOController extends AbstractTransformerController
     private static final String TEST_DELAY = "testDelay";
 
     @Autowired
-    private AllInOneTransformer transformer;
+    private  AIOTransformRegistry transformRegistry;
 
     @Override
     public String getTransformerName()
@@ -90,25 +91,9 @@ public class AIOController extends AbstractTransformerController
     public void processTransform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
             Map<String, String> transformOptions, Long timeout) 
     {
-        logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
-                " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
 
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
-        transformOptions.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, transform);
-
-        try 
-        {
-            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new TransformException(BAD_REQUEST.value(), e.getMessage(), e);
-        }
-        catch (Exception e)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), e.getMessage(), e);
-        }
-        
+        transformInternal( transform, sourceFile, targetFile, MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, transformOptions);
 
     }
 
@@ -126,12 +111,12 @@ public class AIOController extends AbstractTransformerController
             protected void executeTransformCommand(File sourceFile, File targetFile)
             {
                 Map<String, String> parameters = new HashMap<>();
-                parameters.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, "misc");
+                parameters.put(Transformer.TRANSFORM_NAME_PARAMETER, "misc"); // TODO - still need this?
                 parameters.put(SOURCE_ENCODING, "UTF-8");
                 try
                 {
-                    transformer.transform(sourceFile, targetFile, MIMETYPE_HTML,
-                    MIMETYPE_TEXT_PLAIN, parameters);
+                    transformInternal( "misc", sourceFile, targetFile, MIMETYPE_HTML,
+                            MIMETYPE_TEXT_PLAIN, parameters);
                 }
                 catch(Exception e)
                 {
@@ -170,14 +155,11 @@ public class AIOController extends AbstractTransformerController
 
 
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
-        transformOptions.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, transform);
-
-        debugLogTransform("Performing transform with parameters: ", sourceMimetype, targetMimetype,
-                targetExtension, requestParameters);
-
         try 
         {
-            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
+            debugLogTransform("Performing transform with parameters: ", sourceMimetype, targetMimetype,
+                    targetExtension, transformOptions);
+            transformInternal(transform, sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
         } 
         catch (IllegalArgumentException e)
         {
@@ -204,5 +186,55 @@ public class AIOController extends AbstractTransformerController
                 "{} : sourceMimetype: '{}', targetMimetype: '{}', targetExtension: '{}', transformOptions: '{}'",
                 message, sourceMimetype, targetMimetype, targetExtension, transformOptions);
         }
+    }
+
+    public ResponseEntity<TransformConfig> info()
+    {
+        TransformConfig transformConfig = new TransformConfig();
+        logger.info("GET Transform Config.");
+        try
+        {
+            transformConfig = transformRegistry.getTransformConfig();
+        }
+        catch (Exception e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), e.getMessage(), e);
+        }
+
+        return new ResponseEntity<>(transformConfig, OK);
+    }
+
+    protected void transformInternal(String transformName, File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
+                      Map<String, String> transformOptions)
+    {
+        logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
+                " '{}', timeout {} ms", sourceFile, targetFile, transformOptions);
+
+        transformOptions.put(Transformer.TRANSFORM_NAME_PARAMETER, transformName);
+        Transformer transformer = transformRegistry.getByTransformName(transformName);
+
+
+        if (transformer == null)
+        {
+            new TransformException(INTERNAL_SERVER_ERROR.value(), "No transformer mapping for - transform:"
+                    + transformName + " sourceMimetype:" + sourceMimetype + " targetMimetype:" + targetMimetype);
+        }
+
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Performing transform '{}' using {}", transformName, transformer.getClass().getSimpleName());
+        }
+
+        try
+        {
+            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
+
+        }
+        catch (Exception e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), "Failed transform - transform:"
+                    + transformName + " sourceMimetype:" + sourceMimetype + " targetMimetype:" + targetMimetype);
+        }
+
     }
 }

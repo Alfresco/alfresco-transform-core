@@ -26,19 +26,12 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.alfresco.transform.client.model.config.TransformConfig;
-import org.alfresco.transform.client.model.config.TransformOption;
+import org.alfresco.transformer.AIOTransformRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Top level transformer managing multiple sub transformers.
@@ -53,37 +46,25 @@ public class AllInOneTransformer implements Transformer
     /**
      * Represents the mapping between a transform and a transformer, multiple mappings can point to the same transformer.
      */
-    private Map<String, Transformer> transformerTransformMapping = new HashMap();
+    AIOTransformRegistry transformRegistry = new AIOTransformRegistry();
 
-    /**
-     * The registration will go through all supported sub transformers and map them to the transformer implementation.
-     *
-     * @param transformer The transformer implementation,
-     *                    this could be a transformer managing multiple sub transformers.
-     * @throws Exception Exception is thrown if a mapping for a transformer name already exists.
-     */
-    public void registerTransformer(Transformer transformer) throws Exception
+    public AllInOneTransformer()
     {
-        for (org.alfresco.transform.client.model.config.Transformer transformerConfig
-                : transformer.getTransformConfig().getTransformers())
-        {
-            String transformerName = transformerConfig.getTransformerName();
-            if (transformerTransformMapping.containsKey(transformerName))
-            {
-                throw new Exception("Transformer name " + transformerName + " is already registered.");
-            }
 
-            transformerTransformMapping.put(transformerName, transformer);
-            logger.debug("Registered transformer with name: '{}'.", transformerName);
-        }
     }
+
+    public void addTransformer(Transformer transformer) throws Exception
+    {
+        transformRegistry.registerTransformer(transformer);
+    }
+
 
     @Override
     public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
                           Map<String, String> transformOptions) throws Exception
     {
         String transformName = transformOptions.get(TRANSFORM_NAME_PARAMETER);
-        Transformer transformer = transformerTransformMapping.get(transformName);
+        Transformer transformer = transformRegistry.getByTransformName(transformName);
 
         if (transformer == null)
         {
@@ -99,36 +80,19 @@ public class AllInOneTransformer implements Transformer
     }
 
     @Override
-    public TransformConfig getTransformConfig()
+    public String getTransformerId()
     {
-
-        // Merge the config for all sub transformers
-        List<org.alfresco.transform.client.model.config.Transformer> transformerConfigs = new LinkedList<>();
-        Map<String, Set<TransformOption>> transformOptions = new HashMap<>();
-        Set<Transformer> distinctTransformers = new HashSet<>(transformerTransformMapping.values());
-        {
-            for (Transformer transformer: distinctTransformers)
-            {
-                TransformConfig transformConfig = transformer.getTransformConfig();
-                transformerConfigs.addAll(transformConfig.getTransformers());
-                transformOptions.putAll(transformConfig.getTransformOptions());
-            }
-        }
-
-        TransformConfig allInOneConfig = new TransformConfig();
-        allInOneConfig.setTransformers(transformerConfigs);
-        allInOneConfig.setTransformOptions(transformOptions);
-
-        return allInOneConfig;
+        return "all-in-one";
     }
 
-    public Map<String, Transformer> getTransformerTransformMapping()
+
+    public AIOTransformRegistry getTransformRegistry()
     {
-        return transformerTransformMapping;
+        return transformRegistry;
     }
 
-    public void setTransformerTransformMapping(Map<String, Transformer> transformerTransformMapping)
+    public void setTransformRegistry(AIOTransformRegistry transformRegistry)
     {
-        this.transformerTransformMapping = transformerTransformMapping;
+        this.transformRegistry = transformRegistry;
     }
 }

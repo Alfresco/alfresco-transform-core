@@ -37,21 +37,15 @@ import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT
 import static org.alfresco.transformer.executors.Tika.TARGET_ENCODING;
 import static org.alfresco.transformer.executors.Tika.TARGET_MIMETYPE;
 
-public class TikaAdapter extends AbstractTransformer
+public class TikaAdapter implements Transformer
 {
-    private static final String CONFIG_PREFIX = "tika";
+    private static final String ID = "tika";
     private TikaJavaExecutor tikaJavaExecutor;
 
     public TikaAdapter() throws Exception
     {
         super();
         tikaJavaExecutor = new TikaJavaExecutor();
-    }
-
-    @Override
-    String getTransformerConfigPrefix()
-    {
-        return CONFIG_PREFIX;
     }
 
     @Override
@@ -69,5 +63,11 @@ public class TikaAdapter extends AbstractTransformer
                 includeContents ? INCLUDE_CONTENTS : null,
                 notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
                 TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);
+    }
+
+    @Override
+    public String getTransformerId()
+    {
+        return ID;
     }
 }
