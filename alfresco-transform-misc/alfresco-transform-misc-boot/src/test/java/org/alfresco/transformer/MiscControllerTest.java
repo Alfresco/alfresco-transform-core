@@ -71,6 +71,8 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     private final String targetEncoding = "UTF-8";
     private final String targetMimetype = MIMETYPE_TEXT_PLAIN;
 
+    private static final String ENGINE_CONFIG_NAME = "misc_engine_config.json";
+
     @Before
     public void before() throws Exception
     {
@@ -84,6 +86,12 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         //expectedTargetFileBytes = null;
         sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
             expectedSourceFileBytes);
+    }
+
+    @Override
+    public String getEngineConfigName()
+    {
+        return ENGINE_CONFIG_NAME;
     }
 
     @Override
