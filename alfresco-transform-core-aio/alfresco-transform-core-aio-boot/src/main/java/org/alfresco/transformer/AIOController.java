@@ -111,15 +111,9 @@ public class AIOController extends AbstractTransformerController
             {
                 Map<String, String> parameters = new HashMap<>();
                 parameters.put(SOURCE_ENCODING, "UTF-8");
-                try
-                {
-                    transformInternal( "misc", sourceFile, targetFile, MIMETYPE_HTML,
+                transformInternal( "misc", sourceFile, targetFile, MIMETYPE_HTML,
                             MIMETYPE_TEXT_PLAIN, parameters);
-                }
-                catch(Exception e)
-                {
-                    throw new TransformException(INTERNAL_SERVER_ERROR.value(), e.getMessage(), e);
-                }
+            
                 
             }
         };
@@ -152,20 +146,11 @@ public class AIOController extends AbstractTransformerController
         final File targetFile = createTargetFile(request, targetFilename);
 
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
-        try 
-        {
-            debugLogTransform("Performing transform with parameters: ", sourceMimetype, targetMimetype,
-                    targetExtension, transformOptions);
-            transformInternal(transform, sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
-        } 
-        catch (IllegalArgumentException e)
-        {
-            throw new TransformException(BAD_REQUEST.value(), e.getMessage(), e);
-        }
-        catch (Exception e)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), e.getMessage(), e);
-        }
+        debugLogTransform("Performing transform with parameters: ", sourceMimetype, targetMimetype,
+                targetExtension, transformOptions);
+        transformInternal(transform, sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
+
+
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());
@@ -228,6 +213,14 @@ public class AIOController extends AbstractTransformerController
             optionsWithTransformName.put(Transformer.TRANSFORM_NAME_PARAMETER, transformName);
             transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, optionsWithTransformName);
 
+        }
+        catch (TransformException e)
+        {
+            throw e;
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new TransformException(BAD_REQUEST.value(), e.getMessage(), e);
         }
         catch (Exception e)
         {
