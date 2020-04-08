@@ -31,21 +31,14 @@ import java.util.Map;
 
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
 
-public class LibreOfficeAdapter extends AbstractTransformer
+public class LibreOfficeAdapter implements Transformer
 {
-    private static String CONFIG_PREFIX = "libreoffice";
+    private static String ID = "libreoffice";
     private LibreOfficeJavaExecutor javaExecutor;
 
     public LibreOfficeAdapter() throws Exception
     {
-        super();
         javaExecutor = new LibreOfficeJavaExecutor();
-    }
-
-    @Override
-    String getTransformerConfigPrefix() 
-    {
-		return CONFIG_PREFIX;
     }
     
     @Override
@@ -53,5 +46,11 @@ public class LibreOfficeAdapter extends AbstractTransformer
             Map<String, String> transformOptions) throws Exception 
     {
         javaExecutor.call(sourceFile, targetFile);
+    }
+
+    @Override
+    public String getTransformerId()
+    {
+        return ID;
     }
 }

@@ -53,22 +53,16 @@ import java.util.Map;
 import org.alfresco.transformer.ImageMagickOptionsBuilder;
 import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 
-public class ImageMagickAdapter extends AbstractTransformer 
+public class ImageMagickAdapter implements Transformer
 {
 
-    private static String CONFIG_PREFIX = "imagemagick";
+    private static String ID = "imagemagick";
     private ImageMagickCommandExecutor commandExecutor;
 
     public ImageMagickAdapter() throws Exception 
     {
         super();
         commandExecutor = new ImageMagickCommandExecutor();
-    }
-
-    @Override
-    String getTransformerConfigPrefix() 
-    {
-        return CONFIG_PREFIX;
     }
 
     @Override
@@ -105,6 +99,12 @@ public class ImageMagickAdapter extends AbstractTransformer
         Long timeout = stringToLong(transformOptions.get(TIMEOUT));
 
         commandExecutor.run(options, sourceFile, pageRange, targetFile, timeout);
+    }
+
+    @Override
+    public String getTransformerId()
+    {
+        return ID;
     }
 
     // COPIED From ImageMagickController
