@@ -44,6 +44,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
@@ -63,7 +64,10 @@ import org.alfresco.transform.client.model.config.Transformer;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.apache.commons.io.FileUtils;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -84,6 +88,9 @@ import com.google.common.collect.ImmutableSet;
  */
 public abstract class AbstractTransformerControllerTest
 {
+    @Rule
+    public TemporaryFolder folder= new TemporaryFolder();
+
     @Autowired
     protected MockMvc mockMvc;
 
@@ -162,6 +169,38 @@ public abstract class AbstractTransformerControllerTest
     }
 
     protected File getTestFile(String testFilename, boolean required) throws IOException
+    {
+        File testFile;
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL testFileUrl = classLoader.getResource(testFilename);
+        if (required && testFileUrl == null)
+        {
+            throw new IOException("The test file " + testFilename +
+                    " does not exist in the resources directory");
+        }
+        try 
+        {
+            testFile = folder.newFile(testFilename);
+        } 
+        catch (IOException e) 
+        {
+            if(e.getMessage().contains("a file with the name \'" + testFilename + "\' already exists in the test folder"))
+            {
+                testFile = new File(URLDecoder.decode(folder.getRoot().getPath()+ File.separator + testFilename, "UTF-8"));
+            }
+            else
+            {
+                throw e;
+            }
+        }
+        
+        InputStream inputStream = classLoader.getResourceAsStream(testFilename);
+
+        FileUtils.copyInputStreamToFile(inputStream, testFile);
+        return testFileUrl == null ? null : testFile;
+    }
+
+    protected File getTestFileOrig(String testFilename, boolean required) throws IOException
     {
         ClassLoader classLoader = getClass().getClassLoader();
         URL testFileUrl = classLoader.getResource(testFilename);
