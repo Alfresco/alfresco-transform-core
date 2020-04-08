@@ -51,7 +51,7 @@ import static org.alfresco.transformer.transformers.TextToPdfContentTransformer.
 import static org.alfresco.transformer.transformers.Transformer.TRANSFORM_NAME_PARAMETER;
 import static org.junit.Assert.*;
 
-public class AllTransformRegistryTest
+public class AIOTransformRegistryTest
 {
     private static final String SOURCE_MIMETYPE = "text/html";
     private static final String TARGET_MIMETYPE = "text/plain";
