@@ -28,6 +28,7 @@ package org.alfresco.transformer;
 
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transformer.transformers.ImageMagickAdapter;
+import org.alfresco.transformer.transformers.LibreOfficeAdapter;
 import org.alfresco.transformer.transformers.MiscAdapter;
 import org.alfresco.transformer.transformers.PdfRendererAdapter;
 import org.alfresco.transformer.transformers.TikaAdapter;
@@ -50,7 +51,7 @@ public class AIOCustomConfig
         aioTransformRegistry.registerTransformer(new MiscAdapter());
         aioTransformRegistry.registerTransformer(new TikaAdapter());
         aioTransformRegistry.registerTransformer(new ImageMagickAdapter());
-        //aioTransformRegistry.registerTransformer(new LibreOfficeAdapter()); // TODO - why did this start throwing NPE - should we catch them?
+        aioTransformRegistry.registerTransformer(new LibreOfficeAdapter());
         aioTransformRegistry.registerTransformer(new PdfRendererAdapter());
         return aioTransformRegistry;
     }
