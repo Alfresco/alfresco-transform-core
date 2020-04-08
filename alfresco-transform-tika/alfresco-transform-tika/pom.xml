@@ -49,10 +49,6 @@
                     <groupId>org.quartz-scheduler</groupId>
                     <artifactId>quartz</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>xml-apis</groupId>
-                    <artifactId>xml-apis</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
 
