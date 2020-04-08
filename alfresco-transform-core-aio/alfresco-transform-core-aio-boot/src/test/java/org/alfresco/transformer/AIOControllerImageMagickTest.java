@@ -29,7 +29,7 @@ package org.alfresco.transformer;
 import java.io.IOException;
 import java.util.Map;
 
-import org.alfresco.transformer.transformers.AllInOneTransformer;
+import org.alfresco.transformer.AIOTransformRegistry;
 import org.alfresco.transformer.transformers.ImageMagickAdapter;
 import org.alfresco.transformer.transformers.Transformer;
 import org.junit.Before;
@@ -54,7 +54,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTestBase
     static ImageMagickAdapter adapter;
     
     @Autowired
-    AllInOneTransformer transformer;
+    AIOTransformRegistry transformRegistry;
 
     @SpyBean
     AIOController controller;
@@ -65,7 +65,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTestBase
         adapter = new ImageMagickAdapter();
     }
 
-    @Before @SuppressWarnings("unchecked")
+    @Before
     public void before() throws IOException, Exception
     {
         adapter = new ImageMagickAdapter();
@@ -73,11 +73,11 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTestBase
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
         ReflectionTestUtils.setField(adapter, "commandExecutor", commandExecutor);
         //Need to wire in the mocked adpater into the controller...
-        if (ReflectionTestUtils.getField(transformer,"transformerTransformMapping") instanceof Map)
+        if (ReflectionTestUtils.getField(transformRegistry,"transformerTransformMapping") instanceof Map)
         {
-            Map<String,Transformer> transformers = (Map<String,Transformer>)ReflectionTestUtils.getField(transformer,"transformerTransformMapping");
+            Map<String,Transformer> transformers = transformRegistry.getTransformerTransformMapping();
             transformers.replace("imagemagick", adapter);
-            ReflectionTestUtils.setField(transformer, "transformerTransformMapping", transformers);
+            ReflectionTestUtils.setField(transformRegistry, "transformerTransformMapping", transformers);
         }
 
         mockTransformCommand("jpg", "png", "image/jpeg", true);
