@@ -29,7 +29,6 @@ package org.alfresco.transformer;
 import java.io.IOException;
 
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
