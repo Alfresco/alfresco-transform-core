@@ -95,19 +95,7 @@ public class AIOController extends AbstractTransformerController
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         transformOptions.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, transform);
 
-        try 
-        {
-            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new TransformException(BAD_REQUEST.value(), e.getMessage(), e);
-        }
-        catch (Exception e)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), e.getMessage(), e);
-        }
-        
+        transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);        
 
     }
 
@@ -127,16 +115,8 @@ public class AIOController extends AbstractTransformerController
                 Map<String, String> parameters = new HashMap<>();
                 parameters.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, "misc");
                 parameters.put(SOURCE_ENCODING, "UTF-8");
-                try
-                {
-                    transformer.transform(sourceFile, targetFile, MIMETYPE_HTML,
-                    MIMETYPE_TEXT_PLAIN, parameters);
-                }
-                catch(Exception e)
-                {
-                    throw new TransformException(INTERNAL_SERVER_ERROR.value(), e.getMessage(), e);
-                }
-                
+                transformer.transform(sourceFile, targetFile, MIMETYPE_HTML,
+                MIMETYPE_TEXT_PLAIN, parameters);
             }
         };
     }
@@ -166,7 +146,6 @@ public class AIOController extends AbstractTransformerController
         getProbeTestTransform().incrementTransformerCount();
         final File sourceFile = createSourceFile(request, sourceMultipartFile);
         final File targetFile = createTargetFile(request, targetFilename);
-
 
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         transformOptions.put(AllInOneTransformer.TRANSFORM_NAME_PARAMETER, transform);
