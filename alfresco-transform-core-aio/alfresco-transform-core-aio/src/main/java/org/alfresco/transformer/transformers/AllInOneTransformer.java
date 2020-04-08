@@ -58,12 +58,11 @@ public class AllInOneTransformer implements Transformer
         transformRegistry.registerTransformer(transformer);
     }
 
-
     @Override
     public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
                           Map<String, String> transformOptions) throws Exception
     {
-        String transformName = transformRegistry.getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
+        String transformName = transformOptions.get(TRANSFORM_NAME_PARAMETER);
         Transformer transformer = transformRegistry.getByTransformName(transformName);
 
         if (transformer == null)

@@ -151,7 +151,6 @@ public class AIOController extends AbstractTransformerController
         final File sourceFile = createSourceFile(request, sourceMultipartFile);
         final File targetFile = createTargetFile(request, targetFilename);
 
-
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         try 
         {

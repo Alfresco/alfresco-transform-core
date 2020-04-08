@@ -62,9 +62,8 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
     private String locationFromProperty = "engine_config.json";
 
 
-    // These 2 represent the config
-    List<org.alfresco.transform.client.model.config.Transformer> transformerConfigs = new LinkedList<>();
-    Map<String, Set<TransformOption>> transformOptions = new HashMap<>();
+    // The aggregated config
+    TransformConfig aggregatedConfig = new TransformConfig();
 
     // Holds the structures used by AbstractTransformRegistry to look up what is supported.
     // Unlike other sub classes this class does not extend Data or replace it at run time.
@@ -100,8 +99,8 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
                 throw new Exception("Transformer name " + transformerName + " is already registered.");
             }
 
-            transformerConfigs.addAll(transformConfig.getTransformers());
-            transformOptions.putAll(transformConfig.getTransformOptions());
+            aggregatedConfig.getTransformers().addAll(transformConfig.getTransformers());
+            aggregatedConfig.getTransformOptions().putAll(transformConfig.getTransformOptions());
 
             transformerTransformMapping.put(transformerName, transformer);
             log.debug("Registered transformer with name: '{}'.", transformerName);
@@ -123,10 +122,7 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
 
     public TransformConfig getTransformConfig() throws Exception
     {
-        TransformConfig t = new TransformConfig();
-        t.setTransformOptions(transformOptions);
-        t.setTransformers(transformerConfigs);
-        return t;
+        return aggregatedConfig;
     }
 
     protected TransformConfig loadTransformConfig(String name) throws Exception
@@ -147,22 +143,6 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
             throw new Exception("Could not read '" + name + "' from the classpath.", e);
         }
     }
-
-    public String getTransformerName(final File sourceFile, final String sourceMimetype,
-                                        final String targetMimetype, final Map<String, String> transformOptions)
-    {
-
-        final long sourceSizeInBytes = sourceFile.length();
-        final String transformerName = findTransformerName(sourceMimetype,
-                sourceSizeInBytes, targetMimetype, transformOptions, null);
-        if (transformerName == null)
-        {
-            throw new TransformException(BAD_REQUEST.value(),
-                    "No transforms were able to handle the request");
-        }
-        return transformerName;
-    }
-
 
     Map<String, Transformer> getTransformerTransformMapping()
     {
