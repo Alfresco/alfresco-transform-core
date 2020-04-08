@@ -50,7 +50,6 @@ container:
   name: ${HOSTNAME:t-engine}
 
 transform:
-  core:
     imagemagick:
       root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.0.7}
       dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.0.7/lib}
