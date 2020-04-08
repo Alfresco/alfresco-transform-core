@@ -50,11 +50,6 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
         super.checkCommand = createCheckCommand();
     }
 
-    public ImageMagickCommandExecutor()
-    {
-
-    }
-
     @Override
     protected RuntimeExec createTransformCommand()
     {

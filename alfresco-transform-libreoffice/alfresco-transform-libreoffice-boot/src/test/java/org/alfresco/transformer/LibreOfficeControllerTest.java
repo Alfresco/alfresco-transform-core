@@ -73,6 +73,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import javax.annotation.PostConstruct;
+
 /**
  * Test the LibreOfficeController without a server.
  * Super class includes tests for the AbstractTransformerController.
@@ -84,8 +86,13 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
     @Mock
     private ExecutionResult mockExecutionResult;
 
-    @SpyBean
-    private LibreOfficeJavaExecutor javaExecutor;
+    LibreOfficeJavaExecutor javaExecutor;
+
+    @PostConstruct
+    private void init()
+    {
+        javaExecutor = new LibreOfficeJavaExecutor(externalProps.getLibreoffice());
+    }
 
     @SpyBean
     private LibreOfficeController controller;

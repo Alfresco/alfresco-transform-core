@@ -77,6 +77,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import javax.annotation.PostConstruct;
+
 /**
  * Test the ImageMagickController without a server.
  * Super class includes tests for the AbstractTransformerController.
@@ -94,7 +96,13 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     @Mock
     private RuntimeExec mockCheckCommand;
 
-    private ImageMagickCommandExecutor commandExecutor = new ImageMagickCommandExecutor();
+    ImageMagickCommandExecutor commandExecutor;
+
+    @PostConstruct
+    private void init()
+    {
+        commandExecutor = new ImageMagickCommandExecutor(externalProps.getImagemagick());
+    }
 
     @SpyBean
     private ImageMagickController controller;

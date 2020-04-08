@@ -63,9 +63,11 @@ import org.alfresco.transform.client.model.config.TransformOptionValue;
 import org.alfresco.transform.client.model.config.Transformer;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
+import org.alfresco.transformer.config.GlobalProperties;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.ClassPathResource;
@@ -83,6 +85,7 @@ import com.google.common.collect.ImmutableSet;
 /**
  * Super class for testing controllers without a server. Includes tests for the AbstractTransformerController itself.
  */
+@EnableConfigurationProperties(value = GlobalProperties.class)
 public abstract class AbstractTransformerControllerTest
 {
     @Autowired
@@ -90,6 +93,9 @@ public abstract class AbstractTransformerControllerTest
 
     @Autowired
     protected ObjectMapper objectMapper;
+
+    @Autowired
+    protected GlobalProperties externalProps;
 
     @MockBean
     protected AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;

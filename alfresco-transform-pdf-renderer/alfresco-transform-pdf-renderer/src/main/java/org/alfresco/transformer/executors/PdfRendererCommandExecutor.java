@@ -44,11 +44,6 @@ public class PdfRendererCommandExecutor extends AbstractCommandExecutor
         super.checkCommand = createCheckCommand();
     }
 
-    public PdfRendererCommandExecutor()
-    {
-
-    }
-
     @Override
     protected RuntimeExec createTransformCommand()
     {

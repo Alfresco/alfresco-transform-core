@@ -78,6 +78,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import javax.annotation.PostConstruct;
+
 /**
  * Test the AlfrescoPdfRendererController without a server.
  * Super class includes tests for the AbstractTransformerController.
@@ -94,8 +96,14 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
 
     @Mock
     private RuntimeExec mockCheckCommand;
- 
-    private PdfRendererCommandExecutor commandExecutor = new PdfRendererCommandExecutor();
+
+    PdfRendererCommandExecutor commandExecutor;
+
+    @PostConstruct
+    private void init()
+    {
+        commandExecutor = new PdfRendererCommandExecutor(externalProps.getPdf_renderer());
+    }
 
     @SpyBean
     private AlfrescoPdfRendererController controller;
