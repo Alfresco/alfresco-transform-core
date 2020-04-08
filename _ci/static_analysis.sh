@@ -25,7 +25,6 @@ java -jar vosp-api-wrappers-java-$VERACODE_WRAPPER_VERSION.jar -vid $VERACODE_AP
      alfresco-transform-misc/alfresco-transform-misc-boot/target/alfresco-transform-misc-boot*.jar \
      alfresco-transform-core-aio/alfresco-transform-core-aio/target/alfresco-transform-core-aio-*.jar \
      alfresco-transform-core-aio/alfresco-transform-core-aio-boot/target/alfresco-transform-core-aio-boot*.jar \
-
      -version "$TRAVIS_JOB_ID - $TRAVIS_JOB_NUMBER" -scantimeout 3600
 
 popd
