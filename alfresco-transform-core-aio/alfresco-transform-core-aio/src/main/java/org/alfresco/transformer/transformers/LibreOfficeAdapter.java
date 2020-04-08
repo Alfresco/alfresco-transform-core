@@ -29,6 +29,7 @@ package org.alfresco.transformer.transformers;
 import java.io.File;
 import java.util.Map;
 
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
 
 public class LibreOfficeAdapter extends AbstractTransformer
@@ -50,7 +51,7 @@ public class LibreOfficeAdapter extends AbstractTransformer
     
     @Override
 	public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-            Map<String, String> transformOptions) throws Exception 
+            Map<String, String> transformOptions) throws TransformException 
     {
         javaExecutor.call(sourceFile, targetFile);
     }

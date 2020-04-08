@@ -26,8 +26,11 @@
  */
 package org.alfresco.transformer.transformers;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.model.config.TransformOption;
+import org.alfresco.transform.exceptions.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,14 +83,14 @@ public class AllInOneTransformer implements Transformer
 
     @Override
     public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-                          Map<String, String> transformOptions) throws Exception
+                          Map<String, String> transformOptions) throws TransformException
     {
         String transformName = transformOptions.get(TRANSFORM_NAME_PARAMETER);
         Transformer transformer = transformerTransformMapping.get(transformName);
 
         if (transformer == null)
         {
-            throw new Exception("No transformer mapping for : transform:" + transformName + " sourceMimetype:"
+            throw new TransformException(BAD_REQUEST.value(),"No transformer mapping for : transform:" + transformName + " sourceMimetype:"
                     + sourceMimetype + " targetMimetype:" + targetMimetype);
         }
 
