@@ -26,7 +26,7 @@
  */
 package org.alfresco.transformer;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
