@@ -26,7 +26,6 @@
  */
 package org.alfresco.transformer.transformers;
 
-import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.executors.TikaJavaExecutor;
 
 import java.io.File;
@@ -56,8 +55,7 @@ public class TikaAdapter extends AbstractTransformer
     }
 
     @Override
-    public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype, 
-            Map<String, String> transformOptions) throws TransformException
+    public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions) throws Exception
     {
         final String transform = transformOptions.get(TRANSFORM_NAME_PARAMETER);
 

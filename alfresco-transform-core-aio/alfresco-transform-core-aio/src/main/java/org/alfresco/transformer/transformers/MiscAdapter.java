@@ -29,8 +29,6 @@ package org.alfresco.transformer.transformers;
 import java.io.File;
 import java.util.Map;
 
-import org.alfresco.transform.exceptions.TransformException;
-
 public class MiscAdapter extends AbstractTransformer
 {
     private static final String CONFIG_PREFIX = "misc";
@@ -50,8 +48,8 @@ public class MiscAdapter extends AbstractTransformer
     }
 
     @Override
-    public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype, 
-            Map<String,String> transformOptions) throws TransformException
+    public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype, Map<String,
+            String> transformOptions) throws Exception
     {
         String transformerName = transformOptions.get(TRANSFORM_NAME_PARAMETER);
         miscSelectingTransformer.transform(transformerName, sourceFile, targetFile,

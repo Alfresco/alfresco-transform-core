@@ -174,8 +174,19 @@ public class AIOController extends AbstractTransformerController
         debugLogTransform("Performing transform with parameters: ", sourceMimetype, targetMimetype,
                 targetExtension, requestParameters);
 
-        transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
-    
+        try 
+        {
+            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
+        } 
+        catch (IllegalArgumentException e)
+        {
+            throw new TransformException(BAD_REQUEST.value(), e.getMessage(), e);
+        }
+        catch (Exception e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), e.getMessage(), e);
+        }
+
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());
         long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
