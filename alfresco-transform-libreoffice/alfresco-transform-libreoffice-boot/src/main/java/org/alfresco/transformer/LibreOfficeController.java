@@ -36,8 +36,10 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import java.io.File;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
+import org.alfresco.transformer.config.GlobalProperties;
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
@@ -77,7 +79,16 @@ public class LibreOfficeController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeController.class);
 
-    private LibreOfficeJavaExecutor javaExecutor = new LibreOfficeJavaExecutor();
+    @Autowired
+    private GlobalProperties externalProps;
+
+    LibreOfficeJavaExecutor javaExecutor;
+
+    @PostConstruct
+    private void init()
+    {
+        javaExecutor = new LibreOfficeJavaExecutor(externalProps.getLibreoffice());
+    }
 
     @Override
     public String getTransformerName()
