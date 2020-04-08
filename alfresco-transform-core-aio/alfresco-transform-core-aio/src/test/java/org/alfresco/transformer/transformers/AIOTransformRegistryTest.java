@@ -127,7 +127,7 @@ public class AIOTransformRegistryTest
         }
     }
 
-    /// Test copied from Misc aioTransformer - html
+    // Test copied from Misc (HtmlParserContentTransformerTest) See ATS-712 aioTransformer - html
     @Test
     public void testMiscHtml() throws Exception
     {
@@ -227,7 +227,7 @@ public class AIOTransformRegistryTest
         }
     }
 
-    /// Test copied from Misc aioTransformer - pdf
+    // Test copied from Misc (TextToPdfContentTransformerTest) See ATS-712 aioTransformer - pdf
     @Test
     public void testMiscPdf() throws Exception
     {
