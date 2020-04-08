@@ -59,7 +59,7 @@ public interface Transformer
      * @return Supported config for the transformer implementation.
      *
      */
-    TransformConfig getTransformConfig();
+    String getTransformerId();
 
 }
 
