@@ -26,6 +26,8 @@
  */
 package org.alfresco.transformer.executors;
 
+import org.alfresco.transformer.config.GlobalProperties;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,9 +37,23 @@ import java.util.Map;
  */
 public class ImageMagickCommandExecutor extends AbstractCommandExecutor
 {
-    private static final String ROOT = System.getProperty("ImageMagickROOT", "/usr/lib64/ImageMagick-7.0.7");
-    private static final String DYN = System.getProperty("ImageMagickDYN",ROOT + "/lib");
-    private static final String EXE = System.getProperty("ImageMagickEXE","/usr/bin/convert");
+    private static String ROOT;
+    private static String DYN;
+    private static String EXE;
+
+    public ImageMagickCommandExecutor(GlobalProperties.ImageMagick props)
+    {
+        ROOT = props.getRoot();
+        DYN = props.getRoot();
+        EXE = props.getExe();
+        super.transformCommand = createTransformCommand();
+        super.checkCommand = createCheckCommand();
+    }
+
+    public ImageMagickCommandExecutor()
+    {
+
+    }
 
     @Override
     protected RuntimeExec createTransformCommand()
