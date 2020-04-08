@@ -32,6 +32,12 @@ import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
+import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
+import static org.alfresco.transformer.util.RequestParamMap.SOURCE_EXTENSION;
+import static org.alfresco.transformer.util.RequestParamMap.SOURCE_MIMETYPE;
+import static org.alfresco.transformer.util.RequestParamMap.TARGET_EXTENSION;
+import static org.alfresco.transformer.util.RequestParamMap.TARGET_MIMETYPE;
+import static org.alfresco.transformer.util.RequestParamMap.TEST_DELAY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
@@ -64,13 +70,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class AIOController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(AIOController.class);
-
-    private static final String SOURCE_ENCODING = "sourceEncoding";
-    private static final String SOURCE_EXTENSION = "sourceExtension";
-    private static final String TARGET_EXTENSION = "targetExtension";
-    private static final String TARGET_MIMETYPE = "targetMimetype";
-    private static final String SOURCE_MIMETYPE = "sourceMimetype";
-    private static final String TEST_DELAY = "testDelay";
 
     @Autowired
     private  AIOTransformRegistry transformRegistry;

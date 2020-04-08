@@ -26,6 +26,24 @@
  */
 package org.alfresco.transformer.transformers;
 
+import static org.alfresco.transformer.util.RequestParamMap.ALLOW_ENLARGEMENT;
+import static org.alfresco.transformer.util.RequestParamMap.ALPHA_REMOVE;
+import static org.alfresco.transformer.util.RequestParamMap.AUTO_ORIENT;
+import static org.alfresco.transformer.util.RequestParamMap.COMMAND_OPTIONS;
+import static org.alfresco.transformer.util.RequestParamMap.CROP_GRAVITY;
+import static org.alfresco.transformer.util.RequestParamMap.CROP_HEIGHT;
+import static org.alfresco.transformer.util.RequestParamMap.CROP_PERCENTAGE;
+import static org.alfresco.transformer.util.RequestParamMap.CROP_WIDTH;
+import static org.alfresco.transformer.util.RequestParamMap.CROP_X_OFFSET;
+import static org.alfresco.transformer.util.RequestParamMap.CROP_Y_OFFSET;
+import static org.alfresco.transformer.util.RequestParamMap.END_PAGE;
+import static org.alfresco.transformer.util.RequestParamMap.MAINTAIN_ASPECT_RATIO;
+import static org.alfresco.transformer.util.RequestParamMap.RESIZE_HEIGHT;
+import static org.alfresco.transformer.util.RequestParamMap.RESIZE_PERCENTAGE;
+import static org.alfresco.transformer.util.RequestParamMap.RESIZE_WIDTH;
+import static org.alfresco.transformer.util.RequestParamMap.START_PAGE;
+import static org.alfresco.transformer.util.RequestParamMap.THUMBNAIL;
+import static org.alfresco.transformer.util.RequestParamMap.TIMEOUT;
 import static org.alfresco.transformer.util.Util.stringToInteger;
 import static org.alfresco.transformer.util.Util.stringToLong;
 
@@ -40,27 +58,6 @@ public class ImageMagickAdapter implements Transformer
 
     private static String ID = "imagemagick";
     private ImageMagickCommandExecutor commandExecutor;
-
-    //TODO move key strings to a central class
-    private static final String START_PAGE              = "startPage";
-    private static final String END_PAGE                = "endPage";
-    private static final String ALPHA_REMOVE            = "alphaRemove";
-    private static final String AUTO_ORIENT             = "autoOrient";
-    private static final String CROP_GRAVITY            = "cropGravity";
-    private static final String CROP_WIDTH              = "cropWidth";
-    private static final String CROP_HEIGHT             = "cropHeight";
-    private static final String CROP_PERCENTAGE         = "cropPercentage";
-    private static final String CROP_X_OFFSET           = "cropXOffset";
-    private static final String CROP_Y_OFFSET           = "cropYOffset";
-    private static final String THUMBNAIL               = "thumbnail";
-    private static final String RESIZE_WIDTH            = "resizeWidth";
-    private static final String RESIZE_HEIGHT           = "resizeHeight";
-    private static final String RESIZE_PERCENTAGE       = "resizePercentage";
-    private static final String ALLOW_ENLARGEMENT       = "allowEnlargement";
-    private static final String MAINTAIN_ASPECT_RATIO   = "maintainAspectRatio";
-    private static final String COMMAND_OPTIONS         = "commandOptions";
-    private static final String TIMEOUT_REQUEST_PARAM   = "timeOut";
-
 
     public ImageMagickAdapter() throws Exception 
     {
@@ -99,7 +96,7 @@ public class ImageMagickAdapter implements Transformer
             stringToInteger(transformOptions.get(END_PAGE))
         );
 
-        Long timeout = stringToLong(transformOptions.get(TIMEOUT_REQUEST_PARAM));
+        Long timeout = stringToLong(transformOptions.get(TIMEOUT));
 
         commandExecutor.run(options, sourceFile, pageRange, targetFile, timeout);
     }
