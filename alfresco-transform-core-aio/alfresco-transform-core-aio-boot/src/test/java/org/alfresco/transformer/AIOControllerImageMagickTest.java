@@ -104,7 +104,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTestBase
     @Override
     public void noTargetFileTest()
     {
-        // Ignore the test in super class as the AIO transforms we not be selected .
+        // Ignore the test in super class as the AIO transforms will not be selected .
         // It is the mock that returns a zero length file for other transformers, when we supply an invalid targetExtension.
     }
    
@@ -112,7 +112,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTestBase
     @Override
     public void testGetTransformConfigInfo()
     {
-        // Ignore the test in super class as the AIO transforms we not be selected .
+        // Ignore the test in super class as the AIO transforms will not be selected .
 
     }
 
@@ -120,21 +120,21 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTestBase
     @Override
     public void testGetInfoFromConfigWithDuplicates()
     {
-        // Ignore the test in super class as the AIO transforms we not be selected .
+        // Ignore the test in super class as the AIO transforms will not be selected .
 
     }
     @Test
     @Override
     public void testGetInfoFromConfigWithEmptyTransformOptions()
     {
-        // Ignore the test in super class as the AIO transforms we not be selected .
+        // Ignore the test in super class as the AIO transforms will not be selected .
 
     }
     @Test
     @Override
     public void testGetInfoFromConfigWithNoTransformOptions()
     {
-        // Ignore the test in super class as the AIO transforms we not be selected .
+        // Ignore the test in super class as the AIO transforms will not be selected .
 
     }
     
@@ -143,7 +143,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTestBase
     public void deprecatedCommandOptionsTest() throws Exception
     {
         // Ignore test in super class as the CommandOptions is not within the imagemagick_engine_config.json
-        // as such it will not be considere a to have a valid transformer.
+        // as such it will not be considered to have a valid transformer.
 
     }
 }
