@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -44,11 +45,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,7 +65,6 @@ import org.alfresco.transform.client.model.config.Transformer;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.probes.ProbeTestTransform;
-import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -169,7 +169,7 @@ public abstract class AbstractTransformerControllerTest
 
     protected File getTestFile(String testFilename, boolean required) throws IOException
     {
-        File testFile;
+        File testFile = null;
         ClassLoader classLoader = getClass().getClassLoader();
         URL testFileUrl = classLoader.getResource(testFilename);
         if (required && testFileUrl == null)
@@ -177,38 +177,27 @@ public abstract class AbstractTransformerControllerTest
             throw new IOException("The test file " + testFilename +
                     " does not exist in the resources directory");
         }
-        try 
+        if(testFileUrl!=null)
         {
-            testFile = folder.newFile(testFilename);
-        } 
-        catch (IOException e) 
-        {
-            if(e.getMessage().contains("a file with the name \'" + testFilename + "\' already exists in the test folder"))
+            try 
             {
-                testFile = new File(URLDecoder.decode(folder.getRoot().getPath()+ File.separator + testFilename, "UTF-8"));
-            }
-            else
+                testFile = folder.newFile(testFilename);
+                Files.copy(classLoader.getResourceAsStream(testFilename), testFile.toPath(),REPLACE_EXISTING);
+            } 
+            catch (IOException e) 
             {
-                throw e;
+                if(e.getMessage().contains("a file with the name \'" + testFilename + "\' already exists in the test folder"))
+                {
+                    testFile = new File(URLDecoder.decode(folder.getRoot().getPath()+ File.separator + testFilename, "UTF-8"));
+                }
+                else
+                {
+                    throw e;
+                }
             }
         }
-        
-        InputStream inputStream = classLoader.getResourceAsStream(testFilename);
 
-        FileUtils.copyInputStreamToFile(inputStream, testFile);
         return testFileUrl == null ? null : testFile;
-    }
-
-    protected File getTestFileOrig(String testFilename, boolean required) throws IOException
-    {
-        ClassLoader classLoader = getClass().getClassLoader();
-        URL testFileUrl = classLoader.getResource(testFilename);
-        if (required && testFileUrl == null)
-        {
-            throw new IOException("The test file " + testFilename +
-                    " does not exist in the resources directory");
-        }
-        return testFileUrl == null ? null : new File(URLDecoder.decode(testFileUrl.getPath(), "UTF-8"));
     }
 
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
