@@ -26,38 +26,47 @@
  */
 package org.alfresco.transformer.transformers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alfresco.transform.client.model.config.TransformConfig;
+import org.alfresco.transformer.AIOTransformRegistry;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.alfresco.transformer.transformers.TextToPdfContentTransformer.PAGE_LIMIT;
 import static org.alfresco.transformer.transformers.Transformer.TRANSFORM_NAME_PARAMETER;
 import static org.junit.Assert.*;
 
-public class AllInOneTransformerTest
+public class AllTransformRegistryTest
 {
     private static final String SOURCE_MIMETYPE = "text/html";
     private static final String TARGET_MIMETYPE = "text/plain";
     String SOURCE_ENCODING = "sourceEncoding";
     String TARGET_ENCODING = "targetEncoding";
 
-    AllInOneTransformer aioTransformer = new AllInOneTransformer();
+    AIOTransformRegistry aioTransformer = new AIOTransformRegistry();
+    ObjectMapper objectMapper = new ObjectMapper();
 
 
     @Before
     public void before() throws Exception
     {
-        aioTransformer.addTransformer(new MiscAdapter());
-        aioTransformer.addTransformer(new TikaAdapter());
+        aioTransformer.registerTransformer(new MiscAdapter());
+        aioTransformer.registerTransformer(new TikaAdapter());
 
     }
 
@@ -74,43 +83,48 @@ public class AllInOneTransformerTest
         return new String(Files.readAllBytes(file.toPath()), encoding);
     }
 
+    private TransformConfig loadConfig(String s) throws Exception
+    {
+        return objectMapper.readValue(new ClassPathResource(s).getFile(), TransformConfig.class);
+    }
+
     @Test
     public void testConfigAggregation() throws Exception
     {
-//        List<String> expectedTransformNames = Arrays.asList("html", "string", "appleIWorks", "textToPdf", "rfc822",
-//                "Archive", "OutlookMsg", "PdfBox", "Office", "Poi", "OOXML", "TikaAuto", "TextMining");
-//
-//        List<String> expectedTransformOptionNames = Arrays.asList("tikaOptions", "archiveOptions", "pdfboxOptions",
-//                "textToPdfOptions", "stringOptions", "htmlOptions");
-//
-//        TransformConfig miscConfig = (new MiscAdapter()).getTransformConfig();
-//        TransformConfig tikaConfig = (new TikaAdapter()).getTransformConfig();
-//
-//        // check correct number of transformers
-//        assertEquals("Number of expected transformers",
-//                miscConfig.getTransformers().size() + tikaConfig.getTransformers().size(),
-//                aioTransformer.getTransformConfig().getTransformers().size());
-//
-//        List<String> actualTransformerNames = aioTransformer.getTransformConfig().getTransformers()
-//                .stream().map(t -> t.getTransformerName()).collect(Collectors.toList());
-//        // check all transformers are there
-//        for(String transformNames : expectedTransformNames)
-//        {
-//            assertTrue("Expected transformer missing.",  actualTransformerNames.contains(transformNames));
-//        }
-//
-//        // check correct number of options
-//        assertEquals("Number of expected transformers",
-//                miscConfig.getTransformOptions().size() + tikaConfig.getTransformOptions().size(),
-//                aioTransformer.getTransformConfig().getTransformOptions().size());
-//
-//        Set<String> actualOptionNames = aioTransformer.getTransformConfig().getTransformOptions().keySet();
-//
-//        // check all options are there
-//        for (String optionName : expectedTransformOptionNames)
-//        {
-//            assertTrue("Expected transform option missing.",  actualOptionNames.contains(optionName));
-//        }
+        List<String> expectedTransformNames = Arrays.asList("html", "string", "appleIWorks", "textToPdf", "rfc822",
+                "Archive", "OutlookMsg", "PdfBox", "Office", "Poi", "OOXML", "TikaAuto", "TextMining");
+
+        List<String> expectedTransformOptionNames = Arrays.asList("tikaOptions", "archiveOptions", "pdfboxOptions",
+                "textToPdfOptions", "stringOptions", "htmlOptions");
+
+        TransformConfig miscConfig = loadConfig("misc_engine_config.json");
+        TransformConfig tikaConfig = loadConfig("tika_engine_config.json");
+
+        // check correct number of transformers
+        assertEquals("Number of expected transformers",
+                miscConfig.getTransformers().size() + tikaConfig.getTransformers().size(),
+                aioTransformer.getTransformConfig().getTransformers().size());
+
+        List<String> actualTransformerNames = aioTransformer.getTransformConfig().getTransformers()
+                .stream().map(t -> t.getTransformerName()).collect(Collectors.toList());
+        // check all transformers are there
+        for(String transformNames : expectedTransformNames)
+        {
+            assertTrue("Expected transformer missing.",  actualTransformerNames.contains(transformNames));
+        }
+
+        // check correct number of options
+        assertEquals("Number of expected transformers",
+                miscConfig.getTransformOptions().size() + tikaConfig.getTransformOptions().size(),
+                aioTransformer.getTransformConfig().getTransformOptions().size());
+
+        Set<String> actualOptionNames = aioTransformer.getTransformConfig().getTransformOptions().keySet();
+
+        // check all options are there
+        for (String optionName : expectedTransformOptionNames)
+        {
+            assertTrue("Expected transform option missing.",  actualOptionNames.contains(optionName));
+        }
     }
 
     /// Test copied from Misc aioTransformer - html
@@ -143,7 +157,8 @@ public class AllInOneTransformerTest
             Map<String, String> parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
             parameters.put(TRANSFORM_NAME_PARAMETER, "html");
-            aioTransformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            Transformer transformer = aioTransformer.getByTransformName("html");
+            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
 
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
@@ -157,7 +172,7 @@ public class AllInOneTransformerTest
             parameters = new HashMap<>();
             parameters.put(TRANSFORM_NAME_PARAMETER, "html");
             parameters.put(SOURCE_ENCODING, "UTF-8");
-            aioTransformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
@@ -170,7 +185,7 @@ public class AllInOneTransformerTest
             parameters = new HashMap<>();
             parameters.put(TRANSFORM_NAME_PARAMETER, "html");
             parameters.put(SOURCE_ENCODING, "UTF-16");
-            aioTransformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
@@ -196,7 +211,7 @@ public class AllInOneTransformerTest
             parameters = new HashMap<>();
             parameters.put(TRANSFORM_NAME_PARAMETER, "html");
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
-            aioTransformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
@@ -251,9 +266,10 @@ public class AllInOneTransformerTest
 
         // Transform to PDF
         Map<String, String> parameters = new HashMap<>();
-        parameters.put(TRANSFORM_NAME_PARAMETER, "textToPdf");
         parameters.put(PAGE_LIMIT, pageLimit);
-        aioTransformer.transform(sourceFile, targetFile, "text/plain", "application/pdf", parameters);
+        parameters.put(TRANSFORM_NAME_PARAMETER, "textToPdf");
+        Transformer transformer = aioTransformer.getByTransformName("textToPdf");
+        transformer.transform(sourceFile, targetFile, "text/plain", "application/pdf", parameters);
 
         // Read back in the PDF and check it
         PDDocument doc = PDDocument.load(targetFile);

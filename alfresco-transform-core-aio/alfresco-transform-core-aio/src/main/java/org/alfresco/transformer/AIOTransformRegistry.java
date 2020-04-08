@@ -99,14 +99,13 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
                 throw new Exception("Transformer name " + transformerName + " is already registered.");
             }
 
-            aggregatedConfig.getTransformers().addAll(transformConfig.getTransformers());
-            aggregatedConfig.getTransformOptions().putAll(transformConfig.getTransformOptions());
-
             transformerTransformMapping.put(transformerName, transformer);
             log.debug("Registered transformer with name: '{}'.", transformerName);
         }
 
         // add to data
+        aggregatedConfig.getTransformers().addAll(transformConfig.getTransformers());
+        aggregatedConfig.getTransformOptions().putAll(transformConfig.getTransformOptions());
         registerAll(transformConfig, locationFromProperty, locationFromProperty);
     }
 
