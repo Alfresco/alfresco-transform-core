@@ -22,6 +22,7 @@ branches:
     - /^HF\/.+$/
     - company_release
     - /^ATS-.*$/
+    - POC-Parallel-travis-builds
 
 stages:
   - build + test
@@ -64,14 +65,14 @@ jobs:
       install: _ci/build.sh full-build
       script: bash _ci/test.sh aio-test
     - name: "WhiteSource"
-      if: branch NOT IN (company_release)
+      if: branch NOT IN (company_release|POC-Parallel-travis-builds)
       script: bash _ci/whitesource.sh
     - name: "Source Clear Scan (SCA)"
-      if: branch NOT IN (company_release)
+      if: branch NOT IN (company_release|POC-Parallel-travis-builds)
       install: skip
       script: travis_wait 30 bash _ci/sourceclear.sh
     - name: "Static Analysis (SAST)"
-      if: branch NOT IN (company_release) AND type != pull_request
+      if: branch NOT IN (company_release|POC-Parallel-travis-builds) AND type != pull_request
       before_install:
       - bash _ci/static_analysis_init.sh
       - bash _ci/init.sh
