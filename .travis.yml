@@ -33,7 +33,7 @@ before_install: bash _ci/init.sh
 
 jobs:
   include:
-    - stage: "Build and Test"
+    - stage: Build and Test
       name: "ImageMagick"
       if: branch NOT IN (company_release)
       before_script: travis_wait bash _ci/cache_artifacts.sh
