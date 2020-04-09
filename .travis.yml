@@ -26,7 +26,6 @@ branches:
 
 stages:
   - build and test
-  - deploy
   - release
   - company_release
 

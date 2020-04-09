@@ -9,7 +9,7 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ] && PROFILE="internal" || PROFILE="local"
 
 # If the branch is "master" and the commit is not a Pull Request then deploy the JAR SNAPSHOT artifacts
-[ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ] && DEPLOY="deploy" || DEPLOY="install"
+[ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ] && DEPLOY="deploy" || DEPLOY="test"
 
 # If the branch is "master" and the profile provided is not "aio-test" do not deploy alfresco-transformer-base
 [ "${1}" != "aio-test" ] && [ "${TRAVIS_BRANCH}" = "master" ] && IGNORE_BASE="-pl !alfresco-transformer-base" || IGNORE_BASE=""
