@@ -44,7 +44,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.util.List;
@@ -166,9 +168,9 @@ public abstract class AbstractTransformerControllerTest
         if (required && testFileUrl == null)
         {
             throw new IOException("The test file " + testFilename +
-                                  " does not exist in the resources directory");
+                    " does not exist in the resources directory");
         }
-        return testFileUrl == null ? null : new File(testFileUrl.getFile());
+        return testFileUrl == null ? null : new File(URLDecoder.decode(testFileUrl.getPath(), "UTF-8"));
     }
 
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
@@ -338,15 +340,24 @@ public abstract class AbstractTransformerControllerTest
         assertEquals(BAD_REQUEST.value(), transformReply.getStatus());
     }
 
+    /**
+     *
+     * @return transformer specific engine config name
+     */
+    public String getEngineConfigName()
+    {
+        return "engine_config.json";
+    }
+
     @Test
     public void testGetTransformConfigInfo() throws Exception
     {
         TransformConfig expectedTransformConfig = objectMapper
-            .readValue(new ClassPathResource("engine_config.json").getFile(),
+            .readValue(new ClassPathResource(getEngineConfigName()).getFile(),
                 TransformConfig.class);
 
         ReflectionTestUtils.setField(transformRegistry, "engineConfig",
-            new ClassPathResource("engine_config.json"));
+            new ClassPathResource(getEngineConfigName()));
 
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get("/transform/config"))
@@ -355,7 +366,6 @@ public abstract class AbstractTransformerControllerTest
             .andReturn().getResponse().getContentAsString();
 
         TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
-
         assertEquals(expectedTransformConfig, transformConfig);
     }
 

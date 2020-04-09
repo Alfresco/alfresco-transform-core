@@ -52,4 +52,15 @@ public class Util
     {
         return param == null ? null : Boolean.parseBoolean(param);
     }
+
+    /**
+     * Safely converts a {@link String} to a {@link Long}
+     *
+     * @param param String to be converted
+     * @return Null if param is null or converted value as {@link Boolean}
+     */
+    public static Long stringToLong(final String param)
+    {
+        return param == null ? null : Long.parseLong(param);
+    }
 }

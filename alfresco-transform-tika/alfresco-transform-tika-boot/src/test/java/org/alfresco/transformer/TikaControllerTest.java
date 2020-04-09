@@ -116,6 +116,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @WebMvcTest(TikaController.class)
 public class TikaControllerTest extends AbstractTransformerControllerTest
 {
+    private static final String ENGINE_CONFIG_NAME = "tika_engine_config.json";
     private static final String EXPECTED_XHTML_CONTENT_CONTAINS = "<p>The quick brown fox jumps over the lazy dog</p>";
     private static final String EXPECTED_TEXT_CONTENT_CONTAINS = "The quick brown fox jumps over the lazy dog";
     private static final String EXPECTED_MSG_CONTENT_CONTAINS = "Recipients\n" +
@@ -144,6 +145,12 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     {
         sourceExtension = "pdf";
         targetExtension = "txt";
+    }
+
+    @Override
+    public String getEngineConfigName()
+    {
+        return ENGINE_CONFIG_NAME;
     }
 
     @Override

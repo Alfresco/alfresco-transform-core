@@ -40,10 +40,12 @@ import org.alfresco.transform.client.registry.TransformCache;
 import org.alfresco.transform.exceptions.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.io.ResourceLoader;
 
 /**
  * Used by clients to work out if a transformation is supported based on the engine_config.json.
@@ -52,10 +54,21 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
 {
     private static final Logger log = LoggerFactory.getLogger(TransformRegistryImpl.class);
 
-    private static final String ENGINE_CONFIG_JSON = "classpath:engine_config.json";
+    @Autowired
+    ResourceLoader resourceLoader;
 
-    @Value(ENGINE_CONFIG_JSON)
+    @Value("${transform.config.location:classpath:engine_config.json}")
+    private String locationFromProperty;
+
     private Resource engineConfig;
+
+    @PostConstruct
+    public void afterPropertiesSet()
+    {
+        engineConfig = resourceLoader.getResource(locationFromProperty);
+        TransformConfig transformConfig = getTransformConfig();
+        registerAll(transformConfig, null, locationFromProperty);
+    }
 
     // Holds the structures used by AbstractTransformRegistry to look up what is supported.
     // Unlike other sub classes this class does not extend Data or replace it at run time.
@@ -72,15 +85,8 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
         catch (IOException e)
         {
             throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                "Could not read " + ENGINE_CONFIG_JSON, e);
+                "Could not read " + locationFromProperty, e);
         }
-    }
-
-    @PostConstruct
-    public void afterPropertiesSet()
-    {
-        TransformConfig transformConfig = getTransformConfig();
-        registerAll(transformConfig, null, ENGINE_CONFIG_JSON);
     }
 
     @Override

@@ -85,6 +85,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @WebMvcTest(ImageMagickController.class)
 public class ImageMagickControllerTest extends AbstractTransformerControllerTest
 {
+    private static final String ENGINE_CONFIG_NAME = "imagemagick_engine_config.json";
+
     @Mock
     private ExecutionResult mockExecutionResult;
 
@@ -107,6 +109,12 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
         ReflectionTestUtils.setField(controller, "commandExecutor", commandExecutor);
 
         mockTransformCommand("jpg", "png", "image/jpg", true);
+    }
+
+    @Override
+    public String getEngineConfigName()
+    {
+        return ENGINE_CONFIG_NAME;
     }
 
     @Override

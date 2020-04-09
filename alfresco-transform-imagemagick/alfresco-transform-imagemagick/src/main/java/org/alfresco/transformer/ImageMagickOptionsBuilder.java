@@ -42,7 +42,7 @@ import com.google.common.collect.ImmutableList;
  *
  * @author Cezar Leahu
  */
-final class OptionsBuilder
+public final class ImageMagickOptionsBuilder
 {
     private static final List<String> GRAVITY_VALUES = ImmutableList.of("North", "NorthEast",
         "East", "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center");
@@ -65,180 +65,180 @@ final class OptionsBuilder
     private Boolean maintainAspectRatio;
     private String commandOptions;
 
-    private OptionsBuilder() {}
+    private ImageMagickOptionsBuilder() {}
 
-    public OptionsBuilder withStartPage(final String startPage)
+    public ImageMagickOptionsBuilder withStartPage(final String startPage)
     {
         return withStartPage(stringToInteger(startPage));
     }
 
-    public OptionsBuilder withStartPage(final Integer startPage)
+    public ImageMagickOptionsBuilder withStartPage(final Integer startPage)
     {
         this.startPage = startPage;
         return this;
     }
 
-    public OptionsBuilder withEndPage(final String endPage)
+    public ImageMagickOptionsBuilder withEndPage(final String endPage)
     {
         return withEndPage(stringToInteger(endPage));
     }
 
-    public OptionsBuilder withEndPage(final Integer endPage)
+    public ImageMagickOptionsBuilder withEndPage(final Integer endPage)
     {
         this.endPage = endPage;
         return this;
     }
 
-    public OptionsBuilder withAlphaRemove(final String alphaRemove)
+    public ImageMagickOptionsBuilder withAlphaRemove(final String alphaRemove)
     {
         return withAlphaRemove(stringToBoolean(alphaRemove));
     }
 
-    public OptionsBuilder withAlphaRemove(final Boolean alphaRemove)
+    public ImageMagickOptionsBuilder withAlphaRemove(final Boolean alphaRemove)
     {
         this.alphaRemove = alphaRemove;
         return this;
     }
 
-    public OptionsBuilder withAutoOrient(final String autoOrient)
+    public ImageMagickOptionsBuilder withAutoOrient(final String autoOrient)
     {
         return withAutoOrient(stringToBoolean(autoOrient));
     }
 
-    public OptionsBuilder withAutoOrient(final Boolean autoOrient)
+    public ImageMagickOptionsBuilder withAutoOrient(final Boolean autoOrient)
     {
         this.autoOrient = autoOrient;
         return this;
     }
 
-    public OptionsBuilder withCropGravity(final String cropGravity)
+    public ImageMagickOptionsBuilder withCropGravity(final String cropGravity)
     {
         this.cropGravity = cropGravity;
         return this;
     }
 
-    public OptionsBuilder withCropWidth(final String cropWidth)
+    public ImageMagickOptionsBuilder withCropWidth(final String cropWidth)
     {
         return withCropWidth(stringToInteger(cropWidth));
     }
 
-    public OptionsBuilder withCropWidth(final Integer cropWidth)
+    public ImageMagickOptionsBuilder withCropWidth(final Integer cropWidth)
     {
         this.cropWidth = cropWidth;
         return this;
     }
 
-    public OptionsBuilder withCropHeight(final String cropHeight)
+    public ImageMagickOptionsBuilder withCropHeight(final String cropHeight)
     {
         return withCropHeight(stringToInteger(cropHeight));
     }
 
-    public OptionsBuilder withCropHeight(final Integer cropHeight)
+    public ImageMagickOptionsBuilder withCropHeight(final Integer cropHeight)
     {
         this.cropHeight = cropHeight;
         return this;
     }
 
-    public OptionsBuilder withCropPercentage(final String cropPercentage)
+    public ImageMagickOptionsBuilder withCropPercentage(final String cropPercentage)
     {
         return withCropPercentage(stringToBoolean(cropPercentage));
     }
 
-    public OptionsBuilder withCropPercentage(final Boolean cropPercentage)
+    public ImageMagickOptionsBuilder withCropPercentage(final Boolean cropPercentage)
     {
         this.cropPercentage = cropPercentage;
         return this;
     }
 
-    public OptionsBuilder withCropXOffset(final String cropXOffset)
+    public ImageMagickOptionsBuilder withCropXOffset(final String cropXOffset)
     {
         return withCropXOffset(stringToInteger(cropXOffset));
     }
 
-    public OptionsBuilder withCropXOffset(final Integer cropXOffset)
+    public ImageMagickOptionsBuilder withCropXOffset(final Integer cropXOffset)
     {
         this.cropXOffset = cropXOffset;
         return this;
     }
 
-    public OptionsBuilder withCropYOffset(final String cropYOffset)
+    public ImageMagickOptionsBuilder withCropYOffset(final String cropYOffset)
     {
         return withCropYOffset(stringToInteger(cropYOffset));
     }
 
-    public OptionsBuilder withCropYOffset(final Integer cropYOffset)
+    public ImageMagickOptionsBuilder withCropYOffset(final Integer cropYOffset)
     {
         this.cropYOffset = cropYOffset;
         return this;
     }
 
-    public OptionsBuilder withThumbnail(final String thumbnail)
+    public ImageMagickOptionsBuilder withThumbnail(final String thumbnail)
     {
         return withThumbnail(stringToBoolean(thumbnail));
     }
 
-    public OptionsBuilder withThumbnail(final Boolean thumbnail)
+    public ImageMagickOptionsBuilder withThumbnail(final Boolean thumbnail)
     {
         this.thumbnail = thumbnail;
         return this;
     }
 
-    public OptionsBuilder withResizeWidth(final String resizeWidth)
+    public ImageMagickOptionsBuilder withResizeWidth(final String resizeWidth)
     {
         return withResizeWidth(stringToInteger(resizeWidth));
     }
 
-    public OptionsBuilder withResizeWidth(final Integer resizeWidth)
+    public ImageMagickOptionsBuilder withResizeWidth(final Integer resizeWidth)
     {
         this.resizeWidth = resizeWidth;
         return this;
     }
 
-    public OptionsBuilder withResizeHeight(final String resizeHeight)
+    public ImageMagickOptionsBuilder withResizeHeight(final String resizeHeight)
     {
         return withResizeHeight(stringToInteger(resizeHeight));
     }
 
-    public OptionsBuilder withResizeHeight(final Integer resizeHeight)
+    public ImageMagickOptionsBuilder withResizeHeight(final Integer resizeHeight)
     {
         this.resizeHeight = resizeHeight;
         return this;
     }
 
-    public OptionsBuilder withResizePercentage(final String resizePercentage)
+    public ImageMagickOptionsBuilder withResizePercentage(final String resizePercentage)
     {
         return withResizePercentage(stringToBoolean(resizePercentage));
     }
 
-    public OptionsBuilder withResizePercentage(final Boolean resizePercentage)
+    public ImageMagickOptionsBuilder withResizePercentage(final Boolean resizePercentage)
     {
         this.resizePercentage = resizePercentage;
         return this;
     }
 
-    public OptionsBuilder withAllowEnlargement(final String allowEnlargement)
+    public ImageMagickOptionsBuilder withAllowEnlargement(final String allowEnlargement)
     {
         return withAllowEnlargement(stringToBoolean(allowEnlargement));
     }
 
-    public OptionsBuilder withAllowEnlargement(final Boolean allowEnlargement)
+    public ImageMagickOptionsBuilder withAllowEnlargement(final Boolean allowEnlargement)
     {
         this.allowEnlargement = allowEnlargement;
         return this;
     }
 
-    public OptionsBuilder withMaintainAspectRatio(final String maintainAspectRatio)
+    public ImageMagickOptionsBuilder withMaintainAspectRatio(final String maintainAspectRatio)
     {
         return withMaintainAspectRatio(stringToBoolean(maintainAspectRatio));
     }
 
-    public OptionsBuilder withMaintainAspectRatio(final Boolean maintainAspectRatio)
+    public ImageMagickOptionsBuilder withMaintainAspectRatio(final Boolean maintainAspectRatio)
     {
         this.maintainAspectRatio = maintainAspectRatio;
         return this;
     }
 
-    public OptionsBuilder withCommandOptions(final String commandOptions)
+    public ImageMagickOptionsBuilder withCommandOptions(final String commandOptions)
     {
         this.commandOptions = commandOptions;
         return this;
@@ -354,8 +354,8 @@ final class OptionsBuilder
                args.toString();
     }
 
-    public static OptionsBuilder builder()
+    public static ImageMagickOptionsBuilder builder()
     {
-        return new OptionsBuilder();
+        return new ImageMagickOptionsBuilder();
     }
 }

@@ -154,7 +154,7 @@ public class ImageMagickController extends AbstractTransformerController
         File targetFile = createTargetFile(request, targetFilename);
         // Both files are deleted by TransformInterceptor.afterCompletion
 
-        final String options = OptionsBuilder
+        final String options = ImageMagickOptionsBuilder
             .builder()
             .withStartPage(startPage)
             .withEndPage(endPage)
@@ -196,7 +196,7 @@ public class ImageMagickController extends AbstractTransformerController
         logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
                      " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
 
-        final String options = OptionsBuilder
+        final String options = ImageMagickOptionsBuilder
             .builder()
             .withStartPage(transformOptions.get("startPage"))
             .withEndPage(transformOptions.get("endPage"))
