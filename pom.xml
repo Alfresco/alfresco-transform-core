@@ -97,6 +97,7 @@
             <!-- Should only be run after all other snapshot images have been build  -->
             <id>aio-test</id>
             <modules>
+                <module>alfresco-transformer-base</module>
                 <module>alfresco-transform-core-aio/alfresco-transform-core-aio</module>
                 <module>alfresco-transform-core-aio/alfresco-transform-core-aio-boot</module>
             </modules>
