@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -45,6 +45,8 @@ import org.xml.sax.SAXException;
  */
 public class TikaJavaExecutor implements JavaExecutor
 {
+    public static final String LICENCE = "This transformer uses Tika from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt";
+
     private final Tika tika;
 
     public TikaJavaExecutor()
