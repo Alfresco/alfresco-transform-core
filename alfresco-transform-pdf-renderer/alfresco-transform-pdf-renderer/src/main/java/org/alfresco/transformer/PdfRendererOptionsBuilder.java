@@ -36,7 +36,7 @@ import java.util.StringJoiner;
  *
  * @author Cezar Leahu
  */
-final class OptionsBuilder
+public final class PdfRendererOptionsBuilder
 {
     private Integer page;
     private Integer width;
@@ -44,58 +44,58 @@ final class OptionsBuilder
     private Boolean allowPdfEnlargement;
     private Boolean maintainPdfAspectRatio;
 
-    private OptionsBuilder() {}
+    private PdfRendererOptionsBuilder() {}
 
-    public OptionsBuilder withPage(final String page)
+    public PdfRendererOptionsBuilder withPage(final String page)
     {
         return withPage(stringToInteger(page));
     }
 
-    public OptionsBuilder withPage(final Integer page)
+    public PdfRendererOptionsBuilder withPage(final Integer page)
     {
         this.page = page;
         return this;
     }
 
-    public OptionsBuilder withWidth(final String width)
+    public PdfRendererOptionsBuilder withWidth(final String width)
     {
         return withWidth(stringToInteger(width));
     }
 
-    public OptionsBuilder withWidth(final Integer width)
+    public PdfRendererOptionsBuilder withWidth(final Integer width)
     {
         this.width = width;
         return this;
     }
 
-    public OptionsBuilder withHeight(final String height)
+    public PdfRendererOptionsBuilder withHeight(final String height)
     {
         return withHeight(stringToInteger(height));
     }
 
-    public OptionsBuilder withHeight(final Integer height)
+    public PdfRendererOptionsBuilder withHeight(final Integer height)
     {
         this.height = height;
         return this;
     }
 
-    public OptionsBuilder withAllowPdfEnlargement(final String allowPdfEnlargement)
+    public PdfRendererOptionsBuilder withAllowPdfEnlargement(final String allowPdfEnlargement)
     {
         return withAllowPdfEnlargement(stringToBoolean(allowPdfEnlargement));
     }
 
-    public OptionsBuilder withAllowPdfEnlargement(final Boolean allowPdfEnlargement)
+    public PdfRendererOptionsBuilder withAllowPdfEnlargement(final Boolean allowPdfEnlargement)
     {
         this.allowPdfEnlargement = allowPdfEnlargement;
         return this;
     }
 
-    public OptionsBuilder withMaintainPdfAspectRatio(final String maintainPdfAspectRatio)
+    public PdfRendererOptionsBuilder withMaintainPdfAspectRatio(final String maintainPdfAspectRatio)
     {
         return withMaintainPdfAspectRatio(stringToBoolean(maintainPdfAspectRatio));
     }
 
-    public OptionsBuilder withMaintainPdfAspectRatio(final Boolean maintainPdfAspectRatio)
+    public PdfRendererOptionsBuilder withMaintainPdfAspectRatio(final Boolean maintainPdfAspectRatio)
     {
         this.maintainPdfAspectRatio = maintainPdfAspectRatio;
         return this;
@@ -127,8 +127,8 @@ final class OptionsBuilder
         return args.toString();
     }
 
-    public static OptionsBuilder builder()
+    public static PdfRendererOptionsBuilder builder()
     {
-        return new OptionsBuilder();
+        return new PdfRendererOptionsBuilder();
     }
 }

@@ -88,6 +88,9 @@ import javax.annotation.PostConstruct;
 @WebMvcTest(AlfrescoPdfRendererController.class)
 public class AlfrescoPdfRendererControllerTest extends AbstractTransformerControllerTest
 {
+
+    private static final String ENGINE_CONFIG_NAME = "pdfrenderer_engine_config.json";
+
     @Mock
     private ExecutionResult mockExecutionResult;
 
@@ -116,6 +119,12 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
         ReflectionTestUtils.setField(controller, "commandExecutor", commandExecutor);
 
         mockTransformCommand("pdf", "png", "application/pdf", true);
+    }
+
+    @Override
+    public String getEngineConfigName()
+    {
+        return ENGINE_CONFIG_NAME;
     }
 
     @Override
