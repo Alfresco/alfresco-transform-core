@@ -41,6 +41,18 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
 
     public ImageMagickCommandExecutor(String exe, String dyn, String root)
     {
+        if (exe == null || exe.isEmpty())
+        {
+            throw new IllegalArgumentException("ImageMagickCommandExecutor EXE variable cannot be null or empty");
+        }
+        if (dyn == null || dyn.isEmpty())
+        {
+            throw new IllegalArgumentException("ImageMagickCommandExecutor DYN variable cannot be null or empty");
+        }
+        if (root == null || root.isEmpty())
+        {
+            throw new IllegalArgumentException("ImageMagickCommandExecutor ROOT variable cannot be null or empty");
+        }
         this.EXE = exe;
         this.DYN = dyn;
         this.ROOT = root;

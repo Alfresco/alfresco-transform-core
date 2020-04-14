@@ -59,6 +59,10 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
 
     public LibreOfficeJavaExecutor(String path)
     {
+        if (path == null || path.isEmpty())
+        {
+            throw new IllegalArgumentException("LibreOfficeJavaExecutor OFFICE_HOME variable cannot be null or empty");
+        }
         OFFICE_HOME = path;
         jodconverter = createJodConverter();
     }

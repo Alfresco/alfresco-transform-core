@@ -39,6 +39,10 @@ public class PdfRendererCommandExecutor extends AbstractCommandExecutor
 
     public PdfRendererCommandExecutor(String exe)
     {
+        if (exe == null || exe.isEmpty())
+        {
+            throw new IllegalArgumentException("PdfRendererCommandExecutor EXE variable cannot be null or empty");
+        }
         this.EXE = exe;
         super.transformCommand = createTransformCommand();
         super.checkCommand = createCheckCommand();
