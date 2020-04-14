@@ -46,15 +46,14 @@ public class PdfRendererAdapter implements Transformer
     private static String ID = "pdfrenderer";
     private PdfRendererCommandExecutor pdfExecutor;
 
-    public PdfRendererAdapter() throws Exception
+    public PdfRendererAdapter()
     {
-        super();
         pdfExecutor = new PdfRendererCommandExecutor();
     }
 
 	@Override
 	public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-            Map<String, String> transformOptions) throws Exception 
+            Map<String, String> transformOptions)
     {
        
         final String options = PdfRendererOptionsBuilder
