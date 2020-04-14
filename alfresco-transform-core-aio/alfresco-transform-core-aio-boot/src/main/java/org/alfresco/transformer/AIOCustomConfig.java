@@ -73,5 +73,4 @@ public class AIOCustomConfig
         aioTransformRegistry.registerTransformer(new PdfRendererAdapter(pdfRendererPath));
         return aioTransformRegistry;
     }
-
 }

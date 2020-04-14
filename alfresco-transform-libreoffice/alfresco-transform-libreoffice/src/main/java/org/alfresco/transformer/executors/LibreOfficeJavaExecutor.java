@@ -53,6 +53,7 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeJavaExecutor.class);
 
     private static final int JODCONVERTER_TRANSFORMATION_ERROR_CODE = 3088;
+
     private static String OFFICE_HOME;
 
     private JodConverter jodconverter;

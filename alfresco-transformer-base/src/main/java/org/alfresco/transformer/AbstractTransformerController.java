@@ -115,7 +115,6 @@ public abstract class AbstractTransformerController implements TransformControll
     @GetMapping(value = "/transform/config")
     public ResponseEntity<TransformConfig> info()
     {
-        // TODO - This cast should not be here
         logger.info("GET Transform Config.");
         final TransformConfig transformConfig =
             ((TransformRegistryImpl) transformRegistry).getTransformConfig();

@@ -26,21 +26,16 @@
  */
 package org.alfresco.transformer.transformers;
 
-
-import org.alfresco.transform.client.model.config.TransformConfig;
-
 import java.io.File;
 import java.util.Map;
 
 
 /**
- * Interface for transformers which can perform transformations and specify their own supported configuration.
+ * Interface for transformers used with {@link org.alfresco.transformer.AIOTransformRegistry}.
  */
 public interface Transformer
 {
-    /**
-     * Controllers pass this as an additional parameter..
-     */
+    // Additional parameter used by transformers like {@link TikaAdapter} and {@link MiscAdapter}
     String TRANSFORM_NAME_PARAMETER = "alfresco.transform-name-parameter";
 
     /**
@@ -54,13 +49,11 @@ public interface Transformer
     void transform(File sourceFile, File targetFile, String sourceMimetype,
                           String targetMimetype, Map<String, String> transformOptions) throws Exception;
 
-
     /**
-     * @return Supported config for the transformer implementation.
+     * @return A unique transformer id,
      *
      */
     String getTransformerId();
-
 }
 
 
