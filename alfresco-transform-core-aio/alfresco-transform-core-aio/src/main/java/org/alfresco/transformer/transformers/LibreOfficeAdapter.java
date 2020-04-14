@@ -36,15 +36,14 @@ public class LibreOfficeAdapter implements Transformer
     private static String ID = "libreoffice";
     private LibreOfficeJavaExecutor javaExecutor;
 
-    public LibreOfficeAdapter() throws Exception
+    public LibreOfficeAdapter()
     {
-        super();
         javaExecutor = new LibreOfficeJavaExecutor();
     }
     
     @Override
 	public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-            Map<String, String> transformOptions) throws Exception 
+            Map<String, String> transformOptions)
     {
         javaExecutor.call(sourceFile, targetFile);
     }
