@@ -5,7 +5,7 @@ pdfrenderer:
     path: ${PDF_RENDERER_EXE:/usr/bin/alfresco-pdf-renderer}
 libreoffice:
   executor:
-    path: ${LIBREOFFICE_HOME:/opt/libreoffice6.1}
+    path: ${LIBREOFFICE_HOME:/opt/libreoffice6.3}
 imagemagick:
   executor:
     path:
