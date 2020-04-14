@@ -85,7 +85,8 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
     PdfRendererCommandExecutor commandExecutor;
 
     @PostConstruct
-    private void init(){
+    private void init()
+    {
         commandExecutor = new PdfRendererCommandExecutor(externalProps.getPdf_renderer());
     }
 

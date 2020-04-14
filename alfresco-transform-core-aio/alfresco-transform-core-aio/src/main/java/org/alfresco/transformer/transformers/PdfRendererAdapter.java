@@ -46,10 +46,10 @@ public class PdfRendererAdapter implements Transformer
     private static String ID = "pdfrenderer";
     private PdfRendererCommandExecutor pdfExecutor;
 
-    public PdfRendererAdapter() throws Exception
+    public PdfRendererAdapter(String execPath) throws Exception
     {
         super();
-        pdfExecutor = new PdfRendererCommandExecutor();
+        pdfExecutor = new PdfRendererCommandExecutor(execPath);
     }
 
 	@Override

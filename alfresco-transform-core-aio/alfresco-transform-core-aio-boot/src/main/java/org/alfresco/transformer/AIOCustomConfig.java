@@ -27,18 +27,25 @@
 package org.alfresco.transformer;
 
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
+import org.alfresco.transformer.config.GlobalProperties;
 import org.alfresco.transformer.transformers.ImageMagickAdapter;
 import org.alfresco.transformer.transformers.LibreOfficeAdapter;
 import org.alfresco.transformer.transformers.MiscAdapter;
 import org.alfresco.transformer.transformers.PdfRendererAdapter;
 import org.alfresco.transformer.transformers.TikaAdapter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
+@ComponentScan
 public class AIOCustomConfig
 {
+    @Autowired
+    private GlobalProperties externalProps;
+
     /**
      *
      * @return Override the TransformRegistryImpl used in {@link AbstractTransformerController}
@@ -50,9 +57,9 @@ public class AIOCustomConfig
         AIOTransformRegistry aioTransformRegistry = new AIOTransformRegistry();
         aioTransformRegistry.registerTransformer(new MiscAdapter());
         aioTransformRegistry.registerTransformer(new TikaAdapter());
-        aioTransformRegistry.registerTransformer(new ImageMagickAdapter());
-        aioTransformRegistry.registerTransformer(new LibreOfficeAdapter());
-        aioTransformRegistry.registerTransformer(new PdfRendererAdapter());
+        aioTransformRegistry.registerTransformer(new ImageMagickAdapter(externalProps.getImagemagick()));
+        aioTransformRegistry.registerTransformer(new LibreOfficeAdapter(externalProps.getLibreoffice()));
+        aioTransformRegistry.registerTransformer(new PdfRendererAdapter(externalProps.getPdf_renderer()));
         return aioTransformRegistry;
     }
 

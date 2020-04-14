@@ -36,10 +36,10 @@ public class LibreOfficeAdapter implements Transformer
     private static String ID = "libreoffice";
     private LibreOfficeJavaExecutor javaExecutor;
 
-    public LibreOfficeAdapter() throws Exception
+    public LibreOfficeAdapter(String execPath) throws Exception
     {
         super();
-        javaExecutor = new LibreOfficeJavaExecutor();
+        javaExecutor = new LibreOfficeJavaExecutor(execPath);
     }
     
     @Override

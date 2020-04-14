@@ -44,7 +44,7 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
     public ImageMagickCommandExecutor(GlobalProperties.ImageMagick props)
     {
         ROOT = props.getRoot();
-        DYN = props.getRoot();
+        DYN = props.getDyn();
         EXE = props.getExe();
         super.transformCommand = createTransformCommand();
         super.checkCommand = createCheckCommand();
