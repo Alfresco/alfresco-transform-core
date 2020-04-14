@@ -438,9 +438,19 @@ public class JodConverterSharedInstance implements JodConverter
         }
 
         File[] matchingFiles = searchRoot.listFiles((dir, name) -> name.startsWith("soffice"));
+        if (matchingFiles == null)
+        {
+            return results;
+        }
         results.addAll(asList(matchingFiles));
 
-        for (File dir : requireNonNull(searchRoot.listFiles(File::isDirectory)))
+        File[] matchingDirectories = searchRoot.listFiles(File::isDirectory);
+        if (matchingDirectories == null)
+        {
+            return results;
+        }
+
+        for (File dir : requireNonNull(matchingDirectories))
         {
             findSofficePrograms(dir, results, currentRecursionDepth + 1, maxRecursionDepth);
         }
