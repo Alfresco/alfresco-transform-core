@@ -34,16 +34,14 @@ public class MiscAdapter implements Transformer
     private static final String ID = "misc";
     private SelectingTransformer miscSelectingTransformer;
 
-
-    public MiscAdapter() throws Exception
+    public MiscAdapter()
     {
-        super();
         miscSelectingTransformer = new SelectingTransformer();
     }
 
     @Override
     public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype, Map<String,
-            String> transformOptions) throws Exception
+            String> transformOptions)
     {
         String transformerName = transformOptions.get(TRANSFORM_NAME_PARAMETER);
         miscSelectingTransformer.transform(transformerName, sourceFile, targetFile,

@@ -87,13 +87,11 @@ public class AIOController extends AbstractTransformerController
     }
 
     @Override
-    public void processTransform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-            Map<String, String> transformOptions, Long timeout) 
+    public void processTransform(final File sourceFile, final File targetFile, final String sourceMimetype,
+                                 final String targetMimetype, final Map<String, String> transformOptions, final Long timeout)
     {
-
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         transformInternal( transform, sourceFile, targetFile, MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, transformOptions);
-
     }
 
     // TODO ATS-713 Currently uses the Misc probeTest. The implementation will need to be changed such that the test can be selected based on the required transform
@@ -113,8 +111,6 @@ public class AIOController extends AbstractTransformerController
                 parameters.put(SOURCE_ENCODING, "UTF-8");
                 transformInternal( "misc", sourceFile, targetFile, MIMETYPE_HTML,
                             MIMETYPE_TEXT_PLAIN, parameters);
-            
-                
             }
         };
     }
@@ -138,7 +134,6 @@ public class AIOController extends AbstractTransformerController
         transformOptions.keySet().removeAll(optionsToFilter);
         transformOptions.values().removeIf(v -> v.isEmpty());
 
-
         final String targetFilename = createTargetFileName(
             sourceMultipartFile.getOriginalFilename(), targetExtension);
         getProbeTestTransform().incrementTransformerCount();
@@ -150,8 +145,6 @@ public class AIOController extends AbstractTransformerController
                 targetExtension, transformOptions);
         transformInternal(transform, sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
 
-
-
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());
         long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
@@ -160,8 +153,8 @@ public class AIOController extends AbstractTransformerController
         return body;
     }
 
-    private void debugLogTransform(String message, String sourceMimetype, String targetMimetype, String targetExtension,
-                                   Map<String, String> transformOptions) {
+    private void debugLogTransform(final String message, final String sourceMimetype, final String targetMimetype,
+                                   final String targetExtension, final Map<String, String> transformOptions) {
         if (logger.isDebugEnabled())
         {
             logger.debug(
@@ -173,29 +166,19 @@ public class AIOController extends AbstractTransformerController
     @Override
     public ResponseEntity<TransformConfig> info()
     {
-        TransformConfig transformConfig = new TransformConfig();
         logger.info("GET Transform Config.");
-        try
-        {
-            transformConfig = transformRegistry.getTransformConfig();
-        }
-        catch (Exception e)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), e.getMessage(), e);
-        }
-
+        TransformConfig transformConfig = transformRegistry.getTransformConfig();
         return new ResponseEntity<>(transformConfig, OK);
     }
 
-    protected void transformInternal(String transformName, File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-                      Map<String, String> transformOptions)
+    protected void transformInternal(final String transformName, final File sourceFile, final File targetFile,
+                                     final String sourceMimetype, final String targetMimetype,
+                                     final Map<String, String> transformOptions)
     {
         logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
                 " '{}', timeout {} ms", sourceFile, targetFile, transformOptions);
 
         Transformer transformer = transformRegistry.getByTransformName(transformName);
-
-
         if (transformer == null)
         {
             new TransformException(INTERNAL_SERVER_ERROR.value(), "No transformer mapping for - transform:"
@@ -204,7 +187,7 @@ public class AIOController extends AbstractTransformerController
 
         if (logger.isDebugEnabled())
         {
-            logger.debug("Performing transform '{}' using {}", transformName, transformer.getClass().getSimpleName());
+            logger.debug("Performing transform '{}' using {}", transformName, transformer.getTransformerId());
         }
 
         try
@@ -227,6 +210,5 @@ public class AIOController extends AbstractTransformerController
             throw new TransformException(INTERNAL_SERVER_ERROR.value(), "Failed transform - transform:"
                     + transformName + " sourceMimetype:" + sourceMimetype + " targetMimetype:" + targetMimetype);
         }
-
     }
 }
