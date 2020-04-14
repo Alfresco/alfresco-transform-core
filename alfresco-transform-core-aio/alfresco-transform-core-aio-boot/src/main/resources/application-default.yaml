@@ -1,6 +1,6 @@
 queue:
   engineRequestQueue: ${TRANSFORM_ENGINE_REQUEST_QUEUE:org.alfresco.transform.engine.aio.acs}
-pdf_renderer:
+pdfrenderer:
   executor:
     path: ${PDF_RENDERER_EXE:/usr/bin/alfresco-pdf-renderer}
 libreoffice:

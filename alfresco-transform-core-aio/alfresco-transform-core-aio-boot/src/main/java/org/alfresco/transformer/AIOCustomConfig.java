@@ -45,7 +45,7 @@ public class AIOCustomConfig
     @Value("${libreoffice.executor.path}")
     private String libreofficePath;
 
-    @Value("${pdf_renderer.executor.path}")
+    @Value("${pdfrenderer.executor.path}")
     private String pdfRendererPath;
 
     @Value("${imagemagick.executor.path.exe}")
