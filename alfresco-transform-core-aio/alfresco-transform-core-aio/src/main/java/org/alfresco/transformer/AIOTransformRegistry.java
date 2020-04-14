@@ -67,9 +67,7 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
 
     private ObjectMapper jsonObjectMapper = new ObjectMapper();
 
-    /**
-     * Represents the mapping between a transform and a transformer, multiple mappings can point to the same transformer.
-     */
+    //Represents the mapping between a transform and a transformer, multiple mappings can point to the same transformer.
     private Map<String, Transformer> transformerTransformMapping = new HashMap();
 
     /**
@@ -130,7 +128,6 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
 
     protected TransformConfig loadTransformConfig(final String name) throws Exception
     {
-
         if (getClass().getClassLoader().getResource(name) == null)
         {
             throw new Exception("Configuration '" + name + "' does not exist on the classpath.");

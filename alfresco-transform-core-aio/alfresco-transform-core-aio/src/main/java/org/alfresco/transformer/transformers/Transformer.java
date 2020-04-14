@@ -35,9 +35,7 @@ import java.util.Map;
  */
 public interface Transformer
 {
-    /**
-     * Additional parameter used by transformers like {@link TikaAdapter} and {@link MiscAdapter}
-     */
+    // Additional parameter used by transformers like {@link TikaAdapter} and {@link MiscAdapter}
     String TRANSFORM_NAME_PARAMETER = "alfresco.transform-name-parameter";
 
     /**
