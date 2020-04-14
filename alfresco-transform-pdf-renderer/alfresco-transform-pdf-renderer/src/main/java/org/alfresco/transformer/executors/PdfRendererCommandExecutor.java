@@ -35,6 +35,8 @@ import java.util.Map;
  */
 public class PdfRendererCommandExecutor extends AbstractCommandExecutor
 {
+    public static final String LICENCE = "This transformer uses alfresco-pdf-renderer which uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt";
+
     private final String EXE;
 
     public PdfRendererCommandExecutor(String exe)
