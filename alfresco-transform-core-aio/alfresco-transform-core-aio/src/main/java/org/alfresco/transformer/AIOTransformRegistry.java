@@ -50,8 +50,8 @@ import java.util.Set;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
-/***
- * The AIOTransformRegistry manages all of the sub transformers registered to it.
+/**
+ * AIOTransformRegistry manages all of the sub transformers registered to it and provides aggregated TransformConfig.
  */
 public class AIOTransformRegistry extends AbstractTransformRegistry
 {
