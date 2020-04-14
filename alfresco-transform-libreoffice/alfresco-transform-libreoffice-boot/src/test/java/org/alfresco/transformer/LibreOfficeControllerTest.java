@@ -62,6 +62,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -98,7 +99,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
     @PostConstruct
     private void init()
     {
-        javaExecutor = new LibreOfficeJavaExecutor(execPath);
+        javaExecutor = Mockito.spy(new LibreOfficeJavaExecutor(execPath));
     }
 
     @SpyBean
