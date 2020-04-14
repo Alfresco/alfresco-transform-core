@@ -51,13 +51,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 /***
- *
- * @author eknizat
+ * The AIOTransformRegistry manages all of the sub transformers registered to it.
  */
 public class AIOTransformRegistry extends AbstractTransformRegistry
 {
     private static final Logger log = LoggerFactory.getLogger(AIOTransformRegistry.class);
-
 
     private static final String ENGINE_CONFIG_LOCATION_POSTFIX = "_engine_config.json";
 
@@ -69,39 +67,37 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
 
     private ObjectMapper jsonObjectMapper = new ObjectMapper();
 
-
     /**
      * Represents the mapping between a transform and a transformer, multiple mappings can point to the same transformer.
      */
     private Map<String, Transformer> transformerTransformMapping = new HashMap();
 
-
     /**
      * The registration will go through all supported sub transformers and map them to the transformer implementation.
-     *
-     * @param transformer The transformer implementation,
-     *                    this could be a transformer managing multiple sub transformers.
+     * @param transformer The transformer implementation, this could be a single transformer
+     *                    or a transformer managing multiple sub transformers. The transformer's configuration file will
+     *                    be read based on the {@link Transformer#getTransformerId()} value.
      * @throws Exception Exception is thrown if a mapping for a transformer name already exists.
      */
-    public void registerTransformer(Transformer transformer) throws Exception
+    public void registerTransformer(final Transformer transformer) throws Exception
     {
+        // Load config for the transformer
         String location = getTransformConfigLocation(transformer);
         TransformConfig transformConfig = loadTransformConfig(location);
 
-        for (org.alfresco.transform.client.model.config.Transformer transformerConfig
-                : transformConfig.getTransformers())
+        // Map all of the transforms defined in the config to this Transformer implementation
+        for (org.alfresco.transform.client.model.config.Transformer transformerConfig : transformConfig.getTransformers())
         {
             String transformerName = transformerConfig.getTransformerName();
             if (transformerTransformMapping.containsKey(transformerName))
             {
                 throw new Exception("Transformer name " + transformerName + " is already registered.");
             }
-
             transformerTransformMapping.put(transformerName, transformer);
             log.debug("Registered transformer with name: '{}'.", transformerName);
         }
 
-        // add to data
+        // Add the new transformer configuration to the aggregate config
         aggregatedConfig.getTransformers().addAll(transformConfig.getTransformers());
         aggregatedConfig.getTransformOptions().putAll(transformConfig.getTransformOptions());
         registerAll(transformConfig, location, location);
@@ -109,26 +105,30 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
 
     /**
      *
-     * @param transformName - the transform name used in mapping...
-     * @return
+     * @param transformName The transform name as it appears in TransformConfig.
+     * @return The transformer implementation mapped to the transform name.
      */
-    public Transformer getByTransformName(String transformName)
+    public Transformer getByTransformName(final String transformName)
     {
         return getTransformerTransformMapping().get(transformName);
     }
 
-    public TransformConfig getTransformConfig() throws Exception
+    /**
+     *
+     * @return The aggregated config of all the registered transformers
+     */
+    public TransformConfig getTransformConfig()
     {
         return aggregatedConfig;
     }
 
-    protected String getTransformConfigLocation(Transformer transformer)
+    protected String getTransformConfigLocation(final Transformer transformer)
     {
         String location = transformer.getTransformerId() + ENGINE_CONFIG_LOCATION_POSTFIX;
         return location;
     }
 
-    protected TransformConfig loadTransformConfig(String name) throws Exception
+    protected TransformConfig loadTransformConfig(final String name) throws Exception
     {
 
         if (getClass().getClassLoader().getResource(name) == null)

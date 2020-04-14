@@ -34,7 +34,7 @@ import java.util.Map;
 
 
 /**
- * Interface for transformers which can perform transformations and specify their own supported configuration.
+ * Interface for transformers which can perform transformations.
  */
 public interface Transformer
 {
