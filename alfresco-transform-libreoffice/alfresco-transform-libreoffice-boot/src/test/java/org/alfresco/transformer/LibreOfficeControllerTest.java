@@ -62,6 +62,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.FileSystemResource;
@@ -89,12 +90,15 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
     @Mock
     private ExecutionResult mockExecutionResult;
 
+    @Value("${libreoffice.executor.path}")
+    private String execPath;
+
     LibreOfficeJavaExecutor javaExecutor;
 
     @PostConstruct
     private void init()
     {
-        javaExecutor = new LibreOfficeJavaExecutor(externalProps.getLibreoffice());
+        javaExecutor = new LibreOfficeJavaExecutor(execPath);
     }
 
     @SpyBean

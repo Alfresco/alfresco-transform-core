@@ -3,3 +3,6 @@ queue:
 transform:
   config:
     location: classpath:pdfrenderer_engine_config.json
+pdf_renderer:
+  executor:
+    path: ${PDF_RENDERER_EXE:/usr/bin/alfresco-pdf-renderer}

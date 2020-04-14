@@ -35,11 +35,11 @@ import java.util.Map;
  */
 public class PdfRendererCommandExecutor extends AbstractCommandExecutor
 {
-    private static String EXE;
+    private final String EXE;
 
     public PdfRendererCommandExecutor(String exe)
     {
-        EXE = exe;
+        this.EXE = exe;
         super.transformCommand = createTransformCommand();
         super.checkCommand = createCheckCommand();
     }

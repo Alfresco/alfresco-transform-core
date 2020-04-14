@@ -49,11 +49,3 @@ management:
 container:
   name: ${HOSTNAME:t-engine}
 
-transform:
-    imagemagick:
-      root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.0.7}
-      dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.0.7/lib}
-      exe: ${IMAGEMAGICK_EXE:/usr/bin/convert}
-    pdf_renderer: ${PDF_RENDERER_EXE:/usr/bin/alfresco-pdf-renderer}
-    libreoffice: ${LIBREOFFICE_HOME:/opt/libreoffice6.1}
-

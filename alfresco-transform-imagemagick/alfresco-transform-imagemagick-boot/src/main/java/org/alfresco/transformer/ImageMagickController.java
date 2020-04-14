@@ -40,13 +40,12 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.transformer.config.GlobalProperties;
 import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -81,15 +80,21 @@ public class ImageMagickController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(ImageMagickController.class);
 
-    @Autowired
-    private GlobalProperties externalProps;
+    @Value("${imagemagick.executor.path.exe}")
+    private String EXE;
+
+    @Value("${imagemagick.executor.path.dyn}")
+    private String DYN;
+
+    @Value("${imagemagick.executor.path.root}")
+    private String ROOT;
 
     ImageMagickCommandExecutor commandExecutor;
 
     @PostConstruct
     private void init()
     {
-        commandExecutor = new ImageMagickCommandExecutor(externalProps.getImagemagick());
+        commandExecutor = new ImageMagickCommandExecutor(EXE, DYN, ROOT);
     }
 
     @Override

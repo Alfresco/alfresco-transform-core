@@ -51,7 +51,6 @@ import java.io.File;
 import java.util.Map;
 
 import org.alfresco.transformer.ImageMagickOptionsBuilder;
-import org.alfresco.transformer.config.GlobalProperties;
 import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 
 public class ImageMagickAdapter implements Transformer
@@ -60,10 +59,10 @@ public class ImageMagickAdapter implements Transformer
     private static String ID = "imagemagick";
     private ImageMagickCommandExecutor commandExecutor;
 
-    public ImageMagickAdapter(GlobalProperties.ImageMagick execPaths) throws Exception
+    public ImageMagickAdapter(String exe, String dyn, String root) throws Exception
     {
         super();
-        commandExecutor = new ImageMagickCommandExecutor(execPaths);
+        commandExecutor = new ImageMagickCommandExecutor(exe, dyn, root);
     }
 
     @Override

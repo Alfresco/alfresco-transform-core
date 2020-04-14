@@ -3,3 +3,9 @@ queue:
 transform:
   config:
     location: classpath:imagemagick_engine_config.json
+imagemagick:
+  executor:
+    path:
+      root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.0.7}
+      dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.0.7/lib}
+      exe: ${IMAGEMAGICK_EXE:/usr/bin/convert}

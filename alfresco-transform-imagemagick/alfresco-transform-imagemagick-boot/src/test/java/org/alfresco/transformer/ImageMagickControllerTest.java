@@ -66,6 +66,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.FileSystemResource;
@@ -98,12 +99,21 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     @Mock
     private RuntimeExec mockCheckCommand;
 
+    @Value("${imagemagick.executor.path.exe}")
+    private String EXE;
+
+    @Value("${imagemagick.executor.path.dyn}")
+    private String DYN;
+
+    @Value("${imagemagick.executor.path.root}")
+    private String ROOT;
+
     ImageMagickCommandExecutor commandExecutor;
 
     @PostConstruct
     private void init()
     {
-        commandExecutor = new ImageMagickCommandExecutor(externalProps.getImagemagick());
+        commandExecutor = new ImageMagickCommandExecutor(EXE, DYN, ROOT);
     }
 
     @SpyBean

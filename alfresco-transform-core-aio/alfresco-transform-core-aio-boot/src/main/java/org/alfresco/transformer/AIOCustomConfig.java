@@ -27,13 +27,12 @@
 package org.alfresco.transformer;
 
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
-import org.alfresco.transformer.config.GlobalProperties;
 import org.alfresco.transformer.transformers.ImageMagickAdapter;
 import org.alfresco.transformer.transformers.LibreOfficeAdapter;
 import org.alfresco.transformer.transformers.MiscAdapter;
 import org.alfresco.transformer.transformers.PdfRendererAdapter;
 import org.alfresco.transformer.transformers.TikaAdapter;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -43,8 +42,20 @@ import org.springframework.context.annotation.Primary;
 @ComponentScan
 public class AIOCustomConfig
 {
-    @Autowired
-    private GlobalProperties externalProps;
+    @Value("${libreoffice.executor.path}")
+    private String libreofficePath;
+
+    @Value("${pdf_renderer.executor.path}")
+    private String pdfRendererPath;
+
+    @Value("${imagemagick.executor.path.exe}")
+    private String EXE;
+
+    @Value("${imagemagick.executor.path.dyn}")
+    private String DYN;
+
+    @Value("${imagemagick.executor.path.root}")
+    private String ROOT;
 
     /**
      *
@@ -57,9 +68,9 @@ public class AIOCustomConfig
         AIOTransformRegistry aioTransformRegistry = new AIOTransformRegistry();
         aioTransformRegistry.registerTransformer(new MiscAdapter());
         aioTransformRegistry.registerTransformer(new TikaAdapter());
-        aioTransformRegistry.registerTransformer(new ImageMagickAdapter(externalProps.getImagemagick()));
-        aioTransformRegistry.registerTransformer(new LibreOfficeAdapter(externalProps.getLibreoffice()));
-        aioTransformRegistry.registerTransformer(new PdfRendererAdapter(externalProps.getPdf_renderer()));
+        aioTransformRegistry.registerTransformer(new ImageMagickAdapter(EXE, DYN, ROOT));
+        aioTransformRegistry.registerTransformer(new LibreOfficeAdapter(libreofficePath));
+        aioTransformRegistry.registerTransformer(new PdfRendererAdapter(pdfRendererPath));
         return aioTransformRegistry;
     }
 

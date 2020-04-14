@@ -67,6 +67,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.FileSystemResource;
@@ -100,12 +101,15 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
     @Mock
     private RuntimeExec mockCheckCommand;
 
+    @Value("${pdf_renderer.executor.path}")
+    private String execPath;
+
     PdfRendererCommandExecutor commandExecutor;
 
     @PostConstruct
     private void init()
     {
-        commandExecutor = new PdfRendererCommandExecutor(externalProps.getPdf_renderer());
+        commandExecutor = new PdfRendererCommandExecutor(execPath);
     }
 
     @SpyBean
