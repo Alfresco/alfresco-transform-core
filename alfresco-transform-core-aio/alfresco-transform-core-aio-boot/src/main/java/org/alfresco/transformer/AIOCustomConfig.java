@@ -39,7 +39,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
-@ComponentScan
 public class AIOCustomConfig
 {
     @Value("${libreoffice.executor.path}")
