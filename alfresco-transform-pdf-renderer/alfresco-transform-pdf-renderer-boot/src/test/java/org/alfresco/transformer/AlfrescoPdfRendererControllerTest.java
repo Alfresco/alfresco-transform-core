@@ -101,7 +101,7 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
     @Mock
     private RuntimeExec mockCheckCommand;
 
-    @Value("${pdfrenderer.executor.path}")
+    @Value("${transform.core.pdfrenderer.executor.path}")
     private String execPath;
 
     PdfRendererCommandExecutor commandExecutor;
@@ -326,5 +326,12 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
         assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
         assertEquals(transformRequest.getClientData(), transformReply.getClientData());
         assertEquals(transformRequest.getSchema(), transformReply.getSchema());
+    }
+
+    @Test
+    public void testOverridingExecutorPaths()
+    {
+        //System test property value can me modified in the pom.xml
+        assertEquals(execPath, System.getProperty("PDF_RENDERER_EXE"));
     }
 }

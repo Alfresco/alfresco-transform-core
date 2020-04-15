@@ -99,13 +99,13 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     @Mock
     private RuntimeExec mockCheckCommand;
 
-    @Value("${imagemagick.executor.path.exe}")
+    @Value("${transform.core.imagemagick.executor.path.exe}")
     private String EXE;
 
-    @Value("${imagemagick.executor.path.dyn}")
+    @Value("${transform.core.imagemagick.executor.path.dyn}")
     private String DYN;
 
-    @Value("${imagemagick.executor.path.root}")
+    @Value("${transform.core.imagemagick.executor.path.root}")
     private String ROOT;
 
     ImageMagickCommandExecutor commandExecutor;
@@ -409,5 +409,14 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
         assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
         assertEquals(transformRequest.getClientData(), transformReply.getClientData());
         assertEquals(transformRequest.getSchema(), transformReply.getSchema());
+    }
+
+    @Test
+    public void testOverridingExecutorPaths()
+    {
+        //System test property values can me modified in the pom.xml
+        assertEquals(EXE, System.getProperty("IMAGEMAGICK_EXE"));
+        assertEquals(DYN, System.getProperty("IMAGEMAGICK_DYN"));
+        assertEquals(ROOT, System.getProperty("IMAGEMAGICK_ROOT"));
     }
 }

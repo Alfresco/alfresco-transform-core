@@ -91,7 +91,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
     @Mock
     private ExecutionResult mockExecutionResult;
 
-    @Value("${libreoffice.executor.path}")
+    @Value("${transform.core.libreoffice.executor.path}")
     private String execPath;
 
     LibreOfficeJavaExecutor javaExecutor;
@@ -246,5 +246,12 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
         assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
         assertEquals(transformRequest.getClientData(), transformReply.getClientData());
         assertEquals(transformRequest.getSchema(), transformReply.getSchema());
+    }
+
+    @Test
+    public void testOverridingExecutorPaths()
+    {
+        //System test property value can me modified in the pom.xml
+        assertEquals(execPath, System.getProperty("LIBREOFFICE_HOME"));
     }
 }
