@@ -78,7 +78,7 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
     private static final Logger logger = LoggerFactory.getLogger(
         AlfrescoPdfRendererController.class);
 
-    @Value("${pdfrenderer.executor.path}")
+    @Value("${transform.core.pdfrenderer.executor.path}")
     private String execPath;
 
     PdfRendererCommandExecutor commandExecutor;
