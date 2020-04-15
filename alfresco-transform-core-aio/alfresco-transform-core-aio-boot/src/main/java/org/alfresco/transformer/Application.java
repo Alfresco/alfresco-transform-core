@@ -30,6 +30,11 @@ import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
 
 import java.util.Arrays;
 
+import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
+import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
+import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
+import org.alfresco.transformer.executors.TikaJavaExecutor;
+import org.alfresco.transformer.transformers.SelectingTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,9 +74,11 @@ public class Application
     {
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
         Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
-        logger.info("The transformers in this project use libraries from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\\\ 2.0.txt");
-        logger.info("Additional libraries used:");
-        logger.info("* htmlparser http://htmlparser.sourceforge.net/license.html");
+        logger.info(ImageMagickCommandExecutor.LICENCE);
+        logger.info(LibreOfficeJavaExecutor.LICENCE);
+        logger.info(TikaJavaExecutor.LICENCE);
+        logger.info(PdfRendererCommandExecutor.LICENCE);
+        Arrays.stream(SelectingTransformer.LICENCE.split("\\n")).forEach(logger::info);
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
         logger.info("Starting application components... Done");

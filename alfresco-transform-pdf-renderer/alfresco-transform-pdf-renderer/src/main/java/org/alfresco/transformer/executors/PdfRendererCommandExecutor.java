@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -35,6 +35,8 @@ import java.util.Map;
  */
 public class PdfRendererCommandExecutor extends AbstractCommandExecutor
 {
+    public static final String LICENCE = "This transformer uses alfresco-pdf-renderer which uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt";
+
     private static final String EXE = "/usr/bin/alfresco-pdf-renderer";
 
     @Override
