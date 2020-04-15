@@ -41,20 +41,20 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class AIOCustomConfig
 {
-    @Value("${libreoffice.executor.path}")
+    @Value("${transform.core.libreoffice.executor.path}")
     private String libreofficePath;
 
-    @Value("${pdfrenderer.executor.path}")
+    @Value("${transform.core.pdfrenderer.executor.path}")
     private String pdfRendererPath;
 
-    @Value("${imagemagick.executor.path.exe}")
-    private String EXE;
+    @Value("${transform.core.imagemagick.executor.path.exe}")
+    private String imageMagickExePath;
 
-    @Value("${imagemagick.executor.path.dyn}")
-    private String DYN;
+    @Value("${transform.core.imagemagick.executor.path.dyn}")
+    private String imageMagickDynPath;
 
-    @Value("${imagemagick.executor.path.root}")
-    private String ROOT;
+    @Value("${transform.core.imagemagick.executor.path.root}")
+    private String imageMagickRootPath;
 
     /**
      *
@@ -67,7 +67,7 @@ public class AIOCustomConfig
         AIOTransformRegistry aioTransformRegistry = new AIOTransformRegistry();
         aioTransformRegistry.registerTransformer(new MiscAdapter());
         aioTransformRegistry.registerTransformer(new TikaAdapter());
-        aioTransformRegistry.registerTransformer(new ImageMagickAdapter(EXE, DYN, ROOT));
+        aioTransformRegistry.registerTransformer(new ImageMagickAdapter(imageMagickExePath, imageMagickDynPath, imageMagickRootPath));
         aioTransformRegistry.registerTransformer(new LibreOfficeAdapter(libreofficePath));
         aioTransformRegistry.registerTransformer(new PdfRendererAdapter(pdfRendererPath));
         return aioTransformRegistry;
