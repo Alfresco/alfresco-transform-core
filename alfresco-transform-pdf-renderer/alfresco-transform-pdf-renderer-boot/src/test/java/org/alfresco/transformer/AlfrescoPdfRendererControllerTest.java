@@ -101,7 +101,7 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
     @Mock
     private RuntimeExec mockCheckCommand;
 
-    @Value("${transform.core.pdfrenderer.executor.path}")
+    @Value("${transform.core.pdfrenderer.exe}")
     private String execPath;
 
     PdfRendererCommandExecutor commandExecutor;

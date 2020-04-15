@@ -5,5 +5,4 @@ transform:
     config:
       location: classpath:libreoffice_engine_config.json
     libreoffice:
-      executor:
-        path: ${LIBREOFFICE_HOME:/opt/libreoffice6.3}
+        home: ${LIBREOFFICE_HOME:/opt/libreoffice6.3}

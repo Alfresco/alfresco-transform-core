@@ -91,7 +91,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
     @Mock
     private ExecutionResult mockExecutionResult;
 
-    @Value("${transform.core.libreoffice.executor.path}")
+    @Value("${transform.core.libreoffice.home}")
     private String execPath;
 
     LibreOfficeJavaExecutor javaExecutor;

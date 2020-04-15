@@ -41,19 +41,19 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class AIOCustomConfig
 {
-    @Value("${transform.core.libreoffice.executor.path}")
+    @Value("${transform.core.libreoffice.path}")
     private String libreofficePath;
 
-    @Value("${transform.core.pdfrenderer.executor.path}")
+    @Value("${transform.core.pdfrenderer.exe}")
     private String pdfRendererPath;
 
-    @Value("${transform.core.imagemagick.executor.path.exe}")
+    @Value("${transform.core.imagemagick.exe}")
     private String imageMagickExePath;
 
-    @Value("${transform.core.imagemagick.executor.path.dyn}")
+    @Value("${transform.core.imagemagick.dyn}")
     private String imageMagickDynPath;
 
-    @Value("${transform.core.imagemagick.executor.path.root}")
+    @Value("${transform.core.imagemagick.root}")
     private String imageMagickRootPath;
 
     /**

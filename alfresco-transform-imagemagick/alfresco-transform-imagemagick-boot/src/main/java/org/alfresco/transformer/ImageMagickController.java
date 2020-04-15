@@ -80,13 +80,13 @@ public class ImageMagickController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(ImageMagickController.class);
 
-    @Value("${transform.core.imagemagick.executor.path.exe}")
+    @Value("${transform.core.imagemagick.exe}")
     private String EXE;
 
-    @Value("${transform.core.imagemagick.executor.path.dyn}")
+    @Value("${transform.core.imagemagick.dyn}")
     private String DYN;
 
-    @Value("${transform.core.imagemagick.executor.path.root}")
+    @Value("${transform.core.imagemagick.root}")
     private String ROOT;
 
     ImageMagickCommandExecutor commandExecutor;

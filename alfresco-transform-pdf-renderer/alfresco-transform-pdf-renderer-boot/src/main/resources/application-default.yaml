@@ -5,5 +5,4 @@ transform:
     config:
       location: classpath:pdfrenderer_engine_config.json
     pdfrenderer:
-      executor:
-        path: ${PDF_RENDERER_EXE:/usr/bin/alfresco-pdf-renderer}
+        exe: ${PDFRENDERER_EXE:/usr/bin/alfresco-pdf-renderer}
