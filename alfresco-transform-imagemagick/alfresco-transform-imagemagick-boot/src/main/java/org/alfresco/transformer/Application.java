@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -30,6 +30,7 @@ import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
 
 import java.util.Arrays;
 
+import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,7 +70,7 @@ public class Application
     {
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
         Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
-        logger.info("This transformer uses ImageMagick from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt");
+        logger.info(ImageMagickCommandExecutor.LICENCE);
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
         logger.info("Starting application components... Done");

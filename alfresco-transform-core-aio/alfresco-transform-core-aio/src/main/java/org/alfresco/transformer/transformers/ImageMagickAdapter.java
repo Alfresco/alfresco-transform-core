@@ -59,15 +59,14 @@ public class ImageMagickAdapter implements Transformer
     private static String ID = "imagemagick";
     private ImageMagickCommandExecutor commandExecutor;
 
-    public ImageMagickAdapter() throws Exception 
+    public ImageMagickAdapter()
     {
-        super();
         commandExecutor = new ImageMagickCommandExecutor();
     }
 
     @Override
     public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-            Map<String, String> transformOptions) throws Exception 
+            Map<String, String> transformOptions)
     {
         
         final String options = ImageMagickOptionsBuilder

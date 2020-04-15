@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -38,6 +38,8 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
     private static final String ROOT = "/usr/lib64/ImageMagick-7.0.7";
     private static final String DYN = ROOT + "/lib";
     private static final String EXE = "/usr/bin/convert";
+
+    public static final String LICENCE = "This transformer uses ImageMagick from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt";
 
     @Override
     protected RuntimeExec createTransformCommand()
