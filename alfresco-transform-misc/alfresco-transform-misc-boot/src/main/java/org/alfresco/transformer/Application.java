@@ -69,6 +69,7 @@ public class Application
     public void startup()
     {
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
         Arrays.stream(SelectingTransformer.LICENCE.split("\\n")).forEach(logger::info);
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
