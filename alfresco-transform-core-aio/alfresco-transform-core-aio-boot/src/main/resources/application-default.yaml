@@ -1,14 +1,16 @@
 queue:
   engineRequestQueue: ${TRANSFORM_ENGINE_REQUEST_QUEUE:org.alfresco.transform.engine.aio.acs}
-pdfrenderer:
-  executor:
-    path: ${PDF_RENDERER_EXE:/usr/bin/alfresco-pdf-renderer}
-libreoffice:
-  executor:
-    path: ${LIBREOFFICE_HOME:/opt/libreoffice6.3}
-imagemagick:
-  executor:
-    path:
-      root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.0.7}
-      dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.0.7/lib}
-      exe: ${IMAGEMAGICK_EXE:/usr/bin/convert}
+transform:
+  core:
+    pdfrenderer:
+      executor:
+        path: ${PDF_RENDERER_EXE:/usr/bin/alfresco-pdf-renderer}
+    libreoffice:
+      executor:
+        path: ${LIBREOFFICE_HOME:/opt/libreoffice6.3}
+    imagemagick:
+      executor:
+        path:
+          root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.0.7}
+          dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.0.7/lib}
+          exe: ${IMAGEMAGICK_EXE:/usr/bin/convert}

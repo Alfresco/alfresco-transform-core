@@ -1,8 +1,9 @@
 queue:
   engineRequestQueue: ${TRANSFORM_ENGINE_REQUEST_QUEUE:org.alfresco.transform.engine.alfresco-pdf-renderer.acs}
 transform:
-  config:
-    location: classpath:pdfrenderer_engine_config.json
-pdfrenderer:
-  executor:
-    path: ${PDF_RENDERER_EXE:/usr/bin/alfresco-pdf-renderer}
+  core:
+    config:
+      location: classpath:pdfrenderer_engine_config.json
+    pdfrenderer:
+      executor:
+        path: ${PDF_RENDERER_EXE:/usr/bin/alfresco-pdf-renderer}
