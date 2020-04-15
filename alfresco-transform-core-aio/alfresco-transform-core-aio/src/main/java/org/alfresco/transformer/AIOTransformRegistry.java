@@ -61,7 +61,6 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
 
     private TransformConfig aggregatedConfig = new TransformConfig();
 
-
     // Holds the structures used by AbstractTransformRegistry to look up what is supported.
     // Unlike other sub classes this class does not extend Data or replace it at run time.
     private TransformCache data = new TransformCache();
