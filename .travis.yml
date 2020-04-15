@@ -54,7 +54,7 @@ jobs:
       stage: build
 ## TODO ATS-721: comment out until it is possible to run concurrent SAST scans
 #      if: branch NOT IN (company_release) AND type != pull_request
-      if: NOT IN (company_release) AND branch = master
+      if: branch = master
       before_install:
       - bash _ci/static_analysis_init.sh
       - bash _ci/init.sh
