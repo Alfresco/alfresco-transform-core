@@ -58,12 +58,10 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
 {
     private static final Logger log = LoggerFactory.getLogger(AIOTransformRegistry.class);
 
+    private static final String ENGINE_CONFIG_LOCATION_POSTFIX = "_engine_config.json";
 
-    private String locationFromProperty = "engine_config.json";
+    private TransformConfig aggregatedConfig = new TransformConfig();
 
-
-    // The aggregated config
-    TransformConfig aggregatedConfig = new TransformConfig();
 
     // Holds the structures used by AbstractTransformRegistry to look up what is supported.
     // Unlike other sub classes this class does not extend Data or replace it at run time.
@@ -87,7 +85,7 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
      */
     public void registerTransformer(Transformer transformer) throws Exception
     {
-        String location = transformer.getTransformerId() + "_" + locationFromProperty;
+        String location = getTransformConfigLocation(transformer);
         TransformConfig transformConfig = loadTransformConfig(location);
 
         for (org.alfresco.transform.client.model.config.Transformer transformerConfig
@@ -106,7 +104,7 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
         // add to data
         aggregatedConfig.getTransformers().addAll(transformConfig.getTransformers());
         aggregatedConfig.getTransformOptions().putAll(transformConfig.getTransformOptions());
-        registerAll(transformConfig, locationFromProperty, locationFromProperty);
+        registerAll(transformConfig, location, location);
     }
 
     /**
@@ -122,6 +120,13 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
     public TransformConfig getTransformConfig() throws Exception
     {
         return aggregatedConfig;
+    }
+
+
+    protected String getTransformConfigLocation(Transformer transformer)
+    {
+        String location = transformer.getTransformerId() + ENGINE_CONFIG_LOCATION_POSTFIX;
+        return location;
     }
 
     protected TransformConfig loadTransformConfig(String name) throws Exception
@@ -152,17 +157,6 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
     {
         this.transformerTransformMapping = transformerTransformMapping;
     }
-
-    String getLocationFromProperty()
-    {
-        return locationFromProperty;
-    }
-
-    void setLocationFromProperty(String locationFromProperty)
-    {
-        this.locationFromProperty = locationFromProperty;
-    }
-
 
     @Override
     public TransformCache getData()
