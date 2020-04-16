@@ -7,6 +7,6 @@ transform:
     libreoffice:
         path: ${LIBREOFFICE_HOME:/opt/libreoffice6.3}
     imagemagick:
-          root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.0.7}
-          dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.0.7/lib}
-          exe: ${IMAGEMAGICK_EXE:/usr/bin/convert}
+        root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.0.7}
+        dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.0.7/lib}
+        exe: ${IMAGEMAGICK_EXE:/usr/bin/convert}
