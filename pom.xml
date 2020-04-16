@@ -28,6 +28,8 @@
         <dependency.jackson.version>2.10.3</dependency.jackson.version>
         <dependency.cxf.version>3.3.5</dependency.cxf.version>
         <dependency.poi.version>4.1.1</dependency.poi.version>
+
+        <parent.deploy.skip>false</parent.deploy.skip>
     </properties>
 
     
@@ -260,6 +262,14 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <inherited>false</inherited>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                  <skip>${parent.deploy.skip}</skip>
+                </configuration>
             </plugin>
         </plugins>
 
