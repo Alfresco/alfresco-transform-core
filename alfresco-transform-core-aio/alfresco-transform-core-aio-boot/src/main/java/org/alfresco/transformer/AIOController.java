@@ -91,7 +91,7 @@ public class AIOController extends AbstractTransformerController
                                  final String targetMimetype, final Map<String, String> transformOptions, final Long timeout)
     {
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
-        transformInternal( transform, sourceFile, targetFile, MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, transformOptions);
+        transformInternal( transform, sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
     }
 
     // TODO ATS-713 Currently uses the Misc probeTest. The implementation will need to be changed such that the test can be selected based on the required transform
@@ -109,7 +109,7 @@ public class AIOController extends AbstractTransformerController
             {
                 Map<String, String> parameters = new HashMap<>();
                 parameters.put(SOURCE_ENCODING, "UTF-8");
-                transformInternal( "misc", sourceFile, targetFile, MIMETYPE_HTML,
+                transformInternal( "html", sourceFile, targetFile, MIMETYPE_HTML,
                             MIMETYPE_TEXT_PLAIN, parameters);
             }
         };
