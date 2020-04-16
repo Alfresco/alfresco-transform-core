@@ -13,5 +13,5 @@ mvn -B -U \
 
 popd
 set +vex
-echo "=========================== Finishing Build&Test Script =========================="
+echo "=========================== Finishing Build Script =========================="
 
