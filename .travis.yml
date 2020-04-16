@@ -83,7 +83,7 @@ jobs:
 
     - name: "Release"
       stage: release
-      if: commit_message ~= /\[trigger release\]/ AND branch ~= /^(master|SP\/.+|HF\/.+|POC-Parallel-travis-builds)$/
+      if: commit_message ~= /\[trigger release\]/ AND branch ~= /^(master|SP\/.+|HF\/.+)$/
       before_script: travis_wait bash _ci/cache_artifacts.sh
       script: travis_wait 55 bash _ci/release.sh
       before_deploy: source _ci/prepare_staging_deploy.sh
