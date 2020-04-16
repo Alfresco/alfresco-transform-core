@@ -48,7 +48,6 @@ public class PdfRendererAdapter implements Transformer
 
     public PdfRendererAdapter(String execPath) throws Exception
     {
-        super();
         pdfExecutor = new PdfRendererCommandExecutor(execPath);
     }
 

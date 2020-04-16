@@ -38,7 +38,6 @@ public class LibreOfficeAdapter implements Transformer
 
     public LibreOfficeAdapter(String execPath) throws Exception
     {
-        super();
         javaExecutor = new LibreOfficeJavaExecutor(execPath);
     }
     

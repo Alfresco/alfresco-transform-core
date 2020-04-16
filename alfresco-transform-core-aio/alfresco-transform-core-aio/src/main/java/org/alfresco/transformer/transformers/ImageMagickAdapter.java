@@ -61,7 +61,6 @@ public class ImageMagickAdapter implements Transformer
 
     public ImageMagickAdapter(String exe, String dyn, String root) throws Exception
     {
-        super();
         commandExecutor = new ImageMagickCommandExecutor(exe, dyn, root);
     }
 
