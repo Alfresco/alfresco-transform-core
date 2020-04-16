@@ -37,7 +37,18 @@ public class PdfRendererCommandExecutor extends AbstractCommandExecutor
 {
     public static final String LICENCE = "This transformer uses alfresco-pdf-renderer which uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt";
 
-    private static final String EXE = "/usr/bin/alfresco-pdf-renderer";
+    private final String EXE;
+
+    public PdfRendererCommandExecutor(String exe)
+    {
+        if (exe == null || exe.isEmpty())
+        {
+            throw new IllegalArgumentException("PdfRendererCommandExecutor EXE variable cannot be null or empty");
+        }
+        this.EXE = exe;
+        super.transformCommand = createTransformCommand();
+        super.checkCommand = createCheckCommand();
+    }
 
     @Override
     protected RuntimeExec createTransformCommand()

@@ -67,6 +67,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.FileSystemResource;
@@ -77,6 +78,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Test the AlfrescoPdfRendererController without a server.
@@ -97,8 +100,17 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
 
     @Mock
     private RuntimeExec mockCheckCommand;
- 
-    private PdfRendererCommandExecutor commandExecutor = new PdfRendererCommandExecutor();
+
+    @Value("${transform.core.pdfrenderer.exe}")
+    private String execPath;
+
+    PdfRendererCommandExecutor commandExecutor;
+
+    @PostConstruct
+    private void init()
+    {
+        commandExecutor = new PdfRendererCommandExecutor(execPath);
+    }
 
     @SpyBean
     private AlfrescoPdfRendererController controller;
@@ -314,5 +326,12 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
         assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
         assertEquals(transformRequest.getClientData(), transformReply.getClientData());
         assertEquals(transformRequest.getSchema(), transformReply.getSchema());
+    }
+
+    @Test
+    public void testOverridingExecutorPaths()
+    {
+        //System test property value can me modified in the pom.xml
+        assertEquals(execPath, System.getProperty("PDF_RENDERER_EXE"));
     }
 }

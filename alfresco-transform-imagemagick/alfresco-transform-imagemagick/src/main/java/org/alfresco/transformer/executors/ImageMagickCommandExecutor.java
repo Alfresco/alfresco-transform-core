@@ -35,9 +35,31 @@ import java.util.Map;
  */
 public class ImageMagickCommandExecutor extends AbstractCommandExecutor
 {
-    private static final String ROOT = "/usr/lib64/ImageMagick-7.0.7";
-    private static final String DYN = ROOT + "/lib";
-    private static final String EXE = "/usr/bin/convert";
+    private final String ROOT;
+    private final String DYN;
+    private final String EXE;
+
+    public ImageMagickCommandExecutor(String exe, String dyn, String root)
+    {
+        if (exe == null || exe.isEmpty())
+        {
+            throw new IllegalArgumentException("ImageMagickCommandExecutor EXE variable cannot be null or empty");
+        }
+        if (dyn == null || dyn.isEmpty())
+        {
+            throw new IllegalArgumentException("ImageMagickCommandExecutor DYN variable cannot be null or empty");
+        }
+        if (root == null || root.isEmpty())
+        {
+            throw new IllegalArgumentException("ImageMagickCommandExecutor ROOT variable cannot be null or empty");
+        }
+        this.EXE = exe;
+        this.DYN = dyn;
+        this.ROOT = root;
+
+        super.transformCommand = createTransformCommand();
+        super.checkCommand = createCheckCommand();
+    }
 
     public static final String LICENCE = "This transformer uses ImageMagick from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt";
 

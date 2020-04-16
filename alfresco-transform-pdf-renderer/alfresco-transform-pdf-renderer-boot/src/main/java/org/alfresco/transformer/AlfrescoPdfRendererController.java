@@ -36,6 +36,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import java.io.File;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
@@ -43,7 +44,7 @@ import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -77,7 +78,16 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
     private static final Logger logger = LoggerFactory.getLogger(
         AlfrescoPdfRendererController.class);
 
-    private PdfRendererCommandExecutor commandExecutor = new PdfRendererCommandExecutor();
+    @Value("${transform.core.pdfrenderer.exe}")
+    private String execPath;
+
+    PdfRendererCommandExecutor commandExecutor;
+
+    @PostConstruct
+    private void init()
+    {
+        commandExecutor = new PdfRendererCommandExecutor(execPath);
+    }
 
     @Override
     public String getTransformerName()

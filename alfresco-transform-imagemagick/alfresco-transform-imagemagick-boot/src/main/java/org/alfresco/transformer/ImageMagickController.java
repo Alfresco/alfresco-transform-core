@@ -37,6 +37,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import java.io.File;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
@@ -44,7 +45,7 @@ import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -79,7 +80,22 @@ public class ImageMagickController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(ImageMagickController.class);
 
-    private ImageMagickCommandExecutor commandExecutor = new ImageMagickCommandExecutor();
+    @Value("${transform.core.imagemagick.exe}")
+    private String EXE;
+
+    @Value("${transform.core.imagemagick.dyn}")
+    private String DYN;
+
+    @Value("${transform.core.imagemagick.root}")
+    private String ROOT;
+
+    ImageMagickCommandExecutor commandExecutor;
+
+    @PostConstruct
+    private void init()
+    {
+        commandExecutor = new ImageMagickCommandExecutor(EXE, DYN, ROOT);
+    }
 
     @Override
     public String getTransformerName()

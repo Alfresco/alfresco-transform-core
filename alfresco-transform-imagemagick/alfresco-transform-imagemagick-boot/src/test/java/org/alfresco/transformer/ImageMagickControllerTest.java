@@ -38,6 +38,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 /**
  * Test the ImageMagickController without a server.
  * Super class includes tests for the ImageMagickController & AbstractTransformerController.
+ * New tests should be added to ImageMagickControllerTestBase
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(ImageMagickController.class)

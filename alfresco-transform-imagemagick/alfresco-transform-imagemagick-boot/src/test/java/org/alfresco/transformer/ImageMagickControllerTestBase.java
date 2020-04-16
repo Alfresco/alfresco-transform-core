@@ -66,6 +66,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -74,6 +75,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Test the ImageMagickController without a server.
@@ -94,9 +97,23 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
     @Mock
     protected RuntimeExec mockCheckCommand;
 
-    protected ImageMagickCommandExecutor commandExecutor = new ImageMagickCommandExecutor();
+    @Value("${transform.core.imagemagick.exe}")
+    private String EXE;
 
-    
+    @Value("${transform.core.imagemagick.dyn}")
+    private String DYN;
+
+    @Value("${transform.core.imagemagick.root}")
+    private String ROOT;
+
+    protected ImageMagickCommandExecutor commandExecutor;
+
+    @PostConstruct
+    private void init()
+    {
+        commandExecutor = new ImageMagickCommandExecutor(EXE, DYN, ROOT);
+    } 
+
     @Override
     public String getEngineConfigName()
     {
@@ -190,8 +207,6 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
                     .multipart("/transform")
                     .file(sourceFile)
                     .param("targetExtension", targetExtension)
-                    .param("targetMimetype", targetMimetype)
-                    .param("sourceMimetype", sourceMimetype)
                     .param("cropGravity", value))
                 .andExpect(status().is(OK.value()))
                 .andExpect(content().bytes(expectedTargetFileBytes))
@@ -208,8 +223,6 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
-                .param("targetMimetype", targetMimetype)
-                .param("sourceMimetype", sourceMimetype)
                 .param("cropGravity", "badValue"))
             .andExpect(status().is(BAD_REQUEST.value()));
     }
@@ -224,8 +237,6 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
-                .param("targetMimetype", targetMimetype)
-                .param("sourceMimetype", sourceMimetype)
 
                 .param("startPage", "2")
                 .param("endPage", "3")
@@ -262,8 +273,6 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
-                .param("targetMimetype", targetMimetype)
-                .param("sourceMimetype", sourceMimetype)
 
                 .param("startPage", "2")
                 .param("endPage", "3")
@@ -300,8 +309,6 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
-                .param("targetMimetype", targetMimetype)
-                .param("sourceMimetype", sourceMimetype)
                 .param("thumbnail", "false")
                 .param("resizeWidth", "321")
                 .param("resizeHeight", "654")
@@ -348,10 +355,8 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
         transformRequest.setTransformRequestOptions(new HashMap<>());
         transformRequest.setSourceReference(sourceFileRef);
         transformRequest.setSourceExtension(sourceExtension);
-        transformRequest.setSourceMediaType(sourceMimetype);
         transformRequest.setSourceSize(sourceFile.length());
         transformRequest.setTargetExtension(targetExtension);
-        transformRequest.setTargetMediaType(targetMimetype);
 
         // HTTP Request
         HttpHeaders headers = new HttpHeaders();
@@ -385,5 +390,14 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
         assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
         assertEquals(transformRequest.getClientData(), transformReply.getClientData());
         assertEquals(transformRequest.getSchema(), transformReply.getSchema());
+    }
+
+    @Test
+    public void testOverridingExecutorPaths()
+    {
+        //System test property values can me modified in the pom.xml
+        assertEquals(EXE, System.getProperty("IMAGEMAGICK_EXE"));
+        assertEquals(DYN, System.getProperty("IMAGEMAGICK_DYN"));
+        assertEquals(ROOT, System.getProperty("IMAGEMAGICK_ROOT"));
     }
 }

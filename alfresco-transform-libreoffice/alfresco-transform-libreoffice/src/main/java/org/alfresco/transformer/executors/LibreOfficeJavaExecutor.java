@@ -53,14 +53,20 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeJavaExecutor.class);
 
     private static final int JODCONVERTER_TRANSFORMATION_ERROR_CODE = 3088;
-    private static final String OFFICE_HOME = "/opt/libreoffice6.3";
+
+    private static String LIBREOFFICE_HOME;
 
     public static final String LICENCE = "This transformer uses LibreOffice from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt";
 
     private JodConverter jodconverter;
 
-    public LibreOfficeJavaExecutor()
+    public LibreOfficeJavaExecutor(String path)
     {
+        if (path == null || path.isEmpty())
+        {
+            throw new IllegalArgumentException("LibreOfficeJavaExecutor OFFICE_HOME variable cannot be null or empty");
+        }
+        LIBREOFFICE_HOME = path;
         jodconverter = createJodConverter();
     }
 
@@ -70,7 +76,7 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
 
         final JodConverterSharedInstance jodconverter = new JodConverterSharedInstance();
 
-        jodconverter.setOfficeHome(OFFICE_HOME);         // jodconverter.officeHome
+        jodconverter.setOfficeHome(LIBREOFFICE_HOME);         // jodconverter.officeHome
         jodconverter.setMaxTasksPerProcess("200");       // jodconverter.maxTasksPerProcess
         jodconverter.setTaskExecutionTimeout(timeout);   // jodconverter.maxTaskExecutionTimeout
         jodconverter.setTaskQueueTimeout(timeout);       // jodconverter.taskQueueTimeout
