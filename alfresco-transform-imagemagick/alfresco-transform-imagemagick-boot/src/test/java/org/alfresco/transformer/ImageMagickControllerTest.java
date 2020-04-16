@@ -66,6 +66,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.FileSystemResource;
@@ -76,6 +77,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Test the ImageMagickController without a server.
@@ -96,7 +99,22 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     @Mock
     private RuntimeExec mockCheckCommand;
 
-    private ImageMagickCommandExecutor commandExecutor = new ImageMagickCommandExecutor();
+    @Value("${transform.core.imagemagick.exe}")
+    private String EXE;
+
+    @Value("${transform.core.imagemagick.dyn}")
+    private String DYN;
+
+    @Value("${transform.core.imagemagick.root}")
+    private String ROOT;
+
+    ImageMagickCommandExecutor commandExecutor;
+
+    @PostConstruct
+    private void init()
+    {
+        commandExecutor = new ImageMagickCommandExecutor(EXE, DYN, ROOT);
+    }
 
     @SpyBean
     private ImageMagickController controller;
@@ -391,5 +409,14 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
         assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
         assertEquals(transformRequest.getClientData(), transformReply.getClientData());
         assertEquals(transformRequest.getSchema(), transformReply.getSchema());
+    }
+
+    @Test
+    public void testOverridingExecutorPaths()
+    {
+        //System test property values can me modified in the pom.xml
+        assertEquals(EXE, System.getProperty("IMAGEMAGICK_EXE"));
+        assertEquals(DYN, System.getProperty("IMAGEMAGICK_DYN"));
+        assertEquals(ROOT, System.getProperty("IMAGEMAGICK_ROOT"));
     }
 }

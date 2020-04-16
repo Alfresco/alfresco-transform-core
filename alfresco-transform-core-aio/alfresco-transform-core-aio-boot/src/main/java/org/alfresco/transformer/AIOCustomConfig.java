@@ -32,6 +32,7 @@ import org.alfresco.transformer.transformers.LibreOfficeAdapter;
 import org.alfresco.transformer.transformers.MiscAdapter;
 import org.alfresco.transformer.transformers.PdfRendererAdapter;
 import org.alfresco.transformer.transformers.TikaAdapter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -39,6 +40,21 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class AIOCustomConfig
 {
+    @Value("${transform.core.libreoffice.path}")
+    private String libreofficePath;
+
+    @Value("${transform.core.pdfrenderer.exe}")
+    private String pdfRendererPath;
+
+    @Value("${transform.core.imagemagick.exe}")
+    private String imageMagickExePath;
+
+    @Value("${transform.core.imagemagick.dyn}")
+    private String imageMagickDynPath;
+
+    @Value("${transform.core.imagemagick.root}")
+    private String imageMagickRootPath;
+
     /**
      *
      * @return Override the TransformRegistryImpl used in {@link AbstractTransformerController}
@@ -50,9 +66,9 @@ public class AIOCustomConfig
         AIOTransformRegistry aioTransformRegistry = new AIOTransformRegistry();
         aioTransformRegistry.registerTransformer(new MiscAdapter());
         aioTransformRegistry.registerTransformer(new TikaAdapter());
-        aioTransformRegistry.registerTransformer(new ImageMagickAdapter());
-        aioTransformRegistry.registerTransformer(new LibreOfficeAdapter());
-        aioTransformRegistry.registerTransformer(new PdfRendererAdapter());
+        aioTransformRegistry.registerTransformer(new ImageMagickAdapter(imageMagickExePath, imageMagickDynPath, imageMagickRootPath));
+        aioTransformRegistry.registerTransformer(new LibreOfficeAdapter(libreofficePath));
+        aioTransformRegistry.registerTransformer(new PdfRendererAdapter(pdfRendererPath));
         return aioTransformRegistry;
     }
 }

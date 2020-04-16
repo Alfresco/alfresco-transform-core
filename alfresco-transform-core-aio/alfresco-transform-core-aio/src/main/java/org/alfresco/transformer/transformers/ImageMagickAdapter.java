@@ -59,9 +59,9 @@ public class ImageMagickAdapter implements Transformer
     private static String ID = "imagemagick";
     private ImageMagickCommandExecutor commandExecutor;
 
-    public ImageMagickAdapter()
+    public ImageMagickAdapter(String exe, String dyn, String root) throws Exception
     {
-        commandExecutor = new ImageMagickCommandExecutor();
+        commandExecutor = new ImageMagickCommandExecutor(exe, dyn, root);
     }
 
     @Override

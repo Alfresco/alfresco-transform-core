@@ -40,8 +40,8 @@ import org.alfresco.transform.exceptions.TransformException;
  */
 public abstract class AbstractCommandExecutor implements CommandExecutor
 {
-    private final RuntimeExec transformCommand = createTransformCommand();
-    private final RuntimeExec checkCommand = createCheckCommand();
+    protected RuntimeExec transformCommand = createTransformCommand();
+    protected RuntimeExec checkCommand = createCheckCommand();
 
     protected abstract RuntimeExec createTransformCommand();
 

@@ -36,9 +36,9 @@ public class LibreOfficeAdapter implements Transformer
     private static String ID = "libreoffice";
     private LibreOfficeJavaExecutor javaExecutor;
 
-    public LibreOfficeAdapter()
+    public LibreOfficeAdapter(String execPath) throws Exception
     {
-        javaExecutor = new LibreOfficeJavaExecutor();
+        javaExecutor = new LibreOfficeJavaExecutor(execPath);
     }
     
     @Override
