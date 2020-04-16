@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -49,6 +49,11 @@ import com.google.common.collect.ImmutableMap;
 public class SelectingTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(SelectingTransformer.class);
+
+    public static final String LICENCE =
+            "This transformer uses libraries from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\\\ 2.0.txt\\n" +
+            "Additional libraries used:\n" +
+            "* htmlparser http://htmlparser.sourceforge.net/license.html";
 
     private final Map<String, SelectableTransformer> transformers = ImmutableMap
         .<String, SelectableTransformer>builder()

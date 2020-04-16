@@ -58,15 +58,15 @@ public class AIOTransformRegistryTest
     String SOURCE_ENCODING = "sourceEncoding";
     String TARGET_ENCODING = "targetEncoding";
 
-    AIOTransformRegistry aioTransformer = new AIOTransformRegistry();
+    AIOTransformRegistry aioTransformerRegistry = new AIOTransformRegistry();
     ObjectMapper objectMapper = new ObjectMapper();
 
 
     @Before
     public void before() throws Exception
     {
-        aioTransformer.registerTransformer(new MiscAdapter());
-        aioTransformer.registerTransformer(new TikaAdapter());
+        aioTransformerRegistry.registerTransformer(new MiscAdapter());
+        aioTransformerRegistry.registerTransformer(new TikaAdapter());
 
     }
 
@@ -103,9 +103,9 @@ public class AIOTransformRegistryTest
         // check correct number of transformers
         assertEquals("Number of expected transformers",
                 miscConfig.getTransformers().size() + tikaConfig.getTransformers().size(),
-                aioTransformer.getTransformConfig().getTransformers().size());
+                aioTransformerRegistry.getTransformConfig().getTransformers().size());
 
-        List<String> actualTransformerNames = aioTransformer.getTransformConfig().getTransformers()
+        List<String> actualTransformerNames = aioTransformerRegistry.getTransformConfig().getTransformers()
                 .stream().map(t -> t.getTransformerName()).collect(Collectors.toList());
         // check all transformers are there
         for(String transformNames : expectedTransformNames)
@@ -116,9 +116,9 @@ public class AIOTransformRegistryTest
         // check correct number of options
         assertEquals("Number of expected transformers",
                 miscConfig.getTransformOptions().size() + tikaConfig.getTransformOptions().size(),
-                aioTransformer.getTransformConfig().getTransformOptions().size());
+                aioTransformerRegistry.getTransformConfig().getTransformOptions().size());
 
-        Set<String> actualOptionNames = aioTransformer.getTransformConfig().getTransformOptions().keySet();
+        Set<String> actualOptionNames = aioTransformerRegistry.getTransformConfig().getTransformOptions().keySet();
 
         // check all options are there
         for (String optionName : expectedTransformOptionNames)
@@ -127,7 +127,33 @@ public class AIOTransformRegistryTest
         }
     }
 
-    // Test copied from Misc (HtmlParserContentTransformerTest) See ATS-712 aioTransformer - html
+    @Test
+    public void testTransformerMapping()
+    {
+        List<String> tikaTransforms = Arrays.asList("Archive", "OutlookMsg", "PdfBox", "Office", "Poi", "OOXML", "TikaAuto", "TextMining");
+        List<String> miscTransforms = Arrays.asList("html", "string", "appleIWorks", "textToPdf", "rfc822");
+
+        for (String transform : tikaTransforms)
+        {
+            String actualId = aioTransformerRegistry.getByTransformName(transform).getTransformerId();
+            assertEquals("Wrong mapping for transform "+transform, "tika", actualId);
+        }
+
+        for (String transform : miscTransforms)
+        {
+            String actualId = aioTransformerRegistry.getByTransformName(transform).getTransformerId();
+            assertEquals("Wrong mapping for transform "+transform, "misc", actualId);
+        }
+    }
+
+    @Test(expected = Exception.class)
+    public void testDuplicateTransformsException() throws Exception
+    {
+        // The Misc transformers are already registered
+        aioTransformerRegistry.registerTransformer(new MiscAdapter());
+    }
+
+    // Test copied from Misc (HtmlParserContentTransformerTest) See ATS-712 aioTransformerRegistry - html
     @Test
     public void testMiscHtml() throws Exception
     {
@@ -157,7 +183,7 @@ public class AIOTransformRegistryTest
             Map<String, String> parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
             parameters.put(TRANSFORM_NAME_PARAMETER, "html");
-            Transformer transformer = aioTransformer.getByTransformName("html");
+            Transformer transformer = aioTransformerRegistry.getByTransformName("html");
             transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
 
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
@@ -227,7 +253,7 @@ public class AIOTransformRegistryTest
         }
     }
 
-    // Test copied from Misc (TextToPdfContentTransformerTest) See ATS-712 aioTransformer - pdf
+    // Test copied from Misc (TextToPdfContentTransformerTest) See ATS-712 aioTransformerRegistry - pdf
     @Test
     public void testMiscPdf() throws Exception
     {
@@ -268,7 +294,7 @@ public class AIOTransformRegistryTest
         Map<String, String> parameters = new HashMap<>();
         parameters.put(PAGE_LIMIT, pageLimit);
         parameters.put(TRANSFORM_NAME_PARAMETER, "textToPdf");
-        Transformer transformer = aioTransformer.getByTransformName("textToPdf");
+        Transformer transformer = aioTransformerRegistry.getByTransformName("textToPdf");
         transformer.transform(sourceFile, targetFile, "text/plain", "application/pdf", parameters);
 
         // Read back in the PDF and check it

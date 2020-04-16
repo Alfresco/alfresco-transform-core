@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import org.alfresco.transformer.transformers.SelectingTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +40,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 
 import io.micrometer.core.instrument.MeterRegistry;
+
+import java.util.Arrays;
+
+import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
 
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
@@ -64,9 +69,7 @@ public class Application
     public void startup()
     {
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-        logger.info("The transformers in this project use libraries from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\\\ 2.0.txt");
-        logger.info("Additional libraries used:");
-        logger.info("* htmlparser http://htmlparser.sourceforge.net/license.html");
+        Arrays.stream(SelectingTransformer.LICENCE.split("\\n")).forEach(logger::info);
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
         logger.info("Starting application components... Done");

@@ -4,7 +4,7 @@
 
 FROM alfresco/alfresco-base-java:11.0.1-openjdk-centos-7-72b88c6f1f4c
 
-ARG LIBREOFFICE_VERSION=6.1.6
+ARG LIBREOFFICE_VERSION=6.3.5
 
 ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz
 ENV LIBREOFFICE_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/libreoffice.txt
