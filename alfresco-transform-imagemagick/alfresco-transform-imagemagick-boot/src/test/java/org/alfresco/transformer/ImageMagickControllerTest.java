@@ -37,13 +37,15 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Test the ImageMagickController without a server.
- * Super class includes tests for the AbstractTransformerController.
+ * Super class includes tests for the ImageMagickController & AbstractTransformerController.
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(ImageMagickController.class)
 public class ImageMagickControllerTest extends ImageMagickControllerTestBase
 {
 
+    // Brought to the sub class in order to prevent inheritance.
+    // Could not inherit from this class if requred to instantiate this variable
     @SpyBean
     private ImageMagickController controller;
 

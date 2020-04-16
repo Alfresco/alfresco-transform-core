@@ -87,7 +87,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public abstract class AbstractTransformerControllerTest
 {
-    @Rule
+    @Rule // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication
     public TemporaryFolder folder= new TemporaryFolder();
 
     @Autowired
@@ -177,6 +177,7 @@ public abstract class AbstractTransformerControllerTest
             throw new IOException("The test file " + testFilename +
                     " does not exist in the resources directory");
         }
+        // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication
         if(testFileUrl!=null)
         {
             try 

@@ -29,7 +29,6 @@ package org.alfresco.transformer;
 import java.io.IOException;
 import java.util.Map;
 
-import org.alfresco.transformer.AIOTransformRegistry;
 import org.alfresco.transformer.transformers.ImageMagickAdapter;
 import org.alfresco.transformer.transformers.Transformer;
 import org.junit.Before;
@@ -72,7 +71,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTestBase
         ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
         ReflectionTestUtils.setField(adapter, "commandExecutor", commandExecutor);
-        //Need to wire in the mocked adpater into the controller...
+        //Need to wire in the mocked adapter into the controller...
         if (ReflectionTestUtils.getField(transformRegistry,"transformerTransformMapping") instanceof Map)
         {
             Map<String,Transformer> transformers = transformRegistry.getTransformerTransformMapping();
