@@ -63,9 +63,9 @@ jobs:
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: _ci/build.sh full-build
       script: bash _ci/test.sh aio-test
-    # - name: "WhiteSource"
-    #   if: branch NOT IN (company_release)
-    #   script: bash _ci/whitesource.sh
+    - name: "WhiteSource"
+      if: branch NOT IN (company_release)
+      script: bash _ci/whitesource.sh
     - name: "Source Clear Scan (SCA)"
       if: branch NOT IN (company_release)
       install: skip
