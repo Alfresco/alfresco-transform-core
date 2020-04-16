@@ -15,7 +15,7 @@ git config user.email "build@alfresco.com"
 
 # Run the release plugin - with "[skip ci]" in the release commit message
 mvn -B \
-    -DdryRun \
+    ${DRY_RUN} \
     -Prelease \
     "-Darguments=-Prelease -DskipTests -Dmaven.javadoc.skip -Dadditionalparam=-Xdoclint:none" \
     release:clean release:prepare release:perform \
