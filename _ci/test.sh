@@ -9,10 +9,10 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ] && PROFILE="internal" || PROFILE="local"
 
 # If the branch is "master" and the commit is not a Pull Request then deploy the JAR SNAPSHOT artifacts
-[ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ] && DEPLOY="deploy" || DEPLOY="test"
+[ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "ATS-724_Parallel-travis-builds" ] && DEPLOY="deploy" || DEPLOY="test"
 
 # If the branch is "master" and the profile provided is not "aio-test" do not deploy alfresco-transformer-base
-[ "${1}" != "aio-test" ] && [ "${TRAVIS_BRANCH}" = "master" ] && SKIP_DUP_DEPLOY="-Dparent.deploy.skip=true -Dtransformer.base.deploy.skip=true" || SKIP_DUP_DEPLOY=""
+[ "${1}" != "aio-test" ] && [ "${TRAVIS_BRANCH}" = "ATS-724_Parallel-travis-builds" ] && SKIP_DUP_DEPLOY="-Dparent.deploy.skip=true -Dtransformer.base.deploy.skip=true" || SKIP_DUP_DEPLOY=""
 
 mvn -B -U \
     clean ${DEPLOY} \
