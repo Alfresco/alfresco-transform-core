@@ -11,6 +11,12 @@
 </style>
 
 <body>
+	<div>
+		<h1>All in One Transformer Test Transformation</h1>
+	</div>
+	<div>
+		<a href="/log">Log entries</a>
+	</div>
 	<div class="transfomer">
 		<h2>Tika Test Transformations</h2>
         <form method="POST" enctype="multipart/form-data" action="/transform">
@@ -19,7 +25,7 @@
                 <tr><td><div style="text-align:right">sourceMimetype *</div></td><td><input type="text" name="sourceMimetype" required="required" value="application/msword" /></td></tr>
 				<tr><td><div style="text-align:right">targetMimetype *</div></td><td><input type="text" name="targetMimetype" required="required" value="text/plain" /></td></tr>
 				<tr><td><div style="text-align:right">sourceExtension </div></td><td><input type="text" name="sourceExtension" value="" /></td></tr>
-				<tr><td><div style="text-align:right">targetExtension</div></td><td><input type="text" name="targetExtension" value="txt" /></td></tr>
+				<tr><td><div style="text-align:right">targetExtension *</div></td><td><input type="text" name="targetExtension" required="required" value="txt" /></td></tr>
 				<tr><td><div style="text-align:right">timeout</div></td><td><input type="text" name="timeout" value="" /></td></tr>
 				<tr><td><div style="text-align:right">testDelay</div></td><td><input type="text" name="testDelay" value="" /></td></tr>
                 <tr><td><div style="text-align:right">targetEncoding</div></td><td><input type="text" name="targetEncoding" value="UTF-8" /></td></tr>
@@ -125,12 +131,5 @@
 			</table>
 		</form>
 	</div>
-
-	<div style="display: inline-block;">
-		<a href="/log">Log entries</a>
-	</div>
-
-    
-
 </body>
 </html>
