@@ -32,7 +32,6 @@ import java.util.Map;
 import org.alfresco.transformer.transformers.ImageMagickAdapter;
 import org.alfresco.transformer.transformers.Transformer;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +48,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 @Import(AIOCustomConfig.class)
 public class AIOControllerImageMagickTest extends ImageMagickControllerTestBase 
 {
-    
-    static ImageMagickAdapter adapter;
+   
+    ImageMagickAdapter adapter;
     
     @Autowired
     AIOTransformRegistry transformRegistry;
@@ -58,16 +57,10 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTestBase
     @SpyBean
     AIOController controller;
 
-    @BeforeClass
-    public static void beforeClass() throws Exception
-    {
-        adapter = new ImageMagickAdapter();
-    }
-
     @Before
     public void before() throws IOException, Exception
     {
-        adapter = new ImageMagickAdapter();
+        adapter = new ImageMagickAdapter(EXE, DYN, ROOT);
         ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
         ReflectionTestUtils.setField(adapter, "commandExecutor", commandExecutor);

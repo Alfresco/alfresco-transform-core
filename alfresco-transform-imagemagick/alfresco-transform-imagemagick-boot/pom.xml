@@ -81,14 +81,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables>
-                        <IMAGEMAGICK_EXE>/usr/bin/convert</IMAGEMAGICK_EXE>
-                        <IMAGEMAGICK_DYN>/usr/lib64/ImageMagick-7.0.7/lib</IMAGEMAGICK_DYN>
-                        <IMAGEMAGICK_ROOT>/usr/lib64/ImageMagick-7.0.7</IMAGEMAGICK_ROOT>
-                        <buildDirectory>${project.build.directory}</buildDirectory>
-                    </systemPropertyVariables>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

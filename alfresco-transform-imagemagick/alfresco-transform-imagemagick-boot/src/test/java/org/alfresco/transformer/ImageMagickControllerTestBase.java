@@ -98,13 +98,13 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
     protected RuntimeExec mockCheckCommand;
 
     @Value("${transform.core.imagemagick.exe}")
-    private String EXE;
+    protected String EXE;
 
     @Value("${transform.core.imagemagick.dyn}")
-    private String DYN;
+    protected String DYN;
 
     @Value("${transform.core.imagemagick.root}")
-    private String ROOT;
+    protected String ROOT;
 
     protected ImageMagickCommandExecutor commandExecutor;
 
@@ -207,6 +207,8 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
                     .multipart("/transform")
                     .file(sourceFile)
                     .param("targetExtension", targetExtension)
+                    .param("targetMimetype", targetMimetype)
+                    .param("sourceMimetype", sourceMimetype)
                     .param("cropGravity", value))
                 .andExpect(status().is(OK.value()))
                 .andExpect(content().bytes(expectedTargetFileBytes))
@@ -223,6 +225,8 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype)
                 .param("cropGravity", "badValue"))
             .andExpect(status().is(BAD_REQUEST.value()));
     }
@@ -237,6 +241,8 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype)
 
                 .param("startPage", "2")
                 .param("endPage", "3")
@@ -273,7 +279,9 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
-
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype)
+                
                 .param("startPage", "2")
                 .param("endPage", "3")
 
@@ -309,6 +317,8 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype)
                 .param("thumbnail", "false")
                 .param("resizeWidth", "321")
                 .param("resizeHeight", "654")
@@ -355,8 +365,10 @@ public abstract class ImageMagickControllerTestBase extends AbstractTransformerC
         transformRequest.setTransformRequestOptions(new HashMap<>());
         transformRequest.setSourceReference(sourceFileRef);
         transformRequest.setSourceExtension(sourceExtension);
+        transformRequest.setSourceMediaType(sourceMimetype);
         transformRequest.setSourceSize(sourceFile.length());
         transformRequest.setTargetExtension(targetExtension);
+        transformRequest.setTargetMediaType(targetMimetype);
 
         // HTTP Request
         HttpHeaders headers = new HttpHeaders();
