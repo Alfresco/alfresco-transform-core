@@ -29,6 +29,8 @@ package org.alfresco.transformer;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.alfresco.transformer.transformers.ImageMagickAdapter;
 import org.alfresco.transformer.transformers.Transformer;
 import org.junit.Before;
@@ -36,7 +38,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -46,21 +47,28 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 @RunWith(SpringRunner.class)
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
-public class AIOControllerImageMagickTest extends ImageMagickControllerTestBase 
+/**
+ * Test the AIOController ImageMagick transforms without a server.
+ * Super class includes tests for the AbstractTransformerController.
+ */
+public class AIOControllerImageMagickTest extends ImageMagickControllerTest
 {
+   // All tests contained in ImageMagickControllerTest
    
     ImageMagickAdapter adapter;
     
     @Autowired
     AIOTransformRegistry transformRegistry;
 
-    @SpyBean
-    AIOController controller;
-
-    @Before
-    public void before() throws IOException, Exception
+    @PostConstruct
+    private void init() throws Exception
     {
         adapter = new ImageMagickAdapter(EXE, DYN, ROOT);
+    }
+
+    @Before @Override
+    public void before() throws IOException
+    {       
         ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
         ReflectionTestUtils.setField(adapter, "commandExecutor", commandExecutor);
