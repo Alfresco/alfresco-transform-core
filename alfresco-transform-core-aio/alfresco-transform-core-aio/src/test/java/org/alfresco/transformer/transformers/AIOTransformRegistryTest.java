@@ -61,7 +61,7 @@ public class AIOTransformRegistryTest
     AIOTransformRegistry aioTransformerRegistry = new AIOTransformRegistry();
     ObjectMapper objectMapper = new ObjectMapper();
 
-    
+
     @Before
     public void before() throws Exception
     {
