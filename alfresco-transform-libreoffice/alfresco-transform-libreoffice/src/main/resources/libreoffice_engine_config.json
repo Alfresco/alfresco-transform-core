@@ -43,6 +43,7 @@
         {"sourceMediaType": "text/html",                                                                                                 "priority": 55, "targetMediaType": "text/html" },
         {"sourceMediaType": "text/html",                                                                                                                 "targetMediaType": "application/vnd.oasis.opendocument.text" },
         {"sourceMediaType": "text/html",                                                                                                                 "targetMediaType": "application/rtf" },
+        {"sourceMediaType": "text/html",                                                                                                "priority": 150, "targetMediaType": "application/pdf" },
 
         {"sourceMediaType": "application/vnd.oasis.opendocument.graphics",                                                                               "targetMediaType": "application/pdf" },
         {"sourceMediaType": "application/vnd.oasis.opendocument.graphics",                                                                               "targetMediaType": "image/svg+xml" },
