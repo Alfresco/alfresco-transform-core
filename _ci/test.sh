@@ -9,7 +9,7 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ] && PROFILE="internal" || PROFILE="local"
 
 # If the branch is "master" and the commit is not a Pull Request then deploy the JAR SNAPSHOT artifacts
-[ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ] && DEPLOY="deploy" || DEPLOY="test"
+[ "${TRAVIS_BRANCH}" = "ATS-724_Parallel-travis-builds" ] && DEPLOY="deploy" || DEPLOY="test"
 
 # Do not deploy snapshots for alfresco-transform-core and alfresco-transformer-base
 mvn -B -U \

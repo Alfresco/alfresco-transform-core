@@ -34,7 +34,7 @@ jobs:
   include:
     - stage: Build and Test
       name: "Core & Base Snapshot deployment"
-      if: branch = master AND type != pull_request
+      if: branch = ATS-724_Parallel-travis-builds
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: travis_wait 20 mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Pbase
       script: mvn -B -U clean deploy -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Pbase
