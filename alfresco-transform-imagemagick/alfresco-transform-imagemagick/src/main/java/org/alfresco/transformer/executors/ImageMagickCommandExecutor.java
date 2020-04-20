@@ -82,10 +82,12 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
         processProperties.put("LD_LIBRARY_PATH", DYN);
 
         //Optional Windows properties
-        if ((CODERS != null && !CODERS.isBlank())
-                && (CONFIG != null && !CONFIG.isBlank()))
+        if (CODERS != null && !CODERS.isBlank())
         {
             processProperties.put("MAGICK_CODER_MODULE_PATH", CODERS);
+        }
+        if (CONFIG != null && !CONFIG.isBlank())
+        {
             processProperties.put("MAGICK_CONFIGURE_PATH", CONFIG);
         }
         runtimeExec.setProcessProperties(processProperties);
