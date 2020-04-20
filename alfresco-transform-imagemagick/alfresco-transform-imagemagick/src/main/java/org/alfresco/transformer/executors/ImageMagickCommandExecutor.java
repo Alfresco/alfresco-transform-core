@@ -38,8 +38,10 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
     private final String ROOT;
     private final String DYN;
     private final String EXE;
+    private final String CODERS;
+    private final String CONFIG;
 
-    public ImageMagickCommandExecutor(String exe, String dyn, String root)
+    public ImageMagickCommandExecutor(String exe, String dyn, String root, String coders, String config)
     {
         if (exe == null || exe.isEmpty())
         {
@@ -56,6 +58,8 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
         this.EXE = exe;
         this.DYN = dyn;
         this.ROOT = root;
+        this.CODERS = coders;
+        this.CONFIG = config;
 
         super.transformCommand = createTransformCommand();
         super.checkCommand = createCheckCommand();
@@ -76,6 +80,14 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
         processProperties.put("MAGICK_HOME", ROOT);
         processProperties.put("DYLD_FALLBACK_LIBRARY_PATH", DYN);
         processProperties.put("LD_LIBRARY_PATH", DYN);
+
+        //Optional Windows properties
+        if ((CODERS != null && !CODERS.isBlank())
+                && (CONFIG != null && !CONFIG.isBlank()))
+        {
+            processProperties.put("MAGICK_CODER_MODULE_PATH", CODERS);
+            processProperties.put("MAGICK_CONFIGURE_PATH", CONFIG);
+        }
         runtimeExec.setProcessProperties(processProperties);
 
         Map<String, String> defaultProperties = new HashMap<>();

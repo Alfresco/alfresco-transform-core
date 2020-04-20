@@ -55,6 +55,12 @@ public class AIOCustomConfig
     @Value("${transform.core.imagemagick.root}")
     private String imageMagickRootPath;
 
+    @Value("${transform.core.imagemagick.coders}")
+    private String imageMagickCodersPath;
+
+    @Value("${transform.core.imagemagick.config}")
+    private String imageMagickConfigPath;
+
     /**
      *
      * @return Override the TransformRegistryImpl used in {@link AbstractTransformerController}
@@ -66,7 +72,7 @@ public class AIOCustomConfig
         AIOTransformRegistry aioTransformRegistry = new AIOTransformRegistry();
         aioTransformRegistry.registerTransformer(new MiscAdapter());
         aioTransformRegistry.registerTransformer(new TikaAdapter());
-        aioTransformRegistry.registerTransformer(new ImageMagickAdapter(imageMagickExePath, imageMagickDynPath, imageMagickRootPath));
+        aioTransformRegistry.registerTransformer(new ImageMagickAdapter(imageMagickExePath, imageMagickDynPath, imageMagickRootPath, imageMagickCodersPath, imageMagickConfigPath));
         aioTransformRegistry.registerTransformer(new LibreOfficeAdapter(libreofficePath));
         aioTransformRegistry.registerTransformer(new PdfRendererAdapter(pdfRendererPath));
         return aioTransformRegistry;
