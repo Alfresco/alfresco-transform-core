@@ -33,7 +33,12 @@ before_install: bash _ci/init.sh
 jobs:
   include:
     - stage: Build and Test
-      name: "ImageMagick"
+      name: "Core & Base Snapshot deployment"
+      if: branch = master AND type != pull_request
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: travis_wait 20 mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -pl 'alfresco-transform-core','alfresco-transformer-base'
+      script: mvn -B -U clean deploy -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -pl 'alfresco-transform-core','alfresco-transformer-base'
+    - name: "ImageMagick"
       if: branch NOT IN (company_release)
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: _ci/build.sh imagemagick
