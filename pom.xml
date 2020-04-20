@@ -29,7 +29,7 @@
         <dependency.cxf.version>3.3.5</dependency.cxf.version>
         <dependency.poi.version>4.1.1</dependency.poi.version>
 
-        <parent.deploy.skip>false</parent.deploy.skip>
+        <parent.core.deploy.skip>false</parent.core.deploy.skip>
     </properties>
 
     
@@ -53,6 +53,12 @@
                 <module>alfresco-transform-tika/alfresco-transform-tika-boot</module>
                 <module>alfresco-transform-core-aio/alfresco-transform-core-aio</module>
                 <module>alfresco-transform-core-aio/alfresco-transform-core-aio-boot</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>base</id>
+            <modules>
+                <module>alfresco-transformer-base</module>
             </modules>
         </profile>
         <profile>
@@ -268,7 +274,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
-                  <skip>${parent.deploy.skip}</skip>
+                  <skip>${parent.core.deploy.skip}</skip>
                 </configuration>
             </plugin>
         </plugins>

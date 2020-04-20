@@ -11,13 +11,12 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 # If the branch is "master" and the commit is not a Pull Request then deploy the JAR SNAPSHOT artifacts
 [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ] && DEPLOY="deploy" || DEPLOY="test"
 
-# If the branch is "master" and the profile provided is not "aio-test" do not deploy alfresco-transformer-base
-[ "${1}" != "aio-test" ] && [ "${TRAVIS_BRANCH}" = "master" ] && SKIP_DUP_DEPLOY="-Dparent.deploy.skip=true -Dtransformer.base.deploy.skip=true" || SKIP_DUP_DEPLOY=""
-
+# Do not deploy snapshots for alfresco-transform-core and alfresco-transformer-base
 mvn -B -U \
     clean ${DEPLOY} \
     -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true \
-    "-P${PROFILE},docker-it-setup,${1}" ${SKIP_DUP_DEPLOY}
+    -Dparent.core.deploy.skip=true -Dtransformer.base.deploy.skip=true \
+    "-P${PROFILE},docker-it-setup,${1}" 
 
 docker ps -a -q | xargs -r -l docker stop ; docker ps -a -q | xargs -r -l docker rm
 
