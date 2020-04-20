@@ -72,7 +72,9 @@ public class AIOController extends AbstractTransformerController
     private static final Logger logger = LoggerFactory.getLogger(AIOController.class);
 
     // This property can be sent by acs repository's legacy transformers to force a transform,
-    // instead of letting this T-Engine determine it based on the request parameters
+    // instead of letting this T-Engine determine it based on the request parameters.
+    // This allows clients to specify transform names as they appear in the engine config files.
+    @Deprecated
     private static final String TRANSFORM_NAME_PROPERTY = "transformName";
 
     @Autowired
