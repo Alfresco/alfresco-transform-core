@@ -33,7 +33,7 @@ before_install: bash _ci/init.sh
 jobs:
   include:
     - stage: Build and Test
-      name: "Core & Base Snapshot deployment"
+      name: "Core & Base Snapshot deployment" # This is to separate the snapshot deployment from the following jobs, to prevent duplication on nexus
       if: branch = ATS-724_Parallel-travis-builds
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: travis_wait 20 mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Pbase
