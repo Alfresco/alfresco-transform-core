@@ -11,6 +11,10 @@
     <artifactId>alfresco-transformer-base</artifactId>
     <version>2.2.0-A5-SNAPSHOT</version>
 
+    <properties>
+        <transformer.base.deploy.skip>false</transformer.base.deploy.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -80,6 +84,13 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                  <skip>${transformer.base.deploy.skip}</skip>
+                </configuration>
             </plugin>
         </plugins>
     </build>
