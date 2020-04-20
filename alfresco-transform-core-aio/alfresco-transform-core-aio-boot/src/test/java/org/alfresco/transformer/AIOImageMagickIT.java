@@ -34,7 +34,7 @@ import org.junit.runners.Parameterized;
 public class AIOImageMagickIT extends ImageMagickTransformationIT
 {
     //Tests are in ImageMagickTransformationIT
-    public AIOImageMagickIT(final Pair<String, String> entry)
+    public AIOImageMagickIT(final Pair<TestFileInfo, Pair<String,String>> entry)
     {
         super(entry);
     }
