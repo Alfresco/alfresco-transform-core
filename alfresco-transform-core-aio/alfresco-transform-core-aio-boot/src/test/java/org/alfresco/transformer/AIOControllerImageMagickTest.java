@@ -112,7 +112,6 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
     @Override
     public void testGetTransformConfigInfo()
     {
-
         // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
 
 
@@ -121,7 +120,6 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
     @Override
     public void testGetInfoFromConfigWithDuplicates()
     {
-
         // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
 
     }
@@ -130,7 +128,6 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
     @Override
     public void testGetInfoFromConfigWithEmptyTransformOptions()
     {
-
         // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
 
     }
