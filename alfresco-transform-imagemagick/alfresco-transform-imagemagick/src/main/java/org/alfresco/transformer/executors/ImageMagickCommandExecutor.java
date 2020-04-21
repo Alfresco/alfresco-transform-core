@@ -81,7 +81,7 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
         processProperties.put("DYLD_FALLBACK_LIBRARY_PATH", DYN);
         processProperties.put("LD_LIBRARY_PATH", DYN);
 
-        //Optional Windows properties
+        //Optional properties (see also https://imagemagick.org/script/resources.php#environment)
         if (CODERS != null && !CODERS.isBlank())
         {
             processProperties.put("MAGICK_CODER_MODULE_PATH", CODERS);
