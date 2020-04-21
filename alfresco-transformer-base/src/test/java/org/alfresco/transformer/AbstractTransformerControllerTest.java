@@ -26,7 +26,7 @@
  */
 package org.alfresco.transformer;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -88,7 +88,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public abstract class AbstractTransformerControllerTest
 {
-    @Rule
+    @Rule // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication
     public TemporaryFolder folder= new TemporaryFolder();
 
     @Autowired
@@ -106,6 +106,7 @@ public abstract class AbstractTransformerControllerTest
     protected String sourceExtension;
     protected String targetExtension;
     protected String sourceMimetype;
+    protected String targetMimetype;
 
     protected MockMultipartFile sourceFile;
     protected String expectedOptions;
@@ -177,6 +178,7 @@ public abstract class AbstractTransformerControllerTest
             throw new IOException("The test file " + testFilename +
                     " does not exist in the resources directory");
         }
+        // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication
         if(testFileUrl!=null)
         {
             try 

@@ -81,18 +81,22 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables>
-                        <IMAGEMAGICK_EXE>/usr/bin/convert</IMAGEMAGICK_EXE>
-                        <IMAGEMAGICK_DYN>/usr/lib64/ImageMagick-7.0.7/lib</IMAGEMAGICK_DYN>
-                        <IMAGEMAGICK_ROOT>/usr/lib64/ImageMagick-7.0.7</IMAGEMAGICK_ROOT>
-                        <buildDirectory>${project.build.directory}</buildDirectory>
-                    </systemPropertyVariables>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
