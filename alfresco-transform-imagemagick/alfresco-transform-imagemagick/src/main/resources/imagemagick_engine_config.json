@@ -1,6 +1,7 @@
 {
   "transformOptions": {
     "imageMagickOptions": [
+      {"value": {"name": "commandOptions"}},
       {"value": {"name": "alphaRemove"}},
       {"value": {"name": "autoOrient"}},
       {"value": {"name": "startPage"}},
