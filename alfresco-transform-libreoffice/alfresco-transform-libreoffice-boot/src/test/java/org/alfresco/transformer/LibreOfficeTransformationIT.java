@@ -26,28 +26,31 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.transformer.TestFileInfo.testFile;
 import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORD;
+import static org.alfresco.transformer.TestFileInfo.testFile;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_EXCEL;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_HTML;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_SVG;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_GRAPHICS;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_PRESENTATION;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_SPREADSHEET;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_TEXT;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_WORDPROCESSING;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_PDF;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_PPT;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_RTF;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_CSV;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TSV;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VISIO;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VISIO_2013;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORD;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORDPERFECT;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_EXCEL;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_CSV;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_RTF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_HTML;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TSV;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_PDF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_SVG;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.springframework.http.HttpStatus.OK;
@@ -56,7 +59,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.alfresco.transform.client.model.Mimetype;
+import com.google.common.collect.ImmutableSet;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,8 +70,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
-import com.google.common.collect.ImmutableSet;
-
 /**
  * @author Cezar Leahu
  */
@@ -76,7 +78,7 @@ public class LibreOfficeTransformationIT
 {
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeTransformationIT.class);
     private static final String ENGINE_URL = "http://localhost:8090";
-    private static final Set<TestFileInfo> spreadsheetTargetMimetypes = ImmutableSet.of(
+    private static final Set<TestFileInfo> spreadsheetTargets = ImmutableSet.of(
         testFile(MIMETYPE_TEXT_CSV, "csv",null),
         testFile(MIMETYPE_HTML,"html",null),
         testFile(MIMETYPE_OPENDOCUMENT_SPREADSHEET,"ods",null),
@@ -85,7 +87,7 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_EXCEL,"xls",null)
     );
 
-    private static final Set<TestFileInfo> documentsTargetMimetypes = ImmutableSet.of(
+    private static final Set<TestFileInfo> documentsTargets = ImmutableSet.of(
         testFile(MIMETYPE_WORD,"doc",null),
         testFile(MIMETYPE_HTML,"html",null),
         testFile(MIMETYPE_OPENDOCUMENT_TEXT,"odt",null),
@@ -93,12 +95,12 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_RTF,"rtf",null)
     );
 
-    private static final Set<TestFileInfo> graphicTargetMimetypes = ImmutableSet.of(
+    private static final Set<TestFileInfo> graphicTargets = ImmutableSet.of(
         testFile(MIMETYPE_PDF,"pdf",null),
         testFile(MIMETYPE_IMAGE_SVG,"svg",null)
     );
 
-    private static final Set<TestFileInfo> presentationTargetMimetypes = ImmutableSet.of(
+    private static final Set<TestFileInfo> presentationTargets = ImmutableSet.of(
         testFile(MIMETYPE_HTML,"html",null),
         testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION,"odp",null),
         testFile(MIMETYPE_PPT,"ppt",null),
@@ -112,18 +114,18 @@ public class LibreOfficeTransformationIT
 
     private static final Map<String,TestFileInfo> TEST_FILES = Stream.of(
         testFile(MIMETYPE_WORD                      ,"doc"  ,"quick.doc"), 
-        testFile(MIMETYPE_WORD                      ,"docx" ,"quick.docx"),
+        testFile(MIMETYPE_OPENXML_WORDPROCESSING    ,"docx" ,"quick.docx"),
         testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS     ,"odg"  ,"quick.odg"), 
         testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION ,"odp"  ,"quick.odp"), 
         testFile(MIMETYPE_OPENDOCUMENT_SPREADSHEET  ,"ods"  ,"quick.ods"), 
         testFile(MIMETYPE_OPENDOCUMENT_TEXT         ,"odt"  ,"quick.odt"), 
         testFile(MIMETYPE_PPT                       ,"ppt"  ,"quick.ppt"), 
-        testFile(MIMETYPE_PPT                       ,"pptx" ,"quick.pptx"),
+        testFile(MIMETYPE_OPENXML_PRESENTATION      ,"pptx" ,"quick.pptx"),
         testFile(MIMETYPE_VISIO                     ,"vdx"  ,"quick.vdx"), 
         testFile(MIMETYPE_VISIO_2013                ,"vsd"  ,"quick.vsd"), 
         testFile(MIMETYPE_WORDPERFECT               ,"wpd"  ,"quick.wpd"), 
         testFile(MIMETYPE_EXCEL                     ,"xls"  ,"quick.xls" ), 
-        testFile(MIMETYPE_EXCEL                     ,"xlsx" ,"quick.xlsx"),
+        testFile(MIMETYPE_OPENXML_SPREADSHEET       ,"xlsx" ,"quick.xlsx"),
         testFile(MIMETYPE_TEXT_CSV                  ,"csv"  ,"people.csv"),
         testFile(MIMETYPE_RTF                       ,"rtf"  ,"sample.rtf"),
         testFile(MIMETYPE_HTML                      ,"html" ,"quick.html"),
@@ -143,24 +145,26 @@ public class LibreOfficeTransformationIT
     {
         return Stream
             .of(
-                allTargets("quick.doc", documentsTargetMimetypes),
-                allTargets("quick.docx", documentsTargetMimetypes),
-                allTargets("quick.odg", graphicTargetMimetypes),
-                allTargets("quick.odp", presentationTargetMimetypes),
-                allTargets("quick.ods", spreadsheetTargetMimetypes),
-                allTargets("quick.odt", documentsTargetMimetypes),
-                allTargets("quick.ppt", presentationTargetMimetypes),
-                allTargets("quick.pptx", presentationTargetMimetypes),
-                allTargets("quick.vdx", graphicTargetMimetypes),
-                allTargets("quick.vsd", graphicTargetMimetypes),
-                allTargets("quick.wpd", documentsTargetMimetypes),
-                allTargets("quick.xls", spreadsheetTargetMimetypes),
-                allTargets("quick.xlsx", spreadsheetTargetMimetypes),
+                allTargets("quick.doc", documentsTargets),
+                allTargets("quick.docx", documentsTargets),
+                allTargets("quick.html", documentsTargets),
+                allTargets("quick.odt", documentsTargets),
+                allTargets("quick.wpd", documentsTargets),
+                allTargets("sample.rtf", documentsTargets),
 
-                allTargets("people.csv", spreadsheetTargetMimetypes),
-                allTargets("sample.rtf", documentsTargetMimetypes),
-                allTargets("quick.html", documentsTargetMimetypes),
-                allTargets("sample.tsv", spreadsheetTargetMimetypes)
+                allTargets("quick.odp", presentationTargets),
+                allTargets("quick.ppt", presentationTargets),
+                allTargets("quick.pptx", presentationTargets),
+
+                allTargets("quick.odg", graphicTargets),
+                allTargets("quick.vdx", graphicTargets),
+                allTargets("quick.vsd", graphicTargets),
+                
+                allTargets("quick.ods", spreadsheetTargets),
+                allTargets("quick.xls", spreadsheetTargets),
+                allTargets("quick.xlsx", spreadsheetTargets),
+                allTargets("people.csv", spreadsheetTargets),
+                allTargets("sample.tsv", spreadsheetTargets)
             )
             .flatMap(identity())
             .collect(toSet());
@@ -188,6 +192,10 @@ public class LibreOfficeTransformationIT
     {
         return mimetypes
             .stream()
+            //Filter out duplicate mimetypes. eg. We do not want "Transform (quick.doc, application/msword -> application/msword, doc)" as these are not contained in the engine_config
+            .filter(type -> !type.getMimeType().equals(TEST_FILES.get(sourceFile).getMimeType())) 
+            // Edge case Transform (quick.ods, application/vnd.oasis.opendocument.spreadsheet -> text/csv, csv) not in engine_config
+            .filter(type -> !(TEST_FILES.get(sourceFile).getMimeType().equals(MIMETYPE_OPENDOCUMENT_SPREADSHEET) && type.getMimeType().equals(MIMETYPE_TEXT_CSV)))
             .map(k -> Pair.of(TEST_FILES.get(sourceFile), k));
     }
 }
