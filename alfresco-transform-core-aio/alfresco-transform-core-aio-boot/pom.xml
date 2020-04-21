@@ -1,7 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>alfresco-transform-imagemagick-boot</artifactId>
-    <name>Alfresco ImageMagick Transformer Spring Boot</name>
+    <artifactId>alfresco-transform-core-aio-boot</artifactId>
+    <name>Alfresco Core All-In-One Transformer Spring Boot</name>
     <packaging>jar</packaging>
 
     <parent>
@@ -12,7 +14,7 @@
     </parent>
 
     <properties>
-        <image.name>alfresco/alfresco-imagemagick</image.name>
+        <image.name>alfresco/alfresco-transform-core-aio</image.name>
         <image.registry>quay.io</image.registry>
         <env.project_artifactId>${project.artifactId}</env.project_artifactId>
     </properties>
@@ -25,17 +27,18 @@
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-transform-core-aio</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transformer-base</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-transform-imagemagick</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -51,13 +54,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
         </dependency>
     </dependencies>
 
@@ -81,14 +81,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables>
-                        <IMAGEMAGICK_EXE>/usr/bin/convert</IMAGEMAGICK_EXE>
-                        <IMAGEMAGICK_DYN>/usr/lib64/ImageMagick-7.0.7/lib</IMAGEMAGICK_DYN>
-                        <IMAGEMAGICK_ROOT>/usr/lib64/ImageMagick-7.0.7</IMAGEMAGICK_ROOT>
-                        <buildDirectory>${project.build.directory}</buildDirectory>
-                    </systemPropertyVariables>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -133,7 +125,7 @@
                                 </image>
 
                                 <image>
-                                    <alias>imagemagick</alias>
+                                    <alias>aio</alias>
                                     <name>${image.name}:${image.tag}</name>
                                     <run>
                                         <ports>
@@ -206,7 +198,7 @@
                         <configuration>
                             <images>
                                 <!-- QuayIO image -->
-                                <image>
+                                 <image>
                                     <name>${image.name}:${image.tag}</name>
                                     <registry>${image.registry}</registry>
                                     <build>
@@ -270,7 +262,7 @@
                                     </build>
                                 </image>
                                 <!-- DockerHub image -->
-                                <image>
+                                 <image>
                                     <name>${image.name}:${project.version}</name>
                                     <build>
                                         <dockerFileDir>${project.basedir}/</dockerFileDir>
