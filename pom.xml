@@ -73,8 +73,8 @@
             <id>libreoffice</id>
             <modules>
                 <module>alfresco-transformer-base</module>
-                <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick</module>
-                <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot</module>
+                <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice</module>
+                <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice-boot</module>
             </modules>
         </profile>
         <profile>
