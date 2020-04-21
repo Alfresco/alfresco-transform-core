@@ -126,9 +126,9 @@ public class AIOController extends AbstractTransformerController
     @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
         @RequestParam("file") MultipartFile sourceMultipartFile,
+        @RequestParam(TARGET_EXTENSION) String targetExtension,
         @RequestParam(SOURCE_MIMETYPE) String sourceMimetype,
         @RequestParam(TARGET_MIMETYPE) String targetMimetype,
-        @RequestParam(TARGET_EXTENSION) String targetExtension,
         @RequestParam Map<String, String> requestParameters,
         @RequestParam (value = TEST_DELAY, required = false) Long testDelay,
 

@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -63,7 +64,9 @@ import org.alfresco.transform.client.model.config.Transformer;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -84,6 +87,9 @@ import com.google.common.collect.ImmutableSet;
  */
 public abstract class AbstractTransformerControllerTest
 {
+    @Rule // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication
+    public TemporaryFolder folder= new TemporaryFolder();
+
     @Autowired
     protected MockMvc mockMvc;
 
@@ -99,6 +105,7 @@ public abstract class AbstractTransformerControllerTest
     protected String sourceExtension;
     protected String targetExtension;
     protected String sourceMimetype;
+    protected String targetMimetype;
 
     protected MockMultipartFile sourceFile;
     protected String expectedOptions;
@@ -162,6 +169,7 @@ public abstract class AbstractTransformerControllerTest
 
     protected File getTestFile(String testFilename, boolean required) throws IOException
     {
+        File testFile = null;
         ClassLoader classLoader = getClass().getClassLoader();
         URL testFileUrl = classLoader.getResource(testFilename);
         if (required && testFileUrl == null)
@@ -169,7 +177,28 @@ public abstract class AbstractTransformerControllerTest
             throw new IOException("The test file " + testFilename +
                     " does not exist in the resources directory");
         }
-        return testFileUrl == null ? null : new File(URLDecoder.decode(testFileUrl.getPath(), "UTF-8"));
+        // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication
+        if(testFileUrl!=null)
+        {
+            try 
+            {
+                testFile = folder.newFile(testFilename);
+                Files.copy(classLoader.getResourceAsStream(testFilename), testFile.toPath(),REPLACE_EXISTING);
+            } 
+            catch (IOException e) 
+            {
+                if(e.getMessage().contains("a file with the name \'" + testFilename + "\' already exists in the test folder"))
+                {
+                    testFile = new File(URLDecoder.decode(folder.getRoot().getPath()+ File.separator + testFilename, "UTF-8"));
+                }
+                else
+                {
+                    throw e;
+                }
+            }
+        }
+
+        return testFileUrl == null ? null : testFile;
     }
 
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
