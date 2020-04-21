@@ -24,36 +24,60 @@ branches:
     - /^ATS-.*$/
 
 stages:
-  - build
+  - build and test
   - release
   - company_release
 
+before_install: bash _ci/init.sh
+
 jobs:
   include:
-    - name: "Build + Tests"
-      stage: build
-      if: branch NOT IN (company_release)
-      before_install: bash _ci/init.sh
+    - stage: Build and Test
+      name: "Core & Base Snapshot deployment" # This is to separate the snapshot deployment from the following jobs, to prevent duplication on nexus
+      if: branch = master AND type != pull_request
       before_script: travis_wait bash _ci/cache_artifacts.sh
-      script: bash _ci/build.sh
-
+      install: travis_wait 20 mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Pbase
+      script: mvn -B -U clean deploy -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Pbase
+    - name: "ImageMagick"
+      if: branch NOT IN (company_release)
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh imagemagick
+      script: bash _ci/test.sh imagemagick
+    - name: "LibreOffice"
+      if: branch NOT IN (company_release)
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh libreoffice
+      script: bash _ci/test.sh libreoffice
+    - name: "Transform Misc"
+      if: branch NOT IN (company_release)
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh misc
+      script: bash _ci/test.sh misc
+    - name: "PDF Renderer"
+      if: branch NOT IN (company_release)
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh pdf-renderer
+      script: bash _ci/test.sh pdf-renderer
+    - name: "Tika"
+      if: branch NOT IN (company_release)
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh tika
+      script: bash _ci/test.sh tika
+    - name: "All in One Transfomer"
+      if: branch NOT IN (company_release)
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh full-build
+      script: bash _ci/test.sh aio-test
     - name: "WhiteSource"
-      stage: build
       if: branch NOT IN (company_release)
-      before_install: bash _ci/init.sh
       script: bash _ci/whitesource.sh
-
     - name: "Source Clear Scan (SCA)"
-      stage: build
       if: branch NOT IN (company_release)
-      before_install: bash _ci/init.sh
       install: skip
       script: travis_wait 30 bash _ci/sourceclear.sh
-
     - name: "Static Analysis (SAST)"
-      stage: build
-## TODO ATS-721: comment out until it is possible to run concurrent SAST scans
-#      if: branch NOT IN (company_release) AND type != pull_request
+# TODO ATS-721: comment out until it is possible to run concurrent SAST scans
+#    if: branch NOT IN (company_release) AND type != pull_request
       if: branch = master AND type != pull_request
       before_install:
       - bash _ci/static_analysis_init.sh
@@ -63,7 +87,6 @@ jobs:
     - name: "Release"
       stage: release
       if: commit_message ~= /\[trigger release\]/ AND branch ~= /^(master|SP\/.+|HF\/.+)$/
-      before_install: bash _ci/init.sh
       before_script: travis_wait bash _ci/cache_artifacts.sh
       script: travis_wait 55 bash _ci/release.sh
       before_deploy: source _ci/prepare_staging_deploy.sh
