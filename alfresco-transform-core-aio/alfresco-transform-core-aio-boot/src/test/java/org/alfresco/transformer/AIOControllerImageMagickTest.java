@@ -112,38 +112,35 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
     @Override
     public void testGetTransformConfigInfo()
     {
-        // Ignore the test in super class as the AIO transforms will not be selected .
+
+        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
+
 
     }
-
     @Test
     @Override
     public void testGetInfoFromConfigWithDuplicates()
     {
-        // Ignore the test in super class as the AIO transforms will not be selected .
+
+        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
 
     }
+
     @Test
     @Override
     public void testGetInfoFromConfigWithEmptyTransformOptions()
     {
-        // Ignore the test in super class as the AIO transforms will not be selected .
 
-    }
-    @Test
-    @Override
-    public void testGetInfoFromConfigWithNoTransformOptions()
-    {
-        // Ignore the test in super class as the AIO transforms will not be selected .
+        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
 
     }
     
     @Test
     @Override
-    public void deprecatedCommandOptionsTest() throws Exception
+    public void testGetInfoFromConfigWithNoTransformOptions()
     {
-        // Ignore test in super class as the CommandOptions is not within the imagemagick_engine_config.json
-        // as such it will not be considered to have a valid transformer.
+        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
 
     }
+    
 }
