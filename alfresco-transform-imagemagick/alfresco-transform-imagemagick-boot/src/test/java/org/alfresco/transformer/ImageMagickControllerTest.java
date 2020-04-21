@@ -27,6 +27,7 @@
 package org.alfresco.transformer;
 
 import static org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
+import static org.alfresco.transformer.util.MimetypeMap.PREFIX_IMAGE;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -66,9 +67,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -91,22 +92,22 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     private static final String ENGINE_CONFIG_NAME = "imagemagick_engine_config.json";
 
     @Mock
-    private ExecutionResult mockExecutionResult;
+    protected ExecutionResult mockExecutionResult;
 
     @Mock
-    private RuntimeExec mockTransformCommand;
+    protected RuntimeExec mockTransformCommand;
 
     @Mock
-    private RuntimeExec mockCheckCommand;
+    protected RuntimeExec mockCheckCommand;
 
     @Value("${transform.core.imagemagick.exe}")
-    private String EXE;
+    protected String EXE;
 
     @Value("${transform.core.imagemagick.dyn}")
-    private String DYN;
+    protected String DYN;
 
     @Value("${transform.core.imagemagick.root}")
-    private String ROOT;
+    protected String ROOT;
 
     @Value("${transform.core.imagemagick.coders}")
     private String CODERS;
@@ -122,8 +123,8 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
         commandExecutor = new ImageMagickCommandExecutor(EXE, DYN, ROOT, CODERS, CONFIG);
     }
 
-    @SpyBean
-    private ImageMagickController controller;
+    @Autowired
+    protected AbstractTransformerController controller;
 
     @Before
     public void before() throws IOException
@@ -149,6 +150,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
         this.sourceExtension = sourceExtension;
         this.targetExtension = targetExtension;
         this.sourceMimetype = sourceMimetype;
+        this.targetMimetype = PREFIX_IMAGE + targetExtension;
 
         expectedOptions = null;
         expectedSourceSuffix = null;
@@ -232,6 +234,8 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                     .multipart("/transform")
                     .file(sourceFile)
                     .param("targetExtension", targetExtension)
+                    .param("targetMimetype", targetMimetype)
+                    .param("sourceMimetype", sourceMimetype)
                     .param("cropGravity", value))
                 .andExpect(status().is(OK.value()))
                 .andExpect(content().bytes(expectedTargetFileBytes))
@@ -248,6 +252,8 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype)
                 .param("cropGravity", "badValue"))
             .andExpect(status().is(BAD_REQUEST.value()));
     }
@@ -262,6 +268,8 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype)
 
                 .param("startPage", "2")
                 .param("endPage", "3")
@@ -298,7 +306,9 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
-
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype)
+                
                 .param("startPage", "2")
                 .param("endPage", "3")
 
@@ -334,6 +344,8 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype)
                 .param("thumbnail", "false")
                 .param("resizeWidth", "321")
                 .param("resizeHeight", "654")
@@ -380,8 +392,10 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
         transformRequest.setTransformRequestOptions(new HashMap<>());
         transformRequest.setSourceReference(sourceFileRef);
         transformRequest.setSourceExtension(sourceExtension);
+        transformRequest.setSourceMediaType(sourceMimetype);
         transformRequest.setSourceSize(sourceFile.length());
         transformRequest.setTargetExtension(targetExtension);
+        transformRequest.setTargetMediaType(targetMimetype);
 
         // HTTP Request
         HttpHeaders headers = new HttpHeaders();
