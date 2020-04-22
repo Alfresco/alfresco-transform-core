@@ -56,7 +56,6 @@
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
-            <version>${project.version}</version>
             <artifactId>alfresco-transform-pdf-renderer-boot</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
@@ -66,10 +65,10 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transform-tika-boot</artifactId>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
