@@ -83,7 +83,6 @@ public class AIOControllerLibreOfficeTest extends LibreOfficeControllerTest
         //Need to wire in the mocked adapter into the controller...
         Map<String,Transformer> transformers = transformRegistry.getTransformerTransformMapping();
         transformers.replace("libreoffice", adapter);
-        ReflectionTestUtils.setField(transformRegistry, "transformerTransformMapping", transformers);
         // No need to set the transform registry to the controller as it is @Autowired in
     }
 
