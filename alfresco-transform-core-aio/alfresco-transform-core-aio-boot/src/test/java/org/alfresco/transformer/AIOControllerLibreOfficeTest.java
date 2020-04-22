@@ -26,6 +26,8 @@
  */
 package org.alfresco.transformer;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -55,6 +57,13 @@ public class AIOControllerLibreOfficeTest extends LibreOfficeControllerTest
 
     //Tests contained in LibreOfficeControllerTest
     
+    @Test
+    public void testTestValidity()
+    {
+        // just test that we are actually testing against the AIOController (instead of MiscController)
+        assertTrue("Wrong controller wired for test", controller instanceof AIOController);
+    }
+
     LibreOfficeAdapter adapter;
 
     @Autowired
