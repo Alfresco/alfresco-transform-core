@@ -109,12 +109,18 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     @Value("${transform.core.imagemagick.root}")
     protected String ROOT;
 
+    @Value("${transform.core.imagemagick.coders}")
+    protected String CODERS;
+
+    @Value("${transform.core.imagemagick.config}")
+    protected String CONFIG;
+
     ImageMagickCommandExecutor commandExecutor;
 
     @PostConstruct
     private void init()
     {
-        commandExecutor = new ImageMagickCommandExecutor(EXE, DYN, ROOT);
+        commandExecutor = new ImageMagickCommandExecutor(EXE, DYN, ROOT, CODERS, CONFIG);
     }
 
     @Autowired

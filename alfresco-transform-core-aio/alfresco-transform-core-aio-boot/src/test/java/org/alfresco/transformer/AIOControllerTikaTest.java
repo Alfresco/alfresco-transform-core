@@ -26,84 +26,32 @@
  */
 package org.alfresco.transformer;
 
-import java.io.IOException;
-import java.util.Map;
+import static org.junit.Assert.assertTrue;
 
-import javax.annotation.PostConstruct;
-
-import org.alfresco.transformer.transformers.ImageMagickAdapter;
-import org.alfresco.transformer.transformers.Transformer;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
 /**
- * Test the AIOController ImageMagick transforms without a server.
+ * Test the AIOController Tika transforms without a server.
  * Super class includes tests for the AbstractTransformerController.
  */
-public class AIOControllerImageMagickTest extends ImageMagickControllerTest
+public class AIOControllerTikaTest extends TikaControllerTest
 {
-   // All tests contained in ImageMagickControllerTest
-   
-    ImageMagickAdapter adapter;
-    
-    @Autowired
-    AIOTransformRegistry transformRegistry;
-
-    @PostConstruct
-    private void init() throws Exception
-    {
-        adapter = new ImageMagickAdapter(EXE, DYN, ROOT, CODERS, CONFIG);
-    }
-
-    @Before @Override
-    public void before() throws IOException
-    {       
-        ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
-        ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
-        ReflectionTestUtils.setField(adapter, "commandExecutor", commandExecutor);
-        //Need to wire in the mocked adapter into the controller...
-        Map<String,Transformer> transformers = transformRegistry.getTransformerTransformMapping();
-        transformers.replace("imagemagick", adapter);
-
-        mockTransformCommand("jpg", "png", "image/jpeg", true);
-    }
-
-    @Override
-    protected AbstractTransformerController getController() 
-    {
-        return controller;
-    }
-
-    @Override
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
-        String... params)
-    {
-        final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
-            .param("targetMimetype", targetMimetype)
-            .param("sourceMimetype", sourceMimetype);
-
-        return builder;
-    }
+    // All tests contained in TikaControllerTest
 
     @Test
-    @Override
-    public void noTargetFileTest()
+    public void testTestValidity()
     {
-        // Ignore the test in super class as the AIO transforms will not be selected .
-        // It is the mock that returns a zero length file for other transformers, when we supply an invalid targetExtension.
+        // just test that we are actually testing against the AIOController (instead of MiscController)
+        assertTrue("Wrong controller wired for test", controller instanceof AIOController);
     }
-   
+
     @Test
     @Override
     public void testGetTransformConfigInfo()
@@ -135,5 +83,4 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
         // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
     }
-    
 }
