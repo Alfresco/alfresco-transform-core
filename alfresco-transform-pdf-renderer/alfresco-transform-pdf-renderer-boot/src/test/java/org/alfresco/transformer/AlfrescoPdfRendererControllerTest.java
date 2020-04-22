@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -67,9 +67,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -96,15 +96,15 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
     private ExecutionResult mockExecutionResult;
 
     @Mock
-    private RuntimeExec mockTransformCommand;
+    protected RuntimeExec mockTransformCommand;
 
     @Mock
-    private RuntimeExec mockCheckCommand;
+    protected RuntimeExec mockCheckCommand;
 
     @Value("${transform.core.pdfrenderer.exe}")
-    private String execPath;
+    protected String execPath;
 
-    PdfRendererCommandExecutor commandExecutor;
+    protected PdfRendererCommandExecutor commandExecutor;
 
     @PostConstruct
     private void init()
@@ -112,17 +112,22 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
         commandExecutor = new PdfRendererCommandExecutor(execPath);
     }
 
-    @SpyBean
-    private AlfrescoPdfRendererController controller;
+    @Autowired
+    protected AbstractTransformerController controller;
 
     @Before
     public void before() throws IOException
     {
+        setFields();
+
+        mockTransformCommand("pdf", "png", APPLICATION_PDF_VALUE, true);
+    }
+
+    protected void setFields()
+    {
         ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
         ReflectionTestUtils.setField(controller, "commandExecutor", commandExecutor);
-
-        mockTransformCommand("pdf", "png", "application/pdf", true);
     }
 
     @Override
@@ -139,6 +144,7 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
         this.sourceExtension = sourceExtension;
         this.targetExtension = targetExtension;
         this.sourceMimetype = sourceMimetype;
+        this.targetMimetype = IMAGE_PNG_VALUE;
 
         expectedOptions = null;
         expectedSourceSuffix = null;
@@ -220,6 +226,8 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype)
 
                 .param("page", "2")
 
@@ -242,6 +250,8 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
                 .multipart("/transform")
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype)
 
                 .param("page", "2")
 

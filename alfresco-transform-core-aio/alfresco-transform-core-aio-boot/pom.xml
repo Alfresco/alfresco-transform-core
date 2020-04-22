@@ -49,10 +49,19 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transform-misc-boot</artifactId>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
             <version>${project.version}</version>
+            <artifactId>alfresco-transform-pdf-renderer-boot</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
