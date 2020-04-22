@@ -110,10 +110,10 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     protected String ROOT;
 
     @Value("${transform.core.imagemagick.coders}")
-    private String CODERS;
+    protected String CODERS;
 
     @Value("${transform.core.imagemagick.config}")
-    private String CONFIG;
+    protected String CONFIG;
 
     ImageMagickCommandExecutor commandExecutor;
 

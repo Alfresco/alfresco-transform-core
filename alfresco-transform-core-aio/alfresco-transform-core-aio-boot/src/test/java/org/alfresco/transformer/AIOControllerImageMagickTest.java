@@ -63,7 +63,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
     @PostConstruct
     private void init() throws Exception
     {
-        adapter = new ImageMagickAdapter(EXE, DYN, ROOT);
+        adapter = new ImageMagickAdapter(EXE, DYN, ROOT, CODERS, CONFIG);
     }
 
     @Before @Override
