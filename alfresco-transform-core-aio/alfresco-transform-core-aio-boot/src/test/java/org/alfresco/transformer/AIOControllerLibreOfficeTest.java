@@ -26,14 +26,15 @@
  */
 package org.alfresco.transformer;
 
-import java.io.IOException;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.alfresco.transformer.transformers.ImageMagickAdapter;
+import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
+import org.alfresco.transformer.transformers.LibreOfficeAdapter;
 import org.alfresco.transformer.transformers.Transformer;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,41 +49,41 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
 /**
- * Test the AIOController ImageMagick transforms without a server.
- * Super class includes tests for the AbstractTransformerController.
+ * Test the AIOController without a server.
+ * Super class includes tests for the LibreOfficeController and AbstractTransformerController.
  */
-public class AIOControllerImageMagickTest extends ImageMagickControllerTest
+public class AIOControllerLibreOfficeTest extends LibreOfficeControllerTest
 {
-   // All tests contained in ImageMagickControllerTest
-   
-    ImageMagickAdapter adapter;
+
+    //Tests contained in LibreOfficeControllerTest
     
+    @Test
+    public void testTestValidity()
+    {
+        // just test that we are actually testing against the AIOController (instead of MiscController)
+        assertTrue("Wrong controller wired for test", controller instanceof AIOController);
+    }
+
+    LibreOfficeAdapter adapter;
+
     @Autowired
     AIOTransformRegistry transformRegistry;
 
     @PostConstruct
     private void init() throws Exception
     {
-        adapter = new ImageMagickAdapter(EXE, DYN, ROOT, CODERS, CONFIG);
-    }
-
-    @Before @Override
-    public void before() throws IOException
-    {       
-        ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
-        ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
-        ReflectionTestUtils.setField(adapter, "commandExecutor", commandExecutor);
-        //Need to wire in the mocked adapter into the controller...
-        Map<String,Transformer> transformers = transformRegistry.getTransformerTransformMapping();
-        transformers.replace("imagemagick", adapter);
-
-        mockTransformCommand("jpg", "png", "image/jpeg", true);
+        adapter = new LibreOfficeAdapter(execPath);
     }
 
     @Override
-    protected AbstractTransformerController getController() 
+    // Used by the super class to mock the javaExecutor, a different implementation is required here
+    protected void setJavaExecutor(AbstractTransformerController controller, LibreOfficeJavaExecutor javaExecutor)
     {
-        return controller;
+        ReflectionTestUtils.setField(adapter, "javaExecutor", javaExecutor);
+        //Need to wire in the mocked adapter into the controller...
+        Map<String,Transformer> transformers = transformRegistry.getTransformerTransformMapping();
+        transformers.replace("libreoffice", adapter);
+        // No need to set the transform registry to the controller as it is @Autowired in
     }
 
     @Override
@@ -95,45 +96,34 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
 
         return builder;
     }
-
-    @Test
-    @Override
-    public void noTargetFileTest()
-    {
-        // Ignore the test in super class as the AIO transforms will not be selected .
-        // It is the mock that returns a zero length file for other transformers, when we supply an invalid targetExtension.
-    }
-   
+    
     @Test
     @Override
     public void testGetTransformConfigInfo()
     {
-        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-
+        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
 
     }
+
     @Test
     @Override
     public void testGetInfoFromConfigWithDuplicates()
     {
-        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
+        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
 
     }
-
     @Test
     @Override
     public void testGetInfoFromConfigWithEmptyTransformOptions()
     {
-        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
+        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
 
     }
-    
     @Test
     @Override
     public void testGetInfoFromConfigWithNoTransformOptions()
     {
-        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
+        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
 
     }
-    
 }

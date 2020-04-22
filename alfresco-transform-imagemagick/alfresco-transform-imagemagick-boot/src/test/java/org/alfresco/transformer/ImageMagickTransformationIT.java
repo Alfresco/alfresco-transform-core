@@ -142,7 +142,7 @@ public class ImageMagickTransformationIT
         testFile(MIMETYPE_IMAGE_XBM,"xbm","quick.xbm"),
         testFile(MIMETYPE_IMAGE_XPM,"xpm","quick.xpm"),
         testFile(MIMETYPE_IMAGE_XWD,"xwd","quick.xwd")
-    ).collect(toMap(TestFileInfo::getPath, identity()));;
+    ).collect(toMap(TestFileInfo::getPath, identity()));
    
     private final String sourceFile;
     private final String targetExtension;

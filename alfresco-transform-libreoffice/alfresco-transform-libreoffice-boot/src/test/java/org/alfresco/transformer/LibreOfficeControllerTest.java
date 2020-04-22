@@ -26,6 +26,10 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transformer.util.RequestParamMap.SOURCE_MIMETYPE;
+import static org.alfresco.transformer.util.RequestParamMap.TARGET_EXTENSION;
+import static org.alfresco.transformer.util.RequestParamMap.TARGET_MIMETYPE;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -63,9 +67,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -82,19 +86,20 @@ import javax.annotation.PostConstruct;
  * Super class includes tests for the AbstractTransformerController.
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(LibreOfficeControllerTest.class)
+@WebMvcTest(LibreOfficeController.class)
 public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 {
 
-    private static final String ENGINE_CONFIG_NAME = "libreoffice_engine_config.json";
+    protected static final String ENGINE_CONFIG_NAME = "libreoffice_engine_config.json";
+    protected String targetMimetype = MIMETYPE_PDF;
 
     @Mock
-    private ExecutionResult mockExecutionResult;
+    protected ExecutionResult mockExecutionResult;
 
-    @Value("${transform.core.libreoffice.home}")
-    private String execPath;
+    @Value("${transform.core.libreoffice.path}")
+    protected String execPath;
 
-    LibreOfficeJavaExecutor javaExecutor;
+    protected LibreOfficeJavaExecutor javaExecutor;
 
     @PostConstruct
     private void init()
@@ -102,8 +107,8 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
         javaExecutor = Mockito.spy(new LibreOfficeJavaExecutor(execPath));
     }
 
-    @SpyBean
-    private LibreOfficeController controller;
+    @Autowired
+    protected AbstractTransformerController controller;
 
     @Before
     public void before() throws IOException
@@ -112,7 +117,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
         targetExtension = "pdf";
         sourceMimetype = "application/msword";
 
-        ReflectionTestUtils.setField(controller, "javaExecutor", javaExecutor);
+        setJavaExecutor(controller,javaExecutor);
 
         // The following is based on super.mockTransformCommand(...)
         // This is because LibreOffice used JodConverter rather than a RuntimeExec
@@ -152,6 +157,12 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
         }).when(javaExecutor).convert(any(), any());
     }
 
+    
+    protected void setJavaExecutor(AbstractTransformerController controller, LibreOfficeJavaExecutor javaExecutor)
+    {
+        ReflectionTestUtils.setField(controller, "javaExecutor", javaExecutor);
+    }
+
     @Override
     public String getEngineConfigName()
     {
@@ -180,10 +191,12 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
             .perform(MockMvcRequestBuilders
                 .multipart("/transform")
                 .file(sourceFile)
-                .param("targetExtension", "xxx"))
+                .param(TARGET_EXTENSION, "xxx")
+                .param(SOURCE_MIMETYPE,sourceMimetype)
+                .param(TARGET_MIMETYPE,targetMimetype))
             .andExpect(status().is(400))
             .andExpect(status().reason(
-                containsString("LibreOffice - LibreOffice server conversion failed:")));
+                containsString("LibreOffice server conversion failed:")));
     }
 
     @Override
@@ -192,7 +205,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
         transformRequest.setSourceExtension("doc");
         transformRequest.setTargetExtension("pdf");
         transformRequest.setSourceMediaType("application/msword");
-        transformRequest.setTargetMediaType(IMAGE_PNG_VALUE);
+        transformRequest.setTargetMediaType(targetMimetype);
     }
 
     @Test
