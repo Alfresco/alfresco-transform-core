@@ -74,7 +74,6 @@ public class AIOControllerPdfRendererTest extends AlfrescoPdfRendererControllerT
         //Need to wire in the mocked adapter into the controller...
         Map<String,Transformer> transformers = transformRegistry.getTransformerTransformMapping();
         transformers.replace("pdfrenderer", adapter);
-        ReflectionTestUtils.setField(transformRegistry, "transformerTransformMapping", transformers);
     }
 
     @Override
