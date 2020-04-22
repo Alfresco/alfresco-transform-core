@@ -26,6 +26,8 @@
  */
 package org.alfresco.transformer;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -42,6 +44,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class AIOControllerTikaTest extends TikaControllerTest
 {
     // All tests contained in TikaControllerTest
+
+    @Test
+    public void testTestValidity()
+    {
+        // just test that we are actually testing against the AIOController (instead of MiscController)
+        assertTrue("Wrong controller wired for test", controller instanceof AIOController);
+    }
 
     @Test
     @Override
