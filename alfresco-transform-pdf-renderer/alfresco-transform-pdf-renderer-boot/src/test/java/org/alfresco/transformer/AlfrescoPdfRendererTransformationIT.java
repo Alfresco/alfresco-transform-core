@@ -27,12 +27,17 @@
 package org.alfresco.transformer;
 
 import static java.text.MessageFormat.format;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
+import static org.alfresco.transformer.TestFileInfo.testFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.springframework.http.HttpStatus.OK;
 
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,11 +59,19 @@ public class AlfrescoPdfRendererTransformationIT
         AlfrescoPdfRendererTransformationIT.class);
     private static final String ENGINE_URL = "http://localhost:8090";
 
+    private static final Map<String, TestFileInfo> TEST_FILES = Stream.of(
+        testFile("application/pdf","pdf","quick.pdf"),
+        testFile("application/illustrator","ai","quickCS3.ai")  ,      
+        testFile("application/illustrator","ai","quickCS5.ai")
+    ).collect(toMap(TestFileInfo::getPath, identity()));
+
     private final String sourceFile;
+    private final String sourceMimetype;
 
     public AlfrescoPdfRendererTransformationIT(String sourceFile)
     {
         this.sourceFile = sourceFile;
+        this.sourceMimetype = TEST_FILES.get(sourceFile).getMimeType();
     }
 
     @Parameterized.Parameters
@@ -74,12 +87,13 @@ public class AlfrescoPdfRendererTransformationIT
     @Test
     public void testTransformation()
     {
-        final String descriptor = format("Transform ({0} -> png)", sourceFile);
+        final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
+            sourceFile, sourceMimetype, "image/png", "png");
 
         try
         {
-            final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, null,
-                null, "png");
+            final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, sourceMimetype,
+                "image/png", "png");
             assertEquals(descriptor, OK, response.getStatusCode());
         }
         catch (Exception e)
