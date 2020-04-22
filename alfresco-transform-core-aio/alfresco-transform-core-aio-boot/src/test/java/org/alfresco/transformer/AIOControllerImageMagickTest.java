@@ -73,12 +73,9 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
         ReflectionTestUtils.setField(adapter, "commandExecutor", commandExecutor);
         //Need to wire in the mocked adapter into the controller...
-        if (ReflectionTestUtils.getField(transformRegistry,"transformerTransformMapping") instanceof Map)
-        {
-            Map<String,Transformer> transformers = transformRegistry.getTransformerTransformMapping();
-            transformers.replace("imagemagick", adapter);
-            ReflectionTestUtils.setField(transformRegistry, "transformerTransformMapping", transformers);
-        }
+        Map<String,Transformer> transformers = transformRegistry.getTransformerTransformMapping();
+        transformers.replace("imagemagick", adapter);
+        ReflectionTestUtils.setField(transformRegistry, "transformerTransformMapping", transformers);
 
         mockTransformCommand("jpg", "png", "image/jpeg", true);
     }
