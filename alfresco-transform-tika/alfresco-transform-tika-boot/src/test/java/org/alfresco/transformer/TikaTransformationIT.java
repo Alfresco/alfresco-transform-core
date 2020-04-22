@@ -146,9 +146,8 @@ public class TikaTransformationIT
     @Test
     public void testTransformation()
     {
-        final String descriptor = format("Transform ({0} -> {1}, {2}, sourceMimetype={3})",
-            sourceFile, targetMimetype, targetExtension, sourceMimetype);
-
+        final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
+            sourceFile, sourceMimetype, targetMimetype, targetExtension);
         try
         {
             final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, null,
