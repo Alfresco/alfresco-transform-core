@@ -32,6 +32,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static junit.framework.TestCase.assertTrue;
+
 @RunWith(SpringRunner.class)
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
@@ -39,6 +41,14 @@ public class AIOControllerMiscTest extends MiscControllerTest
 {
     //Tests contained in MiscControllerTest
 
+
+    @Test
+    public void testTestValidity()
+    {
+        // just test that we are actually testing against the AIOController (instead of MiscController)
+        assertTrue("Wrong controller wired for test", controller instanceof AIOController);
+    }
+    
     @Test
     @Override
     public void testGetTransformConfigInfo()
