@@ -48,7 +48,7 @@
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-transform-misc-boot</artifactId>
+            <artifactId>alfresco-transform-tika-boot</artifactId>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
