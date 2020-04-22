@@ -79,7 +79,7 @@ public class LibreOfficeController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeController.class);
 
-    @Value("${transform.core.libreoffice.home}")
+    @Value("${transform.core.libreoffice.path}")
     private String execPath;
 
     LibreOfficeJavaExecutor javaExecutor;

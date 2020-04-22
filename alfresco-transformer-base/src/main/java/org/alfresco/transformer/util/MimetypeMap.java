@@ -56,6 +56,8 @@ public interface MimetypeMap
     String MIMETYPE_EXCEL = "application/vnd.ms-excel";
     String MIMETYPE_BINARY = "application/octet-stream";
     String MIMETYPE_PPT = "application/vnd.ms-powerpoint";
+    String MIMETYPE_RTF = "application/rtf";
+    String MIMETYPE_TSV = "text/tab-separated-values";
     String MIMETYPE_APP_DWG = "application/dwg";
     String MIMETYPE_IMG_DWG = "image/vnd.dwg";
     String MIMETYPE_VIDEO_AVI = "video/x-msvideo";
