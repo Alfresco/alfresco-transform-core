@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -88,7 +88,6 @@ import java.util.UUID;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transformer.executors.RuntimeExec;
-import org.alfresco.transformer.executors.TikaJavaExecutor;
 import org.alfresco.transformer.model.FileRefEntity;
 import org.alfresco.transformer.model.FileRefResponse;
 import org.junit.Before;
@@ -96,8 +95,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -134,8 +133,8 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @Mock
     private RuntimeExec mockCheckCommand;
 
-    @SpyBean
-    private TikaController controller;
+    @Autowired
+    protected AbstractTransformerController controller;
 
     private String targetEncoding = "UTF-8";
     private String targetMimetype = MIMETYPE_TEXT_PLAIN;
