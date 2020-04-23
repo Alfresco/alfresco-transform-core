@@ -95,7 +95,7 @@ public class MiscTransformsIT
         testFile(MIMETYPE_OPENXML_PRESENTATION, "pptx", "quick.pptx"),
         testFile(MIMETYPE_OUTLOOK_MSG, "msg", "quick.msg"),
         testFile(MIMETYPE_PDF, "pdf", "quick.pdf"),
-        testFile(MIMETYPE_TEXT_PLAIN, "txt", "quick.txt"),
+        testFile(MIMETYPE_TEXT_PLAIN, "txt", "quick2.txt"),
 
         testFile("text/richtext", "rtf", "sample.rtf"),
         testFile("text/sgml", "sgml", "sample.sgml"),
