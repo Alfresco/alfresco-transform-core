@@ -44,6 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 
 import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.pdfbox.pdmodel.PDDocument;
