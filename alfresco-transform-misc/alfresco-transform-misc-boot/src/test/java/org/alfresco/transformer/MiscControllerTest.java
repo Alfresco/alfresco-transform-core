@@ -80,7 +80,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         expectedOptions = null;
         expectedSourceSuffix = null;
         expectedSourceFileBytes = readTestFile(sourceExtension);
-        expectedTargetFileBytes = readTestFile(targetExtension);
+        expectedTargetFileBytes = Files.readAllBytes(getTestFile("quick2." + targetExtension, true).toPath());
         //expectedTargetFileBytes = null;
         sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
             expectedSourceFileBytes);
