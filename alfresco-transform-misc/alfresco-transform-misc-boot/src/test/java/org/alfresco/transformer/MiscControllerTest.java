@@ -44,9 +44,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transformer.transformers.SelectingTransformer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.Before;
@@ -54,7 +54,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MvcResult;
@@ -65,13 +64,13 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 public class MiscControllerTest extends AbstractTransformerControllerTest
 {
     @Autowired
-    private MiscController controller;
+    protected AbstractTransformerController controller;
 
-    private final String sourceEncoding = "UTF-8";
-    private final String targetEncoding = "UTF-8";
-    private final String targetMimetype = MIMETYPE_TEXT_PLAIN;
+    protected final String sourceEncoding = "UTF-8";
+    protected final String targetEncoding = "UTF-8";
+    protected final String targetMimetype = MIMETYPE_TEXT_PLAIN;
 
-    private static final String ENGINE_CONFIG_NAME = "misc_engine_config.json";
+    protected static final String ENGINE_CONFIG_NAME = "misc_engine_config.json";
 
     @Before
     public void before() throws Exception
@@ -82,7 +81,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         expectedOptions = null;
         expectedSourceSuffix = null;
         expectedSourceFileBytes = readTestFile(sourceExtension);
-        expectedTargetFileBytes = readTestFile(targetExtension);
+        expectedTargetFileBytes = Files.readAllBytes(getTestFile("quick2." + targetExtension, true).toPath());
         //expectedTargetFileBytes = null;
         sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
             expectedSourceFileBytes);

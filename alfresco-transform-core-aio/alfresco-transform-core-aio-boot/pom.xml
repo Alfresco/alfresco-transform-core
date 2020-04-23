@@ -40,6 +40,14 @@
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-transform-tika-boot</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transform-imagemagick-boot</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
@@ -56,11 +64,11 @@
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-transform-tika-boot</artifactId>
+            <artifactId>alfresco-transform-misc-boot</artifactId>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>

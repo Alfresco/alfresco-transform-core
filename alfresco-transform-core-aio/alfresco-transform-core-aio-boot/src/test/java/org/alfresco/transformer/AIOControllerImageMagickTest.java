@@ -26,6 +26,8 @@
  */
 package org.alfresco.transformer;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -94,6 +96,13 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
             .param("sourceMimetype", sourceMimetype);
 
         return builder;
+    }
+
+    @Test
+    public void testTestValidity()
+    {
+        // just test that we are actually testing against the AIOController (instead of MiscController)
+        assertTrue("Wrong controller wired for test", controller instanceof AIOController);
     }
 
     @Test
