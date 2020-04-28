@@ -24,11 +24,13 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer.transformers;
+package org.alfresco.transformer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.transform.client.model.config.TransformConfig;
-import org.alfresco.transformer.AIOTransformRegistry;
+import org.alfresco.transformer.transformers.MiscAdapter;
+import org.alfresco.transformer.transformers.TikaAdapter;
+import org.alfresco.transformer.transformers.Transformer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.Before;
@@ -87,19 +89,6 @@ public class AIOTransformRegistryTest
     private TransformConfig loadConfig(String s) throws Exception
     {
         return objectMapper.readValue(new ClassPathResource(s).getFile(), TransformConfig.class);
-    }
-
-    @Test
-    public void testRegistrySizes() throws Exception
-    {
-
-        long size10kb = 10000;
-        long size4mb = 4000000;
-        String name = aioTransformerRegistry.findTransformerName("application/vnd.openxmlformats-officedocument.wordprocessingml.document", size10kb, "application/pdf", Collections.emptyMap(), null);
-        System.out.println(name);
-
-
-        System.out.println();
     }
 
     @Test
