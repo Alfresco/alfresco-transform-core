@@ -41,6 +41,7 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +87,19 @@ public class AIOTransformRegistryTest
     private TransformConfig loadConfig(String s) throws Exception
     {
         return objectMapper.readValue(new ClassPathResource(s).getFile(), TransformConfig.class);
+    }
+
+    @Test
+    public void testRegistrySizes() throws Exception
+    {
+
+        long size10kb = 10000;
+        long size4mb = 4000000;
+        String name = aioTransformerRegistry.findTransformerName("application/vnd.openxmlformats-officedocument.wordprocessingml.document", size10kb, "application/pdf", Collections.emptyMap(), null);
+        System.out.println(name);
+
+
+        System.out.println();
     }
 
     @Test
