@@ -98,6 +98,11 @@ public class AIOController extends AbstractTransformerController
     public void processTransform(final File sourceFile, final File targetFile, final String sourceMimetype,
                                  final String targetMimetype, final Map<String, String> transformOptions, final Long timeout)
     {
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Processing request via queue endpoint. Params: sourceMimetype: '{}', targetMimetype: '{}', "
+                    + "transformOptions: {}", sourceMimetype, targetMimetype, transformOptions);
+        }
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         transformInternal( transform, sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
     }
@@ -136,7 +141,11 @@ public class AIOController extends AbstractTransformerController
         // It can be removed once legacy transformers are removed from ACS.
         @RequestParam (value = TRANSFORM_NAME_PROPERTY, required = false) String requestTransformName)
     {
-        debugLogTransform("Request parameters: ", sourceMimetype, targetMimetype, targetExtension, requestParameters);
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Processing request via HTTP endpoint. Params: sourceMimetype: '{}', targetMimetype: '{}', "
+                    + "targetExtension: '{}', requestParameters: {}", sourceMimetype, targetMimetype, targetExtension, requestParameters);
+        }
 
         //Remove all required parameters from request parameters to get the list of options
         List<String> optionsToFilter = Arrays.asList(SOURCE_EXTENSION, TARGET_EXTENSION, TARGET_MIMETYPE,
@@ -144,6 +153,11 @@ public class AIOController extends AbstractTransformerController
         Map<String, String> transformOptions = new HashMap<>(requestParameters);
         transformOptions.keySet().removeAll(optionsToFilter);
         transformOptions.values().removeIf(v -> v.isEmpty());
+
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Filtered requestParameters into transformOptions: {}" + transformOptions);
+        }
 
         final String targetFilename = createTargetFileName(
             sourceMultipartFile.getOriginalFilename(), targetExtension);
@@ -155,19 +169,12 @@ public class AIOController extends AbstractTransformerController
         String transform = requestTransformName;
         if (transform == null || transform.isEmpty())
         {
-            if (logger.isDebugEnabled())
-            {
-                logger.debug("Using engine config to determine the transform name.");
-            }
             transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         }
         else if (logger.isDebugEnabled())
         {
-            logger.debug("Using transform name provided by the request.");
+            logger.debug("Using transform name provided in the request: " + requestTransformName);
         }
-
-        debugLogTransform("Performing transform with parameters: ", sourceMimetype, targetMimetype,
-                targetExtension, transformOptions);
         transformInternal(transform, sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
@@ -176,16 +183,6 @@ public class AIOController extends AbstractTransformerController
         time += LogEntry.addDelay(testDelay);
         getProbeTestTransform().recordTransformTime(time);
         return body;
-    }
-
-    private void debugLogTransform(final String message, final String sourceMimetype, final String targetMimetype,
-                                   final String targetExtension, final Map<String, String> transformOptions) {
-        if (logger.isDebugEnabled())
-        {
-            logger.debug(
-                "{} : sourceMimetype: '{}', targetMimetype: '{}', targetExtension: '{}', transformOptions: '{}'",
-                message, sourceMimetype, targetMimetype, targetExtension, transformOptions);
-        }
     }
 
     @Override
@@ -200,8 +197,8 @@ public class AIOController extends AbstractTransformerController
                                      final String sourceMimetype, final String targetMimetype,
                                      final Map<String, String> transformOptions)
     {
-        logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
-                " '{}', timeout {} ms", sourceFile, targetFile, transformOptions);
+        logger.debug("Processing transform with: transformName; '{}', sourceFile '{}', targetFile '{}', transformOptions" +
+                " {}", transformName, sourceFile, targetFile, transformOptions);
 
         Transformer transformer = transformRegistry.getByTransformName(transformName);
         if (transformer == null)
@@ -212,7 +209,7 @@ public class AIOController extends AbstractTransformerController
 
         if (logger.isDebugEnabled())
         {
-            logger.debug("Performing transform '{}' using {}", transformName, transformer.getTransformerId());
+            logger.debug("Performing transform with name '{}' using transformer with id '{}'.", transformName, transformer.getTransformerId());
         }
 
         try

@@ -24,11 +24,13 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer.transformers;
+package org.alfresco.transformer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.transform.client.model.config.TransformConfig;
-import org.alfresco.transformer.AIOTransformRegistry;
+import org.alfresco.transformer.transformers.MiscAdapter;
+import org.alfresco.transformer.transformers.TikaAdapter;
+import org.alfresco.transformer.transformers.Transformer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.Before;
@@ -41,6 +43,7 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
