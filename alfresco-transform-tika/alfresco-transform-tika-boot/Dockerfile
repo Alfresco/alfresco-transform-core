@@ -2,7 +2,7 @@
 
 # Tika is from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0.
 
-FROM alfresco/alfresco-base-java:11.0.1-openjdk-centos-7-72b88c6f1f4c
+FROM alfresco/alfresco-base-java:11.0.7-openjdk-centos-7-145f5d28c8ca
 
 ENV APACHE_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/Apache%202.0.txt
 ENV JAVA_OPTS=""
