@@ -205,7 +205,7 @@
         {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                                                                     "targetMediaType": "text/csv" },
         {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                                                                     "targetMediaType": "text/tab-separated-values" },
         {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                                                                     "targetMediaType": "application/vnd.ms-excel" },
-        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                     "maxSourceSizeBytes": 12582912,                 "targetMediaType": "application/pdf" },
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                     "maxSourceSizeBytes": 18874368,                 "targetMediaType": "application/pdf" },
 
         {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                                                                            "targetMediaType": "text/html" },
         {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                                                                            "targetMediaType": "application/vnd.oasis.opendocument.spreadsheet" },
@@ -213,7 +213,7 @@
         {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                                                                            "targetMediaType": "text/csv" },
         {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                                                                            "targetMediaType": "text/tab-separated-values" },
         {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                                                                            "targetMediaType": "application/vnd.ms-excel" },
-        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                            "maxSourceSizeBytes": 12582912,                 "targetMediaType": "application/pdf" },
+        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                            "maxSourceSizeBytes": 18874368,                 "targetMediaType": "application/pdf" },
 
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",                                                         "targetMediaType": "text/html" },
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",                                                         "targetMediaType": "application/vnd.oasis.opendocument.spreadsheet" },
