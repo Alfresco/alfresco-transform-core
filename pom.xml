@@ -18,7 +18,7 @@
         <java.version>11</java.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        
+
         <image.tag>latest</image.tag>
         <dependency.pdfbox.version>2.0.19</dependency.pdfbox.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.1</dependency.alfresco-jodconverter-core.version>
@@ -32,7 +32,7 @@
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
     </properties>
 
-    
+
     <profiles>
         <profile>
             <id>full-build</id>
@@ -344,8 +344,8 @@
                         <reuseForks>true</reuseForks>
                         <systemPropertyVariables>
                             <IMAGEMAGICK_EXE>/usr/bin/convert</IMAGEMAGICK_EXE>
-                            <IMAGEMAGICK_DYN>/usr/lib64/ImageMagick-7.0.7/lib</IMAGEMAGICK_DYN>
-                            <IMAGEMAGICK_ROOT>/usr/lib64/ImageMagick-7.0.7</IMAGEMAGICK_ROOT>
+                            <IMAGEMAGICK_DYN>/usr/lib64/ImageMagick-7.0.10/lib</IMAGEMAGICK_DYN>
+                            <IMAGEMAGICK_ROOT>/usr/lib64/ImageMagick-7.0.10</IMAGEMAGICK_ROOT>
                             <LIBREOFFICE_HOME>/opt/libreoffice6.3</LIBREOFFICE_HOME>
                             <PDF_RENDERER_EXE>/usr/bin/alfresco-pdf-renderer</PDF_RENDERER_EXE>
                             <buildDirectory>${project.build.directory}</buildDirectory>
