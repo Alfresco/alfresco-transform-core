@@ -471,6 +471,7 @@
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",           "priority": 55, "targetMediaType": "text/html"},
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",                           "targetMediaType": "text/plain"},
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",                           "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",                           "targetMediaType": ""},
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",                           "targetMediaType": "text/xml"},
 
         {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                                           "targetMediaType": "text/html"},
