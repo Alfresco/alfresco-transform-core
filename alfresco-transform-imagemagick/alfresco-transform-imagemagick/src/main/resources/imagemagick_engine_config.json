@@ -61,6 +61,7 @@
         {"sourceMediaType": "image/x-raw-hasselblad",                   "targetMediaType": "image/x-xbitmap" },
         {"sourceMediaType": "image/x-raw-hasselblad",                   "targetMediaType": "image/x-xpixmap" },
         {"sourceMediaType": "image/x-raw-hasselblad",                   "targetMediaType": "image/x-xwindowdump" },
+        {"sourceMediaType": "image/x-raw-hasselblad",  "priority": 100, "targetMediaType": "image/x-raw-hasselblad" },
 
         {"sourceMediaType": "image/x-raw-sony",                         "targetMediaType": "image/x-raw-hasselblad" },
         {"sourceMediaType": "image/x-raw-sony",         "priority": 55, "targetMediaType": "image/x-raw-sony" },
@@ -197,6 +198,7 @@
         {"sourceMediaType": "image/x-raw-canon",                        "targetMediaType": "image/x-xbitmap" },
         {"sourceMediaType": "image/x-raw-canon",                        "targetMediaType": "image/x-xpixmap" },
         {"sourceMediaType": "image/x-raw-canon",                        "targetMediaType": "image/x-xwindowdump" },
+        {"sourceMediaType": "image/x-raw-canon",       "priority": 100, "targetMediaType": "image/x-raw-canon" },
 
         {"sourceMediaType": "image/x-raw-adobe",                        "targetMediaType": "image/x-raw-hasselblad" },
         {"sourceMediaType": "image/x-raw-adobe",                        "targetMediaType": "image/x-raw-sony" },
