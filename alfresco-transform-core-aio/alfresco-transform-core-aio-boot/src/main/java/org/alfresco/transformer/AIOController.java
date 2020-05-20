@@ -71,14 +71,6 @@ public class AIOController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(AIOController.class);
 
-    // This property can be sent by acs repository's legacy transformers to force a transform,
-    // instead of letting this T-Engine determine it based on the request parameters.
-    // This allows clients to specify transform names as they appear in the engine config files, for example:
-    // imagemagick, libreoffice, PdfBox, TikaAuto, ....
-    // See ATS-731.
-    @Deprecated
-    private static final String TRANSFORM_NAME_PROPERTY = "transformName";
-
     @Autowired
     private  AIOTransformRegistry transformRegistry;
 
@@ -135,11 +127,7 @@ public class AIOController extends AbstractTransformerController
         @RequestParam(SOURCE_MIMETYPE) String sourceMimetype,
         @RequestParam(TARGET_MIMETYPE) String targetMimetype,
         @RequestParam Map<String, String> requestParameters,
-        @RequestParam (value = TEST_DELAY, required = false) Long testDelay,
-
-        // The TRANSFORM_NAME_PROPERTY param allows ACS legacy transformers to specify which transform to use,
-        // It can be removed once legacy transformers are removed from ACS.
-        @RequestParam (value = TRANSFORM_NAME_PROPERTY, required = false) String requestTransformName)
+        @RequestParam (value = TEST_DELAY, required = false) Long testDelay)
     {
         if (logger.isDebugEnabled())
         {
@@ -149,7 +137,7 @@ public class AIOController extends AbstractTransformerController
 
         //Remove all required parameters from request parameters to get the list of options
         List<String> optionsToFilter = Arrays.asList(SOURCE_EXTENSION, TARGET_EXTENSION, TARGET_MIMETYPE,
-                SOURCE_MIMETYPE, TEST_DELAY, TRANSFORM_NAME_PROPERTY);
+                SOURCE_MIMETYPE, TEST_DELAY);
         Map<String, String> transformOptions = new HashMap<>(requestParameters);
         transformOptions.keySet().removeAll(optionsToFilter);
         transformOptions.values().removeIf(v -> v.isEmpty());
@@ -164,17 +152,7 @@ public class AIOController extends AbstractTransformerController
         getProbeTestTransform().incrementTransformerCount();
         final File sourceFile = createSourceFile(request, sourceMultipartFile);
         final File targetFile = createTargetFile(request, targetFilename);
-
-        // Check if transformName was provided in the request (this can happen for ACS legacy transformers)
-        String transform = requestTransformName;
-        if (transform == null || transform.isEmpty())
-        {
-            transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
-        }
-        else if (logger.isDebugEnabled())
-        {
-            logger.debug("Using transform name provided in the request: " + requestTransformName);
-        }
+        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         transformInternal(transform, sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
