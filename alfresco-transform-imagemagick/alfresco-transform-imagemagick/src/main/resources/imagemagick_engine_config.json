@@ -1145,7 +1145,7 @@
         {"sourceMediaType": "image/vnd.adobe.photoshop",         "priority": 100, "targetMediaType": "image/jp2" },
         {"sourceMediaType": "image/vnd.adobe.photoshop",         "priority": 100, "targetMediaType": "image/ief" },
         {"sourceMediaType": "image/vnd.adobe.photoshop",         "priority": 100, "targetMediaType": "image/gif" },
-        {"sourceMediaType": "image/vnd.adobe.photoshop",         "priority": 100, "targetMediaType": "application/postscript" },
+        {"sourceMediaType": "image/vnd.adobe.photoshop",         "priority": 100, "targetMediaType": "application/eps" },
         {"sourceMediaType": "image/vnd.adobe.photoshop",         "priority": 100, "targetMediaType": "image/x-raw-adobe" },
         {"sourceMediaType": "image/vnd.adobe.photoshop",         "priority": 100, "targetMediaType": "image/x-raw-canon" },
         {"sourceMediaType": "image/vnd.adobe.photoshop",         "priority": 100, "targetMediaType": "image/cgm" },
