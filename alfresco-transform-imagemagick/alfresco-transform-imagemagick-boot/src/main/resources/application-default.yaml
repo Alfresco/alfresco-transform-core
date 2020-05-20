@@ -5,8 +5,8 @@ transform:
     config:
       location: classpath:imagemagick_engine_config.json
     imagemagick:
-      root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.0.7}
-      dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.0.7/lib}
+      root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.0.10}
+      dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.0.10/lib}
       exe: ${IMAGEMAGICK_EXE:/usr/bin/convert}
       coders: ${IMAGEMAGICK_CODERS:}
       config: ${IMAGEMAGICK_CONFIG:}
