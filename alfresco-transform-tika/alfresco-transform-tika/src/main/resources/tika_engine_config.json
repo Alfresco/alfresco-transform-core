@@ -46,6 +46,13 @@
         {"sourceMediaType": "application/vnd.ms-outlook",                                                                  "targetMediaType": "text/html"},
         {"sourceMediaType": "application/vnd.ms-outlook",                                                                  "targetMediaType": "text/plain"},
         {"sourceMediaType": "application/vnd.ms-outlook",                                                                  "targetMediaType": "application/xhtml+xml"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                 "priority": 450, "targetMediaType": "application/msword"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                 "priority": 450, "targetMediaType": "application/msword"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                 "priority": 450, "targetMediaType": "application/vnd.oasis.opendocument.text"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                 "priority": 450, "targetMediaType": "application/vnd.oasis.opendocument.text-template"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                 "priority": 450, "targetMediaType": "application/rtf"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                 "priority": 450, "targetMediaType": "application/vnd.sun.xml.writer.template"},
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                 "priority": 450, "targetMediaType": "application/vnd.sun.xml.writer"},
         {"sourceMediaType": "application/vnd.ms-outlook",                                                                  "targetMediaType": "text/xml"}
       ],
       "transformOptions": [
