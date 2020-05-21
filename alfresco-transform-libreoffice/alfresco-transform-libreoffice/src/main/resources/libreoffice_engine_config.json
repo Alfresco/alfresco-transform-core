@@ -69,6 +69,10 @@
         {"sourceMediaType": "application/vnd.oasis.opendocument.graphics",                                                                               "targetMediaType": "image/svg+xml" },
         {"sourceMediaType": "application/vnd.oasis.opendocument.graphics",                                                              "priority": 110, "targetMediaType": "application/vnd.visio" },
         {"sourceMediaType": "application/vnd.oasis.opendocument.graphics",                                                              "priority": 110, "targetMediaType": "application/vnd.visio2013" },
+        {"sourceMediaType": "application/vnd.oasis.opendocument.graphics",                                                              "priority": 150, "targetMediaType": "text/html" },
+        {"sourceMediaType": "application/vnd.oasis.opendocument.graphics",                                                              "priority": 150, "targetMediaType": "text/plain" },
+        {"sourceMediaType": "application/vnd.oasis.opendocument.graphics",                                                              "priority": 150, "targetMediaType": "application/xhtml+xml" },
+        {"sourceMediaType": "application/vnd.oasis.opendocument.graphics",                                                              "priority": 150, "targetMediaType": "text/xml" },
 
         {"sourceMediaType": "application/vnd.oasis.opendocument.presentation",                                                                           "targetMediaType": "text/html" },
         {"sourceMediaType": "application/vnd.oasis.opendocument.presentation",                                                                           "targetMediaType": "application/pdf" },
@@ -197,6 +201,9 @@
         {"sourceMediaType": "application/vnd.sun.xml.calc.template",                                                                                     "targetMediaType": "application/vnd.ms-excel" },
         {"sourceMediaType": "application/vnd.sun.xml.calc.template",                                                                                     "targetMediaType": "application/vnd.sun.xml.calc" },
         {"sourceMediaType": "application/vnd.sun.xml.calc.template",                                                                                     "targetMediaType": "application/pdf" },
+        {"sourceMediaType": "application/vnd.sun.xml.calc.template",                                                                    "priority": 150, "targetMediaType": "text/plain" },
+        {"sourceMediaType": "application/vnd.sun.xml.calc.template",                                                                    "priority": 150, "targetMediaType": "application/xhtml+xml" },
+        {"sourceMediaType": "application/vnd.sun.xml.calc.template",                                                                    "priority": 150, "targetMediaType": "text/xml" },
 
         {"sourceMediaType": "application/vnd.sun.xml.impress.template",                                                                                  "targetMediaType": "text/html" },
         {"sourceMediaType": "application/vnd.sun.xml.impress.template",                                                                                  "targetMediaType": "application/vnd.oasis.opendocument.presentation" },
@@ -204,7 +211,9 @@
         {"sourceMediaType": "application/vnd.sun.xml.impress.template",                                                                 "priority": 110, "targetMediaType": "application/vnd.sun.xml.impress" },
         {"sourceMediaType": "application/vnd.sun.xml.impress.template",                                                                 "priority": 110, "targetMediaType": "application/vnd.oasis.opendocument.presentation-template" },
         {"sourceMediaType": "application/vnd.sun.xml.impress.template",                                                                                  "targetMediaType": "application/vnd.ms-powerpoint" },
-
+        {"sourceMediaType": "application/vnd.sun.xml.impress.template",                                                                 "priority": 150, "targetMediaType": "text/plain" },
+        {"sourceMediaType": "application/vnd.sun.xml.impress.template",                                                                 "priority": 150, "targetMediaType": "application/xhtml+xml" },
+        {"sourceMediaType": "application/vnd.sun.xml.impress.template",                                                                 "priority": 150, "targetMediaType": "text/xml" },
 
         {"sourceMediaType": "application/vnd.sun.xml.writer.template",                                                                                   "targetMediaType": "application/msword" },
         {"sourceMediaType": "application/vnd.sun.xml.writer.template",                                                                                   "targetMediaType": "text/html" },
@@ -213,6 +222,9 @@
         {"sourceMediaType": "application/vnd.sun.xml.writer.template",                                                                  "priority": 110, "targetMediaType": "application/vnd.sun.xml.writer" },
         {"sourceMediaType": "application/vnd.sun.xml.writer.template",                                                                  "priority": 110, "targetMediaType": "application/vnd.oasis.opendocument.text-template" },
         {"sourceMediaType": "application/vnd.sun.xml.writer.template",                                                                                   "targetMediaType": "application/pdf" },
+        {"sourceMediaType": "application/vnd.sun.xml.writer.template",                                                                  "priority": 150, "targetMediaType": "text/plain" },
+        {"sourceMediaType": "application/vnd.sun.xml.writer.template",                                                                  "priority": 150, "targetMediaType": "application/xhtml+xml" },
+        {"sourceMediaType": "application/vnd.sun.xml.writer.template",                                                                  "priority": 150, "targetMediaType": "text/xml" },
 
         {"sourceMediaType": "application/vnd.sun.xml.calc",                                                                                              "targetMediaType": "text/html" },
         {"sourceMediaType": "application/vnd.sun.xml.calc",                                                                                              "targetMediaType": "application/vnd.oasis.opendocument.spreadsheet" },
@@ -222,6 +234,9 @@
         {"sourceMediaType": "application/vnd.sun.xml.calc",                                                                                              "targetMediaType": "application/vnd.ms-excel" },
         {"sourceMediaType": "application/vnd.sun.xml.calc",                                                                             "priority": 110, "targetMediaType": "application/vnd.sun.xml.calc.template" },
         {"sourceMediaType": "application/vnd.sun.xml.calc",                                                                                              "targetMediaType": "application/pdf" },
+        {"sourceMediaType": "application/vnd.sun.xml.calc",                                                                             "priority": 150, "targetMediaType": "text/plain" },
+        {"sourceMediaType": "application/vnd.sun.xml.calc",                                                                             "priority": 150, "targetMediaType": "application/xhtml+xml" },
+        {"sourceMediaType": "application/vnd.sun.xml.calc",                                                                             "priority": 150, "targetMediaType": "text/xml" },
 
         {"sourceMediaType": "application/vnd.sun.xml.impress",                                                                                           "targetMediaType": "text/html" },
         {"sourceMediaType": "application/vnd.sun.xml.impress",                                                                                           "targetMediaType": "application/vnd.oasis.opendocument.presentation" },
@@ -230,6 +245,9 @@
         {"sourceMediaType": "application/vnd.sun.xml.impress",                                                                          "priority": 110, "targetMediaType": "application/vnd.sun.xml.impress.template" },
         {"sourceMediaType": "application/vnd.sun.xml.impress",                                                                          "priority": 110, "targetMediaType": "application/vnd.oasis.opendocument.presentation-template" },
         {"sourceMediaType": "application/vnd.sun.xml.impress",                                                                                           "targetMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide" },
+        {"sourceMediaType": "application/vnd.sun.xml.impress",                                                                          "priority": 150, "targetMediaType": "text/plain" },
+        {"sourceMediaType": "application/vnd.sun.xml.impress",                                                                          "priority": 150, "targetMediaType": "application/xhtml+xml" },
+        {"sourceMediaType": "application/vnd.sun.xml.impress",                                                                          "priority": 150, "targetMediaType": "text/xml" },
 
         {"sourceMediaType": "application/vnd.sun.xml.writer",                                                                                            "targetMediaType": "application/msword" },
         {"sourceMediaType": "application/vnd.sun.xml.writer",                                                                                            "targetMediaType": "text/html" },
@@ -248,6 +266,8 @@
         {"sourceMediaType": "text/tab-separated-values",                                                                                "priority": 110, "targetMediaType": "application/vnd.sun.xml.calc" },
         {"sourceMediaType": "text/tab-separated-values",                                                                                "priority": 110, "targetMediaType": "application/vnd.sun.xml.calc.template" },
         {"sourceMediaType": "text/tab-separated-values",                                                                                                 "targetMediaType": "application/pdf" },
+        {"sourceMediaType": "text/tab-separated-values",                                                                                "priority": 150, "targetMediaType": "application/xhtml+xml" },
+        {"sourceMediaType": "text/tab-separated-values",                                                                                "priority": 150, "targetMediaType": "text/xml" },
 
         {"sourceMediaType": "text/plain",                                                                                                                "targetMediaType": "text/html" },
         {"sourceMediaType": "text/plain",                                                                                                                "targetMediaType": "application/vnd.oasis.opendocument.text" },
@@ -267,6 +287,10 @@
         {"sourceMediaType": "application/vnd.visio2013",                                                                                                 "targetMediaType": "image/svg+xml" },
         {"sourceMediaType": "application/vnd.visio2013",                                                                                "priority": 110, "targetMediaType": "application/vnd.visio" },
         {"sourceMediaType": "application/vnd.visio2013",                                                                                                 "targetMediaType": "application/vnd.oasis.opendocument.graphics" },
+        {"sourceMediaType": "application/vnd.visio2013",                                                                                "priority": 150, "targetMediaType": "text/html" },
+        {"sourceMediaType": "application/vnd.visio2013",                                                                                "priority": 150, "targetMediaType": "text/plain" },
+        {"sourceMediaType": "application/vnd.visio2013",                                                                                "priority": 150, "targetMediaType": "application/xhtml+xml" },
+        {"sourceMediaType": "application/vnd.visio2013",                                                                                "priority": 150, "targetMediaType": "text/xml" },
 
         {"sourceMediaType": "application/wordperfect",                                                                                                   "targetMediaType": "application/msword" },
         {"sourceMediaType": "application/wordperfect",                                                                                                   "targetMediaType": "text/html" },
@@ -275,6 +299,9 @@
         {"sourceMediaType": "application/wordperfect",                                                                                  "priority": 110, "targetMediaType": "application/vnd.sun.xml.writer" },
         {"sourceMediaType": "application/wordperfect",                                                                                  "priority": 110, "targetMediaType": "application/vnd.sun.xml.writer.template" },
         {"sourceMediaType": "application/wordperfect",                                                                                  "priority": 110, "targetMediaType": "application/vnd.oasis.opendocument.text-template" },
+        {"sourceMediaType": "application/wordperfect",                                                                                  "priority": 150, "targetMediaType": "text/plain" },
+        {"sourceMediaType": "application/wordperfect",                                                                                  "priority": 150, "targetMediaType": "application/xhtml+xml" },
+        {"sourceMediaType": "application/wordperfect",                                                                                  "priority": 150, "targetMediaType": "text/xml" },
         {"sourceMediaType": "application/wordperfect",                                                                                                   "targetMediaType": "application/pdf" },
 
         {"sourceMediaType": "application/vnd.ms-excel",                                                                                                  "targetMediaType": "text/html" },
