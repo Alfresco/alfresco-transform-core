@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -37,5 +37,10 @@ import org.alfresco.transform.exceptions.TransformException;
  */
 public interface JavaExecutor
 {
+    default void call(String sourceMimetype, String targetMimetype, File sourceFile, File targetFile, String... args) throws TransformException
+    {
+        call(sourceFile, targetFile, args);
+    }
+
     void call(File sourceFile, File targetFile, String... args) throws TransformException;
 }

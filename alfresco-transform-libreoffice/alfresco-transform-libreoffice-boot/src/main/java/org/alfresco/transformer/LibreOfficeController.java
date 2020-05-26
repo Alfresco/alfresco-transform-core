@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -120,6 +120,8 @@ public class LibreOfficeController extends AbstractTransformerController
     //todo: the "timeout" request parameter is ignored; the timeout is preset at JodConverter creation
     @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
+        @RequestParam("sourceMimetype") String sourceMimetype,
+        @RequestParam("targetMimetype") String targetMimetype,
         @RequestParam("file") MultipartFile sourceMultipartFile,
         @RequestParam("targetExtension") String targetExtension,
         @RequestParam(value = "timeout", required = false) Long timeout,
@@ -132,7 +134,7 @@ public class LibreOfficeController extends AbstractTransformerController
         File targetFile = createTargetFile(request, targetFilename);
         // Both files are deleted by TransformInterceptor.afterCompletion
 
-        javaExecutor.call(sourceFile, targetFile);
+        javaExecutor.call(sourceMimetype, targetMimetype, sourceFile, targetFile);
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());
@@ -150,6 +152,6 @@ public class LibreOfficeController extends AbstractTransformerController
         logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
                      " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
 
-        javaExecutor.call(sourceFile, targetFile);
+        javaExecutor.call(sourceMimetype, targetMimetype, sourceFile, targetFile);
     }
 }

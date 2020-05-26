@@ -26,12 +26,8 @@
  */
 package org.alfresco.transformer.executors;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-
-import java.io.File;
-import java.io.IOException;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.star.task.ErrorCodeIOException;
 import org.alfresco.transform.exceptions.TransformException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -42,7 +38,13 @@ import org.artofsolving.jodconverter.office.OfficeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.task.ErrorCodeIOException;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Map;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
  * JavaExecutor implementation for running LibreOffice transformations. It loads the
@@ -58,7 +60,9 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
 
     public static final String LICENCE = "This transformer uses LibreOffice from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt";
 
-    private JodConverter jodconverter;
+    private final JodConverter jodconverter;
+
+    private final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
     public LibreOfficeJavaExecutor(String path)
     {
@@ -76,7 +80,7 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
 
         final JodConverterSharedInstance jodconverter = new JodConverterSharedInstance();
 
-        jodconverter.setOfficeHome(LIBREOFFICE_HOME);         // jodconverter.officeHome
+        jodconverter.setOfficeHome(LIBREOFFICE_HOME);    // jodconverter.officeHome
         jodconverter.setMaxTasksPerProcess("200");       // jodconverter.maxTasksPerProcess
         jodconverter.setTaskExecutionTimeout(timeout);   // jodconverter.maxTaskExecutionTimeout
         jodconverter.setTaskQueueTimeout(timeout);       // jodconverter.taskQueueTimeout
@@ -87,6 +91,19 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
         jodconverter.afterPropertiesSet();
 
         return jodconverter;
+    }
+
+    @Override
+    public void call(String sourceMimetype, String targetMimetype, File sourceFile, File targetFile, String... args)
+    {
+        if (targetMimetype != null && targetMimetype.startsWith("alfresco-metadata-extractor/"))
+        {
+            extractMetadata(sourceFile, targetFile);
+        }
+        else
+        {
+            call(sourceFile, targetFile, args);
+        }
     }
 
     @Override
@@ -160,6 +177,33 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
         {
             throw new TransformException(INTERNAL_SERVER_ERROR.value(),
                 "Error creating empty PDF file", iox);
+        }
+    }
+
+    private void extractMetadata(File sourceFile, File targetFile)
+    {
+        OfficeManager officeManager = jodconverter.getOfficeManager();
+        LibreOfficeExtractMetadataTask extractMetadataTask = new LibreOfficeExtractMetadataTask(sourceFile);
+        officeManager.execute(extractMetadataTask);
+        Map<String, Serializable> metadata = extractMetadataTask.getMetadata();
+
+        if (logger.isDebugEnabled())
+        {
+            metadata.forEach((k,v) -> logger.debug(k+"="+v));
+        }
+
+        writeMetadataIntoTargetFile(targetFile, metadata);
+    }
+
+    private void writeMetadataIntoTargetFile(File targetFile, Map<String, Serializable> results)
+    {
+        try
+        {
+            jsonObjectMapper.writeValue(targetFile, results);
+        }
+        catch (IOException e)
+        {
+            logger.error("Failed to write metadata to targetFile", e);
         }
     }
 }

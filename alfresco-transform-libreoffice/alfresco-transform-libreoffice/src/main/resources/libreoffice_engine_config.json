@@ -26,6 +26,7 @@
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",                                                   "targetMediaType": "application/vnd.oasis.opendocument.text" },
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",                                                   "targetMediaType": "application/rtf" },
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",   "maxSourceSizeBytes": 15728640,                 "targetMediaType": "application/pdf" },
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",                                                   "targetMediaType": "alfresco-metadata-extractor/application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
 
         {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                                                                          "targetMediaType": "application/msword" },
         {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                                                                          "targetMediaType": "text/html" },

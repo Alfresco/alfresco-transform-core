@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -107,7 +107,7 @@ public final class ImageMagickOptionsBuilder
 
     public ImageMagickOptionsBuilder withAutoOrient(final Boolean autoOrient)
     {
-        this.autoOrient = autoOrient;
+        this.autoOrient = autoOrient == null ? true : autoOrient;
         return this;
     }
 
@@ -223,7 +223,7 @@ public final class ImageMagickOptionsBuilder
 
     public ImageMagickOptionsBuilder withAllowEnlargement(final Boolean allowEnlargement)
     {
-        this.allowEnlargement = allowEnlargement;
+        this.allowEnlargement = allowEnlargement == null ? true : allowEnlargement;
         return this;
     }
 
