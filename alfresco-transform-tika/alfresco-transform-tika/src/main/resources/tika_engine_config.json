@@ -354,6 +354,7 @@
         {"sourceMediaType": "application/vnd.apple.pages",                                                                 "targetMediaType": "text/html"},
         {"sourceMediaType": "application/vnd.apple.pages",                                                                 "targetMediaType": "application/xhtml+xml"},
         {"sourceMediaType": "application/vnd.apple.pages",                                                                 "targetMediaType": "text/xml"},
+        {"sourceMediaType": "application/vnd.apple.pages",                                                                 "targetMediaType": "text/plain"},
 
         {"sourceMediaType": "application/pdf",                                                             "priority": 55, "targetMediaType": "text/html"},
         {"sourceMediaType": "application/pdf",                             "maxSourceSizeBytes": 26214400, "priority": 55, "targetMediaType": "text/plain"},
