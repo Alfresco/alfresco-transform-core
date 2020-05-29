@@ -60,6 +60,9 @@ public class Application
         return registry -> registry.config().commonTags("containerName", containerName);
     }
 
+    // To run the LibreOffice T-Engine from the command line on a Mac, you generally need to
+    // install LibreOffice and add: -Dtransform.core.libreoffice.path=/Applications/LibreOffice.app/Contents/
+    // to the start up command.
     public static void main(String[] args)
     {
         SpringApplication.run(Application.class, args);

@@ -53,6 +53,8 @@ import static org.artofsolving.jodconverter.office.OfficeUtils.cast;
 import static org.artofsolving.jodconverter.office.OfficeUtils.toUrl;
 
 /**
+ * @deprecated The JodConverterMetadataExtracter has not been in use since 6.0.1
+ *
  * Extracts values from Open Office documents into the following:
  * <pre>
  *   <b>author:</b>                 --      cm:author
@@ -63,6 +65,7 @@ import static org.artofsolving.jodconverter.office.OfficeUtils.toUrl;
  * @author Neil McErlean
  * @author adavis
  */
+@Deprecated
 public class LibreOfficeExtractMetadataTask implements OfficeTask
 {
     /*

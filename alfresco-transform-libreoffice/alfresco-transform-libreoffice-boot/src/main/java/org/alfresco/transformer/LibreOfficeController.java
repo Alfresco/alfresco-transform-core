@@ -56,7 +56,6 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * Controller for the Docker based LibreOffice transformer.
  *
- *
  * Status Codes:
  *
  * 200 Success

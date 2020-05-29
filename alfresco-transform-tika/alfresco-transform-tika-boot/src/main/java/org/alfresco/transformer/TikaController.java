@@ -149,7 +149,7 @@ public class TikaController extends AbstractTransformerController
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype,
             transformOptions);
 
-        javaExecutor.call(sourceFile, targetFile, transform,
+        javaExecutor.call(sourceMimetype, targetMimetype, sourceFile, targetFile, transform,
             includeContents != null && includeContents ? INCLUDE_CONTENTS : null,
             notExtractBookmarksText != null && notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
             TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);
@@ -181,7 +181,7 @@ public class TikaController extends AbstractTransformerController
         final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype,
             transformOptions);
 
-        javaExecutor.call(sourceFile, targetFile, transform,
+        javaExecutor.call(sourceMimetype, targetMimetype, sourceFile, targetFile, transform,
             includeContents ? INCLUDE_CONTENTS : null,
             notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
             TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);

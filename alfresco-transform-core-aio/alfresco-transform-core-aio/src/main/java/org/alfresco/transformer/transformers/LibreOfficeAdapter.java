@@ -45,7 +45,7 @@ public class LibreOfficeAdapter implements Transformer
 	public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
             Map<String, String> transformOptions)
     {
-        javaExecutor.call(sourceFile, targetFile);
+        javaExecutor.call(sourceMimetype, targetMimetype, sourceFile, targetFile);
     }
 
     @Override

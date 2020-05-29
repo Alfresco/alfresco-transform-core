@@ -59,7 +59,7 @@ public class TikaAdapter implements Transformer
                 transformOptions.getOrDefault("notExtractBookmarksText", "false"));
         final String targetEncoding = transformOptions.getOrDefault("targetEncoding", "UTF-8");
 
-        tikaJavaExecutor.call(sourceFile, targetFile, transform,
+        tikaJavaExecutor.call(sourceMimetype, targetMimetype, sourceFile, targetFile, transform,
                 includeContents ? INCLUDE_CONTENTS : null,
                 notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
                 TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);

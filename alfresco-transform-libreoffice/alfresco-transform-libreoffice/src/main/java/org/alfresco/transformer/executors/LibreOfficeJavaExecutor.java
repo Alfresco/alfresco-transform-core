@@ -180,11 +180,23 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
         }
     }
 
+    /**
+     * @deprecated The JodConverterMetadataExtracter has not been in use since 6.0.1
+     */
     private void extractMetadata(File sourceFile, File targetFile)
     {
         OfficeManager officeManager = jodconverter.getOfficeManager();
         LibreOfficeExtractMetadataTask extractMetadataTask = new LibreOfficeExtractMetadataTask(sourceFile);
-        officeManager.execute(extractMetadataTask);
+        try
+        {
+            officeManager.execute(extractMetadataTask);
+        }
+        catch (OfficeException e)
+        {
+            throw new TransformException(BAD_REQUEST.value(),
+                    "LibreOffice metadata extract failed: \n" +
+                            "   from file: " + sourceFile, e);
+        }
         Map<String, Serializable> metadata = extractMetadataTask.getMetadata();
 
         if (logger.isDebugEnabled())
