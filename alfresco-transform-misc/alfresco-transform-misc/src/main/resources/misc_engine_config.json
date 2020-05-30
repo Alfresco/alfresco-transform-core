@@ -1,15 +1,10 @@
 {
   "transformOptions": {
     "textToPdfOptions": [
-      {"value": {"name": "pageLimit"}},
-      {"value": {"name": "sourceEncoding"}}
+      {"value": {"name": "pageLimit"}}
     ],
     "stringOptions": [
-      {"value": {"name": "sourceEncoding"}},
-      {"value": {"name": "targetEncoding"}}
-    ],
-    "htmlOptions": [
-      {"value": {"name": "sourceEncoding"}}
+       {"value": {"name": "targetEncoding"}}
     ]
   },
   "transformers": [
@@ -19,8 +14,7 @@
         {"sourceMediaType": "text/html",                                     "targetMediaType": "text/plain"}
       ],
       "transformOptions": [
-        "htmlOptions"
-      ]
+       ]
     },
     {
       "transformerName": "string",
