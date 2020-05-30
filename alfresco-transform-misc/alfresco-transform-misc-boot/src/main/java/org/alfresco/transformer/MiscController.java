@@ -132,10 +132,6 @@ public class MiscController extends AbstractTransformerController
                 pageLimit);
         }
 
-        // HACK TODO rm
-        sourceEncoding = sourceEncoding == null || sourceEncoding.isBlank() ? null : sourceEncoding;
-        targetEncoding = targetEncoding == null || targetEncoding.isBlank() ? null : targetEncoding;
-
         final String targetFilename = createTargetFileName(
             sourceMultipartFile.getOriginalFilename(), targetExtension);
         getProbeTestTransform().incrementTransformerCount();

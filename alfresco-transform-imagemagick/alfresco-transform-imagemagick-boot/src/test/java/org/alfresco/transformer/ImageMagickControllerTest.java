@@ -228,7 +228,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     {
         for (String value : new String[]{"North", "NorthEast", "East", "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center"})
         {
-            expectedOptions = "-gravity " + value + " +repage";
+            expectedOptions = "auto-orient" + "-gravity " + value + " +repage";
             mockMvc
                 .perform(MockMvcRequestBuilders
                     .multipart("/transform")
@@ -338,7 +338,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     public void deprecatedCommandOptionsTest() throws Exception
     {
         // Example of why the commandOptions parameter is a bad idea.
-        expectedOptions = "( horrible command / ); -resize 321x654>";
+        expectedOptions = "( horrible command / ); -auto-orient -resize 321x654>";
         mockMvc
             .perform(MockMvcRequestBuilders
                 .multipart("/transform")

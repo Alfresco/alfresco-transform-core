@@ -118,7 +118,9 @@ public class HtmlMetadataExecutor extends AbstractMetadataExtractor implements S
                     title = new StringBuffer();
                 }
                 else
+                {
                     handleSimpleTag(t, a, pos);
+                }
             }
 
             public void handleEndTag(HTML.Tag t, int pos)
@@ -141,8 +143,9 @@ public class HtmlMetadataExecutor extends AbstractMetadataExtractor implements S
                     Object nameO = a.getAttribute(HTML.Attribute.NAME);
                     Object valueO = a.getAttribute(HTML.Attribute.CONTENT);
                     if (nameO == null || valueO == null)
+                    {
                         return;
-
+                    }
                     String name = nameO.toString();
 
                     if (name.equalsIgnoreCase("creator") || name.equalsIgnoreCase("author")
@@ -202,7 +205,6 @@ public class HtmlMetadataExecutor extends AbstractMetadataExtractor implements S
         {
             new IllegalArgumentException("Failed to extract metadata. "+e.getMessage());
         }
-        // Done
         return rawProperties;
     }
 }
