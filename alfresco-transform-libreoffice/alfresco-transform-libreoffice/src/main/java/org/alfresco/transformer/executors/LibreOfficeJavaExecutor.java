@@ -189,6 +189,7 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
         LibreOfficeExtractMetadataTask extractMetadataTask = new LibreOfficeExtractMetadataTask(sourceFile);
         try
         {
+            // TODO The following call fails. Not debugged why as it appears this code is not used any more.
             officeManager.execute(extractMetadataTask);
         }
         catch (OfficeException e)

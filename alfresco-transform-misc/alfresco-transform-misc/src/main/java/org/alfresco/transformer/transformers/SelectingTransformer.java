@@ -59,6 +59,7 @@ public class SelectingTransformer
         .<String, SelectableTransformer>builder()
         .put("appleIWorks", new AppleIWorksContentTransformer())
         .put("html", new HtmlParserContentTransformer())
+        .put("htmlMetadata", new HtmlMetadataExecutor())
         .put("string", new StringExtractingContentTransformer())
         .put("textToPdf", new TextToPdfContentTransformer())
         .put("rfc822", new EMLTransformer())

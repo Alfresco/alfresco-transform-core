@@ -75,6 +75,15 @@
       ],
       "transformOptions": [
       ]
+    },
+    {
+      "transformerName": "htmlMetadata",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "text/html",                                     "targetMediaType": "alfresco-metadata-extractor/text/html"},
+        {"sourceMediaType": "application/xhtml+xml",                         "targetMediaType": "alfresco-metadata-extractor/application/xhtml+xml"}
+      ],
+      "transformOptions": [
+      ]
     }
   ]
 }
