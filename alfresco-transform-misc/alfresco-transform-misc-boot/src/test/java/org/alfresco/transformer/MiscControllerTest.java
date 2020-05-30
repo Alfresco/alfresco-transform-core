@@ -149,6 +149,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             "txt",
             MIMETYPE_TEXT_PLAIN,
             null,
+            null,
             readTestFile("eml"));
         assertTrue("Content from eml transform didn't contain expected value. ",
             result.getResponse().getContentAsString().contains(expected));
@@ -166,6 +167,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_RFC822,
             "txt",
             MIMETYPE_TEXT_PLAIN,
+            null,
             null,
             readTestFile("spanish.eml"));
 
@@ -188,6 +190,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             "txt",
             MIMETYPE_TEXT_PLAIN,
             null,
+            null,
             readTestFile("attachment.eml"));
         assertTrue("Content from eml transform didn't contain expected value. ",
             result.getResponse().getContentAsString().contains(expected));
@@ -207,6 +210,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             "txt",
             MIMETYPE_TEXT_PLAIN,
             null,
+            null,
             readTestFile("alternative.eml"));
         assertTrue("Content from eml transform didn't contain expected value. ",
             result.getResponse().getContentAsString().contains(expected));
@@ -225,6 +229,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             "txt",
             MIMETYPE_TEXT_PLAIN,
             null,
+            null,
             readTestFile("nested.alternative.eml"));
         assertTrue("Content from eml transform didn't contain expected value. ",
             result.getResponse().getContentAsString().contains(expected));
@@ -242,6 +247,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_RFC822,
             "txt",
             MIMETYPE_TEXT_PLAIN,
+            null,
             null,
             readTestFile("htmlChars.eml"));
         assertFalse(result.getResponse().getContentAsString().contains(expected));
@@ -267,6 +273,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_HTML,
             "txt",
             MIMETYPE_TEXT_PLAIN,
+            null,
             null,
             expected.getBytes());
 
@@ -296,6 +303,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             "txt",
             MIMETYPE_TEXT_PLAIN,
             "UTF-8",
+            null,
             content);
 
         String contentResult = new String(result.getResponse().getContentAsByteArray(),
@@ -315,6 +323,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             "txt",
             MIMETYPE_TEXT_PLAIN,
             "UTF-8",
+            null,
             content);
 
         assertEquals("Returned content should be empty for an empty source file", 0,
@@ -339,6 +348,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             "pdf",
             MIMETYPE_PDF,
             null,
+            "1",
             expected.getBytes());
 
         // Read back in the PDF and check it
@@ -358,7 +368,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     public void testAppleIWorksPages() throws Exception
     {
         MvcResult result = sendRequest("numbers", null, MIMETYPE_IWORK_NUMBERS,
-            "jpeg", MIMETYPE_IMAGE_JPEG, null, readTestFile("pages"));
+            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, readTestFile("pages"));
         assertTrue("Expected image content but content is empty.",
             result.getResponse().getContentLengthLong() > 0L);
     }
@@ -367,7 +377,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     public void testAppleIWorksNumbers() throws Exception
     {
         MvcResult result = sendRequest("numbers", null, MIMETYPE_IWORK_NUMBERS,
-            "jpeg", MIMETYPE_IMAGE_JPEG, null, readTestFile("numbers"));
+            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, readTestFile("numbers"));
         assertTrue("Expected image content but content is empty.",
             result.getResponse().getContentLengthLong() > 0L);
     }
@@ -376,7 +386,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     public void testAppleIWorksKey() throws Exception
     {
         MvcResult result = sendRequest("key", null, MIMETYPE_IWORK_KEYNOTE,
-            "jpeg", MIMETYPE_IMAGE_JPEG, null, readTestFile("key"));
+            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, readTestFile("key"));
         assertTrue("Expected image content but content is empty.",
             result.getResponse().getContentLengthLong() > 0L);
     }
@@ -386,7 +396,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     public void testOOXML() throws Exception
     {
         MvcResult result = sendRequest("docx", null, MIMETYPE_OPENXML_WORDPROCESSING,
-            "jpeg", MIMETYPE_IMAGE_JPEG, null, readTestFile("docx"));
+            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, readTestFile("docx"));
         assertTrue("Expected image content but content is empty.",
             result.getResponse().getContentLengthLong() > 0L);
     }
@@ -397,6 +407,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         String targetExtension,
         String targetMimetype,
         String targetEncoding,
+        String pageLimit,
         byte[] content) throws Exception
     {
         final MockMultipartFile sourceFile = new MockMultipartFile("file",
@@ -408,6 +419,8 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             .param("targetMimetype", targetMimetype)
             .param("sourceMimetype", sourceMimetype);
 
+        // SourceEncoding is available in the options but is not used to select the transformer as it is a known
+        // like the source mimetype.
         if (sourceEncoding != null)
         {
             requestBuilder.param("sourceEncoding", sourceEncoding);
@@ -415,6 +428,10 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         if (targetEncoding != null)
         {
             requestBuilder.param("targetEncoding", targetEncoding);
+        }
+        if (pageLimit != null)
+        {
+            requestBuilder.param("pageLimit", pageLimit);
         }
 
         return mockMvc.perform(requestBuilder)
