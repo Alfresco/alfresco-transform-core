@@ -119,8 +119,8 @@ public class LibreOfficeController extends AbstractTransformerController
     //todo: the "timeout" request parameter is ignored; the timeout is preset at JodConverter creation
     @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
-        @RequestParam("sourceMimetype") String sourceMimetype,
-        @RequestParam("targetMimetype") String targetMimetype,
+        @RequestParam(value = "sourceMimetype", required = false) String sourceMimetype,
+        @RequestParam(value = "targetMimetype", required = false) String targetMimetype,
         @RequestParam("file") MultipartFile sourceMultipartFile,
         @RequestParam("targetExtension") String targetExtension,
         @RequestParam(value = "timeout", required = false) Long timeout,
