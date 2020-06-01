@@ -29,6 +29,8 @@ package org.alfresco.transformer.transformers;
 import java.io.File;
 import java.util.Map;
 
+import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
+
 public class MiscAdapter implements Transformer
 {
     private static final String ID = "misc";

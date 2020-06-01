@@ -28,6 +28,8 @@ package org.alfresco.transformer.util;
 
 public interface RequestParamMap 
 {
+    String TRANSFORM_NAME_PARAMETER = "alfresco.transform-name-parameter";
+
     String SOURCE_ENCODING          = "sourceEncoding";
     String SOURCE_EXTENSION         = "sourceExtension";
     String SOURCE_MIMETYPE          = "sourceMimetype";

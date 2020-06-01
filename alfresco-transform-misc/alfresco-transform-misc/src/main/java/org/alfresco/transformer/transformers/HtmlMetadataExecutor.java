@@ -57,7 +57,7 @@ import java.util.Map;
  * search for the variant names ourselves as tika puts them
  * in as-is.
  *
- * Based on HtmlMetadataExtracter in the content repository.
+ * Based on HtmlMetadataExtracter from the content repository.
  *
  * @author Jesper Steen Møller
  * @author Derek Hulley

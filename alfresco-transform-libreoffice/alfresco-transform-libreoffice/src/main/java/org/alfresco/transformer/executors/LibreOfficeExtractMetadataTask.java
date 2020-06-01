@@ -111,6 +111,7 @@ public class LibreOfficeExtractMetadataTask implements OfficeTask
 
             try
             {
+                // TODO The following call fails. Not debugged why as it appears this extractor is not used any more.
                 document = loader.loadComponentFromURL(toUrl(inputFile), "_blank", 0,
                         new PropertyValue[]{hiddenOOo, readOnly});
             }

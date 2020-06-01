@@ -34,6 +34,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -44,7 +45,6 @@ import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -133,7 +133,8 @@ public class LibreOfficeController extends AbstractTransformerController
         File targetFile = createTargetFile(request, targetFilename);
         // Both files are deleted by TransformInterceptor.afterCompletion
 
-        javaExecutor.call(sourceMimetype, targetMimetype, sourceFile, targetFile);
+        final Map<String, String> transformOptions = Collections.emptyMap();
+        transformInternal(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());
@@ -151,6 +152,12 @@ public class LibreOfficeController extends AbstractTransformerController
         logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
                      " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
 
-        javaExecutor.call(sourceMimetype, targetMimetype, sourceFile, targetFile);
+        transformInternal(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+    }
+
+    private void transformInternal(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                                   File sourceFile, File targetFile)
+    {
+        javaExecutor.transformExtractOrEmbed(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }

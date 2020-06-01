@@ -43,7 +43,6 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +50,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.alfresco.transformer.transformers.TextToPdfContentTransformer.PAGE_LIMIT;
-import static org.alfresco.transformer.transformers.Transformer.TRANSFORM_NAME_PARAMETER;
+import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 import static org.junit.Assert.*;
 
 public class AIOTransformRegistryTest
@@ -59,7 +58,6 @@ public class AIOTransformRegistryTest
     private static final String SOURCE_MIMETYPE = "text/html";
     private static final String TARGET_MIMETYPE = "text/plain";
     String SOURCE_ENCODING = "sourceEncoding";
-    String TARGET_ENCODING = "targetEncoding";
 
     AIOTransformRegistry aioTransformerRegistry = new AIOTransformRegistry();
     ObjectMapper objectMapper = new ObjectMapper();

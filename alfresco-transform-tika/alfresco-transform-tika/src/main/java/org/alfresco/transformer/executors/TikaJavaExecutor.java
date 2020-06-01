@@ -26,12 +26,19 @@
  */
 package org.alfresco.transformer.executors;
 
+import static java.lang.Boolean.parseBoolean;
+import static org.alfresco.transformer.executors.Tika.INCLUDE_CONTENTS;
+import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
+import static org.alfresco.transformer.executors.Tika.TARGET_ENCODING;
+import static org.alfresco.transformer.executors.Tika.TARGET_MIMETYPE;
+import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import org.alfresco.transform.exceptions.TransformException;
@@ -59,6 +66,23 @@ public class TikaJavaExecutor implements JavaExecutor
         {
             throw new RuntimeException("Unable to instantiate Tika:  " + e.getMessage());
         }
+    }
+
+    @Override
+    public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                          File sourceFile, File targetFile)
+    {
+        final String transformName = transformOptions.get(TRANSFORM_NAME_PARAMETER);
+        final boolean includeContents = parseBoolean(
+                transformOptions.getOrDefault("includeContents", "false"));
+        final boolean notExtractBookmarksText = parseBoolean(
+                transformOptions.getOrDefault("notExtractBookmarksText", "false"));
+        final String targetEncoding = transformOptions.getOrDefault("targetEncoding", "UTF-8");
+
+        call(sourceFile, targetFile, transformName,
+                includeContents ? INCLUDE_CONTENTS : null,
+                notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
+                TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);
     }
 
     @Override
@@ -126,5 +150,17 @@ public class TikaJavaExecutor implements JavaExecutor
             sj.add(ext);
             methodArgs.add(path);
         }
+    }
+
+    public void extractMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                                File sourceFile, File targetFile)
+    {
+        // TODO
+    }
+
+    public void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                              File sourceFile, File targetFile)
+    {
+        // TODO
     }
 }

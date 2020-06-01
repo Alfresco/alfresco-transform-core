@@ -26,9 +26,6 @@
  */
 package org.alfresco.transformer;
 
-import static java.lang.Boolean.parseBoolean;
-import static org.alfresco.transformer.executors.Tika.INCLUDE_CONTENTS;
-import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
 import static org.alfresco.transformer.executors.Tika.PDF_BOX;
 import static org.alfresco.transformer.executors.Tika.TARGET_ENCODING;
 import static org.alfresco.transformer.executors.Tika.TARGET_MIMETYPE;
@@ -37,6 +34,7 @@ import static org.alfresco.transformer.fs.FileManager.createSourceFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -50,7 +48,6 @@ import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -146,13 +143,7 @@ public class TikaController extends AbstractTransformerController
             "notExtractBookmarksText", notExtractBookmarksText,
             "targetEncoding", targetEncoding);
 
-        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype,
-            transformOptions);
-
-        javaExecutor.call(sourceMimetype, targetMimetype, sourceFile, targetFile, transform,
-            includeContents != null && includeContents ? INCLUDE_CONTENTS : null,
-            notExtractBookmarksText != null && notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
-            TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);
+        transformInternal(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
 
@@ -172,18 +163,14 @@ public class TikaController extends AbstractTransformerController
         logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
                      " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
 
-        final boolean includeContents = parseBoolean(
-            transformOptions.getOrDefault("includeContents", "false"));
-        final boolean notExtractBookmarksText = parseBoolean(
-            transformOptions.getOrDefault("notExtractBookmarksText", "false"));
-        final String targetEncoding = transformOptions.getOrDefault("targetEncoding", "UTF-8");
+        transformInternal(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+    }
 
-        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype,
-            transformOptions);
-
-        javaExecutor.call(sourceMimetype, targetMimetype, sourceFile, targetFile, transform,
-            includeContents ? INCLUDE_CONTENTS : null,
-            notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
-            TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);
+    protected void transformInternal(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                                     File sourceFile, File targetFile)
+    {
+        final String transformName = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
+        transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
+        javaExecutor.transformExtractOrEmbed(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }

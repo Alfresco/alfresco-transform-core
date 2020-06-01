@@ -51,18 +51,7 @@ public class TikaAdapter implements Transformer
     public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
                           Map<String, String> transformOptions) throws Exception
     {
-        final String transform = transformOptions.get(TRANSFORM_NAME_PARAMETER);
-
-        final boolean includeContents = parseBoolean(
-                transformOptions.getOrDefault("includeContents", "false"));
-        final boolean notExtractBookmarksText = parseBoolean(
-                transformOptions.getOrDefault("notExtractBookmarksText", "false"));
-        final String targetEncoding = transformOptions.getOrDefault("targetEncoding", "UTF-8");
-
-        tikaJavaExecutor.call(sourceMimetype, targetMimetype, sourceFile, targetFile, transform,
-                includeContents ? INCLUDE_CONTENTS : null,
-                notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
-                TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);
+        tikaJavaExecutor.transformExtractOrEmbed(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 
     @Override

@@ -38,6 +38,7 @@ import static org.alfresco.transformer.util.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transformer.util.RequestParamMap.TARGET_EXTENSION;
 import static org.alfresco.transformer.util.RequestParamMap.TARGET_MIMETYPE;
 import static org.alfresco.transformer.util.RequestParamMap.TEST_DELAY;
+import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
@@ -214,9 +215,8 @@ public class AIOController extends AbstractTransformerController
 
         try
         {
-            Map<String, String> optionsWithTransformName = new HashMap<>(transformOptions);
-            optionsWithTransformName.put(Transformer.TRANSFORM_NAME_PARAMETER, transformName);
-            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, optionsWithTransformName);
+            transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
+            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
 
         }
         catch (TransformException e)

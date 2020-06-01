@@ -94,16 +94,10 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
     }
 
     @Override
-    public void call(String sourceMimetype, String targetMimetype, File sourceFile, File targetFile, String... args)
+    public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                          File sourceFile, File targetFile)
     {
-        if (targetMimetype != null && targetMimetype.startsWith("alfresco-metadata-extractor/"))
-        {
-            extractMetadata(sourceFile, targetFile);
-        }
-        else
-        {
-            call(sourceFile, targetFile, args);
-        }
+        call(sourceFile, targetFile);
     }
 
     @Override
@@ -164,7 +158,7 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
 
         PDPage pdfPage = new PDPage();
         try (PDDocument pdfDoc = new PDDocument();
-             PDPageContentStream contentStream = new PDPageContentStream(pdfDoc, pdfPage))
+             PDPageContentStream ignore = new PDPageContentStream(pdfDoc, pdfPage))
         {
             // Even though, we want an empty PDF, some libs (e.g. PDFRenderer) object to PDFs
             // that have literally nothing in them. So we'll put a content stream in it.
@@ -183,13 +177,14 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
     /**
      * @deprecated The JodConverterMetadataExtracter has not been in use since 6.0.1
      */
-    private void extractMetadata(File sourceFile, File targetFile)
+    @Override
+    public void extractMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                                File sourceFile, File targetFile)
     {
         OfficeManager officeManager = jodconverter.getOfficeManager();
         LibreOfficeExtractMetadataTask extractMetadataTask = new LibreOfficeExtractMetadataTask(sourceFile);
         try
         {
-            // TODO The following call fails. Not debugged why as it appears this code is not used any more.
             officeManager.execute(extractMetadataTask);
         }
         catch (OfficeException e)
