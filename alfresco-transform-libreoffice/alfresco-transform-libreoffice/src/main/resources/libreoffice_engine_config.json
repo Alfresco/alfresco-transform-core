@@ -223,6 +223,20 @@
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",                                                         "targetMediaType": "application/vnd.ms-excel" },
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",         "maxSourceSizeBytes": 12582912,                 "targetMediaType": "application/pdf" },
 
+        {"sourceMediaType": "text/xml",                                                                                                 "priority": 110, "targetMediaType": "application/pdf" },
+
+        {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                                                        "priority": 110, "targetMediaType": "application/pdf" },
+
+        {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12",                                                           "priority": 110, "targetMediaType": "application/pdf" },
+
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",                                   "priority": 110, "targetMediaType": "application/pdf" },
+
+        {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12",                                                  "priority": 110, "targetMediaType": "application/pdf" },
+
+        {"sourceMediaType": "application/vnd.ms-outlook",                                                                               "priority": 110, "targetMediaType": "application/pdf" },
+
+        {"sourceMediaType": "application/dita+xml",                                                                                     "priority": 110, "targetMediaType": "application/pdf" },
+
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                                      "targetMediaType": "text/html" },
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                                      "targetMediaType": "application/vnd.oasis.opendocument.spreadsheet" },
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                                      "targetMediaType": "application/vnd.oasis.opendocument.spreadsheet-template" },

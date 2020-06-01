@@ -381,7 +381,7 @@ public abstract class AbstractTransformerControllerTest
     public void testGetTransformConfigInfo() throws Exception
     {
         TransformConfig expectedTransformConfig = objectMapper
-            .readValue(new ClassPathResource(getEngineConfigName()).getFile(),
+            .readValue(getTestFile(getEngineConfigName(), true),
                 TransformConfig.class);
 
         ReflectionTestUtils.setField(transformRegistry, "engineConfig",
