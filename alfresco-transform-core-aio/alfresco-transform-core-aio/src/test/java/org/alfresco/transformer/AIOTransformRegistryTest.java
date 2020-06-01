@@ -98,7 +98,7 @@ public class AIOTransformRegistryTest
                 "Archive", "OutlookMsg", "PdfBox", "Office", "Poi", "OOXML", "TikaAuto", "TextMining");
 
         List<String> expectedTransformOptionNames = Arrays.asList("tikaOptions", "archiveOptions", "pdfboxOptions",
-                "textToPdfOptions", "stringOptions", "htmlOptions");
+                "textToPdfOptions", "stringOptions");
 
         TransformConfig miscConfig = loadConfig("misc_engine_config.json");
         TransformConfig tikaConfig = loadConfig("tika_engine_config.json");

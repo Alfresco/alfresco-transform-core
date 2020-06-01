@@ -33,6 +33,7 @@ import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.fs.FileManager.deleteFile;
 import static org.alfresco.transformer.fs.FileManager.getFilenameFromContentDisposition;
 import static org.alfresco.transformer.fs.FileManager.save;
+import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -341,15 +342,29 @@ public abstract class AbstractTransformerController implements TransformControll
     protected String getTransformerName(final File sourceFile, final String sourceMimetype,
         final String targetMimetype, final Map<String, String> transformOptions)
     {
-        final long sourceSizeInBytes = sourceFile.length();
-        final String transformerName = transformRegistry.findTransformerName(sourceMimetype,
-            sourceSizeInBytes, targetMimetype, transformOptions, null);
-        if (transformerName == null)
+        // The transformOptions always contains sourceEncoding when sent to a T-Engine, even though it should not be
+        // used to select a transformer. Similar to source and target mimetypes and extensions, but these are not
+        // passed in transformOptions.
+        String sourceEncoding = transformOptions.remove(SOURCE_ENCODING);
+        try
         {
-            throw new TransformException(BAD_REQUEST.value(),
-                "No transforms were able to handle the request");
+            final long sourceSizeInBytes = sourceFile.length();
+            final String transformerName = transformRegistry.findTransformerName(sourceMimetype,
+                    sourceSizeInBytes, targetMimetype, transformOptions, null);
+            if (transformerName == null)
+            {
+                throw new TransformException(BAD_REQUEST.value(),
+                        "No transforms were able to handle the request");
+            }
+            return transformerName;
         }
-        return transformerName;
+        finally
+        {
+            if (sourceEncoding != null)
+            {
+                transformOptions.put(SOURCE_ENCODING, sourceEncoding);
+            }
+        }
     }
 
     protected Map<String, String> createTransformOptions(Object... namesAndValues)
@@ -365,7 +380,7 @@ public abstract class AbstractTransformerController implements TransformControll
         {
             String name = namesAndValues[i].toString();
             Object value = namesAndValues[i + 1];
-            if (value != null)
+            if (value != null && (!(value instanceof String) || !((String)value).isBlank()))
             {
                 transformOptions.put(name, value.toString());
             }
