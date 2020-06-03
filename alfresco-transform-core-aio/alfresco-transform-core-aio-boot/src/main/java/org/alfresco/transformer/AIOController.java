@@ -172,9 +172,9 @@ public class AIOController extends AbstractTransformerController
         {
             transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
         }
-        else if (logger.isDebugEnabled())
+        else if (logger.isInfoEnabled())
         {
-            logger.debug("Using transform name provided in the request: " + requestTransformName);
+            logger.info("Using transform name provided in the request: " + requestTransformName);
         }
         transformInternal(transform, sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
 

@@ -34,7 +34,6 @@ import static org.alfresco.transformer.fs.FileManager.deleteFile;
 import static org.alfresco.transformer.fs.FileManager.getFilenameFromContentDisposition;
 import static org.alfresco.transformer.fs.FileManager.save;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
-import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;

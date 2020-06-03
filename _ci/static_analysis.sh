@@ -12,11 +12,6 @@ java -jar vosp-api-wrappers-java-$VERACODE_WRAPPER_VERSION.jar -vid $VERACODE_AP
      -vkey $VERACODE_API_KEY -action uploadandscan -appname "Transform Service" \
      ${RUN_IN_SANDBOX} -createprofile false \
      -filepath \
-     alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer-boot/target/alfresco-transform-pdf-renderer-*.jar \
-     alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot/target/alfresco-transform-imagemagick-boot-*.jar \
-     alfresco-transform-libreoffice/alfresco-transform-libreoffice-boot/target/alfresco-transform-libreoffice-boot-*.jar \
-     alfresco-transform-tika/alfresco-transform-tika-boot/target/alfresco-transform-tika-boot-*.jar \
-     alfresco-transform-misc/alfresco-transform-misc-boot/target/alfresco-transform-misc-boot*.jar \
      alfresco-transform-core-aio/alfresco-transform-core-aio-boot/target/alfresco-transform-core-aio-boot*.jar \
      -version "$TRAVIS_JOB_ID - $TRAVIS_JOB_NUMBER" -scantimeout 3600
 
