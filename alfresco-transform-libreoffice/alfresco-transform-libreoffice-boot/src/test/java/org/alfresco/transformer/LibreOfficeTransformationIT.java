@@ -51,6 +51,13 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VISIO;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VISIO_2013;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORD;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORDPERFECT;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET_ADDIN_MACRO;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OUTLOOK_MSG;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_DITA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.springframework.http.HttpStatus.OK;
@@ -113,23 +120,30 @@ public class LibreOfficeTransformationIT
     private final String targetMimetype;
 
     private static final Map<String,TestFileInfo> TEST_FILES = Stream.of(
-        testFile(MIMETYPE_WORD                      ,"doc"  ,"quick.doc"), 
-        testFile(MIMETYPE_OPENXML_WORDPROCESSING    ,"docx" ,"quick.docx"),
-        testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS     ,"odg"  ,"quick.odg"), 
-        testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION ,"odp"  ,"quick.odp"), 
-        testFile(MIMETYPE_OPENDOCUMENT_SPREADSHEET  ,"ods"  ,"quick.ods"), 
-        testFile(MIMETYPE_OPENDOCUMENT_TEXT         ,"odt"  ,"quick.odt"), 
-        testFile(MIMETYPE_PPT                       ,"ppt"  ,"quick.ppt"), 
-        testFile(MIMETYPE_OPENXML_PRESENTATION      ,"pptx" ,"quick.pptx"),
-        testFile(MIMETYPE_VISIO                     ,"vdx"  ,"quick.vdx"), 
-        testFile(MIMETYPE_VISIO_2013                ,"vsd"  ,"quick.vsd"), 
-        testFile(MIMETYPE_WORDPERFECT               ,"wpd"  ,"quick.wpd"), 
-        testFile(MIMETYPE_EXCEL                     ,"xls"  ,"quick.xls" ), 
-        testFile(MIMETYPE_OPENXML_SPREADSHEET       ,"xlsx" ,"quick.xlsx"),
-        testFile(MIMETYPE_TEXT_CSV                  ,"csv"  ,"people.csv"),
-        testFile(MIMETYPE_RTF                       ,"rtf"  ,"sample.rtf"),
-        testFile(MIMETYPE_HTML                      ,"html" ,"quick.html"),
-        testFile(MIMETYPE_TSV                       ,"tsv"  ,"sample.tsv")
+        testFile(MIMETYPE_WORD                                 ,"doc"  ,"quick.doc"),
+        testFile(MIMETYPE_OPENXML_WORDPROCESSING               ,"docx" ,"quick.docx"),
+        testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS                ,"odg"  ,"quick.odg"),
+        testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION            ,"odp"  ,"quick.odp"),
+        testFile(MIMETYPE_OPENDOCUMENT_SPREADSHEET             ,"ods"  ,"quick.ods"),
+        testFile(MIMETYPE_OPENDOCUMENT_TEXT                    ,"odt"  ,"quick.odt"),
+        testFile(MIMETYPE_PPT                                  ,"ppt"  ,"quick.ppt"),
+        testFile(MIMETYPE_OPENXML_PRESENTATION                 ,"pptx" ,"quick.pptx"),
+        testFile(MIMETYPE_VISIO                                ,"vdx"  ,"quick.vdx"),
+        testFile(MIMETYPE_VISIO_2013                           ,"vsd"  ,"quick.vsd"),
+        testFile(MIMETYPE_WORDPERFECT                          ,"wpd"  ,"quick.wpd"),
+        testFile(MIMETYPE_EXCEL                                ,"xls"  ,"quick.xls" ),
+        testFile(MIMETYPE_OPENXML_SPREADSHEET                  ,"xlsx" ,"quick.xlsx"),
+        testFile(MIMETYPE_TEXT_CSV                             ,"csv"  ,"people.csv"),
+        testFile(MIMETYPE_RTF                                  ,"rtf"  ,"sample.rtf"),
+        testFile(MIMETYPE_HTML                                 ,"html" ,"quick.html"),
+        testFile(MIMETYPE_XML                                  ,"xml" ,"quick.xml"),
+        testFile(MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO   ,"xltm" ,"quick.xltm"),
+        testFile(MIMETYPE_OPENXML_SPREADSHEET_ADDIN_MACRO      ,"xlam" ,"quick.xlam"),
+        testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW       ,"ppsx" ,"quick.ppsx"),
+        testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO ,"ppsm" ,"quick.ppsm"),
+        testFile(MIMETYPE_OUTLOOK_MSG                          ,"msg" ,"quick.msg"),
+        testFile(MIMETYPE_DITA                                 ,"dita" ,"quick.dita"),
+        testFile(MIMETYPE_TSV                                  ,"tsv"  ,"sample.tsv")
     ).collect(toMap(TestFileInfo::getPath, identity()));
 
     public LibreOfficeTransformationIT(final Pair<TestFileInfo, TestFileInfo> entry)
