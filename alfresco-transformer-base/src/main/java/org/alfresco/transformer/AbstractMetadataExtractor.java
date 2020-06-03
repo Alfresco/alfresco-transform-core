@@ -27,18 +27,53 @@
 package org.alfresco.transformer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.alfresco.transform.exceptions.TransformException;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
- * Helper methods for MetadataExtractors.
+ * Helper methods for MetadataExtractors. Much of the code is based on AbstractMappingMetadataExtracter from the
+ * content repository, but has been simplified for use in a T-Engine.
+ * <p>
+ * If a transform specifies that it can convert from {@code "<MEDIATYPE>"} to {@code
+ * "alfresco-metadata-extract/<MEDIATYPE>"} (specified in the {@code engine_config.json}), it is indicating that it can
+ * extract metadata for that mediatype.
+ *
+ * The transform results in a Map of extracted properties encoded as json being returned to the content repository.
+ * <ul>
+ *   <li>The content repository will use a transform in preference to any metadata extractors it might have defined
+ *   locally for the same mediatype.</li>
+ *   <li>The T-Engine's Controller class will call a method in a class that extends {@link AbstractMetadataExtractor}
+ *   based on the source and target mediatypes in the normal way.</li>
+ *   <li>The method extracts ALL available metadata is extracted from the document and then calls
+ *   {@link #mapMetadataAndWrite(File, Map)}.</li>
+ *   <li>Selected values from the available metadata are mapped into content repository property names and values,
+ *   depending on what is defined in a {@code "<classname>_metadata_extract.properties"} file.</li>
+ *   <li>The selected values are set back to the content repository as a JSON representation of a Map, where the values
+ *   are applied to the source node.</li>
+ * </ul>
+ * To support the same functionality as metadata extractors configured inside the content repository,
+ * extra key value pairs may be added to the Map passed to {@link #mapMetadataAndWrite(File, Map)}. These are:
+ * <ul>
+ *     <li>{@code "sys:overwritePolicy"} which can specify the
+ *     {@code org.alfresco.repo.content.metadata.MetadataExtracter.OverwritePolicy} name. Defaults to "PRAGMATIC".</li>
+ *     <li>{@code "sys:enableStringTagging"} if {@code "true"} finds or creates tags for each string mapped to
+ *     {@code cm:taggable}. Defaults to {@code "false"} to ignore mapping strings to tags.</li>
+ *     <li>{@code "sys:carryAspectProperties"} </li>
+ *     <li>{@code "sys:stringTaggingSeparators"} </li>
+ * </ul>
  *
  * @author Jesper Steen Møller
  * @author Derek Hulley
@@ -46,7 +81,227 @@ import java.util.Map;
  */
 public class AbstractMetadataExtractor
 {
+    private static final Logger logger = LoggerFactory.getLogger(AbstractMetadataExtractor.class);
+
+    private static final String NAMESPACE_PROPERTY_PREFIX = "namespace.prefix.";
+    private static final char NAMESPACE_PREFIX = ':';
+    private static final char NAMESPACE_BEGIN = '{';
+    private static final char NAMESPACE_END = '}';
+
     private final ObjectMapper jsonObjectMapper = new ObjectMapper();
+
+    private Map<String, Set<String>> extractMapping;
+    private Map<String, Set<String>> embedMapping;
+
+    public AbstractMetadataExtractor()
+    {
+        extractMapping = getExtractMapping();
+        embedMapping = getEmbedMapping();
+    }
+
+    /**
+     * Based on AbstractMappingMetadataExtracter#getDefaultMapping.
+     *
+     * This method provides a <i>mapping</i> of where to store the values extracted from the documents. The list of
+     * properties need <b>not</b> include all metadata values extracted from the document. This mapping should be
+     * defined in a file based on the class name: {@code "<classname>_metadata_extract.properties"}
+     * @return Returns a static mapping. It may not be null.
+     */
+    private Map<String, Set<String>> getExtractMapping()
+    {
+        String filename = getPropertiesFilename("extract");
+        Properties properties = readProperties(filename);
+        if (properties == null)
+        {
+            logger.error("Failed to read "+filename);
+        }
+
+        Map<String, String> namespacesByPrefix = getNamespaces(properties);
+        return getExtractMapping(properties, namespacesByPrefix);
+    }
+
+    private Map<String, Set<String>> getExtractMapping(Properties properties, Map<String, String> namespacesByPrefix)
+    {
+        // Create the mapping
+        Map<String, Set<String>> convertedMapping = new HashMap<>(17);
+        for (Map.Entry<Object, Object> entry : properties.entrySet())
+        {
+            String documentProperty = (String) entry.getKey();
+            String qnamesStr = (String) entry.getValue();
+            if (documentProperty.startsWith(NAMESPACE_PROPERTY_PREFIX))
+            {
+                continue;
+            }
+            // Create the entry
+            Set<String> qnames = new HashSet<>(3);
+            convertedMapping.put(documentProperty, qnames);
+            // The to value can be a list of QNames
+            StringTokenizer tokenizer = new StringTokenizer(qnamesStr, ",");
+            while (tokenizer.hasMoreTokens())
+            {
+                String qnameStr = tokenizer.nextToken().trim();
+                qnameStr = getQNameString(namespacesByPrefix, entry, qnameStr, "extract");
+                qnames.add(qnameStr);
+            }
+            if (logger.isTraceEnabled())
+            {
+                logger.trace("Added mapping from " + documentProperty + " to " + qnames);
+            }
+        }
+        return convertedMapping;
+    }
+
+    /**
+     * Based on AbstractMappingMetadataExtracter#getDefaultEmbedMapping.
+     *
+     * This method provides a <i>mapping</i> of model properties that should be embedded in the content.  The list of
+     * properties need <b>not</b> include all properties. This mapping should be defined in a file based on the class
+     * name: {@code "<classname>_metadata_embed.properties"}
+     * <p>
+     * If no {@code "<classname>_metadata_embed.properties"} file is found, a reverse of the
+     * {@code "<classname>_metadata_extract.properties"} will be assumed. A last win approach will be used for handling
+     * duplicates.
+     * @return Returns a static mapping. It may not be null.
+     */
+    private Map<String, Set<String>> getEmbedMapping()
+    {
+        String filename = getPropertiesFilename("embed");
+        Properties properties = readProperties(filename);
+
+        Map<String, Set<String>> embedMapping;
+        if (properties != null)
+        {
+            Map<String, String> namespacesByPrefix = getNamespaces(properties);
+            embedMapping = getEmbedMapping(properties, namespacesByPrefix);
+        }
+        else
+        {
+            if (logger.isDebugEnabled())
+            {
+                logger.debug("No " + filename + ", assuming reverse of extract mapping");
+            }
+            embedMapping = getEmbedMappingByReversingExtract();
+        }
+        return embedMapping;
+    }
+
+    private Map<String, Set<String>> getEmbedMapping(Properties properties, Map<String, String> namespacesByPrefix)
+    {
+        Map<String, Set<String>> convertedMapping = new HashMap<>(17);
+        for (Map.Entry<Object, Object> entry : properties.entrySet())
+        {
+            String modelProperty = (String) entry.getKey();
+            String metadataKeysString = (String) entry.getValue();
+            if (modelProperty.startsWith(NAMESPACE_PROPERTY_PREFIX))
+            {
+                continue;
+            }
+
+            modelProperty = getQNameString(namespacesByPrefix, entry, modelProperty, "embed");
+            String[] metadataKeysArray = metadataKeysString.split(",");
+            Set<String> metadataKeys = new HashSet<String>(metadataKeysArray.length);
+            for (String metadataKey : metadataKeysArray) {
+                metadataKeys.add(metadataKey.trim());
+            }
+            // Create the entry
+            convertedMapping.put(modelProperty, metadataKeys);
+            if (logger.isTraceEnabled())
+            {
+                logger.trace("Added mapping from " + modelProperty + " to " + metadataKeysString);
+            }
+        }
+        return convertedMapping;
+    }
+
+    private Map<String, Set<String>> getEmbedMappingByReversingExtract()
+    {
+        Map<String, Set<String>> extractMapping = getExtractMapping();
+        Map<String, Set<String>> embedMapping;
+        embedMapping = new HashMap<>(extractMapping.size());
+        for (String metadataKey : extractMapping.keySet())
+        {
+            if (extractMapping.get(metadataKey) != null && extractMapping.get(metadataKey).size() > 0)
+            {
+                String modelProperty = extractMapping.get(metadataKey).iterator().next();
+                Set<String> metadataKeys = embedMapping.get(modelProperty);
+                if (metadataKeys == null)
+                {
+                    metadataKeys = new HashSet<String>(1);
+                    embedMapping.put(modelProperty, metadataKeys);
+                }
+                metadataKeys.add(metadataKey);
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("Added mapping from " + modelProperty + " to " + metadataKeys.toString());
+                }
+            }
+        }
+        return embedMapping;
+    }
+
+    private String getPropertiesFilename(String suffix)
+    {
+        String className = this.getClass().getName();
+        String shortClassName = className.split("\\.")[className.split("\\.").length - 1];
+        shortClassName = shortClassName.replace('$', '-');
+
+        return shortClassName + "_metadata_" + suffix + ".properties";
+    }
+
+    private Properties readProperties(String filename)
+    {
+        Properties properties = null;
+        try
+        {
+            InputStream inputStream = AbstractMetadataExtractor.class.getClassLoader().getResourceAsStream(filename);
+            if (inputStream != null)
+            {
+                properties = new Properties();
+                properties.load(inputStream);
+            }
+        }
+        catch (IOException ignore)
+        {
+        }
+        return properties;
+    }
+
+    private Map<String, String> getNamespaces(Properties properties)
+    {
+        Map<String, String> namespacesByPrefix = new HashMap<String, String>(5);
+        for (Map.Entry<Object, Object> entry : properties.entrySet())
+        {
+            String propertyName = (String) entry.getKey();
+            if (propertyName.startsWith(NAMESPACE_PROPERTY_PREFIX))
+            {
+                String prefix = propertyName.substring(17);
+                String namespace = (String) entry.getValue();
+                namespacesByPrefix.put(prefix, namespace);
+            }
+        }
+        return namespacesByPrefix;
+    }
+
+    private String getQNameString(Map<String, String> namespacesByPrefix, Map.Entry<Object, Object> entry, String qnameStr, String type)
+    {
+        // Check if we need to resolve a namespace reference
+        int index = qnameStr.indexOf(NAMESPACE_PREFIX);
+        if (index > -1 && qnameStr.charAt(0) != NAMESPACE_BEGIN)
+        {
+            String prefix = qnameStr.substring(0, index);
+            String suffix = qnameStr.substring(index + 1);
+            // It is prefixed
+            String uri = namespacesByPrefix.get(prefix);
+            if (uri == null)
+            {
+                logger.error("No prefix mapping for " + type + " property mapping: \n" +
+                        "   Extractor: " + this + "\n" +
+                        "   Mapping: " + entry);
+            }
+            qnameStr = NAMESPACE_BEGIN + uri + NAMESPACE_END + suffix;
+        }
+        return qnameStr;
+    }
 
     /**
      * Adds a value to the map, conserving null values.  Values are converted to null if:
@@ -109,7 +364,49 @@ public class AbstractMetadataExtractor
         return true;
     }
 
-    protected void writeMetadataIntoTargetFile(File targetFile, Map<String, Serializable> results, Logger logger)
+    protected void mapMetadataAndWrite(File targetFile, Map<String, Serializable> metadata) throws IOException
+    {
+        metadata = mapRawToSystem(metadata);
+        writeMetadata(targetFile, metadata);
+    }
+
+    /**
+     * Based on AbstractMappingMetadataExtracter#mapRawToSystem.
+     *
+     * @param rawMetadata   Metadata keyed by document properties
+     * @return              Returns the metadata keyed by the system properties
+     */
+    private Map<String, Serializable> mapRawToSystem(Map<String, Serializable> rawMetadata)
+    {
+        Map<String, Serializable> systemProperties = new HashMap<String, Serializable>(rawMetadata.size() * 2 + 1);
+        for (Map.Entry<String, Serializable> entry : rawMetadata.entrySet())
+        {
+            String documentKey = entry.getKey();
+            // Check if there is a mapping for this
+            if (!extractMapping.containsKey(documentKey))
+            {
+                // No mapping - ignore
+                continue;
+            }
+            Serializable documentValue = entry.getValue();
+            Set<String> systemQNames = extractMapping.get(documentKey);
+            for (String systemQName : systemQNames)
+            {
+                systemProperties.put(systemQName, documentValue);
+            }
+        }
+        // Done
+        if (logger.isDebugEnabled())
+        {
+            logger.debug(
+                    "Converted extracted raw values to system values: \n" +
+                            "   Raw Properties:    " + rawMetadata + "\n" +
+                            "   System Properties: " + systemProperties);
+        }
+        return systemProperties;
+    }
+
+    private void writeMetadata(File targetFile, Map<String, Serializable> results)
             throws IOException
     {
         jsonObjectMapper.writeValue(targetFile, results);

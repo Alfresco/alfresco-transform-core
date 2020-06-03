@@ -63,9 +63,9 @@ import java.util.Map;
  * @author Derek Hulley
  * @author adavis
  */
-public class HtmlMetadataExecutor extends AbstractMetadataExtractor implements SelectableTransformer
+public class HtmlMetadataExtractor extends AbstractMetadataExtractor implements SelectableTransformer
 {
-    private static final Logger logger = LoggerFactory.getLogger(HtmlMetadataExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(HtmlMetadataExtractor.class);
 
     private static final String KEY_AUTHOR = "author";
     private static final String KEY_TITLE = "title";
@@ -82,7 +82,7 @@ public class HtmlMetadataExecutor extends AbstractMetadataExtractor implements S
             metadata.forEach((k,v) -> logger.debug(k+"="+v));
         }
 
-        writeMetadataIntoTargetFile(targetFile, metadata, logger);
+        mapMetadataAndWrite(targetFile, metadata);
     }
 
     private Map<String, Serializable> extractMetadata(File sourceFile)
