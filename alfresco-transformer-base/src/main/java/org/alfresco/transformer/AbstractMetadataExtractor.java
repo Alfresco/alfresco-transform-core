@@ -35,9 +35,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -87,6 +90,12 @@ public class AbstractMetadataExtractor
     private static final char NAMESPACE_PREFIX = ':';
     private static final char NAMESPACE_BEGIN = '{';
     private static final char NAMESPACE_END = '}';
+
+    private static final List<String> SYS_PROPERTIES = Arrays.asList(
+            "sys:overwritePolicy",
+            "sys:enableStringTagging",
+            "sys:carryAspectProperties",
+            "sys:stringTaggingSeparators");
 
     private final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
@@ -382,13 +391,18 @@ public class AbstractMetadataExtractor
         for (Map.Entry<String, Serializable> entry : rawMetadata.entrySet())
         {
             String documentKey = entry.getKey();
+            Serializable documentValue = entry.getValue();
+            if (SYS_PROPERTIES.contains(documentKey))
+            {
+                systemProperties.put(documentKey, documentValue);
+                continue;
+            }
             // Check if there is a mapping for this
             if (!extractMapping.containsKey(documentKey))
             {
                 // No mapping - ignore
                 continue;
             }
-            Serializable documentValue = entry.getValue();
             Set<String> systemQNames = extractMapping.get(documentKey);
             for (String systemQName : systemQNames)
             {
