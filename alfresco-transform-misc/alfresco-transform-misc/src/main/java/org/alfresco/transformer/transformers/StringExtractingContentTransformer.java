@@ -39,8 +39,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Converts any textual format to plain text.
@@ -58,7 +58,7 @@ import org.apache.commons.logging.LogFactory;
 public class StringExtractingContentTransformer implements SelectableTransformer
 {
 
-    private static final Log logger = LogFactory.getLog(StringExtractingContentTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(StringExtractingContentTransformer.class);
 
     /**
      * Text to text conversions are done directly using the content reader and writer string
@@ -126,11 +126,22 @@ public class StringExtractingContentTransformer implements SelectableTransformer
         {
             if (charReader != null)
             {
-                try { charReader.close(); } catch (Throwable e) { logger.error(e); }
+                try {
+                    charReader.close();
+                }
+                catch (Throwable ignore)
+                {
+                }
             }
             if (charWriter != null)
             {
-                try { charWriter.close(); } catch (Throwable e) { logger.error(e); }
+                try
+                {
+                    charWriter.close();
+                }
+                catch (Throwable ignore)
+                {
+                }
             }
         }
         // done

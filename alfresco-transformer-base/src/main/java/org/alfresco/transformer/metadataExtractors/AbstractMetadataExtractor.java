@@ -24,11 +24,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer;
+package org.alfresco.transformer.metadataExtractors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,26 +37,29 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.StringTokenizer;
 
 /**
- * Helper methods for MetadataExtractors. Much of the code is based on AbstractMappingMetadataExtracter from the
- * content repository, but has been simplified for use in a T-Engine.
+ * Helper methods for metadata extract and embed.
  * <p>
- * If a transform specifies that it can convert from {@code "<MEDIATYPE>"} to {@code
- * "alfresco-metadata-extract/<MEDIATYPE>"} (specified in the {@code engine_config.json}), it is indicating that it can
- * extract metadata for that mediatype.
+ * <i>Much of the code is based on AbstractMappingMetadataExtracter from the
+ * content repository. The code has been simplified to only set up mapping one way.</i>
+ * <p>
+ * If a transform specifies that it can convert from {@code "alfresco-metadata-extract/<MIMETYPE>"} (specified in the
+ * {@code engine_config.json}), it is indicating that it can extract metadata from {@code <MIMETYPE>}.
  *
  * The transform results in a Map of extracted properties encoded as json being returned to the content repository.
  * <ul>
  *   <li>The content repository will use a transform in preference to any metadata extractors it might have defined
- *   locally for the same mediatype.</li>
+ *   locally for the same MIMETYPE.</li>
  *   <li>The T-Engine's Controller class will call a method in a class that extends {@link AbstractMetadataExtractor}
  *   based on the source and target mediatypes in the normal way.</li>
  *   <li>The method extracts ALL available metadata is extracted from the document and then calls
@@ -68,7 +70,7 @@ import java.util.StringTokenizer;
  *   are applied to the source node.</li>
  * </ul>
  * To support the same functionality as metadata extractors configured inside the content repository,
- * extra key value pairs may be added to the Map passed to {@link #mapMetadataAndWrite(File, Map)}. These are:
+ * extra key value pairs may be returned from {@link #extractMetadata}. These are:
  * <ul>
  *     <li>{@code "sys:overwritePolicy"} which can specify the
  *     {@code org.alfresco.repo.content.metadata.MetadataExtracter.OverwritePolicy} name. Defaults to "PRAGMATIC".</li>
@@ -78,14 +80,18 @@ import java.util.StringTokenizer;
  *     <li>{@code "sys:stringTaggingSeparators"} </li>
  * </ul>
  *
+ * If a transform specifies that it can convert from {@code "alfresco-metadata-embed/<MIMETYPE>"}, it is indicating
+ * that it can embed metadata in {@code <MIMETYPE>}.
+ *
+ * The transform results in a new version of supplied source file that contains the metadata supplied in the transform
+ * options.
+ * 
  * @author Jesper Steen Møller
  * @author Derek Hulley
  * @author adavis
  */
-public class AbstractMetadataExtractor
+public abstract class AbstractMetadataExtractor
 {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractMetadataExtractor.class);
-
     private static final String NAMESPACE_PROPERTY_PREFIX = "namespace.prefix.";
     private static final char NAMESPACE_PREFIX = ':';
     private static final char NAMESPACE_BEGIN = '{';
@@ -97,15 +103,45 @@ public class AbstractMetadataExtractor
             "sys:carryAspectProperties",
             "sys:stringTaggingSeparators");
 
-    private final ObjectMapper jsonObjectMapper = new ObjectMapper();
+    private static final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
-    private Map<String, Set<String>> extractMapping;
-    private Map<String, Set<String>> embedMapping;
+    protected final Logger logger;
+    private final Map<String, Set<String>> extractMapping;
+    private final Map<String, Set<String>> embedMapping;
 
-    public AbstractMetadataExtractor()
+    public AbstractMetadataExtractor(Logger logger)
     {
-        extractMapping = getExtractMapping();
-        embedMapping = getEmbedMapping();
+        this.logger = logger;
+        extractMapping = buildExtractMapping();
+        embedMapping = buildEmbedMapping();
+    }
+
+    public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
+                          Map<String, String> parameters) throws Exception
+    {
+        // TODO Rename methods to extractMetadata or something like that and call it from TikaJavaExecutor
+        //      What about SelectableTransformer
+        Map<String, Serializable> metadata = extractMetadata(sourceFile, sourceMimetype, parameters);
+        mapMetadataAndWrite(targetFile, metadata);
+    }
+
+    public abstract Map<String, Serializable> extractMetadata(File sourceFile, String sourceMimetype,
+                                                                 Map<String, String> transformOptions) throws Exception;
+
+    public void embedMetadata(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
+                                 Map<String, String> transformOptions) throws Exception
+    {
+        // Default nothing, as embedding is not supported in most cases
+    }
+
+    protected Map<String, Set<String>> getExtractMapping()
+    {
+        return Collections.unmodifiableMap(extractMapping);
+    }
+
+    public Map<String, Set<String>> getEmbedMapping()
+    {
+        return Collections.unmodifiableMap(embedMapping);
     }
 
     /**
@@ -116,7 +152,7 @@ public class AbstractMetadataExtractor
      * defined in a file based on the class name: {@code "<classname>_metadata_extract.properties"}
      * @return Returns a static mapping. It may not be null.
      */
-    private Map<String, Set<String>> getExtractMapping()
+    private Map<String, Set<String>> buildExtractMapping()
     {
         String filename = getPropertiesFilename("extract");
         Properties properties = readProperties(filename);
@@ -126,10 +162,10 @@ public class AbstractMetadataExtractor
         }
 
         Map<String, String> namespacesByPrefix = getNamespaces(properties);
-        return getExtractMapping(properties, namespacesByPrefix);
+        return buildExtractMapping(properties, namespacesByPrefix);
     }
 
-    private Map<String, Set<String>> getExtractMapping(Properties properties, Map<String, String> namespacesByPrefix)
+    private Map<String, Set<String>> buildExtractMapping(Properties properties, Map<String, String> namespacesByPrefix)
     {
         // Create the mapping
         Map<String, Set<String>> convertedMapping = new HashMap<>(17);
@@ -172,7 +208,7 @@ public class AbstractMetadataExtractor
      * duplicates.
      * @return Returns a static mapping. It may not be null.
      */
-    private Map<String, Set<String>> getEmbedMapping()
+    private Map<String, Set<String>> buildEmbedMapping()
     {
         String filename = getPropertiesFilename("embed");
         Properties properties = readProperties(filename);
@@ -181,7 +217,7 @@ public class AbstractMetadataExtractor
         if (properties != null)
         {
             Map<String, String> namespacesByPrefix = getNamespaces(properties);
-            embedMapping = getEmbedMapping(properties, namespacesByPrefix);
+            embedMapping = buildEmbedMapping(properties, namespacesByPrefix);
         }
         else
         {
@@ -189,12 +225,12 @@ public class AbstractMetadataExtractor
             {
                 logger.debug("No " + filename + ", assuming reverse of extract mapping");
             }
-            embedMapping = getEmbedMappingByReversingExtract();
+            embedMapping = buildEmbedMappingByReversingExtract();
         }
         return embedMapping;
     }
 
-    private Map<String, Set<String>> getEmbedMapping(Properties properties, Map<String, String> namespacesByPrefix)
+    private Map<String, Set<String>> buildEmbedMapping(Properties properties, Map<String, String> namespacesByPrefix)
     {
         Map<String, Set<String>> convertedMapping = new HashMap<>(17);
         for (Map.Entry<Object, Object> entry : properties.entrySet())
@@ -222,9 +258,9 @@ public class AbstractMetadataExtractor
         return convertedMapping;
     }
 
-    private Map<String, Set<String>> getEmbedMappingByReversingExtract()
+    private Map<String, Set<String>> buildEmbedMappingByReversingExtract()
     {
-        Map<String, Set<String>> extractMapping = getExtractMapping();
+        Map<String, Set<String>> extractMapping = buildExtractMapping();
         Map<String, Set<String>> embedMapping;
         embedMapping = new HashMap<>(extractMapping.size());
         for (String metadataKey : extractMapping.keySet())
@@ -313,6 +349,84 @@ public class AbstractMetadataExtractor
     }
 
     /**
+     * Convert a date <tt>String</tt> to a <tt>Date</tt> object
+     */
+    protected Date makeDate(String dateStr)
+    {
+        // TODO try to do this on the repo side
+        return null;
+
+
+//        if (dateStr == null || dateStr.length() == 0)
+//        {
+//            return null;
+//        }
+//
+//        Date date = null;
+//        try
+//        {
+//            date = DefaultTypeConverter.INSTANCE.convert(Date.class, dateStr);
+//        }
+//        catch (TypeConversionException e)
+//        {
+//            // Try one of the other formats
+//            if (this.supportedDateFormatters != null)
+//            {
+//                // Remove text such as " (PDT)" which cannot be parsed.
+//                String dateStr2 = (dateStr == null || dateStr.indexOf('(') == -1)
+//                        ? dateStr : dateStr.replaceAll(" \\(.*\\)", "");
+//                for (DateTimeFormatter supportedDateFormatter: supportedDateFormatters)
+//                {
+//                    // supported DateFormats were defined
+//                    /**
+//                     * Regional date format
+//                     */
+//                    try
+//                    {
+//                        DateTime dateTime = supportedDateFormatter.parseDateTime(dateStr2);
+//                        if (dateTime.getCenturyOfEra() > 0)
+//                        {
+//                            return dateTime.toDate();
+//                        }
+//                    }
+//                    catch (IllegalArgumentException e1)
+//                    {
+//                        // Didn't work
+//                    }
+//
+//                    /**
+//                     * Date format can be locale specific - make sure English format always works
+//                     */
+//                    /*
+//                     * TODO MER 25 May 2010 - Added this as a quick fix for IMAP date parsing which is always
+//                     * English regardless of Locale.  Some more thought and/or code is required to configure
+//                     * the relationship between properties, format and locale.
+//                     */
+//                    try
+//                    {
+//                        DateTime dateTime = supportedDateFormatter.withLocale(Locale.US).parseDateTime(dateStr2);
+//                        if (dateTime.getCenturyOfEra() > 0)
+//                        {
+//                            return dateTime.toDate();
+//                        }
+//                    }
+//                    catch (IllegalArgumentException e1)
+//                    {
+//                        // Didn't work
+//                    }
+//                }
+//            }
+//
+//            if (date == null)
+//            {
+//                // Still no luck
+//                throw new TypeConversionException("Unable to convert string to date: " + dateStr);
+//            }
+//        }
+//        return date;
+    }
+
+    /**
      * Adds a value to the map, conserving null values.  Values are converted to null if:
      * <ul>
      *   <li>it is an empty string value after trimming</li>
@@ -373,8 +487,13 @@ public class AbstractMetadataExtractor
         return true;
     }
 
-    protected void mapMetadataAndWrite(File targetFile, Map<String, Serializable> metadata) throws IOException
+    public void mapMetadataAndWrite(File targetFile, Map<String, Serializable> metadata) throws IOException
     {
+        if (logger.isDebugEnabled())
+        {
+            metadata.forEach((k,v) -> logger.debug(k+"="+v));
+        }
+
         metadata = mapRawToSystem(metadata);
         writeMetadata(targetFile, metadata);
     }
@@ -387,6 +506,9 @@ public class AbstractMetadataExtractor
      */
     private Map<String, Serializable> mapRawToSystem(Map<String, Serializable> rawMetadata)
     {
+        StringJoiner debug = logger.isDebugEnabled()
+                ? new StringJoiner("\n  ", "Returned metadata:\n", "")
+                : null;
         Map<String, Serializable> systemProperties = new HashMap<String, Serializable>(rawMetadata.size() * 2 + 1);
         for (Map.Entry<String, Serializable> entry : rawMetadata.entrySet())
         {
@@ -395,6 +517,7 @@ public class AbstractMetadataExtractor
             if (SYS_PROPERTIES.contains(documentKey))
             {
                 systemProperties.put(documentKey, documentValue);
+                debug.add(documentKey+"="+documentValue);
                 continue;
             }
             // Check if there is a mapping for this
@@ -403,19 +526,27 @@ public class AbstractMetadataExtractor
                 // No mapping - ignore
                 continue;
             }
+
+            StringJoiner debugLine = logger.isDebugEnabled()
+                    ? new StringJoiner(", ", documentKey+"="+documentValue+" ==> ", "")
+                    : null;
             Set<String> systemQNames = extractMapping.get(documentKey);
             for (String systemQName : systemQNames)
             {
+                if (debugLine != null)
+                {
+                    debugLine.add(systemQName);
+                }
                 systemProperties.put(systemQName, documentValue);
             }
+            if (debug != null)
+            {
+                debug.add(debugLine.toString());
+            }
         }
-        // Done
-        if (logger.isDebugEnabled())
+        if (debug != null)
         {
-            logger.debug(
-                    "Converted extracted raw values to system values: \n" +
-                            "   Raw Properties:    " + rawMetadata + "\n" +
-                            "   System Properties: " + systemProperties);
+            logger.debug(debug.toString());
         }
         return systemProperties;
     }

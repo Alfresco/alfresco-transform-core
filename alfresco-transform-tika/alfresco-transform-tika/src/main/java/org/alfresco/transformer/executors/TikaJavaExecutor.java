@@ -37,12 +37,24 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import com.google.common.collect.ImmutableMap;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
+import org.alfresco.transformer.metadataExtractors.AbstractTikaMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.DWGMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.MP3MetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.MailMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.OfficeMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.OpenDocumentMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.PdfBoxMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.PoiMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.TikaAudioMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.TikaAutoMetadataExtractor;
 import org.apache.tika.exception.TikaException;
 import org.xml.sax.SAXException;
 
@@ -55,6 +67,18 @@ public class TikaJavaExecutor implements JavaExecutor
     public static final String LICENCE = "This transformer uses Tika from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt";
 
     private final Tika tika;
+    private final Map<String, AbstractTikaMetadataExtractor> metadataExtractor = ImmutableMap
+            .<String, AbstractTikaMetadataExtractor>builder()
+            .put("DWGMetadataExtractor", new DWGMetadataExtractor())
+            .put("MailMetadataExtractor", new MailMetadataExtractor())
+            .put("MP3MetadataExtractor", new MP3MetadataExtractor())
+            .put("OfficeMetadataExtractor", new OfficeMetadataExtractor())
+            .put("OpenDocumentMetadataExtractor", new OpenDocumentMetadataExtractor())
+            .put("PdfBoxMetadataExtractor", new PdfBoxMetadataExtractor())
+            .put("PoiMetadataExtractor", new PoiMetadataExtractor())
+            .put("TikaAudioMetadataExtractor", new TikaAudioMetadataExtractor())
+            .put("TikaAutoMetadataExtractor", new TikaAutoMetadataExtractor())
+            .build();
 
     public TikaJavaExecutor()
     {
@@ -155,12 +179,49 @@ public class TikaJavaExecutor implements JavaExecutor
     public void extractMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
                                 File sourceFile, File targetFile)
     {
-        // TODO
+        final String transformName = transformOptions.get(TRANSFORM_NAME_PARAMETER);
+        AbstractTikaMetadataExtractor metadataExtractor = this.metadataExtractor.get(transformName);
+        try
+        {
+            Map<String, Serializable> metadata = metadataExtractor.extractMetadata(sourceFile, sourceMimetype, transformOptions);
+            metadataExtractor.mapMetadataAndWrite(targetFile, metadata);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new TransformException(BAD_REQUEST.value(), getMessage(e));
+        }
+        catch (Exception e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), getMessage(e));
+        }
+        if (!targetFile.exists() || targetFile.length() == 0)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                    "Transformer failed to create an output file");
+        }
     }
 
     public void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
                               File sourceFile, File targetFile)
     {
-        // TODO
+        final String transformName = transformOptions.get(TRANSFORM_NAME_PARAMETER);
+        AbstractTikaMetadataExtractor metadataExtractor = this.metadataExtractor.get(transformName);
+        try
+        {
+            metadataExtractor.embedMetadata(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new TransformException(BAD_REQUEST.value(), getMessage(e));
+        }
+        catch (Exception e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), getMessage(e));
+        }
+        if (!targetFile.exists() || targetFile.length() == 0)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                    "Transformer failed to create an output file");
+        }
     }
 }

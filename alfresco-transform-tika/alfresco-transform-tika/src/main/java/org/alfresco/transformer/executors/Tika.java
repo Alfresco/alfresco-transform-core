@@ -69,6 +69,7 @@ import org.apache.tika.parser.pdf.PDFParserConfig;
 import org.apache.tika.parser.pkg.PackageParser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.apache.tika.sax.ExpandedTitleContentHandler;
+import org.slf4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
@@ -485,7 +486,7 @@ public class Tika
     private final Parser tikaOfficeDetectParser = new TikaOfficeDetectParser();
     private final PDFParserConfig pdfParserConfig = new PDFParserConfig();
 
-    private final DocumentSelector pdfBoxEmbededDocumentSelector = new DocumentSelector()
+    public static final DocumentSelector pdfBoxEmbededDocumentSelector = new DocumentSelector()
     {
         private final List<String> disabledMediaTypes = ImmutableList.of(MIMETYPE_IMAGE_JPEG,
             MIMETYPE_IMAGE_TIFF, MIMETYPE_IMAGE_PNG);
@@ -504,10 +505,28 @@ public class Tika
 
     public Tika() throws TikaException, IOException, SAXException
     {
-        ClassLoader classLoader = getClass().getClassLoader();
-        URL tikaConfigXml = classLoader.getResource("tika-config.xml");
-        TikaConfig tikaConfig = new TikaConfig(tikaConfigXml);
+        TikaConfig tikaConfig = readTikaConfig();
         autoDetectParser = new AutoDetectParser(tikaConfig);
+    }
+
+    public static TikaConfig readTikaConfig(Logger logger)
+    {
+        try
+        {
+            return readTikaConfig();
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to read tika-config.xml", e);
+            return null;
+        }
+    }
+
+    private static TikaConfig readTikaConfig() throws TikaException, IOException, SAXException
+    {
+        ClassLoader classLoader = Tika.class.getClassLoader();
+        URL tikaConfigXml = classLoader.getResource("tika-config.xml");
+        return new TikaConfig(tikaConfigXml);
     }
 
     // Method included for developer testing

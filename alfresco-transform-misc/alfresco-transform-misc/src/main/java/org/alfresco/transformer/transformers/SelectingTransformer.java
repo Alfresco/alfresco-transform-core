@@ -35,6 +35,8 @@ import java.util.StringJoiner;
 
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
+import org.alfresco.transformer.metadataExtractors.HtmlMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.RFC822MetadataExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,11 +61,12 @@ public class SelectingTransformer
         .<String, SelectableTransformer>builder()
         .put("appleIWorks", new AppleIWorksContentTransformer())
         .put("html", new HtmlParserContentTransformer())
-        .put("htmlMetadata", new HtmlMetadataExtractor())
         .put("string", new StringExtractingContentTransformer())
         .put("textToPdf", new TextToPdfContentTransformer())
         .put("rfc822", new EMLTransformer())
         .put("ooXmlThumbnail", new OOXMLThumbnailContentTransformer())
+        .put("htmlMetadataExtract", new HtmlMetadataExtractor())
+        .put("rfc822Metadata", new RFC822MetadataExtractor())
         .build();
 
     /**

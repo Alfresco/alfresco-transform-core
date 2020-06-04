@@ -24,9 +24,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer.transformers;
+package org.alfresco.transformer.metadataExtractors;
 
-import org.alfresco.transformer.AbstractMetadataExtractor;
+import org.alfresco.transformer.transformers.SelectableTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,6 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -46,16 +45,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Extracts the following values from HTML documents:
+ * Metadata extractor for HTML and XHTML.
+ *
+ * Configuration:   (see HtmlMetadataExtractor_metadata_extract.properties and misc_engine_config.json)
+ *
  * <pre>
  *   <b>author:</b>                 --      cm:author
  *   <b>title:</b>                  --      cm:title
  *   <b>description:</b>            --      cm:description
  * </pre>
- *
- * TIKA note - all metadata will be present, but will need to
- * search for the variant names ourselves as tika puts them
- * in as-is.
  *
  * Based on HtmlMetadataExtracter from the content repository.
  *
@@ -71,21 +69,14 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractor implements 
     private static final String KEY_TITLE = "title";
     private static final String KEY_DESCRIPTION= "description";
 
-    @Override
-    public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-                          Map<String, String> parameters) throws Exception
+    public HtmlMetadataExtractor()
     {
-        Map<String, Serializable> metadata = extractMetadata(sourceFile);
-
-        if (logger.isDebugEnabled())
-        {
-            metadata.forEach((k,v) -> logger.debug(k+"="+v));
-        }
-
-        mapMetadataAndWrite(targetFile, metadata);
+        super(logger);
     }
 
-    private Map<String, Serializable> extractMetadata(File sourceFile)
+    @Override
+    public Map<String, Serializable> extractMetadata(File sourceFile, String sourceMimetype,
+                                                     Map<String, String> transformOptions) throws Exception
     {
         final Map<String, Serializable> rawProperties = new HashMap<>();
 
@@ -165,46 +156,40 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractor implements 
             }
         };
 
-        try
+        String charsetGuess = "UTF-8";
+        int tries = 0;
+        while (tries < 3)
         {
-            String charsetGuess = "UTF-8";
-            int tries = 0;
-            while (tries < 3)
-            {
-                rawProperties.clear();
-                Reader r = null;
+            rawProperties.clear();
+            Reader r = null;
 
-                try (InputStream cis = new FileInputStream(sourceFile))
+            try (InputStream cis = new FileInputStream(sourceFile))
+            {
+                // TODO: for now, use default charset; we should attempt to map from html meta-data
+                r = new InputStreamReader(cis, charsetGuess);
+                HTMLEditorKit.Parser parser = new ParserDelegator();
+                parser.parse(r, callback, tries > 0);
+                break;
+            }
+            catch (ChangedCharSetException ccse)
+            {
+                tries++;
+                charsetGuess = ccse.getCharSetSpec();
+                int begin = charsetGuess.indexOf("charset=");
+                if (begin > 0)
                 {
-                    // TODO: for now, use default charset; we should attempt to map from html meta-data
-                    r = new InputStreamReader(cis, charsetGuess);
-                    HTMLEditorKit.Parser parser = new ParserDelegator();
-                    parser.parse(r, callback, tries > 0);
-                    break;
+                    charsetGuess = charsetGuess.substring(begin + 8, charsetGuess.length());
                 }
-                catch (ChangedCharSetException ccse)
+            }
+            finally
+            {
+                if (r != null)
                 {
-                    tries++;
-                    charsetGuess = ccse.getCharSetSpec();
-                    int begin = charsetGuess.indexOf("charset=");
-                    if (begin > 0)
-                    {
-                        charsetGuess = charsetGuess.substring(begin + 8, charsetGuess.length());
-                    }
-                }
-                finally
-                {
-                    if (r != null)
-                    {
-                        r.close();
-                    }
+                    r.close();
                 }
             }
         }
-        catch (IOException e)
-        {
-            new IllegalArgumentException("Failed to extract metadata. "+e.getMessage());
-        }
+
         return rawProperties;
     }
 }
