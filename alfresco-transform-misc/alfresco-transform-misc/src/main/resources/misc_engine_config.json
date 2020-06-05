@@ -17,15 +17,6 @@
        ]
     },
     {
-      "transformerName": "htmlMetadataExtract",
-      "supportedSourceAndTargetList": [
-        {"sourceMediaType": "text/html",                                     "targetMediaType": "alfresco-metadata-extract/text/html"},
-        {"sourceMediaType": "application/xhtml+xml",                         "targetMediaType": "alfresco-metadata-extract/application/xhtml+xml"}
-      ],
-      "transformOptions": [
-      ]
-    },
-    {
       "transformerName": "string",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "text/plain",                                    "targetMediaType": "text/plain"},
@@ -80,9 +71,18 @@
       ]
     },
     {
-      "transformerName": "rfc822Metadata",
+      "transformerName": "HtmlMetadataExtractor",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "message/rfc822",                                "targetMediaType": "alfresco-metadata-extract/message/rfc822"}
+        {"sourceMediaType": "text/html",                                                                  "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "application/xhtml+xml",                                                      "targetMediaType": "alfresco-metadata-extract"}
+      ],
+      "transformOptions": [
+      ]
+    },
+    {
+      "transformerName": "RFC822MetadataExtractor",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "message/rfc822",                                                             "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
       ]

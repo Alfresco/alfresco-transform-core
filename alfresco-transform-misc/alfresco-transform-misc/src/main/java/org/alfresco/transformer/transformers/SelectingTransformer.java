@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer.transformers;
 
+import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -65,8 +66,8 @@ public class SelectingTransformer
         .put("textToPdf", new TextToPdfContentTransformer())
         .put("rfc822", new EMLTransformer())
         .put("ooXmlThumbnail", new OOXMLThumbnailContentTransformer())
-        .put("htmlMetadataExtract", new HtmlMetadataExtractor())
-        .put("rfc822Metadata", new RFC822MetadataExtractor())
+        .put("HtmlMetadataExtractor", new HtmlMetadataExtractor())
+        .put("RFC822MetadataExtractor", new RFC822MetadataExtractor())
         .build();
 
     /**
@@ -116,8 +117,13 @@ public class SelectingTransformer
     private static void logOptions(File sourceFile, File targetFile, Map<String, String> parameters)
     {
         StringJoiner sj = new StringJoiner(" ");
-        parameters.forEach((k, v) -> sj.add(
-            "--" + k + "=" + v)); // keeping the existing style used in other T-Engines
+        parameters.forEach((k, v) ->
+        {
+            if (!TRANSFORM_NAME_PARAMETER.equals(k))
+            {
+                sj.add("--" + k + "=" + v);
+            }
+        }); // keeping the existing style used in other T-Engines
         sj.add(getExtension(sourceFile));
         sj.add(getExtension(targetFile));
         LogEntry.setOptions(sj.toString());

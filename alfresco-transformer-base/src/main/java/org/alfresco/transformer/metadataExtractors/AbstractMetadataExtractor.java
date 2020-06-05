@@ -53,8 +53,8 @@ import java.util.StringTokenizer;
  * <i>Much of the code is based on AbstractMappingMetadataExtracter from the
  * content repository. The code has been simplified to only set up mapping one way.</i>
  * <p>
- * If a transform specifies that it can convert from {@code "alfresco-metadata-extract/<MIMETYPE>"} (specified in the
- * {@code engine_config.json}), it is indicating that it can extract metadata from {@code <MIMETYPE>}.
+ * If a transform specifies that it can convert from {@code "<MIMETYPE>"} to {@code "alfresco-metadata-extract"}
+ * (specified in the {@code engine_config.json}), it is indicating that it can extract metadata from {@code <MIMETYPE>}.
  *
  * The transform results in a Map of extracted properties encoded as json being returned to the content repository.
  * <ul>
@@ -80,8 +80,8 @@ import java.util.StringTokenizer;
  *     <li>{@code "sys:stringTaggingSeparators"} </li>
  * </ul>
  *
- * If a transform specifies that it can convert from {@code "alfresco-metadata-embed/<MIMETYPE>"}, it is indicating
- * that it can embed metadata in {@code <MIMETYPE>}.
+ * If a transform specifies that it can convert from {@code "<MIMETYPE>"} to {@code "alfresco-metadata-embed"}, it is
+ * indicating that it can embed metadata in {@code <MIMETYPE>}.
  *
  * The transform results in a new version of supplied source file that contains the metadata supplied in the transform
  * options.
@@ -491,7 +491,8 @@ public abstract class AbstractMetadataExtractor
     {
         if (logger.isDebugEnabled())
         {
-            metadata.forEach((k,v) -> logger.debug(k+"="+v));
+            logger.debug("Raw metadata:");
+            metadata.forEach((k,v) -> logger.debug("  "+k+"="+v));
         }
 
         metadata = mapRawToSystem(metadata);
@@ -506,9 +507,11 @@ public abstract class AbstractMetadataExtractor
      */
     private Map<String, Serializable> mapRawToSystem(Map<String, Serializable> rawMetadata)
     {
-        StringJoiner debug = logger.isDebugEnabled()
-                ? new StringJoiner("\n  ", "Returned metadata:\n", "")
-                : null;
+        boolean debugEnabled = logger.isDebugEnabled();
+        if (debugEnabled)
+        {
+            logger.debug("Returned metadata:");
+        }
         Map<String, Serializable> systemProperties = new HashMap<String, Serializable>(rawMetadata.size() * 2 + 1);
         for (Map.Entry<String, Serializable> entry : rawMetadata.entrySet())
         {
@@ -517,7 +520,10 @@ public abstract class AbstractMetadataExtractor
             if (SYS_PROPERTIES.contains(documentKey))
             {
                 systemProperties.put(documentKey, documentValue);
-                debug.add(documentKey+"="+documentValue);
+                if (debugEnabled)
+                {
+                    logger.debug("  " + documentKey + "=" + documentValue);
+                }
                 continue;
             }
             // Check if there is a mapping for this
@@ -527,26 +533,15 @@ public abstract class AbstractMetadataExtractor
                 continue;
             }
 
-            StringJoiner debugLine = logger.isDebugEnabled()
-                    ? new StringJoiner(", ", documentKey+"="+documentValue+" ==> ", "")
-                    : null;
-            Set<String> systemQNames = extractMapping.get(documentKey);
+           Set<String> systemQNames = extractMapping.get(documentKey);
             for (String systemQName : systemQNames)
             {
-                if (debugLine != null)
+                if (debugEnabled)
                 {
-                    debugLine.add(systemQName);
+                    logger.debug("  "+systemQName+"="+documentValue+" ("+documentKey+")");
                 }
                 systemProperties.put(systemQName, documentValue);
             }
-            if (debug != null)
-            {
-                debug.add(debugLine.toString());
-            }
-        }
-        if (debug != null)
-        {
-            logger.debug(debug.toString());
         }
         return systemProperties;
     }

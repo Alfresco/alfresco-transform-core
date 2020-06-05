@@ -45,11 +45,11 @@ public interface JavaExecutor
                                          Map<String, String> transformOptions,
                                          File sourceFile, File targetFile) throws TransformException
     {
-        if (targetMimetype != null && targetMimetype.startsWith("alfresco-metadata-extract/"))
+        if ("alfresco-metadata-extract".equals(targetMimetype))
         {
             extractMetadata(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
         }
-        else if (targetMimetype != null && targetMimetype.startsWith("alfresco-metadata-embed/"))
+        else if ("alfresco-metadata-embed".equals(targetMimetype))
         {
             embedMetadata(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
         }
