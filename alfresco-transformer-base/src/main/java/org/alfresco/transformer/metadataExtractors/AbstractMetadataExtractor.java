@@ -26,12 +26,17 @@
  */
 package org.alfresco.transformer.metadataExtractors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -106,14 +111,23 @@ public abstract class AbstractMetadataExtractor
     private static final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
     protected final Logger logger;
-    private final Map<String, Set<String>> extractMapping;
-    private final Map<String, Set<String>> embedMapping;
+    private Map<String, Set<String>> extractMapping;
+    private Map<String, Set<String>> embedMapping;
 
     public AbstractMetadataExtractor(Logger logger)
     {
         this.logger = logger;
-        extractMapping = buildExtractMapping();
-        embedMapping = buildEmbedMapping();
+        extractMapping = Collections.emptyMap();
+        embedMapping = Collections.emptyMap();
+        try
+        {
+            extractMapping = buildExtractMapping();
+            embedMapping = buildEmbedMapping();
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to read config", e);
+        }
     }
 
     public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
@@ -132,6 +146,25 @@ public abstract class AbstractMetadataExtractor
                                  Map<String, String> transformOptions) throws Exception
     {
         // Default nothing, as embedding is not supported in most cases
+    }
+
+    protected Map<String, String> getMetadata(Map<String, String> transformOptions)
+    {
+        String metadataAsJson = transformOptions.get("metadata");
+        if (metadataAsJson == null)
+        {
+            throw new IllegalArgumentException("No metadata in embed request");
+        }
+
+        try
+        {
+            TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {};
+            return jsonObjectMapper.readValue(metadataAsJson, typeRef);
+        }
+        catch (JsonProcessingException e)
+        {
+            throw new IllegalArgumentException("Failed to read metadata from request", e);
+        }
     }
 
     protected Map<String, Set<String>> getExtractMapping()
@@ -339,7 +372,7 @@ public abstract class AbstractMetadataExtractor
             String uri = namespacesByPrefix.get(prefix);
             if (uri == null)
             {
-                logger.error("No prefix mapping for " + type + " property mapping: \n" +
+                throw new IllegalArgumentException("No prefix mapping for " + type + " property mapping: \n" +
                         "   Extractor: " + this + "\n" +
                         "   Mapping: " + entry);
             }

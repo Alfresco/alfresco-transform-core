@@ -211,7 +211,7 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
         }
         catch (IOException e)
         {
-            logger.error("Failed to write metadata to targetFile", e);
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), "Failed to write metadata to targetFile", e);
         }
     }
 }

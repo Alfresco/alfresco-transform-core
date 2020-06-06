@@ -53,7 +53,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -339,7 +338,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
 
     @Override
     public void embedMetadata(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-                              Map<String, String> properties) throws Exception
+                              Map<String, String> transformOptions) throws Exception
     {
         Embedder embedder = getEmbedder();
         if (embedder == null)
@@ -348,44 +347,8 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
         }
 
         Metadata metadataToEmbed = new Metadata();
-        for (String metadataKey : properties.keySet())
-        {
-            String value = properties.get(metadataKey);
-            if (value == null)
-            {
-                continue;
-            }
-            metadataToEmbed.add(metadataKey, value);
-
-// TODO commented out for now. Assume it is a String.
-//            if (value instanceof Collection<?>)
-//            {
-//                for (Object singleValue : (Collection<?>) value)
-//                {
-//                    try
-//                    {
-//                        // Convert to a string value for Tika
-//                        metadataToEmbed.add(metadataKey, DefaultTypeConverter.INSTANCE.convert(String.class, singleValue));
-//                    }
-//                    catch (TypeConversionException e)
-//                    {
-//                        logger.info("Could not convert " + metadataKey + ": " + e.getMessage());
-//                    }
-//                }
-//            }
-//            else
-//            {
-//                try
-//                {
-//                    // Convert to a string value for Tika
-//                    metadataToEmbed.add(metadataKey, DefaultTypeConverter.INSTANCE.convert(String.class, value));
-//                }
-//                catch (TypeConversionException e)
-//                {
-//                    logger.info("Could not convert " + metadataKey + ": " + e.getMessage());
-//                }
-//            }
-        }
+        Map<String, String> metadataAsStrings = getMetadata(transformOptions);
+        metadataAsStrings.forEach((k,v)->metadataToEmbed.add(k, v));
 
         try (InputStream inputStream = new FileInputStream(sourceFile);
              OutputStream outputStream = new FileOutputStream(targetFile))
