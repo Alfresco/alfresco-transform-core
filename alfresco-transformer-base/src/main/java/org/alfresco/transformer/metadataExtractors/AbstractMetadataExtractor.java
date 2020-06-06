@@ -349,84 +349,6 @@ public abstract class AbstractMetadataExtractor
     }
 
     /**
-     * Convert a date <tt>String</tt> to a <tt>Date</tt> object
-     */
-    protected Date makeDate(String dateStr)
-    {
-        // TODO try to do this on the repo side
-        return null;
-
-
-//        if (dateStr == null || dateStr.length() == 0)
-//        {
-//            return null;
-//        }
-//
-//        Date date = null;
-//        try
-//        {
-//            date = DefaultTypeConverter.INSTANCE.convert(Date.class, dateStr);
-//        }
-//        catch (TypeConversionException e)
-//        {
-//            // Try one of the other formats
-//            if (this.supportedDateFormatters != null)
-//            {
-//                // Remove text such as " (PDT)" which cannot be parsed.
-//                String dateStr2 = (dateStr == null || dateStr.indexOf('(') == -1)
-//                        ? dateStr : dateStr.replaceAll(" \\(.*\\)", "");
-//                for (DateTimeFormatter supportedDateFormatter: supportedDateFormatters)
-//                {
-//                    // supported DateFormats were defined
-//                    /**
-//                     * Regional date format
-//                     */
-//                    try
-//                    {
-//                        DateTime dateTime = supportedDateFormatter.parseDateTime(dateStr2);
-//                        if (dateTime.getCenturyOfEra() > 0)
-//                        {
-//                            return dateTime.toDate();
-//                        }
-//                    }
-//                    catch (IllegalArgumentException e1)
-//                    {
-//                        // Didn't work
-//                    }
-//
-//                    /**
-//                     * Date format can be locale specific - make sure English format always works
-//                     */
-//                    /*
-//                     * TODO MER 25 May 2010 - Added this as a quick fix for IMAP date parsing which is always
-//                     * English regardless of Locale.  Some more thought and/or code is required to configure
-//                     * the relationship between properties, format and locale.
-//                     */
-//                    try
-//                    {
-//                        DateTime dateTime = supportedDateFormatter.withLocale(Locale.US).parseDateTime(dateStr2);
-//                        if (dateTime.getCenturyOfEra() > 0)
-//                        {
-//                            return dateTime.toDate();
-//                        }
-//                    }
-//                    catch (IllegalArgumentException e1)
-//                    {
-//                        // Didn't work
-//                    }
-//                }
-//            }
-//
-//            if (date == null)
-//            {
-//                // Still no luck
-//                throw new TypeConversionException("Unable to convert string to date: " + dateStr);
-//            }
-//        }
-//        return date;
-    }
-
-    /**
      * Adds a value to the map, conserving null values.  Values are converted to null if:
      * <ul>
      *   <li>it is an empty string value after trimming</li>
@@ -443,7 +365,7 @@ public abstract class AbstractMetadataExtractor
      * @param destination   the map to put values into
      * @return              Returns <tt>true</tt> if set, otherwise <tt>false</tt>
      */
-    // Copied from the content repository's AbstractMappingMetadataExtractor.
+    // Copied from the content repository's AbstractMappingMetadataExtracter.
     protected boolean putRawValue(String key, Serializable value, Map<String, Serializable> destination)
     {
         if (value == null)
@@ -459,7 +381,7 @@ public abstract class AbstractMetadataExtractor
             }
             else
             {
-                if(valueStr.indexOf("\u0000") != -1)
+                if (valueStr.indexOf("\u0000") != -1)
                 {
                     valueStr = valueStr.replaceAll("\u0000", "");
                 }

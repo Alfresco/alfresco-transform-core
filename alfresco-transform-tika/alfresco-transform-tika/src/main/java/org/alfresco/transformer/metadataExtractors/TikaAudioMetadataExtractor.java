@@ -107,7 +107,7 @@ public class TikaAudioMetadataExtractor extends AbstractTikaMetadataExtractor
         putRawValue(KEY_DESCRIPTION, generateDescription(metadata), properties);
 
         // The release date can be fiddly
-        Date releaseDate = generateReleaseDate(metadata);
+        Serializable releaseDate = generateReleaseDate(metadata);
         putRawValue(KEY_CREATED, releaseDate, properties);
         putRawValue(XMPDM.RELEASE_DATE.getName(), releaseDate, properties);
 
@@ -117,7 +117,7 @@ public class TikaAudioMetadataExtractor extends AbstractTikaMetadataExtractor
     /**
      * Generates the release date
      */
-    private Date generateReleaseDate(Metadata metadata)
+    private Serializable generateReleaseDate(Metadata metadata)
     {
         String date = metadata.get(XMPDM.RELEASE_DATE);
         if(date == null || date.length() == 0)

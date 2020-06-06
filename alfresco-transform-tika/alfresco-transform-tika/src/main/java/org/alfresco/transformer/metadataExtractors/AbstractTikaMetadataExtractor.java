@@ -115,7 +115,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
      * Version which also tries the ISO-8601 formats (in order..),
      *  and similar formats, which Tika makes use of
      */
-    protected Date makeDate(String dateStr)
+    protected Serializable makeDate(String dateStr)
     {
         // Try our formats first, in order
         try
@@ -142,8 +142,9 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
         }
         catch (IllegalArgumentException ignore) {}
 
-        // Fall back to the normal ones
-        return super.makeDate(dateStr);
+        // Fall back to the normal ones: We just return the String as AbstractMappingMetadataExtracter
+        // convertSystemPropertyValues in the repo will do the conversion that was previously done here.
+        return dateStr;
     }
 
     /**
