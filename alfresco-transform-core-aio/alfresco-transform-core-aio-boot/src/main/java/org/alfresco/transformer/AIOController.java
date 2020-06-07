@@ -115,24 +115,7 @@ public class AIOController extends AbstractTransformerController
             logger.debug("Performing transform with name '{}' using transformer with id '{}'.", transformName, transformer.getTransformerId());
         }
 
-        try
-        {
-            transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
-            transformer.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
-
-        }
-        catch (TransformException e)
-        {
-            throw e;
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new TransformException(BAD_REQUEST.value(), e.getMessage(), e);
-        }
-        catch (Exception e)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), "Failed transform - transform:"
-                    + transformName + " sourceMimetype:" + sourceMimetype + " targetMimetype:" + targetMimetype);
-        }
+        transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
+        transformer.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }

@@ -109,7 +109,7 @@ public class TextToPdfContentTransformerTest
         // Transform to PDF
         Map<String, String> parameters = new HashMap<>();
         parameters.put(PAGE_LIMIT, pageLimit);
-        transformer.transform(sourceFile, targetFile, "text/plain", "application/pdf", parameters);
+        transformer.transform("text/plain", "application/pdf", parameters, sourceFile, targetFile);
 
         // Read back in the PDF and check it
         PDDocument doc = PDDocument.load(targetFile);

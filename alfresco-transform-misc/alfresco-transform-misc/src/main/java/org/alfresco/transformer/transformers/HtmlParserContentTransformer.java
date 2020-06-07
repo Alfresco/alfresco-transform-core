@@ -75,8 +75,8 @@ public class HtmlParserContentTransformer implements SelectableTransformer
         HtmlParserContentTransformer.class);
 
     @Override
-    public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
-        final String targetMimetype, final Map<String, String> parameters) throws Exception
+    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
+                          final File sourceFile, final File targetFile) throws Exception
     {
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
         checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);

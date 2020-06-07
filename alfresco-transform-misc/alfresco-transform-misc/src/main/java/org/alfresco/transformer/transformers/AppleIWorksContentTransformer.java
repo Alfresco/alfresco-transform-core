@@ -74,8 +74,8 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
     //                 (53 x  41) preview-micro.jpg
 
     @Override
-    public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
-        final String targetMimetype, final Map<String, String> parameters)
+    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
+                          final File sourceFile, final File targetFile)
     {
         logger.debug("Performing IWorks to jpeg transform with sourceMimetype={} targetMimetype={}",
             sourceMimetype, targetMimetype);

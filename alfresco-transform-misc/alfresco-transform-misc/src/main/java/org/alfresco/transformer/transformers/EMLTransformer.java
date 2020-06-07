@@ -74,8 +74,8 @@ public class EMLTransformer implements SelectableTransformer
     private static final String DEFAULT_ENCODING = "UTF-8";
 
     @Override
-    public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
-        final String targetMimetype, final Map<String, String> parameters) throws Exception
+    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
+                          final File sourceFile, final File targetFile) throws Exception
     {
         logger.debug("Performing RFC822 to text transform.");
         // Use try with resource

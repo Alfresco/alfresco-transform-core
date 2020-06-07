@@ -39,6 +39,7 @@ import java.util.Map;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transformer.transformers.HtmlParserContentTransformer.SOURCE_ENCODING;
+import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 
 @Controller
 public class MiscController extends AbstractTransformerController
@@ -82,6 +83,7 @@ public class MiscController extends AbstractTransformerController
     protected void transform(String transformName, String sourceMimetype, String targetMimetype,
                              Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
-        transformer.transform(transformName, sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
+        transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
+        transformer.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }

@@ -26,6 +26,8 @@
  */
 package org.alfresco.transformer.transformers;
 
+import org.alfresco.transform.exceptions.TransformException;
+
 import java.io.File;
 import java.util.Map;
 
@@ -39,14 +41,18 @@ public interface SelectableTransformer
     String SOURCE_ENCODING = "sourceEncoding";
     String TARGET_ENCODING = "targetEncoding";
 
-    /**
-     * Implementation of the actual transformation.
-     *
-     * @param sourceFile
-     * @param targetFile
-     * @param parameters
-     * @throws Exception
-     */
-    void transform(File sourceFile, File targetFile, String sourceMimetype,
-        String targetMimetype, Map<String, String> parameters) throws Exception;
+    default void transform(String sourceMimetype, String targetMimetype, Map<String, String> parameters,
+                   File sourceFile, File targetFile) throws Exception
+    {
+    }
+
+    default void extractMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                                 File sourceFile, File targetFile) throws Exception
+    {
+    }
+
+    default void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                               File sourceFile, File targetFile) throws Exception
+    {
+    }
 }

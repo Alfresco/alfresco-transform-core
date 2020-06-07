@@ -27,13 +27,17 @@ package org.alfresco.transformer.executors;
  * #L%
  */
 import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transformer.logging.LogEntry;
 
 import java.io.File;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_METADATA_EMBED;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_METADATA_EXTRACT;
 import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
  * Basic interface for executing transforms and metadata extract or embed actions.
@@ -48,32 +52,63 @@ public interface Transformer
      */
     String getTransformerId();
 
-    default void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile) throws TransformException
+    default void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                           File sourceFile, File targetFile) throws TransformException
     {
-        final String transformName = transformOptions.remove(TRANSFORM_NAME_PARAMETER);
-        if (MIMETYPE_METADATA_EXTRACT.equals(targetMimetype))
+        try
         {
-            extractMetadata(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+            final String transformName = transformOptions.remove(TRANSFORM_NAME_PARAMETER);
+            if (MIMETYPE_METADATA_EXTRACT.equals(targetMimetype))
+            {
+                extractMetadata(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+            }
+            else if (MIMETYPE_METADATA_EMBED.equals(targetMimetype))
+            {
+                embedMetadata(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+            }
+            else
+            {
+                transform(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+            }
         }
-        else if (MIMETYPE_METADATA_EMBED.equals(targetMimetype))
+        catch (TransformException e)
         {
-            embedMetadata(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+            throw e;
         }
-        else
+        catch (IllegalArgumentException e)
         {
-            transform(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+            throw new TransformException(BAD_REQUEST.value(), getMessage(e));
         }
+        catch (Exception e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), getMessage(e));
+        }
+        if (!targetFile.exists())
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                    "Transformer failed to create an output file. Target file does not exist.");
+        }
+        if (sourceFile.length() > 0 && targetFile.length() == 0)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                    "Transformer failed to create an output file. Target file is empty but source file was not empty.");
+        }
+    }
+
+    private static String getMessage(Exception e)
+    {
+        return e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
     }
 
     default void transform(String transformName, String sourceMimetype, String targetMimetype,
                            Map<String, String> transformOptions,
-                           File sourceFile, File targetFile) throws TransformException
+                           File sourceFile, File targetFile) throws Exception
     {
     }
 
     default void extractMetadata(String transformName, String sourceMimetype, String targetMimetype,
                                  Map<String, String> transformOptions,
-                                 File sourceFile, File targetFile) throws TransformException
+                                 File sourceFile, File targetFile) throws Exception
     {
     }
 
@@ -84,7 +119,7 @@ public interface Transformer
      */
     default void embedMetadata(String transformName, String sourceMimetype, String targetMimetype,
                                Map<String, String> transformOptions,
-                               File sourceFile, File targetFile) throws TransformException
+                               File sourceFile, File targetFile) throws Exception
     {
     }
 }

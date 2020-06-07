@@ -61,7 +61,7 @@ import java.util.Map;
  * 507 Insufficient Storage: Failed to store the source file
  */
 @Controller
-public class ImageMagickController extends AbstractTransformerController
+public class  ImageMagickController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(ImageMagickController.class);
 

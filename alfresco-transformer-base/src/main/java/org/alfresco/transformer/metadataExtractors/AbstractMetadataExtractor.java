@@ -132,17 +132,15 @@ public abstract class AbstractMetadataExtractor
     public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
                           Map<String, String> parameters) throws Exception
     {
-        // TODO Rename methods to extractMetadata or something like that and call it from TikaJavaExecutor
-        //      What about SelectableTransformer
-        Map<String, Serializable> metadata = extractMetadata(sourceFile, sourceMimetype, parameters);
+        Map<String, Serializable> metadata = extractMetadata(sourceMimetype, parameters, sourceFile);
         mapMetadataAndWrite(targetFile, metadata);
     }
 
-    public abstract Map<String, Serializable> extractMetadata(File sourceFile, String sourceMimetype,
-                                                                 Map<String, String> transformOptions) throws Exception;
+    public abstract Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
+                                                              File sourceFile) throws Exception;
 
-    public void embedMetadata(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-                                 Map<String, String> transformOptions) throws Exception
+    public void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                              File sourceFile, File targetFile) throws Exception
     {
         // Default nothing, as embedding is not supported in most cases
     }

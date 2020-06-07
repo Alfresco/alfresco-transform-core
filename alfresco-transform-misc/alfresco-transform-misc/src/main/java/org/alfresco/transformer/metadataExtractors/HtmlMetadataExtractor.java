@@ -75,8 +75,8 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractor implements 
     }
 
     @Override
-    public Map<String, Serializable> extractMetadata(File sourceFile, String sourceMimetype,
-                                                     Map<String, String> transformOptions) throws Exception
+    public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
+                                                     File sourceFile) throws Exception
     {
         final Map<String, Serializable> rawProperties = new HashMap<>();
 

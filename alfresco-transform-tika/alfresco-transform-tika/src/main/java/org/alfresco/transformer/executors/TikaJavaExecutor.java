@@ -107,6 +107,7 @@ public class TikaJavaExecutor implements JavaExecutor
     @Override
     public void transform(String transformName, String sourceMimetype, String targetMimetype,
                           Map<String, String> transformOptions, File sourceFile, File targetFile)
+            throws Exception
     {
         final boolean includeContents = parseBoolean(
                 transformOptions.getOrDefault(RequestParamMap.INCLUDE_CONTENTS, "false"));
@@ -121,32 +122,10 @@ public class TikaJavaExecutor implements JavaExecutor
     }
 
     @Override
-    public void call(File sourceFile, File targetFile, String... args)
-        throws TransformException
+    public void call(File sourceFile, File targetFile, String... args) throws Exception
     {
         args = buildArgs(sourceFile, targetFile, args);
-        try
-        {
-            tika.transform(args);
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new TransformException(BAD_REQUEST.value(), getMessage(e));
-        }
-        catch (Exception e)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), getMessage(e));
-        }
-        if (!targetFile.exists() || targetFile.length() == 0)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                "Transformer failed to create an output file");
-        }
-    }
-
-    private static String getMessage(Exception e)
-    {
-        return e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
+        tika.transform(args);
     }
 
     private static String[] buildArgs(File sourceFile, File targetFile, String[] args)
@@ -189,26 +168,11 @@ public class TikaJavaExecutor implements JavaExecutor
 
     public void extractMetadata(String transformName, String sourceMimetype, String targetMimetype,
                                 Map<String, String> transformOptions, File sourceFile, File targetFile)
+                            throws Exception
     {
         AbstractTikaMetadataExtractor metadataExtractor = this.metadataExtractor.get(transformName);
-        try
-        {
-            Map<String, Serializable> metadata = metadataExtractor.extractMetadata(sourceFile, sourceMimetype, transformOptions);
-            metadataExtractor.mapMetadataAndWrite(targetFile, metadata);
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new TransformException(BAD_REQUEST.value(), getMessage(e));
-        }
-        catch (Exception e)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), getMessage(e));
-        }
-        if (!targetFile.exists() || targetFile.length() == 0)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                    "Transformer failed to create an output file");
-        }
+        Map<String, Serializable> metadata = metadataExtractor.extractMetadata(sourceMimetype, transformOptions, sourceFile);
+        metadataExtractor.mapMetadataAndWrite(targetFile, metadata);
     }
 
     /**
@@ -220,24 +184,9 @@ public class TikaJavaExecutor implements JavaExecutor
     @SuppressWarnings("deprecation" )
     public void embedMetadata(String transformName, String sourceMimetype, String targetMimetype,
                               Map<String, String> transformOptions, File sourceFile, File targetFile)
+                            throws Exception
     {
         AbstractTikaMetadataExtractor metadataExtractor = this.metadataEmbedder.get(transformName);
-        try
-        {
-            metadataExtractor.embedMetadata(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new TransformException(BAD_REQUEST.value(), getMessage(e));
-        }
-        catch (Exception e)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), getMessage(e));
-        }
-        if (!targetFile.exists() || targetFile.length() == 0)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                    "Transformer failed to create an output file");
-        }
+        metadataExtractor.embedMetadata(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }

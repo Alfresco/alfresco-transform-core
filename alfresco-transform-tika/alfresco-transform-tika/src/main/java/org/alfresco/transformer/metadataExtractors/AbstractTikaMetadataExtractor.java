@@ -183,41 +183,6 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
         return properties;
     }
 
-//    /**
-//     * There seems to be some sort of issue with some downstream
-//     *  3rd party libraries, and input streams that come from
-//     *  a {@link ContentReader}. This happens most often with
-//     *  JPEG and Tiff files.
-//     * For these cases, buffer out to a local file if not
-//     *  already there
-//     */
-//    protected InputStream getInputStream(ContentReader reader) throws IOException
-//    {
-//        // Prefer the File if available, it's generally quicker
-//        if(reader instanceof FileContentReader)
-//        {
-//            return TikaInputStream.get( ((FileContentReader)reader).getFile() );
-//        }
-//
-//        // Grab the InputStream for the Content
-//        InputStream input = reader.getContentInputStream();
-//
-//        // Images currently always require a file
-//        if (MimetypeMap.MIMETYPE_IMAGE_JPEG.equals(reader.getMimetype()) ||
-//            MimetypeMap.MIMETYPE_IMAGE_TIFF.equals(reader.getMimetype()))
-//        {
-//            TemporaryResources tmp = new TemporaryResources();
-//            TikaInputStream stream = TikaInputStream.get(input, tmp);
-//            stream.getFile(); // Have it turned into File backed
-//            return stream;
-//        }
-//        else
-//        {
-//            // The regular Content InputStream should be fine
-//            return input;
-//        }
-//    }
-
     /**
      * Gets the document selector, used for determining whether to parse embedded resources,
      * null by default so parse all.
@@ -243,8 +208,8 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
 
     @Override
     @SuppressWarnings( "deprecation" )
-    public Map<String, Serializable> extractMetadata(File sourceFile, String sourceMimetype,
-                                                     Map<String, String> transformOptions) throws Exception
+    public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
+                                                     File sourceFile) throws Exception
     {
         Map<String, Serializable> rawProperties = new HashMap<>();
 
@@ -336,9 +301,14 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
         return rawProperties;
     }
 
+    /**
+     * @deprecated The content repository's TikaPoweredMetadataExtracter provides no non test implementations.
+     *             This code exists in case there are custom implementations, that need to be converted to T-Engines.
+     *             It is simply a copy and paste from the content repository and has received limited testing.
+     */
     @Override
-    public void embedMetadata(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-                              Map<String, String> transformOptions) throws Exception
+    public void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                              File sourceFile, File targetFile) throws Exception
     {
         Embedder embedder = getEmbedder();
         if (embedder == null)

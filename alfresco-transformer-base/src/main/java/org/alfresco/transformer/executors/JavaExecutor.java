@@ -38,5 +38,5 @@ import java.io.File;
  */
 public interface JavaExecutor extends Transformer
 {
-    void call(File sourceFile, File targetFile, String... args) throws TransformException;
+    void call(File sourceFile, File targetFile, String... args) throws Exception;
 }
