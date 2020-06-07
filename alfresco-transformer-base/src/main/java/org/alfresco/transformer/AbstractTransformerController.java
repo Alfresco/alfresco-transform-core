@@ -144,7 +144,7 @@ public abstract class AbstractTransformerController implements TransformControll
     @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
                                               @RequestParam(FILE) MultipartFile sourceMultipartFile,
-                                              @RequestParam(value = TARGET_EXTENSION, required = false) String targetExtension,
+                                              @RequestParam(TARGET_EXTENSION) String targetExtension,
                                               @RequestParam(value = SOURCE_MIMETYPE, required = false) String sourceMimetype,
                                               @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,
                                               @RequestParam Map<String, String> requestParameters,
