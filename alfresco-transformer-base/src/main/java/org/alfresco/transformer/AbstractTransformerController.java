@@ -144,9 +144,9 @@ public abstract class AbstractTransformerController implements TransformControll
     @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
                                               @RequestParam(FILE) MultipartFile sourceMultipartFile,
-                                              @RequestParam(TARGET_EXTENSION) String targetExtension,
-                                              @RequestParam(SOURCE_MIMETYPE) String sourceMimetype,
-                                              @RequestParam(TARGET_MIMETYPE) String targetMimetype,
+                                              @RequestParam(value = TARGET_EXTENSION, required = false) String targetExtension,
+                                              @RequestParam(value = SOURCE_MIMETYPE, required = false) String sourceMimetype,
+                                              @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,
                                               @RequestParam Map<String, String> requestParameters,
                                               @RequestParam (value = TEST_DELAY, required = false) Long testDelay,
 
@@ -178,7 +178,7 @@ public abstract class AbstractTransformerController implements TransformControll
         return body;
     }
 
-    protected Map<String, String> getTransformOptions(@RequestParam Map<String, String> requestParameters)
+    protected Map<String, String> getTransformOptions(Map<String, String> requestParameters)
     {
         Map<String, String> transformOptions = new HashMap<>(requestParameters);
         transformOptions.keySet().removeAll(NON_TRANSFORM_OPTION_REQUEST_PARAMETERS);
@@ -418,7 +418,9 @@ public abstract class AbstractTransformerController implements TransformControll
         transform(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 
-    private String getTransformerName(@RequestParam(SOURCE_MIMETYPE) String sourceMimetype, @RequestParam(TARGET_MIMETYPE) String targetMimetype, @RequestParam(value = TRANSFORM_NAME_PROPERTY, required = false) String requestTransformName, File sourceFile, Map<String, String> transformOptions)
+    private String getTransformerName(String sourceMimetype, String targetMimetype,
+                                      String requestTransformName, File sourceFile,
+                                      Map<String, String> transformOptions)
     {
         // Check if transformName was provided in the request (this can happen for ACS legacy transformers)
         String transformName = requestTransformName;
