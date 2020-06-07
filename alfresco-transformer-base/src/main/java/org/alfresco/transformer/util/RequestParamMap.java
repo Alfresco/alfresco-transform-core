@@ -26,15 +26,27 @@
  */
 package org.alfresco.transformer.util;
 
-public interface RequestParamMap 
+import org.springframework.web.bind.annotation.RequestParam;
+
+public interface RequestParamMap
 {
+    // This property can be sent by acs repository's legacy transformers to force a transform,
+    // instead of letting this T-Engine determine it based on the request parameters.
+    // This allows clients to specify transform names as they appear in the engine config files, for example:
+    // imagemagick, libreoffice, PdfBox, TikaAuto, ....
+    // See ATS-731.
+    @Deprecated
+    String TRANSFORM_NAME_PROPERTY = "transformName";
+
     String TRANSFORM_NAME_PARAMETER = "alfresco.transform-name-parameter";
+    String FILE = "file";
 
     String SOURCE_ENCODING          = "sourceEncoding";
     String SOURCE_EXTENSION         = "sourceExtension";
     String SOURCE_MIMETYPE          = "sourceMimetype";
     String TARGET_EXTENSION         = "targetExtension";
     String TARGET_MIMETYPE          = "targetMimetype";
+    String TARGET_ENCODING          = "targetEncoding";
     String TEST_DELAY               = "testDelay";
     String PAGE_REQUEST_PARAM       = "page";    
     String WIDTH_REQUEST_PARAM      = "width";
@@ -58,5 +70,8 @@ public interface RequestParamMap
     String ALLOW_ENLARGEMENT       = "allowEnlargement";
     String MAINTAIN_ASPECT_RATIO   = "maintainAspectRatio";
     String COMMAND_OPTIONS         = "commandOptions";
-    String TIMEOUT                 = "timeOut";
+    String TIMEOUT                 = "timeout";
+    String INCLUDE_CONTENTS        = "includeContents";
+    String NOT_EXTRACT_BOOKMARK_TEXT = "notExtractBookmarksText";
+    String PAGE_LIMIT              = "pageLimit";
 }

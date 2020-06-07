@@ -26,15 +26,8 @@
  */
 package org.alfresco.transformer;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
-import org.alfresco.transformer.transformers.ImageMagickAdapter;
-import org.alfresco.transformer.transformers.Transformer;
+import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
+import org.alfresco.transformer.executors.Transformer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +38,12 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.util.Map;
+
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(AIOController.class)
@@ -57,7 +56,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
 {
    // All tests contained in ImageMagickControllerTest
    
-    ImageMagickAdapter adapter;
+    ImageMagickCommandExecutor adapter;
     
     @Autowired
     AIOTransformRegistry transformRegistry;
@@ -65,7 +64,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
     @PostConstruct
     private void init() throws Exception
     {
-        adapter = new ImageMagickAdapter(EXE, DYN, ROOT, CODERS, CONFIG);
+        adapter = new ImageMagickCommandExecutor(EXE, DYN, ROOT, CODERS, CONFIG);
     }
 
     @Before @Override

@@ -40,6 +40,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.alfresco.transformer.util.RequestParamMap;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -62,7 +63,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(TextToPdfContentTransformer.class);
 
-    public static final String PAGE_LIMIT = "pageLimit";
+    public static final String PAGE_LIMIT = RequestParamMap.PAGE_LIMIT;
 
     private final PagedTextToPDF transformer;
 

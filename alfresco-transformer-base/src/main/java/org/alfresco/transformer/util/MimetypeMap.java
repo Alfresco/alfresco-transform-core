@@ -31,6 +31,9 @@ package org.alfresco.transformer.util;
  */
 public interface MimetypeMap
 {
+    String MIMETYPE_METADATA_EXTRACT = "alfresco-metadata-extract";
+    String MIMETYPE_METADATA_EMBED = "alfresco-metadata-embed";
+
     String PREFIX_APPLICATION = "application/";
     String PREFIX_AUDIO = "audio/";
     String PREFIX_IMAGE = "image/";

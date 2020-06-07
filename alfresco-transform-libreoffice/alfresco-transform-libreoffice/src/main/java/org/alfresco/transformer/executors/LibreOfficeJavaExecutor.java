@@ -52,6 +52,8 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
  */
 public class LibreOfficeJavaExecutor implements JavaExecutor
 {
+    private static String ID = "libreoffice";
+
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeJavaExecutor.class);
 
     private static final int JODCONVERTER_TRANSFORMATION_ERROR_CODE = 3088;
@@ -94,7 +96,13 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
     }
 
     @Override
-    public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+    public String getTransformerId()
+    {
+        return ID;
+    }
+
+    @Override
+    public void transform(String transformName, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
                           File sourceFile, File targetFile)
     {
         call(sourceFile, targetFile);
@@ -175,10 +183,13 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
     }
 
     /**
-     * @deprecated The JodConverterMetadataExtracter has not been in use since 6.0.1
+     * @deprecated The JodConverterMetadataExtracter has not been in use since 6.0.1.
+     *             This code exists in case there are custom implementations, that need to be converted to T-Engines.
+     *             It is simply a copy and paste from the content repository and has received limited testing.
      */
     @Override
-    public void extractMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+    public void extractMetadata(String transformName, String sourceMimetype, String targetMimetype,
+                                Map<String, String> transformOptions,
                                 File sourceFile, File targetFile)
     {
         OfficeManager officeManager = jodconverter.getOfficeManager();

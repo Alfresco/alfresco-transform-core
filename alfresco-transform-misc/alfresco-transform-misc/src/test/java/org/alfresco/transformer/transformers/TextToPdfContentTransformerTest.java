@@ -26,7 +26,7 @@
  */
 package org.alfresco.transformer.transformers;
 
-import static org.alfresco.transformer.transformers.TextToPdfContentTransformer.PAGE_LIMIT;
+import static org.alfresco.transformer.util.RequestParamMap.PAGE_LIMIT;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;

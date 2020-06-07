@@ -32,8 +32,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.alfresco.transformer.transformers.PdfRendererAdapter;
-import org.alfresco.transformer.transformers.Transformer;
+import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
+import org.alfresco.transformer.executors.Transformer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 public class AIOControllerPdfRendererTest extends AlfrescoPdfRendererControllerTest
 {
     // All tests contained IN AlfrescoPdfRendererControllerTest
-    PdfRendererAdapter adapter;
+    PdfRendererCommandExecutor adapter;
     
     @Autowired
     AIOTransformRegistry transformRegistry;
@@ -62,7 +62,7 @@ public class AIOControllerPdfRendererTest extends AlfrescoPdfRendererControllerT
     @PostConstruct
     private void init() throws Exception
     {
-        adapter = new PdfRendererAdapter(execPath);
+        adapter = new PdfRendererCommandExecutor(execPath);
     }
 
     @Override

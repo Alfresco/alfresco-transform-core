@@ -26,22 +26,6 @@
  */
 package org.alfresco.transformer.executors;
 
-import static java.lang.Boolean.parseBoolean;
-import static org.alfresco.transformer.executors.Tika.INCLUDE_CONTENTS;
-import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
-import static org.alfresco.transformer.executors.Tika.TARGET_ENCODING;
-import static org.alfresco.transformer.executors.Tika.TARGET_MIMETYPE;
-import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.StringJoiner;
-
 import com.google.common.collect.ImmutableMap;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
@@ -55,8 +39,25 @@ import org.alfresco.transformer.metadataExtractors.PdfBoxMetadataExtractor;
 import org.alfresco.transformer.metadataExtractors.PoiMetadataExtractor;
 import org.alfresco.transformer.metadataExtractors.TikaAudioMetadataExtractor;
 import org.alfresco.transformer.metadataExtractors.TikaAutoMetadataExtractor;
+import org.alfresco.transformer.util.RequestParamMap;
 import org.apache.tika.exception.TikaException;
 import org.xml.sax.SAXException;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.StringJoiner;
+
+import static java.lang.Boolean.parseBoolean;
+import static org.alfresco.transformer.executors.Tika.INCLUDE_CONTENTS;
+import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
+import static org.alfresco.transformer.executors.Tika.TARGET_ENCODING;
+import static org.alfresco.transformer.executors.Tika.TARGET_MIMETYPE;
+import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARK_TEXT;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
  * JavaExecutor implementation for running TIKA transformations. It loads the
@@ -64,6 +65,8 @@ import org.xml.sax.SAXException;
  */
 public class TikaJavaExecutor implements JavaExecutor
 {
+    private static final String ID = "tika";
+
     public static final String LICENCE = "This transformer uses Tika from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt";
 
     private final Tika tika;
@@ -79,6 +82,9 @@ public class TikaJavaExecutor implements JavaExecutor
             .put("TikaAudioMetadataExtractor", new TikaAudioMetadataExtractor())
             .put("TikaAutoMetadataExtractor", new TikaAutoMetadataExtractor())
             .build();
+    private final Map<String, AbstractTikaMetadataExtractor> metadataEmbedder = ImmutableMap
+            .<String, AbstractTikaMetadataExtractor>builder()
+            .build();
 
     public TikaJavaExecutor()
     {
@@ -93,14 +99,19 @@ public class TikaJavaExecutor implements JavaExecutor
     }
 
     @Override
-    public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                          File sourceFile, File targetFile)
+    public String getTransformerId()
     {
-        final String transformName = transformOptions.get(TRANSFORM_NAME_PARAMETER);
+        return ID;
+    }
+
+    @Override
+    public void transform(String transformName, String sourceMimetype, String targetMimetype,
+                          Map<String, String> transformOptions, File sourceFile, File targetFile)
+    {
         final boolean includeContents = parseBoolean(
-                transformOptions.getOrDefault("includeContents", "false"));
+                transformOptions.getOrDefault(RequestParamMap.INCLUDE_CONTENTS, "false"));
         final boolean notExtractBookmarksText = parseBoolean(
-                transformOptions.getOrDefault("notExtractBookmarksText", "false"));
+                transformOptions.getOrDefault(NOT_EXTRACT_BOOKMARK_TEXT, "false"));
         final String targetEncoding = transformOptions.getOrDefault("targetEncoding", "UTF-8");
 
         call(sourceFile, targetFile, transformName,
@@ -176,10 +187,9 @@ public class TikaJavaExecutor implements JavaExecutor
         }
     }
 
-    public void extractMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                                File sourceFile, File targetFile)
+    public void extractMetadata(String transformName, String sourceMimetype, String targetMimetype,
+                                Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
-        final String transformName = transformOptions.get(TRANSFORM_NAME_PARAMETER);
         AbstractTikaMetadataExtractor metadataExtractor = this.metadataExtractor.get(transformName);
         try
         {
@@ -201,11 +211,17 @@ public class TikaJavaExecutor implements JavaExecutor
         }
     }
 
-    public void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                              File sourceFile, File targetFile)
+    /**
+     * @deprecated The content repository's TikaPoweredMetadataExtracter provides no non test implementations.
+     *             This code exists in case there are custom implementations, that need to be converted to T-Engines.
+     *             It is simply a copy and paste from the content repository and has received limited testing.
+     */
+    @Override
+    @SuppressWarnings("deprecation" )
+    public void embedMetadata(String transformName, String sourceMimetype, String targetMimetype,
+                              Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
-        final String transformName = transformOptions.get(TRANSFORM_NAME_PARAMETER);
-        AbstractTikaMetadataExtractor metadataExtractor = this.metadataExtractor.get(transformName);
+        AbstractTikaMetadataExtractor metadataExtractor = this.metadataEmbedder.get(transformName);
         try
         {
             metadataExtractor.embedMetadata(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions);

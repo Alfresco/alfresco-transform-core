@@ -33,8 +33,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
-import org.alfresco.transformer.transformers.LibreOfficeAdapter;
-import org.alfresco.transformer.transformers.Transformer;
+import org.alfresco.transformer.executors.Transformer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +63,7 @@ public class AIOControllerLibreOfficeTest extends LibreOfficeControllerTest
         assertTrue("Wrong controller wired for test", controller instanceof AIOController);
     }
 
-    LibreOfficeAdapter adapter;
+    LibreOfficeJavaExecutor adapter;
 
     @Autowired
     AIOTransformRegistry transformRegistry;
@@ -72,7 +71,7 @@ public class AIOControllerLibreOfficeTest extends LibreOfficeControllerTest
     @PostConstruct
     private void init() throws Exception
     {
-        adapter = new LibreOfficeAdapter(execPath);
+        adapter = new LibreOfficeJavaExecutor(execPath);
     }
 
     @Override

@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Map;
 
 import static org.alfresco.transformer.executors.Tika.readTikaConfig;

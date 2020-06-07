@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transformer.executors.Transformer;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.metadataExtractors.HtmlMetadataExtractor;
 import org.alfresco.transformer.metadataExtractors.RFC822MetadataExtractor;
@@ -49,8 +50,10 @@ import com.google.common.collect.ImmutableMap;
  *
  * @author eknizat
  */
-public class SelectingTransformer
+public class SelectingTransformer implements Transformer
 {
+    private static final String ID = "misc";
+
     private static final Logger logger = LoggerFactory.getLogger(SelectingTransformer.class);
 
     public static final String LICENCE =
@@ -70,21 +73,27 @@ public class SelectingTransformer
         .put("RFC822MetadataExtractor", new RFC822MetadataExtractor())
         .build();
 
+    @Override
+    public String getTransformerId()
+    {
+        return ID;
+    }
+
     /**
      * Performs a transform using a transformer selected based on the provided sourceMimetype and targetMimetype
      *
-     * @param transform      the name of the transformer
+     * @param transformName  the name of the transformer
      * @param sourceFile     File to transform from
      * @param targetFile     File to transform to
      * @param sourceMimetype Mimetype of the source file
      * @throws TransformException if there was a problem internally
      */
-    public void transform(String transform, File sourceFile, File targetFile, String sourceMimetype,
+    public void transform(String transformName, File sourceFile, File targetFile, String sourceMimetype,
         String targetMimetype, Map<String, String> parameters) throws TransformException
     {
         try
         {
-            final SelectableTransformer transformer = transformers.get(transform);
+            final SelectableTransformer transformer = transformers.get(transformName);
             logOptions(sourceFile, targetFile, parameters);
             transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype,
                 parameters);

@@ -32,7 +32,7 @@ import org.alfresco.transform.client.model.config.TransformOption;
 import org.alfresco.transform.client.registry.AbstractTransformRegistry;
 import org.alfresco.transform.client.registry.TransformCache;
 import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.transformers.Transformer;
+import org.alfresco.transformer.executors.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +67,7 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
 
     private ObjectMapper jsonObjectMapper = new ObjectMapper();
 
-    //Represents the mapping between a transform and a transformer, multiple mappings can point to the same transformer.
+    // Represents the mapping between a transform and a transformer, multiple mappings can point to the same transformer.
     private Map<String, Transformer> transformerTransformMapping = new HashMap();
 
     /**

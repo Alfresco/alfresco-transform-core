@@ -26,51 +26,17 @@
  */
 package org.alfresco.transformer.executors;
 
-import java.io.File;
-import java.util.Map;
-
 import org.alfresco.transform.exceptions.TransformException;
 
+import java.io.File;
+
 /**
- * Basic interface for executing transformations inside Java/JVM
+ * Basic interface for executing transformations inside Java/JVM.
  *
  * @author Cezar Leahu
  * @author adavis
  */
-public interface JavaExecutor
+public interface JavaExecutor extends Transformer
 {
     void call(File sourceFile, File targetFile, String... args) throws TransformException;
-
-    default void transformExtractOrEmbed(String sourceMimetype, String targetMimetype,
-                                         Map<String, String> transformOptions,
-                                         File sourceFile, File targetFile) throws TransformException
-    {
-        if ("alfresco-metadata-extract".equals(targetMimetype))
-        {
-            extractMetadata(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
-        }
-        else if ("alfresco-metadata-embed".equals(targetMimetype))
-        {
-            embedMetadata(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
-        }
-        else
-        {
-            transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
-        }
-    }
-
-    default void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                           File sourceFile, File targetFile) throws TransformException
-    {
-    }
-
-    default void extractMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                                 File sourceFile, File targetFile) throws TransformException
-    {
-    }
-
-    default void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                               File sourceFile, File targetFile) throws TransformException
-    {
-    }
 }

@@ -27,11 +27,11 @@
 package org.alfresco.transformer;
 
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
-import org.alfresco.transformer.transformers.ImageMagickAdapter;
-import org.alfresco.transformer.transformers.LibreOfficeAdapter;
-import org.alfresco.transformer.transformers.MiscAdapter;
-import org.alfresco.transformer.transformers.PdfRendererAdapter;
-import org.alfresco.transformer.transformers.TikaAdapter;
+import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
+import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
+import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
+import org.alfresco.transformer.executors.TikaJavaExecutor;
+import org.alfresco.transformer.transformers.SelectingTransformer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,11 +70,11 @@ public class AIOCustomConfig
     public TransformServiceRegistry aioTransformRegistry() throws Exception
     {
         AIOTransformRegistry aioTransformRegistry = new AIOTransformRegistry();
-        aioTransformRegistry.registerTransformer(new MiscAdapter());
-        aioTransformRegistry.registerTransformer(new TikaAdapter());
-        aioTransformRegistry.registerTransformer(new ImageMagickAdapter(imageMagickExePath, imageMagickDynPath, imageMagickRootPath, imageMagickCodersPath, imageMagickConfigPath));
-        aioTransformRegistry.registerTransformer(new LibreOfficeAdapter(libreofficePath));
-        aioTransformRegistry.registerTransformer(new PdfRendererAdapter(pdfRendererPath));
+        aioTransformRegistry.registerTransformer(new SelectingTransformer());
+        aioTransformRegistry.registerTransformer(new TikaJavaExecutor());
+        aioTransformRegistry.registerTransformer(new ImageMagickCommandExecutor(imageMagickExePath, imageMagickDynPath, imageMagickRootPath, imageMagickCodersPath, imageMagickConfigPath));
+        aioTransformRegistry.registerTransformer(new LibreOfficeJavaExecutor(libreofficePath));
+        aioTransformRegistry.registerTransformer(new PdfRendererCommandExecutor(pdfRendererPath));
         return aioTransformRegistry;
     }
 }

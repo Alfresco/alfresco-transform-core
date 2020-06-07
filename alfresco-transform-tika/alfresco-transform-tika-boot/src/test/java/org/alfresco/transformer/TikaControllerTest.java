@@ -59,6 +59,8 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORD;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XHTML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_ZIP;
+import static org.alfresco.transformer.util.RequestParamMap.INCLUDE_CONTENTS;
+import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARK_TEXT;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -245,7 +247,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
                                                        ? mockMvcRequest("/transform", sourceFile,
             "targetExtension", this.targetExtension)
                                                        : mockMvcRequest("/transform", sourceFile,
-            "targetExtension", this.targetExtension, "includeContents", includeContents.toString());
+            "targetExtension", this.targetExtension, INCLUDE_CONTENTS, includeContents.toString());
         MvcResult result = mockMvc.perform(requestBuilder)
                                   .andExpect(status().is(OK.value()))
                                   .andExpect(header().string("Content-Disposition",
@@ -528,7 +530,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         mockMvc.perform(
             mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension).param(
-                "notExtractBookmarksText", "true"))
+                NOT_EXTRACT_BOOKMARK_TEXT, "true"))
                .andExpect(status().is(OK.value()))
                .andExpect(header().string("Content-Disposition",
                    "attachment; filename*= UTF-8''quick." + targetExtension));
