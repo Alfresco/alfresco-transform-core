@@ -53,7 +53,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
  */
 public class AIOControllerLibreOfficeTest extends LibreOfficeControllerTest
 {
-
     //Tests contained in LibreOfficeControllerTest
     
     @Test
@@ -63,25 +62,16 @@ public class AIOControllerLibreOfficeTest extends LibreOfficeControllerTest
         assertTrue("Wrong controller wired for test", controller instanceof AIOController);
     }
 
-    LibreOfficeJavaExecutor adapter;
-
     @Autowired
     AIOTransformRegistry transformRegistry;
-
-    @PostConstruct
-    private void init() throws Exception
-    {
-        adapter = new LibreOfficeJavaExecutor(execPath);
-    }
 
     @Override
     // Used by the super class to mock the javaExecutor, a different implementation is required here
     protected void setJavaExecutor(AbstractTransformerController controller, LibreOfficeJavaExecutor javaExecutor)
     {
-        ReflectionTestUtils.setField(adapter, "javaExecutor", javaExecutor);
-        //Need to wire in the mocked adapter into the controller...
+        //Need to wire in the mocked javaExecutor into the controller...
         Map<String,Transformer> transformers = transformRegistry.getTransformerTransformMapping();
-        transformers.replace("libreoffice", adapter);
+        transformers.replace("libreoffice", javaExecutor);
         // No need to set the transform registry to the controller as it is @Autowired in
     }
 

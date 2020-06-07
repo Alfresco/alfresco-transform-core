@@ -55,27 +55,18 @@ import static org.junit.Assert.assertTrue;
 public class AIOControllerImageMagickTest extends ImageMagickControllerTest
 {
    // All tests contained in ImageMagickControllerTest
-   
-    ImageMagickCommandExecutor adapter;
-    
+
     @Autowired
     AIOTransformRegistry transformRegistry;
-
-    @PostConstruct
-    private void init() throws Exception
-    {
-        adapter = new ImageMagickCommandExecutor(EXE, DYN, ROOT, CODERS, CONFIG);
-    }
 
     @Before @Override
     public void before() throws IOException
     {       
         ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
-        ReflectionTestUtils.setField(adapter, "commandExecutor", commandExecutor);
-        //Need to wire in the mocked adapter into the controller...
+        //Need to wire in the mocked commandExecutor into the controller...
         Map<String,Transformer> transformers = transformRegistry.getTransformerTransformMapping();
-        transformers.replace("imagemagick", adapter);
+        transformers.replace("imagemagick", commandExecutor);
 
         mockTransformCommand("jpg", "png", "image/jpeg", true);
     }

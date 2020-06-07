@@ -53,27 +53,17 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
  */
 public class AIOControllerPdfRendererTest extends AlfrescoPdfRendererControllerTest
 {
-    // All tests contained IN AlfrescoPdfRendererControllerTest
-    PdfRendererCommandExecutor adapter;
-    
     @Autowired
     AIOTransformRegistry transformRegistry;
-
-    @PostConstruct
-    private void init() throws Exception
-    {
-        adapter = new PdfRendererCommandExecutor(execPath);
-    }
 
     @Override
     protected void setFields()
     {
         ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
-        ReflectionTestUtils.setField(adapter, "pdfExecutor", commandExecutor);
-        //Need to wire in the mocked adapter into the controller...
+        //Need to wire in the mocked commandExecutor into the controller...
         Map<String,Transformer> transformers = transformRegistry.getTransformerTransformMapping();
-        transformers.replace("pdfrenderer", adapter);
+        transformers.replace("pdfrenderer", commandExecutor);
     }
 
     @Override
