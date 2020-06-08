@@ -177,6 +177,15 @@ public class LibreOfficeTransformationIT
                 allTargets("quick.ods", spreadsheetTargets),
                 allTargets("quick.xls", spreadsheetTargets),
                 allTargets("quick.xlsx", spreadsheetTargets),
+
+                allTargets("quick.xml", spreadsheetTargets),
+                allTargets("quick.xltm", spreadsheetTargets),
+                allTargets("quick.xlam", spreadsheetTargets),
+                allTargets("quick.ppsm", spreadsheetTargets),
+                allTargets("quick.msg", spreadsheetTargets),
+                allTargets("quick.dita", spreadsheetTargets),
+                allTargets("quick.ppsx", spreadsheetTargets),
+
                 allTargets("people.csv", spreadsheetTargets),
                 allTargets("sample.tsv", spreadsheetTargets)
             )
