@@ -129,13 +129,6 @@ public abstract class AbstractMetadataExtractor
         }
     }
 
-    public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype,
-                          Map<String, String> parameters) throws Exception
-    {
-        Map<String, Serializable> metadata = extractMetadata(sourceMimetype, parameters, sourceFile);
-        mapMetadataAndWrite(targetFile, metadata);
-    }
-
     public abstract Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
                                                               File sourceFile) throws Exception;
 
