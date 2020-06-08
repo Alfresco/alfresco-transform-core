@@ -58,7 +58,6 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENT
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OUTLOOK_MSG;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_DITA;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_PPSM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.springframework.http.HttpStatus.OK;
@@ -118,8 +117,8 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_HTML,"html",null),
         testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION,"odp",null),
         testFile(MIMETYPE_PPT,"ppt",null),
-        testFile(MIMETYPE_PPSM,"ppsm",null),
-        testFile(MIMETYPE_PPSX,"ppsx",null),
+        testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO,"ppsm",null),
+        testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW,"ppsx",null),
         testFile(MIMETYPE_PDF,"pdf",null)
     );
 
