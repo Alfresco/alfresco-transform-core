@@ -58,6 +58,7 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENT
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OUTLOOK_MSG;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_DITA;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_PPSM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.springframework.http.HttpStatus.OK;
@@ -91,7 +92,13 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_OPENDOCUMENT_SPREADSHEET,"ods",null),
         testFile(MIMETYPE_PDF,"pdf",null),
         testFile(MIMETYPE_TSV,"tsv",null),
-        testFile(MIMETYPE_EXCEL,"xls",null)
+        testFile(MIMETYPE_EXCEL,"xls",null),
+        testFile(MIMETYPE_OPENXML_SPREADSHEET,"xlsx",null),
+        testFile(MIMETYPE_XML,"xml",null),
+        testFile(MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO,"xltm",null),
+        testFile(MIMETYPE_OPENXML_SPREADSHEET_ADDIN_MACRO,"xlam",null),
+        testFile(MIMETYPE_DITA,"dita",null),
+        testFile(MIMETYPE_OUTLOOK_MSG,"msg",null)
     );
 
     private static final Set<TestFileInfo> documentsTargets = ImmutableSet.of(
@@ -111,6 +118,8 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_HTML,"html",null),
         testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION,"odp",null),
         testFile(MIMETYPE_PPT,"ppt",null),
+        testFile(MIMETYPE_PPSM,"ppsm",null),
+        testFile(MIMETYPE_PPSX,"ppsx",null),
         testFile(MIMETYPE_PDF,"pdf",null)
     );
 
@@ -169,6 +178,8 @@ public class LibreOfficeTransformationIT
                 allTargets("quick.odp", presentationTargets),
                 allTargets("quick.ppt", presentationTargets),
                 allTargets("quick.pptx", presentationTargets),
+                allTargets("quick.ppsm", presentationTargets),
+                allTargets("quick.ppsx", spreadsheetTargets),
 
                 allTargets("quick.odg", graphicTargets),
                 allTargets("quick.vdx", graphicTargets),
@@ -177,15 +188,11 @@ public class LibreOfficeTransformationIT
                 allTargets("quick.ods", spreadsheetTargets),
                 allTargets("quick.xls", spreadsheetTargets),
                 allTargets("quick.xlsx", spreadsheetTargets),
-
                 allTargets("quick.xml", spreadsheetTargets),
                 allTargets("quick.xltm", spreadsheetTargets),
                 allTargets("quick.xlam", spreadsheetTargets),
-                allTargets("quick.ppsm", spreadsheetTargets),
-                allTargets("quick.msg", spreadsheetTargets),
                 allTargets("quick.dita", spreadsheetTargets),
-                allTargets("quick.ppsx", spreadsheetTargets),
-
+                allTargets("quick.msg", spreadsheetTargets),
                 allTargets("people.csv", spreadsheetTargets),
                 allTargets("sample.tsv", spreadsheetTargets)
             )
