@@ -192,7 +192,7 @@ public class ImageMagickTransformationIT
                 allTargets("quick.pnm"),
                 allTargets("quick.ppm"),
                 allTargets("quick.psd"),
-//                allTargets("quick.tiff"),
+                //allTargets("quick.tiff"),
                 allTargets("quick.xbm"),
                 allTargets("quick.xpm"),
                 allTargets("quick.xwd")
