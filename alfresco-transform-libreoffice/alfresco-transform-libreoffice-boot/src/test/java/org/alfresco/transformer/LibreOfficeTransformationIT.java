@@ -86,36 +86,36 @@ public class LibreOfficeTransformationIT
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeTransformationIT.class);
     private static final String ENGINE_URL = "http://localhost:8090";
     private static final Set<TestFileInfo> spreadsheetTargets = ImmutableSet.of(
-            testFile(MIMETYPE_TEXT_CSV, "csv",null),
-            testFile(MIMETYPE_HTML,"html",null),
-            testFile(MIMETYPE_OPENDOCUMENT_SPREADSHEET,"ods",null),
-            testFile(MIMETYPE_PDF,"pdf",null),
-            testFile(MIMETYPE_TSV,"tsv",null),
-            testFile(MIMETYPE_EXCEL,"xls",null)
+        testFile(MIMETYPE_TEXT_CSV, "csv",null),
+        testFile(MIMETYPE_HTML,"html",null),
+        testFile(MIMETYPE_OPENDOCUMENT_SPREADSHEET,"ods",null),
+        testFile(MIMETYPE_PDF,"pdf",null),
+        testFile(MIMETYPE_TSV,"tsv",null),
+        testFile(MIMETYPE_EXCEL,"xls",null)
     );
 
     private static final Set<TestFileInfo> documentsTargets = ImmutableSet.of(
-            testFile(MIMETYPE_WORD,"doc",null),
-            testFile(MIMETYPE_HTML,"html",null),
-            testFile(MIMETYPE_OPENDOCUMENT_TEXT,"odt",null),
-            testFile(MIMETYPE_PDF,"pdf",null),
-            testFile(MIMETYPE_RTF,"rtf",null)
+        testFile(MIMETYPE_WORD,"doc",null),
+        testFile(MIMETYPE_HTML,"html",null),
+        testFile(MIMETYPE_OPENDOCUMENT_TEXT,"odt",null),
+        testFile(MIMETYPE_PDF,"pdf",null),
+        testFile(MIMETYPE_RTF,"rtf",null)
     );
 
     private static final Set<TestFileInfo> graphicTargets = ImmutableSet.of(
-            testFile(MIMETYPE_PDF,"pdf",null),
-            testFile(MIMETYPE_IMAGE_SVG,"svg",null)
+        testFile(MIMETYPE_PDF,"pdf",null),
+        testFile(MIMETYPE_IMAGE_SVG,"svg",null)
     );
 
     private static final Set<TestFileInfo> presentationTargets = ImmutableSet.of(
-            testFile(MIMETYPE_HTML,"html",null),
-            testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION,"odp",null),
-            testFile(MIMETYPE_PPT,"ppt",null),
-            testFile(MIMETYPE_PDF,"pdf",null)
+        testFile(MIMETYPE_HTML,"html",null),
+        testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION,"odp",null),
+        testFile(MIMETYPE_PPT,"ppt",null),
+        testFile(MIMETYPE_PDF,"pdf",null)
     );
 
     private static final Set<TestFileInfo> pdfTarget = ImmutableSet.of(
-            testFile(MIMETYPE_PDF,"pdf",null)
+        testFile(MIMETYPE_PDF,"pdf",null)
     );
 
     private final String sourceFile;
@@ -124,29 +124,29 @@ public class LibreOfficeTransformationIT
     private final String targetMimetype;
 
     private static final Map<String,TestFileInfo> TEST_FILES = Stream.of(
-            testFile(MIMETYPE_WORD                                 ,"doc"  ,"quick.doc"),
-            testFile(MIMETYPE_OPENXML_WORDPROCESSING               ,"docx" ,"quick.docx"),
-            testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS                ,"odg"  ,"quick.odg"),
-            testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION            ,"odp"  ,"quick.odp"),
-            testFile(MIMETYPE_OPENDOCUMENT_SPREADSHEET             ,"ods"  ,"quick.ods"),
-            testFile(MIMETYPE_OPENDOCUMENT_TEXT                    ,"odt"  ,"quick.odt"),
-            testFile(MIMETYPE_PPT                                  ,"ppt"  ,"quick.ppt"),
-            testFile(MIMETYPE_OPENXML_PRESENTATION                 ,"pptx" ,"quick.pptx"),
-            testFile(MIMETYPE_VISIO                                ,"vdx"  ,"quick.vdx"),
-            testFile(MIMETYPE_VISIO_2013                           ,"vsd"  ,"quick.vsd"),
-            testFile(MIMETYPE_WORDPERFECT                          ,"wpd"  ,"quick.wpd"),
-            testFile(MIMETYPE_EXCEL                                ,"xls"  ,"quick.xls" ),
-            testFile(MIMETYPE_OPENXML_SPREADSHEET                  ,"xlsx" ,"quick.xlsx"),
-            testFile(MIMETYPE_TEXT_CSV                             ,"csv"  ,"people.csv"),
-            testFile(MIMETYPE_RTF                                  ,"rtf"  ,"sample.rtf"),
-            testFile(MIMETYPE_HTML                                 ,"html" ,"quick.html"),
-            testFile(MIMETYPE_XML                                  ,"xml" ,"quick.xml"),
-            testFile(MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO   ,"xltm" ,"quick.xltm"),
-            testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW       ,"ppsx" ,"quick.ppsx"),
-            testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO ,"ppsm" ,"quick.ppsm"),
-            testFile(MIMETYPE_OUTLOOK_MSG                          ,"msg" ,"quick.msg"),
-            testFile(MIMETYPE_DITA                                 ,"dita" ,"quick.dita"),
-            testFile(MIMETYPE_TSV                                  ,"tsv"  ,"sample.tsv")
+        testFile(MIMETYPE_WORD                                 ,"doc"  ,"quick.doc"),
+        testFile(MIMETYPE_OPENXML_WORDPROCESSING               ,"docx" ,"quick.docx"),
+        testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS                ,"odg"  ,"quick.odg"),
+        testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION            ,"odp"  ,"quick.odp"),
+        testFile(MIMETYPE_OPENDOCUMENT_SPREADSHEET             ,"ods"  ,"quick.ods"),
+        testFile(MIMETYPE_OPENDOCUMENT_TEXT                    ,"odt"  ,"quick.odt"),
+        testFile(MIMETYPE_PPT                                  ,"ppt"  ,"quick.ppt"),
+        testFile(MIMETYPE_OPENXML_PRESENTATION                 ,"pptx" ,"quick.pptx"),
+        testFile(MIMETYPE_VISIO                                ,"vdx"  ,"quick.vdx"),
+        testFile(MIMETYPE_VISIO_2013                           ,"vsd"  ,"quick.vsd"),
+        testFile(MIMETYPE_WORDPERFECT                          ,"wpd"  ,"quick.wpd"),
+        testFile(MIMETYPE_EXCEL                                ,"xls"  ,"quick.xls" ),
+        testFile(MIMETYPE_OPENXML_SPREADSHEET                  ,"xlsx" ,"quick.xlsx"),
+        testFile(MIMETYPE_TEXT_CSV                             ,"csv"  ,"people.csv"),
+        testFile(MIMETYPE_RTF                                  ,"rtf"  ,"sample.rtf"),
+        testFile(MIMETYPE_HTML                                 ,"html" ,"quick.html"),
+        testFile(MIMETYPE_XML                                  ,"xml" ,"quick.xml"),
+        testFile(MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO   ,"xltm" ,"quick.xltm"),
+        testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW       ,"ppsx" ,"quick.ppsx"),
+        testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO ,"ppsm" ,"quick.ppsm"),
+        testFile(MIMETYPE_OUTLOOK_MSG                          ,"msg" ,"quick.msg"),
+        testFile(MIMETYPE_DITA                                 ,"dita" ,"quick.dita"),
+        testFile(MIMETYPE_TSV                                  ,"tsv"  ,"sample.tsv")
     ).collect(toMap(TestFileInfo::getPath, identity()));
 
     public LibreOfficeTransformationIT(final Pair<TestFileInfo, TestFileInfo> entry)
@@ -161,48 +161,48 @@ public class LibreOfficeTransformationIT
     public static Set<Pair<TestFileInfo, TestFileInfo>> engineTransformations()
     {
         return Stream
-                .of(
-                        allTargets("quick.doc", documentsTargets),
-                        allTargets("quick.docx", documentsTargets),
-                        allTargets("quick.html", documentsTargets),
-                        allTargets("quick.odt", documentsTargets),
-                        allTargets("quick.wpd", documentsTargets),
-                        allTargets("sample.rtf", documentsTargets),
+            .of(
+                allTargets("quick.doc", documentsTargets),
+                allTargets("quick.docx", documentsTargets),
+                allTargets("quick.html", documentsTargets),
+                allTargets("quick.odt", documentsTargets),
+                allTargets("quick.wpd", documentsTargets),
+                allTargets("sample.rtf", documentsTargets),
 
-                        allTargets("quick.odp", presentationTargets),
-                        allTargets("quick.ppt", presentationTargets),
-                        allTargets("quick.pptx", presentationTargets),
+                allTargets("quick.odp", presentationTargets),
+                allTargets("quick.ppt", presentationTargets),
+                allTargets("quick.pptx", presentationTargets),
 
-                        allTargets("quick.odg", graphicTargets),
-                        allTargets("quick.vdx", graphicTargets),
-                        allTargets("quick.vsd", graphicTargets),
+                allTargets("quick.odg", graphicTargets),
+                allTargets("quick.vdx", graphicTargets),
+                allTargets("quick.vsd", graphicTargets),
 
-                        allTargets("quick.ods", spreadsheetTargets),
-                        allTargets("quick.xls", spreadsheetTargets),
-                        allTargets("quick.xlsx", spreadsheetTargets),
-                        allTargets("people.csv", spreadsheetTargets),
-                        allTargets("sample.tsv", spreadsheetTargets),
+                allTargets("quick.ods", spreadsheetTargets),
+                allTargets("quick.xls", spreadsheetTargets),
+                allTargets("quick.xlsx", spreadsheetTargets),
+                allTargets("people.csv", spreadsheetTargets),
+                allTargets("sample.tsv", spreadsheetTargets),
 
-                        allTargets("quick.xml", pdfTarget),
-                        allTargets("quick.xltm", pdfTarget),
-                        allTargets("quick.dita", pdfTarget),
-                        allTargets("quick.msg", pdfTarget),
-                        allTargets("quick.ppsm", pdfTarget),
-                        allTargets("quick.ppsx", pdfTarget)
+                allTargets("quick.xml", pdfTarget),
+                allTargets("quick.xltm", pdfTarget),
+                allTargets("quick.dita", pdfTarget),
+                allTargets("quick.msg", pdfTarget),
+                allTargets("quick.ppsm", pdfTarget),
+                allTargets("quick.ppsx", pdfTarget)
                 )
-                .flatMap(identity())
-                .collect(toSet());
+            .flatMap(identity())
+            .collect(toSet());
     }
 
     @Test
     public void testTransformation()
     {
         final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
-                sourceFile, sourceMimetype, targetMimetype, targetExtension);
+            sourceFile, sourceMimetype, targetMimetype, targetExtension);
         try
         {
             final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, sourceMimetype,
-                    targetMimetype, targetExtension);
+                targetMimetype, targetExtension);
             assertEquals(descriptor, OK, response.getStatusCode());
         }
         catch (Exception e)
@@ -212,14 +212,14 @@ public class LibreOfficeTransformationIT
     }
 
     private static Stream<Pair<TestFileInfo, TestFileInfo>> allTargets(final String sourceFile,
-                                                                       final Set<TestFileInfo> mimetypes)
+        final Set<TestFileInfo> mimetypes)
     {
         return mimetypes
-                .stream()
-                //Filter out duplicate mimetypes. eg. We do not want "Transform (quick.doc, application/msword -> application/msword, doc)" as these are not contained in the engine_config
-                .filter(type -> !type.getMimeType().equals(TEST_FILES.get(sourceFile).getMimeType()))
-                // Edge case: Transform (quick.ods, application/vnd.oasis.opendocument.spreadsheet -> text/csv, csv) not in engine_config
-                .filter(type -> !(TEST_FILES.get(sourceFile).getMimeType().equals(MIMETYPE_OPENDOCUMENT_SPREADSHEET) && type.getMimeType().equals(MIMETYPE_TEXT_CSV)))
-                .map(k -> Pair.of(TEST_FILES.get(sourceFile), k));
+            .stream()
+            //Filter out duplicate mimetypes. eg. We do not want "Transform (quick.doc, application/msword -> application/msword, doc)" as these are not contained in the engine_config
+            .filter(type -> !type.getMimeType().equals(TEST_FILES.get(sourceFile).getMimeType()))
+            // Edge case: Transform (quick.ods, application/vnd.oasis.opendocument.spreadsheet -> text/csv, csv) not in engine_config
+            .filter(type -> !(TEST_FILES.get(sourceFile).getMimeType().equals(MIMETYPE_OPENDOCUMENT_SPREADSHEET) && type.getMimeType().equals(MIMETYPE_TEXT_CSV)))
+            .map(k -> Pair.of(TEST_FILES.get(sourceFile), k));
     }
 }
