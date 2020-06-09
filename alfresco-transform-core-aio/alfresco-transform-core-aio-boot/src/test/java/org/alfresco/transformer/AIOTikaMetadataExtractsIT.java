@@ -29,35 +29,16 @@ package org.alfresco.transformer;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.Set;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toSet;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_RFC822;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_XHTML;
-import static org.alfresco.transformer.TestFileInfo.testFile;
-
 /**
- * Metadata integration tests in the Misc T-Engine.
+ * Metadata integration tests in the Tika T-Engine, but run from the AIO T-Engine.
  *
  * @author adavis
  */
 @RunWith(Parameterized.class)
-public class MiscMetadataExtractsIT extends AbstractMetadataExtractsIT
+public class AIOTikaMetadataExtractsIT extends TikaMetadataExtractsIT
 {
-    public MiscMetadataExtractsIT(TestFileInfo testFileInfo)
+    public AIOTikaMetadataExtractsIT(TestFileInfo testFileInfo)
     {
         super(testFileInfo);
-    }
-
-    @Parameterized.Parameters
-    public static Set<TestFileInfo> engineTransformations()
-    {
-        return Stream.of(
-                testFile(MIMETYPE_HTML, "html", "quick.html"),
-                testFile(MIMETYPE_XHTML, "xhtml", "quick.xhtml.alf"), // avoid the license header check on xhtml
-                testFile(MIMETYPE_RFC822, "eml", "quick.eml")
-        ).collect(toSet());
     }
 }

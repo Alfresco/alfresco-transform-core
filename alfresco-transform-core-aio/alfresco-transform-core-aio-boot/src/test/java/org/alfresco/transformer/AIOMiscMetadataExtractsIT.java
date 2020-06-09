@@ -30,7 +30,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 /**
- * Metadata integration tests in the misc T-Engine, but run from the AIO T-Engine.
+ * Metadata integration tests in the Misc T-Engine, but run from the AIO T-Engine.
  *
  * @author adavis
  */
