@@ -30,6 +30,11 @@ import org.alfresco.transformer.transformers.SelectableTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.mail.Header;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMessage.RecipientType;
+import javax.mail.internet.MimeUtility;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -40,12 +45,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import javax.mail.Header;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeUtility;
-import javax.mail.internet.MimeMessage.RecipientType;
 
 /**
  * Metadata extractor for RFC822 mime emails.

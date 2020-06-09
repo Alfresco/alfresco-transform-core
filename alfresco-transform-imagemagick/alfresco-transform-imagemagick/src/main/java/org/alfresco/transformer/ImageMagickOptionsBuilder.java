@@ -26,16 +26,15 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.transformer.util.Util.stringToBoolean;
-import static org.alfresco.transformer.util.Util.stringToInteger;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import com.google.common.collect.ImmutableList;
+import org.alfresco.transform.exceptions.TransformException;
 
 import java.util.List;
 import java.util.StringJoiner;
 
-import org.alfresco.transform.exceptions.TransformException;
-
-import com.google.common.collect.ImmutableList;
+import static org.alfresco.transformer.util.Util.stringToBoolean;
+import static org.alfresco.transformer.util.Util.stringToInteger;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 /**
  * ImageMagick options builder.

@@ -26,12 +26,11 @@ package org.alfresco.transformer.executors;
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+
 import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.logging.LogEntry;
 
 import java.io.File;
 import java.util.Map;
-import java.util.StringJoiner;
 
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_METADATA_EMBED;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_METADATA_EXTRACT;

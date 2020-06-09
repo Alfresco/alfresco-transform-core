@@ -28,27 +28,20 @@ package org.alfresco.transformer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.transform.client.model.config.TransformConfig;
-import org.alfresco.transform.client.model.config.TransformOption;
 import org.alfresco.transform.client.registry.AbstractTransformRegistry;
 import org.alfresco.transform.client.registry.TransformCache;
-import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.executors.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 /**
  * AIOTransformRegistry manages all of the sub transformers registered to it and provides aggregated TransformConfig.
@@ -68,7 +61,7 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
     private ObjectMapper jsonObjectMapper = new ObjectMapper();
 
     // Represents the mapping between a transform and a transformer, multiple mappings can point to the same transformer.
-    private Map<String, Transformer> transformerTransformMapping = new HashMap();
+    private Map<String, Transformer> transformerEngineMapping = new HashMap();
 
     /**
      * The registration will go through all supported sub transformers and map them to the transformer implementation.
@@ -87,11 +80,11 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
         for (org.alfresco.transform.client.model.config.Transformer transformerConfig : transformConfig.getTransformers())
         {
             String transformerName = transformerConfig.getTransformerName();
-            if (transformerTransformMapping.containsKey(transformerName))
+            if (transformerEngineMapping.containsKey(transformerName))
             {
                 throw new Exception("Transformer name " + transformerName + " is already registered.");
             }
-            transformerTransformMapping.put(transformerName, transformer);
+            transformerEngineMapping.put(transformerName, transformer);
             log.debug("Registered transformer with name: '{}'.", transformerName);
         }
 
@@ -108,7 +101,7 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
      */
     public Transformer getByTransformName(final String transformName)
     {
-        return getTransformerTransformMapping().get(transformName);
+        return getTransformerEngineMapping().get(transformName);
     }
 
     /**
@@ -144,14 +137,14 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
         }
     }
 
-    Map<String, Transformer> getTransformerTransformMapping()
+    Map<String, Transformer> getTransformerEngineMapping()
     {
-        return transformerTransformMapping;
+        return transformerEngineMapping;
     }
 
-    void setTransformerTransformMapping(Map<String, Transformer> transformerTransformMapping)
+    void setTransformerEngineMapping(Map<String, Transformer> transformerEngineMapping)
     {
-        this.transformerTransformMapping = transformerTransformMapping;
+        this.transformerEngineMapping = transformerEngineMapping;
     }
 
     @Override

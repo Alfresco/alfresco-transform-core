@@ -1,0 +1,8 @@
+{
+  "{http://www.alfresco.org/model/content/1.0}description" : null,
+  "{http://www.alfresco.org/model/audio/1.0}releaseDate" : null,
+  "{http://www.alfresco.org/model/content/1.0}created" : null,
+  "{http://www.alfresco.org/model/audio/1.0}sampleRate" : "90000",
+  "{http://www.alfresco.org/model/content/1.0}author" : null,
+  "{http://www.alfresco.org/model/content/1.0}title" : null
+}

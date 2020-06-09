@@ -29,10 +29,10 @@ package org.alfresco.transformer;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toList;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_RFC822;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_XHTML;
@@ -52,12 +52,21 @@ public class MiscMetadataExtractsIT extends AbstractMetadataExtractsIT
     }
 
     @Parameterized.Parameters
-    public static Set<TestFileInfo> engineTransformations()
+    public static List<TestFileInfo> engineTransformations()
     {
         return Stream.of(
+                // HtmlMetadataExtractor
                 testFile(MIMETYPE_HTML, "html", "quick.html"),
                 testFile(MIMETYPE_XHTML, "xhtml", "quick.xhtml.alf"), // avoid the license header check on xhtml
-                testFile(MIMETYPE_RFC822, "eml", "quick.eml")
-        ).collect(toSet());
+
+                // RFC822MetadataExtractor
+                testFile(MIMETYPE_RFC822, "eml", "quick.eml"),
+
+                // Special test cases from the repo tests
+                // ======================================
+                testFile(MIMETYPE_RFC822, "eml", "quick.spanish.eml"),
+                testFile(MIMETYPE_HTML, "html", "quick.japanese.html")
+
+        ).collect(toList());
     }
 }

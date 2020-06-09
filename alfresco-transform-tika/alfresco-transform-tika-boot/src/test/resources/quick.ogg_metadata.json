@@ -1,0 +1,13 @@
+{
+  "{http://www.alfresco.org/model/audio/1.0}compressor" : "Vorbis",
+  "{http://www.alfresco.org/model/audio/1.0}artist" : "Hauskaz",
+  "{http://www.alfresco.org/model/audio/1.0}genre" : "Foxtrot",
+  "{http://www.alfresco.org/model/content/1.0}description" : "The quick brown fox jumps over the lazy dog - About a dog and a fox (Hauskaz)",
+  "{http://www.alfresco.org/model/audio/1.0}releaseDate" : 1230768000000,
+  "{http://www.alfresco.org/model/audio/1.0}channelType" : "Stereo",
+  "{http://www.alfresco.org/model/content/1.0}created" : 1230768000000,
+  "{http://www.alfresco.org/model/audio/1.0}sampleRate" : "44100",
+  "{http://www.alfresco.org/model/content/1.0}author" : "Hauskaz",
+  "{http://www.alfresco.org/model/audio/1.0}album" : "About a dog and a fox",
+  "{http://www.alfresco.org/model/content/1.0}title" : "The quick brown fox jumps over the lazy dog"
+}

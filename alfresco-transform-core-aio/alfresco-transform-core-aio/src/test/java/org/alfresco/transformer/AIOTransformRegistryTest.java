@@ -29,8 +29,8 @@ package org.alfresco.transformer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transformer.executors.TikaJavaExecutor;
-import org.alfresco.transformer.transformers.SelectingTransformer;
 import org.alfresco.transformer.executors.Transformer;
+import org.alfresco.transformer.transformers.SelectingTransformer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.Before;
@@ -51,7 +51,8 @@ import java.util.stream.Collectors;
 
 import static org.alfresco.transformer.util.RequestParamMap.PAGE_LIMIT;
 import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AIOTransformRegistryTest
 {

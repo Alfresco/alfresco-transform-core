@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,34 +26,7 @@
  */
 package org.alfresco.transformer.executors;
 
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_HTML;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_PNG;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_TIFF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_CSV;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XHTML;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.net.URL;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.sax.SAXTransformerFactory;
-import javax.xml.transform.sax.TransformerHandler;
-import javax.xml.transform.stream.StreamResult;
-
+import com.google.common.collect.ImmutableList;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.extractor.DocumentSelector;
@@ -74,7 +47,32 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
-import com.google.common.collect.ImmutableList;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.sax.TransformerHandler;
+import javax.xml.transform.stream.StreamResult;
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.net.URL;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_HTML;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_PNG;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_TIFF;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_CSV;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XHTML;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
 
 /**
  * Stripped down command line Tika transformers. Not actually run as a separate process, but the code fits the patten

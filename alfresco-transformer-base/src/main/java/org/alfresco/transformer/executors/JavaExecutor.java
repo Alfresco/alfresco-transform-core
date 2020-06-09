@@ -26,8 +26,6 @@
  */
 package org.alfresco.transformer.executors;
 
-import org.alfresco.transform.exceptions.TransformException;
-
 import java.io.File;
 
 /**

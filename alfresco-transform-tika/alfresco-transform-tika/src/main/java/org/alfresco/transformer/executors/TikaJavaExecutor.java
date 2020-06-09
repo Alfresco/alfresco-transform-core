@@ -27,7 +27,6 @@
 package org.alfresco.transformer.executors;
 
 import com.google.common.collect.ImmutableMap;
-import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.metadataExtractors.AbstractTikaMetadataExtractor;
 import org.alfresco.transformer.metadataExtractors.DWGMetadataExtractor;
@@ -56,8 +55,6 @@ import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT
 import static org.alfresco.transformer.executors.Tika.TARGET_ENCODING;
 import static org.alfresco.transformer.executors.Tika.TARGET_MIMETYPE;
 import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARK_TEXT;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
  * JavaExecutor implementation for running TIKA transformations. It loads the

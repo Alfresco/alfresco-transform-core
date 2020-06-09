@@ -26,13 +26,6 @@
  */
 package org.alfresco.transformer;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
-import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
 import org.alfresco.transformer.executors.Transformer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +36,10 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
+import java.util.Map;
+
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(AIOController.class)
@@ -62,7 +59,7 @@ public class AIOControllerPdfRendererTest extends AlfrescoPdfRendererControllerT
         ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
         //Need to wire in the mocked commandExecutor into the controller...
-        Map<String,Transformer> transformers = transformRegistry.getTransformerTransformMapping();
+        Map<String,Transformer> transformers = transformRegistry.getTransformerEngineMapping();
         transformers.replace("pdfrenderer", commandExecutor);
     }
 

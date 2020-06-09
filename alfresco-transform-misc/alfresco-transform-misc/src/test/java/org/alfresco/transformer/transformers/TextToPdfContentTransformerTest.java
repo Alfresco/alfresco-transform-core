@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,8 +26,10 @@
  */
 package org.alfresco.transformer.transformers;
 
-import static org.alfresco.transformer.util.RequestParamMap.PAGE_LIMIT;
-import static org.junit.Assert.assertEquals;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,10 +38,8 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
-import org.junit.Before;
-import org.junit.Test;
+import static org.alfresco.transformer.util.RequestParamMap.PAGE_LIMIT;
+import static org.junit.Assert.assertEquals;
 
 public class TextToPdfContentTransformerTest
 {

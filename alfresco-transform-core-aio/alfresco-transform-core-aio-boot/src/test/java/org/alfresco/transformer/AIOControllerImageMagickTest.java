@@ -26,7 +26,6 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 import org.alfresco.transformer.executors.Transformer;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +38,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Map;
 
@@ -65,7 +63,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
         ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
         //Need to wire in the mocked commandExecutor into the controller...
-        Map<String,Transformer> transformers = transformRegistry.getTransformerTransformMapping();
+        Map<String,Transformer> transformers = transformRegistry.getTransformerEngineMapping();
         transformers.replace("imagemagick", commandExecutor);
 
         mockTransformCommand("jpg", "png", "image/jpeg", true);

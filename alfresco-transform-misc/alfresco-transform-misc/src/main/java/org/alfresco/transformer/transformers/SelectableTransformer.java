@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -25,8 +25,6 @@
  * #L%
  */
 package org.alfresco.transformer.transformers;
-
-import org.alfresco.transform.exceptions.TransformException;
 
 import java.io.File;
 import java.util.Map;

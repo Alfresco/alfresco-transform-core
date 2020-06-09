@@ -26,8 +26,6 @@
  */
 package org.alfresco.transformer.util;
 
-import org.springframework.web.bind.annotation.RequestParam;
-
 public interface RequestParamMap
 {
     // This property can be sent by acs repository's legacy transformers to force a transform,
