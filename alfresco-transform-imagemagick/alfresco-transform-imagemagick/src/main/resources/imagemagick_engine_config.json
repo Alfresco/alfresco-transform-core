@@ -785,7 +785,6 @@
         {"sourceMediaType": "mage/vnd.adobe.photoshop",                 "targetMediaType": "application/eps" },
         {"sourceMediaType": "mage/vnd.adobe.photoshop",                 "targetMediaType": "image/gif" },
         {"sourceMediaType": "mage/vnd.adobe.photoshop",                 "targetMediaType": "image/ief" },
-        {"sourceMediaType": "mage/vnd.adobe.photoshop",                 "targetMediaType": "image/jp2" },
         {"sourceMediaType": "mage/vnd.adobe.photoshop",                 "targetMediaType": "image/jpeg" },
         {"sourceMediaType": "mage/vnd.adobe.photoshop",                 "targetMediaType": "image/x-raw-kodak" },
         {"sourceMediaType": "mage/vnd.adobe.photoshop",                 "targetMediaType": "image/x-raw-minolta" },

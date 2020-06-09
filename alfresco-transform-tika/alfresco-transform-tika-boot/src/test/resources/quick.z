@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml">
+    
+    <head>
+        
+        <meta name="X-Parsed-By" content="org.apache.tika.parser.DefaultParser"/>
+        
+        <meta name="X-Parsed-By" content="org.apache.tika.parser.pkg.CompressorParser"/>
+        
+        <meta name="Content-Type" content="application/gzip"/>
+        
+        <title/>
+        
+    </head>
+    
+    <body>
+
+        The quick brown fox jumps over the lazy dog
+
+        <div class="package-entry">
+        </div>
+        
+    </body>
+</html>

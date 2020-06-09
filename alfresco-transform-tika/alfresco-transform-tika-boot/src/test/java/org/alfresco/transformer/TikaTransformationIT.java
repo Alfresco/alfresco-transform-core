@@ -138,6 +138,8 @@ public class TikaTransformationIT
                 allTargets("sample.xhtml.txt", "application/xhtml+xml"),
                 allTargets("sample.rss", "application/rss+xml"),
                 //allTargets("quick.rar", "application/x-rar-compressed"),
+                allTargets("quick.z", "application/x-compress"),
+                allTargets("quick.csv", "text/csv"),
                 allTargets("quick.tar.gz", "application/x-gzip"))
             .flatMap(identity())
             .collect(toSet());
