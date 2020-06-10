@@ -72,7 +72,15 @@ public class TikaTransformationIT
     {
         sourceFile = entry.getLeft();
         targetExtension = entry.getMiddle();
-        targetMimetype = extensionMimetype.get(entry.getMiddle());
+        //Single test to cover csv-->pdf
+        if (sourceFile.contains("pdf") && targetExtension.contains("csv"))
+        {
+            targetMimetype = "text/csv";
+        }
+        else
+        {
+            targetMimetype = extensionMimetype.get(entry.getMiddle());
+        }
         sourceMimetype = entry.getRight();
     }
 
@@ -107,6 +115,9 @@ public class TikaTransformationIT
                     // Triple.of("quick.numbers", "txt", "TikaAuto"),
                     Triple.of("quick.numbers", "xhtml", "application/vnd.apple.numbers"),
                     Triple.of("quick.numbers", "xml", "application/vnd.apple.numbers")
+                ),
+                Stream.of(
+                        Triple.of("quick.pdf", "csv", "application/pdf")
                 ),
                 allTargets("quick.odp", "application/vnd.oasis.opendocument.presentation"),
                 allTargets("quick.ods", "application/vnd.oasis.opendocument.spreadsheet"),
