@@ -117,7 +117,7 @@ public class TikaTransformationIT
                     Triple.of("quick.numbers", "xml", "application/vnd.apple.numbers")
                 ),
                 Stream.of(
-                        Triple.of("quick.pdf", "csv", "application/pdf")
+                    Triple.of("quick.pdf", "csv", "application/pdf")
                 ),
                 allTargets("quick.odp", "application/vnd.oasis.opendocument.presentation"),
                 allTargets("quick.ods", "application/vnd.oasis.opendocument.spreadsheet"),
