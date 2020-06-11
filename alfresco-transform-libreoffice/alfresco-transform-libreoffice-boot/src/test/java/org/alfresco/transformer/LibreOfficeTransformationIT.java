@@ -30,6 +30,7 @@ import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
 import static org.alfresco.transformer.TestFileInfo.testFile;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_EXCEL;
@@ -114,8 +115,12 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_PDF,"pdf",null)
     );
 
-    private static final Set<TestFileInfo> pdfTarget = ImmutableSet.of(
+    private static final Set<TestFileInfo> pdfTargets = ImmutableSet.of(
         testFile(MIMETYPE_PDF,"pdf",null)
+    );
+
+    private static final Set<TestFileInfo> msgTargets = ImmutableSet.of(
+            testFile(MIMETYPE_TEXT_PLAIN,"txt",null)
     );
 
     private final String sourceFile;
@@ -146,6 +151,7 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO ,"ppsm" ,"quick.ppsm"),
         testFile(MIMETYPE_OUTLOOK_MSG                          ,"msg" ,"quick.msg"),
         testFile(MIMETYPE_DITA                                 ,"dita" ,"quick.dita"),
+        testFile(MIMETYPE_TEXT_PLAIN                           ,"msg" ,"quick.txt"),
         testFile(MIMETYPE_TSV                                  ,"tsv"  ,"sample.tsv")
     ).collect(toMap(TestFileInfo::getPath, identity()));
 
@@ -167,6 +173,7 @@ public class LibreOfficeTransformationIT
                 allTargets("quick.html", documentsTargets),
                 allTargets("quick.odt", documentsTargets),
                 allTargets("quick.wpd", documentsTargets),
+                allTargets("quick.txt", documentsTargets),
                 allTargets("sample.rtf", documentsTargets),
 
                 allTargets("quick.odp", presentationTargets),
@@ -183,12 +190,14 @@ public class LibreOfficeTransformationIT
                 allTargets("people.csv", spreadsheetTargets),
                 allTargets("sample.tsv", spreadsheetTargets),
 
-                allTargets("quick.xml", pdfTarget),
-                allTargets("quick.xltm", pdfTarget),
-                allTargets("quick.dita", pdfTarget),
-                allTargets("quick.msg", pdfTarget),
-                allTargets("quick.ppsm", pdfTarget),
-                allTargets("quick.ppsx", pdfTarget)
+                allTargets("quick.xml", pdfTargets),
+                allTargets("quick.xltm", pdfTargets),
+                allTargets("quick.dita", pdfTargets),
+                allTargets("quick.msg", pdfTargets),
+                allTargets("quick.ppsm", pdfTargets),
+                allTargets("quick.ppsx", pdfTargets),
+
+                allTargets("quick.msg", msgTargets)
                 )
             .flatMap(identity())
             .collect(toSet());
