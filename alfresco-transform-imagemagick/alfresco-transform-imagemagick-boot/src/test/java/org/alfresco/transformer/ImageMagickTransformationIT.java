@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -27,6 +27,7 @@
 package org.alfresco.transformer;
 
 import static java.text.MessageFormat.format;
+import static java.util.Collections.emptyMap;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -74,6 +75,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -155,6 +157,17 @@ public class ImageMagickTransformationIT
             .add(Pair.of("3fr",MIMETYPE_IMAGE_RAW_3FR))
             .build();
 
+    private static final List<Pair<String,String>> targetExtensionsForTiffFirstPage = new ImmutableList.Builder<Pair<String,String>>()
+            .add(Pair.of("bmp",MIMETYPE_IMAGE_BMP))
+            .add(Pair.of("eps",MIMETYPE_APPLICATION_EPS))
+            .add(Pair.of("jp2",MIMETYPE_IMAGE_JP2))
+            .add(Pair.of("jpg",MIMETYPE_IMAGE_JPEG))
+            .add(Pair.of("png",MIMETYPE_IMAGE_PNG))
+            .add(Pair.of("xbm",MIMETYPE_IMAGE_XBM))
+            .add(Pair.of("xpm",MIMETYPE_IMAGE_XPM))
+            .add(Pair.of("xwd",MIMETYPE_IMAGE_XWD))
+            .build();
+
     private static final Map<String, TestFileInfo> TEST_FILES = Stream.of(
         testFile(MIMETYPE_IMAGE_BMP,"bmp","quick.bmp"),
         testFile(MIMETYPE_APPLICATION_EPS,"eps","quick.eps"),
@@ -168,6 +181,7 @@ public class ImageMagickTransformationIT
         testFile(MIMETYPE_IMAGE_XBM,"xbm","quick.xbm"),
         testFile(MIMETYPE_IMAGE_XPM,"xpm","quick.xpm"),
         testFile(MIMETYPE_IMAGE_PSD,"psd","quick.psd"),
+        testFile(MIMETYPE_IMAGE_TIFF,"tiff","quick.tiff"),
         testFile(MIMETYPE_IMAGE_XWD,"xwd","quick.xwd")
     ).collect(toMap(TestFileInfo::getPath, identity()));
 
@@ -200,7 +214,7 @@ public class ImageMagickTransformationIT
                 allTargets("quick.pnm", targetExtensions),
                 allTargets("quick.ppm", targetExtensions),
                 allTargets("quick.psd", targetExtensionsForPSD),
-                //allTargets("quick.tiff"),
+                allTargets("quick.tiff", targetExtensions),
                 allTargets("quick.xbm", targetExtensions),
                 allTargets("quick.xpm", targetExtensions),
                 allTargets("quick.xwd", targetExtensions)
@@ -217,8 +231,16 @@ public class ImageMagickTransformationIT
             sourceFile, sourceMimetype, targetMimetype, targetExtension);
         try
         {
+            // note: some image/tiff->image/* will return multiple page results (hence error) unless options specified for single page
+            Map<String, String> tOptions = emptyMap();
+            Pair targetPair = Pair.of(targetExtension, targetMimetype);
+            if (MIMETYPE_IMAGE_TIFF.equals(sourceMimetype) && targetExtensionsForTiffFirstPage.contains(targetPair))
+            {
+                tOptions = ImmutableMap.of("startPage", "0", "endPage", "0");
+            }
+
             final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, sourceMimetype,
-                targetMimetype, targetExtension);
+                targetMimetype, targetExtension, tOptions);
             assertEquals(descriptor, OK, response.getStatusCode());
         }
         catch (Exception e)
