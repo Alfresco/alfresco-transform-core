@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,18 +26,18 @@
  */
 package org.alfresco.transformer.executors;
 
+import org.alfresco.transformer.logging.LogEntry;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.alfresco.transformer.logging.LogEntry;
 
 /**
  * Basic interface for executing transformations via Shell commands
  *
  * @author Cezar Leahu
  */
-public interface CommandExecutor
+public interface CommandExecutor extends Transformer
 {
     void run(Map<String, String> properties, File targetFile, Long timeout);
 

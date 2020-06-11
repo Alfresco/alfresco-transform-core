@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -28,14 +28,13 @@ package org.alfresco.transformer.executors;
 
 import java.io.File;
 
-import org.alfresco.transform.exceptions.TransformException;
-
 /**
- * Basic interface for executing transformations inside Java/JVM
+ * Basic interface for executing transformations inside Java/JVM.
  *
  * @author Cezar Leahu
+ * @author adavis
  */
-public interface JavaExecutor
+public interface JavaExecutor extends Transformer
 {
-    void call(File sourceFile, File targetFile, String... args) throws TransformException;
+    void call(File sourceFile, File targetFile, String... args) throws Exception;
 }

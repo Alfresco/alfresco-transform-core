@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,31 +26,17 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.transformer.fs.FileManager.createAttachment;
-import static org.alfresco.transformer.fs.FileManager.createSourceFile;
-import static org.alfresco.transformer.fs.FileManager.createTargetFile;
-import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
-
-import java.io.File;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-
 import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
-import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
+
+import javax.annotation.PostConstruct;
+import java.io.File;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Controller for the Docker based alfresco-pdf-renderer transformer.
@@ -111,68 +97,22 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
             @Override
             protected void executeTransformCommand(File sourceFile, File targetFile)
             {
-                commandExecutor.run("", sourceFile, targetFile, null);
+                transform(null, null, null, Collections.emptyMap(), sourceFile, targetFile);
             }
         };
     }
 
     @Override
-    public void processTransform(final File sourceFile, final File targetFile,
-        final String sourceMimetype, final String targetMimetype,
-        final Map<String, String> transformOptions, final Long timeout)
+    protected String getTransformerName(final File sourceFile, final String sourceMimetype,
+                                        final String targetMimetype, final Map<String, String> transformOptions)
     {
-        logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
-                     " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
-
-        final String options = PdfRendererOptionsBuilder
-            .builder()
-            .withPage(transformOptions.get("page"))
-            .withWidth(transformOptions.get("width"))
-            .withHeight(transformOptions.get("height"))
-            .withAllowPdfEnlargement(transformOptions.get("allowPdfEnlargement"))
-            .withMaintainPdfAspectRatio(transformOptions.get("maintainPdfAspectRatio"))
-            .build();
-
-        commandExecutor.run(options, sourceFile, targetFile, timeout);
+        return null; // does not matter what value is returned, as it is not used because there is only one.
     }
 
-    @Deprecated
-    @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Resource> transform(HttpServletRequest request,
-        @RequestParam("file") MultipartFile sourceMultipartFile,
-        @RequestParam("targetExtension") String targetExtension,
-        @RequestParam(value = "timeout", required = false) Long timeout,
-        @RequestParam(value = "testDelay", required = false) Long testDelay,
-
-        @RequestParam(value = "page", required = false) Integer page,
-        @RequestParam(value = "width", required = false) Integer width,
-        @RequestParam(value = "height", required = false) Integer height,
-        @RequestParam(value = "allowPdfEnlargement", required = false) Boolean allowPdfEnlargement,
-        @RequestParam(value = "maintainPdfAspectRatio", required = false) Boolean maintainPdfAspectRatio)
+    @Override
+    protected void transform(String transformName, String sourceMimetype, String targetMimetype,
+                             Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
-        String targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(),
-            targetExtension);
-        getProbeTestTransform().incrementTransformerCount();
-        File sourceFile = createSourceFile(request, sourceMultipartFile);
-        File targetFile = createTargetFile(request, targetFilename);
-        // Both files are deleted by TransformInterceptor.afterCompletion
-
-        final String options = PdfRendererOptionsBuilder
-            .builder()
-            .withPage(page)
-            .withWidth(width)
-            .withHeight(height)
-            .withAllowPdfEnlargement(allowPdfEnlargement)
-            .withMaintainPdfAspectRatio(maintainPdfAspectRatio)
-            .build();
-
-        commandExecutor.run(options, sourceFile, targetFile, timeout);
-
-        final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
-        LogEntry.setTargetSize(targetFile.length());
-        long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
-        time += LogEntry.addDelay(testDelay);
-        getProbeTestTransform().recordTransformTime(time);
-        return body;
+        commandExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }

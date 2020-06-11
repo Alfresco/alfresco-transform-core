@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -25,36 +25,6 @@
  * #L%
  */
 package org.alfresco.transformer;
-
-import static org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
-import static org.alfresco.transformer.util.MimetypeMap.PREFIX_IMAGE;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.ACCEPT;
-import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.util.StringUtils.getFilenameExtension;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
@@ -80,6 +50,35 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
+import static org.alfresco.transformer.util.MimetypeMap.PREFIX_IMAGE;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.StringUtils.getFilenameExtension;
 
 /**
  * Test the ImageMagickController without a server.
@@ -228,7 +227,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     {
         for (String value : new String[]{"North", "NorthEast", "East", "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center"})
         {
-            expectedOptions = "-gravity " + value + " +repage";
+            expectedOptions = "-auto-orient " + "-gravity " + value + " +repage";
             mockMvc
                 .perform(MockMvcRequestBuilders
                     .multipart("/transform")
@@ -338,7 +337,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     public void deprecatedCommandOptionsTest() throws Exception
     {
         // Example of why the commandOptions parameter is a bad idea.
-        expectedOptions = "( horrible command / ); -resize 321x654>";
+        expectedOptions = "( horrible command / ); -auto-orient -resize 321x654";
         mockMvc
             .perform(MockMvcRequestBuilders
                 .multipart("/transform")

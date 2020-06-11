@@ -26,6 +26,34 @@
  */
 package org.alfresco.transformer;
 
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transformer.executors.RuntimeExec;
+import org.alfresco.transformer.model.FileRefEntity;
+import org.alfresco.transformer.model.FileRefResponse;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import static java.nio.file.Files.readAllBytes;
 import static org.alfresco.transformer.executors.Tika.ARCHIVE;
 import static org.alfresco.transformer.executors.Tika.CSV;
@@ -59,6 +87,8 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORD;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XHTML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_ZIP;
+import static org.alfresco.transformer.util.RequestParamMap.INCLUDE_CONTENTS;
+import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARK_TEXT;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -78,34 +108,6 @@ import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.util.StringUtils.getFilenameExtension;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transformer.executors.RuntimeExec;
-import org.alfresco.transformer.model.FileRefEntity;
-import org.alfresco.transformer.model.FileRefResponse;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
  * Test the TikaController without a server.
@@ -245,7 +247,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
                                                        ? mockMvcRequest("/transform", sourceFile,
             "targetExtension", this.targetExtension)
                                                        : mockMvcRequest("/transform", sourceFile,
-            "targetExtension", this.targetExtension, "includeContents", includeContents.toString());
+            "targetExtension", this.targetExtension, INCLUDE_CONTENTS, includeContents.toString());
         MvcResult result = mockMvc.perform(requestBuilder)
                                   .andExpect(status().is(OK.value()))
                                   .andExpect(header().string("Content-Disposition",
@@ -528,7 +530,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         mockMvc.perform(
             mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension).param(
-                "notExtractBookmarksText", "true"))
+                NOT_EXTRACT_BOOKMARK_TEXT, "true"))
                .andExpect(status().is(OK.value()))
                .andExpect(header().string("Content-Disposition",
                    "attachment; filename*= UTF-8''quick." + targetExtension));

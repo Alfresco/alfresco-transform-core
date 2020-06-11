@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,6 +26,15 @@
  */
 package org.alfresco.transformer.transformers;
 
+import org.alfresco.transformer.util.RequestParamMap;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.tools.TextToPDF;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,14 +48,6 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.tools.TextToPDF;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -62,7 +63,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(TextToPdfContentTransformer.class);
 
-    public static final String PAGE_LIMIT = "pageLimit";
+    public static final String PAGE_LIMIT = RequestParamMap.PAGE_LIMIT;
 
     private final PagedTextToPDF transformer;
 
@@ -98,8 +99,8 @@ public class TextToPdfContentTransformer implements SelectableTransformer
     }
 
     @Override
-    public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
-        final String targetMimetype, final Map<String, String> parameters) throws Exception
+    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
+                          final File sourceFile, final File targetFile) throws Exception
     {
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
         String stringPageLimit = parameters.get(PAGE_LIMIT);

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -31,6 +31,9 @@ package org.alfresco.transformer.util;
  */
 public interface MimetypeMap
 {
+    String MIMETYPE_METADATA_EXTRACT = "alfresco-metadata-extract";
+    String MIMETYPE_METADATA_EMBED = "alfresco-metadata-embed";
+
     String PREFIX_APPLICATION = "application/";
     String PREFIX_AUDIO = "audio/";
     String PREFIX_IMAGE = "image/";

@@ -69,6 +69,23 @@
       ],
       "transformOptions": [
       ]
+    },
+    {
+      "transformerName": "HtmlMetadataExtractor",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "text/html",                                     "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "application/xhtml+xml",                         "targetMediaType": "alfresco-metadata-extract"}
+      ],
+      "transformOptions": [
+      ]
+    },
+    {
+      "transformerName": "RFC822MetadataExtractor",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "message/rfc822",                                "targetMediaType": "alfresco-metadata-extract"}
+      ],
+      "transformOptions": [
+      ]
     }
   ]
 }

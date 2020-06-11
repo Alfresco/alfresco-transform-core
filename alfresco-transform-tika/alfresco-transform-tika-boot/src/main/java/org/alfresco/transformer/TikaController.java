@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,37 +26,20 @@
  */
 package org.alfresco.transformer;
 
-import static java.lang.Boolean.parseBoolean;
-import static org.alfresco.transformer.executors.Tika.INCLUDE_CONTENTS;
-import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
-import static org.alfresco.transformer.executors.Tika.PDF_BOX;
-import static org.alfresco.transformer.executors.Tika.TARGET_ENCODING;
-import static org.alfresco.transformer.executors.Tika.TARGET_MIMETYPE;
-import static org.alfresco.transformer.fs.FileManager.createAttachment;
-import static org.alfresco.transformer.fs.FileManager.createSourceFile;
-import static org.alfresco.transformer.fs.FileManager.createTargetFile;
-import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
-
-import java.io.File;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.alfresco.transformer.executors.TikaJavaExecutor;
-import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.Map;
+
+import static org.alfresco.transformer.executors.Tika.PDF_BOX;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_PDF;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 
 /**
  * Controller for the Docker based Tika transformers.
@@ -109,81 +92,16 @@ public class TikaController extends AbstractTransformerController
             @Override
             protected void executeTransformCommand(File sourceFile, File targetFile)
             {
-                javaExecutor.call(sourceFile, targetFile, PDF_BOX,
-                    TARGET_MIMETYPE + MIMETYPE_TEXT_PLAIN, TARGET_ENCODING + "UTF-8");
+                transform(PDF_BOX, MIMETYPE_PDF, MIMETYPE_TEXT_PLAIN, Collections.emptyMap(), sourceFile, targetFile);
             }
         };
     }
 
-    @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Resource> transform(HttpServletRequest request,
-        @RequestParam("file") final MultipartFile sourceMultipartFile,
-        @RequestParam("sourceMimetype") final String sourceMimetype,
-        @RequestParam("targetExtension") final String targetExtension,
-        @RequestParam("targetMimetype") final String targetMimetype,
-        @RequestParam(value = "targetEncoding", required = false, defaultValue = "UTF-8") final String targetEncoding,
-
-        @RequestParam(value = "timeout", required = false) final Long timeout,
-        @RequestParam(value = "testDelay", required = false) final Long testDelay,
-
-        @RequestParam(value = "includeContents", required = false) final Boolean includeContents,
-        @RequestParam(value = "notExtractBookmarksText", required = false) final Boolean notExtractBookmarksText)
-    {
-        final String targetFilename = createTargetFileName(
-            sourceMultipartFile.getOriginalFilename(), targetExtension);
-
-        getProbeTestTransform().incrementTransformerCount();
-
-        final File sourceFile = createSourceFile(request, sourceMultipartFile);
-        final File targetFile = createTargetFile(request, targetFilename);
-        // Both files are deleted by TransformInterceptor.afterCompletion
-
-        // TODO Consider streaming the request and response rather than using temporary files
-        // https://www.logicbig.com/tutorials/spring-framework/spring-web-mvc/streaming-response-body.html
-
-        final Map<String, String> transformOptions = createTransformOptions(
-            "includeContents", includeContents,
-            "notExtractBookmarksText", notExtractBookmarksText,
-            "targetEncoding", targetEncoding);
-
-        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype,
-            transformOptions);
-
-        javaExecutor.call(sourceFile, targetFile, transform,
-            includeContents != null && includeContents ? INCLUDE_CONTENTS : null,
-            notExtractBookmarksText != null && notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
-            TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);
-
-        final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
-
-        LogEntry.setTargetSize(targetFile.length());
-        long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
-        time += LogEntry.addDelay(testDelay);
-        getProbeTestTransform().recordTransformTime(time);
-
-        return body;
-    }
-
     @Override
-    public void processTransform(final File sourceFile, final File targetFile,
-        final String sourceMimetype, final String targetMimetype,
-        final Map<String, String> transformOptions, final Long timeout)
+    protected void transform(String transformName, String sourceMimetype, String targetMimetype,
+                             Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
-        logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
-                     " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
-
-        final boolean includeContents = parseBoolean(
-            transformOptions.getOrDefault("includeContents", "false"));
-        final boolean notExtractBookmarksText = parseBoolean(
-            transformOptions.getOrDefault("notExtractBookmarksText", "false"));
-        final String targetEncoding = transformOptions.getOrDefault("targetEncoding", "UTF-8");
-
-        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype,
-            transformOptions);
-
-        javaExecutor.call(sourceFile, targetFile, transform,
-            includeContents ? INCLUDE_CONTENTS : null,
-            notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
-            TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);
+        transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
+        javaExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }

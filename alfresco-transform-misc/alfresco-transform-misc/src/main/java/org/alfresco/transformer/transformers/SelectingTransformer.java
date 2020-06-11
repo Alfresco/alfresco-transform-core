@@ -26,19 +26,17 @@
  */
 package org.alfresco.transformer.transformers;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import com.google.common.collect.ImmutableMap;
+import org.alfresco.transformer.executors.Transformer;
+import org.alfresco.transformer.logging.LogEntry;
+import org.alfresco.transformer.metadataExtractors.HtmlMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.RFC822MetadataExtractor;
 
 import java.io.File;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.logging.LogEntry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
+import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 
 /**
  * The SelectingTransformer selects a registered {@link SelectableTransformer}
@@ -46,9 +44,9 @@ import com.google.common.collect.ImmutableMap;
  *
  * @author eknizat
  */
-public class SelectingTransformer
+public class SelectingTransformer implements Transformer
 {
-    private static final Logger logger = LoggerFactory.getLogger(SelectingTransformer.class);
+    private static final String ID = "misc";
 
     public static final String LICENCE =
             "This transformer uses libraries from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\\\ 2.0.txt\\n" +
@@ -63,57 +61,45 @@ public class SelectingTransformer
         .put("textToPdf", new TextToPdfContentTransformer())
         .put("rfc822", new EMLTransformer())
         .put("ooXmlThumbnail", new OOXMLThumbnailContentTransformer())
+        .put("HtmlMetadataExtractor", new HtmlMetadataExtractor())
+        .put("RFC822MetadataExtractor", new RFC822MetadataExtractor())
         .build();
 
-    /**
-     * Performs a transform using a transformer selected based on the provided sourceMimetype and targetMimetype
-     *
-     * @param transform      the name of the transformer
-     * @param sourceFile     File to transform from
-     * @param targetFile     File to transform to
-     * @param sourceMimetype Mimetype of the source file
-     * @throws TransformException if there was a problem internally
-     */
-    public void transform(String transform, File sourceFile, File targetFile, String sourceMimetype,
-        String targetMimetype, Map<String, String> parameters) throws TransformException
+    @Override
+    public String getTransformerId()
     {
-        try
-        {
-            final SelectableTransformer transformer = transformers.get(transform);
-            logOptions(sourceFile, targetFile, parameters);
-            transformer.transform(sourceFile, targetFile, sourceMimetype, targetMimetype,
-                parameters);
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new TransformException(BAD_REQUEST.value(), getMessage(e));
-        }
-        catch (Exception e)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), getMessage(e));
-        }
-        if (!targetFile.exists())
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                "Transformer failed to create an output file. Target file does not exist.");
-        }
-        if (sourceFile.length() > 0 && targetFile.length() == 0)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                "Transformer failed to create an output file. Target file is empty but source file was not empty.");
-        }
+        return ID;
     }
 
-    private static String getMessage(Exception e)
+    @Override
+    public void transform(String transformName, String sourceMimetype, String targetMimetype,
+                           Map<String, String> transformOptions,
+                           File sourceFile, File targetFile) throws Exception
     {
-        return e.getMessage() == null || e.getMessage().isEmpty() ? e.getClass().getSimpleName() : e.getMessage();
+        final SelectableTransformer transformer = transformers.get(transformName);
+        logOptions(sourceFile, targetFile, transformOptions);
+        transformer.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+    }
+
+    public void extractMetadata(String transformName, String sourceMimetype, String targetMimetype,
+                                Map<String, String> transformOptions,
+                                File sourceFile, File targetFile) throws Exception
+    {
+        final SelectableTransformer transformer = transformers.get(transformName);
+        logOptions(sourceFile, targetFile, transformOptions);
+        transformer.extractMetadata(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 
     private static void logOptions(File sourceFile, File targetFile, Map<String, String> parameters)
     {
         StringJoiner sj = new StringJoiner(" ");
-        parameters.forEach((k, v) -> sj.add(
-            "--" + k + "=" + v)); // keeping the existing style used in other T-Engines
+        parameters.forEach((k, v) ->
+        {
+            if (!TRANSFORM_NAME_PARAMETER.equals(k))
+            {
+                sj.add("--" + k + "=" + v);
+            }
+        }); // keeping the existing style used in other T-Engines
         sj.add(getExtension(sourceFile));
         sj.add(getExtension(targetFile));
         LogEntry.setOptions(sj.toString());

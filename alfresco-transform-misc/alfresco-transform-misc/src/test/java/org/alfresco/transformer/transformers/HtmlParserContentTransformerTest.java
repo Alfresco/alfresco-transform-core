@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,8 +26,7 @@
  */
 package org.alfresco.transformer.transformers;
 
-import static org.alfresco.transformer.transformers.StringExtractingContentTransformer.SOURCE_ENCODING;
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,7 +35,8 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import static org.alfresco.transformer.transformers.StringExtractingContentTransformer.SOURCE_ENCODING;
+import static org.junit.Assert.assertEquals;
 
 public class HtmlParserContentTransformerTest
 {
@@ -81,7 +81,7 @@ public class HtmlParserContentTransformerTest
 
             Map<String, String> parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
-            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
 
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
@@ -94,7 +94,7 @@ public class HtmlParserContentTransformerTest
             tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
             parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "UTF-8");
-            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
@@ -106,7 +106,7 @@ public class HtmlParserContentTransformerTest
             tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
             parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "UTF-16");
-            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
@@ -131,7 +131,7 @@ public class HtmlParserContentTransformerTest
 
             parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
-            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();

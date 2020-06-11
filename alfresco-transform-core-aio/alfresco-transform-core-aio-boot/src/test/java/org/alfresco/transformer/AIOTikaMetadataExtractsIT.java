@@ -24,35 +24,21 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer.transformers;
+package org.alfresco.transformer;
 
-import java.io.File;
-import java.util.Map;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-public class MiscAdapter implements Transformer
+/**
+ * Metadata integration tests in the Tika T-Engine, but run from the AIO T-Engine.
+ *
+ * @author adavis
+ */
+@RunWith(Parameterized.class)
+public class AIOTikaMetadataExtractsIT extends TikaMetadataExtractsIT
 {
-    private static final String ID = "misc";
-    private SelectingTransformer miscSelectingTransformer;
-
-    public MiscAdapter()
+    public AIOTikaMetadataExtractsIT(TestFileInfo testFileInfo)
     {
-        miscSelectingTransformer = new SelectingTransformer();
-    }
-
-    @Override
-    public void transform(File sourceFile, File targetFile, String sourceMimetype, String targetMimetype, Map<String,
-            String> transformOptions)
-    {
-        String transformerName = transformOptions.get(TRANSFORM_NAME_PARAMETER);
-        miscSelectingTransformer.transform(transformerName, sourceFile, targetFile,
-                sourceMimetype, targetMimetype, transformOptions);
-
-    }
-
-    @Override
-    public String getTransformerId()
-    {
-        return ID;
+        super(testFileInfo);
     }
 }
-

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,7 +26,11 @@
  */
 package org.alfresco.transformer.transformers;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
+import com.google.common.collect.ImmutableList;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -37,12 +41,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableList;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
 
 /**
  * Converts Apple iWorks files to JPEGs for thumbnailing and previewing.
@@ -74,8 +73,8 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
     //                 (53 x  41) preview-micro.jpg
 
     @Override
-    public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
-        final String targetMimetype, final Map<String, String> parameters)
+    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
+                          final File sourceFile, final File targetFile)
     {
         logger.debug("Performing IWorks to jpeg transform with sourceMimetype={} targetMimetype={}",
             sourceMimetype, targetMimetype);

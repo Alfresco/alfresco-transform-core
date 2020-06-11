@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,34 +26,20 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transformer.fs.FileManager.createAttachment;
-import static org.alfresco.transformer.fs.FileManager.createSourceFile;
-import static org.alfresco.transformer.fs.FileManager.createTargetFile;
-import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
-import static org.alfresco.transformer.transformers.HtmlParserContentTransformer.SOURCE_ENCODING;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.alfresco.transformer.transformers.SelectingTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.alfresco.transformer.logging.LogEntry;
-import org.alfresco.transformer.probes.ProbeTestTransform;
-import org.alfresco.transformer.transformers.SelectingTransformer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transformer.transformers.HtmlParserContentTransformer.SOURCE_ENCODING;
+import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 
 @Controller
 public class MiscController extends AbstractTransformerController
@@ -88,71 +74,16 @@ public class MiscController extends AbstractTransformerController
             {
                 Map<String, String> parameters = new HashMap<>();
                 parameters.put(SOURCE_ENCODING, "UTF-8");
-                transformer.transform("html", sourceFile, targetFile, MIMETYPE_HTML,
-                    MIMETYPE_TEXT_PLAIN, parameters);
+                transform("html", MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, parameters, sourceFile, targetFile);
             }
         };
     }
 
     @Override
-    public void processTransform(final File sourceFile, final File targetFile,
-        final String sourceMimetype, final String targetMimetype,
-        final Map<String, String> transformOptions, final Long timeout)
+    protected void transform(String transformName, String sourceMimetype, String targetMimetype,
+                             Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
-        if (logger.isDebugEnabled())
-        {
-            logger.debug(
-                "Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
-                " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
-        }
-
-        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype,
-            transformOptions);
-        transformer.transform(transform, sourceFile, targetFile, sourceMimetype, targetMimetype,
-            transformOptions);
-    }
-
-    @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Resource> transform(HttpServletRequest request,
-        @RequestParam("file") MultipartFile sourceMultipartFile,
-        @RequestParam("targetExtension") String targetExtension,
-        @RequestParam("targetMimetype") String targetMimetype,
-        @RequestParam(value = "targetEncoding", required = false) String targetEncoding,
-        @RequestParam("sourceMimetype") String sourceMimetype,
-        @RequestParam(value = "sourceEncoding", required = false) String sourceEncoding,
-        @RequestParam(value = "pageLimit", required = false) String pageLimit,
-        @RequestParam(value = "testDelay", required = false) Long testDelay)
-    {
-        if (logger.isDebugEnabled())
-        {
-            logger.debug(
-                "Processing request with: sourceMimetype '{}', sourceEncoding '{}', " +
-                "targetMimetype '{}', targetExtension '{}', targetEncoding '{}', pageLimit '{}'",
-                sourceMimetype, sourceEncoding, targetMimetype, targetExtension, targetEncoding,
-                pageLimit);
-        }
-
-        final String targetFilename = createTargetFileName(
-            sourceMultipartFile.getOriginalFilename(), targetExtension);
-        getProbeTestTransform().incrementTransformerCount();
-        final File sourceFile = createSourceFile(request, sourceMultipartFile);
-        final File targetFile = createTargetFile(request, targetFilename);
-
-        final Map<String, String> transformOptions = createTransformOptions(
-            "sourceEncoding", sourceEncoding,
-            "targetEncoding", targetEncoding,
-            "pageLimit", pageLimit);
-
-        final String transform = getTransformerName(sourceFile, sourceMimetype, targetMimetype,
-            transformOptions);
-        transformer.transform(transform, sourceFile, targetFile, sourceMimetype, targetMimetype,
-            transformOptions);
-
-        final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
-        LogEntry.setTargetSize(targetFile.length());
-        long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
-        time += LogEntry.addDelay(testDelay);
-        getProbeTestTransform().recordTransformTime(time);
-        return body;
+        transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
+        transformer.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }

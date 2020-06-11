@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,6 +26,9 @@
  */
 package org.alfresco.transformer.transformers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -38,9 +41,6 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Converts any textual format to plain text.
@@ -58,7 +58,7 @@ import org.apache.commons.logging.LogFactory;
 public class StringExtractingContentTransformer implements SelectableTransformer
 {
 
-    private static final Log logger = LogFactory.getLog(StringExtractingContentTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(StringExtractingContentTransformer.class);
 
     /**
      * Text to text conversions are done directly using the content reader and writer string
@@ -69,8 +69,8 @@ public class StringExtractingContentTransformer implements SelectableTransformer
      * be unformatted but valid.
      */
     @Override
-    public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
-        final String targetMimetype, final Map<String, String> parameters) throws Exception
+    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
+                          final File sourceFile, final File targetFile) throws Exception
     {
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
         String targetEncoding = parameters.get(TARGET_ENCODING);
@@ -126,11 +126,11 @@ public class StringExtractingContentTransformer implements SelectableTransformer
         {
             if (charReader != null)
             {
-                try { charReader.close(); } catch (Throwable e) { logger.error(e); }
+                try { charReader.close(); } catch (Throwable e) { logger.error("Failed to close charReader", e); }
             }
             if (charWriter != null)
             {
-                try { charWriter.close(); } catch (Throwable e) { logger.error(e); }
+                try { charWriter.close(); } catch (Throwable e) { logger.error("Failed to close charWriter", e); }
             }
         }
         // done

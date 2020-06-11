@@ -26,10 +26,7 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
-
-import java.util.Arrays;
-
+import io.micrometer.core.instrument.MeterRegistry;
 import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
 import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
@@ -47,7 +44,9 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 
-import io.micrometer.core.instrument.MeterRegistry;
+import java.util.Arrays;
+
+import static org.alfresco.transformer.logging.StandardMessages.LICENCE;
 
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})

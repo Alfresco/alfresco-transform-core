@@ -26,18 +26,35 @@
  */
 package org.alfresco.transformer.executors;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import com.google.common.collect.ImmutableMap;
+import org.alfresco.transformer.logging.LogEntry;
+import org.alfresco.transformer.metadataExtractors.AbstractTikaMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.DWGMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.MP3MetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.MailMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.OfficeMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.OpenDocumentMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.PdfBoxMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.PoiMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.TikaAudioMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.TikaAutoMetadataExtractor;
+import org.alfresco.transformer.util.RequestParamMap;
+import org.apache.tika.exception.TikaException;
+import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.StringJoiner;
 
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.logging.LogEntry;
-import org.apache.tika.exception.TikaException;
-import org.xml.sax.SAXException;
+import static java.lang.Boolean.parseBoolean;
+import static org.alfresco.transformer.executors.Tika.INCLUDE_CONTENTS;
+import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
+import static org.alfresco.transformer.executors.Tika.TARGET_ENCODING;
+import static org.alfresco.transformer.executors.Tika.TARGET_MIMETYPE;
+import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARK_TEXT;
 
 /**
  * JavaExecutor implementation for running TIKA transformations. It loads the
@@ -45,9 +62,26 @@ import org.xml.sax.SAXException;
  */
 public class TikaJavaExecutor implements JavaExecutor
 {
+    private static final String ID = "tika";
+
     public static final String LICENCE = "This transformer uses Tika from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt";
 
     private final Tika tika;
+    private final Map<String, AbstractTikaMetadataExtractor> metadataExtractor = ImmutableMap
+            .<String, AbstractTikaMetadataExtractor>builder()
+            .put("DWGMetadataExtractor", new DWGMetadataExtractor())
+            .put("MailMetadataExtractor", new MailMetadataExtractor())
+            .put("MP3MetadataExtractor", new MP3MetadataExtractor())
+            .put("OfficeMetadataExtractor", new OfficeMetadataExtractor())
+            .put("OpenDocumentMetadataExtractor", new OpenDocumentMetadataExtractor())
+            .put("PdfBoxMetadataExtractor", new PdfBoxMetadataExtractor())
+            .put("PoiMetadataExtractor", new PoiMetadataExtractor())
+            .put("TikaAudioMetadataExtractor", new TikaAudioMetadataExtractor())
+            .put("TikaAutoMetadataExtractor", new TikaAutoMetadataExtractor())
+            .build();
+    private final Map<String, AbstractTikaMetadataExtractor> metadataEmbedder = ImmutableMap
+            .<String, AbstractTikaMetadataExtractor>builder()
+            .build();
 
     public TikaJavaExecutor()
     {
@@ -62,32 +96,33 @@ public class TikaJavaExecutor implements JavaExecutor
     }
 
     @Override
-    public void call(File sourceFile, File targetFile, String... args)
-        throws TransformException
+    public String getTransformerId()
     {
-        args = buildArgs(sourceFile, targetFile, args);
-        try
-        {
-            tika.transform(args);
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new TransformException(BAD_REQUEST.value(), getMessage(e));
-        }
-        catch (Exception e)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), getMessage(e));
-        }
-        if (!targetFile.exists() || targetFile.length() == 0)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                "Transformer failed to create an output file");
-        }
+        return ID;
     }
 
-    private static String getMessage(Exception e)
+    @Override
+    public void transform(String transformName, String sourceMimetype, String targetMimetype,
+                          Map<String, String> transformOptions, File sourceFile, File targetFile)
+            throws Exception
     {
-        return e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
+        final boolean includeContents = parseBoolean(
+                transformOptions.getOrDefault(RequestParamMap.INCLUDE_CONTENTS, "false"));
+        final boolean notExtractBookmarksText = parseBoolean(
+                transformOptions.getOrDefault(NOT_EXTRACT_BOOKMARK_TEXT, "false"));
+        final String targetEncoding = transformOptions.getOrDefault("targetEncoding", "UTF-8");
+
+        call(sourceFile, targetFile, transformName,
+                includeContents ? INCLUDE_CONTENTS : null,
+                notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
+                TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);
+    }
+
+    @Override
+    public void call(File sourceFile, File targetFile, String... args) throws Exception
+    {
+        args = buildArgs(sourceFile, targetFile, args);
+        tika.transform(args);
     }
 
     private static String[] buildArgs(File sourceFile, File targetFile, String[] args)
@@ -126,5 +161,29 @@ public class TikaJavaExecutor implements JavaExecutor
             sj.add(ext);
             methodArgs.add(path);
         }
+    }
+
+    public void extractMetadata(String transformName, String sourceMimetype, String targetMimetype,
+                                Map<String, String> transformOptions, File sourceFile, File targetFile)
+                            throws Exception
+    {
+        AbstractTikaMetadataExtractor metadataExtractor = this.metadataExtractor.get(transformName);
+        Map<String, Serializable> metadata = metadataExtractor.extractMetadata(sourceMimetype, transformOptions, sourceFile);
+        metadataExtractor.mapMetadataAndWrite(targetFile, metadata);
+    }
+
+    /**
+     * @deprecated The content repository's TikaPoweredMetadataExtracter provides no non test implementations.
+     *             This code exists in case there are custom implementations, that need to be converted to T-Engines.
+     *             It is simply a copy and paste from the content repository and has received limited testing.
+     */
+    @Override
+    @SuppressWarnings("deprecation" )
+    public void embedMetadata(String transformName, String sourceMimetype, String targetMimetype,
+                              Map<String, String> transformOptions, File sourceFile, File targetFile)
+                            throws Exception
+    {
+        AbstractTikaMetadataExtractor metadataExtractor = this.metadataEmbedder.get(transformName);
+        metadataExtractor.embedMetadata(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }

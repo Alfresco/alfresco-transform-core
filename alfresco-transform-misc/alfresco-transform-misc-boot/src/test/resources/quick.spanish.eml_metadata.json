@@ -1,0 +1,16 @@
+{
+  "{http://www.alfresco.org/model/imap/1.0}dateReceived" : "Thu, 16 Aug 2012 08:13:29 -0700 (PDT)",
+  "{http://www.alfresco.org/model/content/1.0}addressee" : "jane.doe@alfresco.com",
+  "{http://www.alfresco.org/model/content/1.0}description" : "The quick brown fox jumps over the lazy dog",
+  "{http://www.alfresco.org/model/content/1.0}addressees" : null,
+  "{http://www.alfresco.org/model/imap/1.0}dateSent" : 1345130009000,
+  "{http://www.alfresco.org/model/imap/1.0}messageTo" : "jane.doe@alfresco.com",
+  "{http://www.alfresco.org/model/imap/1.0}messageId" : "<CAL0uq1f9vPczLRinL3xB5U_oSSd5U0ob=408nBgosCY0OVFyBw@mail.alfresco.com>",
+  "{http://www.alfresco.org/model/content/1.0}title" : "The quick brown fox jumps over the lazy dog",
+  "{http://www.alfresco.org/model/imap/1.0}messageSubject" : "The quick brown fox jumps over the lazy dog",
+  "{http://www.alfresco.org/model/imap/1.0}messageCc" : null,
+  "{http://www.alfresco.org/model/content/1.0}sentdate" : 1345130009000,
+  "{http://www.alfresco.org/model/content/1.0}subjectline" : "The quick brown fox jumps over the lazy dog",
+  "{http://www.alfresco.org/model/imap/1.0}messageFrom" : "john.doe@alfresco.com",
+  "{http://www.alfresco.org/model/content/1.0}originator" : "john.doe@alfresco.com"
+}

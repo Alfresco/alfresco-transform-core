@@ -28,9 +28,9 @@ package org.alfresco.transformer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.transform.client.model.config.TransformConfig;
-import org.alfresco.transformer.transformers.MiscAdapter;
-import org.alfresco.transformer.transformers.TikaAdapter;
-import org.alfresco.transformer.transformers.Transformer;
+import org.alfresco.transformer.executors.TikaJavaExecutor;
+import org.alfresco.transformer.executors.Transformer;
+import org.alfresco.transformer.transformers.SelectingTransformer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.Before;
@@ -43,23 +43,22 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.alfresco.transformer.transformers.TextToPdfContentTransformer.PAGE_LIMIT;
-import static org.alfresco.transformer.transformers.Transformer.TRANSFORM_NAME_PARAMETER;
-import static org.junit.Assert.*;
+import static org.alfresco.transformer.util.RequestParamMap.PAGE_LIMIT;
+import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AIOTransformRegistryTest
 {
     private static final String SOURCE_MIMETYPE = "text/html";
     private static final String TARGET_MIMETYPE = "text/plain";
     String SOURCE_ENCODING = "sourceEncoding";
-    String TARGET_ENCODING = "targetEncoding";
 
     AIOTransformRegistry aioTransformerRegistry = new AIOTransformRegistry();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -68,8 +67,8 @@ public class AIOTransformRegistryTest
     @Before
     public void before() throws Exception
     {
-        aioTransformerRegistry.registerTransformer(new MiscAdapter());
-        aioTransformerRegistry.registerTransformer(new TikaAdapter());
+        aioTransformerRegistry.registerTransformer(new SelectingTransformer());
+        aioTransformerRegistry.registerTransformer(new TikaJavaExecutor());
 
     }
 
@@ -153,7 +152,7 @@ public class AIOTransformRegistryTest
     public void testDuplicateTransformsException() throws Exception
     {
         // The Misc transformers are already registered
-        aioTransformerRegistry.registerTransformer(new MiscAdapter());
+        aioTransformerRegistry.registerTransformer(new SelectingTransformer());
     }
 
     // Test copied from Misc (HtmlParserContentTransformerTest) See ATS-712 aioTransformerRegistry - html
@@ -187,7 +186,7 @@ public class AIOTransformRegistryTest
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
             parameters.put(TRANSFORM_NAME_PARAMETER, "html");
             Transformer transformer = aioTransformerRegistry.getByTransformName("html");
-            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
 
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
@@ -201,7 +200,7 @@ public class AIOTransformRegistryTest
             parameters = new HashMap<>();
             parameters.put(TRANSFORM_NAME_PARAMETER, "html");
             parameters.put(SOURCE_ENCODING, "UTF-8");
-            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
@@ -214,7 +213,7 @@ public class AIOTransformRegistryTest
             parameters = new HashMap<>();
             parameters.put(TRANSFORM_NAME_PARAMETER, "html");
             parameters.put(SOURCE_ENCODING, "UTF-16");
-            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
@@ -240,7 +239,7 @@ public class AIOTransformRegistryTest
             parameters = new HashMap<>();
             parameters.put(TRANSFORM_NAME_PARAMETER, "html");
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
-            transformer.transform(tmpS, tmpD, SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters);
+            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
@@ -298,7 +297,7 @@ public class AIOTransformRegistryTest
         parameters.put(PAGE_LIMIT, pageLimit);
         parameters.put(TRANSFORM_NAME_PARAMETER, "textToPdf");
         Transformer transformer = aioTransformerRegistry.getByTransformName("textToPdf");
-        transformer.transform(sourceFile, targetFile, "text/plain", "application/pdf", parameters);
+        transformer.transform("text/plain", "application/pdf", parameters, sourceFile, targetFile);
 
         // Read back in the PDF and check it
         PDDocument doc = PDDocument.load(targetFile);

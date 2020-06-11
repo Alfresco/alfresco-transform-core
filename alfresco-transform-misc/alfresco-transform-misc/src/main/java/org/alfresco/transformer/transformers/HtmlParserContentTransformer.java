@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,6 +26,12 @@
  */
 package org.alfresco.transformer.transformers;
 
+import org.htmlparser.Parser;
+import org.htmlparser.beans.StringBean;
+import org.htmlparser.util.ParserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,12 +41,6 @@ import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.util.Map;
-
-import org.htmlparser.Parser;
-import org.htmlparser.beans.StringBean;
-import org.htmlparser.util.ParserException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Content transformer which wraps the HTML Parser library for
@@ -75,8 +75,8 @@ public class HtmlParserContentTransformer implements SelectableTransformer
         HtmlParserContentTransformer.class);
 
     @Override
-    public void transform(final File sourceFile, final File targetFile, final String sourceMimetype,
-        final String targetMimetype, final Map<String, String> parameters) throws Exception
+    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
+                          final File sourceFile, final File targetFile) throws Exception
     {
         String sourceEncoding = parameters.get(SOURCE_ENCODING);
         checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);

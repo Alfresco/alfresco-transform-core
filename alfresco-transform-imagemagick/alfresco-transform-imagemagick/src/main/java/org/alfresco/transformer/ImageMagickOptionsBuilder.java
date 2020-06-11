@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,16 +26,15 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.transformer.util.Util.stringToBoolean;
-import static org.alfresco.transformer.util.Util.stringToInteger;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import com.google.common.collect.ImmutableList;
+import org.alfresco.transform.exceptions.TransformException;
 
 import java.util.List;
 import java.util.StringJoiner;
 
-import org.alfresco.transform.exceptions.TransformException;
-
-import com.google.common.collect.ImmutableList;
+import static org.alfresco.transformer.util.Util.stringToBoolean;
+import static org.alfresco.transformer.util.Util.stringToInteger;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 /**
  * ImageMagick options builder.
@@ -107,7 +106,7 @@ public final class ImageMagickOptionsBuilder
 
     public ImageMagickOptionsBuilder withAutoOrient(final Boolean autoOrient)
     {
-        this.autoOrient = autoOrient;
+        this.autoOrient = autoOrient == null ? true : autoOrient;
         return this;
     }
 
@@ -223,7 +222,7 @@ public final class ImageMagickOptionsBuilder
 
     public ImageMagickOptionsBuilder withAllowEnlargement(final Boolean allowEnlargement)
     {
-        this.allowEnlargement = allowEnlargement;
+        this.allowEnlargement = allowEnlargement == null ? true : allowEnlargement;
         return this;
     }
 

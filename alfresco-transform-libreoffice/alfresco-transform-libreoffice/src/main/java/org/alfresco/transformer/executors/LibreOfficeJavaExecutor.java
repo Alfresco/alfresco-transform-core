@@ -26,12 +26,8 @@
  */
 package org.alfresco.transformer.executors;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-
-import java.io.File;
-import java.io.IOException;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.star.task.ErrorCodeIOException;
 import org.alfresco.transform.exceptions.TransformException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -42,7 +38,13 @@ import org.artofsolving.jodconverter.office.OfficeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.task.ErrorCodeIOException;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Map;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
  * JavaExecutor implementation for running LibreOffice transformations. It loads the
@@ -50,6 +52,8 @@ import com.sun.star.task.ErrorCodeIOException;
  */
 public class LibreOfficeJavaExecutor implements JavaExecutor
 {
+    private static String ID = "libreoffice";
+
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeJavaExecutor.class);
 
     private static final int JODCONVERTER_TRANSFORMATION_ERROR_CODE = 3088;
@@ -58,7 +62,9 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
 
     public static final String LICENCE = "This transformer uses LibreOffice from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt";
 
-    private JodConverter jodconverter;
+    private final JodConverter jodconverter;
+
+    private final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
     public LibreOfficeJavaExecutor(String path)
     {
@@ -76,7 +82,7 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
 
         final JodConverterSharedInstance jodconverter = new JodConverterSharedInstance();
 
-        jodconverter.setOfficeHome(LIBREOFFICE_HOME);         // jodconverter.officeHome
+        jodconverter.setOfficeHome(LIBREOFFICE_HOME);    // jodconverter.officeHome
         jodconverter.setMaxTasksPerProcess("200");       // jodconverter.maxTasksPerProcess
         jodconverter.setTaskExecutionTimeout(timeout);   // jodconverter.maxTaskExecutionTimeout
         jodconverter.setTaskQueueTimeout(timeout);       // jodconverter.taskQueueTimeout
@@ -87,6 +93,19 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
         jodconverter.afterPropertiesSet();
 
         return jodconverter;
+    }
+
+    @Override
+    public String getTransformerId()
+    {
+        return ID;
+    }
+
+    @Override
+    public void transform(String transformName, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                          File sourceFile, File targetFile)
+    {
+        call(sourceFile, targetFile);
     }
 
     @Override
@@ -147,7 +166,7 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
 
         PDPage pdfPage = new PDPage();
         try (PDDocument pdfDoc = new PDDocument();
-             PDPageContentStream contentStream = new PDPageContentStream(pdfDoc, pdfPage))
+             PDPageContentStream ignore = new PDPageContentStream(pdfDoc, pdfPage))
         {
             // Even though, we want an empty PDF, some libs (e.g. PDFRenderer) object to PDFs
             // that have literally nothing in them. So we'll put a content stream in it.
@@ -160,6 +179,50 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
         {
             throw new TransformException(INTERNAL_SERVER_ERROR.value(),
                 "Error creating empty PDF file", iox);
+        }
+    }
+
+    /**
+     * @deprecated The JodConverterMetadataExtracter has not been in use since 6.0.1.
+     *             This code exists in case there are custom implementations, that need to be converted to T-Engines.
+     *             It is simply a copy and paste from the content repository and has received limited testing.
+     */
+    @Override
+    public void extractMetadata(String transformName, String sourceMimetype, String targetMimetype,
+                                Map<String, String> transformOptions,
+                                File sourceFile, File targetFile)
+    {
+        OfficeManager officeManager = jodconverter.getOfficeManager();
+        LibreOfficeExtractMetadataTask extractMetadataTask = new LibreOfficeExtractMetadataTask(sourceFile);
+        try
+        {
+            officeManager.execute(extractMetadataTask);
+        }
+        catch (OfficeException e)
+        {
+            throw new TransformException(BAD_REQUEST.value(),
+                    "LibreOffice metadata extract failed: \n" +
+                            "   from file: " + sourceFile, e);
+        }
+        Map<String, Serializable> metadata = extractMetadataTask.getMetadata();
+
+        if (logger.isDebugEnabled())
+        {
+            metadata.forEach((k,v) -> logger.debug(k+"="+v));
+        }
+
+        writeMetadataIntoTargetFile(targetFile, metadata);
+    }
+
+    private void writeMetadataIntoTargetFile(File targetFile, Map<String, Serializable> results)
+    {
+        try
+        {
+            jsonObjectMapper.writeValue(targetFile, results);
+        }
+        catch (IOException e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), "Failed to write metadata to targetFile", e);
         }
     }
 }
