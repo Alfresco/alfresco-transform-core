@@ -234,7 +234,7 @@ public class ImageMagickTransformationIT
             // note: some image/tiff->image/* will return multiple page results (hence error) unless options specified for single page
             Map<String, String> tOptions = emptyMap();
             Pair targetPair = Pair.of(targetExtension, targetMimetype);
-            if (targetExtensionsForTiffFirstPage.contains(targetPair))
+            if (MIMETYPE_IMAGE_TIFF.equals(sourceMimetype) && targetExtensionsForTiffFirstPage.contains(targetPair))
             {
                 tOptions = ImmutableMap.of("startPage", "0", "endPage", "0");
             }
