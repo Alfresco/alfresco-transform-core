@@ -30,35 +30,9 @@ import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
 import static org.alfresco.transformer.TestFileInfo.testFile;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_EXCEL;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_HTML;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_SVG;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_GRAPHICS;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_PRESENTATION;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_SPREADSHEET;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_TEXT;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_WORDPROCESSING;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_PDF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_PPT;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_RTF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_CSV;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TSV;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VISIO;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VISIO_2013;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORD;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORDPERFECT;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET_ADDIN_MACRO;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OUTLOOK_MSG;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_DITA;
+import static org.alfresco.transformer.util.MimetypeMap.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.springframework.http.HttpStatus.OK;
@@ -115,11 +89,11 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_PDF,"pdf",null)
     );
 
-    private static final Set<TestFileInfo> pdfTargets = ImmutableSet.of(
+    private static final Set<TestFileInfo> pdfTarget = ImmutableSet.of(
         testFile(MIMETYPE_PDF,"pdf",null)
     );
 
-    private static final Set<TestFileInfo> msgTargets = ImmutableSet.of(
+    private static final Set<TestFileInfo> txtTarget = ImmutableSet.of(
             testFile(MIMETYPE_TEXT_PLAIN,"txt",null)
     );
 
@@ -152,6 +126,11 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_OUTLOOK_MSG                          ,"msg" ,"quick.msg"),
         testFile(MIMETYPE_DITA                                 ,"dita" ,"quick.dita"),
         testFile(MIMETYPE_TEXT_PLAIN                           ,"msg" ,"quick.txt"),
+        testFile(MIMETYPE_STC                                  ,"stc" ,"quick.stc"),
+        testFile(MIMETYPE_STI                                  ,"sti" ,"quick.sti"),
+        testFile(MIMETYPE_STW                                  ,"stw" ,"quick.stw"),
+        testFile(MIMETYPE_SXC                                  ,"sxc" ,"quick.sxc"),
+        testFile(MIMETYPE_SXI                                  ,"sxi" ,"quick.sxi"),
         testFile(MIMETYPE_TSV                                  ,"tsv"  ,"sample.tsv")
     ).collect(toMap(TestFileInfo::getPath, identity()));
 
@@ -190,14 +169,19 @@ public class LibreOfficeTransformationIT
                 allTargets("people.csv", spreadsheetTargets),
                 allTargets("sample.tsv", spreadsheetTargets),
 
-                allTargets("quick.xml", pdfTargets),
-                allTargets("quick.xltm", pdfTargets),
-                allTargets("quick.dita", pdfTargets),
-                allTargets("quick.msg", pdfTargets),
-                allTargets("quick.ppsm", pdfTargets),
-                allTargets("quick.ppsx", pdfTargets),
+                allTargets("quick.xml", pdfTarget),
+                allTargets("quick.xltm", pdfTarget),
+                allTargets("quick.dita", pdfTarget),
+                allTargets("quick.msg", pdfTarget),
+                allTargets("quick.ppsm", pdfTarget),
+                allTargets("quick.ppsx", pdfTarget),
+                allTargets("quick.stc", pdfTarget),
+                allTargets("quick.sti", pdfTarget),
+                allTargets("quick.stw", pdfTarget),
+                allTargets("quick.sxc", pdfTarget),
+                allTargets("quick.sxi", pdfTarget),
 
-                allTargets("quick.msg", msgTargets)
+                allTargets("quick.msg", txtTarget)
                 )
             .flatMap(identity())
             .collect(toSet());
