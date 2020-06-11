@@ -126,22 +126,11 @@ public class StringExtractingContentTransformer implements SelectableTransformer
         {
             if (charReader != null)
             {
-                try {
-                    charReader.close();
-                }
-                catch (Throwable ignore)
-                {
-                }
+                try { charReader.close(); } catch (Throwable e) { logger.error("Failed to close charReader", e); }
             }
             if (charWriter != null)
             {
-                try
-                {
-                    charWriter.close();
-                }
-                catch (Throwable ignore)
-                {
-                }
+                try { charWriter.close(); } catch (Throwable e) { logger.error("Failed to close charWriter", e); }
             }
         }
         // done
