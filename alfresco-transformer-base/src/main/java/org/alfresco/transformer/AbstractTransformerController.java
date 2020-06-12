@@ -87,7 +87,9 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static org.springframework.util.StringUtils.getFilenameExtension;
 
 /**
- * <p>Abstract Controller, provides structure and helper methods to sub-class transformer controllers.</p>
+ * <p>Abstract Controller, provides structure and helper methods to sub-class transformer controllers. Sub classes
+ * should implement {@link #transform(String, String, String, Map, File, File)} and unimplemented methods from
+ * {@link TransformController}.</p>
  *
  * <p>Status Codes:</p>
  * <ul>
@@ -484,6 +486,20 @@ public abstract class AbstractTransformerController implements TransformControll
         return transformOptions;
     }
 
-    protected abstract void transform(String transformName, String sourceMimetype, String targetMimetype,
-                                      Map<String, String> transformOptions, File sourceFile, File targetFile);
+    /**
+     * Normally overridden in subclasses to initiate the transformation.
+     *
+     * @param transformName the name of the transformer in the engine_config.json file
+     * @param sourceMimetype mimetype of the source
+     * @param targetMimetype mimetype of the target
+     * @param transformOptions transform options from the client
+     * @param sourceFile the source file
+     * @param targetFile the target file
+     */
+    protected void transform(String transformName, String sourceMimetype, String targetMimetype,
+                             Map<String, String> transformOptions, File sourceFile, File targetFile)
+    {
+        throw new IllegalStateException("This method should be overridden if you have not overridden " +
+                "transform(HttpServletRequest...) and processTransform(...)");
+    }
 }
