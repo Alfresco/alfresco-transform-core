@@ -28,6 +28,7 @@
         <dependency.jackson.version>2.10.2</dependency.jackson.version>
         <dependency.cxf.version>3.3.5</dependency.cxf.version>
         <dependency.poi.version>4.1.1</dependency.poi.version>
+        <dependency.ooxml-schemas.version>1.4</dependency.ooxml-schemas.version>
     </properties>
 
     <modules>
