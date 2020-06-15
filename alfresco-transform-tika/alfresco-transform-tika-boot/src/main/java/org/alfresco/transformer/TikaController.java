@@ -92,14 +92,22 @@ public class TikaController extends AbstractTransformerController
             @Override
             protected void executeTransformCommand(File sourceFile, File targetFile)
             {
-                transform(PDF_BOX, MIMETYPE_PDF, MIMETYPE_TEXT_PLAIN, Collections.emptyMap(), sourceFile, targetFile);
+                processTransform(PDF_BOX, MIMETYPE_PDF, MIMETYPE_TEXT_PLAIN, Collections.emptyMap(), sourceFile, targetFile, null);
             }
         };
     }
 
+    @Deprecated
+    public void processTransform(final File sourceFile, final File targetFile,
+                                 final String sourceMimetype, final String targetMimetype,
+                                 final Map<String, String> transformOptions, final Long timeout)
+    {
+        processTransform(null, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile, timeout);
+    }
+
     @Override
-    protected void transform(String transformName, String sourceMimetype, String targetMimetype,
-                             Map<String, String> transformOptions, File sourceFile, File targetFile)
+    public void processTransform(String transformName, String sourceMimetype, String targetMimetype,
+                                    Map<String, String> transformOptions, File sourceFile, File targetFile, Long timeout)
     {
         transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
         javaExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);

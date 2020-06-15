@@ -88,7 +88,7 @@ import static org.springframework.util.StringUtils.getFilenameExtension;
 
 /**
  * <p>Abstract Controller, provides structure and helper methods to sub-class transformer controllers. Sub classes
- * should implement {@link #transform(String, String, String, Map, File, File)} and unimplemented methods from
+ * should implement {@link #processTransform(String, String, String, Map, File, File, Long)} and unimplemented methods from
  * {@link TransformController}.</p>
  *
  * <p>Status Codes:</p>
@@ -170,7 +170,7 @@ public abstract class AbstractTransformerController implements TransformControll
 
         Map<String, String> transformOptions = getTransformOptions(requestParameters);
         String transformName = getTransformerName(sourceMimetype, targetMimetype, requestTransformName, sourceFile, transformOptions);
-        transform(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+        processTransform(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile, null);
 
         final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
         LogEntry.setTargetSize(targetFile.length());
@@ -266,8 +266,12 @@ public abstract class AbstractTransformerController implements TransformControll
         // Run the transformation
         try
         {
-            processTransform(sourceFile, targetFile, request.getSourceMediaType(),
-                request.getTargetMediaType(), request.getTransformRequestOptions(), timeout);
+            String sourceMimetype = request.getSourceMediaType();
+            String targetMimetype = request.getTargetMediaType();
+            Map<String, String> transformOptions = request.getTransformRequestOptions();
+
+            String transformName = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
+            processTransform(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile, timeout);
         }
         catch (TransformException e)
         {
@@ -405,21 +409,6 @@ public abstract class AbstractTransformerController implements TransformControll
         return sb.toString();
     }
 
-    public void processTransform(final File sourceFile, final File targetFile,
-                                  final String sourceMimetype, final String targetMimetype,
-                                  final Map<String, String> transformOptions, final Long timeout)
-    {
-        if (logger.isDebugEnabled())
-        {
-            logger.debug(
-                    "Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
-                            " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
-        }
-
-        String transformName = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
-        transform(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
-    }
-
     private String getTransformerName(String sourceMimetype, String targetMimetype,
                                       String requestTransformName, File sourceFile,
                                       Map<String, String> transformOptions)
@@ -487,6 +476,29 @@ public abstract class AbstractTransformerController implements TransformControll
     }
 
     /**
+     * Deprecated: for backwards compatibility with T-Engine 2.1.0 - 2.2.2.
+     *
+     * Transformers should *Override* the implementation of:
+     *
+     * processTransform(String transformName, String sourceMimetype, String targetMimetype,
+     *                  Map<String, String> transformOptions, File sourceFile, File targetFile, Long timeout)
+     *
+     * @param sourceFile
+     * @param targetFile
+     * @param sourceMimetype
+     * @param targetMimetype
+     * @param transformOptions
+     * @param timeout
+     */
+    @Deprecated
+    public void processTransform(final File sourceFile, final File targetFile,
+                                 final String sourceMimetype, final String targetMimetype,
+                                 final Map<String, String> transformOptions, final Long timeout)
+    {
+        throw new IllegalArgumentException("Deprecated - new implementations should override other processTransform method !");
+    }
+
+    /**
      * Normally overridden in subclasses to initiate the transformation.
      *
      * @param transformName the name of the transformer in the engine_config.json file
@@ -496,10 +508,16 @@ public abstract class AbstractTransformerController implements TransformControll
      * @param sourceFile the source file
      * @param targetFile the target file
      */
-    protected void transform(String transformName, String sourceMimetype, String targetMimetype,
-                             Map<String, String> transformOptions, File sourceFile, File targetFile)
+    public void processTransform(String transformName, String sourceMimetype, String targetMimetype,
+                                 Map<String, String> transformOptions, File sourceFile, File targetFile, Long timeout)
     {
-        throw new IllegalStateException("This method should be overridden if you have not overridden " +
-                "transform(HttpServletRequest...) and processTransform(...)");
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Processing request with: sourceFile '{}', targetFile '{}', transformOptions" +
+                    " '{}', timeout {} ms", sourceFile, targetFile, transformOptions, timeout);
+        }
+
+        // for backwards-compatibility only for older T-Engines that have overridden other *deprecated* processTransform method !
+        processTransform(sourceFile, targetFile, sourceMimetype, targetMimetype, transformOptions, timeout);
     }
 }

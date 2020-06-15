@@ -97,7 +97,7 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
             @Override
             protected void executeTransformCommand(File sourceFile, File targetFile)
             {
-                transform(null, null, null, Collections.emptyMap(), sourceFile, targetFile);
+                processTransform(null, null, null, Collections.emptyMap(), sourceFile, targetFile, null);
             }
         };
     }
@@ -109,9 +109,17 @@ public class AlfrescoPdfRendererController extends AbstractTransformerController
         return null; // does not matter what value is returned, as it is not used because there is only one.
     }
 
+    @Deprecated
+    public void processTransform(final File sourceFile, final File targetFile,
+                                 final String sourceMimetype, final String targetMimetype,
+                                 final Map<String, String> transformOptions, final Long timeout)
+    {
+        processTransform(null, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile, timeout);
+    }
+
     @Override
-    protected void transform(String transformName, String sourceMimetype, String targetMimetype,
-                             Map<String, String> transformOptions, File sourceFile, File targetFile)
+    public void processTransform(String transformName, String sourceMimetype, String targetMimetype,
+                                    Map<String, String> transformOptions, File sourceFile, File targetFile, Long timeout)
     {
         commandExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }

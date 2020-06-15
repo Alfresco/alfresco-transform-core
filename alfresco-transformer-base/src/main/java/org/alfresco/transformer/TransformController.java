@@ -65,9 +65,13 @@ public interface TransformController
 
     ResponseEntity<TransformReply> transform(TransformRequest transformRequest, Long timeout);
 
+    @Deprecated
     void processTransform(final File sourceFile, final File targetFile,
         final String sourceMimetype, final String targetMimetype,
         final Map<String, String> transformOptions, final Long timeout);
+
+    void processTransform(String transformName, String sourceMimetype, String targetMimetype,
+                          Map<String, String> transformOptions, File sourceFile, File targetFile, Long timeout);
 
     String getTransformerName();
 
