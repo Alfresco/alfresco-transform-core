@@ -82,7 +82,7 @@ public class AIOController extends AbstractTransformerController
             {
                 Map<String, String> parameters = new HashMap<>();
                 parameters.put(SOURCE_ENCODING, "UTF-8");
-                processTransform("html", MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, parameters, sourceFile, targetFile, null);
+                transform("html", MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, parameters, sourceFile, targetFile);
             }
         };
     }
@@ -95,17 +95,9 @@ public class AIOController extends AbstractTransformerController
         return new ResponseEntity<>(transformConfig, OK);
     }
 
-    @Deprecated
-    public void processTransform(final File sourceFile, final File targetFile,
-                                 final String sourceMimetype, final String targetMimetype,
-                                 final Map<String, String> transformOptions, final Long timeout)
-    {
-        processTransform(null, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile, timeout);
-    }
-
     @Override
-    public void processTransform(String transformName, String sourceMimetype, String targetMimetype,
-                                    Map<String, String> transformOptions, File sourceFile, File targetFile, Long timeout)
+    protected void transform(String transformName, String sourceMimetype, String targetMimetype,
+                             Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
         logger.debug("Processing transform with: transformName; '{}', sourceFile '{}', targetFile '{}', transformOptions" +
                 " {}", transformName, sourceFile, targetFile, transformOptions);
