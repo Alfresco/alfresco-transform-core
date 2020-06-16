@@ -63,37 +63,86 @@ public interface TransformController
 {
     Logger logger = LoggerFactory.getLogger(TransformController.class);
 
+    /**
+     * Should be overridden in subclasses to initiate the transformation.
+     *
+     * @param transformName the name of the transformer in the engine_config.json file
+     * @param sourceMimetype mimetype of the source
+     * @param targetMimetype mimetype of the target
+     * @param transformOptions transform options from the client
+     * @param sourceFile the source file
+     * @param targetFile the target file
+     */
+    void transformImpl(String transformName, String sourceMimetype, String targetMimetype,
+                       Map<String, String> transformOptions, File sourceFile, File targetFile);
+
+    /**
+     * @deprecated use {@link #transformImpl(String, String, String, Map, File, File)} and timeout should be part of
+     * the transformOptions created from the TransformRequest.
+     */
+    @Deprecated
     ResponseEntity<TransformReply> transform(TransformRequest transformRequest, Long timeout);
 
-    void processTransform(final File sourceFile, final File targetFile,
+    /**
+     * @deprecated use {@link #transformImpl(String, String, String, Map, File, File)}.
+     */
+    @Deprecated
+    default void processTransform(final File sourceFile, final File targetFile,
         final String sourceMimetype, final String targetMimetype,
-        final Map<String, String> transformOptions, final Long timeout);
+        final Map<String, String> transformOptions, final Long timeout)
+    {
+    }
 
+    /**
+     * @return a friendly name for the T-Engine.
+     */
     String getTransformerName();
 
+    /**
+     * Provides the Kubernetes pod probes.
+     */
     ProbeTestTransform getProbeTestTransform();
 
+    /**
+     * Method used by Kubernetes pod probes.
+     */
     default String probe(HttpServletRequest request, boolean isLiveProbe)
     {
         return getProbeTestTransform().doTransformOrNothing(request, isLiveProbe);
     }
 
+    /**
+     * @return a string that may be used by clients in debug. It need not include the version.
+     */
     @RequestMapping("/version")
     @ResponseBody
     String version();
 
+    /**
+     * @return the name of a template to test the T-Engine. Defaults to {@code "transformForm"}.
+     */
     @GetMapping("/")
     default String transformForm(Model model)
     {
         return "transformForm"; // the name of the template
     }
 
+    /**
+     * @return the name of a template to display when there is an error when using the test UI for the T-Engine.
+     * Defaults to {@code "error"}.
+     * @See #transformForm
+     */
     @GetMapping("/error")
     default String error()
     {
         return "error"; // the name of the template
     }
 
+    /**
+     * @return the name of a template to display log messages when using the test UI for the T-Engine.
+     * Defaults to {@code "log"}.
+     * @See #transformForm
+     */
     @GetMapping("/log")
     default String log(Model model)
     {
@@ -106,6 +155,9 @@ public interface TransformController
         return "log"; // the name of the template
     }
 
+    /**
+     * Method used by Kubernetes ready pod probes.
+     */
     @GetMapping("/ready")
     @ResponseBody
     default String ready(HttpServletRequest request)
@@ -113,6 +165,9 @@ public interface TransformController
         return probe(request, false);
     }
 
+    /**
+     * Method used by Kubernetes live pod probes.
+     */
     @GetMapping("/live")
     @ResponseBody
     default String live(HttpServletRequest request)

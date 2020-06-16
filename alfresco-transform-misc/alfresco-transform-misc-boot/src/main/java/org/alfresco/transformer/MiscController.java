@@ -74,14 +74,14 @@ public class MiscController extends AbstractTransformerController
             {
                 Map<String, String> parameters = new HashMap<>();
                 parameters.put(SOURCE_ENCODING, "UTF-8");
-                transform("html", MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, parameters, sourceFile, targetFile);
+                transformImpl("html", MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, parameters, sourceFile, targetFile);
             }
         };
     }
 
     @Override
-    protected void transform(String transformName, String sourceMimetype, String targetMimetype,
-                             Map<String, String> transformOptions, File sourceFile, File targetFile)
+    public void transformImpl(String transformName, String sourceMimetype, String targetMimetype,
+                                 Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
         transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
         transformer.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);

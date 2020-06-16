@@ -96,7 +96,7 @@ public class LibreOfficeController extends AbstractTransformerController
             @Override
             protected void executeTransformCommand(File sourceFile, File targetFile)
             {
-                transform(null, null, null, Collections.emptyMap(), sourceFile, targetFile);
+                transformImpl(null, null, null, Collections.emptyMap(), sourceFile, targetFile);
                 javaExecutor.call(sourceFile, targetFile);
             }
         };
@@ -110,8 +110,8 @@ public class LibreOfficeController extends AbstractTransformerController
     }
 
     @Override
-    protected void transform(String transformName, String sourceMimetype, String targetMimetype,
-                             Map<String, String> transformOptions, File sourceFile, File targetFile)
+    public void transformImpl(String transformName, String sourceMimetype, String targetMimetype,
+                                 Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
         javaExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
