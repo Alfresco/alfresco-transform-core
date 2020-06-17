@@ -2,9 +2,7 @@
 
 This project contains code that is common between all the ACS transformers that run within their own
 Docker containers. It performs common actions such as logging, throttling requests and handling the
-streaming of content to and from the container. It also provides structure and hook points to allow
-specific transformers to simply check request parameter and perform the transformation using either
-files or a pair of InputStream and OutputStream.
+streaming of content to and from the container.
 
 A transformer project is expected to provide the following files:
 
