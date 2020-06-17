@@ -14,7 +14,7 @@ src/main/java/org/alfresco/transformer/<TransformerName>Controller.java
 src/main/java/org/alfresco/transformer/Application.java
 ~~~
 
-* transformerForm.html - A simple test page using [thymeleaf](http://www.thymeleaf.org) that gathers request
+* transformForm.html - A simple test page using [thymeleaf](http://www.thymeleaf.org) that gathers request
   parameters so they may be used to test the transformer.
 
 ~~~
@@ -25,12 +25,13 @@ src/main/java/org/alfresco/transformer/Application.java
     <form method="POST" enctype="multipart/form-data" action="/transform">
       <table>
         <tr><td><div style="text-align:right">file *</div></td><td><input type="file" name="file" /></td></tr>
-        <tr><td><div style="text-align:right">targetFilename *</div></td><td><input type="text" name="targetFilename" value="" /></td></tr>
-        <tr><td><div style="text-align:right">width</div></td><td><input type="text" name="width" value="" /></td></tr>
-        <tr><td><div style="text-align:right">height</div></td><td><input type="text" name="height" value="" /></td></tr>
-        <tr><td><div style="text-align:right">allowPdfEnlargement</div></td><td><input type="checkbox" name="allowPdfEnlargement" value="true" /></td></tr>
-        <tr><td><div style="text-align:right">maintainPdfAspectRatio</div></td><td><input type="checkbox" name="maintainPdfAspectRatio" value="true" /></td></tr>
-        <tr><td><div style="text-align:right">page</div></td><td><input type="text" name="page" value="" /></td></tr>
+        <tr><td><div style="text-align:right">file *</div></td><td><input type="file" name="file" /></td></tr>
+        <tr><td><div style="text-align:right">sourceExtension *</div></td><td><input type="text" name="sourceExtension" value="" /></td></tr>
+        <tr><td><div style="text-align:right">targetExtension *</div></td><td><input type="text" name="targetExtension" value="" /></td></tr>
+        <tr><td><div style="text-align:right">sourceMimetype *</div></td><td><input type="text" name="sourceMimetype" value="" /></td></tr>
+        <tr><td><div style="text-align:right">targetMimetype *</div></td><td><input type="text" name="targetMimetype" value="" /></td></tr>
+        <tr><td><div style="text-align:right">abc:width</div></td><td><input type="text" name="width" value="" /></td></tr>
+        <tr><td><div style="text-align:right">abc:height</div></td><td><input type="text" name="height" value="" /></td></tr>
         <tr><td><div style="text-align:right">timeout</div></td><td><input type="text" name="timeout" value="" /></td></tr>
         <tr><td></td><td><input type="submit" value="Transform" /></td></tr>
 	  </table>
