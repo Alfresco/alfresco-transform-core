@@ -72,7 +72,7 @@ public class TikaTransformationIT
     {
         sourceFile = entry.getLeft();
         targetExtension = entry.getMiddle();
-        //Single test to cover csv-->pdf
+        //Single test to cover pdf-->csv
         if (sourceFile.contains("pdf") && targetExtension.contains("csv"))
         {
             targetMimetype = "text/csv";
