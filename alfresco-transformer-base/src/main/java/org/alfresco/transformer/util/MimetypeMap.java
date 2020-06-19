@@ -181,4 +181,10 @@ public interface MimetypeMap
     String MIMETYPE_VORBIS = "audio/vorbis";
     String MIMETYPE_FLAC = "audio/x-flac";
     String MIMETYPE_ACP = "application/acp";
+    String MIMETYPE_STC = "application/vnd.sun.xml.calc.template";
+    String MIMETYPE_STI = "application/vnd.sun.xml.impress.template";
+    String MIMETYPE_STW = "application/vnd.sun.xml.writer.template";
+    String MIMETYPE_SXC = "application/vnd.sun.xml.calc";
+    String MIMETYPE_SXI = "application/vnd.sun.xml.impress";
+
 }

@@ -53,11 +53,16 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORD;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORDPERFECT;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET_ADDIN_MACRO;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OUTLOOK_MSG;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_DITA;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_SXI;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_SXC;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_STW;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_STI;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_STC;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.springframework.http.HttpStatus.OK;
@@ -118,6 +123,10 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_PDF,"pdf",null)
     );
 
+    private static final Set<TestFileInfo> txtTarget = ImmutableSet.of(
+            testFile(MIMETYPE_TEXT_PLAIN,"txt",null)
+    );
+
     private final String sourceFile;
     private final String targetExtension;
     private final String sourceMimetype;
@@ -146,6 +155,12 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO ,"ppsm" ,"quick.ppsm"),
         testFile(MIMETYPE_OUTLOOK_MSG                          ,"msg" ,"quick.msg"),
         testFile(MIMETYPE_DITA                                 ,"dita" ,"quick.dita"),
+        testFile(MIMETYPE_TEXT_PLAIN                           ,"txt" ,"quick.txt"),
+        testFile(MIMETYPE_STC                                  ,"stc" ,"quick.stc"),
+        testFile(MIMETYPE_STI                                  ,"sti" ,"quick.sti"),
+        testFile(MIMETYPE_STW                                  ,"stw" ,"quick.stw"),
+        testFile(MIMETYPE_SXC                                  ,"sxc" ,"quick.sxc"),
+        testFile(MIMETYPE_SXI                                  ,"sxi" ,"quick.sxi"),
         testFile(MIMETYPE_TSV                                  ,"tsv"  ,"sample.tsv")
     ).collect(toMap(TestFileInfo::getPath, identity()));
 
@@ -167,6 +182,7 @@ public class LibreOfficeTransformationIT
                 allTargets("quick.html", documentsTargets),
                 allTargets("quick.odt", documentsTargets),
                 allTargets("quick.wpd", documentsTargets),
+                allTargets("quick.txt", documentsTargets),
                 allTargets("sample.rtf", documentsTargets),
 
                 allTargets("quick.odp", presentationTargets),
@@ -188,7 +204,14 @@ public class LibreOfficeTransformationIT
                 allTargets("quick.dita", pdfTarget),
                 allTargets("quick.msg", pdfTarget),
                 allTargets("quick.ppsm", pdfTarget),
-                allTargets("quick.ppsx", pdfTarget)
+                allTargets("quick.ppsx", pdfTarget),
+                allTargets("quick.stc", pdfTarget),
+                allTargets("quick.sti", pdfTarget),
+                allTargets("quick.stw", pdfTarget),
+                allTargets("quick.sxc", pdfTarget),
+                allTargets("quick.sxi", pdfTarget),
+
+                allTargets("quick.msg", txtTarget)
                 )
             .flatMap(identity())
             .collect(toSet());
