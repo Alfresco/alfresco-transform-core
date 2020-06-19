@@ -155,7 +155,7 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO ,"ppsm" ,"quick.ppsm"),
         testFile(MIMETYPE_OUTLOOK_MSG                          ,"msg" ,"quick.msg"),
         testFile(MIMETYPE_DITA                                 ,"dita" ,"quick.dita"),
-        testFile(MIMETYPE_TEXT_PLAIN                           ,"msg" ,"quick.txt"),
+        testFile(MIMETYPE_TEXT_PLAIN                           ,"txt" ,"quick.txt"),
         testFile(MIMETYPE_STC                                  ,"stc" ,"quick.stc"),
         testFile(MIMETYPE_STI                                  ,"sti" ,"quick.sti"),
         testFile(MIMETYPE_STW                                  ,"stw" ,"quick.stw"),
