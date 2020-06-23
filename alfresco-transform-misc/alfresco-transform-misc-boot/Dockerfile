@@ -1,6 +1,6 @@
 # Image provides a container in which to run miscellaneous transformations for Alfresco Content Services.
 
-FROM alfresco/alfresco-base-java:11.0.7-openjdk-centos-7-145f5d28c8ca
+FROM alfresco/alfresco-base-java:11.0.7-openjdk-centos-7-9448dd21de19
 
 ENV APACHE_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/Apache%202.0.txt
 ENV JAVA_OPTS=""
