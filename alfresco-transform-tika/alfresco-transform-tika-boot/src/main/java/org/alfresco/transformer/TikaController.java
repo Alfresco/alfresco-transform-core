@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import java.io.File;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.alfresco.transformer.executors.Tika.PDF_BOX;
@@ -92,7 +92,7 @@ public class TikaController extends AbstractTransformerController
             @Override
             protected void executeTransformCommand(File sourceFile, File targetFile)
             {
-                transformImpl(PDF_BOX, MIMETYPE_PDF, MIMETYPE_TEXT_PLAIN, Collections.emptyMap(), sourceFile, targetFile);
+                transformImpl(PDF_BOX, MIMETYPE_PDF, MIMETYPE_TEXT_PLAIN, new HashMap<>(), sourceFile, targetFile);
             }
         };
     }
