@@ -31,6 +31,7 @@ import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transformer.executors.RuntimeExec;
 import org.alfresco.transformer.model.FileRefEntity;
 import org.alfresco.transformer.model.FileRefResponse;
+import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,10 +45,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -267,6 +270,18 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
                     .param("targetEncoding", targetEncoding)
                     .param("targetMimetype", targetMimetype)
                     .param("sourceMimetype", sourceMimetype);
+    }
+
+    @Mock
+    HttpServletRequest httpServletRequest;
+
+    @Test
+    public void testImmutableEmptyMap()
+    {
+        // See ACS-373
+        ProbeTestTransform probeTestTransform = getController().getProbeTestTransform();
+        ReflectionTestUtils.setField(probeTestTransform, "livenessTransformEnabled", true);
+        probeTestTransform.doTransformOrNothing(httpServletRequest, true);
     }
 
     @Test
