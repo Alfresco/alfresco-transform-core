@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -49,8 +49,19 @@ public class MessagingInfo
     @PostConstruct
     public void init()
     {
-        final boolean jms = activemqUrl != null && !activemqUrl.trim().isEmpty();
-        logger.info("JMS client is {}, activemq.url: '{}'", jms ? "ENABLED" : "DISABLED",
-            activemqUrl);
+        // For backwards-compatibility, we continue to rely on setting ACTIVEMQ_URL environment variable (see application.yaml)
+        // The MessagingConfig class uses on ConditionalOnProperty (ie. activemq.url is set and not false)
+
+        // Note: as per application.yaml the broker url is appended with "?jms.watchTopicAdvisories=false". If this needs to be fully
+        // overridden then it would require explicitly setting both "spring.activemq.broker-url" *and* "activemq.url" (latter to non-false value).
+
+        if ((activemqUrl != null) && (! activemqUrl.equals("false")))
+        {
+            logger.info("JMS client is ENABLED - ACTIVEMQ_URL ='{}'", activemqUrl);
+        }
+        else
+        {
+            logger.info("JMS client is DISABLED - ACTIVEMQ_URL is not set");
+        }
     }
 }
