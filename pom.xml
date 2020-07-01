@@ -27,6 +27,7 @@
         <dependency.activemq.version>5.15.9</dependency.activemq.version>
         <dependency.jackson.version>2.10.3</dependency.jackson.version>
         <dependency.cxf.version>3.3.5</dependency.cxf.version>
+        <dependency.tika.version>1.21</dependency.tika.version>
         <dependency.poi.version>4.1.1</dependency.poi.version>
         <dependency.ooxml-schemas.version>1.4</dependency.ooxml-schemas.version>
 
