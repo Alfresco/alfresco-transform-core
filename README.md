@@ -7,10 +7,20 @@ Contains the common transformer (T-Engine) code, plus a few actual implementatio
 
 * `alfresco-transformer-base` - library packaged as a jar file which contains code that is common
  to all the transformers; see the sub-project's
-  [README](https://github.com/Alfresco/alfresco-transform-core/tree/master/alfresco-transformer-base)
+  [README](alfresco-transform-core/tree/master/alfresco-transformer-base)
 * `alfresco-docker-<name>` - multiple T-Engines; each one of them builds both a SpringBoot fat jar
  and a Docker image
+ 
+### Documentation
 
+In addition to the sub-projects (such as `alfresco-transformer-base` README above) some additional documentation can be found in:
+
+* [this project's docs](docs) folder
+* [ACS Packaging docs](https://github.com/Alfresco/acs-packaging/tree/master/docs) folder
+
+Note: if you're interested in the Alfresco Transform Service (ATS) that is part of the enterprise Alfresco Content Services (ACS) please see:
+
+*  https://docs.alfresco.com/transform/concepts/transformservice-overview.html
 
 ### Building and testing
 
