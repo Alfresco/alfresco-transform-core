@@ -1,8 +1,14 @@
-# Common code for Docker based ACS transformers
+# Common code for Transform Engines
 
-This project contains code that is common between all the ACS transformers that run within their own
-Docker containers. It performs common actions such as logging, throttling requests and handling the
-streaming of content to and from the container.
+This project contains code that is common between all the ACS T-Engine transformers that run as Spring Boot process (optionally within their own
+Docker containers). It performs common actions such as logging, throttling requests and handling the streaming of content to and from the container.
+
+For more details on build a custom T-Engine, please refer to the current docs in ACS Packaging, including:
+
+* [ATS Configuration](https://github.com/Alfresco/acs-packaging/blob/master/docs/custom-transforms-and-renditions.md#ats-configuration)
+* [Creating a T-Engine](https://github.com/Alfresco/acs-packaging/blob/master/docs/creating-a-t-engine.md)
+
+## Overview
 
 A transformer project is expected to provide the following files:
 
