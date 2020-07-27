@@ -45,6 +45,8 @@
                 <module>alfresco-transformer-base</module>
                 <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick</module>
                 <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot</module>
+                <module>alfresco-transform-ffmpeg/alfresco-transform-ffmpeg</module>
+                <module>alfresco-transform-ffmpeg/alfresco-transform-ffmpeg-boot</module>
                 <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice</module>
                 <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice-boot</module>
                 <module>alfresco-transform-misc/alfresco-transform-misc</module>
@@ -69,6 +71,14 @@
                 <module>alfresco-transformer-base</module>
                 <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick</module>
                 <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>ffmpeg</id>
+            <modules>
+                <module>alfresco-transformer-base</module>
+                <module>alfresco-transform-ffmpeg/alfresco-transform-ffmpeg</module>
+                <module>alfresco-transform-ffmpeg/alfresco-transform-ffmpeg-boot</module>
             </modules>
         </profile>
         <profile>

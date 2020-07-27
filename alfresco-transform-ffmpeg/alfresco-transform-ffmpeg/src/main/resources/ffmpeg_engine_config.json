@@ -1,0 +1,18 @@
+{
+  "transformOptions": {
+    "ffmpegOptions": [
+    ]
+  },
+  "transformers": [
+    {
+      "transformerName": "ffmpeg",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "video/mp4",                                  "targetMediaType": "video/avi" },
+        {"sourceMediaType": "video/mp4",                                  "targetMediaType": "audio/mp3" }
+      ],
+      "transformOptions": [
+        "ffmpegOptions"
+      ]
+    }
+  ]
+}
