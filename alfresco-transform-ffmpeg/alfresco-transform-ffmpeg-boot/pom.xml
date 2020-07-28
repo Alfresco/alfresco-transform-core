@@ -14,7 +14,9 @@
     </parent>
 
     <properties>
-        <image.name>alfresco/alfresco-transform-ffmpeg</image.name>
+        <!-- TODO PoC for FFmpeg -->
+        <image.name>alfresco/alfresco-transform-ffmpeg-poc</image.name>
+
         <image.registry>quay.io</image.registry>
         <env.project_artifactId>${project.artifactId}</env.project_artifactId>
     </properties>
