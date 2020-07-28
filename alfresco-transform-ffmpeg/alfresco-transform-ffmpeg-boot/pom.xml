@@ -14,7 +14,7 @@
     </parent>
 
     <properties>
-        <image.name>alfresco/alfresco-ffmpeg</image.name>
+        <image.name>alfresco/alfresco-transform-ffmpeg</image.name>
         <image.registry>quay.io</image.registry>
         <env.project_artifactId>${project.artifactId}</env.project_artifactId>
     </properties>
