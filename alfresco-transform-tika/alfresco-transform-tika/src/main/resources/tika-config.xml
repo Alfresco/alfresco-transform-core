@@ -3,4 +3,11 @@
     <!-- This property, when set, will hide the start up warnings of tika for libraries are missing. -->
     <!-- See https://issues.apache.org/jira/browse/TIKA-2490 -->
     <service-loader initializableProblemHandler="ignore"/>
+
+    <parsers>
+        <!-- ATS-816: Use the PackageParser for application/vnd.apple.keynote.13 as that was used in tika-1.21-20190624-alfresco-patched -->
+        <parser class="org.apache.tika.parser.pkg.PackageParser">
+            <mime>application/vnd.apple.keynote.13</mime>
+        </parser>
+    </parsers>
 </properties>
