@@ -104,7 +104,7 @@ public class TikaTransformationIT
                 Stream.of(
                     Triple.of("quick.key", "html", "application/vnd.apple.keynote"),
                     // Does not work, alfresco-docker-sourceMimetype-misc can handle this target mimetype, removed from engine_config.json
-                    // Triple.of("quick.key", "txt", "TikaAuto"),
+                     Triple.of("quick.key", "txt", "application/vnd.apple.keynote"),
                     Triple.of("quick.key", "xhtml", "application/vnd.apple.keynote"),
                     Triple.of("quick.key", "xml", "application/vnd.apple.keynote")
                 ),
