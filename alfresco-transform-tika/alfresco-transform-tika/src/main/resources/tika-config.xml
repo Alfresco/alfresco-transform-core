@@ -5,6 +5,10 @@
     <service-loader initializableProblemHandler="ignore"/>
 
     <parsers>
+        <!-- Default Parser for most things, except application/vnd.apple.keynote.13, which is handled by PackageParser -->
+        <parser class="org.apache.tika.parser.DefaultParser">
+            <mime-exclude>application/vnd.apple.keynote.13</mime-exclude>
+        </parser>
         <!-- ATS-816: Use the PackageParser for application/vnd.apple.keynote.13 as that was used in tika-1.21-20190624-alfresco-patched -->
         <parser class="org.apache.tika.parser.pkg.PackageParser">
             <mime>application/vnd.apple.keynote.13</mime>
