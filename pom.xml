@@ -242,6 +242,20 @@
         </dependencies>
     </dependencyManagement>
 
+    <repositories>
+        <repository>
+            <id>alfresco-releases</id>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <name>Alfresco Releases</name>
+            <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+        </repository>
+    </repositories>
+
     <distributionManagement>
         <snapshotRepository>
             <id>alfresco-public-snapshots</id>
