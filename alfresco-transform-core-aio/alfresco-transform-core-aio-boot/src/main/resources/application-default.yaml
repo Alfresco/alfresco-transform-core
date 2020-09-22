@@ -6,6 +6,7 @@ transform:
         exe: ${PDFRENDERER_EXE:/usr/bin/alfresco-pdf-renderer}
     libreoffice:
         path: ${LIBREOFFICE_HOME:/opt/libreoffice6.3}
+        timeout: ${LIBREOFFICE_TIMEOUT:1200000}
     imagemagick:
         root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.0.10}
         dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.0.10/lib}

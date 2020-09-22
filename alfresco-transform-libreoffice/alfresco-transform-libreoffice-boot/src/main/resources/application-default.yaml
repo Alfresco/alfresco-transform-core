@@ -6,3 +6,4 @@ transform:
       location: classpath:libreoffice_engine_config.json
     libreoffice:
       path: ${LIBREOFFICE_HOME:/opt/libreoffice6.3}
+      timeout: ${LIBREOFFICE_TIMEOUT:1200000}

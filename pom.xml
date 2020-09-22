@@ -349,6 +349,7 @@
                             <IMAGEMAGICK_DYN>/usr/lib64/ImageMagick-7.0.10/lib</IMAGEMAGICK_DYN>
                             <IMAGEMAGICK_ROOT>/usr/lib64/ImageMagick-7.0.10</IMAGEMAGICK_ROOT>
                             <LIBREOFFICE_HOME>/opt/libreoffice6.3</LIBREOFFICE_HOME>
+                            <LIBREOFFICE_TIMEOUT>1200000</LIBREOFFICE_TIMEOUT>
                             <PDF_RENDERER_EXE>/usr/bin/alfresco-pdf-renderer</PDF_RENDERER_EXE>
                             <buildDirectory>${project.build.directory}</buildDirectory>
                         </systemPropertyVariables>

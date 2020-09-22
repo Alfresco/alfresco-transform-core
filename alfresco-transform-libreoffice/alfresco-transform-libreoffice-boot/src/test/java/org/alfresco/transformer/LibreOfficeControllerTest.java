@@ -99,12 +99,15 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
     @Value("${transform.core.libreoffice.path}")
     protected String execPath;
 
+    @Value("${transform.core.libreoffice.timeout}")
+    private String timeout;
+
     protected LibreOfficeJavaExecutor javaExecutor;
 
     @PostConstruct
     private void init()
     {
-        javaExecutor = Mockito.spy(new LibreOfficeJavaExecutor(execPath));
+        javaExecutor = Mockito.spy(new LibreOfficeJavaExecutor(execPath, timeout));
     }
 
     @Autowired
@@ -266,5 +269,28 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
     {
         //System test property value can me modified in the pom.xml
         assertEquals(execPath, System.getProperty("LIBREOFFICE_HOME"));
+    }
+
+    @Test
+    public void testOverridingExecutorTimeout()
+    {
+        //System test property value can me modified in the pom.xml
+        assertEquals(timeout, System.getProperty("LIBREOFFICE_TIMEOUT"));
+    }
+
+    @Test
+    public void testInvalidExecutorTimeout()
+    {
+        String errorMessage = "";
+        try
+        {
+            new LibreOfficeJavaExecutor(execPath, "INVALID");
+        }
+        catch (IllegalArgumentException e)
+        {
+            errorMessage = e.getMessage();
+        }
+
+        assertEquals("LibreOfficeJavaExecutor TIMEOUT variable must have a numeric value", errorMessage);
     }
 }

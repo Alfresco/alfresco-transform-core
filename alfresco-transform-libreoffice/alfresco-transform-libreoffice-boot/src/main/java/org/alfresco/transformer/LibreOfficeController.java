@@ -66,12 +66,15 @@ public class LibreOfficeController extends AbstractTransformerController
     @Value("${transform.core.libreoffice.path}")
     private String execPath;
 
+    @Value("${transform.core.libreoffice.timeout}")
+    private String timeout;
+
     LibreOfficeJavaExecutor javaExecutor;
 
     @PostConstruct
     private void init()
     {
-        javaExecutor = new LibreOfficeJavaExecutor(execPath);
+        javaExecutor = new LibreOfficeJavaExecutor(execPath, timeout);
     }
 
     @Override
