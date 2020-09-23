@@ -88,7 +88,7 @@ public class AIOCustomConfig
         aioTransformRegistry.registerTransformer(new SelectingTransformer());
         aioTransformRegistry.registerTransformer(new TikaJavaExecutor());
         aioTransformRegistry.registerTransformer(new ImageMagickCommandExecutor(imageMagickExePath, imageMagickDynPath, imageMagickRootPath, imageMagickCodersPath, imageMagickConfigPath));
-        aioTransformRegistry.registerTransformer(new LibreOfficeJavaExecutor(libreofficePath, libreofficeMaxTasksPerProcess, libreofficeTimeout, libreofficePortNumbers, libreofficePath, libreofficeIsEnabled));
+        aioTransformRegistry.registerTransformer(new LibreOfficeJavaExecutor(libreofficePath, libreofficeMaxTasksPerProcess, libreofficeTimeout, libreofficePortNumbers, libreofficeTemplateProfileDir, libreofficeIsEnabled));
         aioTransformRegistry.registerTransformer(new PdfRendererCommandExecutor(pdfRendererPath));
         return aioTransformRegistry;
     }
