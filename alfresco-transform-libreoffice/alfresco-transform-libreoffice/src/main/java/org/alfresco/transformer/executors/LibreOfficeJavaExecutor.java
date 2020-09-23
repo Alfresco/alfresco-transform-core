@@ -61,7 +61,15 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
 
     private static String LIBREOFFICE_HOME;
 
+    private static String LIBREOFFICE_MAX_TASKS_PER_PROCESS;
+
     private static String LIBREOFFICE_TIMEOUT;
+
+    private static String LIBREOFFICE_PORT_NUMBERS;
+
+    private static String LIBREOFFICE_TEMPLATE_PROFILE_DIR;
+
+    private static String LIBREOFFICE_IS_ENABLED;
 
     public static final String LICENCE = "This transformer uses LibreOffice from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt";
 
@@ -69,19 +77,44 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
 
     private final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
-    public LibreOfficeJavaExecutor(String path, String timeout)
+    public LibreOfficeJavaExecutor(String path, String maxTasksPerProcess, String timeout,  String portNumbers, String templateProfileDir, String isEnabled)
     {
         if (path == null || path.isEmpty())
         {
-            throw new IllegalArgumentException("LibreOfficeJavaExecutor OFFICE_HOME variable cannot be null or empty");
+            throw new IllegalArgumentException("LibreOfficeJavaExecutor OFFICE_HOME cannot be null or empty");
         }
         LIBREOFFICE_HOME = path;
 
         if(timeout == null || timeout.isEmpty() || !StringUtils.isNumeric(timeout))
         {
-            throw new IllegalArgumentException("LibreOfficeJavaExecutor TIMEOUT variable must have a numeric value");
+            throw new IllegalArgumentException("LibreOfficeJavaExecutor TIMEOUT must have a numeric value");
         }
         LIBREOFFICE_TIMEOUT = timeout;
+
+        if(maxTasksPerProcess == null || maxTasksPerProcess.isEmpty() || !StringUtils.isNumeric(maxTasksPerProcess))
+        {
+            throw new IllegalArgumentException("LibreOfficeJavaExecutor MAX_TASKS_PER_PROCESS must have a numeric value");
+        }
+        LIBREOFFICE_MAX_TASKS_PER_PROCESS = maxTasksPerProcess;
+
+        if(portNumbers == null || portNumbers.isEmpty())
+        {
+            throw new IllegalArgumentException("LibreOfficeJavaExecutor PORT variable cannot be null or empty");
+        }
+        // value parsed and validated in JodConverterSharedInstance#parsePortNumbers(String s, String sys)
+        LIBREOFFICE_PORT_NUMBERS = portNumbers;
+
+        if (templateProfileDir == null)
+        {
+            throw new IllegalArgumentException("LibreOfficeJavaExecutor TEMPLATE_PROFILE_DIR variable cannot be null");
+        }
+        LIBREOFFICE_TEMPLATE_PROFILE_DIR = templateProfileDir;
+
+        if(isEnabled == null || isEnabled.isEmpty() || !(isEnabled.equalsIgnoreCase("true")|| isEnabled.equalsIgnoreCase("false")))
+        {
+            throw new IllegalArgumentException("LibreOfficeJavaExecutor IS_ENABLED variable must be set to true/false");
+        }
+        LIBREOFFICE_IS_ENABLED = isEnabled;
 
         jodconverter = createJodConverter();
     }
@@ -90,14 +123,14 @@ public class LibreOfficeJavaExecutor implements JavaExecutor
     {
         final JodConverterSharedInstance jodconverter = new JodConverterSharedInstance();
 
-        jodconverter.setOfficeHome(LIBREOFFICE_HOME);    // jodconverter.officeHome
-        jodconverter.setMaxTasksPerProcess("200");       // jodconverter.maxTasksPerProcess
-        jodconverter.setTaskExecutionTimeout(LIBREOFFICE_TIMEOUT);   // jodconverter.maxTaskExecutionTimeout
-        jodconverter.setTaskQueueTimeout(LIBREOFFICE_TIMEOUT);       // jodconverter.taskQueueTimeout
-        jodconverter.setConnectTimeout(LIBREOFFICE_TIMEOUT);         // jodconverter.connectTimeout
-        jodconverter.setPortNumbers("8100");             // jodconverter.portNumbers
-        jodconverter.setTemplateProfileDir("");          // jodconverter.templateProfileDir
-        jodconverter.setEnabled("true");                 // jodconverter.enabled
+        jodconverter.setOfficeHome(LIBREOFFICE_HOME);                                      // jodconverter.officeHome
+        jodconverter.setMaxTasksPerProcess(LIBREOFFICE_MAX_TASKS_PER_PROCESS);             // jodconverter.maxTasksPerProcess
+        jodconverter.setTaskExecutionTimeout(LIBREOFFICE_TIMEOUT);                         // jodconverter.maxTaskExecutionTimeout
+        jodconverter.setTaskQueueTimeout(LIBREOFFICE_TIMEOUT);                             // jodconverter.taskQueueTimeout
+        jodconverter.setConnectTimeout(LIBREOFFICE_TIMEOUT);                               // jodconverter.connectTimeout
+        jodconverter.setPortNumbers(LIBREOFFICE_PORT_NUMBERS);                             // jodconverter.portNumbers
+        jodconverter.setTemplateProfileDir(LIBREOFFICE_TEMPLATE_PROFILE_DIR);              // jodconverter.templateProfileDir
+        jodconverter.setEnabled(LIBREOFFICE_IS_ENABLED);                                   // jodconverter.enabled
         jodconverter.afterPropertiesSet();
 
         return jodconverter;

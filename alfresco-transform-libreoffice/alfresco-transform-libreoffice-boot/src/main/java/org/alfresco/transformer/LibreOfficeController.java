@@ -66,15 +66,27 @@ public class LibreOfficeController extends AbstractTransformerController
     @Value("${transform.core.libreoffice.path}")
     private String execPath;
 
+    @Value("${transform.core.libreoffice.maxTasksPerProcess}")
+    private String maxTasksPerProcess;
+
     @Value("${transform.core.libreoffice.timeout}")
     private String timeout;
+
+    @Value("${transform.core.libreoffice.portNumbers}")
+    private String portNumbers;
+
+    @Value("${transform.core.libreoffice.templateProfileDir}")
+    private String templateProfileDir;
+
+    @Value("${transform.core.libreoffice.isEnabled}")
+    private String isEnabled;
 
     LibreOfficeJavaExecutor javaExecutor;
 
     @PostConstruct
     private void init()
     {
-        javaExecutor = new LibreOfficeJavaExecutor(execPath, timeout);
+        javaExecutor = new LibreOfficeJavaExecutor(execPath, maxTasksPerProcess, timeout, portNumbers, templateProfileDir, isEnabled);
     }
 
     @Override

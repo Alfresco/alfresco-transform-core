@@ -349,8 +349,13 @@
                             <IMAGEMAGICK_DYN>/usr/lib64/ImageMagick-7.0.10/lib</IMAGEMAGICK_DYN>
                             <IMAGEMAGICK_ROOT>/usr/lib64/ImageMagick-7.0.10</IMAGEMAGICK_ROOT>
                             <LIBREOFFICE_HOME>/opt/libreoffice6.3</LIBREOFFICE_HOME>
+                            <LIBREOFFICE_MAX_TASKS_PER_PROCESS>200</LIBREOFFICE_MAX_TASKS_PER_PROCESS>
                             <LIBREOFFICE_TIMEOUT>1200000</LIBREOFFICE_TIMEOUT>
+                            <LIBREOFFICE_PORT_NUMBERS>8100</LIBREOFFICE_PORT_NUMBERS>
+                            <LIBREOFFICE_TEMPLATE_PROFILE_DIR></LIBREOFFICE_TEMPLATE_PROFILE_DIR>
+                            <LIBREOFFICE_IS_ENABLED>true</LIBREOFFICE_IS_ENABLED>
                             <PDF_RENDERER_EXE>/usr/bin/alfresco-pdf-renderer</PDF_RENDERER_EXE>
+                            <SERVER.PORT>8090</SERVER.PORT>
                             <buildDirectory>${project.build.directory}</buildDirectory>
                         </systemPropertyVariables>
                     </configuration>
