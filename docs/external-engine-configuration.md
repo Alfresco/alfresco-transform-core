@@ -2,12 +2,17 @@
 
 In order to configure an external property it needs to be set as ENV property.
 
-The following xternalized T-engines properties are available:
+The following externalized T-engines properties are available:
 
 ## Tika
 | Property | Description | Default value |
 |----------|-------------|---------------|
 | SERVER.PORT | T-Engine Port. | 8090 |
+| HOSTNAME | T-Engine Name. | t-engine |
+| ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
+| ACTIVEMQ_USER | ActiveMQ User. | admin |
+| ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
+| FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for receiving async requests. | org.alfresco.transform.engine.tika.acs |
 
 
@@ -15,6 +20,11 @@ The following xternalized T-engines properties are available:
 | Property | Description | Default value |
 |----------|-------------|---------------|
 | SERVER.PORT | T-Engine Port | 8090 |
+| HOSTNAME | T-Engine Name. | t-engine |
+| ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
+| ACTIVEMQ_USER | ActiveMQ User. | admin |
+| ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
+| FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.alfresco-pdf-renderer.acs |
 | PDFRENDERER_EXE | Path to Pdf-renderer EXE. | /usr/bin/alfresco-pdf-renderer |
 
@@ -22,12 +32,22 @@ The following xternalized T-engines properties are available:
 | Property | Description | Default value |
 |----------|-------------|---------------|
 | SERVER.PORT | T-Engine Port | 8090 |
+| HOSTNAME | T-Engine Name. | t-engine |
+| ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
+| ACTIVEMQ_USER | ActiveMQ User. | admin |
+| ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
+| FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.misc.acs |
 
 ## Libreoffice
 | Property | Description | Default value |
 |----------|-------------|---------------|
 | SERVER.PORT | T-Engine Port | 8090 |
+| HOSTNAME | T-Engine Name. | t-engine |
+| ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
+| ACTIVEMQ_USER | ActiveMQ User. | admin |
+| ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
+| FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.libreoffice.acs |
 | LIBREOFFICE_HOME | Path to LibreOffice_Home.  | /opt/libreoffice6.3 |
 | LIBREOFFICE_MAX_TASKS_PER_PROCESS | Number of maximum tasks per process. | 200 |
@@ -40,6 +60,11 @@ The following xternalized T-engines properties are available:
 | Property | Description | Default value |
 |----------|-------------|---------------|
 | SERVER.PORT | T-Engine Port | 8090 |
+| HOSTNAME | T-Engine Name. | t-engine |
+| ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
+| ACTIVEMQ_USER | ActiveMQ User. | admin |
+| ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
+| FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.imagemagick.acs |
 | IMAGEMAGICK_ROOT | Path to Imagemagick Root. | /usr/lib64/ImageMagick-7.0.10 |
 | IMAGEMAGICK_DYN | Path to Imagemagick DYLD. | /usr/lib64/ImageMagick-7.0.10/lib |
@@ -51,6 +76,11 @@ The following xternalized T-engines properties are available:
 | Property | Description | Default value |
 |----------|-------------|---------------|
 | SERVER.PORT | T-Engine Port | 8090 |
+| HOSTNAME | T-Engine Name. | t-engine |
+| ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
+| ACTIVEMQ_USER | ActiveMQ User. | admin |
+| ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
+| FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.aio.acs |
 | PDFRENDERER_EXE | Path to Pdf-renderer EXE. | /usr/bin/alfresco-pdf-renderer |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.libreoffice.acs |
