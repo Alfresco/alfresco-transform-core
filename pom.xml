@@ -11,7 +11,7 @@
 
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>2.3.5-SNAPSHOT</version>
+    <version>2.3.5</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -117,7 +117,7 @@
         <connection>scm:git:https://github.com/Alfresco/alfresco-transform-core.git</connection>
         <developerConnection>scm:git:https://github.com/Alfresco/alfresco-transform-core.git</developerConnection>
         <url>https://github.com/Alfresco/alfresco-transform-core</url>
-        <tag>HEAD</tag>
+        <tag>2.3.5</tag>
     </scm>
 
     <dependencyManagement>
@@ -352,7 +352,7 @@
                             <LIBREOFFICE_MAX_TASKS_PER_PROCESS>200</LIBREOFFICE_MAX_TASKS_PER_PROCESS>
                             <LIBREOFFICE_TIMEOUT>1200000</LIBREOFFICE_TIMEOUT>
                             <LIBREOFFICE_PORT_NUMBERS>8100</LIBREOFFICE_PORT_NUMBERS>
-                            <LIBREOFFICE_TEMPLATE_PROFILE_DIR></LIBREOFFICE_TEMPLATE_PROFILE_DIR>
+                            <LIBREOFFICE_TEMPLATE_PROFILE_DIR />
                             <LIBREOFFICE_IS_ENABLED>true</LIBREOFFICE_IS_ENABLED>
                             <PDF_RENDERER_EXE>/usr/bin/alfresco-pdf-renderer</PDF_RENDERER_EXE>
                             <SERVER_PORT>8090</SERVER_PORT>
