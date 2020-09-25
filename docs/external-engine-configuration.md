@@ -7,7 +7,7 @@ The following externalized T-engines properties are available:
 ## Tika
 | Property | Description | Default value |
 |----------|-------------|---------------|
-| SERVER.PORT | T-Engine Port. | 8090 |
+| SERVER_PORT | T-Engine Port. | 8090 |
 | HOSTNAME | T-Engine Name. | t-engine |
 | ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
 | ACTIVEMQ_USER | ActiveMQ User. | admin |
@@ -19,7 +19,7 @@ The following externalized T-engines properties are available:
 ## Pdf-renderer
 | Property | Description | Default value |
 |----------|-------------|---------------|
-| SERVER.PORT | T-Engine Port | 8090 |
+| SERVER_PORT | T-Engine Port | 8090 |
 | HOSTNAME | T-Engine Name. | t-engine |
 | ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
 | ACTIVEMQ_USER | ActiveMQ User. | admin |
@@ -31,7 +31,7 @@ The following externalized T-engines properties are available:
 ## Misc
 | Property | Description | Default value |
 |----------|-------------|---------------|
-| SERVER.PORT | T-Engine Port | 8090 |
+| SERVER_PORT | T-Engine Port | 8090 |
 | HOSTNAME | T-Engine Name. | t-engine |
 | ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
 | ACTIVEMQ_USER | ActiveMQ User. | admin |
@@ -42,7 +42,7 @@ The following externalized T-engines properties are available:
 ## Libreoffice
 | Property | Description | Default value |
 |----------|-------------|---------------|
-| SERVER.PORT | T-Engine Port | 8090 |
+| SERVER_PORT | T-Engine Port | 8090 |
 | HOSTNAME | T-Engine Name. | t-engine |
 | ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
 | ACTIVEMQ_USER | ActiveMQ User. | admin |
@@ -59,7 +59,7 @@ The following externalized T-engines properties are available:
 ## Imagemagick
 | Property | Description | Default value |
 |----------|-------------|---------------|
-| SERVER.PORT | T-Engine Port | 8090 |
+| SERVER_PORT | T-Engine Port | 8090 |
 | HOSTNAME | T-Engine Name. | t-engine |
 | ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
 | ACTIVEMQ_USER | ActiveMQ User. | admin |
@@ -75,7 +75,7 @@ The following externalized T-engines properties are available:
 ## Core-aio
 | Property | Description | Default value |
 |----------|-------------|---------------|
-| SERVER.PORT | T-Engine Port | 8090 |
+| SERVER_PORT | T-Engine Port | 8090 |
 | HOSTNAME | T-Engine Name. | t-engine |
 | ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
 | ACTIVEMQ_USER | ActiveMQ User. | admin |

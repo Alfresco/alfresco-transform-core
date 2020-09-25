@@ -355,7 +355,7 @@
                             <LIBREOFFICE_TEMPLATE_PROFILE_DIR></LIBREOFFICE_TEMPLATE_PROFILE_DIR>
                             <LIBREOFFICE_IS_ENABLED>true</LIBREOFFICE_IS_ENABLED>
                             <PDF_RENDERER_EXE>/usr/bin/alfresco-pdf-renderer</PDF_RENDERER_EXE>
-                            <SERVER.PORT>8090</SERVER.PORT>
+                            <SERVER_PORT>8090</SERVER_PORT>
                             <buildDirectory>${project.build.directory}</buildDirectory>
                         </systemPropertyVariables>
                     </configuration>
