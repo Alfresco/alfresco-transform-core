@@ -43,6 +43,21 @@ public class AIOCustomConfig
     @Value("${transform.core.libreoffice.path}")
     private String libreofficePath;
 
+    @Value("${transform.core.libreoffice.maxTasksPerProcess}")
+    private String libreofficeMaxTasksPerProcess;
+
+    @Value("${transform.core.libreoffice.timeout}")
+    private String libreofficeTimeout;
+
+    @Value("${transform.core.libreoffice.portNumbers}")
+    private String libreofficePortNumbers;
+
+    @Value("${transform.core.libreoffice.templateProfileDir}")
+    private String libreofficeTemplateProfileDir;
+
+    @Value("${transform.core.libreoffice.isEnabled}")
+    private String libreofficeIsEnabled;
+
     @Value("${transform.core.pdfrenderer.exe}")
     private String pdfRendererPath;
 
@@ -73,7 +88,7 @@ public class AIOCustomConfig
         aioTransformRegistry.registerTransformer(new SelectingTransformer());
         aioTransformRegistry.registerTransformer(new TikaJavaExecutor());
         aioTransformRegistry.registerTransformer(new ImageMagickCommandExecutor(imageMagickExePath, imageMagickDynPath, imageMagickRootPath, imageMagickCodersPath, imageMagickConfigPath));
-        aioTransformRegistry.registerTransformer(new LibreOfficeJavaExecutor(libreofficePath));
+        aioTransformRegistry.registerTransformer(new LibreOfficeJavaExecutor(libreofficePath, libreofficeMaxTasksPerProcess, libreofficeTimeout, libreofficePortNumbers, libreofficeTemplateProfileDir, libreofficeIsEnabled));
         aioTransformRegistry.registerTransformer(new PdfRendererCommandExecutor(pdfRendererPath));
         return aioTransformRegistry;
     }
