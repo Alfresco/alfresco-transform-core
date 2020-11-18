@@ -168,8 +168,7 @@ public class TikaJavaExecutor implements JavaExecutor
                             throws Exception
     {
         AbstractTikaMetadataExtractor metadataExtractor = this.metadataExtractor.get(transformName);
-        Map<String, Serializable> metadata = metadataExtractor.extractMetadata(sourceMimetype, transformOptions, sourceFile);
-        metadataExtractor.mapMetadataAndWrite(targetFile, metadata);
+        metadataExtractor.extractMetadata(sourceMimetype, transformOptions, sourceFile, targetFile);
     }
 
     /**

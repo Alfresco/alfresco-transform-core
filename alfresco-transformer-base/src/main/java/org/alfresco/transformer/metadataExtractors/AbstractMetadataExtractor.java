@@ -63,7 +63,7 @@ import java.util.StringTokenizer;
  *   <li>The T-Engine's Controller class will call a method in a class that extends {@link AbstractMetadataExtractor}
  *   based on the source and target mediatypes in the normal way.</li>
  *   <li>The method extracts ALL available metadata is extracted from the document and then calls
- *   {@link #mapMetadataAndWrite(File, Map)}.</li>
+ *   {@link #mapMetadataAndWrite(File, Map, Map)}.</li>
  *   <li>Selected values from the available metadata are mapped into content repository property names and values,
  *   depending on what is defined in a {@code "<classname>_metadata_extract.properties"} file.</li>
  *   <li>The selected values are set back to the content repository as a JSON representation of a Map, where the values
@@ -95,6 +95,7 @@ public abstract class AbstractMetadataExtractor
     private static final String EXTRACT = "extract";
     private static final String EMBED = "embed";
     private static final String METADATA = "metadata";
+    private static final String EXTRACT_MAPPING = "extractMapping";
 
     private static final String NAMESPACE_PROPERTY_PREFIX = "namespace.prefix.";
     private static final char NAMESPACE_PREFIX = ':';
@@ -110,17 +111,18 @@ public abstract class AbstractMetadataExtractor
     private static final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
     protected final Logger logger;
-    private Map<String, Set<String>> extractMapping;
+    private Map<String, Set<String>> defaultExtractMapping;
+    private ThreadLocal<Map<String, Set<String>>> extractMapping = new ThreadLocal<>();
     private Map<String, Set<String>> embedMapping;
 
     public AbstractMetadataExtractor(Logger logger)
     {
         this.logger = logger;
-        extractMapping = Collections.emptyMap();
+        defaultExtractMapping = Collections.emptyMap();
         embedMapping = Collections.emptyMap();
         try
         {
-            extractMapping = buildExtractMapping();
+            defaultExtractMapping = buildExtractMapping();
             embedMapping = buildEmbedMapping();
         }
         catch (Exception e)
@@ -148,7 +150,7 @@ public abstract class AbstractMetadataExtractor
 
         try
         {
-            TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {};
+            TypeReference<HashMap<String, String>> typeRef = new TypeReference<>() {};
             return jsonObjectMapper.readValue(metadataAsJson, typeRef);
         }
         catch (JsonProcessingException e)
@@ -159,7 +161,7 @@ public abstract class AbstractMetadataExtractor
 
     protected Map<String, Set<String>> getExtractMapping()
     {
-        return Collections.unmodifiableMap(extractMapping);
+        return Collections.unmodifiableMap(extractMapping.get());
     }
 
     public Map<String, Set<String>> getEmbedMapping()
@@ -432,7 +434,60 @@ public abstract class AbstractMetadataExtractor
         return true;
     }
 
+    /**
+     * The {@code transformOptions} may contain a replacement set of mappings. These will be used in place of the
+     * default mappings from read from file if supplied.
+     */
+    public void extractMetadata(String sourceMimetype, Map<String, String> transformOptions, File sourceFile,
+                                File targetFile) throws Exception
+    {
+        Map<String, Set<String>> mapping = getExtractMappingFromOptions(transformOptions, defaultExtractMapping);
+
+        // Use a ThreadLocal to avoid changing method signatures of methods that currently call getExtractMapping.
+        try
+        {
+            extractMapping.set(mapping);
+            Map<String, Serializable> metadata = extractMetadata(sourceMimetype, transformOptions, sourceFile);
+            mapMetadataAndWrite(targetFile, metadata, mapping);
+
+        }
+        finally
+        {
+            extractMapping.set(null);
+        }
+    }
+
+    private Map<String, Set<String>> getExtractMappingFromOptions(Map<String, String> transformOptions, Map<String,
+            Set<String>> defaultExtractMapping)
+    {
+        String extractMappingOption = transformOptions.get(EXTRACT_MAPPING);
+        if (extractMappingOption != null)
+        {
+            try
+            {
+                TypeReference<HashMap<String, Set<String>>> typeRef = new TypeReference<>() {};
+                return jsonObjectMapper.readValue(extractMappingOption, typeRef);
+            }
+            catch (JsonProcessingException e)
+            {
+                throw new IllegalArgumentException("Failed to read "+ EXTRACT_MAPPING +" from request", e);
+            }
+        }
+        return defaultExtractMapping;
+    }
+
+    /**
+     * @deprecated use {@link #extractMetadata(String, Map, File, File)} rather than calling this method.
+     * By default call the overloaded method with the default {@code extractMapping}.
+     */
+    @Deprecated
     public void mapMetadataAndWrite(File targetFile, Map<String, Serializable> metadata) throws IOException
+    {
+        mapMetadataAndWrite(targetFile, metadata, defaultExtractMapping);
+    }
+
+    public void mapMetadataAndWrite(File targetFile, Map<String, Serializable> metadata,
+                                    Map<String, Set<String>> extractMapping) throws IOException
     {
         if (logger.isDebugEnabled())
         {
@@ -440,17 +495,19 @@ public abstract class AbstractMetadataExtractor
             metadata.forEach((k,v) -> logger.debug("  "+k+"="+v));
         }
 
-        metadata = mapRawToSystem(metadata);
+        metadata = mapRawToSystem(metadata, extractMapping);
         writeMetadata(targetFile, metadata);
     }
 
     /**
      * Based on AbstractMappingMetadataExtracter#mapRawToSystem.
      *
-     * @param rawMetadata   Metadata keyed by document properties
-     * @return              Returns the metadata keyed by the system properties
+     * @param rawMetadata    Metadata keyed by document properties
+     * @param extractMapping Mapping between document ans system properties
+     * @return               Returns the metadata keyed by the system properties
      */
-    private Map<String, Serializable> mapRawToSystem(Map<String, Serializable> rawMetadata)
+    private Map<String, Serializable> mapRawToSystem(Map<String, Serializable> rawMetadata,
+                                                     Map<String, Set<String>> extractMapping)
     {
         boolean debugEnabled = logger.isDebugEnabled();
         if (debugEnabled)

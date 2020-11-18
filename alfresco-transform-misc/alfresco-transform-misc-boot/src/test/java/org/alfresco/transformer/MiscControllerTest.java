@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -150,6 +150,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_TEXT_PLAIN,
             null,
             null,
+            null,
             readTestFile("eml"));
         assertTrue("Content from eml transform didn't contain expected value. ",
             result.getResponse().getContentAsString().contains(expected));
@@ -169,7 +170,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_TEXT_PLAIN,
             null,
             null,
-            readTestFile("spanish.eml"));
+                null, readTestFile("spanish.eml"));
 
         String contentResult = new String(result.getResponse().getContentAsByteArray(), UTF_8);
         assertTrue("Content from eml transform didn't contain expected value. ",
@@ -189,6 +190,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_RFC822,
             "txt",
             MIMETYPE_TEXT_PLAIN,
+            null,
             null,
             null,
             readTestFile("attachment.eml"));
@@ -211,6 +213,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_TEXT_PLAIN,
             null,
             null,
+            null,
             readTestFile("alternative.eml"));
         assertTrue("Content from eml transform didn't contain expected value. ",
             result.getResponse().getContentAsString().contains(expected));
@@ -230,9 +233,75 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_TEXT_PLAIN,
             null,
             null,
+            null,
             readTestFile("nested.alternative.eml"));
         assertTrue("Content from eml transform didn't contain expected value. ",
             result.getResponse().getContentAsString().contains(expected));
+    }
+
+    /**
+     * Test extracting default metadata from a valid eml file
+     */
+    @Test
+    public void testExtractMetadataRFC822() throws Exception
+    {
+        String expected =
+                "{\"{http://www.alfresco.org/model/content/1.0}addressee\":\"Nevin Nollop <nevin.nollop@gmail.com>\"," +
+                        "\"{http://www.alfresco.org/model/content/1.0}description\":\"The quick brown fox jumps over the lazy dog\"," +
+                        "\"{http://www.alfresco.org/model/content/1.0}addressees\":\"Nevin Nollop <nevinn@alfresco.com>\"," +
+                        "\"{http://www.alfresco.org/model/imap/1.0}dateSent\":1086351802000," +
+                        "\"{http://www.alfresco.org/model/imap/1.0}messageTo\":\"Nevin Nollop <nevin.nollop@gmail.com>\"," +
+                        "\"{http://www.alfresco.org/model/imap/1.0}messageId\":\"<20040604122322.GV1905@phoenix.home>\"," +
+                        "\"{http://www.alfresco.org/model/content/1.0}title\":\"The quick brown fox jumps over the lazy dog\"," +
+                        "\"{http://www.alfresco.org/model/imap/1.0}messageSubject\":\"The quick brown fox jumps over the lazy dog\"," +
+                        "\"{http://www.alfresco.org/model/imap/1.0}messageCc\":\"Nevin Nollop <nevinn@alfresco.com>\"," +
+                        "\"{http://www.alfresco.org/model/content/1.0}sentdate\":1086351802000," +
+                        "\"{http://www.alfresco.org/model/content/1.0}subjectline\":\"The quick brown fox jumps over the lazy dog\"," +
+                        "\"{http://www.alfresco.org/model/imap/1.0}messageFrom\":\"Nevin Nollop <nevin.nollop@alfresco.com>\"," +
+                        "\"{http://www.alfresco.org/model/content/1.0}originator\":\"Nevin Nollop <nevin.nollop@alfresco.com>\"}";
+        MvcResult result = sendRequest("eml",
+                null,
+                MIMETYPE_RFC822,
+                "json",
+                "alfresco-metadata-extract",
+                null,
+                null,
+                null,
+                readTestFile("eml"));
+        String metadata = result.getResponse().getContentAsString();
+        assertEquals("Metadata extract", expected, metadata);
+    }
+
+    /**
+     * Test extracting metadata specified in an option from a valid eml file
+     */
+    @Test
+    public void testExtractMetadataOptionRFC822() throws Exception
+    {
+        // {"messageSubject":["{http://www.alfresco.org/model/imap/1.0}messageSubject","{http://www.alfresco.org/model/content/1.0}subjectline","{http://www.alfresco.org/model/content/1.0}description","{http://www.alfresco.org/model/content/1.0}title"],"Thread-Index":["{http://www.alfresco.org/model/imap/1.0}threadIndex"],"messageTo":["{http://www.alfresco.org/model/imap/1.0}messageTo","{http://www.alfresco.org/model/content/1.0}addressee"],"messageSent":["{http://www.alfresco.org/model/content/1.0}sentdate","{http://www.alfresco.org/model/imap/1.0}dateSent"],"Message-ID":["{http://www.alfresco.org/model/imap/1.0}messageId"],"messageCc":["{http://www.alfresco.org/model/imap/1.0}messageCc","{http://www.alfresco.org/model/content/1.0}addressees"],"messageReceived":["{http://www.alfresco.org/model/imap/1.0}dateReceived"],"messageFrom":["{http://www.alfresco.org/model/imap/1.0}messageFrom","{http://www.alfresco.org/model/content/1.0}originator"]}
+        String extractMapping =
+                "{\"messageSubject\":[" +
+                    "\"{http://www.alfresco.org/model/imap/1.0}messageSubject\"," +
+                    "\"{http://www.alfresco.org/model/content/1.0}title\"]," +
+                "\"Thread-Index\":[" +
+                    "\"{http://www.alfresco.org/model/imap/1.0}threadIndex\"]," +
+                "\"messageFrom\":[" +
+                    "\"{http://www.alfresco.org/model/dod5015/1.0}dodProp1\"]}\n";
+        String expected =
+                "{\"{http://www.alfresco.org/model/imap/1.0}messageSubject\":\"The quick brown fox jumps over the lazy dog\"," +
+                 "\"{http://www.alfresco.org/model/dod5015/1.0}dodProp1\":\"Nevin Nollop <nevin.nollop@alfresco.com>\"," +
+                 "\"{http://www.alfresco.org/model/content/1.0}title\":\"The quick brown fox jumps over the lazy dog\"}";
+        MvcResult result = sendRequest("eml",
+                null,
+                MIMETYPE_RFC822,
+                "json",
+                "alfresco-metadata-extract",
+                null,
+                null,
+                extractMapping,
+                readTestFile("eml"));
+        String metadata = result.getResponse().getContentAsString();
+        assertEquals("Option metadata extract", expected, metadata);
     }
 
     /**
@@ -247,6 +316,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_RFC822,
             "txt",
             MIMETYPE_TEXT_PLAIN,
+            null,
             null,
             null,
             readTestFile("htmlChars.eml"));
@@ -273,6 +343,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_HTML,
             "txt",
             MIMETYPE_TEXT_PLAIN,
+            null,
             null,
             null,
             expected.getBytes());
@@ -304,6 +375,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_TEXT_PLAIN,
             "UTF-8",
             null,
+            null,
             content);
 
         String contentResult = new String(result.getResponse().getContentAsByteArray(),
@@ -323,6 +395,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             "txt",
             MIMETYPE_TEXT_PLAIN,
             "UTF-8",
+            null,
             null,
             content);
 
@@ -349,6 +422,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             MIMETYPE_PDF,
             null,
             "1",
+            null,
             expected.getBytes());
 
         // Read back in the PDF and check it
@@ -368,7 +442,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     public void testAppleIWorksPages() throws Exception
     {
         MvcResult result = sendRequest("numbers", null, MIMETYPE_IWORK_NUMBERS,
-            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, readTestFile("pages"));
+            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("pages"));
         assertTrue("Expected image content but content is empty.",
             result.getResponse().getContentLengthLong() > 0L);
     }
@@ -377,7 +451,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     public void testAppleIWorksNumbers() throws Exception
     {
         MvcResult result = sendRequest("numbers", null, MIMETYPE_IWORK_NUMBERS,
-            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, readTestFile("numbers"));
+            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("numbers"));
         assertTrue("Expected image content but content is empty.",
             result.getResponse().getContentLengthLong() > 0L);
     }
@@ -386,7 +460,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     public void testAppleIWorksKey() throws Exception
     {
         MvcResult result = sendRequest("key", null, MIMETYPE_IWORK_KEYNOTE,
-            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, readTestFile("key"));
+            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("key"));
         assertTrue("Expected image content but content is empty.",
             result.getResponse().getContentLengthLong() > 0L);
     }
@@ -396,7 +470,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     public void testOOXML() throws Exception
     {
         MvcResult result = sendRequest("docx", null, MIMETYPE_OPENXML_WORDPROCESSING,
-            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, readTestFile("docx"));
+            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("docx"));
         assertTrue("Expected image content but content is empty.",
             result.getResponse().getContentLengthLong() > 0L);
     }
@@ -408,6 +482,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         String targetMimetype,
         String targetEncoding,
         String pageLimit,
+        String extractMapping,
         byte[] content) throws Exception
     {
         final MockMultipartFile sourceFile = new MockMultipartFile("file",
@@ -432,6 +507,10 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         if (pageLimit != null)
         {
             requestBuilder.param("pageLimit", pageLimit);
+        }
+        if (extractMapping != null)
+        {
+            requestBuilder.param("extractMapping", extractMapping);
         }
 
         return mockMvc.perform(requestBuilder)

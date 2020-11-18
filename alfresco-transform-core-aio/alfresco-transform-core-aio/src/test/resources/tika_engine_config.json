@@ -10,6 +10,9 @@
     "pdfboxOptions": [
       {"value": {"name": "notExtractBookmarksText"}},
       {"value": {"name": "targetEncoding"}}
+    ],
+    "metadataOptions": [
+      {"value": {"name": "extractMapping"}}
     ]
   },
   "transformers": [
@@ -520,6 +523,7 @@
         {"sourceMediaType": "image/x-dwg",                                                                "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
+        "metadataOptions"
       ]
     },
     {
@@ -528,6 +532,7 @@
         {"sourceMediaType": "application/vnd.ms-outlook",                                                 "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
+        "metadataOptions"
       ]
     },
     {
@@ -536,6 +541,7 @@
         {"sourceMediaType": "audio/mpeg",                                                                 "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
+        "metadataOptions"
       ]
     },
     {
@@ -556,6 +562,7 @@
         {"sourceMediaType": "application/x-tika-ooxml-protected",                                         "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
+        "metadataOptions"
       ]
     },
     {
@@ -601,6 +608,7 @@
         {"sourceMediaType": "application/x-vnd.oasis.opendocument.graphics",                              "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
+        "metadataOptions"
       ]
     },
     {
@@ -610,6 +618,7 @@
         {"sourceMediaType": "application/illustrator",                                                    "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
+        "metadataOptions"
       ]
     },
     {
@@ -645,6 +654,7 @@
         {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                          "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
+        "metadataOptions"
       ]
     },
     {
@@ -662,6 +672,7 @@
         {"sourceMediaType": "video/mp4",                                                                  "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
+        "metadataOptions"
       ]
     },
     {
@@ -968,6 +979,7 @@
         {"sourceMediaType": "image/hfa",                                                                  "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
+        "metadataOptions"
       ]
     }
   ]

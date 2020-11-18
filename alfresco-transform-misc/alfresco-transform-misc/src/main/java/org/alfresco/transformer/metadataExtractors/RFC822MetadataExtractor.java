@@ -86,8 +86,7 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractor implement
     public void extractMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
                                 File sourceFile, File targetFile) throws Exception
     {
-        Map<String, Serializable> metadata = extractMetadata(sourceMimetype, transformOptions, sourceFile);
-        mapMetadataAndWrite(targetFile, metadata);
+        extractMetadata(sourceMimetype, transformOptions, sourceFile, targetFile);
     }
 
     @Override
