@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.alfresco.transformer.util.RequestParamMap.PAGE_LIMIT;
 import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
@@ -97,7 +98,7 @@ public class AIOTransformRegistryTest
                 "Archive", "OutlookMsg", "PdfBox", "Office", "Poi", "OOXML", "TikaAuto", "TextMining");
 
         List<String> expectedTransformOptionNames = Arrays.asList("tikaOptions", "archiveOptions", "pdfboxOptions",
-                "textToPdfOptions", "stringOptions");
+                "textToPdfOptions", "stringOptions", "metadataOptions");
 
         TransformConfig miscConfig = loadConfig("misc_engine_config.json");
         TransformConfig tikaConfig = loadConfig("tika_engine_config.json");
@@ -116,8 +117,11 @@ public class AIOTransformRegistryTest
         }
 
         // check correct number of options
+        long distinctOptionCount = Stream.concat(
+                miscConfig.getTransformOptions().keySet().stream(),
+                tikaConfig.getTransformOptions().keySet().stream()).distinct().count();
         assertEquals("Number of expected transformers",
-                miscConfig.getTransformOptions().size() + tikaConfig.getTransformOptions().size(),
+                distinctOptionCount,
                 aioTransformerRegistry.getTransformConfig().getTransformOptions().size());
 
         Set<String> actualOptionNames = aioTransformerRegistry.getTransformConfig().getTransformOptions().keySet();
@@ -125,7 +129,7 @@ public class AIOTransformRegistryTest
         // check all options are there
         for (String optionName : expectedTransformOptionNames)
         {
-            assertTrue("Expected transform option missing.",  actualOptionNames.contains(optionName));
+            assertTrue("Expected transform option missing:"+optionName,  actualOptionNames.contains(optionName));
         }
     }
 
