@@ -75,12 +75,20 @@ public class AIOControllerTikaTest extends TikaControllerTest
         // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
     }
-    
+
     @Test
     @Override
     public void testGetInfoFromConfigWithNoTransformOptions()
     {
         // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
+    }
+
+    @Test
+    @Override
+    public void xlsxEmbedTest()
+    {
+        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
+        // It uses the real class path rather than the test one.
     }
 }
