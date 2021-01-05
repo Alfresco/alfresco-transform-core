@@ -27,6 +27,7 @@
         <dependency.activemq.version>5.15.13</dependency.activemq.version>
         <dependency.jackson.version>2.10.5</dependency.jackson.version>
         <dependency.jackson-databind.version>2.10.5.1</dependency.jackson-databind.version>
+        <dependency.junit.version>4.13.1</dependency.junit.version>
         <dependency.cxf.version>3.4.1</dependency.cxf.version>
         <dependency.tika.version>1.24.1</dependency.tika.version>
         <dependency.poi.version>4.1.2</dependency.poi.version>
@@ -239,6 +240,12 @@
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>1.14</version>
+            </dependency>
+            <!-- Junit -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${dependency.junit.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
