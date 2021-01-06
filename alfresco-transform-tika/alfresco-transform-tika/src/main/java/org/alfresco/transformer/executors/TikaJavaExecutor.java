@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -44,7 +44,6 @@ import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -81,6 +80,7 @@ public class TikaJavaExecutor implements JavaExecutor
             .build();
     private final Map<String, AbstractTikaMetadataExtractor> metadataEmbedder = ImmutableMap
             .<String, AbstractTikaMetadataExtractor>builder()
+            .put("SamplePoiMetadataEmbedder", new PoiMetadataExtractor())
             .build();
 
     public TikaJavaExecutor()
@@ -119,7 +119,7 @@ public class TikaJavaExecutor implements JavaExecutor
     }
 
     @Override
-    public void call(File sourceFile, File targetFile, String... args) throws Exception
+    public void call(File sourceFile, File targetFile, String... args)
     {
         args = buildArgs(sourceFile, targetFile, args);
         tika.transform(args);

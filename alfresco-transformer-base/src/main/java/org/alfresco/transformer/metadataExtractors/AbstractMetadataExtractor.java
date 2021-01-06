@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005-2020 Alfresco Software Limited
+ * Copyright (C) 2005-2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -140,7 +140,7 @@ public abstract class AbstractMetadataExtractor
         // Default nothing, as embedding is not supported in most cases
     }
 
-    protected Map<String, String> getMetadata(Map<String, String> transformOptions)
+    protected Map<String, Serializable> getMetadata(Map<String, String> transformOptions)
     {
         String metadataAsJson = transformOptions.get(METADATA);
         if (metadataAsJson == null)
@@ -150,13 +150,45 @@ public abstract class AbstractMetadataExtractor
 
         try
         {
-            TypeReference<HashMap<String, String>> typeRef = new TypeReference<>() {};
-            return jsonObjectMapper.readValue(metadataAsJson, typeRef);
+            TypeReference<HashMap<String, Serializable>> typeRef = new TypeReference<>() {};
+            HashMap<String, Serializable> systemProperties = jsonObjectMapper.readValue(metadataAsJson, typeRef);
+            Map<String, Serializable> rawProperties = mapSystemToRaw(systemProperties);
+            return rawProperties;
         }
         catch (JsonProcessingException e)
         {
             throw new IllegalArgumentException("Failed to read metadata from request", e);
         }
+    }
+
+    private Map<String, Serializable> mapSystemToRaw(Map<String, Serializable> systemMetadata)
+    {
+        Map<String, Serializable> metadataProperties = new HashMap<>(systemMetadata.size() * 2 + 1);
+        for (Map.Entry<String, Serializable> entry : systemMetadata.entrySet())
+        {
+            String modelProperty = entry.getKey();
+            // Check if there is a mapping for this
+            if (!embedMapping.containsKey(modelProperty))
+            {
+                // No mapping - ignore
+                continue;
+            }
+            Serializable documentValue = entry.getValue();
+            Set<String> metadataKeys = embedMapping.get(modelProperty);
+            for (String metadataKey : metadataKeys)
+            {
+                metadataProperties.put(metadataKey, documentValue);
+            }
+        }
+        // Done
+        if (logger.isDebugEnabled())
+        {
+            logger.debug(
+                    "Converted system model values to metadata values: \n" +
+                            "   System Properties:    " + systemMetadata + "\n" +
+                            "   Metadata Properties: " + metadataProperties);
+        }
+        return metadataProperties;
     }
 
     protected Map<String, Set<String>> getExtractMapping()

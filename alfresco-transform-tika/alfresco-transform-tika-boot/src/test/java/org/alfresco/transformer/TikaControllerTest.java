@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -32,6 +32,8 @@ import org.alfresco.transformer.executors.RuntimeExec;
 import org.alfresco.transformer.model.FileRefEntity;
 import org.alfresco.transformer.model.FileRefResponse;
 import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.apache.poi.ooxml.POIXMLProperties;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +53,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -79,6 +82,7 @@ import static org.alfresco.transformer.executors.Tika.XML;
 import static org.alfresco.transformer.executors.Tika.XSLX;
 import static org.alfresco.transformer.executors.Tika.ZIP;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_HTML;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_METADATA_EMBED;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_WORDPROCESSING;
@@ -537,6 +541,43 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     {
         transform(TEXT_MINING, DOC, TXT, MIMETYPE_WORD, MIMETYPE_TEXT_PLAIN, null,
             EXPECTED_TEXT_CONTENT_CONTAINS);
+    }
+
+    @Test
+    public void xlsxEmbedTest() throws Exception
+    {
+        mockTransformCommand(XSLX, XSLX, MIMETYPE_OPENXML_SPREADSHEET, false);
+
+        String metadata =
+                "{\"{http://www.alfresco.org/model/content/1.0}author\":\"author1\"," +
+                 "\"{http://www.alfresco.org/model/content/1.0}title\":\"title1\"," +
+                 "\"{http://www.alfresco.org/model/content/1.0}description\":[\"desc1\",\"desc2\"]," +
+                 "\"{http://www.alfresco.org/model/content/1.0}created\":\"created1\"}";
+
+        MockHttpServletRequestBuilder requestBuilder =
+                super.mockMvcRequest("/transform", sourceFile,
+                        "targetExtension", XSLX,
+                        "metadata", metadata,
+                        "targetMimetype", MIMETYPE_METADATA_EMBED,
+                        "sourceMimetype", MIMETYPE_OPENXML_SPREADSHEET);
+
+        MvcResult result = mockMvc.perform(requestBuilder)
+                .andExpect(status().is(OK.value()))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*= UTF-8''quick." + targetExtension)).
+                        andReturn();
+
+        byte[] bytes = result.getResponse().getContentAsByteArray();
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+        XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
+        POIXMLProperties props = workbook.getProperties();
+        POIXMLProperties.CoreProperties coreProp = props.getCoreProperties();
+        POIXMLProperties.CustomProperties custProp = props.getCustomProperties();
+
+        assertEquals("author1", coreProp.getCreator());
+        assertEquals("title1", coreProp.getTitle());
+        assertEquals("desc1, desc2", coreProp.getDescription()); // multi value
+        assertEquals("created1", custProp.getProperty("created").getLpwstr());
     }
 
     @Test
