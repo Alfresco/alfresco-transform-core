@@ -326,7 +326,8 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
         }
     }
 
-    private Metadata getTikaMetadata(Map<String, String> transformOptions) {
+    private Metadata getTikaMetadata(Map<String, String> transformOptions)
+    {
         Metadata metadataToEmbed = new Metadata();
         Map<String, Serializable> properties = getMetadata(transformOptions);
         for (String metadataKey : properties.keySet())

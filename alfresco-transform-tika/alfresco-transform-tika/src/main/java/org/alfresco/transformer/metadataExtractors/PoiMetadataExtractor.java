@@ -29,7 +29,6 @@ package org.alfresco.transformer.metadataExtractors;
 import org.apache.poi.ooxml.POIXMLProperties;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tika.embedder.Embedder;
-import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.ParseContext;
@@ -38,8 +37,6 @@ import org.apache.tika.parser.microsoft.ooxml.OOXMLParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
