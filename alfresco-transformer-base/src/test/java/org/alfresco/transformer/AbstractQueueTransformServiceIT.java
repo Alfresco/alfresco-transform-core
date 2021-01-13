@@ -26,25 +26,22 @@
  */
 package org.alfresco.transformer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import javax.jms.Queue;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.activemq.command.ActiveMQQueue;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * @author Lucian Tuca
  * created on 15/01/2019
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(properties = {"activemq.url=nio://localhost:61616"})
 public abstract class AbstractQueueTransformServiceIT
 {

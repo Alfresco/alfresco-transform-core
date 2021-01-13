@@ -28,7 +28,8 @@ package org.alfresco.transformer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
@@ -42,8 +43,8 @@ import java.util.Map;
 import static java.text.MessageFormat.format;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_METADATA_EXTRACT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;
 
 /**
@@ -79,7 +80,7 @@ public abstract class AbstractMetadataExtractsIT
         {
             final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile,
                     sourceMimetype, targetMimetype, targetExtension);
-            assertEquals(descriptor, OK, response.getStatusCode());
+            assertEquals(OK, response.getStatusCode(), descriptor);
 
             String metadataFilename = sourceFile + "_metadata.json";
             Map<String, Serializable> actualMetadata = readMetadata(response.getBody().getInputStream());
@@ -87,8 +88,8 @@ public abstract class AbstractMetadataExtractsIT
             jsonObjectMapper.writerWithDefaultPrettyPrinter().writeValue(actualMetadataFile, actualMetadata);
 
             Map<String, Serializable> expectedMetadata = readExpectedMetadata(metadataFilename, actualMetadataFile);
-            assertEquals("The metadata did not match the expected value. It has been saved in "+actualMetadataFile.getAbsolutePath(),
-                    expectedMetadata, actualMetadata);
+            assertEquals(expectedMetadata, actualMetadata, 
+                "The metadata did not match the expected value. It has been saved in "+actualMetadataFile.getAbsolutePath());
             actualMetadataFile.delete();
         }
         catch (Exception e)

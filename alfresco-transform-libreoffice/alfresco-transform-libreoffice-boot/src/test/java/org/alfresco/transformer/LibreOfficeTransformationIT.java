@@ -63,8 +63,8 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_SXC;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_STW;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_STI;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_STC;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.util.Map;
@@ -74,9 +74,7 @@ import java.util.stream.Stream;
 import com.google.common.collect.ImmutableSet;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -85,7 +83,6 @@ import org.springframework.http.ResponseEntity;
 /**
  * @author Cezar Leahu
  */
-@RunWith(Parameterized.class)
 public class LibreOfficeTransformationIT
 {
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeTransformationIT.class);
@@ -127,11 +124,6 @@ public class LibreOfficeTransformationIT
             testFile(MIMETYPE_TEXT_PLAIN,"txt",null)
     );
 
-    private final String sourceFile;
-    private final String targetExtension;
-    private final String sourceMimetype;
-    private final String targetMimetype;
-
     private static final Map<String,TestFileInfo> TEST_FILES = Stream.of(
         testFile(MIMETYPE_WORD                                 ,"doc"  ,"quick.doc"),
         testFile(MIMETYPE_OPENXML_WORDPROCESSING               ,"docx" ,"quick.docx"),
@@ -164,16 +156,7 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_TSV                                  ,"tsv"  ,"sample.tsv")
     ).collect(toMap(TestFileInfo::getPath, identity()));
 
-    public LibreOfficeTransformationIT(final Pair<TestFileInfo, TestFileInfo> entry)
-    {
-        sourceFile = entry.getLeft().getPath();
-        targetExtension = entry.getRight().getExtension();
-        sourceMimetype = entry.getLeft().getMimeType();
-        targetMimetype = entry.getRight().getMimeType();
-    }
-
-    @Parameterized.Parameters
-    public static Set<Pair<TestFileInfo, TestFileInfo>> engineTransformations()
+    public static Stream<Pair<TestFileInfo, TestFileInfo>> engineTransformations()
     {
         return Stream
             .of(
@@ -213,13 +196,16 @@ public class LibreOfficeTransformationIT
 
                 allTargets("quick.msg", txtTarget)
                 )
-            .flatMap(identity())
-            .collect(toSet());
+            .flatMap(identity());
     }
 
-    @Test
-    public void testTransformation()
+    @ParameterizedTest
+    public void testTransformation(final Pair<TestFileInfo, TestFileInfo> entry)
     {
+        final String sourceFile = entry.getLeft().getPath();
+        final String targetExtension = entry.getRight().getExtension();
+        final String sourceMimetype = entry.getLeft().getMimeType();
+        final String targetMimetype = entry.getRight().getMimeType();
         final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
             sourceFile, sourceMimetype, targetMimetype, targetExtension);
         try

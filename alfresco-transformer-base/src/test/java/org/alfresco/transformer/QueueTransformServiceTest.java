@@ -46,8 +46,8 @@ import org.alfresco.transformer.messaging.TransformMessageConverter;
 import org.alfresco.transformer.messaging.TransformReplySender;
 import org.apache.activemq.command.ActiveMQObjectMessage;
 import org.apache.activemq.command.ActiveMQQueue;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -67,7 +67,7 @@ public class QueueTransformServiceTest
     @InjectMocks
     private QueueTransformService queueTransformService;
 
-    @Before
+    @BeforeEach
     public void setup()
     {
         MockitoAnnotations.initMocks(this);

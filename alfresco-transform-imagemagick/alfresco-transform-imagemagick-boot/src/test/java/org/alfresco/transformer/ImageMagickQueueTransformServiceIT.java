@@ -32,15 +32,12 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_PNG;
 import java.util.UUID;
 
 import org.alfresco.transform.client.model.TransformRequest;
-import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * @author Lucian Tuca
  * created on 15/01/2019
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
                 properties = {"activemq.url=nio://localhost:61616"})
 public class ImageMagickQueueTransformServiceIT extends AbstractQueueTransformServiceIT

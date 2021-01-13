@@ -28,9 +28,9 @@ package org.alfresco.transformer;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -46,7 +46,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.util.List;
@@ -64,9 +63,8 @@ import org.alfresco.transform.client.model.config.Transformer;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.probes.ProbeTestTransform;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -87,8 +85,8 @@ import com.google.common.collect.ImmutableSet;
  */
 public abstract class AbstractTransformerControllerTest
 {
-    @Rule // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication
-    public TemporaryFolder folder= new TemporaryFolder();
+    @TempDir // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication
+    public File tempDir;
 
     @Autowired
     protected MockMvc mockMvc;
@@ -146,18 +144,34 @@ public abstract class AbstractTransformerControllerTest
     {
         if (testFile != null)
         {
-            FileChannel source = new FileInputStream(testFile).getChannel();
-            FileChannel target = new FileOutputStream(targetFile).getChannel();
-            target.transferFrom(source, 0, source.size());
+            try (var inputStream = new FileInputStream(testFile);
+                    var outputStream = new FileOutputStream(targetFile)) 
+            {
+                FileChannel source = inputStream.getChannel();
+                FileChannel target = outputStream.getChannel();
+                target.transferFrom(source, 0, source.size());
+
+            } catch (Exception e) 
+            {
+                throw e;
+            }
         }
         else
         {
             testFile = getTestFile("quick." + actualTargetExtension, false);
             if (testFile != null)
             {
-                FileChannel source = new FileInputStream(testFile).getChannel();
-                FileChannel target = new FileOutputStream(targetFile).getChannel();
-                target.transferFrom(source, 0, source.size());
+                try (var inputStream = new FileInputStream(testFile);
+                        var outputStream = new FileOutputStream(targetFile)) 
+                {
+                    FileChannel source = inputStream.getChannel();
+                    FileChannel target = outputStream.getChannel();
+                    target.transferFrom(source, 0, source.size());
+
+                } catch (Exception e) 
+                {
+                    throw e;
+                }
             }
         }
     }
@@ -180,22 +194,9 @@ public abstract class AbstractTransformerControllerTest
         // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication
         if(testFileUrl!=null)
         {
-            try 
-            {
-                testFile = folder.newFile(testFilename);
-                Files.copy(classLoader.getResourceAsStream(testFilename), testFile.toPath(),REPLACE_EXISTING);
-            } 
-            catch (IOException e) 
-            {
-                if(e.getMessage().contains("a file with the name \'" + testFilename + "\' already exists in the test folder"))
-                {
-                    testFile = new File(URLDecoder.decode(folder.getRoot().getPath()+ File.separator + testFilename, "UTF-8"));
-                }
-                else
-                {
-                    throw e;
-                }
-            }
+            // Each use of the tempDir should result in a unique directory being used
+            testFile = new File(tempDir, testFilename);
+            Files.copy(classLoader.getResourceAsStream(testFilename), testFile.toPath(),REPLACE_EXISTING);
         }
 
         return testFileUrl == null ? null : testFile;
@@ -242,8 +243,8 @@ public abstract class AbstractTransformerControllerTest
                    "attachment; filename*= UTF-8''quick." + targetExtension));
         long ms = System.currentTimeMillis() - start;
         System.out.println("Transform incluing test delay was " + ms);
-        assertTrue("Delay sending the result back was too small " + ms, ms >= 400);
-        assertTrue("Delay sending the result back was too big " + ms, ms <= 500);
+        assertTrue(ms >= 400, "Delay sending the result back was too small " + ms);
+        assertTrue(ms <= 500,"Delay sending the result back was too big " + ms);
     }
 
     @Test
@@ -302,8 +303,7 @@ public abstract class AbstractTransformerControllerTest
 
         mockMvc.perform(
             mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension))
-               .andExpect(status().is(BAD_REQUEST.value()))
-               .andExpect(status().reason(containsString("The source filename was not supplied")));
+               .andExpect(status().is(BAD_REQUEST.value()));
     }
 
     @Test
@@ -339,8 +339,8 @@ public abstract class AbstractTransformerControllerTest
             long expectedMaxTime = v[2];
 
             probeTestTransform.calculateMaxTime(time, true);
-            assertEquals("", expectedNormalTime, probeTestTransform.getNormalTime());
-            assertEquals("", expectedMaxTime, probeTestTransform.getMaxTime());
+            assertEquals(expectedNormalTime, probeTestTransform.getNormalTime());
+            assertEquals(expectedMaxTime, probeTestTransform.getMaxTime());
         }
     }
 
