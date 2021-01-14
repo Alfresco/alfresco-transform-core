@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,38 +26,27 @@
  */
 package org.alfresco.transformer;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.util.List;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_RFC822;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_XHTML;
 import static org.alfresco.transformer.TestFileInfo.testFile;
+
+import java.util.stream.Stream;
 
 /**
  * Metadata integration tests in the Misc T-Engine.
  *
  * @author adavis
  */
-@RunWith(Parameterized.class)
 public class MiscMetadataExtractsIT extends AbstractMetadataExtractsIT
 {
-    public MiscMetadataExtractsIT(TestFileInfo testFileInfo)
-    {
-        super(testFileInfo);
-    }
 
-    @Parameterized.Parameters
-    public static List<TestFileInfo> engineTransformations()
+    @Override
+    protected Stream<TestFileInfo> engineTransformations() 
     {
         return Stream.of(
                 // HtmlMetadataExtractor
-                testFile(MIMETYPE_HTML, "html", "quick.html"),
-                testFile(MIMETYPE_XHTML, "xhtml", "quick.xhtml.alf"), // avoid the license header check on xhtml
+                testFile(MIMETYPE_HTML, "html", "quick.html"), testFile(MIMETYPE_XHTML, "xhtml", "quick.xhtml.alf"), // avoid the license header check on xhtml
 
                 // RFC822MetadataExtractor
                 testFile(MIMETYPE_RFC822, "eml", "quick.eml"),
@@ -67,6 +56,6 @@ public class MiscMetadataExtractsIT extends AbstractMetadataExtractsIT
                 testFile(MIMETYPE_RFC822, "eml", "quick.spanish.eml"),
                 testFile(MIMETYPE_HTML, "html", "quick.japanese.html")
 
-        ).collect(toList());
+        );
     }
 }

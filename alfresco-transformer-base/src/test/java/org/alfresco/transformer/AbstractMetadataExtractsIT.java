@@ -29,7 +29,8 @@ package org.alfresco.transformer;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
@@ -39,6 +40,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static java.text.MessageFormat.format;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
@@ -60,19 +62,18 @@ public abstract class AbstractMetadataExtractsIT
     // These are normally variable, hence the lowercase.
     private static final String targetMimetype = MIMETYPE_METADATA_EXTRACT;
     private static final String targetExtension = "json";
-    protected final String sourceMimetype;
-    protected final String sourceFile;
+
     private final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
-    public AbstractMetadataExtractsIT(TestFileInfo testFileInfo)
-    {
-        sourceMimetype = testFileInfo.getMimeType();
-        sourceFile = testFileInfo.getPath();
-    }
+    abstract protected Stream<TestFileInfo> engineTransformations();
 
-    @Test
-    public void testTransformation()
+    @ParameterizedTest
+    @MethodSource("engineTransformations")
+    public void testTransformation(TestFileInfo testFileInfo)
     {
+        final String sourceMimetype = testFileInfo.getMimeType();
+        final String sourceFile = testFileInfo.getPath();
+
         final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
                 sourceFile, sourceMimetype, targetMimetype, targetExtension);
 
