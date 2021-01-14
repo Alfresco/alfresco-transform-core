@@ -41,7 +41,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-@ExtendWith(SpringExtension.class)
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
 /**

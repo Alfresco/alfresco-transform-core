@@ -34,12 +34,10 @@ import java.util.Map;
 import org.alfresco.transformer.executors.Transformer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
@@ -47,7 +45,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
  * Test the AIOController ImageMagick transforms without a server.
  * Super class includes tests for the AbstractTransformerController.
  */
-@ExtendWith(SpringExtension.class)
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
 public class AIOControllerImageMagickTest extends ImageMagickControllerTest

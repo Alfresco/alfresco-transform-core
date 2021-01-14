@@ -101,7 +101,6 @@ import org.apache.poi.ooxml.POIXMLProperties;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,7 +110,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -121,7 +119,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * Test the TikaController without a server.
  * Super class includes tests for the AbstractTransformerController.
  */
-@ExtendWith(SpringExtension.class)
 // Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in context, 
 // currently only TikaController.class
 @WebMvcTest()

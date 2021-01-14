@@ -26,11 +26,10 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transformer.util.RequestParamMap.TARGET_EXTENSION;
 import static org.alfresco.transformer.util.RequestParamMap.TARGET_MIMETYPE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -55,15 +54,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
+
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
+import org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
 import org.alfresco.transformer.model.FileRefEntity;
 import org.alfresco.transformer.model.FileRefResponse;
 import org.artofsolving.jodconverter.office.OfficeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,17 +75,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import javax.annotation.PostConstruct;
 
 /**
  * Test the LibreOfficeController without a server.
  * Super class includes tests for the AbstractTransformerController.
  */
-@ExtendWith(SpringExtension.class)
 // Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in context, 
 // currently only LibreOfficeController.class
 @WebMvcTest()

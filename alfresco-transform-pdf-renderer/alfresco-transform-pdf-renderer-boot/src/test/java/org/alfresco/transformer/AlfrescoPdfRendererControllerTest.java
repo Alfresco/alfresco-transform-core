@@ -66,7 +66,6 @@ import org.alfresco.transformer.model.FileRefEntity;
 import org.alfresco.transformer.model.FileRefResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +76,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -85,7 +83,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * Test the AlfrescoPdfRendererController without a server.
  * Super class includes tests for the AbstractTransformerController.
  */
-@ExtendWith(SpringExtension.class)
 // Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in context, 
 // currently only AlfrescoPdfRendererController.class
 @WebMvcTest()
