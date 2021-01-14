@@ -28,5 +28,5 @@ package org.alfresco.transformer;
 
 public class AIOLibreOfficeTransformationIT extends LibreOfficeTransformationIT
 {
-
+    // Tests are in LibreOfficeTransformationIT
 }

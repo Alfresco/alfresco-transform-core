@@ -30,11 +30,9 @@ import java.io.IOException;
 
 import org.alfresco.transform.client.model.TransformRequest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)

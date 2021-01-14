@@ -36,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,8 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-
-import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Cezar Leahu
@@ -63,9 +60,9 @@ public class AlfrescoPdfRendererTransformationIT
         testFile("application/illustrator","ai","quickCS5.ai")
     ).collect(toMap(TestFileInfo::getPath, identity()));
 
-    public static Set<String> engineTransformations()
+    public static Stream<String> engineTransformations()
     {
-        return ImmutableSet.of(
+        return Stream.of(
             "quick.pdf",
             "quickCS3.ai",
             "quickCS5.ai"

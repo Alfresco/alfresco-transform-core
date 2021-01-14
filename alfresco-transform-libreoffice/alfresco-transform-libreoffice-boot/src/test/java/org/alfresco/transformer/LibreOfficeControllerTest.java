@@ -82,7 +82,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * Test the LibreOfficeController without a server.
  * Super class includes tests for the AbstractTransformerController.
  */
-// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in context, 
+// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in the application context,
 // currently only LibreOfficeController.class
 @WebMvcTest()
 public class LibreOfficeControllerTest extends AbstractTransformerControllerTest

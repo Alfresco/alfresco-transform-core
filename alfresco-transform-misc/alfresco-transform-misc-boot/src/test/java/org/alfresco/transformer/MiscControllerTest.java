@@ -57,7 +57,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in context, 
+// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in the application context,
 // currently only MiscController.class
 @WebMvcTest()
 public class MiscControllerTest extends AbstractTransformerControllerTest

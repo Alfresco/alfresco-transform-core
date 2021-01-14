@@ -85,7 +85,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * Test the ImageMagickController without a server.
  * Super class includes tests for the AbstractTransformerController.
  */
-// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in context, 
+// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in the application context, 
 // currently only ImageMagickController.class
 @WebMvcTest()
 public class ImageMagickControllerTest extends AbstractTransformerControllerTest

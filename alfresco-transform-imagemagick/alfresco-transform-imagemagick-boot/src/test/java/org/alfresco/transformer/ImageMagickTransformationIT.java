@@ -91,52 +91,114 @@ public class ImageMagickTransformationIT {
     private static final Logger logger = LoggerFactory.getLogger(ImageMagickTransformationIT.class);
     private static final String ENGINE_URL = "http://localhost:8090";
     private static final List<Pair<String, String>> targetExtensions = new ImmutableList.Builder<Pair<String, String>>()
-            .add(Pair.of("3fr", MIMETYPE_IMAGE_RAW_3FR)).add(Pair.of("arw", MIMETYPE_IMAGE_RAW_ARW))
-            .add(Pair.of("bmp", MIMETYPE_IMAGE_BMP)).add(Pair.of("cgm", MIMETYPE_IMAGE_CGM))
-            .add(Pair.of("cr2", MIMETYPE_IMAGE_RAW_CR2)).add(Pair.of("dng", MIMETYPE_IMAGE_RAW_DNG))
-            .add(Pair.of("eps", MIMETYPE_APPLICATION_EPS)).add(Pair.of("gif", MIMETYPE_IMAGE_GIF))
-            .add(Pair.of("ief", MIMETYPE_IMAGE_IEF)).add(Pair.of("jp2", MIMETYPE_IMAGE_JP2))
-            .add(Pair.of("jpg", MIMETYPE_IMAGE_JPEG)).add(Pair.of("k25", MIMETYPE_IMAGE_RAW_K25))
-            .add(Pair.of("mrw", MIMETYPE_IMAGE_RAW_MRW)).add(Pair.of("nef", MIMETYPE_IMAGE_RAW_NEF))
-            .add(Pair.of("orf", MIMETYPE_IMAGE_RAW_ORF)).add(Pair.of("pbm", MIMETYPE_IMAGE_PBM))
-            .add(Pair.of("pef", MIMETYPE_IMAGE_RAW_PEF)).add(Pair.of("pgm", MIMETYPE_IMAGE_PGM))
-            .add(Pair.of("png", MIMETYPE_IMAGE_PNG)).add(Pair.of("pnm", MIMETYPE_IMAGE_PNM))
-            .add(Pair.of("ppj", MIMETYPE_IMAGE_PPJ)).add(Pair.of("ppm", MIMETYPE_IMAGE_PPM))
-            .add(Pair.of("r3d", MIMETYPE_IMAGE_RAW_R3D)).add(Pair.of("raf", MIMETYPE_IMAGE_RAW_RAF))
-            .add(Pair.of("ras", MIMETYPE_IMAGE_RAS)).add(Pair.of("rw2", MIMETYPE_IMAGE_RAW_RW2))
-            .add(Pair.of("rwl", MIMETYPE_IMAGE_RAW_RWL)).add(Pair.of("tiff", MIMETYPE_IMAGE_TIFF))
-            .add(Pair.of("x3f", MIMETYPE_IMAGE_RAW_X3F)).add(Pair.of("xbm", MIMETYPE_IMAGE_XBM))
-            .add(Pair.of("xpm", MIMETYPE_IMAGE_XPM)).add(Pair.of("xwd", MIMETYPE_IMAGE_XWD)).build();
+            .add(Pair.of("3fr", MIMETYPE_IMAGE_RAW_3FR))
+            .add(Pair.of("arw", MIMETYPE_IMAGE_RAW_ARW))
+            .add(Pair.of("bmp", MIMETYPE_IMAGE_BMP))
+            .add(Pair.of("cgm", MIMETYPE_IMAGE_CGM))
+            .add(Pair.of("cr2", MIMETYPE_IMAGE_RAW_CR2))
+            .add(Pair.of("dng", MIMETYPE_IMAGE_RAW_DNG))
+            .add(Pair.of("eps", MIMETYPE_APPLICATION_EPS))
+            .add(Pair.of("gif", MIMETYPE_IMAGE_GIF))
+            .add(Pair.of("ief", MIMETYPE_IMAGE_IEF))
+            .add(Pair.of("jp2", MIMETYPE_IMAGE_JP2))
+            .add(Pair.of("jpg", MIMETYPE_IMAGE_JPEG))
+            .add(Pair.of("k25", MIMETYPE_IMAGE_RAW_K25))
+            .add(Pair.of("mrw", MIMETYPE_IMAGE_RAW_MRW))
+            .add(Pair.of("nef", MIMETYPE_IMAGE_RAW_NEF))
+            .add(Pair.of("orf", MIMETYPE_IMAGE_RAW_ORF))
+            .add(Pair.of("pbm", MIMETYPE_IMAGE_PBM))
+            .add(Pair.of("pef", MIMETYPE_IMAGE_RAW_PEF))
+            .add(Pair.of("pgm", MIMETYPE_IMAGE_PGM))
+            .add(Pair.of("png", MIMETYPE_IMAGE_PNG))
+            .add(Pair.of("pnm", MIMETYPE_IMAGE_PNM))
+            .add(Pair.of("ppj", MIMETYPE_IMAGE_PPJ))
+            .add(Pair.of("ppm", MIMETYPE_IMAGE_PPM))
+            .add(Pair.of("r3d", MIMETYPE_IMAGE_RAW_R3D))
+            .add(Pair.of("raf", MIMETYPE_IMAGE_RAW_RAF))
+            .add(Pair.of("ras", MIMETYPE_IMAGE_RAS))
+            .add(Pair.of("rw2", MIMETYPE_IMAGE_RAW_RW2))
+            .add(Pair.of("rwl", MIMETYPE_IMAGE_RAW_RWL))
+            .add(Pair.of("tiff", MIMETYPE_IMAGE_TIFF))
+            .add(Pair.of("x3f", MIMETYPE_IMAGE_RAW_X3F))
+            .add(Pair.of("xbm", MIMETYPE_IMAGE_XBM))
+            .add(Pair.of("xpm", MIMETYPE_IMAGE_XPM))
+            .add(Pair.of("xwd", MIMETYPE_IMAGE_XWD))
+            .build();
 
     private static final List<Pair<String, String>> targetExtensionsForPSD = new ImmutableList.Builder<Pair<String, String>>()
-            .add(Pair.of("x3f", MIMETYPE_IMAGE_RAW_X3F)).add(Pair.of("tiff", MIMETYPE_IMAGE_TIFF))
-            .add(Pair.of("rwl", MIMETYPE_IMAGE_RAW_RWL)).add(Pair.of("rw2", MIMETYPE_IMAGE_RAW_RW2))
-            .add(Pair.of("ras", MIMETYPE_IMAGE_RAS)).add(Pair.of("raf", MIMETYPE_IMAGE_RAW_RAF))
-            .add(Pair.of("r3d", MIMETYPE_IMAGE_RAW_R3D)).add(Pair.of("psd", MIMETYPE_IMAGE_PSD))
-            .add(Pair.of("ppm", MIMETYPE_IMAGE_PPM)).add(Pair.of("ppj", MIMETYPE_IMAGE_PPJ))
-            .add(Pair.of("pnm", MIMETYPE_IMAGE_PNM)).add(Pair.of("pgm", MIMETYPE_IMAGE_PGM))
-            .add(Pair.of("pef", MIMETYPE_IMAGE_RAW_PEF)).add(Pair.of("pbm", MIMETYPE_IMAGE_PBM))
-            .add(Pair.of("orf", MIMETYPE_IMAGE_RAW_ORF)).add(Pair.of("nef", MIMETYPE_IMAGE_RAW_NEF))
-            .add(Pair.of("mrw", MIMETYPE_IMAGE_RAW_MRW)).add(Pair.of("k25", MIMETYPE_IMAGE_RAW_K25))
-            .add(Pair.of("ief", MIMETYPE_IMAGE_IEF)).add(Pair.of("gif", MIMETYPE_IMAGE_GIF))
-            .add(Pair.of("dng", MIMETYPE_IMAGE_RAW_DNG)).add(Pair.of("cr2", MIMETYPE_IMAGE_RAW_CR2))
-            .add(Pair.of("arw", MIMETYPE_IMAGE_RAW_ARW)).add(Pair.of("3fr", MIMETYPE_IMAGE_RAW_3FR)).build();
+            .add(Pair.of("x3f", MIMETYPE_IMAGE_RAW_X3F))
+            .add(Pair.of("tiff", MIMETYPE_IMAGE_TIFF))
+            .add(Pair.of("rwl", MIMETYPE_IMAGE_RAW_RWL))
+            .add(Pair.of("rw2", MIMETYPE_IMAGE_RAW_RW2))
+            .add(Pair.of("ras", MIMETYPE_IMAGE_RAS))
+            .add(Pair.of("raf", MIMETYPE_IMAGE_RAW_RAF))
+            .add(Pair.of("r3d", MIMETYPE_IMAGE_RAW_R3D))
+            .add(Pair.of("psd", MIMETYPE_IMAGE_PSD))
+            .add(Pair.of("ppm", MIMETYPE_IMAGE_PPM))
+            .add(Pair.of("ppj", MIMETYPE_IMAGE_PPJ))
+            .add(Pair.of("pnm", MIMETYPE_IMAGE_PNM))
+            .add(Pair.of("pgm", MIMETYPE_IMAGE_PGM))
+            .add(Pair.of("pef", MIMETYPE_IMAGE_RAW_PEF))
+            .add(Pair.of("pbm", MIMETYPE_IMAGE_PBM))
+            .add(Pair.of("orf", MIMETYPE_IMAGE_RAW_ORF))
+            .add(Pair.of("nef", MIMETYPE_IMAGE_RAW_NEF))
+            .add(Pair.of("mrw", MIMETYPE_IMAGE_RAW_MRW))
+            .add(Pair.of("k25", MIMETYPE_IMAGE_RAW_K25))
+            .add(Pair.of("ief", MIMETYPE_IMAGE_IEF))
+            .add(Pair.of("gif", MIMETYPE_IMAGE_GIF))
+            .add(Pair.of("dng", MIMETYPE_IMAGE_RAW_DNG))
+            .add(Pair.of("cr2", MIMETYPE_IMAGE_RAW_CR2))
+            .add(Pair.of("arw", MIMETYPE_IMAGE_RAW_ARW))
+            .add(Pair.of("3fr", MIMETYPE_IMAGE_RAW_3FR))
+            .build();
 
     private static final List<Pair<String, String>> targetExtensionsForTiffFirstPage = new ImmutableList.Builder<Pair<String, String>>()
-            .add(Pair.of("bmp", MIMETYPE_IMAGE_BMP)).add(Pair.of("eps", MIMETYPE_APPLICATION_EPS))
-            .add(Pair.of("jp2", MIMETYPE_IMAGE_JP2)).add(Pair.of("jpg", MIMETYPE_IMAGE_JPEG))
-            .add(Pair.of("png", MIMETYPE_IMAGE_PNG)).add(Pair.of("xbm", MIMETYPE_IMAGE_XBM))
-            .add(Pair.of("xpm", MIMETYPE_IMAGE_XPM)).add(Pair.of("xwd", MIMETYPE_IMAGE_XWD)).build();
+            .add(Pair.of("bmp", MIMETYPE_IMAGE_BMP))
+            .add(Pair.of("eps", MIMETYPE_APPLICATION_EPS))
+            .add(Pair.of("jp2", MIMETYPE_IMAGE_JP2))
+            .add(Pair.of("jpg", MIMETYPE_IMAGE_JPEG))
+            .add(Pair.of("png", MIMETYPE_IMAGE_PNG))
+            .add(Pair.of("xbm", MIMETYPE_IMAGE_XBM))
+            .add(Pair.of("xpm", MIMETYPE_IMAGE_XPM))
+            .add(Pair.of("xwd", MIMETYPE_IMAGE_XWD))
+            .build();
 
     private static final Map<String, TestFileInfo> TEST_FILES = Stream.of(
-            testFile(MIMETYPE_IMAGE_BMP, "bmp", "quick.bmp"), testFile(MIMETYPE_APPLICATION_EPS, "eps", "quick.eps"),
-            testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"), testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quick.jpg"),
-            testFile(MIMETYPE_IMAGE_PBM, "pbm", "quick.pbm"), testFile(MIMETYPE_IMAGE_PGM, "pgm", "quick.pgm"),
-            testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"), testFile(MIMETYPE_IMAGE_PNM, "pnm", "quick.pnm"),
-            testFile(MIMETYPE_IMAGE_PPM, "ppm", "quick.ppm"), testFile(MIMETYPE_IMAGE_XBM, "xbm", "quick.xbm"),
-            testFile(MIMETYPE_IMAGE_XPM, "xpm", "quick.xpm"), testFile(MIMETYPE_IMAGE_PSD, "psd", "quick.psd"),
-            testFile(MIMETYPE_IMAGE_TIFF, "tiff", "quick.tiff"), testFile(MIMETYPE_IMAGE_XWD, "xwd", "quick.xwd"))
-            .collect(toMap(TestFileInfo::getPath, identity()));
+            testFile(MIMETYPE_IMAGE_BMP, "bmp", "quick.bmp"), 
+            testFile(MIMETYPE_APPLICATION_EPS, "eps", "quick.eps"),
+            testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"), 
+            testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quick.jpg"),
+            testFile(MIMETYPE_IMAGE_PBM, "pbm", "quick.pbm"), 
+            testFile(MIMETYPE_IMAGE_PGM, "pgm", "quick.pgm"),
+            testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"), 
+            testFile(MIMETYPE_IMAGE_PNM, "pnm", "quick.pnm"),
+            testFile(MIMETYPE_IMAGE_PPM, "ppm", "quick.ppm"), 
+            testFile(MIMETYPE_IMAGE_XBM, "xbm", "quick.xbm"),
+            testFile(MIMETYPE_IMAGE_XPM, "xpm", "quick.xpm"), 
+            testFile(MIMETYPE_IMAGE_PSD, "psd", "quick.psd"),
+            testFile(MIMETYPE_IMAGE_TIFF, "tiff", "quick.tiff"), 
+            testFile(MIMETYPE_IMAGE_XWD, "xwd", "quick.xwd")
+        ).collect(toMap(TestFileInfo::getPath, identity()));
+
+    public static Stream<Pair<TestFileInfo, Pair<String,String>>> engineTransformations() {
+        return Stream
+            .of(
+                allTargets("quick.bmp", targetExtensions), 
+                allTargets("quick.eps", targetExtensions),
+                allTargets("quick.gif", targetExtensions), 
+                allTargets("quick.jpg", targetExtensions),
+                allTargets("quick.pbm", targetExtensions), 
+                allTargets("quick.pgm", targetExtensions),
+                allTargets("quick.png", targetExtensions), 
+                allTargets("quick.pnm", targetExtensions),
+                allTargets("quick.ppm", targetExtensions), 
+                allTargets("quick.psd", targetExtensionsForPSD),
+                allTargets("quick.tiff", targetExtensions), 
+                allTargets("quick.xbm", targetExtensions),
+                allTargets("quick.xpm", targetExtensions), 
+                allTargets("quick.xwd", targetExtensions)
+            ).flatMap(identity());
+    }
 
     @ParameterizedTest
     @MethodSource("engineTransformations")
@@ -176,15 +238,5 @@ public class ImageMagickTransformationIT {
             .map(k -> Pair.of(TEST_FILES.get(sourceFile), k));
     }
 
-    public static Stream<Pair<TestFileInfo, Pair<String,String>>> engineTransformations() {
-        return Stream.of(
-                allTargets("quick.bmp", targetExtensions), allTargets("quick.eps", targetExtensions),
-                allTargets("quick.gif", targetExtensions), allTargets("quick.jpg", targetExtensions),
-                allTargets("quick.pbm", targetExtensions), allTargets("quick.pgm", targetExtensions),
-                allTargets("quick.png", targetExtensions), allTargets("quick.pnm", targetExtensions),
-                allTargets("quick.ppm", targetExtensions), allTargets("quick.psd", targetExtensionsForPSD),
-                allTargets("quick.tiff", targetExtensions), allTargets("quick.xbm", targetExtensions),
-                allTargets("quick.xpm", targetExtensions), allTargets("quick.xwd", targetExtensions)
-               ).flatMap(i -> i);
-    }
+    
 }
