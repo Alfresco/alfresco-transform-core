@@ -33,6 +33,9 @@ import static org.alfresco.transformer.TestFileInfo.testFile;
 
 import java.util.stream.Stream;
 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
 /**
  * Metadata integration tests in the Misc T-Engine.
  *
@@ -41,8 +44,15 @@ import java.util.stream.Stream;
 public class MiscMetadataExtractsIT extends AbstractMetadataExtractsIT
 {
 
+    @ParameterizedTest
+    @MethodSource("engineTransformations")
     @Override
-    protected Stream<TestFileInfo> engineTransformations() 
+    public void testTransformation(TestFileInfo testFileInfo)
+    {
+        super.testTransformation(testFileInfo);
+    }
+    
+    private static Stream<TestFileInfo> engineTransformations() 
     {
         return Stream.of(
                 // HtmlMetadataExtractor

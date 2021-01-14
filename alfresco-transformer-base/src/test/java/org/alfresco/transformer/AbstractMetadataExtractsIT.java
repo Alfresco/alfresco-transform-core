@@ -65,10 +65,7 @@ public abstract class AbstractMetadataExtractsIT
 
     private final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
-    abstract protected Stream<TestFileInfo> engineTransformations();
-
-    @ParameterizedTest
-    @MethodSource("engineTransformations")
+    
     public void testTransformation(TestFileInfo testFileInfo)
     {
         final String sourceMimetype = testFileInfo.getMimeType();
