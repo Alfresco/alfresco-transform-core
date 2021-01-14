@@ -26,13 +26,12 @@
  */
 package org.alfresco.transformer;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
+import static java.text.MessageFormat.format;
+import static org.alfresco.transformer.EngineClient.sendTRequest;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_METADATA_EXTRACT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.springframework.http.HttpStatus.OK;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,14 +39,12 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
-import static java.text.MessageFormat.format;
-import static org.alfresco.transformer.EngineClient.sendTRequest;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_METADATA_EXTRACT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.springframework.http.HttpStatus.OK;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 
 /**
  * Super class of metadata integration tests. Sub classes should add the list of test files to
