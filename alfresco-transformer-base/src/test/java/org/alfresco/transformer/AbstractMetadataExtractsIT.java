@@ -47,11 +47,30 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
 /**
- * Super class of metadata integration tests. Sub classes should add the list of test files to
- * {@code @Parameterized.Parameters public static Set<TestFileInfo> engineTransformations()} and provide
- * expected json files (&lt;sourceFilename>"_metadata.json") as resources on the classpath.
+ * Super class of metadata integration tests. Sub classes should provide the following:
+ * <p>
+ * <ul>
+ * <li>A method providing a 
+ * Stream of test files: {@code public static Stream<TestFileInfo> engineTransformations()}; </li>
+ * <li> Provide expected json files (&lt;sourceFilename>"_metadata.json") as resources on the classpath.</li>
+ * <li> Override the method {@code testTransformation(TestFileInfo testFileInfo)} such that it calls 
+ * the super method as a {@code @ParameterizedTest} for example:</li> </ul>
+ * <pre>
+ * &#64;ParameterizedTest
+ * 
+ * &#64;MethodSource("engineTransformations")
+ * 
+ * &#64;Override
+
+ * public void testTransformation(TestFileInfo testFileInfo)
+ * 
+ * { 
+ *      super.testTransformation(TestFileInfo testFileInfo)
+ * }
+ * </pre> 
  *
  * @author adavis
+ * @author dedwards
  */
 public abstract class AbstractMetadataExtractsIT
 {

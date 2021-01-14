@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,11 +26,10 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -56,15 +55,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
+
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
 import org.alfresco.transformer.executors.RuntimeExec;
+import org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
 import org.alfresco.transformer.model.FileRefEntity;
 import org.alfresco.transformer.model.FileRefResponse;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,17 +77,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import javax.annotation.PostConstruct;
 
 /**
  * Test the AlfrescoPdfRendererController without a server.
  * Super class includes tests for the AbstractTransformerController.
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebMvcTest(AlfrescoPdfRendererController.class)
 public class AlfrescoPdfRendererControllerTest extends AbstractTransformerControllerTest
 {
@@ -115,7 +115,7 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
     @Autowired
     protected AbstractTransformerController controller;
 
-    @Before
+    @BeforeEach
     public void before() throws IOException
     {
         setFields();
@@ -156,7 +156,7 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
         when(mockTransformCommand.execute(any(), anyLong())).thenAnswer(
             (Answer<RuntimeExec.ExecutionResult>) invocation -> {
                 Map<String, String> actualProperties = invocation.getArgument(0);
-                assertEquals("There should be 3 properties", 3, actualProperties.size());
+                assertEquals(3, actualProperties.size(), "There should be 3 properties");
 
                 String actualOptions = actualProperties.get("options");
                 String actualSource = actualProperties.get("source");
@@ -167,9 +167,9 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
                 assertNotNull(actualTarget);
                 if (expectedSourceSuffix != null)
                 {
-                    assertTrue("The source file \"" + actualSource +
-                               "\" should have ended in \"" + expectedSourceSuffix + "\"",
-                        actualSource.endsWith(expectedSourceSuffix));
+                    assertTrue(actualSource.endsWith(expectedSourceSuffix),
+                        "The source file \"" + actualSource +
+                               "\" should have ended in \"" + expectedSourceSuffix + "\"");
                     actualSource = actualSource.substring(0,
                         actualSource.length() - expectedSourceSuffix.length());
                 }
@@ -177,14 +177,14 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
                 assertNotNull(actualOptions);
                 if (expectedOptions != null)
                 {
-                    assertEquals("expectedOptions", expectedOptions, actualOptions);
+                    assertEquals(expectedOptions, actualOptions,"expectedOptions");
                 }
 
                 Long actualTimeout = invocation.getArgument(1);
                 assertNotNull(actualTimeout);
                 if (expectedTimeout != null)
                 {
-                    assertEquals("expectedTimeout", expectedTimeout, actualTimeout);
+                    assertEquals(expectedTimeout, actualTimeout,"expectedTimeout");
                 }
 
                 // Copy a test file into the target file location if it exists
@@ -200,8 +200,8 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
 
                 // Check the supplied source file has not been changed.
                 byte[] actualSourceFileBytes = Files.readAllBytes(new File(actualSource).toPath());
-                assertTrue("Source file is not the same",
-                    Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes));
+                assertTrue(Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes),
+                    "Source file is not the same");
 
                 return mockExecutionResult;
             });
