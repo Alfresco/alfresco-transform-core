@@ -27,12 +27,11 @@
 package org.alfresco.transformer;
 
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 /**
  * Tests ImageMagickController with a server test harness.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ImageMagickHttpRequestTest extends AbstractHttpRequestTest
 {
     @Override
