@@ -35,7 +35,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(ImageMagickController.class)
+@WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
 /**
  * Test the AIOController Tika transforms without a server.
