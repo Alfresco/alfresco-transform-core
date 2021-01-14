@@ -85,7 +85,9 @@ import javax.annotation.PostConstruct;
  * Super class includes tests for the AbstractTransformerController.
  */
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(LibreOfficeController.class)
+// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in context, 
+// currently only LibreOfficeController.class
+@WebMvcTest()
 public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 {
 

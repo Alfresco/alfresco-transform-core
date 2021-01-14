@@ -88,7 +88,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * Super class includes tests for the AbstractTransformerController.
  */
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(ImageMagickController.class)
+// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in context, 
+// currently only ImageMagickController.class
+@WebMvcTest()
 public class ImageMagickControllerTest extends AbstractTransformerControllerTest
 {
     private static final String ENGINE_CONFIG_NAME = "imagemagick_engine_config.json";

@@ -43,13 +43,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-@ExtendWith(SpringExtension.class)
-@WebMvcTest(AIOController.class)
-@Import(AIOCustomConfig.class)
 /**
  * Test the AIOController ImageMagick transforms without a server.
  * Super class includes tests for the AbstractTransformerController.
  */
+@ExtendWith(SpringExtension.class)
+@WebMvcTest(AIOController.class)
+@Import(AIOCustomConfig.class)
 public class AIOControllerImageMagickTest extends ImageMagickControllerTest
 {
    // All tests contained in ImageMagickControllerTest

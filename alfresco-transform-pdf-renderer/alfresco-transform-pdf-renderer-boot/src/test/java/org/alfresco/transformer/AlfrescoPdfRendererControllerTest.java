@@ -86,7 +86,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * Super class includes tests for the AbstractTransformerController.
  */
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(AlfrescoPdfRendererController.class)
+// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in context, 
+// currently only AlfrescoPdfRendererController.class
+@WebMvcTest()
 public class AlfrescoPdfRendererControllerTest extends AbstractTransformerControllerTest
 {
 

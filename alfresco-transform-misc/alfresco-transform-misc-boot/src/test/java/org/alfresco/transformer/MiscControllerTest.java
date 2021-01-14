@@ -60,7 +60,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(MiscController.class)
+// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in context, 
+// currently only MiscController.class
+@WebMvcTest()
 public class MiscControllerTest extends AbstractTransformerControllerTest
 {
     @Autowired
