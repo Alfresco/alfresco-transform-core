@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,15 +26,15 @@
  */
 package org.alfresco.transformer;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static junit.framework.TestCase.assertTrue;
-
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
 public class AIOControllerMiscTest extends MiscControllerTest 
@@ -46,14 +46,14 @@ public class AIOControllerMiscTest extends MiscControllerTest
     public void testTestValidity()
     {
         // just test that we are actually testing against the AIOController (instead of MiscController)
-        assertTrue("Wrong controller wired for test", controller instanceof AIOController);
+        assertTrue(controller instanceof AIOController, "Wrong controller wired for test");
     }
     
     @Test
     @Override
     public void testGetTransformConfigInfo()
     {
-        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
+        // Ignore the test in super class as the way the AIO transformer provides config is fundamentality different.
 
     }
 
@@ -61,21 +61,21 @@ public class AIOControllerMiscTest extends MiscControllerTest
     @Override
     public void testGetInfoFromConfigWithDuplicates()
     {
-        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
+        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
     }
     @Test
     @Override
     public void testGetInfoFromConfigWithEmptyTransformOptions()
     {
-        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
+        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
     }
     @Test
     @Override
     public void testGetInfoFromConfigWithNoTransformOptions()
     {
-        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
+        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
     }
 }

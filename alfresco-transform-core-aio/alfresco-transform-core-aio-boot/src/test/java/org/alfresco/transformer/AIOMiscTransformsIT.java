@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,15 +26,7 @@
  */
 package org.alfresco.transformer;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-@RunWith(Parameterized.class)
 public class AIOMiscTransformsIT extends MiscTransformsIT
 {
-    //Tests are in ImageMagickTransformationIT
-    public AIOMiscTransformsIT(final SourceTarget sourceTarget)
-    {
-        super(sourceTarget);
-    }
+    // Tests are in ImageMagickTransformationIT
 }

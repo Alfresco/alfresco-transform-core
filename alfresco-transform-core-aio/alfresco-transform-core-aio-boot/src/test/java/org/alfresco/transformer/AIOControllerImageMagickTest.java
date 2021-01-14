@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,24 +26,24 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transformer.executors.Transformer;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.Map;
 
-import static org.junit.Assert.assertTrue;
+import org.alfresco.transformer.executors.Transformer;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
 /**
@@ -57,7 +57,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
     @Autowired
     AIOTransformRegistry transformRegistry;
 
-    @Before @Override
+    @BeforeEach @Override
     public void before() throws IOException
     {       
         ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
@@ -90,7 +90,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
     public void testTestValidity()
     {
         // just test that we are actually testing against the AIOController (instead of MiscController)
-        assertTrue("Wrong controller wired for test", controller instanceof AIOController);
+        assertTrue(controller instanceof AIOController, "Wrong controller wired for test");
     }
 
     @Test

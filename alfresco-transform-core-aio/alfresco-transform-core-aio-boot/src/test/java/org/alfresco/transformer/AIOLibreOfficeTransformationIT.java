@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,16 +26,7 @@
  */
 package org.alfresco.transformer;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-@RunWith(Parameterized.class)
 public class AIOLibreOfficeTransformationIT extends LibreOfficeTransformationIT
 {
 
-    public AIOLibreOfficeTransformationIT(final Pair<TestFileInfo, TestFileInfo> entry)
-    {
-        super(entry);
-    }
 }

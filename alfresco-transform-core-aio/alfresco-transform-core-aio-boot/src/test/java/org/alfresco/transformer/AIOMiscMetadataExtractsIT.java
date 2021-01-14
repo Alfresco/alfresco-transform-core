@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,19 +26,13 @@
  */
 package org.alfresco.transformer;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
 /**
  * Metadata integration tests in the Misc T-Engine, but run from the AIO T-Engine.
  *
  * @author adavis
+ * @author dedwards
  */
-@RunWith(Parameterized.class)
 public class AIOMiscMetadataExtractsIT extends MiscMetadataExtractsIT
 {
-    public AIOMiscMetadataExtractsIT(TestFileInfo testFileInfo)
-    {
-        super(testFileInfo);
-    }
+    //Tests are in MiscMetadataExtractsIT
 }
