@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -29,7 +29,6 @@ package org.alfresco.transformer;
 import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
 import static org.alfresco.transformer.TestFileInfo.testFile;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_EXCEL;
@@ -75,6 +74,7 @@ import com.google.common.collect.ImmutableSet;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -200,6 +200,7 @@ public class LibreOfficeTransformationIT
     }
 
     @ParameterizedTest
+    @MethodSource("engineTransformations")
     public void testTransformation(final Pair<TestFileInfo, TestFileInfo> entry)
     {
         final String sourceFile = entry.getLeft().getPath();
@@ -212,7 +213,7 @@ public class LibreOfficeTransformationIT
         {
             final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, sourceMimetype,
                 targetMimetype, targetExtension);
-            assertEquals(descriptor, OK, response.getStatusCode());
+            assertEquals(OK, response.getStatusCode(), descriptor);
         }
         catch (Exception e)
         {
