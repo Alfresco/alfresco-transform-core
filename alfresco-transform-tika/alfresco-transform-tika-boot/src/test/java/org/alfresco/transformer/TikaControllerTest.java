@@ -26,40 +26,6 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transformer.executors.RuntimeExec;
-import org.alfresco.transformer.model.FileRefEntity;
-import org.alfresco.transformer.model.FileRefResponse;
-import org.alfresco.transformer.probes.ProbeTestTransform;
-import org.apache.poi.ooxml.POIXMLProperties;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 import static java.nio.file.Files.readAllBytes;
 import static org.alfresco.transformer.executors.Tika.ARCHIVE;
 import static org.alfresco.transformer.executors.Tika.CSV;
@@ -96,10 +62,10 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_ZIP;
 import static org.alfresco.transformer.util.RequestParamMap.INCLUDE_CONTENTS;
 import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARK_TEXT;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -116,11 +82,46 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.util.StringUtils.getFilenameExtension;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transformer.executors.RuntimeExec;
+import org.alfresco.transformer.model.FileRefEntity;
+import org.alfresco.transformer.model.FileRefResponse;
+import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.apache.poi.ooxml.POIXMLProperties;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
 /**
  * Test the TikaController without a server.
  * Super class includes tests for the AbstractTransformerController.
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebMvcTest(TikaController.class)
 public class TikaControllerTest extends AbstractTransformerControllerTest
 {
@@ -148,7 +149,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     private String targetEncoding = "UTF-8";
     private String targetMimetype = MIMETYPE_TEXT_PLAIN;
 
-    @Before
+    @BeforeEach
     public void before()
     {
         sourceExtension = "pdf";
@@ -180,7 +181,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         when(mockTransformCommand.execute(any(), anyLong())).thenAnswer(
             (Answer<RuntimeExec.ExecutionResult>) invocation -> {
                 Map<String, String> actualProperties = invocation.getArgument(0);
-                assertEquals("There should be 3 properties", 3, actualProperties.size());
+                assertEquals(3, actualProperties.size(),"There should be 3 properties");
 
                 String actualOptions = actualProperties.get("options");
                 String actualSource = actualProperties.get("source");
@@ -191,9 +192,8 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
                 assertNotNull(actualTarget);
                 if (expectedSourceSuffix != null)
                 {
-                    assertTrue(
-                        "The source file \"" + actualSource + "\" should have ended in \"" + expectedSourceSuffix + "\"",
-                        actualSource.endsWith(expectedSourceSuffix));
+                    assertTrue(actualSource.endsWith(expectedSourceSuffix),
+                        "The source file \"" + actualSource + "\" should have ended in \"" + expectedSourceSuffix + "\"");
                     actualSource = actualSource.substring(0,
                         actualSource.length() - expectedSourceSuffix.length());
                 }
@@ -201,14 +201,14 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
                 assertNotNull(actualOptions);
                 if (expectedOptions != null)
                 {
-                    assertEquals("expectedOptions", expectedOptions, actualOptions);
+                    assertEquals(expectedOptions, actualOptions, "expectedOptions");
                 }
 
                 Long actualTimeout = invocation.getArgument(1);
                 assertNotNull(actualTimeout);
                 if (expectedTimeout != null)
                 {
-                    assertEquals("expectedTimeout", expectedTimeout, actualTimeout);
+                    assertEquals(expectedTimeout, actualTimeout, "expectedTimeout");
                 }
 
                 // Copy a test file into the target file location if it exists
@@ -224,8 +224,8 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
 
                 // Check the supplied source file has not been changed.
                 byte[] actualSourceFileBytes = readAllBytes(new File(actualSource).toPath());
-                assertArrayEquals("Source file is not the same", expectedSourceFileBytes,
-                    actualSourceFileBytes);
+                assertArrayEquals(expectedSourceFileBytes, actualSourceFileBytes, 
+                    "Source file is not the same");
 
                 return mockExecutionResult;
             });
@@ -261,8 +261,8 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
                                       "attachment; filename*= UTF-8''quick." + this.targetExtension)).
                                       andReturn();
         String content = result.getResponse().getContentAsString();
-        assertTrue("The content did not include \"" + expectedContentContains,
-            content.contains(expectedContentContains));
+        assertTrue(content.contains(expectedContentContains),
+            "The content did not include \"" + expectedContentContains);
     }
 
     @Override

@@ -40,6 +40,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  * Metadata integration tests in the Misc T-Engine.
  *
  * @author adavis
+ * @author dedwards
  */
 public class MiscMetadataExtractsIT extends AbstractMetadataExtractsIT
 {
