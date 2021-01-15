@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,11 +26,11 @@
  */
 package org.alfresco.transformer;
 
-import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+/**
+ * Tests MiscController with a server test harness.
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class MiscTransformerHttpRequestTest extends AbstractHttpRequestTest
 {

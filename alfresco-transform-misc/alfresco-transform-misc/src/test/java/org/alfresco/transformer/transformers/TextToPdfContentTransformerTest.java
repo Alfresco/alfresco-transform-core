@@ -28,8 +28,8 @@ package org.alfresco.transformer.transformers;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,13 +39,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.alfresco.transformer.util.RequestParamMap.PAGE_LIMIT;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TextToPdfContentTransformerTest
 {
     TextToPdfContentTransformer transformer = new TextToPdfContentTransformer();
 
-    @Before
+    @BeforeEach
     public void setUp()
     {
         transformer.setStandardFont("Times-Roman");
@@ -121,8 +121,8 @@ public class TextToPdfContentTransformerTest
         String roundTrip = clean(textWriter.toString());
 
         assertEquals(
-            "Incorrect text in PDF when starting from text in " + encoding,
-            checkText, roundTrip
+            checkText, roundTrip,
+            "Incorrect text in PDF when starting from text in " + encoding
         );
 
         sourceFile.delete();

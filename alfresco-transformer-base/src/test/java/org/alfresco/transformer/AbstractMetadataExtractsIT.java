@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,11 +26,12 @@
  */
 package org.alfresco.transformer;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
+import static java.text.MessageFormat.format;
+import static org.alfresco.transformer.EngineClient.sendTRequest;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_METADATA_EXTRACT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.springframework.http.HttpStatus.OK;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,19 +40,37 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.text.MessageFormat.format;
-import static org.alfresco.transformer.EngineClient.sendTRequest;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_METADATA_EXTRACT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.springframework.http.HttpStatus.OK;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 
 /**
- * Super class of metadata integration tests. Sub classes should add the list of test files to
- * {@code @Parameterized.Parameters public static Set<TestFileInfo> engineTransformations()} and provide
- * expected json files (&lt;sourceFilename>"_metadata.json") as resources on the classpath.
+ * Super class of metadata integration tests. Sub classes should provide the following:
+ * <p>
+ * <ul>
+ * <li>A method providing a 
+ * Stream of test files: {@code public static Stream<TestFileInfo> engineTransformations()}; </li>
+ * <li> Provide expected json files (&lt;sourceFilename>"_metadata.json") as resources on the classpath.</li>
+ * <li> Override the method {@code testTransformation(TestFileInfo testFileInfo)} such that it calls 
+ * the super method as a {@code @ParameterizedTest} for example:</li> </ul>
+ * <pre>
+ * &#64;ParameterizedTest
+ * 
+ * &#64;MethodSource("engineTransformations")
+ * 
+ * &#64;Override
+
+ * public void testTransformation(TestFileInfo testFileInfo)
+ * 
+ * { 
+ *      super.testTransformation(TestFileInfo testFileInfo)
+ * }
+ * </pre> 
  *
  * @author adavis
+ * @author dedwards
  */
 public abstract class AbstractMetadataExtractsIT
 {
@@ -59,19 +78,15 @@ public abstract class AbstractMetadataExtractsIT
     // These are normally variable, hence the lowercase.
     private static final String targetMimetype = MIMETYPE_METADATA_EXTRACT;
     private static final String targetExtension = "json";
-    protected final String sourceMimetype;
-    protected final String sourceFile;
+
     private final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
-    public AbstractMetadataExtractsIT(TestFileInfo testFileInfo)
+    
+    public void testTransformation(TestFileInfo testFileInfo)
     {
-        sourceMimetype = testFileInfo.getMimeType();
-        sourceFile = testFileInfo.getPath();
-    }
+        final String sourceMimetype = testFileInfo.getMimeType();
+        final String sourceFile = testFileInfo.getPath();
 
-    @Test
-    public void testTransformation()
-    {
         final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
                 sourceFile, sourceMimetype, targetMimetype, targetExtension);
 
@@ -79,7 +94,7 @@ public abstract class AbstractMetadataExtractsIT
         {
             final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile,
                     sourceMimetype, targetMimetype, targetExtension);
-            assertEquals(descriptor, OK, response.getStatusCode());
+            assertEquals(OK, response.getStatusCode(), descriptor);
 
             String metadataFilename = sourceFile + "_metadata.json";
             Map<String, Serializable> actualMetadata = readMetadata(response.getBody().getInputStream());
@@ -87,8 +102,8 @@ public abstract class AbstractMetadataExtractsIT
             jsonObjectMapper.writerWithDefaultPrettyPrinter().writeValue(actualMetadataFile, actualMetadata);
 
             Map<String, Serializable> expectedMetadata = readExpectedMetadata(metadataFilename, actualMetadataFile);
-            assertEquals("The metadata did not match the expected value. It has been saved in "+actualMetadataFile.getAbsolutePath(),
-                    expectedMetadata, actualMetadata);
+            assertEquals(expectedMetadata, actualMetadata, 
+                "The metadata did not match the expected value. It has been saved in "+actualMetadataFile.getAbsolutePath());
             actualMetadataFile.delete();
         }
         catch (Exception e)

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -31,15 +31,12 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORD
 import java.util.UUID;
 
 import org.alfresco.transform.client.model.TransformRequest;
-import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * @author Lucian Tuca
  * created on 15/01/2019
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
                 properties = {"activemq.url=nio://localhost:61616"})
 public class LibreOfficeQueueTransformServiceIT extends AbstractQueueTransformServiceIT
