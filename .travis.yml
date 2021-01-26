@@ -71,10 +71,10 @@ jobs:
     # - name: "WhiteSource"
     #   if: branch NOT IN (company_release)
     #   script: bash _ci/whitesource.sh
-    - name: "Source Clear Scan (SCA)"
-      if: branch NOT IN (company_release)
-      install: skip
-      script: travis_wait 30 bash _ci/sourceclear.sh
+    # - name: "Source Clear Scan (SCA)"
+    #   if: branch NOT IN (company_release)
+    #   install: skip
+    #   script: travis_wait 30 bash _ci/sourceclear.sh
 #    - name: "Static Analysis (SAST)"
 # TODO ATS-721: comment out until it is possible to run concurrent SAST scans
 #    if: branch NOT IN (company_release) AND type != pull_request
