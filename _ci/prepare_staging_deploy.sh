@@ -11,10 +11,10 @@ export VERSION=$(git describe --abbrev=0 --tags)
 mkdir -p deploy_dir
 
 # Download the WhiteSource report
-mvn -B org.alfresco:whitesource-downloader-plugin:inventoryReport \
-    -N \
-    "-Dorg.whitesource.product=Transform Service" \
-    -DsaveReportAs=deploy_dir/3rd-party.xlsx
+# mvn -B org.alfresco:whitesource-downloader-plugin:inventoryReport \
+#     -N \
+#     "-Dorg.whitesource.product=Transform Service" \
+#     -DsaveReportAs=deploy_dir/3rd-party.xlsx
 
 echo "Local deploy directory content:"
 ls -lA deploy_dir
