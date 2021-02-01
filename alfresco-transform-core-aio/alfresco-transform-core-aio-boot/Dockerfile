@@ -5,7 +5,7 @@
 # ImageMagick is from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt.
 # alfresco-pdf-renderer uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt.
 
-FROM alfresco/alfresco-base-java:11.0.7-openjdk-centos-7-dcd8edf6cb70
+FROM alfresco/alfresco-base-java:11.0.10-openjdk-centos-7-9da90416ab19
 
 ENV APACHE_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/Apache%202.0.txt
 
