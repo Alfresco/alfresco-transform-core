@@ -5,7 +5,7 @@ PS4="\[\e[35m\]+ \[\e[m\]"
 set -vex
 pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 
-mvn -B -U \
+mvn -B -U -Dmaven.wagon.http.pool=false \
     clean install \
     -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true \
     -DskipTests \
@@ -14,4 +14,3 @@ mvn -B -U \
 popd
 set +vex
 echo "=========================== Finishing Build Script =========================="
-

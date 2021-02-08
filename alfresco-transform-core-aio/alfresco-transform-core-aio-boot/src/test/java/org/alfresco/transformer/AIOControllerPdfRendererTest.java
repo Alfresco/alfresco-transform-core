@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,22 +26,20 @@
  */
 package org.alfresco.transformer;
 
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Map;
+
 import org.alfresco.transformer.executors.Transformer;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import java.util.Map;
-
-import static org.junit.Assert.assertTrue;
-
-@RunWith(SpringRunner.class)
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
 /**
@@ -78,14 +76,14 @@ public class AIOControllerPdfRendererTest extends AlfrescoPdfRendererControllerT
     public void testTestValidity()
     {
         // just test that we are actually testing against the AIOController (instead of MiscController)
-        assertTrue("Wrong controller wired for test", controller instanceof AIOController);
+        assertTrue(controller instanceof AIOController, "Wrong controller wired for test");
     }
     
     @Test
     @Override
     public void testGetTransformConfigInfo()
     {
-        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
+        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
 
     }
@@ -93,7 +91,7 @@ public class AIOControllerPdfRendererTest extends AlfrescoPdfRendererControllerT
     @Override
     public void testGetInfoFromConfigWithDuplicates()
     {
-        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
+        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
     }
 
@@ -101,7 +99,7 @@ public class AIOControllerPdfRendererTest extends AlfrescoPdfRendererControllerT
     @Override
     public void testGetInfoFromConfigWithEmptyTransformOptions()
     {
-        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
+        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
     }
     
@@ -109,7 +107,7 @@ public class AIOControllerPdfRendererTest extends AlfrescoPdfRendererControllerT
     @Override
     public void testGetInfoFromConfigWithNoTransformOptions()
     {
-        // Ignore the test in super class as the way the AIO transformer provides config is fundementally different.
+        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
     }
 }

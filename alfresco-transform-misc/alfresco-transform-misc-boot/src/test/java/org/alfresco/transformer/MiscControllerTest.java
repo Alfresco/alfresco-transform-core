@@ -35,9 +35,9 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORD
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_RFC822;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,18 +49,17 @@ import java.nio.file.Files;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-@RunWith(SpringRunner.class)
-@WebMvcTest(MiscController.class)
+// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in the application context,
+// currently only MiscController.class
+@WebMvcTest()
 public class MiscControllerTest extends AbstractTransformerControllerTest
 {
     @Autowired
@@ -72,7 +71,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
 
     protected static final String ENGINE_CONFIG_NAME = "misc_engine_config.json";
 
-    @Before
+    @BeforeEach
     public void before() throws Exception
     {
         sourceMimetype = MIMETYPE_HTML;
@@ -152,8 +151,8 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             null,
             null,
             readTestFile("eml"));
-        assertTrue("Content from eml transform didn't contain expected value. ",
-            result.getResponse().getContentAsString().contains(expected));
+        assertTrue(result.getResponse().getContentAsString().contains(expected),
+            "Content from eml transform didn't contain expected value. ");
     }
 
     /**
@@ -173,8 +172,8 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
                 null, readTestFile("spanish.eml"));
 
         String contentResult = new String(result.getResponse().getContentAsByteArray(), UTF_8);
-        assertTrue("Content from eml transform didn't contain expected value. ",
-            contentResult.contains(expected));
+        assertTrue(contentResult.contains(expected),
+            "Content from eml transform didn't contain expected value. ");
     }
 
     /**
@@ -194,8 +193,8 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             null,
             null,
             readTestFile("attachment.eml"));
-        assertTrue("Content from eml transform didn't contain expected value. ",
-            result.getResponse().getContentAsString().contains(expected));
+        assertTrue(result.getResponse().getContentAsString().contains(expected),
+            "Content from eml transform didn't contain expected value. ");
         assertFalse(result.getResponse().getContentAsString().contains(notExpected));
     }
 
@@ -215,8 +214,8 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             null,
             null,
             readTestFile("alternative.eml"));
-        assertTrue("Content from eml transform didn't contain expected value. ",
-            result.getResponse().getContentAsString().contains(expected));
+        assertTrue(result.getResponse().getContentAsString().contains(expected),
+            "Content from eml transform didn't contain expected value. ");
     }
 
     /**
@@ -235,8 +234,8 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             null,
             null,
             readTestFile("nested.alternative.eml"));
-        assertTrue("Content from eml transform didn't contain expected value. ",
-            result.getResponse().getContentAsString().contains(expected));
+        assertTrue(result.getResponse().getContentAsString().contains(expected),
+            "Content from eml transform didn't contain expected value. ");
     }
 
     /**
@@ -269,7 +268,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
                 null,
                 readTestFile("eml"));
         String metadata = result.getResponse().getContentAsString();
-        assertEquals("Metadata extract", expected, metadata);
+        assertEquals(expected, metadata, "Metadata extract");
     }
 
     /**
@@ -301,7 +300,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
                 extractMapping,
                 readTestFile("eml"));
         String metadata = result.getResponse().getContentAsString();
-        assertEquals("Option metadata extract", expected, metadata);
+        assertEquals(expected, metadata, "Option metadata extract");
     }
 
     /**
@@ -350,7 +349,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
 
         String contentResult = new String(result.getResponse().getContentAsByteArray(),
             targetEncoding);
-        assertTrue("The content did not include \"" + expected, contentResult.contains(expected));
+        assertTrue(contentResult.contains(expected), "The content did not include \"" + expected);
     }
 
     @Test
@@ -380,7 +379,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
 
         String contentResult = new String(result.getResponse().getContentAsByteArray(),
             targetEncoding);
-        assertTrue("The content did not include \"" + expected, contentResult.contains(expected));
+        assertTrue(contentResult.contains(expected), "The content did not include \"" + expected);
     }
 
     @Test
@@ -399,8 +398,8 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             null,
             content);
 
-        assertEquals("Returned content should be empty for an empty source file", 0,
-            result.getResponse().getContentLength());
+        assertEquals(0, result.getResponse().getContentLength(),
+            "Returned content should be empty for an empty source file");
     }
 
     @Test
@@ -435,7 +434,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         expected = clean(expected);
         String actual = clean(textWriter.toString());
 
-        assertEquals("The content did not match.", expected, actual);
+        assertEquals(expected, actual, "The content did not match.");
     }
 
     @Test
@@ -443,8 +442,8 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     {
         MvcResult result = sendRequest("numbers", null, MIMETYPE_IWORK_NUMBERS,
             "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("pages"));
-        assertTrue("Expected image content but content is empty.",
-            result.getResponse().getContentLengthLong() > 0L);
+        assertTrue(result.getResponse().getContentLengthLong() > 0L,
+            "Expected image content but content is empty.");
     }
 
     @Test
@@ -452,8 +451,8 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     {
         MvcResult result = sendRequest("numbers", null, MIMETYPE_IWORK_NUMBERS,
             "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("numbers"));
-        assertTrue("Expected image content but content is empty.",
-            result.getResponse().getContentLengthLong() > 0L);
+        assertTrue(result.getResponse().getContentLengthLong() > 0L,
+            "Expected image content but content is empty.");
     }
 
     @Test
@@ -461,8 +460,8 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     {
         MvcResult result = sendRequest("key", null, MIMETYPE_IWORK_KEYNOTE,
             "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("key"));
-        assertTrue("Expected image content but content is empty.",
-            result.getResponse().getContentLengthLong() > 0L);
+        assertTrue(result.getResponse().getContentLengthLong() > 0L,
+            "Expected image content but content is empty.");
     }
 
     //    @Test
@@ -471,8 +470,8 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     {
         MvcResult result = sendRequest("docx", null, MIMETYPE_OPENXML_WORDPROCESSING,
             "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("docx"));
-        assertTrue("Expected image content but content is empty.",
-            result.getResponse().getContentLengthLong() > 0L);
+        assertTrue(result.getResponse().getContentLengthLong() > 0L,
+            "Expected image content but content is empty.");
     }
 
     private MvcResult sendRequest(String sourceExtension,

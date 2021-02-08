@@ -13,6 +13,10 @@
     ],
     "metadataOptions": [
       {"value": {"name": "extractMapping"}}
+    ],
+    "metadataEmbedOptions": [
+      {"value": {"name": "metadata", "required": true}},
+      {"value": {"name": "targetEncoding"}}
     ]
   },
   "transformers": [
@@ -980,6 +984,15 @@
       ],
       "transformOptions": [
         "metadataOptions"
+      ]
+    },
+    {
+      "transformerName": "SamplePoiMetadataEmbedder",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",          "targetMediaType": "alfresco-metadata-embed"}
+      ],
+      "transformOptions": [
+        "metadataEmbedOptions"
       ]
     }
   ]

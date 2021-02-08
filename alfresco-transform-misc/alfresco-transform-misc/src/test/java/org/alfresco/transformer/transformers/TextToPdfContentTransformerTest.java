@@ -28,8 +28,8 @@ package org.alfresco.transformer.transformers;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -45,7 +45,7 @@ import java.util.Map;
 
 import static org.alfresco.transformer.util.RequestParamMap.PAGE_LIMIT;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TextToPdfContentTransformerTest
 {
@@ -53,7 +53,7 @@ public class TextToPdfContentTransformerTest
     public static final Character NORMAL_BOM = Character.valueOf('\uFEFF');
     TextToPdfContentTransformer transformer = new TextToPdfContentTransformer();
 
-    @Before
+    @BeforeEach
     public void setUp()
     {
         transformer.setStandardFont("Times-Roman");
@@ -214,8 +214,8 @@ public class TextToPdfContentTransformerTest
         String roundTrip = clean(textWriter.toString());
 
         assertEquals(
-            "Incorrect text in PDF when starting from text in " + encoding,
-            checkText, roundTrip
+            checkText, roundTrip,
+            "Incorrect text in PDF when starting from text in " + encoding
         );
 
         sourceFile.delete();
@@ -319,7 +319,7 @@ public class TextToPdfContentTransformerTest
             FileInputStream is = new FileInputStream(sourceFile);
             is.read(actualBytes, 0, l);
             String actualByteOrder = bytesToHex(actualBytes);
-            assertEquals("The sourceFile does not contain the expected bytes", expectedByteOrder, actualByteOrder);
+            assertEquals(expectedByteOrder, actualByteOrder, "The sourceFile does not contain the expected bytes");
         }
     }
 
