@@ -158,28 +158,29 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                 if ("UTF-16".equals(name) || "UTF-16BE".equals(name) || "UTF-16LE".equals(name))
                 {
                     logger.debug("Handle big and little endian UTF16 text in encoding " + name);
-                    charset = Charset.forName("UTF-16BE");
+                    charset = Charset.forName("UTF-16");
                     is = new PushbackInputStream(is, UTF16_READ_AHEAD_BYTES)
                     {
                         boolean bomRead;
                         boolean switchByteOrder;
                         boolean evenByte = true;
+                        int i = 0;
 
                         @Override
-                        public int read(byte[] b, int off, int len) throws IOException
+                        public int read(byte[] bytes, int off, int len) throws IOException
                         {
                             int i = 0;
-                            int j = 0;
+                            int b = 0;
                             for (; i<len; i++)
                             {
-                                j = read();
-                                if (j == -1)
+                                b = read();
+                                if (b == -1)
                                 {
                                     break;
                                 }
-                                b[off+i] = (byte)j;
+                                bytes[off+i] = (byte)b;
                             }
-                            return i == 0 && j == -1 ? -1 : i;
+                            return i == 0 && b == -1 ? -1 : i;
                         }
 
                         @Override
@@ -206,8 +207,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                                     start = 0;
                                     int evenZeros = countZeros(b, 0);
                                     int oddZeros = countZeros(b, 1);
-                                    if (oddZeros > evenZeros)
-//                                    if (evenZeros > oddZeros)
+                                    if (evenZeros > oddZeros)
                                     {
                                         switchByteOrder = false;
                                         logger.debug("More even zero bytes, so normal read for big-endian");
@@ -232,19 +232,30 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                                 {
                                     int b1 = super.read();
                                     int b2 = super.read();
-                                    if (b2 != -1)
-                                    {
-                                        unread(b2);
-                                    }
                                     if (b1 != -1)
                                     {
                                         unread(b1);
+                                    }
+                                    if (b2 != -1)
+                                    {
+                                        unread(b2);
                                     }
                                 }
                                 evenByte = !evenByte;
                             }
 
-                            return super.read();
+                            int b = super.read();
+                            if (logger.isDebugEnabled())
+                            {
+                                if (i < 8)
+                                {
+                                    logger.debug("byte[" + i + "]=" +
+                                            Character.forDigit((b >> 4) & 0xF, 16) +
+                                            Character.forDigit((b & 0xF), 16));
+                                    i++;
+                                }
+                            }
+                            return b;
                         }
 
                         // Counts the number of even or odd 00 bytes

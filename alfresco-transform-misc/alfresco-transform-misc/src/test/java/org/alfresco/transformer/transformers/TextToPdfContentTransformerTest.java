@@ -31,9 +31,13 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -42,7 +46,6 @@ import java.util.Map;
 import static org.alfresco.transformer.util.RequestParamMap.PAGE_LIMIT;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 public class TextToPdfContentTransformerTest
 {
@@ -86,15 +89,10 @@ public class TextToPdfContentTransformerTest
     {
         // 1. BOM indicates BE (fe then ff) + chars appear to be BE (as first byte read tends to be a zero)
         //    Expected with UTF-16. Some systems use BE and other like Windows and Mac used LE
-        transformTextAndCheck("UTF-16", "UTF-16BE", NORMAL_BOM,
-                "fe ff 00 31 00 20 00 49");
-        transformTextAndCheck("UTF-16", "UTF-16", null,
-                "fe ff 00 31 00 20 00 49");
-
-        transformTextAndCheck("UTF-16BE", "UTF-16", null,
-                "fe ff 00 31 00 20 00 49");
-        transformTextAndCheck("UTF-16LE", "UTF-16", null,
-                "fe ff 00 31 00 20 00 49");
+        String expectedByteOrder = "fe ff 00 31 00 20 00 49";
+        transformTextAndCheck("UTF-16", true, true, expectedByteOrder);
+        transformTextAndCheck("UTF-16", true, true, expectedByteOrder);
+        transformTextAndCheck("UTF-16BE", true, true, expectedByteOrder);
     }
 
     @Test
@@ -102,8 +100,7 @@ public class TextToPdfContentTransformerTest
     {
         // 2. BOM indicates LE (ff then fe) + chars appear to be LE (as second byte read tends to be a zero)
         //    Expected with UTF-16. Some systems use BE and other like Windows and Mac used LE
-        transformTextAndCheck("UTF-16", "UTF-16LE", REVERSE_BOM,
-                "ff fe 31 00 20 00 49 00");
+        transformTextAndCheck("UTF-16", false, true, "ff fe 31 00 20 00 49 00");
     }
 
     @Test
@@ -111,8 +108,7 @@ public class TextToPdfContentTransformerTest
     {
         // 3. No BOM + chars appear to be BE (as first byte read tends to be a zero)
         //    Expected with UTF-16BE
-        transformTextAndCheck("UTF-16", "UTF-16BE", null,
-                "00 31 00 20 00 49");
+        transformTextAndCheck("UTF-16", true, null, "00 31 00 20 00 49");
     }
 
     @Test
@@ -120,8 +116,7 @@ public class TextToPdfContentTransformerTest
     {
         // 4. No BOM + chars appear to be LE (as second byte read tends to be a zero)
         //    Expected with UTF-16LE
-        transformTextAndCheck("UTF-16", "UTF-16LE", null,
-                "31 00 20 00 49 00");
+        transformTextAndCheck("UTF-16", false, null, "31 00 20 00 49 00");
     }
 
     @Test
@@ -129,8 +124,7 @@ public class TextToPdfContentTransformerTest
     {
         // 5. BOM indicates BE (fe then ff) + chars appear to be LE (as second byte read tends to be a zero)
         //    SOMETHING IS WRONG, BUT USE LE!!!!
-        transformTextAndCheck("UTF-16", "UTF-16LE", NORMAL_BOM,
-                "fe ff 31 00 20 00 49 00");
+        transformTextAndCheck("UTF-16", false, false, "fe ff 31 00 20 00 49 00");
     }
 
     @Test
@@ -138,43 +132,47 @@ public class TextToPdfContentTransformerTest
     {
         // 6. BOM indicates LE (ff then fe) + chars appear to be BE (as first byte read tends to be a zero)
         //    SOMETHING IS WRONG, BUT USE BE!!!!
-        transformTextAndCheck("UTF-16", "UTF-16BE", REVERSE_BOM,
-                "ff fe 00 31 00 20 00 49");
+        transformTextAndCheck("UTF-16", true, false, "ff fe 00 31 00 20 00 49");
     }
 
-    private void transformTextAndCheck(String encoding, String actualSourceEncoding,
-                                       Character byteOrderMark, String expectedByteOrder) throws Exception
+    /**
+     * @param encoding to be used to read the source file
+     * @param bigEndian indicates that the file should contain big endian characters, so typically the first byte of
+     *                 each char is a zero when using English.
+     * @param validBom if not null, the BOM is included. If true it is the one matching bigEndian. If false it is the
+     *                 opposite byte order, which really is an error, but we try to recover from it.
+     * @param expectedByteOrder The first few bytes of the source file so we can check the test data has been
+     *                 correctly created.
+     */
+    protected void transformTextAndCheck(String encoding, boolean bigEndian, Boolean validBom,
+                                         String expectedByteOrder) throws Exception
     {
-        transformTextAndCheckPageLength(-1, encoding, actualSourceEncoding, byteOrderMark, expectedByteOrder);
+        transformTextAndCheckImpl(-1, encoding, bigEndian, validBom, expectedByteOrder);
     }
 
-    private void transformTextAndCheckPageLength(int pageLimit) throws Exception
+    protected void transformTextAndCheckPageLength(int pageLimit) throws Exception
     {
-        transformTextAndCheck("UTF-8", "UTF-8", null, null);
+        transformTextAndCheckImpl(pageLimit, "UTF-8", null, null, null);
     }
 
-    private void transformTextAndCheckPageLength(int pageLimit, String encoding, String actualSourceEncoding,
-                                                 Character byteOrderMark, String expectedByteOrder) throws Exception
+    private void transformTextAndCheckImpl(int pageLimit, String encoding, Boolean bigEndian, Boolean validBom,
+                                           String expectedByteOrder) throws Exception
     {
         StringBuilder sb = new StringBuilder();
-        String checkText = createTestText(pageLimit, byteOrderMark, sb);
+        String checkText = createTestText(pageLimit, sb);
         String text = sb.toString();
 
         File sourceFile = File.createTempFile("AlfrescoTestSource_", ".txt");
-        writeToFile(sourceFile, text, actualSourceEncoding);
+        writeToFile(sourceFile, text, encoding, bigEndian, validBom);
         checkFileBytes(sourceFile, expectedByteOrder);
 
         transformTextAndCheck(sourceFile, encoding, checkText, String.valueOf(pageLimit));
     }
 
-    private String createTestText(int pageLimit, Character byteOrderMark, StringBuilder sb)
+    private String createTestText(int pageLimit, StringBuilder sb)
     {
         int pageLength = 32;
         int lines = (pageLength + 10) * ((pageLimit > 0) ? pageLimit : 1);
-        if (byteOrderMark != null)
-        {
-            sb.append(byteOrderMark);
-        }
         String checkText = null;
         int cutoff = pageLimit * pageLength;
         for (int i = 1; i <= lines; i++)
@@ -190,7 +188,6 @@ public class TextToPdfContentTransformerTest
 
         String text = sb.toString();
         checkText = checkText == null ? clean(text) : clean(checkText);
-        checkText =  byteOrderMark != null ? checkText.substring(1) : checkText;
 
         return checkText;
     }
@@ -234,11 +231,77 @@ public class TextToPdfContentTransformerTest
         return text;
     }
 
-    private void writeToFile(File file, String content, String encoding) throws Exception
+    private void writeToFile(File file, String content, String encoding, Boolean bigEndian, Boolean validBom) throws Exception
     {
+        // If we may have to change the endian or include/exclude the BOM, write initially to a tmp file using
+        // UTF-16 which includes the BOM FEFF.
+        File originalFile = file;
+        if (bigEndian != null)
+        {
+            file = File.createTempFile("AlfrescoTestTmpSrc_", ".txt");
+            encoding = "UTF-16";
+        }
+
+        // Use a writer to use the required encoding
         try (OutputStreamWriter ow = new OutputStreamWriter(new FileOutputStream(file), encoding))
         {
             ow.append(content);
+        }
+
+        // If we may have to change the endian or include/exclude the BOM, copy the raw bytes to the supplied file
+        if (bigEndian != null)
+        {
+            boolean firstRead = true;
+            byte[] bytes = new byte[8192];
+            try (InputStream is = new BufferedInputStream(new FileInputStream(file));
+                 OutputStream os = new BufferedOutputStream(new FileOutputStream(originalFile)))
+            {
+                int l;
+                int off;
+                boolean switchBytes = false;
+                do
+                {
+                    l = is.read(bytes);
+                    off = 0;
+                    // When we read the first block, change the offset if we don't want the BOM and also work out
+                    // if the byte endian need to be switch. The source bytes allways start with a standard BOM.
+                    if (firstRead)
+                    {
+                        firstRead = false;
+                        boolean actualEndianBytes = bytes[0] == (byte)0xfe; // if true [1] would also be 0xff
+                        switchBytes = actualEndianBytes != bigEndian;
+                        if (validBom == null)
+                        {
+                            // Strip the BOM
+                            off = 2;
+                        }
+                        else if (!validBom)
+                        {
+                            // Reverse the BOM so it does not match the characters!
+                            byte aByte = bytes[0];
+                            bytes[0] = bytes[1];
+                            bytes[1] = aByte;
+                        }
+                    }
+                    // 6. Expected :ff fe 00 31 00 20 00 49
+                    //    Actual   :fe ff 31 00 20 00 49 00
+                    int len = l - off;
+                    if (len > 0)
+                    {
+                        if (switchBytes)
+                        {
+                            // Reverse the byte order of characters including the BOM.
+                            for (int i=0; i<l; i+=2)
+                            {
+                                byte aByte = bytes[i];
+                                bytes[i] = bytes[i+1];
+                                bytes[i+1] = aByte;
+                            }
+                        }
+                        os.write(bytes, off, len-off);
+                    }
+                } while (l != -1);
+            }
         }
     }
 
