@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -409,7 +409,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i <= 5; i++)
         {
-            sb.append(i);
+            sb.append(Integer.toString(i));
             sb.append(" I must not talk in class or feed my homework to my cat.\n");
         }
         sb.append("\nBart\n");
