@@ -152,19 +152,22 @@ public class TextToPdfContentTransformer implements SelectableTransformer
             if (charset != null)
             {
                 // Handles the situation where there is a BOM even though the encoding indicates that normally
-                // there should not be one (UTF-16BE and UTF-16LE). The normal Java decoder ignores it.
-                // For extra flexibility includes UTF-16 which optionally has the BOM.
+                // there should not be one for UTF-16BE and UTF-16LE. For extra flexibility includes UTF-16 too
+                // which optionally has the BOM. Rather than look at the BOM we look at the number of zero bytes
+                // in the first few character. XML files even when not in European languages tend to have more
+                // even zero bytes when big-endian encoded and more odd zero bytes when little-endian.
+                // Think of: <?xml version="1.0"?> The normal Java decoder does not have this flexibility but
+                // other transformers do.
                 String name = charset.displayName();
                 if ("UTF-16".equals(name) || "UTF-16BE".equals(name) || "UTF-16LE".equals(name))
                 {
-                    logger.debug("Handle big and little endian UTF16 text in encoding " + name);
+                    logger.debug("Handle big and little endian UTF-16 text. Using UTF-16 rather than encoding " + name);
                     charset = Charset.forName("UTF-16");
                     is = new PushbackInputStream(is, UTF16_READ_AHEAD_BYTES)
                     {
                         boolean bomRead;
                         boolean switchByteOrder;
                         boolean evenByte = true;
-                        int i = 0;
 
                         @Override
                         public int read(byte[] bytes, int off, int len) throws IOException
@@ -189,41 +192,49 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                             if (!bomRead)
                             {
                                 bomRead = true;
-                                byte[] b = new byte[UTF16_READ_AHEAD_BYTES];
-                                int start = 2;
-                                int end = in.read(b, 0, UTF16_READ_AHEAD_BYTES);
-                                if (b[0] == FF && b[1] == FE)
+                                boolean switchBom = false;
+                                byte[] bytes = new byte[UTF16_READ_AHEAD_BYTES];
+                                int end = in.read(bytes, 0, UTF16_READ_AHEAD_BYTES);
+                                int evenZeros = countZeros(bytes, 0);
+                                int oddZeros = countZeros(bytes, 1);
+                                if (evenZeros > oddZeros)
                                 {
-                                    switchByteOrder = true;
-                                    logger.debug("Reverse BOM FFFE read, so switch bytes for little-endian");
-                                }
-                                else if (b[0] == FE && b[1] == FF)
-                                {
-                                    switchByteOrder = false;
-                                    logger.debug("Normal BOM FEFF read, so normal read for big-endian");
+                                    if (bytes[0] == FF && bytes[1] == FE)
+                                    {
+                                        switchByteOrder = true;
+                                        switchBom = true;
+                                        logger.warn("Little-endian BOM FFFE read, but characters are big-endian");
+                                    }
+                                    else
+                                    {
+                                        logger.debug("More even zero bytes, so normal read for big-endian");
+                                    }
                                 }
                                 else
                                 {
-                                    start = 0;
-                                    int evenZeros = countZeros(b, 0);
-                                    int oddZeros = countZeros(b, 1);
-                                    if (evenZeros > oddZeros)
+                                    if (bytes[0] == FE && bytes[1] == FF)
                                     {
-                                        switchByteOrder = false;
-                                        logger.debug("More even zero bytes, so normal read for big-endian");
+                                        switchBom = true;
+                                        logger.debug("Big-endian BOM FEFF read, but characters are little-endian");
                                     }
                                     else
                                     {
                                         switchByteOrder = true;
-                                        logger.debug("More odd zero bytes, so switch bytes for little-endian");
+                                        logger.debug("More odd zero bytes, so switch bytes from little-endian");
                                     }
                                 }
 
-                                for (int i=end-1; i>=start; i--)
+                                if (switchBom)
                                 {
-                                    unread(b[i]);
+                                    byte b = bytes[0];
+                                    bytes[0] = bytes[1];
+                                    bytes[1] = b;
                                 }
-                                logger.debug("switchByteOrder="+switchByteOrder);
+
+                                for (int i = end-1; i>=0; i--)
+                                {
+                                    unread(bytes[i]);
+                                }
                             }
 
                             if (switchByteOrder)
@@ -244,18 +255,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                                 evenByte = !evenByte;
                             }
 
-                            int b = super.read();
-                            if (logger.isDebugEnabled())
-                            {
-                                if (i < 8)
-                                {
-                                    logger.debug("byte[" + i + "]=" +
-                                            Character.forDigit((b >> 4) & 0xF, 16) +
-                                            Character.forDigit((b & 0xF), 16));
-                                    i++;
-                                }
-                            }
-                            return b;
+                            return super.read();
                         }
 
                         // Counts the number of even or odd 00 bytes
