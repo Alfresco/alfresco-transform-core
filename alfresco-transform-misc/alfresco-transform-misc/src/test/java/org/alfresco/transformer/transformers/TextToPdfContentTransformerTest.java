@@ -49,8 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TextToPdfContentTransformerTest
 {
-    public static final Character REVERSE_BOM = Character.valueOf('\uFFFE');
-    public static final Character NORMAL_BOM = Character.valueOf('\uFEFF');
     TextToPdfContentTransformer transformer = new TextToPdfContentTransformer();
 
     @BeforeEach
@@ -93,6 +91,7 @@ public class TextToPdfContentTransformerTest
         transformTextAndCheck("UTF-16", true, true, expectedByteOrder);
         transformTextAndCheck("UTF-16", true, true, expectedByteOrder);
         transformTextAndCheck("UTF-16BE", true, true, expectedByteOrder);
+        transformTextAndCheck("UTF-16LE", true, true, expectedByteOrder);
     }
 
     @Test
@@ -283,8 +282,6 @@ public class TextToPdfContentTransformerTest
                             bytes[1] = aByte;
                         }
                     }
-                    // 6. Expected :ff fe 00 31 00 20 00 49
-                    //    Actual   :fe ff 31 00 20 00 49 00
                     int len = l - off;
                     if (len > 0)
                     {
