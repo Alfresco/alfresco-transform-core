@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PushbackInputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -62,6 +63,10 @@ import java.util.Map;
 public class TextToPdfContentTransformer implements SelectableTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(TextToPdfContentTransformer.class);
+
+    private static final int UTF16_READ_AHEAD_BYTES = 16; // 8 characters including BOM if it exists
+    private static final byte FE = (byte) 0xFE;
+    private static final byte FF = (byte) 0xFF;
 
     public static final String PAGE_LIMIT = RequestParamMap.PAGE_LIMIT;
 
@@ -146,7 +151,129 @@ public class TextToPdfContentTransformer implements SelectableTransformer
             }
             if (charset != null)
             {
-                logger.debug("Processing plain text in encoding " + charset.displayName());
+                // Handles the situation where there is a BOM even though the encoding indicates that normally
+                // there should not be one for UTF-16BE and UTF-16LE. For extra flexibility includes UTF-16 too
+                // which optionally has the BOM. Rather than look at the BOM we look at the number of zero bytes
+                // in the first few character. XML files even when not in European languages tend to have more
+                // even zero bytes when big-endian encoded and more odd zero bytes when little-endian.
+                // Think of: <?xml version="1.0"?> The normal Java decoder does not have this flexibility but
+                // other transformers do.
+                String name = charset.displayName();
+                if ("UTF-16".equals(name) || "UTF-16BE".equals(name) || "UTF-16LE".equals(name))
+                {
+                    logger.debug("Handle big and little endian UTF-16 text. Using UTF-16 rather than encoding " + name);
+                    charset = Charset.forName("UTF-16");
+                    is = new PushbackInputStream(is, UTF16_READ_AHEAD_BYTES)
+                    {
+                        boolean bomRead;
+                        boolean switchByteOrder;
+                        boolean evenByte = true;
+
+                        @Override
+                        public int read(byte[] bytes, int off, int len) throws IOException
+                        {
+                            int i = 0;
+                            int b = 0;
+                            for (; i<len; i++)
+                            {
+                                b = read();
+                                if (b == -1)
+                                {
+                                    break;
+                                }
+                                bytes[off+i] = (byte)b;
+                            }
+                            return i == 0 && b == -1 ? -1 : i;
+                        }
+
+                        @Override
+                        public int read() throws IOException
+                        {
+                            if (!bomRead)
+                            {
+                                bomRead = true;
+                                boolean switchBom = false;
+                                byte[] bytes = new byte[UTF16_READ_AHEAD_BYTES];
+                                int end = in.read(bytes, 0, UTF16_READ_AHEAD_BYTES);
+                                int evenZeros = countZeros(bytes, 0);
+                                int oddZeros = countZeros(bytes, 1);
+                                if (evenZeros > oddZeros)
+                                {
+                                    if (bytes[0] == FF && bytes[1] == FE)
+                                    {
+                                        switchByteOrder = true;
+                                        switchBom = true;
+                                        logger.warn("Little-endian BOM FFFE read, but characters are big-endian");
+                                    }
+                                    else
+                                    {
+                                        logger.debug("More even zero bytes, so normal read for big-endian");
+                                    }
+                                }
+                                else
+                                {
+                                    if (bytes[0] == FE && bytes[1] == FF)
+                                    {
+                                        switchBom = true;
+                                        logger.debug("Big-endian BOM FEFF read, but characters are little-endian");
+                                    }
+                                    else
+                                    {
+                                        switchByteOrder = true;
+                                        logger.debug("More odd zero bytes, so switch bytes from little-endian");
+                                    }
+                                }
+
+                                if (switchBom)
+                                {
+                                    byte b = bytes[0];
+                                    bytes[0] = bytes[1];
+                                    bytes[1] = b;
+                                }
+
+                                for (int i = end-1; i>=0; i--)
+                                {
+                                    unread(bytes[i]);
+                                }
+                            }
+
+                            if (switchByteOrder)
+                            {
+                                if (evenByte)
+                                {
+                                    int b1 = super.read();
+                                    int b2 = super.read();
+                                    if (b1 != -1)
+                                    {
+                                        unread(b1);
+                                    }
+                                    if (b2 != -1)
+                                    {
+                                        unread(b2);
+                                    }
+                                }
+                                evenByte = !evenByte;
+                            }
+
+                            return super.read();
+                        }
+
+                        // Counts the number of even or odd 00 bytes
+                        private int countZeros(byte[] b, int offset)
+                        {
+                            int count = 0;
+                            for (int i=offset; i<UTF16_READ_AHEAD_BYTES; i+=2)
+                            {
+                                if (b[i] == 0)
+                                {
+                                    count++;
+                                }
+                            }
+                            return count;
+                        }
+                    };
+                }
+                logger.debug("Processing plain text in encoding " + name);
                 return new InputStreamReader(is, charset);
             }
         }
@@ -196,7 +323,6 @@ public class TextToPdfContentTransformer implements SelectableTransformer
         public PDDocument createPDFFromText(Reader text, int pageLimit)
             throws IOException
         {
-            //int pageLimit = (int)pageLimits.getValue();
             PDDocument doc = null;
             int pageCount = 0;
             try
@@ -207,7 +333,7 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                 //calculate font height and increase by 5 percent.
                 height = height * getFontSize() * 1.05f;
                 doc = new PDDocument();
-                BufferedReader data = new BufferedReader(text);
+                BufferedReader data = (text instanceof BufferedReader) ? (BufferedReader) text : new BufferedReader(text);
                 String nextLine;
                 PDPage page = new PDPage();
                 PDPageContentStream contentStream = null;
@@ -220,7 +346,6 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                 outer:
                 while ((nextLine = data.readLine()) != null)
                 {
-
                     // The input text is nonEmpty. New pages will be created and added
                     // to the PDF document as they are needed, depending on the length of
                     // the text.
@@ -252,8 +377,6 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                             int test = pageCount + 1;
                             if (pageLimit > 0 && (pageCount++ >= pageLimit))
                             {
-//                                pageLimits.getAction().throwIOExceptionIfRequired("Page limit ("+pageLimit+
-//                                        ") reached.", transformerDebug);
                                 break outer;
                             }
 
@@ -272,7 +395,6 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                             y = page.getMediaBox().getHeight() - margin + height;
                             contentStream.moveTextPositionByAmount(margin, y);
                         }
-                        //System.out.println( "Drawing string at " + x + "," + y );
 
                         if (contentStream == null)
                         {
