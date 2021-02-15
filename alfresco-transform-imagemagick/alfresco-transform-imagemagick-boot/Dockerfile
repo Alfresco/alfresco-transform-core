@@ -4,7 +4,7 @@
 
 FROM alfresco/alfresco-base-java:11.0.10-openjdk-centos-8@sha256:f498c3106940e6fccc5d52e6c3e6e8ff237a3ad689bf737b2ca6fdff1a2109cc
 
-ARG IMAGEMAGICK_VERSION=7.0.10-11
+ARG IMAGEMAGICK_VERSION=7.0.10-59
 
 ENV IMAGEMAGICK_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}/imagemagick-distribution-${IMAGEMAGICK_VERSION}-linux.rpm
 ENV IMAGEMAGICK_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}/imagemagick-distribution-${IMAGEMAGICK_VERSION}-libs-linux.rpm
