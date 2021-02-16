@@ -76,11 +76,11 @@ public interface Transformer
         }
         catch (IllegalArgumentException e)
         {
-            throw new TransformException(BAD_REQUEST.value(), getMessage(e));
+            throw new TransformException(BAD_REQUEST.value(), getMessage(e), e);
         }
         catch (Exception e)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), getMessage(e));
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), getMessage(e), e);
         }
         if (!targetFile.exists())
         {
