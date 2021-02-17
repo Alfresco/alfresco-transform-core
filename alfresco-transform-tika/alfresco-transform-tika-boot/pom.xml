@@ -97,7 +97,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcmail-jdk15on</artifactId>
-            <version>1.68</version>
+            <version>1.64</version>
         </dependency>
 
         <!-- Apache POI -->
@@ -193,7 +193,7 @@
                             <images>
                                 <image>
                                     <alias>activemq</alias>
-                                    <name>alfresco/alfresco-activemq:5.15.8</name>
+                                    <name>alfresco/alfresco-activemq:5.16.1</name>
                                     <run>
                                         <hostname>activemq</hostname>
                                         <ports>
@@ -202,7 +202,7 @@
                                             <port>61616:61616</port>
                                         </ports>
                                         <wait>
-                                            <log>Apache ActiveMQ 5.15.8 .* started</log>
+                                            <log>Apache ActiveMQ 5.16.1 .* started</log>
                                             <time>20000</time>
                                             <kill>500</kill>
                                             <shutdown>100</shutdown>
