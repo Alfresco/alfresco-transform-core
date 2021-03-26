@@ -4,3 +4,6 @@ transform:
   core:
     config:
       location: classpath:tika_engine_config.json
+    tika:
+      PdfBox:
+        extractBookmarksText: ${PDFBOX_EXTRACTBOOKMARKS:true}
