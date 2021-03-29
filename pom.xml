@@ -75,6 +75,7 @@
                 <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot</module>
             </modules>
         </profile>
+        <!-- TODO PoC for Video/Audio transforms (using FFmpeg) -->
         <profile>
             <id>ffmpeg</id>
             <modules>

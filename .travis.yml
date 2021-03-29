@@ -39,6 +39,12 @@ jobs:
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: travis_wait 20 mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
       script: mvn -B -U clean deploy -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
+# TODO PoC for Video/Audio transforms (using FFmpeg)
+    - name: "Transform Video/Audio (FFmpeg)"
+      if: branch NOT IN (company_release)
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh ffmpeg
+      script: bash _ci/test.sh ffmpeg
     - name: "ImageMagick"
       if: branch NOT IN (company_release)
       before_script: travis_wait bash _ci/cache_artifacts.sh
