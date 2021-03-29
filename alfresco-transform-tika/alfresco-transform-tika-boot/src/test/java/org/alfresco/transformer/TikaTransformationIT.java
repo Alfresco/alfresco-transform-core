@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -28,31 +28,27 @@ package org.alfresco.transformer;
 
 import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toSet;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.apache.commons.lang3.tuple.Triple;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
-import com.google.common.collect.ImmutableMap;
-
 /**
  * @author Cezar Leahu
  */
-@RunWith(Parameterized.class)
 public class TikaTransformationIT
 {
     private static final Logger logger = LoggerFactory.getLogger(TikaTransformationIT.class);
@@ -63,15 +59,16 @@ public class TikaTransformationIT
         "xhtml", "application/xhtml+xml",
         "xml", "text/xml");
 
-    private final String sourceFile;
-    private final String targetExtension;
-    private final String targetMimetype;
-    private final String sourceMimetype;
+    
 
-    public TikaTransformationIT(final Triple<String, String, String> entry)
+    @ParameterizedTest
+    @MethodSource("engineTransformations")
+    public void testTransformation(Triple<String, String, String> entry)
     {
-        sourceFile = entry.getLeft();
-        targetExtension = entry.getMiddle();
+        final String sourceFile = entry.getLeft();
+        final String sourceMimetype = entry.getRight();
+        final String targetExtension = entry.getMiddle();
+        String targetMimetype;
         //Single test to cover pdf-->csv
         if (sourceFile.contains("pdf") && targetExtension.contains("csv"))
         {
@@ -81,7 +78,31 @@ public class TikaTransformationIT
         {
             targetMimetype = extensionMimetype.get(entry.getMiddle());
         }
-        sourceMimetype = entry.getRight();
+        
+
+        final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
+            sourceFile, sourceMimetype, targetMimetype, targetExtension);
+        try
+        {
+            final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, null,
+                targetMimetype, targetExtension, ImmutableMap.of(
+                    "targetEncoding", "UTF-8",
+                    "sourceMimetype", sourceMimetype));
+            assertEquals(OK, response.getStatusCode(), descriptor);
+        }
+        catch (Exception e)
+        {
+            fail(descriptor + " exception: " + e.getMessage());
+        }
+    }
+
+    private static Stream<Triple<String, String, String>> allTargets(final String sourceFile,
+        final String sourceMimetype)
+    {
+        return extensionMimetype
+            .keySet()
+            .stream()
+            .map(k -> Triple.of(sourceFile, k, sourceMimetype));
     }
 
     // TODO unit tests for the following file types (for which is difficult to find file samples):
@@ -89,9 +110,7 @@ public class TikaTransformationIT
     //  *.cpio (application/x-cpio)
     //  *.cdf (application/x-netcdf) 
     //  *.hdf (application/x-hdf)
-
-    @Parameterized.Parameters
-    public static Set<Triple<String, String, String>> engineTransformations()
+    public static Stream<Triple<String, String, String>> engineTransformations()
     {
         return Stream
             .of(
@@ -104,7 +123,7 @@ public class TikaTransformationIT
                 Stream.of(
                     Triple.of("quick.key", "html", "application/vnd.apple.keynote"),
                     // Does not work, alfresco-docker-sourceMimetype-misc can handle this target mimetype, removed from engine_config.json
-                    // Triple.of("quick.key", "txt", "TikaAuto"),
+                     Triple.of("quick.key", "txt", "application/vnd.apple.keynote"),
                     Triple.of("quick.key", "xhtml", "application/vnd.apple.keynote"),
                     Triple.of("quick.key", "xml", "application/vnd.apple.keynote")
                 ),
@@ -152,35 +171,6 @@ public class TikaTransformationIT
                 allTargets("quick.z", "application/x-compress"),
                 allTargets("quick.csv", "text/csv"),
                 allTargets("quick.tar.gz", "application/x-gzip"))
-            .flatMap(identity())
-            .collect(toSet());
-    }
-
-    @Test
-    public void testTransformation()
-    {
-        final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
-            sourceFile, sourceMimetype, targetMimetype, targetExtension);
-        try
-        {
-            final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, null,
-                targetMimetype, targetExtension, ImmutableMap.of(
-                    "targetEncoding", "UTF-8",
-                    "sourceMimetype", sourceMimetype));
-            assertEquals(descriptor, OK, response.getStatusCode());
-        }
-        catch (Exception e)
-        {
-            fail(descriptor + " exception: " + e.getMessage());
-        }
-    }
-
-    private static Stream<Triple<String, String, String>> allTargets(final String sourceFile,
-        final String sourceMimetype)
-    {
-        return extensionMimetype
-            .keySet()
-            .stream()
-            .map(k -> Triple.of(sourceFile, k, sourceMimetype));
+            .flatMap(identity());
     }
 }

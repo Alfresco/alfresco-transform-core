@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,15 +26,14 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transformer.util.RequestParamMap.TARGET_EXTENSION;
 import static org.alfresco.transformer.util.RequestParamMap.TARGET_MIMETYPE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
@@ -45,7 +44,6 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.util.StringUtils.getFilenameExtension;
 
@@ -56,15 +54,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
+
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
+import org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
 import org.alfresco.transformer.model.FileRefEntity;
 import org.alfresco.transformer.model.FileRefResponse;
 import org.artofsolving.jodconverter.office.OfficeException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,18 +75,16 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import javax.annotation.PostConstruct;
 
 /**
  * Test the LibreOfficeController without a server.
  * Super class includes tests for the AbstractTransformerController.
  */
-@RunWith(SpringRunner.class)
-@WebMvcTest(LibreOfficeController.class)
+// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in the application context,
+// currently only LibreOfficeController.class
+@WebMvcTest()
 public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 {
 
@@ -97,20 +95,35 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
     protected ExecutionResult mockExecutionResult;
 
     @Value("${transform.core.libreoffice.path}")
-    protected String execPath;
+    private String execPath;
+
+    @Value("${transform.core.libreoffice.maxTasksPerProcess}")
+    private String maxTasksPerProcess;
+
+    @Value("${transform.core.libreoffice.timeout}")
+    private String timeout;
+
+    @Value("${transform.core.libreoffice.portNumbers}")
+    private String portNumbers;
+
+    @Value("${transform.core.libreoffice.templateProfileDir}")
+    private String templateProfileDir;
+
+    @Value("${transform.core.libreoffice.isEnabled}")
+    private String isEnabled;
 
     protected LibreOfficeJavaExecutor javaExecutor;
 
     @PostConstruct
     private void init()
     {
-        javaExecutor = Mockito.spy(new LibreOfficeJavaExecutor(execPath));
+        javaExecutor = Mockito.spy(new LibreOfficeJavaExecutor(execPath, maxTasksPerProcess, timeout, portNumbers, templateProfileDir, isEnabled));
     }
 
     @Autowired
     protected AbstractTransformerController controller;
 
-    @Before
+    @BeforeEach
     public void before() throws IOException
     {
         sourceExtension = "doc";
@@ -150,8 +163,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 
             // Check the supplied source file has not been changed.
             byte[] actualSourceFileBytes = Files.readAllBytes(sourceFile.toPath());
-            assertTrue("Source file is not the same",
-                Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes));
+            assertTrue(Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes), "Source file is not the same");
 
             return null;
         }).when(javaExecutor).convert(any(), any());
@@ -266,5 +278,104 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
     {
         //System test property value can me modified in the pom.xml
         assertEquals(execPath, System.getProperty("LIBREOFFICE_HOME"));
+    }
+
+    @Test
+    public void testOverridingExecutorMaxTasksPerProcess()
+    {
+        //System test property value can me modified in the pom.xml
+        assertEquals(maxTasksPerProcess, System.getProperty("LIBREOFFICE_MAX_TASKS_PER_PROCESS"));
+    }
+
+    @Test
+    public void testOverridingExecutorTimeout()
+    {
+        //System test property value can me modified in the pom.xml
+        assertEquals(timeout, System.getProperty("LIBREOFFICE_TIMEOUT"));
+    }
+
+    @Test
+    public void testOverridingExecutorPortNumbers()
+    {
+        //System test property value can me modified in the pom.xml
+        assertEquals(portNumbers, System.getProperty("LIBREOFFICE_PORT_NUMBERS"));
+    }
+
+    @Test
+    public void testOverridingExecutorTemplateProfileDir()
+    {
+        //System test property value can me modified in the pom.xml
+        assertEquals(templateProfileDir, System.getProperty("LIBREOFFICE_TEMPLATE_PROFILE_DIR"));
+    }
+
+    @Test
+    public void testOverridingExecutorIsEnabled()
+    {
+        //System test property value can me modified in the pom.xml
+        assertEquals(isEnabled, System.getProperty("LIBREOFFICE_IS_ENABLED"));
+    }
+
+    @Test
+    public void testInvalidExecutorMaxTasksPerProcess()
+    {
+        String errorMessage = "";
+        try
+        {
+            new LibreOfficeJavaExecutor(execPath, "INVALID", timeout, portNumbers, templateProfileDir, isEnabled);
+        }
+        catch (IllegalArgumentException e)
+        {
+            errorMessage = e.getMessage();
+        }
+
+        assertEquals("LibreOfficeJavaExecutor MAX_TASKS_PER_PROCESS must have a numeric value", errorMessage);
+    }
+
+    @Test
+    public void testInvalidExecutorTimeout()
+    {
+        String errorMessage = "";
+        try
+        {
+            new LibreOfficeJavaExecutor(execPath, maxTasksPerProcess, "INVALID", portNumbers, templateProfileDir, isEnabled);
+        }
+        catch (IllegalArgumentException e)
+        {
+            errorMessage = e.getMessage();
+        }
+
+        assertEquals("LibreOfficeJavaExecutor TIMEOUT must have a numeric value", errorMessage);
+    }
+
+    @Test
+    public void testInvalidExecutorPortNumbers()
+    {
+        String errorMessage = "";
+        try
+        {
+            new LibreOfficeJavaExecutor(execPath, maxTasksPerProcess, timeout, null, templateProfileDir, isEnabled);
+        }
+        catch (IllegalArgumentException e)
+        {
+            errorMessage = e.getMessage();
+        }
+
+        assertEquals("LibreOfficeJavaExecutor PORT variable cannot be null or empty", errorMessage);
+    }
+
+    @Test
+    public void testInvalidExecutorIsEnabled()
+    {
+        String errorMessage = "";
+        try
+        {
+            new LibreOfficeJavaExecutor(execPath, maxTasksPerProcess, timeout, portNumbers, templateProfileDir, "INVALID");
+        }
+        catch (IllegalArgumentException e)
+        {
+            errorMessage = e.getMessage();
+        }
+
+        assertEquals("LibreOfficeJavaExecutor IS_ENABLED variable must be set to true/false", errorMessage);
     }
 }

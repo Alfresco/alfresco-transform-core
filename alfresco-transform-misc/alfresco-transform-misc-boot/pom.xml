@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-transform-core</artifactId>
-        <version>2.3.3-SNAPSHOT</version>
+        <version>2.3.11-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -38,7 +38,6 @@
             <artifactId>alfresco-transform-misc</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -54,7 +53,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <dependency>
             <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
@@ -115,7 +113,7 @@
                             <images>
                                 <image>
                                     <alias>activemq</alias>
-                                    <name>alfresco/alfresco-activemq:5.15.8</name>
+                                    <name>alfresco/alfresco-activemq:5.16.1</name>
                                     <run>
                                         <hostname>activemq</hostname>
                                         <ports>
@@ -124,7 +122,7 @@
                                             <port>61616:61616</port>
                                         </ports>
                                         <wait>
-                                            <log>Apache ActiveMQ 5.15.8 .* started</log>
+                                            <log>Apache ActiveMQ 5.16.1 .* started</log>
                                             <time>20000</time>
                                             <kill>500</kill>
                                             <shutdown>100</shutdown>

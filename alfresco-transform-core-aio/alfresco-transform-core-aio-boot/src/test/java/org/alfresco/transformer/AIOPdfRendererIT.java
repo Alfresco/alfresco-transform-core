@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,14 +26,6 @@
  */
 package org.alfresco.transformer;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-@RunWith(Parameterized.class)
 public class AIOPdfRendererIT extends AlfrescoPdfRendererTransformationIT {
     // Tests are in AlfrescoPdfRendererTransformationIT
-    public AIOPdfRendererIT(String sourceFile)
-    {
-        super(sourceFile);
-    }
 }

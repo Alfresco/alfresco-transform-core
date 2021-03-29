@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -31,28 +31,23 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
 import static org.alfresco.transformer.TestFileInfo.testFile;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
-import com.google.common.collect.ImmutableSet;
-
 /**
  * @author Cezar Leahu
  */
-@RunWith(Parameterized.class)
 public class AlfrescoPdfRendererTransformationIT
 {
     private static final Logger logger = LoggerFactory.getLogger(
@@ -65,28 +60,21 @@ public class AlfrescoPdfRendererTransformationIT
         testFile("application/illustrator","ai","quickCS5.ai")
     ).collect(toMap(TestFileInfo::getPath, identity()));
 
-    private final String sourceFile;
-    private final String sourceMimetype;
-
-    public AlfrescoPdfRendererTransformationIT(String sourceFile)
+    public static Stream<String> engineTransformations()
     {
-        this.sourceFile = sourceFile;
-        this.sourceMimetype = TEST_FILES.get(sourceFile).getMimeType();
-    }
-
-    @Parameterized.Parameters
-    public static Set<String> engineTransformations()
-    {
-        return ImmutableSet.of(
+        return Stream.of(
             "quick.pdf",
             "quickCS3.ai",
             "quickCS5.ai"
         );
     }
 
-    @Test
-    public void testTransformation()
+    @ParameterizedTest
+    @MethodSource("engineTransformations")
+    public void testTransformation(String sourceFile)
     {
+        final String sourceMimetype = TEST_FILES.get(sourceFile).getMimeType();
+
         final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
             sourceFile, sourceMimetype, "image/png", "png");
 
@@ -94,7 +82,7 @@ public class AlfrescoPdfRendererTransformationIT
         {
             final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, sourceMimetype,
                 "image/png", "png");
-            assertEquals(descriptor, OK, response.getStatusCode());
+            assertEquals(OK, response.getStatusCode(),descriptor);
         }
         catch (Exception e)
         {

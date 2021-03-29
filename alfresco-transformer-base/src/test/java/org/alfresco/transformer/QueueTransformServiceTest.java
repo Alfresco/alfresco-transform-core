@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -46,8 +46,8 @@ import org.alfresco.transformer.messaging.TransformMessageConverter;
 import org.alfresco.transformer.messaging.TransformReplySender;
 import org.apache.activemq.command.ActiveMQObjectMessage;
 import org.apache.activemq.command.ActiveMQQueue;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -67,7 +67,7 @@ public class QueueTransformServiceTest
     @InjectMocks
     private QueueTransformService queueTransformService;
 
-    @Before
+    @BeforeEach
     public void setup()
     {
         MockitoAnnotations.initMocks(this);

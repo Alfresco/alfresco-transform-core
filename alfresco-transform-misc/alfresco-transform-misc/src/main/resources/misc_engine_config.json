@@ -5,6 +5,9 @@
     ],
     "stringOptions": [
        {"value": {"name": "targetEncoding"}}
+    ],
+    "metadataOptions": [
+      {"value": {"name": "extractMapping"}}
     ]
   },
   "transformers": [
@@ -77,6 +80,7 @@
         {"sourceMediaType": "application/xhtml+xml",                         "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
+        "metadataOptions"
       ]
     },
     {
@@ -85,6 +89,7 @@
         {"sourceMediaType": "message/rfc822",                                "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
+        "metadataOptions"
       ]
     }
   ]

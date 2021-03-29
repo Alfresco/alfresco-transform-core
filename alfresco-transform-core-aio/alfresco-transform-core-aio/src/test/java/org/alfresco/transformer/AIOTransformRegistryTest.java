@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -33,8 +33,8 @@ import org.alfresco.transformer.executors.Transformer;
 import org.alfresco.transformer.transformers.SelectingTransformer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
@@ -48,11 +48,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.alfresco.transformer.util.RequestParamMap.PAGE_LIMIT;
 import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AIOTransformRegistryTest
 {
@@ -64,7 +66,7 @@ public class AIOTransformRegistryTest
     ObjectMapper objectMapper = new ObjectMapper();
 
 
-    @Before
+    @BeforeEach
     public void before() throws Exception
     {
         aioTransformerRegistry.registerTransformer(new SelectingTransformer());
@@ -97,35 +99,40 @@ public class AIOTransformRegistryTest
                 "Archive", "OutlookMsg", "PdfBox", "Office", "Poi", "OOXML", "TikaAuto", "TextMining");
 
         List<String> expectedTransformOptionNames = Arrays.asList("tikaOptions", "archiveOptions", "pdfboxOptions",
-                "textToPdfOptions", "stringOptions");
+                "textToPdfOptions", "stringOptions", "metadataOptions");
 
         TransformConfig miscConfig = loadConfig("misc_engine_config.json");
         TransformConfig tikaConfig = loadConfig("tika_engine_config.json");
 
         // check correct number of transformers
-        assertEquals("Number of expected transformers",
+        assertEquals(
                 miscConfig.getTransformers().size() + tikaConfig.getTransformers().size(),
-                aioTransformerRegistry.getTransformConfig().getTransformers().size());
+                aioTransformerRegistry.getTransformConfig().getTransformers().size(),
+                "Number of expected transformers");
 
         List<String> actualTransformerNames = aioTransformerRegistry.getTransformConfig().getTransformers()
                 .stream().map(t -> t.getTransformerName()).collect(Collectors.toList());
         // check all transformers are there
         for(String transformNames : expectedTransformNames)
         {
-            assertTrue("Expected transformer missing.",  actualTransformerNames.contains(transformNames));
+            assertTrue(actualTransformerNames.contains(transformNames),"Expected transformer missing.");
         }
 
         // check correct number of options
-        assertEquals("Number of expected transformers",
-                miscConfig.getTransformOptions().size() + tikaConfig.getTransformOptions().size(),
-                aioTransformerRegistry.getTransformConfig().getTransformOptions().size());
+        long distinctOptionCount = Stream.concat(
+                miscConfig.getTransformOptions().keySet().stream(),
+                tikaConfig.getTransformOptions().keySet().stream()).distinct().count();
+        assertEquals(
+                distinctOptionCount,
+                aioTransformerRegistry.getTransformConfig().getTransformOptions().size(),
+                "Number of expected transformers");
 
         Set<String> actualOptionNames = aioTransformerRegistry.getTransformConfig().getTransformOptions().keySet();
 
         // check all options are there
         for (String optionName : expectedTransformOptionNames)
         {
-            assertTrue("Expected transform option missing.",  actualOptionNames.contains(optionName));
+            assertTrue(actualOptionNames.contains(optionName), "Expected transform option missing:"+optionName);
         }
     }
 
@@ -138,21 +145,23 @@ public class AIOTransformRegistryTest
         for (String transform : tikaTransforms)
         {
             String actualId = aioTransformerRegistry.getByTransformName(transform).getTransformerId();
-            assertEquals("Wrong mapping for transform "+transform, "tika", actualId);
+            assertEquals("tika", actualId, "Wrong mapping for transform "+transform);
         }
 
         for (String transform : miscTransforms)
         {
             String actualId = aioTransformerRegistry.getByTransformName(transform).getTransformerId();
-            assertEquals("Wrong mapping for transform "+transform, "misc", actualId);
+            assertEquals("misc", actualId, "Wrong mapping for transform "+transform);
         }
     }
 
-    @Test(expected = Exception.class)
+    @Test
     public void testDuplicateTransformsException() throws Exception
     {
-        // The Misc transformers are already registered
-        aioTransformerRegistry.registerTransformer(new SelectingTransformer());
+        assertThrows(Exception.class, () ->{
+            // The Misc transformers are already registered
+            aioTransformerRegistry.registerTransformer(new SelectingTransformer());
+        });
     }
 
     // Test copied from Misc (HtmlParserContentTransformerTest) See ATS-712 aioTransformerRegistry - html
@@ -271,7 +280,7 @@ public class AIOTransformRegistryTest
         int cutoff = pageLimit * pageLength;
         for (int i = 1; i <= lines; i++)
         {
-            sb.append(i);
+            sb.append(Integer.toString(i));
             sb.append(" I must not talk in class or feed my homework to my cat.\n");
             if (i == cutoff)
                 checkText = sb.toString();
@@ -309,8 +318,8 @@ public class AIOTransformRegistryTest
         String roundTrip = clean(textWriter.toString());
 
         assertEquals(
-                "Incorrect text in PDF when starting from text in " + encoding,
-                checkText, roundTrip
+                checkText, roundTrip, 
+                "Incorrect text in PDF when starting from text in " + encoding
         );
 
         sourceFile.delete();

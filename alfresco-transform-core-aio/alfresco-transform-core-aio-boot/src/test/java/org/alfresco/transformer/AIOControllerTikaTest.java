@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,15 +26,12 @@
  */
 package org.alfresco.transformer;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
 /**
@@ -49,7 +46,7 @@ public class AIOControllerTikaTest extends TikaControllerTest
     public void testTestValidity()
     {
         // just test that we are actually testing against the AIOController (instead of MiscController)
-        assertTrue("Wrong controller wired for test", controller instanceof AIOController);
+        assertTrue(controller instanceof AIOController,"Wrong controller wired for test");
     }
 
     @Test
@@ -75,12 +72,20 @@ public class AIOControllerTikaTest extends TikaControllerTest
         // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
     }
-    
+
     @Test
     @Override
     public void testGetInfoFromConfigWithNoTransformOptions()
     {
         // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
+    }
+
+    @Test
+    @Override
+    public void xlsxEmbedTest()
+    {
+        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
+        // It uses the real class path rather than the test one.
     }
 }

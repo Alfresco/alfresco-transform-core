@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,37 +26,6 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transformer.executors.RuntimeExec;
-import org.alfresco.transformer.model.FileRefEntity;
-import org.alfresco.transformer.model.FileRefResponse;
-import org.alfresco.transformer.probes.ProbeTestTransform;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 import static java.nio.file.Files.readAllBytes;
 import static org.alfresco.transformer.executors.Tika.ARCHIVE;
 import static org.alfresco.transformer.executors.Tika.CSV;
@@ -79,6 +48,7 @@ import static org.alfresco.transformer.executors.Tika.XML;
 import static org.alfresco.transformer.executors.Tika.XSLX;
 import static org.alfresco.transformer.executors.Tika.ZIP;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_HTML;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_METADATA_EMBED;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_WORDPROCESSING;
@@ -92,10 +62,10 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_ZIP;
 import static org.alfresco.transformer.util.RequestParamMap.INCLUDE_CONTENTS;
 import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARK_TEXT;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -112,12 +82,46 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.util.StringUtils.getFilenameExtension;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transformer.executors.RuntimeExec;
+import org.alfresco.transformer.model.FileRefEntity;
+import org.alfresco.transformer.model.FileRefResponse;
+import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.apache.poi.ooxml.POIXMLProperties;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
 /**
  * Test the TikaController without a server.
  * Super class includes tests for the AbstractTransformerController.
  */
-@RunWith(SpringRunner.class)
-@WebMvcTest(TikaController.class)
+// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in the application context,
+// currently only TikaController.class
+@WebMvcTest()
 public class TikaControllerTest extends AbstractTransformerControllerTest
 {
     private static final String ENGINE_CONFIG_NAME = "tika_engine_config.json";
@@ -144,7 +148,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     private String targetEncoding = "UTF-8";
     private String targetMimetype = MIMETYPE_TEXT_PLAIN;
 
-    @Before
+    @BeforeEach
     public void before()
     {
         sourceExtension = "pdf";
@@ -176,7 +180,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         when(mockTransformCommand.execute(any(), anyLong())).thenAnswer(
             (Answer<RuntimeExec.ExecutionResult>) invocation -> {
                 Map<String, String> actualProperties = invocation.getArgument(0);
-                assertEquals("There should be 3 properties", 3, actualProperties.size());
+                assertEquals(3, actualProperties.size(),"There should be 3 properties");
 
                 String actualOptions = actualProperties.get("options");
                 String actualSource = actualProperties.get("source");
@@ -187,9 +191,8 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
                 assertNotNull(actualTarget);
                 if (expectedSourceSuffix != null)
                 {
-                    assertTrue(
-                        "The source file \"" + actualSource + "\" should have ended in \"" + expectedSourceSuffix + "\"",
-                        actualSource.endsWith(expectedSourceSuffix));
+                    assertTrue(actualSource.endsWith(expectedSourceSuffix),
+                        "The source file \"" + actualSource + "\" should have ended in \"" + expectedSourceSuffix + "\"");
                     actualSource = actualSource.substring(0,
                         actualSource.length() - expectedSourceSuffix.length());
                 }
@@ -197,14 +200,14 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
                 assertNotNull(actualOptions);
                 if (expectedOptions != null)
                 {
-                    assertEquals("expectedOptions", expectedOptions, actualOptions);
+                    assertEquals(expectedOptions, actualOptions, "expectedOptions");
                 }
 
                 Long actualTimeout = invocation.getArgument(1);
                 assertNotNull(actualTimeout);
                 if (expectedTimeout != null)
                 {
-                    assertEquals("expectedTimeout", expectedTimeout, actualTimeout);
+                    assertEquals(expectedTimeout, actualTimeout, "expectedTimeout");
                 }
 
                 // Copy a test file into the target file location if it exists
@@ -220,8 +223,8 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
 
                 // Check the supplied source file has not been changed.
                 byte[] actualSourceFileBytes = readAllBytes(new File(actualSource).toPath());
-                assertArrayEquals("Source file is not the same", expectedSourceFileBytes,
-                    actualSourceFileBytes);
+                assertArrayEquals(expectedSourceFileBytes, actualSourceFileBytes, 
+                    "Source file is not the same");
 
                 return mockExecutionResult;
             });
@@ -257,8 +260,8 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
                                       "attachment; filename*= UTF-8''quick." + this.targetExtension)).
                                       andReturn();
         String content = result.getResponse().getContentAsString();
-        assertTrue("The content did not include \"" + expectedContentContains,
-            content.contains(expectedContentContains));
+        assertTrue(content.contains(expectedContentContains),
+            "The content did not include \"" + expectedContentContains);
     }
 
     @Override
@@ -537,6 +540,43 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     {
         transform(TEXT_MINING, DOC, TXT, MIMETYPE_WORD, MIMETYPE_TEXT_PLAIN, null,
             EXPECTED_TEXT_CONTENT_CONTAINS);
+    }
+
+    @Test
+    public void xlsxEmbedTest() throws Exception
+    {
+        mockTransformCommand(XSLX, XSLX, MIMETYPE_OPENXML_SPREADSHEET, false);
+
+        String metadata =
+                "{\"{http://www.alfresco.org/model/content/1.0}author\":\"author1\"," +
+                 "\"{http://www.alfresco.org/model/content/1.0}title\":\"title1\"," +
+                 "\"{http://www.alfresco.org/model/content/1.0}description\":[\"desc1\",\"desc2\"]," +
+                 "\"{http://www.alfresco.org/model/content/1.0}created\":\"created1\"}";
+
+        MockHttpServletRequestBuilder requestBuilder =
+                super.mockMvcRequest("/transform", sourceFile,
+                        "targetExtension", XSLX,
+                        "metadata", metadata,
+                        "targetMimetype", MIMETYPE_METADATA_EMBED,
+                        "sourceMimetype", MIMETYPE_OPENXML_SPREADSHEET);
+
+        MvcResult result = mockMvc.perform(requestBuilder)
+                .andExpect(status().is(OK.value()))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*= UTF-8''quick." + targetExtension)).
+                        andReturn();
+
+        byte[] bytes = result.getResponse().getContentAsByteArray();
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+        XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
+        POIXMLProperties props = workbook.getProperties();
+        POIXMLProperties.CoreProperties coreProp = props.getCoreProperties();
+        POIXMLProperties.CustomProperties custProp = props.getCustomProperties();
+
+        assertEquals("author1", coreProp.getCreator());
+        assertEquals("title1", coreProp.getTitle());
+        assertEquals("desc1, desc2", coreProp.getDescription()); // multi value
+        assertEquals("created1", custProp.getProperty("created").getLpwstr());
     }
 
     @Test

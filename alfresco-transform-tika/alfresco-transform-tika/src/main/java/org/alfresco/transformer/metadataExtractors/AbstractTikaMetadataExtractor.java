@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -316,15 +317,53 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
             return;
         }
 
-        Metadata metadataToEmbed = new Metadata();
-        Map<String, String> metadataAsStrings = getMetadata(transformOptions);
-        metadataAsStrings.forEach((k,v)->metadataToEmbed.add(k, v));
+        Metadata metadataToEmbed = getTikaMetadata(transformOptions);
 
         try (InputStream inputStream = new FileInputStream(sourceFile);
              OutputStream outputStream = new FileOutputStream(targetFile))
         {
             embedder.embed(metadataToEmbed, inputStream, outputStream, null);
         }
+    }
+
+    private Metadata getTikaMetadata(Map<String, String> transformOptions)
+    {
+        Metadata metadataToEmbed = new Metadata();
+        Map<String, Serializable> properties = getMetadata(transformOptions);
+        for (String metadataKey : properties.keySet())
+        {
+            Serializable value = properties.get(metadataKey);
+            if (value == null)
+            {
+                continue;
+            }
+            if (value instanceof Collection<?>)
+            {
+                for (Object singleValue : (Collection<?>) value)
+                {
+                    try
+                    {
+                        metadataToEmbed.add(metadataKey, (String)singleValue);
+                    }
+                    catch (ClassCastException e)
+                    {
+                        logger.info("Could not convert " + metadataKey + ": " + e.getMessage());
+                    }
+                }
+            }
+            else
+            {
+                try
+                {
+                    metadataToEmbed.add(metadataKey, (String)value);
+                }
+                catch (ClassCastException e)
+                {
+                    logger.info("Could not convert " + metadataKey + ": " + e.getMessage());
+                }
+            }
+        }
+        return metadataToEmbed;
     }
 
     private Serializable getMetadataValues(Metadata metadata, String key)

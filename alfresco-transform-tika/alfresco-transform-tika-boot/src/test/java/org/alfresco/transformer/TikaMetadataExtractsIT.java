@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,13 +26,6 @@
  */
 package org.alfresco.transformer;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.util.List;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_APP_DWG;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OUTLOOK_MSG;
 import static org.alfresco.transformer.TestFileInfo.testFile;
@@ -74,21 +67,29 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORD;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_ZIP;
 
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
 /**
  * Metadata integration tests in the Tika T-Engine.
  *
  * @author adavis
+ * @author dedwards
  */
-@RunWith(Parameterized.class)
 public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
 {
-    public TikaMetadataExtractsIT(TestFileInfo testFileInfo)
+
+    @ParameterizedTest
+    @MethodSource("engineTransformations")
+    @Override
+    public void testTransformation(TestFileInfo testFileInfo)
     {
-        super(testFileInfo);
+        super.testTransformation(testFileInfo);
     }
 
-    @Parameterized.Parameters
-    public static List<TestFileInfo> engineTransformations()
+    private static Stream<TestFileInfo> engineTransformations()
     {
         // The following files are the ones tested in the content repository.
         // There are many more mimetypes supported by these extractors.
@@ -528,6 +529,6 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 // cause OutOfMemory in Tika Note - doesn't use extractFromMimetype
                 testFile(MIMETYPE_OPENXML_SPREADSHEET, "xlsx", "dmsu1332-reproduced.xlsx")
 
-        ).collect(toList());
+        );
     }
 }
