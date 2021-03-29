@@ -3,7 +3,8 @@
 # TODO PoC for FFmpeg
 # The FFmpeg transformer uses FFmpeg. See license: https://github.com/FFmpeg/FFmpeg/blob/master/LICENSE.md
 
-FROM alfresco/alfresco-base-java:11.0.10-openjdk-centos-8@sha256:343c8f63cf80c7af51785b93d6972b0c00087a1c0b995098cb8285c4d9db74b5
+FROM alfresco/alfresco-base-java:11.0.7-openjdk-centos-7-9448dd21de19
+#FROM alfresco/alfresco-base-java:11.0.10-openjdk-centos-8@sha256:343c8f63cf80c7af51785b93d6972b0c00087a1c0b995098cb8285c4d9db74b5
 
 ARG FFMPEG_VERSION=3.4.8-1
 
