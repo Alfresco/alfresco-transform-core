@@ -1,7 +1,5 @@
 {
   "transformOptions": {
-    "ffmpegOptions": [
-    ]
   },
   "transformers": [
     {
@@ -9,9 +7,6 @@
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "video/mp4",                                  "targetMediaType": "video/avi" },
         {"sourceMediaType": "video/mp4",                                  "targetMediaType": "audio/mpeg" }
-      ],
-      "transformOptions": [
-        "ffmpegOptions"
       ]
     }
   ]

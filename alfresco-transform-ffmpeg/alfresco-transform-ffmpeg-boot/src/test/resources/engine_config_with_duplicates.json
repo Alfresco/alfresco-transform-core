@@ -13,9 +13,9 @@
     {
       "transformerName": "engineX",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "video/mp4", "targetMediaType": "audio/mpeg" },
-        {"sourceMediaType": "video/mp4", "targetMediaType": "audio/mpeg" },
-        {"sourceMediaType": "video/mp4", "targetMediaType": "audio/mpeg" }
+        {"sourceMediaType": "application/pdf", "targetMediaType": "image/png" },
+        {"sourceMediaType": "application/pdf", "targetMediaType": "image/png" },
+        {"sourceMediaType": "application/pdf", "targetMediaType": "image/png" }
       ],
       "transformOptions": [
         "engineXOptions",

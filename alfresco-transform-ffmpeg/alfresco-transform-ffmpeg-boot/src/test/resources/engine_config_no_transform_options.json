@@ -3,7 +3,7 @@
     {
       "transformerName": "engineX",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "video/mp4", "targetMediaType": "audio/mpeg" }
+        {"sourceMediaType": "application/pdf", "targetMediaType": "image/png" }
       ]
     }
   ]
