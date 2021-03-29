@@ -1,0 +1,10 @@
+{
+  "transformers": [
+    {
+      "transformerName": "engineX",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "video/mp4", "targetMediaType": "audio/mpeg" }
+      ]
+    }
+  ]
+}

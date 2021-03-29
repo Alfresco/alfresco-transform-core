@@ -1,0 +1,10 @@
+{
+  "transformOptions": {},
+  "transformers": [
+    {
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "video/mp4", "targetMediaType": "audio/mpeg" }
+      ]
+    }
+  ]
+}

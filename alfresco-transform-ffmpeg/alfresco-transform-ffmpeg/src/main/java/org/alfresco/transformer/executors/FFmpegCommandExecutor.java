@@ -46,7 +46,7 @@ public class FFmpegCommandExecutor extends AbstractCommandExecutor
     private static String ID = "ffmpeg";
 
     // TODO PoC for FFmpeg
-    public static final String LICENCE = "TODO: This transformer uses Ffmpeg. See the license at ...";
+    public static final String LICENCE = "TODO: This transformer uses FFmpeg. See the license at ...";
 
     private final String EXE;
 
@@ -54,7 +54,7 @@ public class FFmpegCommandExecutor extends AbstractCommandExecutor
     {
         if (exe == null || exe.isEmpty())
         {
-            throw new IllegalArgumentException("FfmpegCommandExecutor EXE variable cannot be null or empty");
+            throw new IllegalArgumentException("FFmpegCommandExecutor EXE variable cannot be null or empty");
         }
         this.EXE = exe;
         super.transformCommand = createTransformCommand();
