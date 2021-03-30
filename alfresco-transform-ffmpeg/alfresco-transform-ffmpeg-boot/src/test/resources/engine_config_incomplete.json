@@ -1,0 +1,10 @@
+{
+  "transformOptions": {},
+  "transformers": [
+    {
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/pdf", "targetMediaType": "image/png" }
+      ]
+    }
+  ]
+}
