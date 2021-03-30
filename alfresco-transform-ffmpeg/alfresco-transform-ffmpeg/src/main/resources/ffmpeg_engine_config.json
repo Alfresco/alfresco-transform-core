@@ -1,6 +1,7 @@
 {
   "transformOptions": {
     "ffmpegOptions": [
+      {"value": {"name": "timeOffset"}}
     ]
   },
   "transformers": [
@@ -8,7 +9,9 @@
       "transformerName": "ffmpeg",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "video/mp4",                                  "targetMediaType": "video/avi" },
-        {"sourceMediaType": "video/mp4",                                  "targetMediaType": "audio/mpeg" }
+        {"sourceMediaType": "video/mp4",                                  "targetMediaType": "audio/mpeg" },
+        {"sourceMediaType": "video/mp4",                                  "targetMediaType": "image/png" },
+        {"sourceMediaType": "video/mp4",                                  "targetMediaType": "image/jpeg" }
       ],
       "transformOptions": [
         "ffmpegOptions"

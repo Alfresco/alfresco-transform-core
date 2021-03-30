@@ -72,4 +72,7 @@ public interface RequestParamMap
     String INCLUDE_CONTENTS        = "includeContents";
     String NOT_EXTRACT_BOOKMARK_TEXT = "notExtractBookmarksText";
     String PAGE_LIMIT              = "pageLimit";
+
+    // TODO PoC for FFmpeg
+    String TIME_OFFSET             = "timeOffset";
 }

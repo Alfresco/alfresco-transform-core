@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -33,7 +33,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.alfresco.transformer.util.RequestParamMap.START_PAGE;
 import static org.alfresco.transformer.util.RequestParamMap.TIMEOUT;
+import static org.alfresco.transformer.util.RequestParamMap.TIME_OFFSET;
 import static org.alfresco.transformer.util.Util.stringToLong;
 
 /**
@@ -49,6 +51,8 @@ public class FFmpegCommandExecutor extends AbstractCommandExecutor
     public static final String LICENCE = "TODO: This transformer uses FFmpeg. See the license at ...";
 
     private final String EXE;
+
+    private final int FRAMES_NUM_1 = 1;
 
     public FFmpegCommandExecutor(String exe)
     {
@@ -75,7 +79,7 @@ public class FFmpegCommandExecutor extends AbstractCommandExecutor
 
         // TODO PoC for FFmpeg - check against Gytheio: -y SPLIT:${sourceOptions} -i ${source} SPLIT:${targetOptions} ${target}
         commandsAndArguments.put(".*",
-            new String[]{EXE, "-y", "-i", "SPLIT:${options}", "${source}", "${target}"});
+              new String[]{EXE, "-y", "-i", "${source}", "SPLIT:${options}", "${target}"});
 
         runtimeExec.setCommandsAndArguments(commandsAndArguments);
 
@@ -103,9 +107,17 @@ public class FFmpegCommandExecutor extends AbstractCommandExecutor
                           Map<String, String> transformOptions,
                           File sourceFile, File targetFile) throws TransformException
     {
-        final String options = FFmpegOptionsBuilder
-                .builder()
-                .build();
+        FFmpegOptionsBuilder optionsBuilder = FFmpegOptionsBuilder.builder();
+
+        String timeOffset = transformOptions.get(TIME_OFFSET);
+        if (timeOffset != null)
+        {
+            // TODO check target mimetype (to be supported image formats) for "single frame" option
+            optionsBuilder.withTimeOffset(transformOptions.get(TIME_OFFSET));
+            optionsBuilder.withFramesNum(FRAMES_NUM_1);
+        }
+
+        final String options = optionsBuilder.build();
 
         Long timeout = stringToLong(transformOptions.get(TIMEOUT));
 

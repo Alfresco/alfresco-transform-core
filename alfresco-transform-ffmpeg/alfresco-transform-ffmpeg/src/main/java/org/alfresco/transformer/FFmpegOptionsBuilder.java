@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -36,12 +36,37 @@ import java.util.StringJoiner;
 // TODO PoC for FFmpeg
 public final class FFmpegOptionsBuilder
 {
+    private String timeOffset;
+    private Integer framesNum;
+
     // TODO PoC - add FFmpeg options ...
     private FFmpegOptionsBuilder() {}
+
+    public FFmpegOptionsBuilder withTimeOffset(final String timeOffset)
+    {
+        this.timeOffset = timeOffset;
+        return this;
+    }
+
+    public FFmpegOptionsBuilder withFramesNum(final Integer framesNum)
+    {
+        this.framesNum = framesNum;
+        return this;
+    }
 
     public String build()
     {
         StringJoiner args = new StringJoiner(" ");
+
+        if (timeOffset != null)
+        {
+            args.add("-ss "+timeOffset);
+        }
+
+        if (framesNum != null)
+        {
+            args.add("-frames:v "+framesNum);
+        }
 
         return args.toString();
     }
