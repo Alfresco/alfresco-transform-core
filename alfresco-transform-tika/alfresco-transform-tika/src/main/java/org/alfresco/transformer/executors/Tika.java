@@ -43,8 +43,6 @@ import org.apache.tika.parser.pkg.PackageParser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.apache.tika.sax.ExpandedTitleContentHandler;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
@@ -486,11 +484,6 @@ public class Tika
     private final Parser tikaOfficeDetectParser = new TikaOfficeDetectParser();
     private final PDFParserConfig pdfParserConfig = new PDFParserConfig();
 
-    @Value("${transform.core.tika.pdfbox.extractBookmarksText:true}")
-    private boolean extractBookmarksTextDefault;
-
-    private static final Logger logger = LoggerFactory.getLogger(Tika.class);
-
     public static final DocumentSelector pdfBoxEmbededDocumentSelector = new DocumentSelector()
     {
         private final List<String> disabledMediaTypes = ImmutableList.of(MIMETYPE_IMAGE_JPEG,
@@ -619,13 +612,8 @@ public class Tika
             throw new IllegalArgumentException("Missing arguments");
         }
         includeContents = includeContents == null ? false : includeContents;
-        notExtractBookmarksText = notExtractBookmarksText == null ? !extractBookmarksTextDefault : notExtractBookmarksText;
+        notExtractBookmarksText = notExtractBookmarksText == null ? false : notExtractBookmarksText;
 
-        if(!extractBookmarksTextDefault)
-        {
-            logger.trace("transform.core.tika.pdfbox.extractBookmarksText:{} notExtractBookmarksText={}",
-                    extractBookmarksTextDefault, !extractBookmarksTextDefault);
-        }
         transform(transform, includeContents, notExtractBookmarksText, sourceFilename,
             targetFilename, targetMimetype, targetEncoding);
     }

@@ -18,5 +18,5 @@ transform:
         coders: ${IMAGEMAGICK_CODERS:}
         config: ${IMAGEMAGICK_CONFIG:}
     tika:
-        PdfBox:
-          extractBookmarksText: true
+        pdfBox:
+          notExtractBookmarksTextDefault: ${TIKA_PDFBOX_NOTEXTRACTBOOKMARKSDEFAULT:false}

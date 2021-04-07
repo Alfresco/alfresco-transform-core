@@ -30,6 +30,7 @@ import org.alfresco.transformer.executors.TikaJavaExecutor;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import java.io.File;
@@ -67,7 +68,10 @@ public class TikaController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(TikaController.class);
 
-    private TikaJavaExecutor javaExecutor = new TikaJavaExecutor();
+    @Value("${transform.core.tika.pdfBox.notExtractBookmarksTextDefault:false}")
+    private boolean notExtractBookmarksTextDefault;
+
+    private TikaJavaExecutor javaExecutor;
 
     @Override
     public String getTransformerName()
@@ -102,6 +106,15 @@ public class TikaController extends AbstractTransformerController
                                  Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
         transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
-        javaExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+        getJavaExecutor().transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+    }
+
+    private TikaJavaExecutor getJavaExecutor()
+    {
+        if(javaExecutor==null)
+        {
+            javaExecutor = new TikaJavaExecutor(notExtractBookmarksTextDefault);
+        }
+        return javaExecutor;
     }
 }
