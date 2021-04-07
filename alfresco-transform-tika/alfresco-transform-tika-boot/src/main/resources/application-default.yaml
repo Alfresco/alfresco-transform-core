@@ -6,4 +6,4 @@ transform:
       location: classpath:tika_engine_config.json
     tika:
       pdfBox:
-        notExtractBookmarksTextDefault: ${TIKA_PDFBOX_NOTEXTRACTBOOKMARKSDEFAULT:false}
+        notExtractBookmarksTextDefault: ${PDFBOX_NOTEXTRACTBOOKMARKS_DEFAULT:false}

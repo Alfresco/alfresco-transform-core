@@ -19,4 +19,4 @@ transform:
         config: ${IMAGEMAGICK_CONFIG:}
     tika:
         pdfBox:
-          notExtractBookmarksTextDefault: ${TIKA_PDFBOX_NOTEXTRACTBOOKMARKSDEFAULT:false}
+          notExtractBookmarksTextDefault: ${PDFBOX_NOTEXTRACTBOOKMARKS_DEFAULT:false}

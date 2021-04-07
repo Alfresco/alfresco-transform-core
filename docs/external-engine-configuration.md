@@ -13,7 +13,7 @@ The following externalized T-engines properties are available:
 | ACTIVEMQ_USER | ActiveMQ User. | admin |
 | ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
 | FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
-| TIKA_PDFBOX_NOTEXTRACTBOOKMARKSDEFAULT | The default behaviour for notExtractBookmarksText when this request param is omitted from a request. | false |
+| PDFBOX_NOTEXTRACTBOOKMARKS_DEFAULT | The default behaviour for notExtractBookmarksText when this request param is omitted from a request. | false |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for receiving async requests. | org.alfresco.transform.engine.tika.acs |
 
 
@@ -82,7 +82,7 @@ The following externalized T-engines properties are available:
 | ACTIVEMQ_USER | ActiveMQ User. | admin |
 | ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
 | FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
-| TIKA_PDFBOX_NOTEXTRACTBOOKMARKSDEFAULT | The default behaviour for notExtractBookmarksText when this request param is omitted from a request. | false |
+| PDFBOX_NOTEXTRACTBOOKMARKS_DEFAULT | The default behaviour for notExtractBookmarksText when this request param is omitted from a request. | false |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.aio.acs |
 | PDFRENDERER_EXE | Path to Pdf-renderer EXE. | /usr/bin/alfresco-pdf-renderer |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.libreoffice.acs |
