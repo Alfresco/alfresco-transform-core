@@ -54,7 +54,7 @@ import static org.alfresco.transformer.executors.Tika.INCLUDE_CONTENTS;
 import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
 import static org.alfresco.transformer.executors.Tika.TARGET_ENCODING;
 import static org.alfresco.transformer.executors.Tika.TARGET_MIMETYPE;
-import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARK_TEXT;
+import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARKS_TEXT;
 
 /**
  * JavaExecutor implementation for running TIKA transformations. It loads the
@@ -118,9 +118,9 @@ public class TikaJavaExecutor implements JavaExecutor
         final boolean includeContents = parseBoolean(
                 transformOptions.getOrDefault(RequestParamMap.INCLUDE_CONTENTS, "false"));
         final boolean notExtractBookmarksText = parseBoolean(
-                transformOptions.getOrDefault(NOT_EXTRACT_BOOKMARK_TEXT, String.valueOf(notExtractBookmarksTextDefault)));
+                transformOptions.getOrDefault(NOT_EXTRACT_BOOKMARKS_TEXT, String.valueOf(notExtractBookmarksTextDefault)));
         final String targetEncoding = transformOptions.getOrDefault("targetEncoding", "UTF-8");
-        if(transformOptions.get(NOT_EXTRACT_BOOKMARK_TEXT)==null && notExtractBookmarksTextDefault)
+        if(transformOptions.get(NOT_EXTRACT_BOOKMARKS_TEXT)==null && notExtractBookmarksTextDefault)
         {
             LoggerFactory.getLogger(TikaJavaExecutor.class).trace(
                     "notExtractBookmarksText default value has been overridden to {}",
