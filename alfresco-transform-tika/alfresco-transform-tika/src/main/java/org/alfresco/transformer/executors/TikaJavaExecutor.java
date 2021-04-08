@@ -118,9 +118,9 @@ public class TikaJavaExecutor implements JavaExecutor
         final boolean includeContents = parseBoolean(
                 transformOptions.getOrDefault(RequestParamMap.INCLUDE_CONTENTS, "false"));
         final boolean notExtractBookmarksText = parseBoolean(
-                transformOptions.getOrDefault(NOT_EXTRACT_BOOKMARKS_TEXT, String.valueOf(notExtractBookmarksTextDefault)));
+                transformOptions.getOrDefault(RequestParamMap.NOT_EXTRACT_BOOKMARKS_TEXT, String.valueOf(notExtractBookmarksTextDefault)));
         final String targetEncoding = transformOptions.getOrDefault("targetEncoding", "UTF-8");
-        if(transformOptions.get(NOT_EXTRACT_BOOKMARKS_TEXT)==null && notExtractBookmarksTextDefault)
+        if(transformOptions.get(RequestParamMap.NOT_EXTRACT_BOOKMARKS_TEXT)==null && notExtractBookmarksTextDefault)
         {
             LoggerFactory.getLogger(TikaJavaExecutor.class).trace(
                     "notExtractBookmarksText default value has been overridden to {}",
@@ -128,7 +128,7 @@ public class TikaJavaExecutor implements JavaExecutor
         }
         call(sourceFile, targetFile, transformName,
                 includeContents ? INCLUDE_CONTENTS : null,
-                notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
+                notExtractBookmarksText ? Tika.NOT_EXTRACT_BOOKMARKS_TEXT : null,
                 TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);
     }
 
