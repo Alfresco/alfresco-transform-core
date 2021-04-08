@@ -49,7 +49,7 @@ src/main/java/org/alfresco/transformer/Application.java
 ~~~
 
 * *TransformerName*Controller.java - A [Spring Boot](https://projects.spring.io/spring-boot/) Controller that
-  extends AbstractTransformerController to handel requests. It implements a few methods including *transformImpl*
+  extends AbstractTransformerController to handle requests. It implements a few methods including *transformImpl*
   which is intended to perform the actual transform. Generally the transform is done in a sub class of
   *JavaExecutor*, when a Java library is being used or *AbstractCommandExecutor*, when an external process is used.
   Both are sub interfaces of *Transformer*.
@@ -153,7 +153,7 @@ Transform requests are handled by the *AbstractTransformerController*, but are e
  * POST requests (a direct http request from a client) where the transform options are passed as parameters, the source is supplied as a multipart file and
    the response is a file download.
  * POST request (a request via a message queue) where the transform options are supplied as JSON and the response is also JSON.
-   The source and target content is read from a location accessible to both the client and the transfomer.
+   The source and target content is read from a location accessible to both the client and the transformer.
 
 **Example JSON request body**
 ```javascript
@@ -228,6 +228,6 @@ The build plan is available in [TravisCI](https://travis-ci.com/Alfresco/alfresc
 
 ## Contributing guide
 
-Please use [this guide](https://github.com/Alfresco/alfresco-repository/blob/master/CONTRIBUTING.md)
+Please use [this guide](https://github.com/Alfresco/alfresco-community-repo/blob/master/CONTRIBUTING.md)
 to make a contribution to the project.
 

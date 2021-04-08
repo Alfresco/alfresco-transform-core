@@ -96,7 +96,7 @@ The config can be found under `alfresco-transform-core\<t-engine-name>\src\main\
   **Limitations**:
   * For a transformOptions to be referenced in a different T-engine, another transformer
   with the complete definition of the transformOptions needs to return the config to the client.
-  * In a transformOptions definition it is not allowed to use a reference to another tranformOption.
+  * In a transformOptions definition it is not allowed to use a reference to another transformOption.
   
 ### Transformers
 * **transformers** - A list of transformer definitions.
@@ -113,7 +113,7 @@ The config can be found under `alfresco-transform-core\<t-engine-name>\src\main\
   **maxSourceSizeBytes** and a **priority** value. 
 *  *maxSourceSizeBytes* is used to set the upper size limit of a transformation.
    * If not specified, the default value for maxSourceSizeBytes is **unlimited**.
-*  *priority* it is used by clients to determine which transfomer to call or by T-engines
+*  *priority* it is used by clients to determine which transformer to call or by T-engines
     with multiple transformers to determine which one to use. In the above Tika snippet,
     both *TikaAuto* and *TextMining* have the capability to transform *"application/msword"*
     into *"text/xml"*, the transformer containing the source-target media type with higher priority will be chosen by the

@@ -52,6 +52,7 @@ and Alfresco Maven repository:
 ```
 
 #### Docker
+
 The core T-Engine images are available on Docker Hub:
 * [alfresco/alfresco-imagemagick](https://hub.docker.com/r/alfresco/alfresco-imagemagick)
 * [alfresco/alfresco-pdf-renderer](https://hub.docker.com/r/alfresco/alfresco-pdf-renderer)
@@ -59,12 +60,27 @@ The core T-Engine images are available on Docker Hub:
 * [alfresco/alfresco-tika](https://hub.docker.com/r/alfresco/alfresco-tika)
 * [alfresco/alfresco-transform-misc](https://hub.docker.com/r/alfresco/alfresco-transform-misc)
 
+Unless you plan to deploy & scale each independently, the above five are also combined into a single Core AIO ("All-In-One"):
+* [alfresco/alfresco-transform-core-aio](https://hub.docker.com/r/alfresco/alfresco-transform-core-aio)
+
+For ACS Enterprise subscribers, the above T-Engine images are also available in [Quay.io](https://quay.io/alfresco).
+
+### Alfresco Content Services Deployments
+
+For containerized reference deployments (of either Alfresco Community or ACS Enterprise) see ACS Deployment project:
+
+* [Docker Compose](https://github.com/Alfresco/acs-deployment/tree/master/docs/docker-compose#readme)
+* [Helm / Kubernetes](https://github.com/Alfresco/acs-deployment/tree/master/docs/helm#readme)
+
+For non-containerized reference deployment, see Ansible Playbook project:
+
+* [Ansible Playbooks](https://github.com/Alfresco/alfresco-ansible-deployment#readme)
+
 ### Release Process
 
 For a complete walk-through check out the
 [build-and-release.MD](https://github.com/Alfresco/alfresco-transform-core/tree/master/docs/build-and-release.md)
 under the `docs` folder.
-
 
 ### Contributing guide
 
