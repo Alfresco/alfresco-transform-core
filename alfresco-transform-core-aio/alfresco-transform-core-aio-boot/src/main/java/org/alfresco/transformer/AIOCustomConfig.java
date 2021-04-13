@@ -76,6 +76,9 @@ public class AIOCustomConfig
     @Value("${transform.core.imagemagick.config}")
     private String imageMagickConfigPath;
 
+    @Value("${transform.core.tika.pdfBox.notExtractBookmarksTextDefault:false}")
+    private boolean notExtractBookmarksTextDefault;
+
     /**
      *
      * @return Override the TransformRegistryImpl used in {@link AbstractTransformerController}
@@ -86,7 +89,7 @@ public class AIOCustomConfig
     {
         AIOTransformRegistry aioTransformRegistry = new AIOTransformRegistry();
         aioTransformRegistry.registerTransformer(new SelectingTransformer());
-        aioTransformRegistry.registerTransformer(new TikaJavaExecutor());
+        aioTransformRegistry.registerTransformer(new TikaJavaExecutor(notExtractBookmarksTextDefault));
         aioTransformRegistry.registerTransformer(new ImageMagickCommandExecutor(imageMagickExePath, imageMagickDynPath, imageMagickRootPath, imageMagickCodersPath, imageMagickConfigPath));
         aioTransformRegistry.registerTransformer(new LibreOfficeJavaExecutor(libreofficePath, libreofficeMaxTasksPerProcess, libreofficeTimeout, libreofficePortNumbers, libreofficeTemplateProfileDir, libreofficeIsEnabled));
         aioTransformRegistry.registerTransformer(new PdfRendererCommandExecutor(pdfRendererPath));

@@ -61,7 +61,7 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XHTML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_ZIP;
 import static org.alfresco.transformer.util.RequestParamMap.INCLUDE_CONTENTS;
-import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARK_TEXT;
+import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARKS_TEXT;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -585,7 +585,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         mockMvc.perform(
             mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension).param(
-                NOT_EXTRACT_BOOKMARK_TEXT, "true"))
+                NOT_EXTRACT_BOOKMARKS_TEXT, "true"))
                .andExpect(status().is(OK.value()))
                .andExpect(header().string("Content-Disposition",
                    "attachment; filename*= UTF-8''quick." + targetExtension));

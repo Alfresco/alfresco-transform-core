@@ -40,6 +40,7 @@ import org.alfresco.transformer.metadataExtractors.TikaAudioMetadataExtractor;
 import org.alfresco.transformer.metadataExtractors.TikaAutoMetadataExtractor;
 import org.alfresco.transformer.util.RequestParamMap;
 import org.apache.tika.exception.TikaException;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -53,7 +54,7 @@ import static org.alfresco.transformer.executors.Tika.INCLUDE_CONTENTS;
 import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
 import static org.alfresco.transformer.executors.Tika.TARGET_ENCODING;
 import static org.alfresco.transformer.executors.Tika.TARGET_MIMETYPE;
-import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARK_TEXT;
+import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARKS_TEXT;
 
 /**
  * JavaExecutor implementation for running TIKA transformations. It loads the
@@ -61,6 +62,8 @@ import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARK
  */
 public class TikaJavaExecutor implements JavaExecutor
 {
+    private boolean notExtractBookmarksTextDefault;
+    
     private static final String ID = "tika";
 
     public static final String LICENCE = "This transformer uses Tika from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt";
@@ -83,8 +86,9 @@ public class TikaJavaExecutor implements JavaExecutor
             .put("SamplePoiMetadataEmbedder", new PoiMetadataExtractor())
             .build();
 
-    public TikaJavaExecutor()
+    public TikaJavaExecutor(boolean notExtractBookmarksTextDefault)
     {
+        this.notExtractBookmarksTextDefault = notExtractBookmarksTextDefault;
         try
         {
             tika = new Tika();
@@ -93,6 +97,11 @@ public class TikaJavaExecutor implements JavaExecutor
         {
             throw new RuntimeException("Unable to instantiate Tika:  " + e.getMessage());
         }
+    }
+
+    public TikaJavaExecutor() 
+    {
+        this(false);
     }
 
     @Override
@@ -109,12 +118,17 @@ public class TikaJavaExecutor implements JavaExecutor
         final boolean includeContents = parseBoolean(
                 transformOptions.getOrDefault(RequestParamMap.INCLUDE_CONTENTS, "false"));
         final boolean notExtractBookmarksText = parseBoolean(
-                transformOptions.getOrDefault(NOT_EXTRACT_BOOKMARK_TEXT, "false"));
+                transformOptions.getOrDefault(RequestParamMap.NOT_EXTRACT_BOOKMARKS_TEXT, String.valueOf(notExtractBookmarksTextDefault)));
         final String targetEncoding = transformOptions.getOrDefault("targetEncoding", "UTF-8");
-
+        if(transformOptions.get(RequestParamMap.NOT_EXTRACT_BOOKMARKS_TEXT)==null && notExtractBookmarksTextDefault)
+        {
+            LoggerFactory.getLogger(TikaJavaExecutor.class).trace(
+                    "notExtractBookmarksText default value has been overridden to {}",
+                    notExtractBookmarksTextDefault);
+        }
         call(sourceFile, targetFile, transformName,
                 includeContents ? INCLUDE_CONTENTS : null,
-                notExtractBookmarksText ? NOT_EXTRACT_BOOKMARKS_TEXT : null,
+                notExtractBookmarksText ? Tika.NOT_EXTRACT_BOOKMARKS_TEXT : null,
                 TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + targetEncoding);
     }
 

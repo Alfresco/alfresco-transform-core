@@ -17,3 +17,6 @@ transform:
         exe: ${IMAGEMAGICK_EXE:/usr/bin/convert}
         coders: ${IMAGEMAGICK_CODERS:}
         config: ${IMAGEMAGICK_CONFIG:}
+    tika:
+        pdfBox:
+          notExtractBookmarksTextDefault: ${PDFBOX_NOTEXTRACTBOOKMARKS_DEFAULT:false}
