@@ -529,7 +529,7 @@
     {
       "transformerName": "IPTCMetadataExtractor",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "image/jpeg",                                                            "targetMediaType": "alfresco-metadata-extract"}
+        {"sourceMediaType": "video/mp4",                                    "priority": 45,              "targetMediaType": "alfresco-metadata-extract"}
        ],
       "transformOptions": [
         "metadataOptions"
@@ -964,6 +964,7 @@
         {"sourceMediaType": "application/gff",                                                            "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "video/x-oggyuv",                                                             "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "application/x-msdownload",                                                   "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "image/jpeg",                                                                 "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "image/icns",                                                                 "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "application/x-emf",                                                          "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "application/x-geo-pdf",                                                      "targetMediaType": "alfresco-metadata-extract"},

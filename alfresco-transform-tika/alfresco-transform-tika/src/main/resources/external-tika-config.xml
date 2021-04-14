@@ -3,10 +3,14 @@
     <!-- This property, when set, will hide the start up warnings of tika for libraries are missing. -->
     <!-- See https://issues.apache.org/jira/browse/TIKA-2490 -->
     <service-loader initializableProblemHandler="ignore"/>
-    <parser class="org.apache.tika.parser.DefaultParser"></parser>
     <parsers>
+        <parser class="org.apache.tika.parser.DefaultParser">
+        </parser>
+        <parser class="org.apache.tika.parser.mp4.MP4Parser">
+          <mime-exclude>video/mp4</mime-exclude>
+        </parser>
         <parser class="org.apache.tika.parser.external.CompositeExternalParser">
-            <mime>image/jpeg</mime>
+          <mime>video/mp4</mime>
         </parser>
     </parsers>
 </properties>
