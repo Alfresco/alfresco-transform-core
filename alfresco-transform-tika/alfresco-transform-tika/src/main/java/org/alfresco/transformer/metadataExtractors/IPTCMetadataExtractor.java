@@ -25,42 +25,41 @@
  * #L%
  */
 package org.alfresco.transformer.metadataExtractors;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import java.io.IOException;
 
-import org.apache.tika.exception.TikaException;
+import static org.alfresco.transformer.executors.Tika.readTikaConfig;
+import static org.alfresco.transformer.executors.Tika.DEFAULT_CONFIG;
+
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.Parser;
-import org.apache.tika.parser.external.CompositeExternalParser;
+import org.apache.tika.parser.external.ExternalParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.alfresco.transform.exceptions.TransformException;
 
 public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
 {
 
     private static final Logger logger = LoggerFactory.getLogger(IPTCMetadataExtractor.class);
 
+    private TikaConfig tikaConfig;
+
     public IPTCMetadataExtractor() 
     {
-        super(IPTCMetadataExtractor.logger);
+        super(logger);
+        tikaConfig = readTikaConfig(logger, "external-"+ DEFAULT_CONFIG);
     }
 
     /**
      * TODO Remove notes
-     * Notes: In media management a patched version of tika is used with a parser not in the core tika
+     * Notes: In media management a patched/forked version of tika is used with a parser not in the core tika
      * product: ExiftoolImageParser
      * https://github.com/apache/tika/pull/92/files
      * 
      */
 
-
     @Override
     protected Parser getParser() {
-        try {
-            return new CompositeExternalParser();
-        } catch (IOException | TikaException e) {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), e.getMessage(), e);
-        }
+        return new AutoDetectParser(tikaConfig);
     }
 
     // TODO REMOVE NOTES
@@ -74,6 +73,7 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
      * 
      * If the correct parser is instantiated then we will be able to find the desired IPTC metadata when the
      * parse() method is called by the super class. We will then add the desired additional results via extractSpecific()
+     * 
      * Required components:
      *  ** ??tika config file?? Might be required to instantiate the external parser if using the TikaAutoMetadataExtractor
      *      ** Tika.readTikaConfig() may need to modified to provide a different config file for external parsers.
