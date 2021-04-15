@@ -29,15 +29,22 @@ package org.alfresco.transformer.metadataExtractors;
 import static java.text.MessageFormat.format;
 import static org.alfresco.transformer.executors.Tika.DEFAULT_CONFIG;
 import static org.alfresco.transformer.executors.Tika.readTikaConfig;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.alfresco.transform.exceptions.TransformException;
+import org.apache.tika.config.ServiceLoader;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
@@ -53,16 +60,11 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
 
     private static final Logger logger = LoggerFactory.getLogger(IPTCMetadataExtractor.class);
 
-    private static final String EXIFTOOL_CMD = format("env FOO=exiftool {1}", ExternalParser.OUTPUT_FILE_TOKEN, ExternalParser.INPUT_FILE_TOKEN);
-    private static final String METADATA_PATTERN = "\\s*([A-Za-z0-9/ \\(\\)]+\\S{1})\\s+:\\s+([A-Za-z0-9\\(\\)\\[\\] \\:\\-\\.]+)\\s*";
-
-
-    private TikaConfig tikaConfig;
+    private static final String EXIFTOOL_PARSER_CONFIG = "parsers/external/config/exiftool-parser.xml";
 
     public IPTCMetadataExtractor() 
     {
         super(logger);
-        tikaConfig = readTikaConfig(logger, "external-"+ DEFAULT_CONFIG);
     }
 
     /**
@@ -75,38 +77,20 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
 
     @Override
     protected Parser getParser() {
+        return createExifToolParser();
+    }
 
-        ExternalParser external;
+    private Parser createExifToolParser() {
         try {
-            external = ExternalParsersFactory.create().get(0);
+           return ExternalParsersFactory.create(getExternalParserConfigURL()).get(0);
         } catch (IOException | TikaException e) {
-            // Let try to create from scratch if ParserFactory Fails
-            external = new ExternalParser();
-            external.setCommand(EXIFTOOL_CMD);
-            external.setMetadataExtractionPatterns(getExtractionPattern());
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), "Error creating Exiftool Parser", e);
         }
-        external.setSupportedTypes(addSupportedTypes(external.getSupportedTypes()));
-        return external;
     }
 
-    private Set<MediaType> getSupportedTypes() {
-        Set<MediaType> supportedTypes = new HashSet<MediaType>();
-        supportedTypes.add(new MediaType("image","jpeg"));
-
-        return supportedTypes;
-    }
-
-    private Set<MediaType> addSupportedTypes(Set<MediaType>orig) {
-        Set<MediaType> combined = new HashSet<>();
-        combined.addAll(orig);
-        combined.addAll(getSupportedTypes());
-        return combined;
-    }
-
-    private Map<Pattern, String> getExtractionPattern() {
-        var extractionPatterns = new HashMap<Pattern,String>();
-        extractionPatterns.put(Pattern.compile(METADATA_PATTERN), "");
-        return extractionPatterns;
+    private URL getExternalParserConfigURL(){
+        ClassLoader classLoader = IPTCMetadataExtractor.class.getClassLoader();
+        return classLoader.getResource(EXIFTOOL_PARSER_CONFIG);
     }
 
     // TODO REMOVE NOTES
