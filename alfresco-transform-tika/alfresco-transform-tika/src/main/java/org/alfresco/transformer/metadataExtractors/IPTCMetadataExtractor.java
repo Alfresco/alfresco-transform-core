@@ -26,13 +26,25 @@
  */
 package org.alfresco.transformer.metadataExtractors;
 
-import static org.alfresco.transformer.executors.Tika.readTikaConfig;
+import static java.text.MessageFormat.format;
 import static org.alfresco.transformer.executors.Tika.DEFAULT_CONFIG;
+import static org.alfresco.transformer.executors.Tika.readTikaConfig;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.tika.config.TikaConfig;
-import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.external.ExternalParser;
+import org.apache.tika.parser.external.ExternalParsersFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +52,10 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
 {
 
     private static final Logger logger = LoggerFactory.getLogger(IPTCMetadataExtractor.class);
+
+    private static final String EXIFTOOL_CMD = format("env FOO=exiftool {1}", ExternalParser.OUTPUT_FILE_TOKEN, ExternalParser.INPUT_FILE_TOKEN);
+    private static final String METADATA_PATTERN = "\\s*([A-Za-z0-9/ \\(\\)]+\\S{1})\\s+:\\s+([A-Za-z0-9\\(\\)\\[\\] \\:\\-\\.]+)\\s*";
+
 
     private TikaConfig tikaConfig;
 
@@ -59,7 +75,38 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
 
     @Override
     protected Parser getParser() {
-        return new AutoDetectParser(tikaConfig);
+
+        ExternalParser external;
+        try {
+            external = ExternalParsersFactory.create().get(0);
+        } catch (IOException | TikaException e) {
+            // Let try to create from scratch if ParserFactory Fails
+            external = new ExternalParser();
+            external.setCommand(EXIFTOOL_CMD);
+            external.setMetadataExtractionPatterns(getExtractionPattern());
+        }
+        external.setSupportedTypes(addSupportedTypes(external.getSupportedTypes()));
+        return external;
+    }
+
+    private Set<MediaType> getSupportedTypes() {
+        Set<MediaType> supportedTypes = new HashSet<MediaType>();
+        supportedTypes.add(new MediaType("image","jpeg"));
+
+        return supportedTypes;
+    }
+
+    private Set<MediaType> addSupportedTypes(Set<MediaType>orig) {
+        Set<MediaType> combined = new HashSet<>();
+        combined.addAll(orig);
+        combined.addAll(getSupportedTypes());
+        return combined;
+    }
+
+    private Map<Pattern, String> getExtractionPattern() {
+        var extractionPatterns = new HashMap<Pattern,String>();
+        extractionPatterns.put(Pattern.compile(METADATA_PATTERN), "");
+        return extractionPatterns;
     }
 
     // TODO REMOVE NOTES
@@ -81,4 +128,11 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
      *  ** Create the model for IPTC properties.
      */
 
+    @Override
+    protected Map<String, Serializable> extractSpecific(Metadata metadata,
+                                                        Map<String, Serializable> properties, Map<String,String> headers)
+    {
+        
+        return properties;
+    }
 }
