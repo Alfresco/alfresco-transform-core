@@ -34,7 +34,7 @@ public class ExifToolParser extends ExternalParser {
 
     public ExifToolParser() throws IOException, TikaException {
         super();
-        var parser = ExternalParsersFactory.create(getExternalParserConfigURL()).get(0);
+        ExternalParser parser = ExternalParsersFactory.create(getExternalParserConfigURL()).get(0);
         this.setCommand(parser.getCommand());
         this.setIgnoredLineConsumer(parser.getIgnoredLineConsumer());
         this.setMetadataExtractionPatterns(parser.getMetadataExtractionPatterns());
@@ -46,25 +46,25 @@ public class ExifToolParser extends ExternalParser {
         return classLoader.getResource(EXIFTOOL_PARSER_CONFIG);
     }
 
-    public void parse(
-            InputStream stream, ContentHandler handler,
-            Metadata metadata, ParseContext context)
+    /**
+     * Executes the configured external command and passes the given document
+     *  stream as a simple XHTML document to the given SAX content handler.
+     * Metadata is only extracted if {@link #setMetadataExtractionPatterns(Map)}
+     *  has been called to set patterns.
+     */
+    public void parse(InputStream stream, ContentHandler handler, Metadata metadata, ParseContext context)
             throws IOException, SAXException, TikaException {
-        XHTMLContentHandler xhtml =
-            new XHTMLContentHandler(handler, metadata);
+        XHTMLContentHandler xhtml = new XHTMLContentHandler(handler, metadata);
 
         TemporaryResources tmp = new TemporaryResources();
         try {
-            parse(TikaInputStream.get(stream, tmp),
-                    xhtml, metadata, tmp);
+            parse(TikaInputStream.get(stream, tmp), xhtml, metadata, tmp);
         } finally {
             tmp.dispose();
         }
     }
 
-    private void parse(
-            TikaInputStream stream, XHTMLContentHandler xhtml,
-            Metadata metadata, TemporaryResources tmp)
+    private void parse(TikaInputStream stream, XHTMLContentHandler xhtml, Metadata metadata, TemporaryResources tmp)
             throws IOException, SAXException, TikaException {
         boolean inputToStdIn = true;
         boolean outputFromStdOut = true;
@@ -80,57 +80,57 @@ public class ExifToolParser extends ExternalParser {
             cmd = new String[getCommand().length];
             System.arraycopy(getCommand(), 0, cmd, 0, getCommand().length);
         }
-        for(int i=0; i<cmd.length; i++) {
-           if(cmd[i].indexOf(INPUT_FILE_TOKEN) != -1) {
-              cmd[i] = cmd[i].replace(INPUT_FILE_TOKEN, stream.getFile().getPath());
-              inputToStdIn = false;
-           }
-           if(cmd[i].indexOf(OUTPUT_FILE_TOKEN) != -1) {
-              output = tmp.createTemporaryFile();
-              outputFromStdOut = false;
-              cmd[i] = cmd[i].replace(OUTPUT_FILE_TOKEN, output.getPath());
-           }
+        for (int i = 0; i < cmd.length; i++) {
+            if (cmd[i].indexOf(INPUT_FILE_TOKEN) != -1) {
+                cmd[i] = cmd[i].replace(INPUT_FILE_TOKEN, stream.getFile().getPath());
+                inputToStdIn = false;
+            }
+            if (cmd[i].indexOf(OUTPUT_FILE_TOKEN) != -1) {
+                output = tmp.createTemporaryFile();
+                outputFromStdOut = false;
+                cmd[i] = cmd[i].replace(OUTPUT_FILE_TOKEN, output.getPath());
+            }
         }
 
         // Execute
         Process process = null;
-      try{
-        if(cmd.length == 1) {
-           process = Runtime.getRuntime().exec( cmd[0] );
-        } else {
-           process = Runtime.getRuntime().exec( cmd );
+        try {
+            if (cmd.length == 1) {
+                process = Runtime.getRuntime().exec(cmd[0]);
+            } else {
+                process = Runtime.getRuntime().exec(cmd);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-      }
-      catch(Exception e){
-    	  e.printStackTrace();
-      }
 
         try {
-            if(inputToStdIn) {
-               sendInput(process, stream);
+            if (inputToStdIn) {
+                sendInput(process, stream);
             } else {
-               process.getOutputStream().close();
+                process.getOutputStream().close();
             }
 
             InputStream out = process.getInputStream();
             InputStream err = process.getErrorStream();
-            
-            if(hasPatterns) {
-               //extractMetadata(err, metadata);
-               
-               if(outputFromStdOut) {
-                  extractOutput(out, xhtml);
-               } else {
-                  extractMetadata(out, metadata);
-               }
+
+            if (hasPatterns) {
+                // Calling extractMetadata on the error stream causes the thread to get stuck, unsure why...
+                // extractMetadata(err, metadata);
+
+                if (outputFromStdOut) {
+                    extractOutput(out, xhtml);
+                } else {
+                    extractMetadata(out, metadata);
+                }
             } else {
-               ignoreStream(err);
-               
-               if(outputFromStdOut) {
-                  extractOutput(out, xhtml);
-               } else {
-                  ignoreStream(out);
-               }
+                ignoreStream(err);
+
+                if (outputFromStdOut) {
+                    extractOutput(out, xhtml);
+                } else {
+                    ignoreStream(out);
+                }
             }
         } finally {
             try {
@@ -155,8 +155,7 @@ public class ExifToolParser extends ExternalParser {
      * @throws SAXException if the XHTML SAX events could not be handled
      * @throws IOException if an input error occurred
      */
-    private void extractOutput(InputStream stream, XHTMLContentHandler xhtml)
-            throws SAXException, IOException {
+    private void extractOutput(InputStream stream, XHTMLContentHandler xhtml) throws SAXException, IOException {
         try (Reader reader = new InputStreamReader(stream, UTF_8)) {
             xhtml.startDocument();
             xhtml.startElement("p");
@@ -190,10 +189,10 @@ public class ExifToolParser extends ExternalParser {
             }
         };
         t.start();
-        try{
-     	   t.join();
+        try {
+            t.join();
+        } catch (InterruptedException ignore) {
         }
-        catch(InterruptedException ignore){}        
     }
 
     /**
@@ -215,45 +214,44 @@ public class ExifToolParser extends ExternalParser {
             }
         };
         t.start();
-        try{
-     	   t.join();
+        try {
+            t.join();
+        } catch (InterruptedException ignore) {
         }
-        catch(InterruptedException ignore){}
     }
-    
+
     private void extractMetadata(final InputStream stream, final Metadata metadata) {
-       Thread t = new Thread() {
-          public void run() {
-             BufferedReader reader;
-              reader = new BufferedReader(new InputStreamReader(stream, UTF_8));
-             try {
-                String line;
-                while ( (line = reader.readLine()) != null ) {
-                   for(Pattern p : getMetadataExtractionPatterns().keySet()) {
-                      Matcher m = p.matcher(line);
-                      if(m.find()) {
-                    	 if (getMetadataExtractionPatterns().get(p) != null && 
-                    			 !getMetadataExtractionPatterns().get(p).equals("")){
-                                   metadata.add( getMetadataExtractionPatterns().get(p), m.group(1) );
-                    	 }
-                    	 else{
-                    		 metadata.add( m.group(1), m.group(2));
-                    	 }
-                      }
-                   }
+        Thread t = new Thread() {
+            public void run() {
+                BufferedReader reader;
+                reader = new BufferedReader(new InputStreamReader(stream, UTF_8));
+                try {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        for (Pattern p : getMetadataExtractionPatterns().keySet()) {
+                            Matcher m = p.matcher(line);
+                            if (m.find()) {
+                                if (getMetadataExtractionPatterns().get(p) != null
+                                        && !getMetadataExtractionPatterns().get(p).equals("")) {
+                                    metadata.add(getMetadataExtractionPatterns().get(p), m.group(1));
+                                } else {
+                                    metadata.add(m.group(1), m.group(2));
+                                }
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    // Ignore
+                } finally {
+                    IOUtils.closeQuietly(reader);
+                    IOUtils.closeQuietly(stream);
                 }
-             } catch (IOException e) {
-                 // Ignore
-             } finally {
-                IOUtils.closeQuietly(reader);
-                IOUtils.closeQuietly(stream);
             }
-          }
-       };
-	   t.start();
-       try{
-    	   t.join();
-       }
-       catch(InterruptedException ignore){}
+        };
+        t.start();
+        try {
+            t.join();
+        } catch (InterruptedException ignore) {
+        }
     }
 }
