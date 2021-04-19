@@ -44,10 +44,12 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transformer.tika.parsers.ExifToolParser;
 import org.apache.tika.config.ServiceLoader;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.IPTC;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.external.ExternalParser;
@@ -77,21 +79,27 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
 
     @Override
     protected Parser getParser() {
-        return createExifToolParser();
-    }
-
-    private Parser createExifToolParser() {
+        Parser parser = null;
         try {
-           return ExternalParsersFactory.create(getExternalParserConfigURL()).get(0);
+            parser = new ExifToolParser();
         } catch (IOException | TikaException e) {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), "Error creating Exiftool Parser", e);
-        }
+            throw new TransformException(500, "Error creating IPTC parser");
+        }    
+        return parser;
     }
 
-    private URL getExternalParserConfigURL(){
-        ClassLoader classLoader = IPTCMetadataExtractor.class.getClassLoader();
-        return classLoader.getResource(EXIFTOOL_PARSER_CONFIG);
-    }
+    // private Parser createExifToolParser() {
+    //     try {
+    //        return ExternalParsersFactory.create(getExternalParserConfigURL()).get(0);
+    //     } catch (IOException | TikaException e) {
+    //         throw new TransformException(INTERNAL_SERVER_ERROR.value(), "Error creating Exiftool Parser", e);
+    //     }
+    // }
+
+    // private URL getExternalParserConfigURL(){
+    //     ClassLoader classLoader = IPTCMetadataExtractor.class.getClassLoader();
+    //     return classLoader.getResource(EXIFTOOL_PARSER_CONFIG);
+    // }
 
     // TODO REMOVE NOTES
     /** Notes

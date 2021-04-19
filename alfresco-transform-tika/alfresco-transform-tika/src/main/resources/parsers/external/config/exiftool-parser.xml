@@ -5,7 +5,7 @@
        <command>exiftool -ver</command>
        <error-codes>126,127</error-codes>
      </check>
-     <command>env FOO=${OUTPUT} exiftool ${INPUT}</command>
+     <command>env FOO=${OUTPUT} exiftool -args -groupNames -charset latin ${INPUT}</command>
      <mime-types>
        <mime-type>video/avi</mime-type>
        <mime-type>video/mpeg</mime-type>
@@ -15,7 +15,10 @@
        <mime-type>image/png</mime-type>
      </mime-types>
      <metadata>
+       <!-- Default output-->
        <match>\s*([A-Za-z0-9/ \(\)]+\S{1})\s+:\s+([A-Za-z0-9\(\)\[\] \:\-\.]+)\s*</match>
+       <!-- args format-->
+       <match>^-([\S]+)\=(.*)</match>
      </metadata>
   </parser>
 </external-parsers>
