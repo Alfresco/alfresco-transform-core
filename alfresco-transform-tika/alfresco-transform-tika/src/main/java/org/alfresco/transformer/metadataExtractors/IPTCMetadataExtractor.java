@@ -47,13 +47,11 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
 
     @Override
     protected Parser getParser() {
-        Parser parser = null;
         try {
-            parser = new ExifToolParser();
+            return new ExifToolParser();
         } catch (IOException | TikaException e) {
             throw new TransformException(500, "Error creating IPTC parser");
         }    
-        return parser;
     }
 
 }
