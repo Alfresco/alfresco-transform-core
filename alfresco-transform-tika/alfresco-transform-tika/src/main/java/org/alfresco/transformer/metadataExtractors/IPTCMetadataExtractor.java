@@ -50,6 +50,7 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
         try {
             return new ExifToolParser();
         } catch (IOException | TikaException e) {
+            logger.error(e.getMessage(), e);
             throw new TransformException(500, "Error creating IPTC parser");
         }    
     }
