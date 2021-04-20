@@ -508,7 +508,7 @@ public class Tika
     }
 
     public static TikaConfig readTikaConfig(Logger logger)
-    {        
+    {
         try
         {
             return readTikaConfig();
