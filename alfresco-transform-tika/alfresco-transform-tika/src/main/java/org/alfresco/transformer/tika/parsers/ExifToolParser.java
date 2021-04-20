@@ -34,11 +34,11 @@ public class ExifToolParser extends ExternalParser {
 
     public ExifToolParser() throws IOException, TikaException {
         super();
-        ExternalParser parser = ExternalParsersFactory.create(getExternalParserConfigURL()).get(0);
-        this.setCommand(parser.getCommand());
-        this.setIgnoredLineConsumer(parser.getIgnoredLineConsumer());
-        this.setMetadataExtractionPatterns(parser.getMetadataExtractionPatterns());
-        this.setSupportedTypes(parser.getSupportedTypes());
+        ExternalParser eParser = ExternalParsersFactory.create(getExternalParserConfigURL()).get(0);
+        this.setCommand(eParser.getCommand());
+        this.setIgnoredLineConsumer(eParser.getIgnoredLineConsumer());
+        this.setMetadataExtractionPatterns(eParser.getMetadataExtractionPatterns());
+        this.setSupportedTypes(eParser.getSupportedTypes());
     }
     
     private URL getExternalParserConfigURL(){
@@ -47,6 +47,8 @@ public class ExifToolParser extends ExternalParser {
     }
 
     /**
+     * Adapted from {@link org.apache.tika.parser.external.ExternalParser} 
+     * due to errors attempting to {@link #extractMetadata} from the errorStream in original implementation.  <p>
      * Executes the configured external command and passes the given document
      *  stream as a simple XHTML document to the given SAX content handler.
      * Metadata is only extracted if {@link #setMetadataExtractionPatterns(Map)}
@@ -115,8 +117,6 @@ public class ExifToolParser extends ExternalParser {
             InputStream err = process.getErrorStream();
 
             if (hasPatterns) {
-                // Calling extractMetadata on the error stream causes the thread to get stuck, unsure why...
-                // extractMetadata(err, metadata);
 
                 if (outputFromStdOut) {
                     extractOutput(out, xhtml);
@@ -146,6 +146,7 @@ public class ExifToolParser extends ExternalParser {
     }
 
     /**
+     * Adapted from {@link org.apache.tika.parser.external.ExternalParser}<p>
      * Starts a thread that extracts the contents of the standard output
      * stream of the given process to the given XHTML content handler.
      * The standard output stream is closed once fully processed.
@@ -169,6 +170,7 @@ public class ExifToolParser extends ExternalParser {
     }
 
     /**
+     * Adapted from {@link org.apache.tika.parser.external.ExternalParser}<p>
      * Starts a thread that sends the contents of the given input stream
      * to the standard input stream of the given process. Potential
      * exceptions are ignored, and the standard input stream is closed
@@ -196,6 +198,7 @@ public class ExifToolParser extends ExternalParser {
     }
 
     /**
+     * Adapted from {@link org.apache.tika.parser.external.ExternalParser}<p>
      * Starts a thread that reads and discards the contents of the
      * standard stream of the given process. Potential exceptions
      * are ignored, and the stream is closed once fully processed.

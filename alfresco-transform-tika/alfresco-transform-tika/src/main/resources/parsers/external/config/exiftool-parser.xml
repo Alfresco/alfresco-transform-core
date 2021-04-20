@@ -5,7 +5,7 @@
        <command>exiftool -ver</command>
        <error-codes>126,127</error-codes>
      </check>
-     <command>env FOO=${OUTPUT} exiftool -args -groupNames ${INPUT}</command>
+     <command>env FOO=${OUTPUT} exiftool -args -G1 ${INPUT}</command>
      <mime-types>
        <mime-type>video/avi</mime-type>
        <mime-type>video/mpeg</mime-type>
