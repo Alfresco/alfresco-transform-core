@@ -476,8 +476,6 @@ public class Tika
     public static final String XML = "xml";
     public static final String ZIP = "zip";
 
-    public static final String DEFAULT_CONFIG = "tika-config.xml";
-
     private final Parser packageParser = new PackageParser();
     private final Parser pdfParser = new PDFParser();
     private final Parser officeParser = new OfficeParser();
@@ -505,20 +503,15 @@ public class Tika
 
     public Tika() throws TikaException, IOException, SAXException
     {
-        TikaConfig tikaConfig = readTikaConfig(DEFAULT_CONFIG);
+        TikaConfig tikaConfig = readTikaConfig();
         autoDetectParser = new AutoDetectParser(tikaConfig);
     }
 
     public static TikaConfig readTikaConfig(Logger logger)
-    {
-        return readTikaConfig(logger, DEFAULT_CONFIG);
-    }
-
-    public static TikaConfig readTikaConfig(Logger logger, String filepath)
-    {
+    {        
         try
         {
-            return readTikaConfig(filepath);
+            return readTikaConfig();
         }
         catch (Exception e)
         {
@@ -527,10 +520,10 @@ public class Tika
         }
     }
 
-    private static TikaConfig readTikaConfig(String filepath) throws TikaException, IOException, SAXException
+    private static TikaConfig readTikaConfig() throws TikaException, IOException, SAXException
     {
         ClassLoader classLoader = Tika.class.getClassLoader();
-        URL tikaConfigXml = classLoader.getResource(filepath);
+        URL tikaConfigXml = classLoader.getResource("tika-config.xml");
         return new TikaConfig(tikaConfigXml);
     }
 
