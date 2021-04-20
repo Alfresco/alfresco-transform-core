@@ -529,9 +529,8 @@
     {
       "transformerName": "IPTCMetadataExtractor",
       "supportedSourceAndTargetList": [
-        {"sourceMediaType": "video/mp4",                                    "priority": 45,              "targetMediaType": "alfresco-metadata-extract"},
-        {"sourceMediaType": "image/jpeg",                                    "priority": 45,              "targetMediaType": "alfresco-metadata-extract"},
-        {"sourceMediaType": "image/png",                                    "priority": 45,              "targetMediaType": "alfresco-metadata-extract"}
+        {"sourceMediaType": "image/jpeg",                                    "priority": 60,              "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "image/png",                                    "priority": 60,              "targetMediaType": "alfresco-metadata-extract"}
        ],
       "transformOptions": [
         "metadataOptions"
