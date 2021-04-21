@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<external-parsers>
+    <parser>
+        <check>
+            <command>exiftool -ver</command>
+            <error-codes>126,127</error-codes>
+        </check>
+        <command>env FOO=${OUTPUT} exiftool -args -G1 ${INPUT}</command>
+        <mime-types>
+            <mime-type>image/x-raw-hasselblad</mime-type>
+            <mime-type>image/x-raw-sony</mime-type>
+            <mime-type>image/x-raw-canon</mime-type>
+            <mime-type>image/x-raw-adobe</mime-type>
+            <mime-type>image/gif</mime-type>
+            <mime-type>image/jp2</mime-type>
+            <mime-type>image/jpeg</mime-type>
+            <mime-type>image/x-raw-kodak</mime-type>
+            <mime-type>image/x-raw-minolta</mime-type>
+            <mime-type>image/x-raw-nikon</mime-type>
+            <mime-type>image/x-raw-olympus</mime-type>
+            <mime-type>image/x-raw-pentax</mime-type>
+            <mime-type>image/png</mime-type>
+            <mime-type>image/x-raw-fuji</mime-type>
+            <mime-type>image/x-raw-panasonic</mime-type>
+            <mime-type>image/tiff</mime-type>
+            <mime-type>image/webp</mime-type>
+        </mime-types>
+        <metadata>
+            <!-- Default output-->
+            <match>\s*([A-Za-z0-9/ \(\)]+\S{1})\s+:\s+([A-Za-z0-9\(\)\[\] \:\-\.]+)\s*</match>
+            <!-- args format-->
+            <match>^-([\S]+)\=(.*)</match>
+        </metadata>
+    </parser>
+</external-parsers>

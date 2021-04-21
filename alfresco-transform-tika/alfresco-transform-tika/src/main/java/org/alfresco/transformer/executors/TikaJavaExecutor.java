@@ -38,6 +38,7 @@ import org.alfresco.transformer.metadataExtractors.PdfBoxMetadataExtractor;
 import org.alfresco.transformer.metadataExtractors.PoiMetadataExtractor;
 import org.alfresco.transformer.metadataExtractors.TikaAudioMetadataExtractor;
 import org.alfresco.transformer.metadataExtractors.TikaAutoMetadataExtractor;
+import org.alfresco.transformer.metadataExtractors.IPTCMetadataExtractor;
 import org.alfresco.transformer.util.RequestParamMap;
 import org.apache.tika.exception.TikaException;
 import org.slf4j.LoggerFactory;
@@ -80,6 +81,7 @@ public class TikaJavaExecutor implements JavaExecutor
             .put("PoiMetadataExtractor", new PoiMetadataExtractor())
             .put("TikaAudioMetadataExtractor", new TikaAudioMetadataExtractor())
             .put("TikaAutoMetadataExtractor", new TikaAutoMetadataExtractor())
+            .put("IPTCMetadataExtractor", new IPTCMetadataExtractor())
             .build();
     private final Map<String, AbstractTikaMetadataExtractor> metadataEmbedder = ImmutableMap
             .<String, AbstractTikaMetadataExtractor>builder()

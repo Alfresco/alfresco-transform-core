@@ -527,6 +527,16 @@
       ]
     },
     {
+      "transformerName": "IPTCMetadataExtractor",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "image/jpeg",                                    "priority": 60,              "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "image/png",                                    "priority": 60,              "targetMediaType": "alfresco-metadata-extract"}
+       ],
+      "transformOptions": [
+        "metadataOptions"
+      ]
+    },
+    {
       "transformerName": "MailMetadataExtractor",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "application/vnd.ms-outlook",                                                 "targetMediaType": "alfresco-metadata-extract"}
