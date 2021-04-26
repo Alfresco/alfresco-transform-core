@@ -27,10 +27,13 @@
 package org.alfresco.transformer.metadataExtractors;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Map;
 
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.tika.parsers.ExifToolParser;
 import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +54,20 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
             return new ExifToolParser();
         } catch (IOException | TikaException e) {
             logger.error(e.getMessage(), e);
-            throw new TransformException(500, "Error creating IPTC parser");
+            throw new TransformException(500, "Error creating IPTC parser: " + e.getMessage());
         }    
     }
 
+    /**
+     * Because some of the mimetypes that IPTCMetadataExtractor now parse, were previously handled 
+     * by TikaAutoMetadataExtractor we call the TikaAutoMetadataExtractor.extractSpecific method to 
+     * ensure that the returned properties contains the expected entries.
+     */
+    @Override
+    protected Map<String, Serializable> extractSpecific(Metadata metadata, Map<String, Serializable> properties,
+            Map<String, String> headers) {
+
+        properties = new TikaAutoMetadataExtractor().extractSpecific(metadata, properties, headers);
+        return properties;
+    }
 }

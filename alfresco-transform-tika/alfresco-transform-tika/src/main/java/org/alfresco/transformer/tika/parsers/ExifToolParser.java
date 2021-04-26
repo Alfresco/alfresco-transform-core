@@ -26,6 +26,10 @@
  */
 package org.alfresco.transformer.tika.parsers;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_TIFF;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,24 +39,27 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.net.URL;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.tika.metadata.Metadata;
 
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.io.IOUtils;
 import org.apache.tika.io.NullOutputStream;
 import org.apache.tika.io.TemporaryResources;
 import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.external.ExternalParser;
 import org.apache.tika.parser.external.ExternalParsersFactory;
+import org.apache.tika.parser.image.ImageParser;
+import org.apache.tika.parser.image.TiffParser;
+import org.apache.tika.parser.jpeg.JpegParser;
 import org.apache.tika.sax.XHTMLContentHandler;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class ExifToolParser extends ExternalParser {
     
@@ -84,11 +91,30 @@ public class ExifToolParser extends ExternalParser {
             throws IOException, SAXException, TikaException {
         XHTMLContentHandler xhtml = new XHTMLContentHandler(handler, metadata);
 
+        MediaType mediaType = MediaType.parse(metadata.get(Metadata.CONTENT_TYPE));
         TemporaryResources tmp = new TemporaryResources();
         try {
-            parse(TikaInputStream.get(stream, tmp), xhtml, metadata, tmp);
+            TikaInputStream tis = TikaInputStream.get(stream, tmp);
+            parse(tis, xhtml, metadata, tmp);
+            switch (mediaType.getType()+"/"+mediaType.getSubtype()) {
+                case MIMETYPE_IMAGE_JPEG: 
+                    parseAdditional(new JpegParser(), tis, handler, metadata, context, mediaType);
+                    break;
+                case MIMETYPE_IMAGE_TIFF:
+                    parseAdditional(new TiffParser(), tis, handler, metadata, context, mediaType);
+                    break;
+                default:
+                    parseAdditional(new ImageParser(), tis, handler, metadata, context, mediaType);
+            }
         } finally {
             tmp.dispose();
+        }
+    }
+
+    private void parseAdditional(Parser parser, TikaInputStream tis, ContentHandler handler, Metadata metadata, ParseContext context,
+            MediaType mediaType) throws IOException, SAXException, TikaException {
+        if (parser.getSupportedTypes(context).contains(mediaType)) {
+                parser.parse(tis, handler, metadata, context);
         }
     }
 
