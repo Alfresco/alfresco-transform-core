@@ -69,7 +69,7 @@ public class Application
     {
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
         Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
-        logger.info(TikaJavaExecutor.LICENCE);
+        Arrays.stream(TikaJavaExecutor.LICENCE.split("\\n")).forEach(logger::info);
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
         logger.info("Starting application components... Done");
