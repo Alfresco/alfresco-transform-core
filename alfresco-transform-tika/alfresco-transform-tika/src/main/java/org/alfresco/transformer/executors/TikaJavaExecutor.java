@@ -67,7 +67,7 @@ public class TikaJavaExecutor implements JavaExecutor
 
     public static final String LICENCE = 
         "This transformer uses Tika from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt\n" +
-        "This transformer uses ExifTool by Phil Harvey. See license at https://exiftool.org/#license. or in /Perl GNU License.txt & /Perl Artistic License.txt";
+        "This transformer uses ExifTool by Phil Harvey. See license at https://exiftool.org/#license. or in /Perl-Artistic-License.txt";
 
     private final Tika tika;
     private final Map<String, AbstractTikaMetadataExtractor> metadataExtractor = ImmutableMap
