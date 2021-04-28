@@ -4,7 +4,10 @@
 
 FROM alfresco/alfresco-base-java:11.0.10-openjdk-centos-8@sha256:80b36118c9efd70b09d31aa4aff521e16cd191aa3fed0230e93f60edb75af84a
 
-ENV APACHE_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/Apache%202.0.txt
+ARG EXIFTOOL_VERSION=12.25
+ARG EXIFTOOL_FOLDER=Image-ExifTool-${EXIFTOOL_VERSION}
+ARG EXIFTOOL_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/exiftool/image-exiftool/${EXIFTOOL_VERSION}/image-exiftool-${EXIFTOOL_VERSION}.tgz
+
 ENV JAVA_OPTS=""
 
 # Set default user information
@@ -16,12 +19,20 @@ ARG USERID=33004
 COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 
 RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
-    curl -s -S $APACHE_LICENSE_FILE -o Apache\ 2.0.txt && \
+    curl -s -S $EXIFTOOL_URL -o ${EXIFTOOL_FOLDER}.tgz && \
+    tar xzf ${EXIFTOOL_FOLDER}.tgz && \
+    yum -y install perl && \
+    (cd ./${EXIFTOOL_FOLDER} && \
+    perl Makefile.PL && \
+    make && \
+    make test && \
+    make install) && \
     yum clean all
 
 ADD target/generated-resources/licenses              /licenses
 ADD target/generated-resources/licenses.xml          /licenses/
 ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
+COPY src/main/resources/licenses/3rd-party/ /
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
     useradd -u ${USERID} -G ${GROUPNAME} ${TIKAUSERNAME} && \

@@ -52,10 +52,8 @@ import java.util.StringJoiner;
 
 import static java.lang.Boolean.parseBoolean;
 import static org.alfresco.transformer.executors.Tika.INCLUDE_CONTENTS;
-import static org.alfresco.transformer.executors.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
 import static org.alfresco.transformer.executors.Tika.TARGET_ENCODING;
 import static org.alfresco.transformer.executors.Tika.TARGET_MIMETYPE;
-import static org.alfresco.transformer.util.RequestParamMap.NOT_EXTRACT_BOOKMARKS_TEXT;
 
 /**
  * JavaExecutor implementation for running TIKA transformations. It loads the
@@ -67,7 +65,9 @@ public class TikaJavaExecutor implements JavaExecutor
     
     private static final String ID = "tika";
 
-    public static final String LICENCE = "This transformer uses Tika from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt";
+    public static final String LICENCE = 
+        "This transformer uses Tika from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt\n" +
+        "This transformer uses ExifTool by Phil Harvey. See license at https://exiftool.org/#license. or in /Perl-Artistic-License.txt";
 
     private final Tika tika;
     private final Map<String, AbstractTikaMetadataExtractor> metadataExtractor = ImmutableMap

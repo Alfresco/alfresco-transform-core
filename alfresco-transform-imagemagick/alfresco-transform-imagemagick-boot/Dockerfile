@@ -9,7 +9,6 @@ ARG IMAGEMAGICK_VERSION=7.0.10-59
 ENV IMAGEMAGICK_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}/imagemagick-distribution-${IMAGEMAGICK_VERSION}-linux.rpm
 ENV IMAGEMAGICK_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}/imagemagick-distribution-${IMAGEMAGICK_VERSION}-libs-linux.rpm
 ENV IMAGEMAGICK_DEP_RPM_URL=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-ENV IMAGEMAGICK_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/ImageMagick-license.txt
 ENV JAVA_OPTS=""
 
 # Set default user information
@@ -23,7 +22,6 @@ COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     curl -s -S $IMAGEMAGICK_RPM_URL      -o imagemagick-distribution-linux.rpm && \
     curl -s -S $IMAGEMAGICK_LIB_RPM_URL  -o imagemagick-distribution-libs-linux.rpm && \
-    curl -s -S $IMAGEMAGICK_LICENSE_FILE -o ImageMagick-license.txt && \
     curl -s -S $IMAGEMAGICK_DEP_RPM_URL  -o imagemagick-epel-dep.rpm && \
     yum localinstall -y imagemagick-epel-dep.rpm && \
     yum localinstall -y imagemagick-distribution-*linux.rpm && \
@@ -33,6 +31,7 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
 ADD target/generated-resources/licenses              /licenses
 ADD target/generated-resources/licenses.xml          /licenses/
 ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
+COPY src/main/resources/licenses/3rd-party/ /
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
     useradd -u ${USERID} -G ${GROUPNAME} ${IMAGEUSERNAME} && \
