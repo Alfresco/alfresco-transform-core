@@ -67,8 +67,8 @@ jobs:
     - name: "All in One Transfomer"
       if: branch NOT IN (company_release)
       before_script: travis_wait bash _ci/cache_artifacts.sh
-      install: travis_wait 30 _ci/build.sh full-build
-      script: bash _ci/test.sh aio-test
+      install: _ci/build.sh full-build
+      script:  travis_wait 30 bash _ci/test.sh aio-test
     # - name: "WhiteSource"
     #   if: branch NOT IN (company_release)
     #   script: bash _ci/whitesource.sh
