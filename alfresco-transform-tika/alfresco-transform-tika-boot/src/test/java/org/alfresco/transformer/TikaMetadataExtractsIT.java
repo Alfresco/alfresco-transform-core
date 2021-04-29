@@ -29,43 +29,7 @@ package org.alfresco.transformer;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_APP_DWG;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OUTLOOK_MSG;
 import static org.alfresco.transformer.TestFileInfo.testFile;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_AUDIO_MP4;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_EXCEL;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_BMP;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_GIF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_PNG;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_TIFF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IWORK_KEYNOTE;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IWORK_NUMBERS;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IWORK_PAGES;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_MP3;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_FORMULA;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_GRAPHICS;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_GRAPHICS_TEMPLATE;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_PRESENTATION;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_PRESENTATION_TEMPLATE;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_SPREADSHEET;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_SPREADSHEET_TEMPLATE;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_TEXT;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_TEXT_TEMPLATE;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENOFFICE1_WRITER;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_WORDPROCESSING;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_PDF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_PPT;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VIDEO_3GP;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VIDEO_3GP2;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VIDEO_FLV;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VIDEO_MP4;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VIDEO_QUICKTIME;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VISIO;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VORBIS;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORD;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_ZIP;
+import static org.alfresco.transformer.util.MimetypeMap.*;
 
 import java.util.stream.Stream;
 
@@ -98,6 +62,27 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
         // either no quick file or the target extension has not been registered.
 
         return Stream.of(
+                //IPTCMetadataExtractor
+                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quickIPTC-EXT.jpg"),
+                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quickIPTC-multi-creator.jpg"),
+                testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"),
+                testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"),
+                testFile(MIMETYPE_IMAGE_TIFF, "tiff", "quick.tiff"),
+                testFile(MIMETYPE_IMAGE_RAW_DNG, "dng", "quick.dng"),
+                testFile(MIMETYPE_IMAGE_RAW_CR2, "cr2", "quick.cr2"),
+                testFile(MIMETYPE_IMAGE_RAW_RAF, "raf", "quick.raf"),
+                testFile(MIMETYPE_IMAGE_RAW_NEF, "nef", "quick.nef"),
+                testFile(MIMETYPE_IMAGE_RAW_ORF, "orf", "quick.orf"),
+                testFile(MIMETYPE_IMAGE_RAW_RW2, "rw2", "quick.rw2"),
+                testFile(MIMETYPE_IMAGE_RAW_PEF, "pef", "quick.pef"),
+                testFile(MIMETYPE_IMAGE_JP2, "jp2", "quick.jp2"),
+                testFile(MIMETYPE_IMAGE_RAW_webp, "webp", "quick.webp"), // exif Error: Writing of WEBP files is not yet supported
+                testFile(MIMETYPE_IMAGE_RAW_3FR, "3fr", "quick.3fr"), // exif Error: Writing of 3FR files is not yet supported
+
+                // testFile("image/x-raw-kodak", "", ""),
+                // testFile("image/x-raw-minolta", "", ""),
+                // testFile("image/x-raw-sony", "", ""),                
+
                 // DWGMetadataExtractor
                 testFile(MIMETYPE_APP_DWG, "dwg", "quick2010CustomProps.dwg"),
 
@@ -260,7 +245,6 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile(MIMETYPE_IMAGE_PSD, "psd", ""),
                 //testFile("application/x-sharedlib", "", ""),
                 //testFile("audio/x-m4a", "", ""),
-                //testFile("image/webp", "", ""),
                 //testFile("application/vnd.wap.xhtml+xml", "", ""),
                 //testFile("audio/x-aiff", "aiff", ""),
                 //testFile("application/vnd.ms-spreadsheetml", "", ""),
@@ -282,7 +266,6 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("application/x-coredump", "", ""),
                 //testFile("application/x-msaccess", "", ""),
                 //testFile("application/x-dods", "", ""),
-                testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"),
                 //testFile("application/vnd.ms-outlook-pst", "", ""),
                 //testFile("image/bsb", "", ""),
                 //testFile("application/x-cpio", "cpio", ""),
@@ -320,7 +303,6 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("application/x-wcs", "", ""),
                 //testFile("text/x-c++src", "", ""),
                 //testFile("application/timestamped-data", "", ""),
-                testFile(MIMETYPE_IMAGE_TIFF, "tiff", "quick.tiff"),
                 //testFile("application/msexcel", "", ""),
                 //testFile("application/x-asp", "", ""),
                 //testFile("application/x-rar-compressed", "rar", ""),
@@ -399,7 +381,6 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("audio/ogg; codecs=opus", "", ""),
                 //testFile("application/fits", "", ""),
                 //testFile("application/x-r", "", ""),
-                testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"),
                 //testFile("application/java-vm", "", ""),
                 //testFile("application/mspowerpoint", "", ""),
                 //testFile("application/x-http", "", ""),
@@ -476,7 +457,6 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("application/pcisdk", "", ""),
                 //testFile("application/x-rik", "", ""),
                 //testFile("audio/opus", "", ""),
-                //testFile(MIMETYPE_IMAGE_JP2, "jp2", ""),
                 //testFile("application/x-gtx", "", ""),
                 //testFile("application/x-object", "", ""),
                 //testFile("application/vnd.ms-wordml", "", ""),
@@ -495,7 +475,6 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("application/gff", "", ""),
                 //testFile("video/x-oggyuv", "", ""),
                 //testFile("application/x-msdownload", "", ""),
-                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quick.jpg"),
                 //testFile("image/icns", "", ""),
                 //testFile("application/x-emf", "", ""),
                 //testFile("application/x-geo-pdf", "", ""),

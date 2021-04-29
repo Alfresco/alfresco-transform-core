@@ -105,6 +105,7 @@ public interface MimetypeMap
     String MIMETYPE_IMAGE_RAW_RW2 = "image/x-raw-panasonic";
     String MIMETYPE_IMAGE_RAW_RWL = "image/x-raw-leica";
     String MIMETYPE_IMAGE_RAW_R3D = "image/x-raw-red";
+    String MIMETYPE_IMAGE_RAW_webp = "image/webp";
     String MIMETYPE_IMAGE_DWT = "image/x-dwt";
     String MIMETYPE_IMAGE_XBM = "image/x-xbitmap";
     String MIMETYPE_IMAGE_XPM = "image/x-xpixmap";

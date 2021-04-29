@@ -1,0 +1,10 @@
+{
+  "{http://iptc.org/std/Iptc4xmpExt/2008-02-29/}LocationShownCity" : "Maidenhead",
+  "{http://iptc.org/std/Iptc4xmpExt/2008-02-29/}LocationShownSublocation" : "The Gym",
+  "{http://purl.org/dc/elements/1.1/}description" : "Gym class featuring a brown fox and lazy dog",
+  "{http://purl.org/dc/elements/1.1/}title" : "The quick brown fox jumps over the lazy dog",
+  "{http://purl.org/dc/elements/1.1/}subject" : "fox -dog -lazy -jumping",
+  "{http://www.alfresco.org/model/content/1.0}author" : null,
+  "{http://iptc.org/std/Iptc4xmpExt/2008-02-29/}LocationShownCountryName" : "United Kingdom",
+  "{http://www.alfresco.org/model/content/1.0}title" : null
+}
