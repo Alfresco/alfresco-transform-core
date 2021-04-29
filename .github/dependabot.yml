@@ -1,0 +1,105 @@
+version: 2
+registries:
+  docker-registry-quay-io:
+    type: docker-registry
+    url: https://quay.io
+    username: alfresco+bamboo
+    password: "${{secrets.DOCKER_REGISTRY_QUAY_IO_PASSWORD}}"
+  maven-repository-artifacts-alfresco-com-nexus-content-groups-int:
+    type: maven-repository
+    url: https://artifacts.alfresco.com/nexus/content/groups/internal
+    username: bamboo
+    password: "${{secrets.MAVEN_REPOSITORY_ARTIFACTS_ALFRESCO_COM_NEXUS_CONTENT_GROUPS_INT_PASSWORD}}"
+
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "22:00"
+    timezone: Africa/Abidjan
+  open-pull-requests-limit: 99
+  ignore:
+  - dependency-name: io.fabric8:fabric8-maven-plugin
+    versions:
+    - "> 4.4.0, < 4.5"
+  - dependency-name: com.fasterxml.jackson.module:jackson-module-parameter-names
+    versions:
+    - 2.12.2
+  - dependency-name: com.fasterxml.jackson.datatype:jackson-datatype-jsr310
+    versions:
+    - 2.12.2
+  - dependency-name: com.fasterxml.jackson.datatype:jackson-datatype-jdk8
+    versions:
+    - 2.12.2
+  - dependency-name: com.fasterxml.jackson.core:jackson-core
+    versions:
+    - 2.12.2
+  - dependency-name: com.fasterxml.jackson.core:jackson-annotations
+    versions:
+    - 2.12.2
+  - dependency-name: org.apache.poi:poi-scratchpad
+    versions:
+    - 5.0.0
+  - dependency-name: org.apache.poi:poi
+    versions:
+    - 5.0.0
+  - dependency-name: org.apache.poi:poi-ooxml
+    versions:
+    - 5.0.0
+  registries:
+  - maven-repository-artifacts-alfresco-com-nexus-content-groups-int
+- package-ecosystem: docker
+  directory: "/alfresco-transform-core-aio/alfresco-transform-core-aio-boot"
+  schedule:
+    interval: daily
+    time: "22:00"
+    timezone: Africa/Abidjan
+  open-pull-requests-limit: 99
+  registries:
+  - docker-registry-quay-io
+- package-ecosystem: docker
+  directory: "/alfresco-transform-libreoffice/alfresco-transform-libreoffice-boot"
+  schedule:
+    interval: daily
+    time: "22:00"
+    timezone: Africa/Abidjan
+  open-pull-requests-limit: 99
+  registries:
+  - docker-registry-quay-io
+- package-ecosystem: docker
+  directory: "/alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot"
+  schedule:
+    interval: daily
+    time: "22:00"
+    timezone: Africa/Abidjan
+  open-pull-requests-limit: 99
+  registries:
+  - docker-registry-quay-io
+- package-ecosystem: docker
+  directory: "/alfresco-transform-misc/alfresco-transform-misc-boot"
+  schedule:
+    interval: daily
+    time: "22:00"
+    timezone: Africa/Abidjan
+  open-pull-requests-limit: 99
+  registries:
+  - docker-registry-quay-io
+- package-ecosystem: docker
+  directory: "/alfresco-transform-tika/alfresco-transform-tika-boot"
+  schedule:
+    interval: daily
+    time: "22:00"
+    timezone: Africa/Abidjan
+  open-pull-requests-limit: 99
+  registries:
+  - docker-registry-quay-io
+- package-ecosystem: docker
+  directory: "/alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer-boot"
+  schedule:
+    interval: daily
+    time: "22:00"
+    timezone: Africa/Abidjan
+  open-pull-requests-limit: 99
+  registries:
+  - docker-registry-quay-io
