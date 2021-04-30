@@ -27,15 +27,19 @@
 package org.alfresco.transformer.tika.parsers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 public class ExifToolParserTest {
 
-    ExifToolParser exifToolParser = new ExifToolParser();
 
     @Test
     public void testFindSeparator() {
+        ExifToolParser exifToolParser = new ExifToolParser();
         String testCommand = "env FOO=${OUTPUT} exiftool -args -G1 " + ExifToolParser.SEPARATOR_SETTING
                 + " \"|||\" ${INPUT}";
         String expected = "|||";
