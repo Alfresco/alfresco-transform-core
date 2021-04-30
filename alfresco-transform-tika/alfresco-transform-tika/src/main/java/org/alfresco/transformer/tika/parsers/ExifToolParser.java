@@ -39,6 +39,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -82,8 +83,8 @@ public class ExifToolParser extends ExternalParser {
             this.setIgnoredLineConsumer(eParser.getIgnoredLineConsumer());
             this.setMetadataExtractionPatterns(eParser.getMetadataExtractionPatterns());
             this.setSupportedTypes(eParser.getSupportedTypes());
-        } catch (IOException | TikaException e) {
-            logger.error("Error creating ExifToolParser from config, ExifToolExtractions not enabled: " +e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error("Error creating ExifToolParser from config, ExifToolExtractions not enabled: ", e);
         }  
     }
     
