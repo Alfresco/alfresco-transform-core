@@ -9,7 +9,7 @@
   "{http://purl.org/dc/elements/1.1/}description" : "Gym class featuring a brown fox and lazy dog",
   "{http://purl.org/dc/elements/1.1/}creator" : "Nevin Nollop",
   "{http://www.alfresco.org/model/exif/1.0}orientation" : "1",
-  "{http://purl.org/dc/elements/1.1/}subject" : "Pangram, fox, dog",
+  "{http://purl.org/dc/elements/1.1/}subject" : [ "Pangram", "fox", "dog" ],
   "{http://www.alfresco.org/model/exif/1.0}resolutionUnit" : "Inch",
   "{http://www.alfresco.org/model/exif/1.0}yResolution" : "50.0",
   "{http://www.alfresco.org/model/exif/1.0}xResolution" : "50.0"
