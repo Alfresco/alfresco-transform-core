@@ -50,7 +50,8 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
     }
 
     @Override
-    protected Parser getParser() {
+    protected Parser getParser() 
+    {
         this.parser = new ExifToolParser();
         return this.parser;  
     }
@@ -62,8 +63,8 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
      */
     @Override
     protected Map<String, Serializable> extractSpecific(Metadata metadata, Map<String, Serializable> properties,
-            Map<String, String> headers) {
-
+            Map<String, String> headers) 
+    {
         properties = new TikaAutoMetadataExtractor().extractSpecific(metadata, properties, headers);
         if (parser.getSeparator()!=null)
         {
@@ -75,7 +76,8 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
                     String separator = parser.getSeparator();
                     if (value.contains(separator))
                     {
-                        if (value.contains(String.format("\"%s\"",separator))){
+                        if (value.contains(String.format("\"%s\"",separator)))
+                        {
                             separator = String.format("\"%s\"",separator);
                         }
                         String [] values = StringUtils.splitByWholeSeparator(value, separator);
