@@ -982,7 +982,7 @@
         {"sourceMediaType": "application/x-msdownload",                                                   "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "image/jpeg",                                                                 "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "image/icns",                                                                 "targetMediaType": "alfresco-metadata-extract"},
-        {"sourceMediaType": "application/x-emf",                           q                               "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "application/x-emf",                                                          "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "application/x-geo-pdf",                                                      "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "video/x-ogg-uvs",                                                            "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "video/x-flv",                                                                "targetMediaType": "alfresco-metadata-extract"},
