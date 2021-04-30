@@ -65,18 +65,24 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
             Map<String, String> headers) {
 
         properties = new TikaAutoMetadataExtractor().extractSpecific(metadata, properties, headers);
-        for (String key : properties.keySet())
+        if (parser.getSeparator()!=null)
         {
-            if (properties.get(key) instanceof String)
+            for (String key : properties.keySet())
             {
-                String value = (String) properties.get(key);
-                if (value.contains(parser.getSeparator()))
+                if (properties.get(key) instanceof String)
                 {
-                    String [] values = StringUtils.splitByWholeSeparator(value, parser.getSeparator());
-                    putRawValue(key, (Serializable) Arrays.asList(values), properties);
+                    String value = (String) properties.get(key);
+                    String separator = parser.getSeparator();
+                    if (value.contains(separator))
+                    {
+                        if (value.contains(String.format("\"%s\"",separator))){
+                            separator = String.format("\"%s\"",separator);
+                        }
+                        String [] values = StringUtils.splitByWholeSeparator(value, separator);
+                        putRawValue(key, (Serializable) Arrays.asList(values), properties);
+                    }
                 }
             }
-
         }
         return properties;
     }

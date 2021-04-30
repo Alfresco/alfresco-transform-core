@@ -78,16 +78,23 @@ public class ExifToolParser extends ExternalParser {
     public ExifToolParser() {
         super();
         try {
-            ExternalParser eParser = ExternalParsersFactory.create(getExternalParserConfigURL()).get(0);
-            this.setCommand(eParser.getCommand());
-            this.setIgnoredLineConsumer(eParser.getIgnoredLineConsumer());
-            this.setMetadataExtractionPatterns(eParser.getMetadataExtractionPatterns());
-            this.setSupportedTypes(eParser.getSupportedTypes());
-        } catch (Exception e) {
+            List<ExternalParser> eParsers = ExternalParsersFactory.create(getExternalParserConfigURL());
+            // if ExifTool is not installed then no parsers are returned
+            if (eParsers.size() > 0) {
+                ExternalParser eParser = eParsers.get(0);
+                this.setCommand(eParser.getCommand());
+                this.setIgnoredLineConsumer(eParser.getIgnoredLineConsumer());
+                this.setMetadataExtractionPatterns(eParser.getMetadataExtractionPatterns());
+                this.setSupportedTypes(eParser.getSupportedTypes());
+            } else {
+                logger.error(
+                        "Error creating ExifToolParser from config, ExifToolExtractions not enabled. Please check ExifTool is installed correctly.");
+            }
+        } catch (IOException | TikaException e) {
             logger.error("Error creating ExifToolParser from config, ExifToolExtractions not enabled: ", e);
-        }  
+        }
     }
-    
+
     private URL getExternalParserConfigURL(){
         ClassLoader classLoader = ExifToolParser.class.getClassLoader();
         return classLoader.getResource(EXIFTOOL_PARSER_CONFIG);
