@@ -5,7 +5,7 @@
             <command>exiftool -ver</command>
             <error-codes>126,127</error-codes>
         </check>
-        <command>env FOO=${OUTPUT} exiftool -args -G1 ${INPUT}</command>
+        <command>env FOO=${OUTPUT} exiftool -args -G1 -sep "|||" ${INPUT}</command>
         <mime-types>
             <mime-type>image/x-raw-hasselblad</mime-type>
             <mime-type>image/x-raw-sony</mime-type>

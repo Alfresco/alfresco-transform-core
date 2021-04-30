@@ -26,13 +26,12 @@
  */
 package org.alfresco.transformer.metadataExtractors;
 
-import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Map;
 
-import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.tika.parsers.ExifToolParser;
-import org.apache.tika.exception.TikaException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.Parser;
 import org.slf4j.Logger;
@@ -42,6 +41,8 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
 {
 
     private static final Logger logger = LoggerFactory.getLogger(IPTCMetadataExtractor.class);
+    
+    private ExifToolParser parser;
 
     public IPTCMetadataExtractor() 
     {
@@ -50,12 +51,8 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
 
     @Override
     protected Parser getParser() {
-        try {
-            return new ExifToolParser();
-        } catch (IOException | TikaException e) {
-            logger.error(e.getMessage(), e);
-            throw new TransformException(500, "Error creating IPTC parser: " + e.getMessage());
-        }    
+        this.parser = new ExifToolParser();
+        return this.parser;  
     }
 
     /**
@@ -68,6 +65,19 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
             Map<String, String> headers) {
 
         properties = new TikaAutoMetadataExtractor().extractSpecific(metadata, properties, headers);
+        for (String key : properties.keySet())
+        {
+            if (properties.get(key) instanceof String)
+            {
+                String value = (String) properties.get(key);
+                if (value.contains(parser.getSeparator()))
+                {
+                    String [] values = StringUtils.splitByWholeSeparator(value, parser.getSeparator());
+                    putRawValue(key, (Serializable) Arrays.asList(values), properties);
+                }
+            }
+
+        }
         return properties;
     }
 }
