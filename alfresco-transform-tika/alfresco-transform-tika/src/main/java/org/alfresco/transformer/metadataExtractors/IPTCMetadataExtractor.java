@@ -124,7 +124,8 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
      * @param dateStr
      * @return dateStr in Iso8601 format
      */
-    protected String iptcToIso8601DateString(String dateStr) {
+    protected String iptcToIso8601DateString(String dateStr) 
+    {
         return dateStr.replaceAll(":", "-");
     }
 
