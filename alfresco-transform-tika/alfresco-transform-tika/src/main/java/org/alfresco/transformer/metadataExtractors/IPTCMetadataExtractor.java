@@ -27,8 +27,12 @@
 package org.alfresco.transformer.metadataExtractors;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.alfresco.transformer.tika.parsers.ExifToolParser;
 import org.apache.commons.lang3.StringUtils;
@@ -37,11 +41,15 @@ import org.apache.tika.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jdk.internal.jshell.tool.resources.l10n;
+
 public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
 {
 
     private static final Logger logger = LoggerFactory.getLogger(IPTCMetadataExtractor.class);
     
+    private static Set<String> IPTC_DATE_KEYS = Set.of("XMP-photoshop:DateCreated", "XMP-iptcExt:ArtworkDateCreated");
+
     private ExifToolParser parser;
 
     public IPTCMetadataExtractor() 
@@ -85,28 +93,32 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
                         }
                         String [] values = StringUtils.splitByWholeSeparator(value, separator);
                         // Change dateTime format. MM converted ':' to '-'
-                        if (isIPTCDate(key)){
+                        if (IPTC_DATE_KEYS.contains(key)){
                             values =  iptcToIso8601DateStrings(values);
                         }
                         putRawValue(key, (Serializable) Arrays.asList(values), properties);
                     }
+                    else if (IPTC_DATE_KEYS.contains(key)) {
+                        // Handle key with single date string
+                        putRawValue(key, (Serializable) iptcToIso8601DateString(value), properties);
+                    }
                 }
             }
         }
-
         return properties;
-    }
-
-    public boolean isIPTCDate(String key) {
-        return key.contains("Date");
     }
 
     protected String[] iptcToIso8601DateStrings(String[] values)
     {
         for (int i = 0; i < values.length; i++)
         {
-            values[i] = values[i].replaceAll(":", "-");
+            values[i] = iptcToIso8601DateString(values[i]);
         }
         return values;
     }
+
+    protected String iptcToIso8601DateString(String value) {
+        return value.replaceAll(":", "-");
+    }
+
 }
