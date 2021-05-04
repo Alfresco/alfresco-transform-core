@@ -66,6 +66,7 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VORBIS;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORD;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_ZIP;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_RAF;
 
 import java.util.stream.Stream;
 
@@ -98,6 +99,13 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
         // either no quick file or the target extension has not been registered.
 
         return Stream.of(
+                //IPTCMetadataExtractor
+                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quickIPTC-EXT.jpg"),
+                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quickIPTC-multi-creator.jpg"),
+                testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"),
+                testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"),
+                testFile(MIMETYPE_IMAGE_RAW_RAF, "raf", "quick.raf"),
+
                 // DWGMetadataExtractor
                 testFile(MIMETYPE_APP_DWG, "dwg", "quick2010CustomProps.dwg"),
 
@@ -495,7 +503,6 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("application/gff", "", ""),
                 //testFile("video/x-oggyuv", "", ""),
                 //testFile("application/x-msdownload", "", ""),
-                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quick.jpg"),
                 //testFile("image/icns", "", ""),
                 //testFile("application/x-emf", "", ""),
                 //testFile("application/x-geo-pdf", "", ""),
