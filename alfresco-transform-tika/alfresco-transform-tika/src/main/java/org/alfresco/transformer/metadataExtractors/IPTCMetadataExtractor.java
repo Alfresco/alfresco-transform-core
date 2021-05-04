@@ -52,7 +52,9 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
     @Override
     protected Parser getParser() 
     {
-        this.parser = new ExifToolParser();
+        if (this.parser == null) {
+            this.parser = new ExifToolParser();
+        }
         return this.parser;  
     }
 
@@ -66,6 +68,7 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
             Map<String, String> headers) 
     {
         properties = new TikaAutoMetadataExtractor().extractSpecific(metadata, properties, headers);
+        ExifToolParser parser = (ExifToolParser)this.getParser();
         if (parser.getSeparator()!=null)
         {
             for (String key : properties.keySet())
