@@ -21,7 +21,7 @@
   "{http://www.alfresco.org/model/exif/1.0}software" : "Adobe Photoshop CC (Macintosh)",
   "{http://ns.useplus.org/ldf/xmp/1.0/}Version" : "1.2.0",
   "{http://www.alfresco.org/model/exif/1.0}orientation" : "1",
-  "{http://purl.org/dc/elements/1.1/}subject" : "fox, dog, lazy, jumping",
+  "{http://purl.org/dc/elements/1.1/}subject" : [ "fox", "dog", "lazy", "jumping" ],
   "{http://www.alfresco.org/model/exif/1.0}resolutionUnit" : "Inch",
   "{http://www.alfresco.org/model/exif/1.0}yResolution" : "1.0",
   "{http://iptc.org/std/Iptc4xmpExt/2008-02-29/}AOTitle" : "The Dog",

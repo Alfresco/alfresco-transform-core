@@ -84,11 +84,29 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
                             separator = String.format("\"%s\"",separator);
                         }
                         String [] values = StringUtils.splitByWholeSeparator(value, separator);
+                        // Change dateTime format. MM converted ':' to '-'
+                        if (isIPTCDate(key)){
+                            values =  iptcToIso8601DateStrings(values);
+                        }
                         putRawValue(key, (Serializable) Arrays.asList(values), properties);
                     }
                 }
             }
         }
+
         return properties;
+    }
+
+    public boolean isIPTCDate(String key) {
+        return key.contains("Date");
+    }
+
+    protected String[] iptcToIso8601DateStrings(String[] values)
+    {
+        for (int i = 0; i < values.length; i++)
+        {
+            values[i] = values[i].replaceAll(":", "-");
+        }
+        return values;
     }
 }
