@@ -27,12 +27,9 @@
 package org.alfresco.transformer.metadataExtractors;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.alfresco.transformer.tika.parsers.ExifToolParser;
 import org.apache.commons.lang3.StringUtils;
@@ -40,8 +37,6 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import jdk.internal.jshell.tool.resources.l10n;
 
 public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
 {
@@ -99,7 +94,7 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
                         putRawValue(key, (Serializable) Arrays.asList(values), properties);
                     }
                     else if (IPTC_DATE_KEYS.contains(key)) {
-                        // Handle key with single date string
+                        // Handle property with a single date string
                         putRawValue(key, (Serializable) iptcToIso8601DateString(value), properties);
                     }
                 }
@@ -108,17 +103,29 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
         return properties;
     }
 
-    protected String[] iptcToIso8601DateStrings(String[] values)
+    /**
+     * Implementation taken from Media Management
+     * Converts any ':' characters to '-'
+     * @param dateStrings
+     * @return dateStrings in Iso8601 format
+     */
+    protected String[] iptcToIso8601DateStrings(String[] dateStrings)
     {
-        for (int i = 0; i < values.length; i++)
+        for (int i = 0; i < dateStrings.length; i++)
         {
-            values[i] = iptcToIso8601DateString(values[i]);
+            dateStrings[i] = iptcToIso8601DateString(dateStrings[i]);
         }
-        return values;
+        return dateStrings;
     }
 
-    protected String iptcToIso8601DateString(String value) {
-        return value.replaceAll(":", "-");
+    /**
+     * Implementation taken from Media Management
+     * Converts any ':' characters to '-'
+     * @param dateStr
+     * @return dateStr in Iso8601 format
+     */
+    protected String iptcToIso8601DateString(String dateStr) {
+        return dateStr.replaceAll(":", "-");
     }
 
 }
