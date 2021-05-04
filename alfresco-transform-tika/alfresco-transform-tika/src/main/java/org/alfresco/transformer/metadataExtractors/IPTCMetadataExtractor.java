@@ -68,15 +68,15 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
             Map<String, String> headers) 
     {
         properties = new TikaAutoMetadataExtractor().extractSpecific(metadata, properties, headers);
-        ExifToolParser parser = (ExifToolParser)this.getParser();
-        if (parser.getSeparator()!=null)
+        ExifToolParser etParser = (ExifToolParser)this.getParser();
+        if (etParser.getSeparator()!=null)
         {
             for (String key : properties.keySet())
             {
                 if (properties.get(key) instanceof String)
                 {
                     String value = (String) properties.get(key);
-                    String separator = parser.getSeparator();
+                    String separator = etParser.getSeparator();
                     if (value.contains(separator))
                     {
                         if (value.contains(String.format("\"%s\"",separator)))
