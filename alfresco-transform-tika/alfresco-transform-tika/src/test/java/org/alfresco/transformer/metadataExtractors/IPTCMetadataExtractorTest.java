@@ -27,31 +27,12 @@
 package org.alfresco.transformer.metadataExtractors;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
 public class IPTCMetadataExtractorTest {
     
     IPTCMetadataExtractor extractor = new IPTCMetadataExtractor();
-
-    @Test
-    public void testIsIPTCDate(){
-        String[] expectedTrueKeys = {"XMP-photoshop:DateCreated", "XMP-iptcExt:ArtworkDateCreated", "anyoldstringwiththewordDateinit"};
-        for (String key : expectedTrueKeys) {
-            boolean expected = true;
-            boolean actual = extractor.isIPTCDate(key);
-
-            assertEquals(expected, actual);
-        }
-
-        String expectedFalseKey = "any string that does not contain a capitalised date.";
-        boolean expected = false;
-        boolean actual = extractor.isIPTCDate(expectedFalseKey);
-
-        assertEquals(expected, actual);
-        
-    }
 
     @Test
     public void testIptcToIso8601DateStrings() {
