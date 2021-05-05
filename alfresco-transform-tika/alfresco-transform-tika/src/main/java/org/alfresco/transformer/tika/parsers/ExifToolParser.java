@@ -120,18 +120,15 @@ public class ExifToolParser extends ExternalParser {
     }
 
     protected String findSeparator(String command) {
-        if (command.contains(SEPARATOR_SETTING))
-        {
+        if (command.contains(SEPARATOR_SETTING)) {
             int start = command.indexOf(SEPARATOR_SETTING)+SEPARATOR_SETTING.length()+1;
             String separator = DEFAULT_SEPARATOR;
-            if (command.charAt(start)=='\"')
-            {
+            if (command.charAt(start)=='\"') {
                 //get all chars up to the next \"
                 int end = command.indexOf("\"", start+1);
                 separator = command.substring(start+1, end);
             }
-            else
-            {
+            else {
                 int end = command.indexOf(" ", start);
                 separator = command.substring(start, end);
             }
@@ -156,7 +153,7 @@ public class ExifToolParser extends ExternalParser {
         TemporaryResources tmp = new TemporaryResources();
         try {
             TikaInputStream tis = TikaInputStream.get(stream, tmp);
-            if (this.getSupportedTypes().contains(mediaType)){
+            if (this.getSupportedTypes().contains(mediaType)) {
                 parse(tis, xhtml, metadata, tmp);
             }       
             switch (mediaType.getType()+"/"+mediaType.getSubtype()) {
