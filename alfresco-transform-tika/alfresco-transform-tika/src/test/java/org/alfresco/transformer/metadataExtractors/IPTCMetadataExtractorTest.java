@@ -31,14 +31,16 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import org.junit.jupiter.api.Test;
 
 public class IPTCMetadataExtractorTest {
-    
+
     IPTCMetadataExtractor extractor = new IPTCMetadataExtractor();
 
     @Test
     public void testIptcToIso8601DateStrings() {
-        String[] testStrings = {"1890:01:01", "1901:02:01"};
-        String[] expected = {"1890-01-01", "1901-02-01"};
-        
+        String[] testStrings = { "1890:01:01", "1901:02:01 00:00:00.000Z", "1901-02-01 00:00:00.000Z",
+                "1901-02-01T00:00:00.000Z", "1901:02:01T00:00+00:00", "1901:02:01 00:00+00:00" };
+        String[] expected = { "1890-01-01", "1901-02-01T00:00:00.000Z", "1901-02-01T00:00:00.000Z",
+                "1901-02-01T00:00:00.000Z", "1901-02-01T00:00+00:00", "1901-02-01T00:00+00:00" };
+
         assertArrayEquals(expected, extractor.iptcToIso8601DateStrings(testStrings));
 
     }
