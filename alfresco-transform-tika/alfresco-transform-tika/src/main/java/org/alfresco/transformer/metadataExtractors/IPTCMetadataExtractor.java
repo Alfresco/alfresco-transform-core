@@ -147,7 +147,7 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
         {
             String year = yearMatcher.group(1);
             dateStr = yearMatcher.replaceFirst(year.replaceAll(":", "-"));
-            if (dateStr.length()!=year.length() && dateStr.charAt(year.length())!=timeSeparator) 
+            if (dateStr.length()>year.length() && dateStr.charAt(year.length())!=timeSeparator) 
             {
                 dateStr = dateStr.replace(dateStr.charAt(year.length()), timeSeparator);
             }
