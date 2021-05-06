@@ -39,6 +39,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,25 +59,82 @@ import org.apache.tika.parser.image.ImageParser;
 import org.apache.tika.parser.image.TiffParser;
 import org.apache.tika.parser.jpeg.JpegParser;
 import org.apache.tika.sax.XHTMLContentHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 public class ExifToolParser extends ExternalParser {
     
+    private static final Logger logger = LoggerFactory.getLogger(ExifToolParser.class);
+
     private static final String EXIFTOOL_PARSER_CONFIG = "parsers/external/config/exiftool-parser.xml";
 
-    public ExifToolParser() throws IOException, TikaException {
+    protected static final String DEFAULT_SEPARATOR = ", ";
+    protected static final String SEPARATOR_SETTING = "-sep";
+
+    private String separator;
+
+    public ExifToolParser() {
         super();
-        ExternalParser eParser = ExternalParsersFactory.create(getExternalParserConfigURL()).get(0);
-        this.setCommand(eParser.getCommand());
-        this.setIgnoredLineConsumer(eParser.getIgnoredLineConsumer());
-        this.setMetadataExtractionPatterns(eParser.getMetadataExtractionPatterns());
-        this.setSupportedTypes(eParser.getSupportedTypes());
+        try {
+            List<ExternalParser> eParsers = ExternalParsersFactory.create(getExternalParserConfigURL());
+            // if ExifTool is not installed then no parsers are returned
+            if (eParsers.size() > 0) {
+                ExternalParser eParser = eParsers.get(0);
+                this.setCommand(eParser.getCommand());
+                this.setIgnoredLineConsumer(eParser.getIgnoredLineConsumer());
+                this.setMetadataExtractionPatterns(eParser.getMetadataExtractionPatterns());
+                this.setSupportedTypes(eParser.getSupportedTypes());
+            } else {
+                logger.error(
+                        "Error creating ExifToolParser from config, ExifToolExtractions not enabled. Please check ExifTool is installed correctly.");
+            }
+        } catch (IOException | TikaException e) {
+            logger.error("Error creating ExifToolParser from config, ExifToolExtractions not enabled: ", e);
+        }
     }
-    
+
     private URL getExternalParserConfigURL(){
         ClassLoader classLoader = ExifToolParser.class.getClassLoader();
         return classLoader.getResource(EXIFTOOL_PARSER_CONFIG);
+    }
+
+    public void setSeparator(String sep) {
+        this.separator = sep;
+    }
+
+    public String getSeparator() {
+        return this.separator;
+    }
+
+    @Override
+    public void setCommand(String... command){
+        super.setCommand(command);
+        if (command.length==1) {
+            setSeparator(findSeparator(command[0]));
+        }
+        else {
+            setSeparator(DEFAULT_SEPARATOR);
+        }
+    }
+
+    protected String findSeparator(String command) {
+        if (command.contains(SEPARATOR_SETTING)) {
+            int start = command.indexOf(SEPARATOR_SETTING)+SEPARATOR_SETTING.length()+1;
+            String separator = DEFAULT_SEPARATOR;
+            if (command.charAt(start)=='\"') {
+                //get all chars up to the next \"
+                int end = command.indexOf("\"", start+1);
+                separator = command.substring(start+1, end);
+            }
+            else {
+                int end = command.indexOf(" ", start);
+                separator = command.substring(start, end);
+            }
+            return separator;
+        }
+        return DEFAULT_SEPARATOR;
     }
 
     /**
@@ -95,7 +153,9 @@ public class ExifToolParser extends ExternalParser {
         TemporaryResources tmp = new TemporaryResources();
         try {
             TikaInputStream tis = TikaInputStream.get(stream, tmp);
-            parse(tis, xhtml, metadata, tmp);
+            if (this.getSupportedTypes().contains(mediaType)) {
+                parse(tis, xhtml, metadata, tmp);
+            }       
             switch (mediaType.getType()+"/"+mediaType.getSubtype()) {
                 case MIMETYPE_IMAGE_JPEG: 
                     parseAdditional(new JpegParser(), tis, handler, metadata, context, mediaType);

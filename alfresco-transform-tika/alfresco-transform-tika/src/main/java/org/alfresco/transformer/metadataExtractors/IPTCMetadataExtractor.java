@@ -26,13 +26,15 @@
  */
 package org.alfresco.transformer.metadataExtractors;
 
-import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.tika.parsers.ExifToolParser;
-import org.apache.tika.exception.TikaException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.Parser;
 import org.slf4j.Logger;
@@ -42,6 +44,12 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
 {
 
     private static final Logger logger = LoggerFactory.getLogger(IPTCMetadataExtractor.class);
+    
+    private static Set<String> IPTC_DATE_KEYS = Set.of("XMP-photoshop:DateCreated", "XMP-iptcExt:ArtworkDateCreated");
+
+    private static final Pattern YEAR_IPTC = Pattern.compile("(\\d{4}[:|-]\\d{2}[:|-]\\d{2})");
+
+    private ExifToolParser parser;
 
     public IPTCMetadataExtractor() 
     {
@@ -49,13 +57,12 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
     }
 
     @Override
-    protected Parser getParser() {
-        try {
-            return new ExifToolParser();
-        } catch (IOException | TikaException e) {
-            logger.error(e.getMessage(), e);
-            throw new TransformException(500, "Error creating IPTC parser: " + e.getMessage());
-        }    
+    protected Parser getParser() 
+    {
+        if (this.parser == null) {
+            this.parser = new ExifToolParser();
+        }
+        return this.parser;  
     }
 
     /**
@@ -65,9 +72,87 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
      */
     @Override
     protected Map<String, Serializable> extractSpecific(Metadata metadata, Map<String, Serializable> properties,
-            Map<String, String> headers) {
-
+            Map<String, String> headers) 
+    {
         properties = new TikaAutoMetadataExtractor().extractSpecific(metadata, properties, headers);
+        ExifToolParser etParser = (ExifToolParser)this.getParser();
+        if (etParser.getSeparator()!=null)
+        {
+            for (String key : properties.keySet())
+            {
+                if (properties.get(key) instanceof String)
+                {
+                    String value = (String) properties.get(key);
+                    String separator = etParser.getSeparator();
+                    if (value.contains(separator))
+                    {
+                        if (value.contains(String.format("\"%s\"",separator)))
+                        {
+                            separator = String.format("\"%s\"",separator);
+                        }
+                        String [] values = StringUtils.splitByWholeSeparator(value, separator);
+                        // Change dateTime format. MM converted ':' to '-'
+                        if (IPTC_DATE_KEYS.contains(key)){
+                            values =  iptcToIso8601DateStrings(values);
+                        }
+                        putRawValue(key, (Serializable) Arrays.asList(values), properties);
+                    }
+                    else if (IPTC_DATE_KEYS.contains(key)) {
+                        // Handle property with a single date string
+                        putRawValue(key, (Serializable) iptcToIso8601DateString(value), properties);
+                    }
+                }
+            }
+        }
         return properties;
     }
+
+    /**
+     * Converts a date or date time strings into Iso8601 format <p>
+     * 
+     * @param dateStrings
+     * @return dateStrings in Iso8601 format
+     * @see #iptcToIso8601DateString
+     */
+    protected String[] iptcToIso8601DateStrings(String[] dateStrings)
+    {
+        for (int i = 0; i < dateStrings.length; i++)
+        {
+            dateStrings[i] = iptcToIso8601DateString(dateStrings[i]);
+        }
+        return dateStrings;
+    }
+
+    /**
+     * Converts a date or date time string into Iso8601 format <p>
+     * Converts any ':' in the year portion of a date string characters to '-'. <p>
+     * Expects the year in the format YYYY:MM:DD or YYYY-MM-DD <p>
+     * Will add the correct delimiter, 'T',  to any dateTime strings, where | can be any char other than ,'T':
+     * YYYY:MM:DD|HH:mm:ss.... or YYYY-MM-DD|HH:mm:ss....
+     * <p>
+     * Examples: <p><ul>
+     * <li>"1919:10:16" will convert to "1919-10-16"</li>
+     * <li>"1901:02:01 00:00:00.000Z" will convert to "1901-02-01T00:00:00.000Z"</li>
+     * <li>"2001:02:01 16:15+00:00" will convert to "2001-02-01T16:15+00:00"</li>
+     * <li>"2021-06-11 05:36-01:00" will convert to "2021-06-11T05:36-01:00"</li>
+     * </ul>
+     * @param dateStr
+     * @return dateStr in Iso8601 format
+     */
+    protected String iptcToIso8601DateString(String dateStr) 
+    {
+        char timeSeparator = 'T';
+        Matcher yearMatcher = YEAR_IPTC.matcher(dateStr);
+        if (yearMatcher.find())
+        {
+            String year = yearMatcher.group(1);
+            dateStr = yearMatcher.replaceFirst(year.replaceAll(":", "-"));
+            if (dateStr.length()>year.length() && dateStr.charAt(year.length())!=timeSeparator) 
+            {
+                dateStr = dateStr.replace(dateStr.charAt(year.length()), timeSeparator);
+            }
+        }
+        return dateStr;
+    }
+
 }
