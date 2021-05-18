@@ -1,6 +1,6 @@
 # Image provides a container in which to run miscellaneous transformations for Alfresco Content Services.
 
-FROM alfresco/alfresco-base-java:11.0.10-openjdk-centos-8@sha256:7d4177162080b8f18b3c7b9f59fb86a3c74c8e82aa329ab4e3878d660bc16195
+FROM alfresco/alfresco-base-java:11.0.11-openjdk-centos-8@sha256:7d4177162080b8f18b3c7b9f59fb86a3c74c8e82aa329ab4e3878d660bc16195
 
 ENV JAVA_OPTS=""
 
