@@ -68,11 +68,9 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_ZIP;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_RAF;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_ARW;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XMP;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_CR2;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_RW2;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_NEF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_NRW;
 
 import java.util.stream.Stream;
 
