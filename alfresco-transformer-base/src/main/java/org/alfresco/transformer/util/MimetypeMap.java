@@ -107,6 +107,7 @@ public interface MimetypeMap
     String MIMETYPE_IMAGE_RAW_R3D = "image/x-raw-red";
     String MIMETYPE_IMAGE_DWT = "image/x-dwt";
     String MIMETYPE_IMAGE_XBM = "image/x-xbitmap";
+    String MIMETYPE_IMAGE_XPM = "image/x-xpixmap";
     String MIMETYPE_IMAGE_XWD = "image/x-xwindowdump";
     String MIMETYPE_APPLICATION_EPS = "application/eps";
     String MIMETYPE_APPLICATION_PS = "application/postscript";
