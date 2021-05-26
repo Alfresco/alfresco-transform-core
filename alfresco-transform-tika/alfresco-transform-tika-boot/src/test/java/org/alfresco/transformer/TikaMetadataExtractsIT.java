@@ -114,7 +114,7 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 testFile(MIMETYPE_IMAGE_RAW_ARW, "arw", "20140614_163822_Photogrpahy_Class.ARW"),
                 testFile(MIMETYPE_IMAGE_RAW_CR2, "cr2", "20141227_134519_Palace.CR2"),
                 testFile(MIMETYPE_IMAGE_RAW_RW2, "rw2", "20140629_145035_Flower.RW2"),
-                testFile(MIMETYPE_IMAGE_RAW_RW2, "rw2", "from-kris-P1090242.RW2"),
+                testFile(MIMETYPE_IMAGE_RAW_RW2, "rw2", "P1090242.RW2"),
                 testFile(MIMETYPE_IMAGE_RAW_NEF, "nef", "20150408_074941_Bush.NEF"),
                 testFile(MIMETYPE_IMAGE_RAW_RAF, "raf", "20160502_190928_London_Underground.RAF"),
                 testFile(MIMETYPE_IMAGE_RAW_RAF, "raf", "20200223_131629_DSCF3148_Lofoten_Tour.RAF"),
