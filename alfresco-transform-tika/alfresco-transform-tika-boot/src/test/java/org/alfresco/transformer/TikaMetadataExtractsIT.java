@@ -110,7 +110,6 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 testFile(MIMETYPE_IMAGE_JPEG, "jpg", "testJPEG_IPTC_EXT.jpg"),
                 testFile(MIMETYPE_IMAGE_GIF, "gif", "quickIPTC.gif"),
                 testFile(MIMETYPE_IMAGE_PNG, "png", "quickIPTC.png"),
-                testFile(MIMETYPE_IMAGE_RAW_RAF, "raf", "quick.raf"),
                 testFile(MIMETYPE_IMAGE_RAW_ARW, "arw", "20140614_163822_Photogrpahy_Class.ARW"),
                 testFile(MIMETYPE_IMAGE_RAW_CR2, "cr2", "20141227_134519_Palace.CR2"),
                 testFile(MIMETYPE_IMAGE_RAW_RW2, "rw2", "20140629_145035_Flower.RW2"),
