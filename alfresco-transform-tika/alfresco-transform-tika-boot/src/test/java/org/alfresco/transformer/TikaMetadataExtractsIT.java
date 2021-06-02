@@ -104,8 +104,8 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quickIPTC-EXT.jpg"),
                 testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quickIPTC-multi-creator.jpg"),
                 testFile(MIMETYPE_IMAGE_JPEG, "jpg", "testJPEG_IPTC_EXT.jpg"),
-                testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"),
-                testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"),
+                testFile(MIMETYPE_IMAGE_GIF, "gif", "quickIPTC.gif"),
+                testFile(MIMETYPE_IMAGE_PNG, "png", "quickIPTC.png"),
                 testFile(MIMETYPE_IMAGE_RAW_RAF, "raf", "quick.raf"),
 
                 // DWGMetadataExtractor
