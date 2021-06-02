@@ -1,0 +1,63 @@
+version: 2
+registries:
+  maven-alfresco-internal:
+    type: maven-repository
+    url: https://artifacts.alfresco.com/nexus/content/groups/internal
+    username: ${{secrets.NEXUS_USERNAME}}
+    password: ${{secrets.NEXUS_PASSWORD}}
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "22:00"
+    timezone: Europe/London
+  open-pull-requests-limit: 99
+  ignore:
+  - dependency-name: io.fabric8:fabric8-maven-plugin
+    versions:
+    - "> 4.4.0, < 4.5"
+  registries:
+  - maven-alfresco-internal
+- package-ecosystem: docker
+  directory: "/alfresco-transform-core-aio/alfresco-transform-core-aio-boot"
+  schedule:
+    interval: daily
+    time: "22:00"
+    timezone: Europe/London
+  open-pull-requests-limit: 99
+- package-ecosystem: docker
+  directory: "/alfresco-transform-libreoffice/alfresco-transform-libreoffice-boot"
+  schedule:
+    interval: daily
+    time: "22:00"
+    timezone: Europe/London
+  open-pull-requests-limit: 99
+- package-ecosystem: docker
+  directory: "/alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot"
+  schedule:
+    interval: daily
+    time: "22:00"
+    timezone: Europe/London
+  open-pull-requests-limit: 99
+- package-ecosystem: docker
+  directory: "/alfresco-transform-misc/alfresco-transform-misc-boot"
+  schedule:
+    interval: daily
+    time: "22:00"
+    timezone: Europe/London
+  open-pull-requests-limit: 99
+- package-ecosystem: docker
+  directory: "/alfresco-transform-tika/alfresco-transform-tika-boot"
+  schedule:
+    interval: daily
+    time: "22:00"
+    timezone: Europe/London
+  open-pull-requests-limit: 99
+- package-ecosystem: docker
+  directory: "/alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer-boot"
+  schedule:
+    interval: daily
+    time: "22:00"
+    timezone: Europe/London
+  open-pull-requests-limit: 99
