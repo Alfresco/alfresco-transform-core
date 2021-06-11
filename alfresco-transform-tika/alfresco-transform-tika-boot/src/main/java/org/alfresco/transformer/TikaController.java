@@ -68,10 +68,12 @@ public class TikaController extends AbstractTransformerController
 {
     private static final Logger logger = LoggerFactory.getLogger(TikaController.class);
 
-    @Value("${transform.core.tika.pdfBox.notExtractBookmarksTextDefault:false}")
-    private boolean notExtractBookmarksTextDefault;
-
     private TikaJavaExecutor javaExecutor;
+
+    public TikaController(@Value("${transform.core.tika.pdfBox.notExtractBookmarksTextDefault:false}") boolean notExtractBookmarksTextDefault)
+    {
+        javaExecutor= new TikaJavaExecutor(notExtractBookmarksTextDefault);
+    }
 
     @Override
     public String getTransformerName()
@@ -106,15 +108,6 @@ public class TikaController extends AbstractTransformerController
                                  Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
         transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
-        getJavaExecutor().transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
-    }
-
-    private TikaJavaExecutor getJavaExecutor()
-    {
-        if(javaExecutor==null)
-        {
-            javaExecutor = new TikaJavaExecutor(notExtractBookmarksTextDefault);
-        }
-        return javaExecutor;
+        javaExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }
