@@ -50,7 +50,7 @@ The following externalized T-engines properties are available:
 | ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
 | FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.libreoffice.acs |
-| LIBREOFFICE_HOME | Path to LibreOffice_Home.  | /opt/libreoffice6.3 |
+| LIBREOFFICE_HOME | Path to LibreOffice_Home.  | /opt/libreoffice7.0 |
 | LIBREOFFICE_MAX_TASKS_PER_PROCESS | Number of maximum tasks per process. | 200 |
 | LIBREOFFICE_TIMEOUT | Timeout value for LibreOffice `execution timeout`, `queue timeout` and `connection timeout`. | 1200000 |
 | LIBREOFFICE_PORT_NUMBERS | LibreOffice port. | 8100 |
@@ -86,7 +86,7 @@ The following externalized T-engines properties are available:
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.aio.acs |
 | PDFRENDERER_EXE | Path to Pdf-renderer EXE. | /usr/bin/alfresco-pdf-renderer |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.libreoffice.acs |
-| LIBREOFFICE_HOME | Path to LibreOffice_Home.  | /opt/libreoffice6.3 |
+| LIBREOFFICE_HOME | Path to LibreOffice_Home.  | /opt/libreoffice7.0 |
 | LIBREOFFICE_MAX_TASKS_PER_PROCESS | Number of maximum tasks per process. | 200 |
 | LIBREOFFICE_TIMEOUT | Timeout value for LibreOffice `execution timeout`, `queue timeout` and `connection timeout`. | 1200000 |
 | LIBREOFFICE_PORT_NUMBERS | LibreOffice port. | 8100 |

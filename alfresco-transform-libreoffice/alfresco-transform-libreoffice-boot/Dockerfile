@@ -4,7 +4,7 @@
 
 FROM alfresco/alfresco-base-java:11.0.11-openjdk-centos-8@sha256:7d4177162080b8f18b3c7b9f59fb86a3c74c8e82aa329ab4e3878d660bc16195
 
-ARG LIBREOFFICE_VERSION=6.3.5
+ARG LIBREOFFICE_VERSION=7.0.6
 
 ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz
 ENV JAVA_OPTS=""
@@ -18,7 +18,7 @@ ARG USERID=33003
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
 RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
-    yum install -y cairo cups-libs libSM && \
+    yum install -y cairo cups-libs libSM libGLU && \
     test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
     ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
     curl -s -S $LIBREOFFICE_RPM_URL      -o libreoffice-dist-linux.gz && \

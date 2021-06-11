@@ -16,7 +16,7 @@ ENV IMAGEMAGICK_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositor
 ENV IMAGEMAGICK_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}/imagemagick-distribution-${IMAGEMAGICK_VERSION}-libs-linux.rpm
 ENV IMAGEMAGICK_DEP_RPM_URL=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
-ARG LIBREOFFICE_VERSION=6.3.5
+ARG LIBREOFFICE_VERSION=7.0.6
 ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz
 
 ENV ALFRESCO_PDF_RENDERER_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-pdf-renderer/1.1/alfresco-pdf-renderer-1.1-linux.tgz
@@ -38,7 +38,7 @@ RUN ln /usr/bin/alfresco-transform-core-aio-boot-${env.project_version}.jar /usr
     yum localinstall -y imagemagick-epel-dep.rpm && \
     yum localinstall -y imagemagick-distribution-*linux.rpm && \
     rm -f imagemagick-distribution-*.rpm && \
-    yum install -y cairo cups-libs libSM && \
+    yum install -y cairo cups-libs libSM libGLU && \
     test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
     ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
     curl -s -S $LIBREOFFICE_RPM_URL      -o libreoffice-dist-linux.gz && \
