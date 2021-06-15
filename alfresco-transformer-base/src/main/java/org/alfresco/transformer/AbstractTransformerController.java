@@ -230,7 +230,7 @@ public abstract class AbstractTransformerController implements TransformControll
         File sourceFile;
         try
         {
-            sourceFile = loadSourceFile(request.getSourceReference());
+            sourceFile = loadSourceFile(request.getSourceReference(), request.getSourceExtension());
         }
         catch (TransformException e)
         {
@@ -358,9 +358,10 @@ public abstract class AbstractTransformerController implements TransformControll
      * Loads the file with the specified sourceReference from Alfresco Shared File Store
      *
      * @param sourceReference reference to the file in Alfresco Shared File Store
+     * @param sourceExtension default extension if the file in Alfresco Shared File Store has none
      * @return the file containing the source content for the transformation
      */
-    private File loadSourceFile(final String sourceReference)
+    private File loadSourceFile(final String sourceReference, final String sourceExtension)
     {
         ResponseEntity<Resource> responseEntity = alfrescoSharedFileStoreClient
             .retrieveFile(sourceReference);
@@ -369,7 +370,7 @@ public abstract class AbstractTransformerController implements TransformControll
         HttpHeaders headers = responseEntity.getHeaders();
         String filename = getFilenameFromContentDisposition(headers);
 
-        String extension = getFilenameExtension(filename);
+        String extension = getFilenameExtension(filename) != null ? getFilenameExtension(filename) : sourceExtension;
         MediaType contentType = headers.getContentType();
         long size = headers.getContentLength();
 
