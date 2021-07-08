@@ -137,13 +137,23 @@
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
+                        <version>0.36.0</version>
+                        <extensions>true</extensions>
                         <configuration>
+                            <apiVersion>1.29</apiVersion>
+                            <imagePullPolicy>Always</imagePullPolicy>
+                            <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
+                            <!--<dockerHost>tcp://127.0.0.1:2376</dockerHost>-->
                             <images>
                                 <image>
                                     <alias>activemq</alias>
                                     <name>alfresco/alfresco-activemq:5.16.1</name>
                                     <run>
                                         <hostname>activemq</hostname>
+                                        <network>
+                                            <name>transform</name>
+                                            <alias>activemq</alias>
+                                        </network>
                                         <ports>
                                             <port>8161:8161</port>
                                             <port>5672:5672</port>
@@ -187,6 +197,23 @@
                                 </image>
                             </images>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <id>before-integration-tests</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>after-integration-tests</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

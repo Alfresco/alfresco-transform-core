@@ -400,24 +400,6 @@
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
                     <version>0.39.0</version>
-                    <extensions>true</extensions>
-                    <executions>
-                        <execution>
-                            <id>before-integration-tests</id>
-                            <phase>pre-integration-test</phase>
-                            <goals>
-                                <goal>stop</goal>
-                                <goal>start</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>after-integration-tests</id>
-                            <phase>post-integration-test</phase>
-                            <goals>
-                                <goal>stop</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                  </plugin>
             </plugins>
         </pluginManagement>
