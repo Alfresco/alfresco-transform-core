@@ -172,7 +172,7 @@
                 <plugins>
                     <plugin>
                         <groupId>io.fabric8</groupId>
-                        <artifactId>fabric8-maven-plugin</artifactId>
+                        <artifactId>docker-maven-plugin</artifactId>
                         <configuration>
                             <images>
                                 <image>
@@ -206,7 +206,7 @@
                 <plugins>
                     <plugin>
                         <groupId>io.fabric8</groupId>
-                        <artifactId>fabric8-maven-plugin</artifactId>
+                        <artifactId>fdocker-maven-plugin</artifactId>
                         <configuration>
                             <images>
                                 <!-- QuayIO image -->
@@ -259,9 +259,9 @@
                 <plugins>
                     <plugin>
                         <groupId>io.fabric8</groupId>
-                        <artifactId>fabric8-maven-plugin</artifactId>
-                        <configuration combine.self="override">
-                            <images>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <configuration>
+                            <images combine.self="override">
                                 <!-- QuayIO image -->
                                 <image>
                                     <name>${image.name}:${project.version}</name>
