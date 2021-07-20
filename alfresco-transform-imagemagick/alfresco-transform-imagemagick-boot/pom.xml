@@ -206,7 +206,7 @@
                 <plugins>
                     <plugin>
                         <groupId>io.fabric8</groupId>
-                        <artifactId>fdocker-maven-plugin</artifactId>
+                        <artifactId>docker-maven-plugin</artifactId>
                         <configuration>
                             <images>
                                 <!-- QuayIO image -->
