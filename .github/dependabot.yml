@@ -14,9 +14,6 @@ updates:
     timezone: Europe/London
   open-pull-requests-limit: 99
   ignore:
-  - dependency-name: io.fabric8:fabric8-maven-plugin
-    versions:
-    - "> 4.4.0, < 4.5"
   registries:
   - maven-alfresco-internal
 - package-ecosystem: docker
