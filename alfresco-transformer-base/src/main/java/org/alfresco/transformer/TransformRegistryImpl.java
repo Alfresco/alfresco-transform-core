@@ -100,4 +100,10 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
     {
         log.error(msg);
     }
+
+    @Override
+    protected void logWarn(String msg)
+    {
+        log.warn(msg);
+    }
 }
