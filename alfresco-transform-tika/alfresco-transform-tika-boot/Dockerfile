@@ -22,6 +22,8 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
     curl -s -S $EXIFTOOL_URL -o ${EXIFTOOL_FOLDER}.tgz && \
     tar xzf ${EXIFTOOL_FOLDER}.tgz && \
     yum -y install perl && \
+    yum -y install perl-ExtUtils-MakeMaker && \
+    yum -y install make && \
     (cd ./${EXIFTOOL_FOLDER} && \
     perl Makefile.PL && \
     make && \
