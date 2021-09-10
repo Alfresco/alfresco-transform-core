@@ -2,7 +2,7 @@
 
 # ImageMagick is from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt.
 
-FROM alfresco/alfresco-base-java:11.0.12-centos-811@sha256:f1bb731da820f33dc1e3cfe27d3192b67d68237d0a4441829140dfbd1e48c8a5
+FROM alfresco/alfresco-base-java:11.0.12-centos-7@sha256:6abdbfd14492fb78ae5d865eb25627bb241b11da406ef8df91a77716a3538f36
 
 ARG IMAGEMAGICK_VERSION=7.0.10-59
 
@@ -20,6 +20,7 @@ ARG USERID=33002
 COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 
 RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
+    yum clean all && \
     curl -s -S $IMAGEMAGICK_RPM_URL      -o imagemagick-distribution-linux.rpm && \
     curl -s -S $IMAGEMAGICK_LIB_RPM_URL  -o imagemagick-distribution-libs-linux.rpm && \
     curl -s -S $IMAGEMAGICK_DEP_RPM_URL  -o imagemagick-epel-dep.rpm && \
