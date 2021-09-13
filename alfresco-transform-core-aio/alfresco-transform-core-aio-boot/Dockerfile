@@ -52,6 +52,8 @@ RUN ln /usr/bin/alfresco-transform-core-aio-boot-${env.project_version}.jar /usr
     curl -s -S $EXIFTOOL_URL -o ${EXIFTOOL_FOLDER}.tgz && \
     tar xzf ${EXIFTOOL_FOLDER}.tgz && \
     yum -y install perl && \
+    yum -y install perl-ExtUtils-MakeMaker && \
+    yum -y install make && \
     (cd ./${EXIFTOOL_FOLDER} && \
     perl Makefile.PL && \
     make && \
