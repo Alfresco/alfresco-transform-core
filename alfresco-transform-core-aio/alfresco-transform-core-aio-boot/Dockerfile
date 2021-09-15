@@ -12,9 +12,7 @@ ARG EXIFTOOL_FOLDER=Image-ExifTool-${EXIFTOOL_VERSION}
 ARG EXIFTOOL_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/exiftool/image-exiftool/${EXIFTOOL_VERSION}/image-exiftool-${EXIFTOOL_VERSION}.tgz
 
 ARG IMAGEMAGICK_VERSION=7.0.10-59
-ENV IMAGEMAGICK_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}/imagemagick-distribution-${IMAGEMAGICK_VERSION}-linux.rpm
-ENV IMAGEMAGICK_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}/imagemagick-distribution-${IMAGEMAGICK_VERSION}-libs-linux.rpm
-ENV IMAGEMAGICK_DEP_RPM_URL=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+ENV IMAGEMAGICK_SRC_URL=https://download.imagemagick.org/ImageMagick/download/releases/ImageMagick-${IMAGEMAGICK_VERSION}.tar.xz
 
 ARG LIBREOFFICE_VERSION=7.0.6
 ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz
@@ -33,12 +31,15 @@ COPY target/alfresco-transform-core-aio-boot-${env.project_version}.jar /usr/bin
 
 RUN ln /usr/bin/alfresco-transform-core-aio-boot-${env.project_version}.jar /usr/bin/alfresco-transform-core-aio-boot.jar && \
     yum clean all && \
-    curl -s -S $IMAGEMAGICK_RPM_URL      -o imagemagick-distribution-linux.rpm && \
-    curl -s -S $IMAGEMAGICK_LIB_RPM_URL  -o imagemagick-distribution-libs-linux.rpm && \
-    curl -s -S $IMAGEMAGICK_DEP_RPM_URL  -o imagemagick-epel-dep.rpm && \
-    yum localinstall -y imagemagick-epel-dep.rpm && \
-    yum localinstall -y imagemagick-distribution-*linux.rpm && \
-    rm -f imagemagick-distribution-*.rpm && \
+    yum -y group install "Development Tools" && \
+    curl -s -S $IMAGEMAGICK_SRC_URL -o ImageMagick-7.0.10-59.tar.xz && \
+    tar -xf ImageMagick-7.0.10-59.tar.xz && \
+    cd ImageMagick-7.0.10-59 && \
+    ./configure && \
+    make && \
+    make install && \
+    ldconfig /usr/local/lib && \
+    cd / && \
     yum install -y cairo cups-libs libSM libGLU && \
     test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
     ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
