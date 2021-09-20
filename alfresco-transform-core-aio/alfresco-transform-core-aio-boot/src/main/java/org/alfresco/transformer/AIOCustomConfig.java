@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -93,6 +93,7 @@ public class AIOCustomConfig
         aioTransformRegistry.registerTransformer(new ImageMagickCommandExecutor(imageMagickExePath, imageMagickDynPath, imageMagickRootPath, imageMagickCodersPath, imageMagickConfigPath));
         aioTransformRegistry.registerTransformer(new LibreOfficeJavaExecutor(libreofficePath, libreofficeMaxTasksPerProcess, libreofficeTimeout, libreofficePortNumbers, libreofficeTemplateProfileDir, libreofficeIsEnabled));
         aioTransformRegistry.registerTransformer(new PdfRendererCommandExecutor(pdfRendererPath));
+        aioTransformRegistry.registerCombinedTransformers();
         return aioTransformRegistry;
     }
 }

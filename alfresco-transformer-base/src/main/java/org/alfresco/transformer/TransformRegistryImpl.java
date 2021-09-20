@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Repository
  * %%
- * Copyright (C) 2005 - 2018 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -36,6 +36,7 @@ import javax.annotation.PostConstruct;
 
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.registry.AbstractTransformRegistry;
+import org.alfresco.transform.client.registry.CombinedTransformConfig;
 import org.alfresco.transform.client.registry.TransformCache;
 import org.alfresco.transform.exceptions.TransformException;
 import org.slf4j.Logger;
@@ -67,7 +68,8 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
     {
         engineConfig = resourceLoader.getResource(locationFromProperty);
         TransformConfig transformConfig = getTransformConfig();
-        registerAll(transformConfig, null, locationFromProperty);
+        // There is only one TransformConfig in a T-Engine so the following call is fine
+        CombinedTransformConfig.combineAndRegister(transformConfig, locationFromProperty, null, this);
     }
 
     // Holds the structures used by AbstractTransformRegistry to look up what is supported.
