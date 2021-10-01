@@ -25,7 +25,7 @@
         <env.project_version>${project.version}</env.project_version>
         <dependency.alfresco-transform-model.version>1.4.0</dependency.alfresco-transform-model.version>
         <dependency.activemq.version>5.16.3</dependency.activemq.version>
-        <dependency.jackson.version>2.12.5</dependency.jackson.version>
+        <dependency.jackson.version>2.13.0</dependency.jackson.version>
         <dependency.jackson-databind.version>${dependency.jackson.version}</dependency.jackson-databind.version>
         <dependency.junit.version>4.13.2</dependency.junit.version>
         <dependency.cxf.version>3.4.4</dependency.cxf.version>
