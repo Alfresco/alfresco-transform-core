@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -614,8 +614,14 @@ public class Tika
         includeContents = includeContents == null ? false : includeContents;
         notExtractBookmarksText = notExtractBookmarksText == null ? false : notExtractBookmarksText;
 
-        transform(transform, includeContents, notExtractBookmarksText, sourceFilename,
-            targetFilename, targetMimetype, targetEncoding);
+        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(sourceFilename));
+             OutputStream outputStream = new FileOutputStream(targetFilename))
+        {
+            transform(transform, includeContents, notExtractBookmarksText, inputStream, outputStream, targetMimetype, targetEncoding);
+        } catch (IOException e)
+        {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
     }
 
     private String getValue(String arg, boolean valueExpected, Object value, String optionName)
@@ -637,10 +643,8 @@ public class Tika
     }
 
     // Adds transform specific values such as parser and documentSelector.
-    private void transform(String transform, Boolean includeContents,
-        Boolean notExtractBookmarksText,
-        String sourceFilename,
-        String targetFilename, String targetMimetype, String targetEncoding)
+    protected void transform(String transform, Boolean includeContents, Boolean notExtractBookmarksText, InputStream inputStream,
+                             OutputStream outputStream, String targetMimetype, String targetEncoding)
     {
         Parser parser = null;
         DocumentSelector documentSelector = null;
@@ -671,26 +675,24 @@ public class Tika
         }
 
         transform(parser, documentSelector, includeContents, notExtractBookmarksText,
-            sourceFilename, targetFilename, targetMimetype, targetEncoding);
+                inputStream, outputStream, targetMimetype, targetEncoding);
     }
 
     private void transform(Parser parser, DocumentSelector documentSelector,
         Boolean includeContents,
         Boolean notExtractBookmarksText,
-        String sourceFilename,
-        String targetFilename, String targetMimetype, String targetEncoding)
+        InputStream inputStream,
+        OutputStream outputStream, String targetMimetype, String targetEncoding)
     {
 
-        try (InputStream is = new BufferedInputStream(new FileInputStream(sourceFilename));
-             OutputStream os = new FileOutputStream(targetFilename);
-             Writer ow = new BufferedWriter(new OutputStreamWriter(os, targetEncoding)))
+        try (Writer ow = new BufferedWriter(new OutputStreamWriter(outputStream, targetEncoding)))
         {
             Metadata metadata = new Metadata();
             ParseContext context = buildParseContext(documentSelector, includeContents,
                 notExtractBookmarksText);
             ContentHandler handler = getContentHandler(targetMimetype, ow);
 
-            parser.parse(is, handler, metadata, context);
+            parser.parse(inputStream, handler, metadata, context);
         }
         catch (SAXException | TikaException | IOException e)
         {

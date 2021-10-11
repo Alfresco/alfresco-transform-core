@@ -288,6 +288,15 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     }
 
     @Test
+    public void testAbleToTransformFileForBackwardsCompatibility()
+    {
+        ProbeTestTransform probeTestTransform = getController().getProbeTestTransform();
+        ReflectionTestUtils.setField(probeTestTransform, "livenessTransformEnabled", true);
+        probeTestTransform.setUseTempSourceFile(true);
+        probeTestTransform.doTransformOrNothing(httpServletRequest, true);
+    }
+
+    @Test
     @Override
     public void simpleTransformTest() throws Exception
     {

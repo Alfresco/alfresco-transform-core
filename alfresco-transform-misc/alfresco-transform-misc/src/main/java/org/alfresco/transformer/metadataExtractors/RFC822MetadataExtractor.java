@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005-2020 Alfresco Software Limited
+ * Copyright (C) 2005-2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -90,14 +90,21 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractor implement
     }
 
     @Override
+    public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions, File sourceFile) throws Exception
+    {
+        try (InputStream inputStream = new FileInputStream(sourceFile))
+        {
+            return extractMetadata(sourceMimetype, transformOptions, inputStream);
+        }
+    }
+
+    @Override
     public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
-                                                     File sourceFile) throws Exception
+                                                     InputStream inputStream) throws Exception
     {
         final Map<String, Serializable> rawProperties = new HashMap<>();
 
-        try (InputStream is = new FileInputStream(sourceFile))
-        {
-            MimeMessage mimeMessage = new MimeMessage(null, is);
+            MimeMessage mimeMessage = new MimeMessage(null, inputStream);
 
             if (mimeMessage != null)
             {
@@ -188,8 +195,6 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractor implement
                     }
                 }
             }
-        }
-
         return rawProperties;
     }
 }

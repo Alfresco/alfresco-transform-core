@@ -42,10 +42,14 @@ import org.alfresco.transformer.metadataExtractors.IPTCMetadataExtractor;
 import org.alfresco.transformer.util.RequestParamMap;
 import org.apache.tika.exception.TikaException;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -110,6 +114,27 @@ public class TikaJavaExecutor implements JavaExecutor
     public String getTransformerId()
     {
         return ID;
+    }
+
+    @Override
+    public void transform(String transformName, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                          MultipartFile sourceMultipartFile, File targetFile) throws Exception
+    {
+
+        boolean includeContents = parseBoolean(transformOptions.getOrDefault(RequestParamMap.INCLUDE_CONTENTS, "false"));
+        boolean notExtractBookmarksText = parseBoolean(transformOptions.getOrDefault(RequestParamMap.NOT_EXTRACT_BOOKMARKS_TEXT, String.valueOf(notExtractBookmarksTextDefault)));
+        String targetEncoding = transformOptions.getOrDefault("targetEncoding", "UTF-8");
+        if (transformOptions.get(RequestParamMap.NOT_EXTRACT_BOOKMARKS_TEXT) == null && notExtractBookmarksTextDefault)
+        {
+            LoggerFactory.getLogger(TikaJavaExecutor.class).trace(
+                    "notExtractBookmarksText default value has been overridden to {}",
+                    notExtractBookmarksTextDefault);
+        }
+        try (InputStream inputStream = sourceMultipartFile.getInputStream();
+             OutputStream outputStream = new FileOutputStream(targetFile))
+        {
+            tika.transform(transformName, includeContents, notExtractBookmarksText, inputStream, outputStream, targetMimetype, targetEncoding);
+        }
     }
 
     @Override
@@ -187,6 +212,13 @@ public class TikaJavaExecutor implements JavaExecutor
         metadataExtractor.extractMetadata(sourceMimetype, transformOptions, sourceFile, targetFile);
     }
 
+    public void extractMetadata(String transformName, String sourceMimetype, String targetMimetype,
+                                Map<String, String> transformOptions, MultipartFile multipartSourceFile, File targetFile) throws Exception
+    {
+        AbstractTikaMetadataExtractor metadataExtractor = this.metadataExtractor.get(transformName);
+        metadataExtractor.extractMetadata(sourceMimetype, transformOptions, multipartSourceFile, targetFile);
+    }
+
     /**
      * @deprecated The content repository's TikaPoweredMetadataExtracter provides no non test implementations.
      *             This code exists in case there are custom implementations, that need to be converted to T-Engines.
@@ -201,4 +233,13 @@ public class TikaJavaExecutor implements JavaExecutor
         AbstractTikaMetadataExtractor metadataExtractor = this.metadataEmbedder.get(transformName);
         metadataExtractor.embedMetadata(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
+
+    @SuppressWarnings("deprecation")
+    public void embedMetadata(String transformName, String sourceMimetype, String targetMimetype,
+                              Map<String, String> transformOptions, MultipartFile multipartSourceFile, File targetFile) throws Exception
+    {
+        AbstractTikaMetadataExtractor metadataExtractor = this.metadataEmbedder.get(transformName);
+        metadataExtractor.embedMetadata(sourceMimetype, targetMimetype, transformOptions, multipartSourceFile, targetFile);
+    }
+
 }

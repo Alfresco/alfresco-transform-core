@@ -26,13 +26,17 @@
  */
 package org.alfresco.transformer;
 
+import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transformer.executors.TikaJavaExecutor;
 import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.alfresco.transformer.util.TransformerNameUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -92,15 +96,21 @@ public class TikaController extends AbstractTransformerController
     {
         // See the Javadoc on this method and Probes.md for the choice of these values.
         // the livenessPercentage is a little large as Tika does tend to suffer from slow transforms that class with a gc.
-        return new ProbeTestTransform(this, "quick.pdf", "quick.txt",
-            60, 16, 400, 10240, 60 * 30 + 1, 60 * 15 + 20)
-        {
+        ProbeTestTransform result = new ProbeTestTransform(this, "quick.pdf", "quick.txt",
+                60, 16, 400, 10240, 60 * 30 + 1, 60 * 15 + 20) {
             @Override
-            protected void executeTransformCommand(File sourceFile, File targetFile)
-            {
+            protected void executeTransformCommand(File sourceFile, File targetFile) {
+                logger.info("ProbeTest with temp source file.");
                 transformImpl(PDF_BOX, MIMETYPE_PDF, MIMETYPE_TEXT_PLAIN, new HashMap<>(), sourceFile, targetFile);
             }
+            @Override
+            protected void executeTransformCommand(MultipartFile sourceMultipartFile, File targetFile) {
+                logger.info("ProbeTest without temp source file.");
+                transformImpl(PDF_BOX, MIMETYPE_PDF, MIMETYPE_TEXT_PLAIN, new HashMap<>(), sourceMultipartFile, targetFile);
+            }
         };
+        result.setUseTempSourceFile(false);
+        return result;
     }
 
     @Override
@@ -110,4 +120,22 @@ public class TikaController extends AbstractTransformerController
         transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
         javaExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
+
+    @Override
+    public void transformImpl(TransformServiceRegistry transformServiceRegistry, String requestTransformName,
+                              String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                              HttpServletRequest request, MultipartFile sourceMultipartFile, File targetFile){
+        logger.info("Will not create temp source file for: " + sourceMultipartFile.getName());
+        String transformName = TransformerNameUtil.getTransformerName(
+                transformServiceRegistry, sourceMimetype, sourceMultipartFile.getSize(), targetMimetype, requestTransformName, transformOptions);
+        transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
+        javaExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceMultipartFile, targetFile);
+    }
+
+    private void transformImpl(String requestTransformName, String sourceMimetype, String targetMimetype,
+                               Map<String, String> transformOptions, MultipartFile sourceMultipartFile, File targetFile) {
+        transformImpl(this.transformRegistry, requestTransformName, sourceMimetype, targetMimetype, transformOptions,
+                null, sourceMultipartFile, targetFile);
+    }
+
 }

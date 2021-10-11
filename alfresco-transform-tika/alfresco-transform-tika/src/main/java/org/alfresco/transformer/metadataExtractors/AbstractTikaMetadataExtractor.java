@@ -210,12 +210,20 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
     @Override
     @SuppressWarnings( "deprecation" )
     public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
-                                                     File sourceFile) throws Exception
+                                                     File sourceFile) throws Exception{
+        Map<String, Serializable> result = new HashMap<>();
+        try (InputStream inputStream = new FileInputStream(sourceFile)) {
+            result = extractMetadata(sourceMimetype, transformOptions, inputStream);
+        }
+        return result;
+    }
+
+    @Override
+    @SuppressWarnings( "deprecation" )
+    public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
+                                                     InputStream inputStream) throws Exception
     {
         Map<String, Serializable> rawProperties = new HashMap<>();
-
-        try (InputStream is = new FileInputStream(sourceFile))
-        {
             Parser parser = getParser();
 
             Metadata metadata = new Metadata();
@@ -237,7 +245,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
                 handler = new NullContentHandler();
             }
 
-            parser.parse(is, handler, metadata, context);
+            parser.parse(inputStream, handler, metadata, context);
 
             // First up, copy all the Tika metadata over
             // This allows people to map any of the Tika
@@ -297,8 +305,6 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
             //  existing namespace so that older properties
             //  files continue to map correctly
             rawProperties = extractSpecific(metadata, rawProperties, headers);
-        }
-
         return rawProperties;
     }
 
@@ -309,7 +315,15 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
      */
     @Override
     public void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                              File sourceFile, File targetFile) throws Exception
+                              File sourceFile, File targetFile) throws Exception {
+        try (InputStream inputStream = new FileInputStream(sourceFile)) {
+            embedMetadata(sourceMimetype, targetMimetype, transformOptions, inputStream, targetFile);
+        }
+    }
+
+    @Override
+    public void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                              InputStream inputStream, File targetFile) throws Exception
     {
         Embedder embedder = getEmbedder();
         if (embedder == null)
@@ -319,8 +333,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
 
         Metadata metadataToEmbed = getTikaMetadata(transformOptions);
 
-        try (InputStream inputStream = new FileInputStream(sourceFile);
-             OutputStream outputStream = new FileOutputStream(targetFile))
+        try (OutputStream outputStream = new FileOutputStream(targetFile))
         {
             embedder.embed(metadataToEmbed, inputStream, outputStream, null);
         }

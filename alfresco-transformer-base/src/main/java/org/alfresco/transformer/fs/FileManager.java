@@ -44,6 +44,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -56,6 +58,7 @@ import org.springframework.web.util.UriUtils;
  */
 public class FileManager
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileManager.class);
     public static final String SOURCE_FILE = "sourceFile";
     public static final String TARGET_FILE = "targetFile";
     private static final String FILENAME = "filename=";
@@ -220,6 +223,7 @@ public class FileManager
         request.setAttribute(SOURCE_FILE, file);
         save(multipartFile, file);
         LogEntry.setSource(filename, size);
+        LOGGER.info("Temporary source file created: " + file.getAbsolutePath());
         return file;
     }
 

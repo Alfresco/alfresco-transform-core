@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -27,6 +27,9 @@
 package org.alfresco.transformer;
 
 import static java.text.MessageFormat.format;
+import static org.alfresco.transformer.fs.FileManager.createSourceFile;
+import static org.alfresco.transformer.fs.FileManager.deleteFile;
+import static org.alfresco.transformer.fs.FileManager.save;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 import java.io.File;
@@ -39,19 +42,27 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.alfresco.transformer.util.TransformerNameUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
+
+import static org.springframework.util.StringUtils.getFilenameExtension;
+import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTempFile;
+
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * TransformController interface.
@@ -75,6 +86,72 @@ public interface TransformController
      */
     void transformImpl(String transformName, String sourceMimetype, String targetMimetype,
                        Map<String, String> transformOptions, File sourceFile, File targetFile);
+
+    default void transformImpl(String transformName, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                               Resource resource, String fileNameFromContentDisposition, String resourceExtension, File targetFile)
+    {
+        File tempSourceFile = null;
+        try
+        {
+            String extension = getFilenameExtension(fileNameFromContentDisposition) != null ? getFilenameExtension(fileNameFromContentDisposition) : resourceExtension;
+            tempSourceFile = createTempFile("source_", "." + extension);
+            save(resource, tempSourceFile);
+            LogEntry.setSource(fileNameFromContentDisposition, tempSourceFile.length());
+            logger.info("Temporary source file created: " + tempSourceFile.getAbsolutePath());
+            transformImpl(transformName, sourceMimetype, targetMimetype, transformOptions, tempSourceFile, targetFile);
+        } finally
+        {
+            try
+            {
+                if (tempSourceFile != null)
+                {
+                    deleteFile(tempSourceFile);
+                }
+            } catch (Exception e)
+            {
+                logger.error("Failed to delete source local temp file " + tempSourceFile, e);
+            }
+        }
+    }
+
+    /**
+     * A method which delegates control of source file creation to implementation class.
+     * Will create file by default.
+     *
+     * @param transformServiceRegistry registry to seek for a transformer name
+     * @param requestTransformName     the name of the transformer from the original request
+     * @param sourceMimetype           mimetype of the source
+     * @param targetMimetype           mimetype of the target
+     * @param transformOptions         transform options from the client
+     * @param request                  The transformation request
+     * @param sourceMultipartFile      Source multi part file from original request
+     * @param targetFile               the target file
+     */
+    default void transformImpl(TransformServiceRegistry transformServiceRegistry, String requestTransformName,
+                               String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                               HttpServletRequest request, MultipartFile sourceMultipartFile, File targetFile)
+    {
+        String transformName = TransformerNameUtil.getTransformerName(transformServiceRegistry, sourceMimetype, sourceMultipartFile.getSize(),
+                                                                      targetMimetype, requestTransformName, transformOptions);
+        File tempSourceFile = null;
+        try
+        {
+            tempSourceFile = createSourceFile(request, sourceMultipartFile);
+            transformImpl(transformName, sourceMimetype, targetMimetype, transformOptions, tempSourceFile, targetFile);
+        } finally
+        {
+            try
+            {
+                if (tempSourceFile != null)
+                {
+                    deleteFile(tempSourceFile);
+                }
+            } catch (Exception e)
+            {
+                logger.error("Failed to delete source local temp file " + tempSourceFile, e);
+            }
+        }
+    }
 
     /**
      * @deprecated use {@link #transformImpl(String, String, String, Map, File, File)} and timeout should be part of

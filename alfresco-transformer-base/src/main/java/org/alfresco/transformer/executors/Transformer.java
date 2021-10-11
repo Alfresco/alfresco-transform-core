@@ -4,7 +4,7 @@ package org.alfresco.transformer.executors;
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -28,6 +28,7 @@ package org.alfresco.transformer.executors;
  */
 
 import org.alfresco.transform.exceptions.TransformException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.Map;
@@ -94,6 +95,47 @@ public interface Transformer
         }
     }
 
+    default void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                           MultipartFile sourceMultipartFile, File targetFile) throws TransformException
+    {
+        try
+        {
+            final String transformName = transformOptions.remove(TRANSFORM_NAME_PARAMETER);
+            if (MIMETYPE_METADATA_EXTRACT.equals(targetMimetype))
+            {
+                extractMetadata(transformName, sourceMimetype, targetMimetype, transformOptions, sourceMultipartFile, targetFile);
+            }
+            else if (MIMETYPE_METADATA_EMBED.equals(targetMimetype))
+            {
+                embedMetadata(transformName, sourceMimetype, targetMimetype, transformOptions, sourceMultipartFile, targetFile);
+            }
+            else
+            {
+                transform(transformName, sourceMimetype, targetMimetype, transformOptions, sourceMultipartFile, targetFile);
+            }
+        } catch (TransformException e)
+        {
+            throw e;
+        } catch (IllegalArgumentException e)
+        {
+            throw new TransformException(BAD_REQUEST.value(), getMessage(e), e);
+        } catch (Exception e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), getMessage(e), e);
+        }
+
+        if (!targetFile.exists())
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                                         "Transformer failed to create an output file. Target file does not exist.");
+        }
+        if (sourceMultipartFile.getSize() > 0 && targetFile.length() == 0)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                                         "Transformer failed to create an output file. Target file is empty but source file was not empty.");
+        }
+    }
+
     private static String getMessage(Exception e)
     {
         return e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
@@ -105,9 +147,21 @@ public interface Transformer
     {
     }
 
+    default void transform(String transformName, String sourceMimetype, String targetMimetype,
+                           Map<String, String> transformOptions,
+                           MultipartFile sourceMultipartFile, File targetFile) throws Exception
+    {
+    }
+
     default void extractMetadata(String transformName, String sourceMimetype, String targetMimetype,
                                  Map<String, String> transformOptions,
                                  File sourceFile, File targetFile) throws Exception
+    {
+    }
+
+    default void extractMetadata(String transformName, String sourceMimetype, String targetMimetype,
+                                 Map<String, String> transformOptions,
+                                 MultipartFile sourceMultipartFile, File targetFile) throws Exception
     {
     }
 
@@ -119,6 +173,12 @@ public interface Transformer
     default void embedMetadata(String transformName, String sourceMimetype, String targetMimetype,
                                Map<String, String> transformOptions,
                                File sourceFile, File targetFile) throws Exception
+    {
+    }
+
+    default void embedMetadata(String transformName, String sourceMimetype, String targetMimetype,
+                               Map<String, String> transformOptions,
+                               MultipartFile sourceMultipartFile, File targetFile) throws Exception
     {
     }
 }

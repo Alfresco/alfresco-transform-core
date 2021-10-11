@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,17 +26,23 @@
  */
 package org.alfresco.transformer;
 
+import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.Collections;
 import java.util.Map;
+
+import static org.alfresco.transformer.fs.FileManager.createSourceFile;
+import static org.alfresco.transformer.fs.FileManager.deleteFile;
 
 /**
  * Controller for the Docker based LibreOffice transformer.
@@ -118,16 +124,35 @@ public class LibreOfficeController extends AbstractTransformerController
     }
 
     @Override
-    protected String getTransformerName(final File sourceFile, final String sourceMimetype,
-                                        final String targetMimetype, final Map<String, String> transformOptions)
-    {
-        return null; // does not matter what value is returned, as it is not used because there is only one.
-    }
-
-    @Override
     public void transformImpl(String transformName, String sourceMimetype, String targetMimetype,
                                  Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
         javaExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
+
+    @Override
+    public void transformImpl(TransformServiceRegistry transformServiceRegistry, String requestTransformName,
+                              String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                              HttpServletRequest request, MultipartFile sourceMultipartFile, File targetFile)
+    {
+        File tempSourceFile = null;
+        try
+        {
+            tempSourceFile = createSourceFile(request, sourceMultipartFile);
+            transformImpl(null, sourceMimetype, targetMimetype, transformOptions, tempSourceFile, targetFile);
+        } finally
+        {
+            try
+            {
+                if (tempSourceFile != null)
+                {
+                    deleteFile(tempSourceFile);
+                }
+            } catch (Exception e)
+            {
+                logger.error("Failed to delete source local temp file " + tempSourceFile, e);
+            }
+        }
+    }
+
 }

@@ -30,6 +30,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -135,10 +136,28 @@ public abstract class AbstractMetadataExtractor
     public abstract Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
                                                               File sourceFile) throws Exception;
 
+    public abstract Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
+                                                              InputStream multipartSourceFileInputStream) throws Exception;
+
     public void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
                               File sourceFile, File targetFile) throws Exception
     {
         // Default nothing, as embedding is not supported in most cases
+    }
+
+    public void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                              InputStream multipartSourceFileInputStream, File targetFile) throws Exception
+    {
+        // Default nothing, as embedding is not supported in most cases
+    }
+
+    public void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                              MultipartFile sourceMultipartFile, File targetFile) throws Exception
+    {
+        try (InputStream inputStream = sourceMultipartFile.getInputStream())
+        {
+            embedMetadata(sourceMimetype, targetMimetype, transformOptions, inputStream, targetFile);
+        }
     }
 
     protected Map<String, Serializable> getMetadata(Map<String, String> transformOptions)
@@ -485,6 +504,21 @@ public abstract class AbstractMetadataExtractor
 
         }
         finally
+        {
+            extractMapping.set(null);
+        }
+    }
+
+    public void extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
+                                MultipartFile multipartSourceFile, File targetFile) throws Exception
+    {
+        Map<String, Set<String>> mapping = getExtractMappingFromOptions(transformOptions, defaultExtractMapping);
+        try (InputStream multipartSourceFileInputStream = multipartSourceFile.getInputStream())
+        {
+            extractMapping.set(mapping);
+            Map<String, Serializable> metadata = extractMetadata(sourceMimetype, transformOptions, multipartSourceFileInputStream);
+            mapMetadataAndWrite(targetFile, metadata, mapping);
+        } finally
         {
             extractMapping.set(null);
         }

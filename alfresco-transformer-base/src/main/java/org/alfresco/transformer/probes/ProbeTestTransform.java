@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -29,12 +29,15 @@ package org.alfresco.transformer.probes;
 import static org.alfresco.transformer.fs.FileManager.SOURCE_FILE;
 import static org.alfresco.transformer.fs.FileManager.TARGET_FILE;
 import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTempFile;
+import static org.alfresco.transformer.fs.FileManager.deleteFile;
 import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -49,6 +52,7 @@ import org.alfresco.transformer.AbstractTransformerController;
 import org.alfresco.transformer.logging.LogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Provides the logic performing test transformations by the live and ready probes.
@@ -93,6 +97,8 @@ public abstract class ProbeTestTransform
     private final long livenessTransformPeriod;
     private final long maxTransformCount;
     private long maxTransformTime;
+
+    private boolean useTempSourceFile = true;
 
     private final AtomicBoolean initialised = new AtomicBoolean(false);
     private final AtomicBoolean readySent = new AtomicBoolean(false);
@@ -216,9 +222,40 @@ public abstract class ProbeTestTransform
             while (nextTransformTime < start);
         }
 
-        File sourceFile = getSourceFile(request, isLiveProbe);
         File targetFile = getTargetFile(request);
-        executeTransformCommand(sourceFile, targetFile);
+        if (useTempSourceFile)
+        {
+            File sourceFile = null;
+            try
+            {
+                sourceFile = getSourceFile(request, isLiveProbe);
+                executeTransformCommand(sourceFile, targetFile);
+            } finally
+            {
+                try
+                {
+                    if (sourceFile != null)
+                    {
+                        deleteFile(sourceFile);
+                    }
+                } catch (Exception e)
+                {
+                    logger.error("Failed to delete source local temp file " + sourceFile, e);
+                }
+            }
+        }
+        else
+        {
+            try (InputStream inputStream = this.getClass().getResourceAsStream('/' + sourceFilename))
+            {
+                MyMultipartFile multipartFile = new MyMultipartFile(inputStream.readAllBytes());
+                executeTransformCommand(multipartFile, targetFile);
+            } catch (IOException e)
+            {
+                throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                                             getMessagePrefix(isLiveProbe) + "Failed to open stream of source file", e);
+            }
+        }
 
         long time = System.currentTimeMillis() - start;
         String message = "Transform " + time + "ms";
@@ -324,6 +361,9 @@ public abstract class ProbeTestTransform
 
     protected abstract void executeTransformCommand(File sourceFile, File targetFile);
 
+    protected void executeTransformCommand(MultipartFile sourceMultipartFile, File targetFile) {
+    }
+
     private void checkTargetFile(File targetFile, boolean isLiveProbe, String message)
     {
         String probeMessage = getProbeMessage(isLiveProbe);
@@ -368,4 +408,68 @@ public abstract class ProbeTestTransform
     {
         return normalTime;
     }
+
+    public void setUseTempSourceFile(boolean useTempSourceFile)
+    {
+        this.useTempSourceFile = useTempSourceFile;
+    }
+
+    private class MyMultipartFile implements MultipartFile
+    {
+        private final byte[] fileContent;
+
+        public MyMultipartFile(byte[] fileContent)
+        {
+            this.fileContent = fileContent;
+        }
+
+        @Override
+        public String getName()
+        {
+            return null;
+        }
+
+        @Override
+        public String getOriginalFilename()
+        {
+            return null;
+        }
+
+        @Override
+        public String getContentType()
+        {
+            return null;
+        }
+
+        @Override
+        public boolean isEmpty()
+        {
+            return fileContent == null || fileContent.length == 0;
+        }
+
+        @Override
+        public long getSize()
+        {
+            return fileContent.length;
+        }
+
+        @Override
+        public byte[] getBytes()
+        {
+            return fileContent;
+        }
+
+        @Override
+        public InputStream getInputStream()
+        {
+            return new ByteArrayInputStream(fileContent);
+        }
+
+        @Override
+        public void transferTo(File dest) throws IOException, IllegalStateException
+        {
+            new FileOutputStream(dest).write(fileContent);
+        }
+    }
+
 }

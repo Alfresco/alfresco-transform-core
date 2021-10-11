@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005-2020 Alfresco Software Limited
+ * Copyright (C) 2005-2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -35,6 +35,8 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -82,8 +84,17 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractor implements 
     }
 
     @Override
+    public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions, File sourceFile) throws Exception
+    {
+        try (InputStream inputStream = new FileInputStream(sourceFile))
+        {
+            return extractMetadata(sourceMimetype, transformOptions, inputStream);
+        }
+    }
+
+    @Override
     public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
-                                                     File sourceFile) throws Exception
+                                                     InputStream inputStream) throws Exception
     {
         final Map<String, Serializable> rawProperties = new HashMap<>();
 
@@ -163,17 +174,18 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractor implements 
             }
         };
 
+        ByteArrayOutputStream inputStreamCopy = new ByteArrayOutputStream();
+        inputStream.transferTo(inputStreamCopy);
         String charsetGuess = "UTF-8";
         int tries = 0;
         while (tries < 3)
         {
             rawProperties.clear();
-            Reader r = null;
 
-            try (InputStream cis = new FileInputStream(sourceFile))
+            try (InputStream clonedStream = new ByteArrayInputStream(inputStreamCopy.toByteArray());
+                 Reader r = new InputStreamReader(clonedStream, charsetGuess))
             {
                 // TODO: for now, use default charset; we should attempt to map from html meta-data
-                r = new InputStreamReader(cis, charsetGuess);
                 HTMLEditorKit.Parser parser = new ParserDelegator();
                 parser.parse(r, callback, tries > 0);
                 break;
@@ -188,13 +200,13 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractor implements 
                     charsetGuess = charsetGuess.substring(begin + 8, charsetGuess.length());
                 }
             }
-            finally
-            {
-                if (r != null)
-                {
-                    r.close();
-                }
-            }
+        }
+        try
+        {
+            inputStreamCopy.close();
+        } catch (Exception e)
+        {
+            logger.warn("Unable to close stream", e);
         }
 
         return rawProperties;
