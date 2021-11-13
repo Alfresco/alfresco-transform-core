@@ -71,7 +71,7 @@ public class AIOTransformRegistryTest
     {
         aioTransformerRegistry.registerTransformer(new SelectingTransformer());
         aioTransformerRegistry.registerTransformer(new TikaJavaExecutor());
-
+        aioTransformerRegistry.registerCombinedTransformers();
     }
 
     private void writeToFile(File file, String content, String encoding) throws Exception
@@ -153,15 +153,6 @@ public class AIOTransformRegistryTest
             String actualId = aioTransformerRegistry.getByTransformName(transform).getTransformerId();
             assertEquals("misc", actualId, "Wrong mapping for transform "+transform);
         }
-    }
-
-    @Test
-    public void testDuplicateTransformsException() throws Exception
-    {
-        assertThrows(Exception.class, () ->{
-            // The Misc transformers are already registered
-            aioTransformerRegistry.registerTransformer(new SelectingTransformer());
-        });
     }
 
     // Test copied from Misc (HtmlParserContentTransformerTest) See ATS-712 aioTransformerRegistry - html
