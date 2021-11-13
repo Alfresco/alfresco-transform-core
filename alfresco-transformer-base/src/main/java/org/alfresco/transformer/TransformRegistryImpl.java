@@ -69,7 +69,7 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
         engineConfig = resourceLoader.getResource(locationFromProperty);
         TransformConfig transformConfig = getTransformConfig();
         // There is only one TransformConfig in a T-Engine so the following call is fine
-        CombinedTransformConfig.combineAndRegister(transformConfig, locationFromProperty, null, this);
+        CombinedTransformConfig.combineAndRegister(transformConfig, locationFromProperty, "---", this);
     }
 
     // Holds the structures used by AbstractTransformRegistry to look up what is supported.

@@ -503,7 +503,10 @@ public abstract class AbstractTransformerControllerTest
     private Transformer buildTransformer(String sourceMediaType, String targetMediaType)
     {
         Set<SupportedSourceAndTarget> supportedSourceAndTargetList = ImmutableSet.of(
-            new SupportedSourceAndTarget(sourceMediaType, targetMediaType, -1));
+            SupportedSourceAndTarget.builder()
+                .withSourceMediaType(sourceMediaType)
+                .withTargetMediaType(targetMediaType)
+                .build());
 
         Transformer transformer = new Transformer();
         transformer.setSupportedSourceAndTargetList(supportedSourceAndTargetList);
