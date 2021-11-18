@@ -31,18 +31,11 @@ import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
 import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
 import org.alfresco.transformer.executors.TikaJavaExecutor;
-import org.alfresco.transformer.executors.Transformer;
 import org.alfresco.transformer.transformers.SelectingTransformer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Configuration
 public class AIOCustomConfig
@@ -95,26 +88,12 @@ public class AIOCustomConfig
     public TransformServiceRegistry aioTransformRegistry() throws Exception
     {
         AIOTransformRegistry aioTransformRegistry = new AIOTransformRegistry();
-
-        // T-Engines are sorted by name so they are combined in the same order as in the T-Router
-        // and Content Repository with individual T-Engines. See TransformersConfigRegistry#retrieveRemoteConfig and
-        // LocalTransformServiceRegistry#getTEngineUrlsSortedByName.
-        for (Transformer tEngine : getTEnginesSortedByName())
-        {
-            aioTransformRegistry.registerTransformer(tEngine); // now a poor name - should be combinedTransformers
-        }
+        aioTransformRegistry.registerTransformer(new SelectingTransformer());
+        aioTransformRegistry.registerTransformer(new TikaJavaExecutor(notExtractBookmarksTextDefault));
+        aioTransformRegistry.registerTransformer(new ImageMagickCommandExecutor(imageMagickExePath, imageMagickDynPath, imageMagickRootPath, imageMagickCodersPath, imageMagickConfigPath));
+        aioTransformRegistry.registerTransformer(new LibreOfficeJavaExecutor(libreofficePath, libreofficeMaxTasksPerProcess, libreofficeTimeout, libreofficePortNumbers, libreofficeTemplateProfileDir, libreofficeIsEnabled));
+        aioTransformRegistry.registerTransformer(new PdfRendererCommandExecutor(pdfRendererPath));
         aioTransformRegistry.registerCombinedTransformers();
         return aioTransformRegistry;
-    }
-
-    List<Transformer> getTEnginesSortedByName()
-    {
-        return Stream.of(new SelectingTransformer(),
-                new TikaJavaExecutor(notExtractBookmarksTextDefault),
-                new ImageMagickCommandExecutor(imageMagickExePath, imageMagickDynPath, imageMagickRootPath, imageMagickCodersPath, imageMagickConfigPath),
-                new LibreOfficeJavaExecutor(libreofficePath, libreofficeMaxTasksPerProcess, libreofficeTimeout, libreofficePortNumbers, libreofficeTemplateProfileDir, libreofficeIsEnabled),
-                new PdfRendererCommandExecutor(pdfRendererPath))
-                .sorted(Comparator.comparing(Transformer::getTransformerId))
-                .collect(Collectors.toList());
     }
 }
