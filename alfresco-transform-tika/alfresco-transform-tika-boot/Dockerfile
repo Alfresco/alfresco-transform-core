@@ -21,7 +21,7 @@ COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     curl -s -S $EXIFTOOL_URL -o ${EXIFTOOL_FOLDER}.tgz && \
     tar xzf ${EXIFTOOL_FOLDER}.tgz && \
-    yum -y install perl perl-ExtUtils-MakeMaker && \
+    yum -y install perl perl-ExtUtils-MakeMaker make && \
     (cd ./${EXIFTOOL_FOLDER} && \
     perl Makefile.PL && \
     make && \
