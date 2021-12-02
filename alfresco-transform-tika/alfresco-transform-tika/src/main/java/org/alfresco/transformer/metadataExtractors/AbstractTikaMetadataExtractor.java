@@ -57,10 +57,8 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -260,7 +258,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
             //  to work without needing any changes
 
             // The simple ones
-            putRawValue(KEY_AUTHOR, getAuthor(metadata), rawProperties);
+            putRawValue(KEY_AUTHOR, getMetadataValue(metadata, TikaCoreProperties.CREATOR), rawProperties);
             putRawValue(KEY_TITLE, getMetadataValue(metadata, TikaCoreProperties.TITLE), rawProperties);
             putRawValue(KEY_COMMENTS, getMetadataValue(metadata, TikaCoreProperties.COMMENTS), rawProperties);
 
@@ -391,28 +389,11 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
         return values.length == 0 ? null : (values.length == 1 ? values[0] : values);
     }
 
-    private Serializable getAuthor(Metadata metadata)
-    {
-        //heuristic to get single author in case of multiple ones - backward compatibility
-        if (!metadata.isMultiValued(TikaCoreProperties.CREATOR))
-        {
-            return metadata.get(TikaCoreProperties.CREATOR);
-        }
-        List<String> authors = Stream.of(metadata.getValues(TikaCoreProperties.CREATOR))
-                                     .filter(Objects::nonNull)
-                                     .map(String::strip)
-                                     .filter(s -> !s.isEmpty())
-                                     .collect(Collectors.toList());
-        Collections.reverse(authors);
-        return authors.stream().findFirst().orElse(null);
-    }
-
     private String getMetadataValue(Metadata metadata, Property key)
     {
         if (metadata.isMultiValued(key))
         {
             String[] parts = metadata.getValues(key);
-
             return Stream.of(parts)
                          .filter(Objects::nonNull)
                          .map(String::strip)
