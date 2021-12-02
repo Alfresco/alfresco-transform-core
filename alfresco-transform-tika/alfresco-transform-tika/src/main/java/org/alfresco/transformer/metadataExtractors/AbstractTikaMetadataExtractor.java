@@ -60,7 +60,10 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The parent of all Metadata Extractors which use Apache Tika under the hood. This handles all the
@@ -390,19 +393,12 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
         if (metadata.isMultiValued(key))
         {
             String[] parts = metadata.getValues(key);
-
-            // use Set to prevent duplicates
-            Set<String> value = new LinkedHashSet<>(parts.length);
-
-            for (int i = 0; i < parts.length; i++)
-            {
-                value.add(parts[i]);
-            }
-
-            String valueStr = value.toString();
-
-            // remove leading/trailing braces []
-            return valueStr.substring(1, valueStr.length() - 1);
+            return Stream.of(parts)
+                         .filter(Objects::nonNull)
+                         .map(String::strip)
+                         .filter(s -> !s.isEmpty())
+                         .distinct()
+                         .collect(Collectors.joining(", "));
         }
         else
         {
