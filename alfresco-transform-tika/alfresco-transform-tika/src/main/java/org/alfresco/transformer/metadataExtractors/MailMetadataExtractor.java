@@ -88,7 +88,7 @@ public class MailMetadataExtractor extends AbstractTikaMetadataExtractor
     protected Map<String, Serializable> extractSpecific(Metadata metadata,
                                                         Map<String, Serializable> properties, Map<String,String> headers)
     {
-        putRawValue(KEY_ORIGINATOR, metadata.get(TikaCoreProperties.CREATED), properties);
+        putRawValue(KEY_ORIGINATOR, metadata.get(TikaCoreProperties.CREATOR), properties);
         putRawValue(KEY_SUBJECT, metadata.get(TikaCoreProperties.TITLE), properties);
         putRawValue(KEY_DESCRIPTION, metadata.get(TikaCoreProperties.SUBJECT), properties);
         putRawValue(KEY_SENT_DATE, metadata.get(TikaCoreProperties.MODIFIED), properties);
