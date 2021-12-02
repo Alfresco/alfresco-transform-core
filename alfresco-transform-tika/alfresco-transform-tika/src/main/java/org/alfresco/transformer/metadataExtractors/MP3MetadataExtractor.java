@@ -27,6 +27,7 @@
 package org.alfresco.transformer.metadataExtractors;
 
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.metadata.XMPDM;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.mp3.Mp3Parser;
@@ -86,7 +87,6 @@ public class MP3MetadataExtractor extends TikaAudioMetadataExtractor
         return new Mp3Parser();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected Map<String, Serializable> extractSpecific(Metadata metadata,
                                                         Map<String, Serializable> properties, Map<String,String> headers)
@@ -98,7 +98,7 @@ public class MP3MetadataExtractor extends TikaAudioMetadataExtractor
         // We only need these for people who had pre-existing mapping
         //  properties from before the proper audio model was added
         putRawValue(KEY_ALBUM_TITLE, metadata.get(XMPDM.ALBUM), properties);
-        putRawValue(KEY_SONG_TITLE, metadata.get(Metadata.TITLE), properties);
+        putRawValue(KEY_SONG_TITLE, metadata.get(TikaCoreProperties.TITLE), properties);
         putRawValue(KEY_ARTIST, metadata.get(XMPDM.ARTIST), properties);
         putRawValue(KEY_COMMENT, metadata.get(XMPDM.LOG_COMMENT), properties);
         putRawValue(KEY_TRACK_NUMBER, metadata.get(XMPDM.TRACK_NUMBER), properties);

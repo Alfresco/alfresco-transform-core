@@ -27,6 +27,7 @@
 package org.alfresco.transformer.metadataExtractors;
 
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.odf.OpenDocumentParser;
 import org.joda.time.format.DateTimeFormat;
@@ -93,19 +94,18 @@ public class OpenDocumentMetadataExtractor extends AbstractTikaMetadataExtractor
         return new OpenDocumentParser();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected Map<String, Serializable> extractSpecific(Metadata metadata,
                                                         Map<String, Serializable> properties, Map<String, String> headers)
     {
-        putRawValue(KEY_CREATION_DATE, getDateOrNull(metadata.get(Metadata.CREATION_DATE)), properties);
-        putRawValue(KEY_CREATOR, metadata.get(Metadata.CREATOR), properties);
-        putRawValue(KEY_DATE, getDateOrNull(metadata.get(Metadata.DATE)), properties);
-        putRawValue(KEY_DESCRIPTION, metadata.get(Metadata.DESCRIPTION), properties);
+        putRawValue(KEY_CREATION_DATE, getDateOrNull(metadata.get(TikaCoreProperties.CREATED)), properties);
+        putRawValue(KEY_CREATOR, metadata.get(TikaCoreProperties.CREATOR), properties);
+        putRawValue(KEY_DATE, getDateOrNull(metadata.get(TikaCoreProperties.MODIFIED)), properties);
+        putRawValue(KEY_DESCRIPTION, metadata.get(TikaCoreProperties.DESCRIPTION), properties);
         putRawValue(KEY_GENERATOR, metadata.get("generator"), properties);
         putRawValue(KEY_INITIAL_CREATOR, metadata.get("initial-creator"), properties);
-        putRawValue(KEY_KEYWORD, metadata.get(Metadata.KEYWORDS), properties);
-        putRawValue(KEY_LANGUAGE, metadata.get(Metadata.LANGUAGE), properties);
+        putRawValue(KEY_KEYWORD, metadata.get(TikaCoreProperties.SUBJECT), properties);
+        putRawValue(KEY_LANGUAGE, metadata.get(TikaCoreProperties.LANGUAGE), properties);
 
         // Handle user-defined properties dynamically
         Map<String, Set<String>> mapping = super.getExtractMapping();

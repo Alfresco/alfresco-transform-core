@@ -27,6 +27,7 @@
 package org.alfresco.transformer.metadataExtractors;
 
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.dwg.DWGParser;
 import org.slf4j.Logger;
@@ -64,13 +65,12 @@ public class DWGMetadataExtractor extends AbstractTikaMetadataExtractor
         super(logger);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected Map<String, Serializable> extractSpecific(Metadata metadata,
                                                         Map<String, Serializable> properties, Map<String,String> headers)
     {
-        putRawValue(KEY_KEYWORD, metadata.get(Metadata.KEYWORDS), properties);
-        putRawValue(KEY_LAST_AUTHOR, metadata.get(Metadata.LAST_AUTHOR), properties);
+        putRawValue(KEY_KEYWORD, metadata.get(TikaCoreProperties.SUBJECT), properties);
+        putRawValue(KEY_LAST_AUTHOR, metadata.get(TikaCoreProperties.MODIFIED), properties);
         return properties;
     }
 

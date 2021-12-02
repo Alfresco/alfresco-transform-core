@@ -29,6 +29,8 @@ package org.alfresco.transformer.metadataExtractors;
 import org.apache.tika.embedder.Embedder;
 import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.Property;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.ContentHandlerDecorator;
@@ -83,7 +85,6 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
     protected static final String KEY_CREATED = "created";
     protected static final String KEY_DESCRIPTION = "description";
     protected static final String KEY_COMMENTS = "comments";
-    protected static final String KEY_TAGS = "dc:subject";
 
     private static final String METADATA_SEPARATOR = ",";
 
@@ -208,7 +209,6 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
     }
 
     @Override
-    @SuppressWarnings( "deprecation" )
     public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
                                                      File sourceFile) throws Exception
     {
@@ -245,7 +245,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
             for (String tikaKey : metadata.names())
             {
                 // TODO review this change (part of MNT-15267) - should we really force string concatenation here !?
-                putRawValue(tikaKey, getMetadataValue(metadata, tikaKey), rawProperties);
+                putRawValue(tikaKey, getMetadataValue(metadata, Property.internalText(tikaKey)), rawProperties);
             }
 
             // Now, map the common Tika metadata keys onto
@@ -254,17 +254,14 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
             //  to work without needing any changes
 
             // The simple ones
-            putRawValue(KEY_AUTHOR, getMetadataValue(metadata, Metadata.AUTHOR), rawProperties);
-            putRawValue(KEY_TITLE, getMetadataValue(metadata, Metadata.TITLE), rawProperties);
-            putRawValue(KEY_COMMENTS, getMetadataValue(metadata, Metadata.COMMENTS), rawProperties);
-
-            // Tags
-            putRawValue(KEY_TAGS, getMetadataValues(metadata, KEY_TAGS), rawProperties);
+            putRawValue(KEY_AUTHOR, getMetadataValue(metadata, TikaCoreProperties.CREATOR), rawProperties);
+            putRawValue(KEY_TITLE, getMetadataValue(metadata, TikaCoreProperties.TITLE), rawProperties);
+            putRawValue(KEY_COMMENTS, getMetadataValue(metadata, TikaCoreProperties.COMMENTS), rawProperties);
 
             // Get the subject and description, despite things not
             //  being nearly as consistent as one might hope
-            String subject = getMetadataValue(metadata, Metadata.SUBJECT);
-            String description = getMetadataValue(metadata, Metadata.DESCRIPTION);
+            String subject = getMetadataValue(metadata, TikaCoreProperties.SUBJECT);
+            String description = getMetadataValue(metadata, TikaCoreProperties.DESCRIPTION);
             if(subject != null && description != null)
             {
                 putRawValue(KEY_DESCRIPTION, description, rawProperties);
@@ -282,13 +279,13 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
             }
 
             // Try for the dates two different ways too
-            if(metadata.get(Metadata.CREATION_DATE) != null)
+            if(metadata.get(TikaCoreProperties.CREATED) != null)
             {
-                putRawValue(KEY_CREATED, metadata.get(Metadata.CREATION_DATE), rawProperties);
+                putRawValue(KEY_CREATED, metadata.get(TikaCoreProperties.CREATED), rawProperties);
             }
-            else if(metadata.get(Metadata.DATE) != null)
+            else if(metadata.get(TikaCoreProperties.MODIFIED) != null)
             {
-                putRawValue(KEY_CREATED, metadata.get(Metadata.DATE), rawProperties);
+                putRawValue(KEY_CREATED, metadata.get(TikaCoreProperties.MODIFIED), rawProperties);
             }
 
             // If people created a specific instance
@@ -388,7 +385,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
         return values.length == 0 ? null : (values.length == 1 ? values[0] : values);
     }
 
-    private String getMetadataValue(Metadata metadata, String key)
+    private String getMetadataValue(Metadata metadata, Property key)
     {
         if (metadata.isMultiValued(key))
         {

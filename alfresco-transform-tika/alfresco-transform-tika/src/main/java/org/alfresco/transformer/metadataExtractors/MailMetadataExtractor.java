@@ -26,7 +26,9 @@
  */
 package org.alfresco.transformer.metadataExtractors;
 
+import org.apache.tika.metadata.Message;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.microsoft.OfficeParser;
 import org.slf4j.Logger;
@@ -82,26 +84,25 @@ public class MailMetadataExtractor extends AbstractTikaMetadataExtractor
         return new OfficeParser();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected Map<String, Serializable> extractSpecific(Metadata metadata,
                                                         Map<String, Serializable> properties, Map<String,String> headers)
     {
-        putRawValue(KEY_ORIGINATOR, metadata.get(Metadata.AUTHOR), properties);
-        putRawValue(KEY_SUBJECT, metadata.get(Metadata.TITLE), properties);
-        putRawValue(KEY_DESCRIPTION, metadata.get(Metadata.SUBJECT), properties);
-        putRawValue(KEY_SENT_DATE, metadata.get(Metadata.LAST_SAVED), properties);
+        putRawValue(KEY_ORIGINATOR, metadata.get(TikaCoreProperties.CREATED), properties);
+        putRawValue(KEY_SUBJECT, metadata.get(TikaCoreProperties.TITLE), properties);
+        putRawValue(KEY_DESCRIPTION, metadata.get(TikaCoreProperties.SUBJECT), properties);
+        putRawValue(KEY_SENT_DATE, metadata.get(TikaCoreProperties.MODIFIED), properties);
 
         // Store the TO, but not cc/bcc in the addressee field
-        putRawValue(KEY_ADDRESSEE, metadata.get(Metadata.MESSAGE_TO), properties);
+        putRawValue(KEY_ADDRESSEE, metadata.get(Message.MESSAGE_TO), properties);
 
         // Store each of To, CC and BCC in their own fields
-        putRawValue(KEY_TO_NAMES, metadata.getValues(Metadata.MESSAGE_TO), properties);
-        putRawValue(KEY_CC_NAMES, metadata.getValues(Metadata.MESSAGE_CC), properties);
-        putRawValue(KEY_BCC_NAMES, metadata.getValues(Metadata.MESSAGE_BCC), properties);
+        putRawValue(KEY_TO_NAMES, metadata.getValues(Message.MESSAGE_TO), properties);
+        putRawValue(KEY_CC_NAMES, metadata.getValues(Message.MESSAGE_CC), properties);
+        putRawValue(KEY_BCC_NAMES, metadata.getValues(Message.MESSAGE_BCC), properties);
 
         // But store all email addresses (to/cc/bcc) in the addresses field
-        putRawValue(KEY_ADDRESSEES, metadata.getValues(Metadata.MESSAGE_RECIPIENT_ADDRESS), properties);
+        putRawValue(KEY_ADDRESSEES, metadata.getValues(Message.MESSAGE_RECIPIENT_ADDRESS), properties);
 
         return properties;
     }
