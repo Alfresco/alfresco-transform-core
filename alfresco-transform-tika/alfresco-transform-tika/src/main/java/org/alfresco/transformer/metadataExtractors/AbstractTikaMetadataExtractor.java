@@ -29,6 +29,7 @@ package org.alfresco.transformer.metadataExtractors;
 import org.apache.tika.embedder.Embedder;
 import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.OfficeOpenXMLCore;
 import org.apache.tika.metadata.Property;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
@@ -263,7 +264,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
 
             // Get the subject and description, despite things not
             //  being nearly as consistent as one might hope
-            String subject = getMetadataValue(metadata, TikaCoreProperties.SUBJECT);
+            String subject = getMetadataValue(metadata, OfficeOpenXMLCore.SUBJECT);
             String description = getMetadataValue(metadata, TikaCoreProperties.DESCRIPTION);
             if(subject != null && description != null)
             {
