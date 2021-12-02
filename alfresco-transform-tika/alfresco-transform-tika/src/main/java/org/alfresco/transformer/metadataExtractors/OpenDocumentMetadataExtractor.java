@@ -111,7 +111,7 @@ public class OpenDocumentMetadataExtractor extends AbstractTikaMetadataExtractor
                 return new TeeContentHandler(superHandler, creatorHandler);
             }
         });
-        return new OpenDocumentParser();
+        return parser;
     }
 
     @Override
