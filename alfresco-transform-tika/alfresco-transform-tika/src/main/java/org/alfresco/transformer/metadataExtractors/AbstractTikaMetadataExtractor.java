@@ -55,14 +55,11 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -89,8 +86,6 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
     protected static final String KEY_CREATED = "created";
     protected static final String KEY_DESCRIPTION = "description";
     protected static final String KEY_COMMENTS = "comments";
-
-    private static final String METADATA_SEPARATOR = ",";
 
     private final DateTimeFormatter tikaUTCDateFormater;
     private final DateTimeFormatter tikaDateFormater;
@@ -367,44 +362,25 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
         return metadataToEmbed;
     }
 
-    private Serializable getMetadataValues(Metadata metadata, String key)
-    {
-        // Use Set to prevent duplicates.
-        Set<String> valuesSet = new LinkedHashSet<String>();
-        String[] values = metadata.getValues(key);
-
-        for (int i = 0; i < values.length; i++)
-        {
-            String[] parts = values[i].split(METADATA_SEPARATOR);
-
-            for (String subPart : parts)
-            {
-                valuesSet.add(subPart.trim());
-            }
-        }
-
-        Object[] objArrayValues = valuesSet.toArray();
-        values = Arrays.copyOf(objArrayValues, objArrayValues.length, String[].class);
-
-        return values.length == 0 ? null : (values.length == 1 ? values[0] : values);
-    }
-
     private String getMetadataValue(Metadata metadata, Property key)
     {
         if (metadata.isMultiValued(key))
         {
-            String[] parts = metadata.getValues(key);
-            return Stream.of(parts)
-                         .filter(Objects::nonNull)
-                         .map(String::strip)
-                         .filter(s -> !s.isEmpty())
-                         .distinct()
-                         .collect(Collectors.joining(", "));
+            return distinct(metadata.getValues(key)).collect(Collectors.joining(", "));
         }
         else
         {
             return metadata.get(key);
         }
+    }
+
+    protected static Stream<String> distinct(final String[] strings)
+    {
+        return Stream.of(strings)
+                     .filter(Objects::nonNull)
+                     .map(String::strip)
+                     .filter(s -> !s.isEmpty())
+                     .distinct();
     }
 
     /**

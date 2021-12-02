@@ -26,19 +26,28 @@
  */
 package org.alfresco.transformer.metadataExtractors;
 
+import static org.apache.tika.metadata.DublinCore.NAMESPACE_URI_DC;
+
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
+import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
+import org.apache.tika.parser.odf.OpenDocumentMetaParser;
 import org.apache.tika.parser.odf.OpenDocumentParser;
+import org.apache.tika.parser.xml.ElementMetadataHandler;
+import org.apache.tika.sax.TeeContentHandler;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.ContentHandler;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * {@code "application/vnd.oasis.opendocument..."} and {@code "applicationvnd.oasis.opendocument..."} metadata extractor.
@@ -78,6 +87,7 @@ public class OpenDocumentMetadataExtractor extends AbstractTikaMetadataExtractor
     private static final String KEY_INITIAL_CREATOR = "initialCreator";
     private static final String KEY_KEYWORD = "keyword";
     private static final String KEY_LANGUAGE = "language";
+    private static final String KEY_ALFRESCO_CREATOR = "_alfresco:creator";
 
     private static final String CUSTOM_PREFIX = "custom:";
 
@@ -91,6 +101,16 @@ public class OpenDocumentMetadataExtractor extends AbstractTikaMetadataExtractor
     @Override
     protected Parser getParser()
     {
+        OpenDocumentParser parser = new OpenDocumentParser();
+        parser.setMetaParser(new OpenDocumentMetaParser() {
+            @Override
+            protected ContentHandler getContentHandler(ContentHandler ch, Metadata md, ParseContext context)
+            {
+                final ContentHandler superHandler = super.getContentHandler(ch, md, context);
+                final ContentHandler creatorHandler = new ElementMetadataHandler(NAMESPACE_URI_DC, KEY_CREATOR, md, KEY_ALFRESCO_CREATOR);
+                return new TeeContentHandler(superHandler, creatorHandler);
+            }
+        });
         return new OpenDocumentParser();
     }
 
@@ -99,7 +119,9 @@ public class OpenDocumentMetadataExtractor extends AbstractTikaMetadataExtractor
                                                         Map<String, Serializable> properties, Map<String, String> headers)
     {
         putRawValue(KEY_CREATION_DATE, getDateOrNull(metadata.get(TikaCoreProperties.CREATED)), properties);
-        putRawValue(KEY_CREATOR, metadata.get(TikaCoreProperties.CREATOR), properties);
+        final String creator = getCreator(metadata);
+        putRawValue(KEY_CREATOR, creator, properties);
+        putRawValue(KEY_AUTHOR, creator, properties);
         putRawValue(KEY_DATE, getDateOrNull(metadata.get(TikaCoreProperties.MODIFIED)), properties);
         putRawValue(KEY_DESCRIPTION, metadata.get(TikaCoreProperties.DESCRIPTION), properties);
         putRawValue(KEY_GENERATOR, metadata.get("generator"), properties);
@@ -118,6 +140,18 @@ public class OpenDocumentMetadataExtractor extends AbstractTikaMetadataExtractor
         }
 
         return properties;
+    }
+
+    private String getCreator(Metadata metadata)
+    {
+        final List<String> creators = distinct(metadata.getValues(TikaCoreProperties.CREATOR))
+                .collect(Collectors.toUnmodifiableList());
+        if (creators.size() == 1)
+        {
+            return creators.get(0);
+        }
+
+        return metadata.get(KEY_ALFRESCO_CREATOR);
     }
 
     private Date getDateOrNull(String dateString)
