@@ -28,6 +28,7 @@ package org.alfresco.transformer.metadataExtractors;
 
 import org.apache.tika.embedder.Embedder;
 import org.apache.tika.extractor.DocumentSelector;
+import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.OfficeOpenXMLCore;
 import org.apache.tika.metadata.Property;
@@ -55,11 +56,14 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -86,6 +90,9 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
     protected static final String KEY_CREATED = "created";
     protected static final String KEY_DESCRIPTION = "description";
     protected static final String KEY_COMMENTS = "comments";
+    protected static final String KEY_TAGS = DublinCore.SUBJECT.getName();
+
+    private static final String METADATA_SEPARATOR = ",";
 
     private final DateTimeFormatter tikaUTCDateFormater;
     private final DateTimeFormatter tikaDateFormater;
@@ -257,6 +264,9 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
             putRawValue(KEY_TITLE, getMetadataValue(metadata, TikaCoreProperties.TITLE), rawProperties);
             putRawValue(KEY_COMMENTS, getMetadataValue(metadata, TikaCoreProperties.COMMENTS), rawProperties);
 
+            // Tags
+            putRawValue(KEY_TAGS, getMetadataValues(metadata, KEY_TAGS), rawProperties);
+
             // Get the subject and description, despite things not
             //  being nearly as consistent as one might hope
             String subject = getMetadataValue(metadata, OfficeOpenXMLCore.SUBJECT);
@@ -360,6 +370,28 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
             }
         }
         return metadataToEmbed;
+    }
+
+    private Serializable getMetadataValues(Metadata metadata, String key)
+    {
+        // Use Set to prevent duplicates.
+        Set<String> valuesSet = new LinkedHashSet<String>();
+        String[] values = metadata.getValues(key);
+
+        for (int i = 0; i < values.length; i++)
+        {
+            String[] parts = values[i].split(METADATA_SEPARATOR);
+
+            for (String subPart : parts)
+            {
+                valuesSet.add(subPart.trim());
+            }
+        }
+
+        Object[] objArrayValues = valuesSet.toArray();
+        values = Arrays.copyOf(objArrayValues, objArrayValues.length, String[].class);
+
+        return values.length == 0 ? null : (values.length == 1 ? values[0] : values);
     }
 
     private String getMetadataValue(Metadata metadata, Property key)
