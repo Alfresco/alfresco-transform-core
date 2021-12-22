@@ -39,7 +39,7 @@ public final class FFmpegOptionsBuilder
     private String timeOffset;
     private Integer framesNum;
 
-    // TODO PoC - add FFmpeg options ...
+    // TODO PoC - add other FFmpeg transform options ...
     private FFmpegOptionsBuilder() {}
 
     public FFmpegOptionsBuilder withTimeOffset(final String timeOffset)
