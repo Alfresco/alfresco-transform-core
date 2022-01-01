@@ -278,6 +278,7 @@ public abstract class AbstractTransformerController implements TransformControll
             String targetMimetype = request.getTargetMediaType();
             String sourceMimetype = request.getSourceMediaType();
             Map<String, String> transformOptions = request.getTransformRequestOptions();
+            transformerDebug.logOptions(request);
             String transformName = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
             transformImpl(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
         }
