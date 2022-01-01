@@ -32,6 +32,7 @@ import org.alfresco.transform.client.model.TransformRequestValidator;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.router.TransformerDebug;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.model.FileRefResponse;
@@ -134,6 +135,9 @@ public abstract class AbstractTransformerController implements TransformControll
     @Autowired
     private TransformServiceRegistry transformRegistry;
 
+    @Autowired
+    private TransformerDebug transformerDebug;
+
     @GetMapping(value = "/transform/config")
     public ResponseEntity<TransformConfig> info()
     {
@@ -203,7 +207,8 @@ public abstract class AbstractTransformerController implements TransformControll
     public ResponseEntity<TransformReply> transform(@RequestBody TransformRequest request,
         @RequestParam(value = "timeout", required = false) Long timeout)
     {
-        logger.info("Received {}, timeout {} ms", request, timeout);
+        logger.trace("Received {}, timeout {} ms", request, timeout);
+        transformerDebug.pushTransform(request);
 
         final TransformReply reply = new TransformReply();
         reply.setInternalContext(request.getInternalContext());
@@ -222,7 +227,8 @@ public abstract class AbstractTransformerController implements TransformControll
                 .map(Object::toString)
                 .collect(joining(", ")));
 
-            logger.error("Invalid request, sending {}", reply);
+            transformerDebug.logFailure(reply);
+            logger.trace("Invalid request, sending {}", reply);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
 
@@ -237,7 +243,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(e.getStatusCode());
             reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
 
-            logger.error("Failed to load source file (TransformException), sending " + reply);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to load source file (TransformException), sending " + reply);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (HttpClientErrorException e)
@@ -245,8 +252,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(e.getStatusCode().value());
             reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
 
-            logger.error("Failed to load source file (HttpClientErrorException), sending " +
-                         reply, e);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to load source file (HttpClientErrorException), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (Exception e)
@@ -254,7 +261,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(INTERNAL_SERVER_ERROR.value());
             reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
 
-            logger.error("Failed to load source file (Exception), sending " + reply, e);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to load source file (Exception), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
 
@@ -278,7 +286,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(e.getStatusCode());
             reply.setErrorDetails(messageWithCause("Failed at processing transformation", e));
 
-            logger.error("Failed to perform transform (TransformException), sending " + reply, e);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to perform transform (TransformException), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (Exception e)
@@ -286,7 +295,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(INTERNAL_SERVER_ERROR.value());
             reply.setErrorDetails(messageWithCause("Failed at processing transformation", e));
 
-            logger.error("Failed to perform transform (Exception), sending " + reply, e);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to perform transform (Exception), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
 
@@ -301,7 +311,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(e.getStatusCode());
             reply.setErrorDetails(messageWithCause("Failed at writing the transformed file", e));
 
-            logger.error("Failed to save target file (TransformException), sending " + reply, e);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to save target file (TransformException), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (HttpClientErrorException e)
@@ -309,8 +320,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(e.getStatusCode().value());
             reply.setErrorDetails(messageWithCause("Failed at writing the transformed file. ", e));
 
-            logger.error("Failed to save target file (HttpClientErrorException), sending " + reply,
-                e);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to save target file (HttpClientErrorException), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (Exception e)
@@ -318,7 +329,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(INTERNAL_SERVER_ERROR.value());
             reply.setErrorDetails(messageWithCause("Failed at writing the transformed file. ", e));
 
-            logger.error("Failed to save target file (Exception), sending " + reply, e);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to save target file (Exception), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
 
@@ -343,7 +355,8 @@ public abstract class AbstractTransformerController implements TransformControll
         reply.setTargetReference(targetRef.getEntry().getFileRef());
         reply.setStatus(CREATED.value());
 
-        logger.info("Sending successful {}, timeout {} ms", reply, timeout);
+        transformerDebug.popTransform(reply);
+        logger.trace("Sending successful {}, timeout {} ms", reply, timeout);
         return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
     }
 
@@ -422,7 +435,7 @@ public abstract class AbstractTransformerController implements TransformControll
         }
         else if (logger.isInfoEnabled())
         {
-            logger.info("Using transform name provided in the request: " + requestTransformName);
+            logger.trace("Using transform name provided in the request: " + requestTransformName);
         }
         return transformName;
     }
