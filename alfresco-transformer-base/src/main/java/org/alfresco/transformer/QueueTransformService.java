@@ -106,7 +106,7 @@ public class QueueTransformService
             return;
         }
 
-        logger.debug("New T-Request from queue with correlationId: {}", correlationId);
+        logger.trace("New T-Request from queue with correlationId: {}", correlationId);
 
         Optional<TransformRequest> transformRequest;
         try
