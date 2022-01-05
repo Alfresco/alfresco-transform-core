@@ -234,6 +234,7 @@ public abstract class AbstractTransformerController implements TransformControll
             logger.trace("Invalid request, sending {}", reply);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
+        transformerDebug.pushTransform(request);
 
         // Load the source file
         File sourceFile;
