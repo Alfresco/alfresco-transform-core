@@ -75,7 +75,7 @@ public class Application
         Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
         logger.info(ImageMagickCommandExecutor.LICENCE);
         logger.info(LibreOfficeJavaExecutor.LICENCE);
-        logger.info(TikaJavaExecutor.LICENCE);
+        Arrays.stream(TikaJavaExecutor.LICENCE.split("\\n")).forEach(logger::info);
         logger.info(PdfRendererCommandExecutor.LICENCE);
         Arrays.stream(SelectingTransformer.LICENCE.split("\\n")).forEach(logger::info);
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");

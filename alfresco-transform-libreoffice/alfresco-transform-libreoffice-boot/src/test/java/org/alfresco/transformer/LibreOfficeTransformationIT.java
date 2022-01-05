@@ -145,7 +145,6 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO   ,"xltm" ,"quick.xltm"),
         testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW       ,"ppsx" ,"quick.ppsx"),
         testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO ,"ppsm" ,"quick.ppsm"),
-        testFile(MIMETYPE_OUTLOOK_MSG                          ,"msg" ,"quick.msg"),
         testFile(MIMETYPE_DITA                                 ,"dita" ,"quick.dita"),
         testFile(MIMETYPE_TEXT_PLAIN                           ,"txt" ,"quick.txt"),
         testFile(MIMETYPE_STC                                  ,"stc" ,"quick.stc"),
@@ -185,16 +184,14 @@ public class LibreOfficeTransformationIT
                 allTargets("quick.xml", pdfTarget),
                 allTargets("quick.xltm", pdfTarget),
                 allTargets("quick.dita", pdfTarget),
-                allTargets("quick.msg", pdfTarget),
                 allTargets("quick.ppsm", pdfTarget),
                 allTargets("quick.ppsx", pdfTarget),
                 allTargets("quick.stc", pdfTarget),
                 allTargets("quick.sti", pdfTarget),
                 allTargets("quick.stw", pdfTarget),
                 allTargets("quick.sxc", pdfTarget),
-                allTargets("quick.sxi", pdfTarget),
+                allTargets("quick.sxi", pdfTarget)
 
-                allTargets("quick.msg", txtTarget)
                 )
             .flatMap(identity());
     }

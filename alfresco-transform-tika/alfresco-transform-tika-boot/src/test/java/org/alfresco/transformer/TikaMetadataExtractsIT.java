@@ -66,6 +66,11 @@ import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VORBIS;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORD;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_ZIP;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_RAF;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_ARW;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_CR2;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_RW2;
+import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_NEF;
 
 import java.util.stream.Stream;
 
@@ -98,6 +103,19 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
         // either no quick file or the target extension has not been registered.
 
         return Stream.of(
+                //IPTCMetadataExtractor
+                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quick.jpg"),
+                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quickIPTC-EXT.jpg"),
+                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quickIPTC-multi-creator.jpg"),
+                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "testJPEG_IPTC_EXT.jpg"),
+                testFile(MIMETYPE_IMAGE_GIF, "gif", "quickIPTC.gif"),
+                testFile(MIMETYPE_IMAGE_PNG, "png", "quickIPTC.png"),
+                testFile(MIMETYPE_IMAGE_RAW_ARW, "arw", "20140614_163822_Photogrpahy_Class.ARW"),
+                testFile(MIMETYPE_IMAGE_RAW_CR2, "cr2", "20141227_134519_Palace.CR2"),
+                testFile(MIMETYPE_IMAGE_RAW_RW2, "rw2", "20140629_145035_Flower.RW2"),
+                testFile(MIMETYPE_IMAGE_RAW_NEF, "nef", "20150408_074941_Bush.NEF"),
+                testFile(MIMETYPE_IMAGE_RAW_RAF, "raf", "20160502_190928_London_Underground.RAF"),
+                
                 // DWGMetadataExtractor
                 testFile(MIMETYPE_APP_DWG, "dwg", "quick2010CustomProps.dwg"),
 
@@ -495,7 +513,6 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("application/gff", "", ""),
                 //testFile("video/x-oggyuv", "", ""),
                 //testFile("application/x-msdownload", "", ""),
-                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quick.jpg"),
                 //testFile("image/icns", "", ""),
                 //testFile("application/x-emf", "", ""),
                 //testFile("application/x-geo-pdf", "", ""),

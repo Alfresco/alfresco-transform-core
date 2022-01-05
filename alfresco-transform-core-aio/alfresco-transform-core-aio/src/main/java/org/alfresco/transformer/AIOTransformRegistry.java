@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -29,6 +29,7 @@ package org.alfresco.transformer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.registry.AbstractTransformRegistry;
+import org.alfresco.transform.client.registry.CombinedTransformConfig;
 import org.alfresco.transform.client.registry.TransformCache;
 import org.alfresco.transformer.executors.Transformer;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
 
     private static final String ENGINE_CONFIG_LOCATION_POSTFIX = "_engine_config.json";
 
-    private TransformConfig aggregatedConfig = new TransformConfig();
+    private CombinedTransformConfig combinedTransformConfig = new CombinedTransformConfig();
 
     // Holds the structures used by AbstractTransformRegistry to look up what is supported.
     // Unlike other sub classes this class does not extend Data or replace it at run time.
@@ -64,34 +65,40 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
     private Map<String, Transformer> transformerEngineMapping = new HashMap();
 
     /**
-     * The registration will go through all supported sub transformers and map them to the transformer implementation.
+     * Adds a transformer's (T-Engine) config to the configuration and creates a map of transforms to the T-Engine.
+     * The name of this method is now misleading as the registry of transforms takes place in
+     * {@link #registerCombinedTransformers()} .
      * @param transformer The transformer implementation, this could be a single transformer
      *                    or a transformer managing multiple sub transformers. The transformer's configuration file will
      *                    be read based on the {@link Transformer#getTransformerId()} value.
-     * @throws Exception Exception is thrown if a mapping for a transformer name already exists.
      */
     public void registerTransformer(final Transformer transformer) throws Exception
     {
         // Load config for the transformer
         String location = getTransformConfigLocation(transformer);
         TransformConfig transformConfig = loadTransformConfig(location);
+        String transformerId = transformer.getTransformerId();
+        combinedTransformConfig.addTransformConfig(transformConfig, location, transformerId, this);
 
         // Map all of the transforms defined in the config to this Transformer implementation
         for (org.alfresco.transform.client.model.config.Transformer transformerConfig : transformConfig.getTransformers())
         {
             String transformerName = transformerConfig.getTransformerName();
-            if (transformerEngineMapping.containsKey(transformerName))
+            // A later tEngine 'might' override one that has already been defined. That is fine.
+            Transformer originalTEngine = transformerEngineMapping.get(transformerName);
+            if (originalTEngine != null)
             {
-                throw new Exception("Transformer name " + transformerName + " is already registered.");
+                log.debug("Overriding transform with name: '{}' originally defined in '{}'.", transformerName, originalTEngine.getTransformerId());
             }
             transformerEngineMapping.put(transformerName, transformer);
-            log.debug("Registered transformer with name: '{}'.", transformerName);
+            log.debug("Registered transform with name: '{}' defined in '{}'.", transformerName, transformerId);
         }
+    }
 
-        // Add the new transformer configuration to the aggregate config
-        aggregatedConfig.getTransformers().addAll(transformConfig.getTransformers());
-        aggregatedConfig.getTransformOptions().putAll(transformConfig.getTransformOptions());
-        registerAll(transformConfig, location, location);
+    public void registerCombinedTransformers()
+    {
+        combinedTransformConfig.combineTransformerConfig(this);
+        combinedTransformConfig.registerCombinedTransformers(this);
     }
 
     /**
@@ -110,7 +117,7 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
      */
     public TransformConfig getTransformConfig()
     {
-        return aggregatedConfig;
+        return combinedTransformConfig.buildTransformConfig();
     }
 
     protected String getTransformConfigLocation(final Transformer transformer)
@@ -157,5 +164,11 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
     protected void logError(String msg)
     {
         log.error(msg);
+    }
+
+    @Override
+    protected void logWarn(String msg)
+    {
+        log.warn(msg);
     }
 }

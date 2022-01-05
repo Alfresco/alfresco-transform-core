@@ -70,7 +70,7 @@ public interface RequestParamMap
     String COMMAND_OPTIONS         = "commandOptions";
     String TIMEOUT                 = "timeout";
     String INCLUDE_CONTENTS        = "includeContents";
-    String NOT_EXTRACT_BOOKMARK_TEXT = "notExtractBookmarksText";
+    String NOT_EXTRACT_BOOKMARKS_TEXT = "notExtractBookmarksText";
     String PAGE_LIMIT              = "pageLimit";
 
     // TODO PoC for FFmpeg

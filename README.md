@@ -8,8 +8,8 @@ Contains the common transformer (T-Engine) code, plus a few actual implementatio
 * `alfresco-transformer-base` - library packaged as a jar file which contains code that is common
  to all the transformers; see the sub-project's
   [README](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-transformer-base/README.md)
-* `alfresco-docker-<name>` - multiple T-Engines; each one of them builds both a SpringBoot fat jar
- and a Docker image
+* `alfresco-transform-<name>` - multiple T-Engines; each one of them builds both a SpringBoot fat jar
+ and a [Docker image](https://github.com/Alfresco/alfresco-transform-core#docker)
  
 ### Documentation
 
@@ -52,19 +52,31 @@ and Alfresco Maven repository:
 ```
 
 #### Docker
-The core T-Engine images are available on Docker Hub:
+The core T-Engine images are available on Docker Hub. 
+
+Either as a single Core AIO (All-In-One) T-Engine:
+* [alfresco/alfresco-transform-core-aio](https://hub.docker.com/r/alfresco/alfresco-transform-core-aio)
+
+Or as set of individual T-Engines:
 * [alfresco/alfresco-imagemagick](https://hub.docker.com/r/alfresco/alfresco-imagemagick)
 * [alfresco/alfresco-pdf-renderer](https://hub.docker.com/r/alfresco/alfresco-pdf-renderer)
 * [alfresco/alfresco-libreoffice](https://hub.docker.com/r/alfresco/alfresco-libreoffice)
 * [alfresco/alfresco-tika](https://hub.docker.com/r/alfresco/alfresco-tika)
 * [alfresco/alfresco-transform-misc](https://hub.docker.com/r/alfresco/alfresco-transform-misc)
 
+You can find examples of using Core AIO in the reference ACS Deployment for Docker Compose:
+* [ACS Community](https://github.com/Alfresco/acs-deployment/blob/master/docker-compose/community-docker-compose.yml)
+* [ACS Enterprise](https://github.com/Alfresco/acs-deployment/blob/master/docker-compose/docker-compose.yml)
+
+You can find examples of using the indivudal T-Engines in the reference ACS Deployment for Helm / Kubernetes:
+* [ACS Community](https://github.com/Alfresco/acs-deployment/blob/master/helm/alfresco-content-services/community_values.yaml)
+* [ACS Enterprise](https://github.com/Alfresco/acs-deployment/blob/master/helm/alfresco-content-services/values.yaml)
+
 ### Release Process
 
 For a complete walk-through check out the
 [build-and-release.MD](https://github.com/Alfresco/alfresco-transform-core/tree/master/docs/build-and-release.md)
 under the `docs` folder.
-
 
 ### Contributing guide
 

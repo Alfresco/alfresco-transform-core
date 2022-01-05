@@ -1,11 +1,16 @@
 {
   "{http://www.alfresco.org/model/exif/1.0}pixelYDimension" : "584",
   "{http://www.alfresco.org/model/content/1.0}description" : "Gym class featuring a brown fox and lazy dog",
-  "{http://www.alfresco.org/model/exif/1.0}orientation" : "1",
-  "{http://www.alfresco.org/model/exif/1.0}yResolution" : "50.0",
-  "{http://www.alfresco.org/model/exif/1.0}resolutionUnit" : "Inch",
+  "{http://purl.org/dc/elements/1.1/}title" : "The quick brown fox jumps over the lazy dog",
   "{http://www.alfresco.org/model/exif/1.0}pixelXDimension" : "413",
   "{http://www.alfresco.org/model/content/1.0}author" : "Nevin Nollop",
-  "{http://www.alfresco.org/model/exif/1.0}xResolution" : "50.0",
-  "{http://www.alfresco.org/model/content/1.0}title" : "The quick brown fox jumps over the lazy dog"
+  "{http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/}CiEmailWork" : "nevin.nollop@alfresco.com",
+  "{http://www.alfresco.org/model/content/1.0}title" : "The quick brown fox jumps over the lazy dog",
+  "{http://purl.org/dc/elements/1.1/}description" : "Gym class featuring a brown fox and lazy dog",
+  "{http://purl.org/dc/elements/1.1/}creator" : "Nevin Nollop",
+  "{http://www.alfresco.org/model/exif/1.0}orientation" : "1",
+  "{http://purl.org/dc/elements/1.1/}subject" : [ "Pangram", "fox", "dog" ],
+  "{http://www.alfresco.org/model/exif/1.0}resolutionUnit" : "Inch",
+  "{http://www.alfresco.org/model/exif/1.0}yResolution" : "50.0",
+  "{http://www.alfresco.org/model/exif/1.0}xResolution" : "50.0"
 }

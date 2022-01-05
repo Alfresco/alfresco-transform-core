@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 
 /**
  * Helper methods for metadata extract and embed.
@@ -577,7 +578,7 @@ public abstract class AbstractMetadataExtractor
                 systemProperties.put(systemQName, documentValue);
             }
         }
-        return systemProperties;
+        return new TreeMap<String, Serializable>(systemProperties);
     }
 
     private void writeMetadata(File targetFile, Map<String, Serializable> results)

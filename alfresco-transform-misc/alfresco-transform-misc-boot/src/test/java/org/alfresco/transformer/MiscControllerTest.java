@@ -245,19 +245,21 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
     public void testExtractMetadataRFC822() throws Exception
     {
         String expected =
-                "{\"{http://www.alfresco.org/model/content/1.0}addressee\":\"Nevin Nollop <nevin.nollop@gmail.com>\"," +
-                        "\"{http://www.alfresco.org/model/content/1.0}description\":\"The quick brown fox jumps over the lazy dog\"," +
-                        "\"{http://www.alfresco.org/model/content/1.0}addressees\":\"Nevin Nollop <nevinn@alfresco.com>\"," +
-                        "\"{http://www.alfresco.org/model/imap/1.0}dateSent\":1086351802000," +
-                        "\"{http://www.alfresco.org/model/imap/1.0}messageTo\":\"Nevin Nollop <nevin.nollop@gmail.com>\"," +
-                        "\"{http://www.alfresco.org/model/imap/1.0}messageId\":\"<20040604122322.GV1905@phoenix.home>\"," +
-                        "\"{http://www.alfresco.org/model/content/1.0}title\":\"The quick brown fox jumps over the lazy dog\"," +
-                        "\"{http://www.alfresco.org/model/imap/1.0}messageSubject\":\"The quick brown fox jumps over the lazy dog\"," +
-                        "\"{http://www.alfresco.org/model/imap/1.0}messageCc\":\"Nevin Nollop <nevinn@alfresco.com>\"," +
-                        "\"{http://www.alfresco.org/model/content/1.0}sentdate\":1086351802000," +
-                        "\"{http://www.alfresco.org/model/content/1.0}subjectline\":\"The quick brown fox jumps over the lazy dog\"," +
-                        "\"{http://www.alfresco.org/model/imap/1.0}messageFrom\":\"Nevin Nollop <nevin.nollop@alfresco.com>\"," +
-                        "\"{http://www.alfresco.org/model/content/1.0}originator\":\"Nevin Nollop <nevin.nollop@alfresco.com>\"}";
+                "{"+
+                    "\"{http://www.alfresco.org/model/content/1.0}addressee\":\"Nevin Nollop <nevin.nollop@gmail.com>\","+
+                    "\"{http://www.alfresco.org/model/content/1.0}addressees\":\"Nevin Nollop <nevinn@alfresco.com>\","+
+                    "\"{http://www.alfresco.org/model/content/1.0}description\":\"The quick brown fox jumps over the lazy dog\","+
+                    "\"{http://www.alfresco.org/model/content/1.0}originator\":\"Nevin Nollop <nevin.nollop@alfresco.com>\","+
+                    "\"{http://www.alfresco.org/model/content/1.0}sentdate\":1086351802000,"+
+                    "\"{http://www.alfresco.org/model/content/1.0}subjectline\":\"The quick brown fox jumps over the lazy dog\","+
+                    "\"{http://www.alfresco.org/model/content/1.0}title\":\"The quick brown fox jumps over the lazy dog\","+
+                    "\"{http://www.alfresco.org/model/imap/1.0}dateSent\":1086351802000,"+
+                    "\"{http://www.alfresco.org/model/imap/1.0}messageCc\":\"Nevin Nollop <nevinn@alfresco.com>\","+
+                    "\"{http://www.alfresco.org/model/imap/1.0}messageFrom\":\"Nevin Nollop <nevin.nollop@alfresco.com>\","+
+                    "\"{http://www.alfresco.org/model/imap/1.0}messageId\":\"<20040604122322.GV1905@phoenix.home>\","+
+                    "\"{http://www.alfresco.org/model/imap/1.0}messageSubject\":\"The quick brown fox jumps over the lazy dog\","+
+                    "\"{http://www.alfresco.org/model/imap/1.0}messageTo\":\"Nevin Nollop <nevin.nollop@gmail.com>\""+
+                "}";
         MvcResult result = sendRequest("eml",
                 null,
                 MIMETYPE_RFC822,
@@ -287,9 +289,9 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
                 "\"messageFrom\":[" +
                     "\"{http://www.alfresco.org/model/dod5015/1.0}dodProp1\"]}\n";
         String expected =
-                "{\"{http://www.alfresco.org/model/imap/1.0}messageSubject\":\"The quick brown fox jumps over the lazy dog\"," +
+                "{\"{http://www.alfresco.org/model/content/1.0}title\":\"The quick brown fox jumps over the lazy dog\","+
                  "\"{http://www.alfresco.org/model/dod5015/1.0}dodProp1\":\"Nevin Nollop <nevin.nollop@alfresco.com>\"," +
-                 "\"{http://www.alfresco.org/model/content/1.0}title\":\"The quick brown fox jumps over the lazy dog\"}";
+                 "\"{http://www.alfresco.org/model/imap/1.0}messageSubject\":\"The quick brown fox jumps over the lazy dog\"}";
         MvcResult result = sendRequest("eml",
                 null,
                 MIMETYPE_RFC822,
