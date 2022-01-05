@@ -44,9 +44,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.NullOutputStream;
 import org.apache.tika.exception.TikaException;
-import org.apache.tika.io.IOUtils;
-import org.apache.tika.io.NullOutputStream;
 import org.apache.tika.io.TemporaryResources;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
@@ -57,7 +57,7 @@ import org.apache.tika.parser.external.ExternalParser;
 import org.apache.tika.parser.external.ExternalParsersFactory;
 import org.apache.tika.parser.image.ImageParser;
 import org.apache.tika.parser.image.TiffParser;
-import org.apache.tika.parser.jpeg.JpegParser;
+import org.apache.tika.parser.image.JpegParser;
 import org.apache.tika.sax.XHTMLContentHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -263,7 +263,7 @@ public class ExifToolParser extends ExternalParser {
      * stream of the given process to the given XHTML content handler.
      * The standard output stream is closed once fully processed.
      *
-     * @param process process
+     * @param stream stream
      * @param xhtml XHTML content handler
      * @throws SAXException if the XHTML SAX events could not be handled
      * @throws IOException if an input error occurred
@@ -315,13 +315,13 @@ public class ExifToolParser extends ExternalParser {
      * standard stream of the given process. Potential exceptions
      * are ignored, and the stream is closed once fully processed.
      *
-     * @param process process
+     * @param stream stream
      */
     private void ignoreStream(final InputStream stream) {
         Thread t = new Thread() {
             public void run() {
                 try {
-                    IOUtils.copy(stream, new NullOutputStream());
+                    IOUtils.copy(stream, NullOutputStream.NULL_OUTPUT_STREAM);
                 } catch (IOException e) {
                 } finally {
                     IOUtils.closeQuietly(stream);
