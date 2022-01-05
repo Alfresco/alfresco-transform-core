@@ -27,9 +27,13 @@
         </dependency>
         <dependency>
             <groupId>org.apache.tika</groupId>
-            <artifactId>tika-parsers-standard-package</artifactId>
+            <artifactId>tika-parsers</artifactId>
             <version>${dependency.tika.version}</version>
             <exclusions>
+                <exclusion>
+                    <groupId>com.tdunning</groupId>
+                    <artifactId>json</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcprov-jdk15on</artifactId>
@@ -37,6 +41,11 @@
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcmail-jdk15on</artifactId>
+                </exclusion>
+                <!-- TODO ATS-534 check transformations not affected by this missing quartz lib -->
+                <exclusion>
+                    <groupId>org.quartz-scheduler</groupId>
+                    <artifactId>quartz</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>xml-apis</groupId>
