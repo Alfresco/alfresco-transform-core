@@ -34,7 +34,7 @@ before_install: bash _ci/init.sh
 jobs:
   include:
     - stage: Build and Test
-      name: "Core & Base Snapshot deployment" # This is to separate the snapshot deployment from the following jobs, to prevent duplication on nexus
+    - name: "Core & Base Snapshot deployment" # This is to separate the snapshot deployment from the following jobs, to prevent duplication on nexus
       if: branch = master AND type != pull_request
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: travis_wait 20 mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
@@ -45,36 +45,36 @@ jobs:
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: _ci/build.sh ffmpeg
       script: bash _ci/test.sh ffmpeg
-    - name: "ImageMagick"
-      if: branch NOT IN (company_release)
-      before_script: travis_wait bash _ci/cache_artifacts.sh
-      install: _ci/build.sh imagemagick
-      script: bash _ci/test.sh imagemagick
-    - name: "LibreOffice"
-      if: branch NOT IN (company_release)
-      before_script: travis_wait bash _ci/cache_artifacts.sh
-      install: _ci/build.sh libreoffice
-      script: bash _ci/test.sh libreoffice
-    - name: "Transform Misc"
-      if: branch NOT IN (company_release)
-      before_script: travis_wait bash _ci/cache_artifacts.sh
-      install: _ci/build.sh misc
-      script: bash _ci/test.sh misc
-    - name: "PDF Renderer"
-      if: branch NOT IN (company_release)
-      before_script: travis_wait bash _ci/cache_artifacts.sh
-      install: _ci/build.sh pdf-renderer
-      script: bash _ci/test.sh pdf-renderer
-    - name: "Tika"
-      if: branch NOT IN (company_release)
-      before_script: travis_wait bash _ci/cache_artifacts.sh
-      install: _ci/build.sh tika
-      script: bash _ci/test.sh tika
-    - name: "All in One Transformer"
-      if: branch NOT IN (company_release)
-      before_script: travis_wait bash _ci/cache_artifacts.sh
-      install: _ci/build.sh full-build
-      script:  travis_wait 30 bash _ci/test.sh aio-test
+#    - name: "ImageMagick"
+#      if: branch NOT IN (company_release)
+#      before_script: travis_wait bash _ci/cache_artifacts.sh
+#      install: _ci/build.sh imagemagick
+#      script: bash _ci/test.sh imagemagick
+#    - name: "LibreOffice"
+#      if: branch NOT IN (company_release)
+#      before_script: travis_wait bash _ci/cache_artifacts.sh
+#      install: _ci/build.sh libreoffice
+#      script: bash _ci/test.sh libreoffice
+#    - name: "Transform Misc"
+#      if: branch NOT IN (company_release)
+#      before_script: travis_wait bash _ci/cache_artifacts.sh
+#      install: _ci/build.sh misc
+#      script: bash _ci/test.sh misc
+#    - name: "PDF Renderer"
+#      if: branch NOT IN (company_release)
+#      before_script: travis_wait bash _ci/cache_artifacts.sh
+#      install: _ci/build.sh pdf-renderer
+#      script: bash _ci/test.sh pdf-renderer
+#    - name: "Tika"
+#      if: branch NOT IN (company_release)
+#      before_script: travis_wait bash _ci/cache_artifacts.sh
+#      install: _ci/build.sh tika
+#      script: bash _ci/test.sh tika
+#    - name: "All in One Transformer"
+#      if: branch NOT IN (company_release)
+#      before_script: travis_wait bash _ci/cache_artifacts.sh
+#      install: _ci/build.sh full-build
+#      script:  travis_wait 30 bash _ci/test.sh aio-test
     # - name: "WhiteSource"
     #   if: branch NOT IN (company_release)
     #   script: bash _ci/whitesource.sh
