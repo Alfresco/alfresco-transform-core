@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -106,7 +106,7 @@ public class QueueTransformService
             return;
         }
 
-        logger.info("New T-Request from queue with correlationId: {}", correlationId);
+        logger.trace("New T-Request from queue with correlationId: {}", correlationId);
 
         Optional<TransformRequest> transformRequest;
         try

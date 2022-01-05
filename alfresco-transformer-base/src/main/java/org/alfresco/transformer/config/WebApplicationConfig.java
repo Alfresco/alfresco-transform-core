@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -28,6 +28,7 @@ package org.alfresco.transformer.config;
 
 import org.alfresco.transform.client.model.TransformRequestValidator;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
+import org.alfresco.transform.router.TransformerDebug;
 import org.alfresco.transformer.TransformInterceptor;
 import org.alfresco.transformer.TransformRegistryImpl;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
@@ -77,5 +78,11 @@ public class WebApplicationConfig implements WebMvcConfigurer
     public TransformServiceRegistry transformRegistry()
     {
         return new TransformRegistryImpl();
+    }
+
+    @Bean
+    public TransformerDebug transformerDebug()
+    {
+        return new TransformerDebug().setIsTEngine(true);
     }
 }

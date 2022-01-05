@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -85,7 +85,6 @@ import static org.springframework.util.StringUtils.getFilenameExtension;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -609,17 +608,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         File sourceFile = getTestFile("quick." + sourceExtension, true);
         String targetFileRef = UUID.randomUUID().toString();
 
-        // Transformation Request POJO
-        TransformRequest transformRequest = new TransformRequest();
-        transformRequest.setRequestId("1");
-        transformRequest.setSchema(1);
-        transformRequest.setClientData("Alfresco Digital Business Platform");
-        transformRequest.setTransformRequestOptions(new HashMap<>());
-        transformRequest.setSourceReference(sourceFileRef);
-        transformRequest.setSourceExtension(sourceExtension);
-        transformRequest.setSourceSize(sourceFile.length());
-        transformRequest.setTargetExtension(targetExtension);
-        transformRequest.setSourceMediaType(sourceMimetype);
+        TransformRequest transformRequest = createTransformRequest(sourceFileRef, sourceFile);
 
         // HTTP Request
         HttpHeaders headers = new HttpHeaders();

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -48,10 +48,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.client.model.config.SupportedSourceAndTarget;
@@ -61,6 +63,7 @@ import org.alfresco.transform.client.model.config.TransformOptionGroup;
 import org.alfresco.transform.client.model.config.TransformOptionValue;
 import org.alfresco.transform.client.model.config.Transformer;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
+import org.alfresco.transform.router.TransformStack;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.junit.jupiter.api.Test;
@@ -104,6 +107,7 @@ public abstract class AbstractTransformerControllerTest
     protected String targetExtension;
     protected String sourceMimetype;
     protected String targetMimetype;
+    protected HashMap<String, String> options = new HashMap<>();
 
     protected MockMultipartFile sourceFile;
     protected String expectedOptions;
@@ -218,6 +222,30 @@ public abstract class AbstractTransformerControllerTest
         }
 
         return builder;
+    }
+
+    protected TransformRequest createTransformRequest(String sourceFileRef, File sourceFile)
+    {
+        TransformRequest transformRequest = new TransformRequest();
+        transformRequest.setRequestId("1");
+        transformRequest.setSchema(1);
+        transformRequest.setClientData("Alfresco Digital Business Platform");
+        transformRequest.setTransformRequestOptions(options);
+        transformRequest.setSourceReference(sourceFileRef);
+        transformRequest.setSourceExtension(sourceExtension);
+        transformRequest.setSourceMediaType(sourceMimetype);
+        transformRequest.setSourceSize(sourceFile.length());
+        transformRequest.setTargetExtension(targetExtension);
+        transformRequest.setTargetMediaType(targetMimetype);
+        transformRequest.setInternalContext(InternalContext.initialise(null));
+        transformRequest.getInternalContext().getMultiStep().setInitialRequestId("123");
+        transformRequest.getInternalContext().getMultiStep().setInitialSourceMediaType(sourceMimetype);
+        TransformStack.setInitialTransformRequestOptions(transformRequest.getInternalContext(), options);
+        TransformStack.setInitialSourceReference(transformRequest.getInternalContext(), sourceFileRef);
+        TransformStack.addTransformLevel(transformRequest.getInternalContext(),
+                TransformStack.levelBuilder(TransformStack.PIPELINE_FLAG)
+                        .withStep("transformerName", sourceMimetype, targetMimetype));
+        return transformRequest;
     }
 
     @Test
