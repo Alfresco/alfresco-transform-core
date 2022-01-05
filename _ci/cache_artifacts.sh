@@ -5,7 +5,7 @@ PS4="\[\e[35m\]+ \[\e[m\]"
 set -vex
 pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 
-LIBREOFFICE_VERSION=6.3.5
+LIBREOFFICE_VERSION=7.0.6
 
 # Cache the LibreOffice distribution, as it is takes a long time to download and it can cause the
 # build to fail (no output for more than 10 minutes)
