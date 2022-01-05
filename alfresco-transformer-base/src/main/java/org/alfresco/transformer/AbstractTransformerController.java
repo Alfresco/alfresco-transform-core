@@ -26,12 +26,14 @@
  */
 package org.alfresco.transformer;
 
+import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.client.model.TransformRequestValidator;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.router.TransformStack;
 import org.alfresco.transform.router.TransformerDebug;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.logging.LogEntry;
@@ -208,16 +210,17 @@ public abstract class AbstractTransformerController implements TransformControll
         @RequestParam(value = "timeout", required = false) Long timeout)
     {
         logger.trace("Received {}, timeout {} ms", request, timeout);
-        transformerDebug.pushTransform(request);
 
         final TransformReply reply = new TransformReply();
-        reply.setInternalContext(request.getInternalContext());
         reply.setRequestId(request.getRequestId());
         reply.setSourceReference(request.getSourceReference());
         reply.setSchema(request.getSchema());
         reply.setClientData(request.getClientData());
 
         final Errors errors = validateTransformRequest(request);
+        validateInternalContext(request, errors);
+        initialiseContext(request);
+        reply.setInternalContext(request.getInternalContext());
         if (!errors.getAllErrors().isEmpty())
         {
             reply.setStatus(BAD_REQUEST.value());
@@ -274,7 +277,6 @@ public abstract class AbstractTransformerController implements TransformControll
         // Run the transformation
         try
         {
-
             String targetMimetype = request.getTargetMediaType();
             String sourceMimetype = request.getSourceMediaType();
             Map<String, String> transformOptions = request.getTransformRequestOptions();
@@ -366,6 +368,21 @@ public abstract class AbstractTransformerController implements TransformControll
         DirectFieldBindingResult errors = new DirectFieldBindingResult(transformRequest, "request");
         transformRequestValidator.validate(transformRequest, errors);
         return errors;
+    }
+
+    private void validateInternalContext(TransformRequest request, Errors errors)
+    {
+        String errorMessage = InternalContext.checkForBasicErrors(request.getInternalContext(), "T-Request");
+        if (errorMessage != null)
+        {
+            errors.rejectValue("internalContext", null, errorMessage);
+        }
+    }
+
+    private void initialiseContext(TransformRequest request)
+    {
+        // If needed initialise the context enough to allow logging to take place without NPE checks
+        request.setInternalContext(InternalContext.initialise(request.getInternalContext()));
     }
 
     /**
