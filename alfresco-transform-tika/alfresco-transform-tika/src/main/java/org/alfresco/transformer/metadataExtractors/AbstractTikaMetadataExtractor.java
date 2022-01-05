@@ -28,11 +28,7 @@ package org.alfresco.transformer.metadataExtractors;
 
 import org.apache.tika.embedder.Embedder;
 import org.apache.tika.extractor.DocumentSelector;
-import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.metadata.OfficeOpenXMLCore;
-import org.apache.tika.metadata.Property;
-import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.ContentHandlerDecorator;
@@ -62,10 +58,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The parent of all Metadata Extractors which use Apache Tika under the hood. This handles all the
@@ -90,7 +83,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
     protected static final String KEY_CREATED = "created";
     protected static final String KEY_DESCRIPTION = "description";
     protected static final String KEY_COMMENTS = "comments";
-    protected static final String KEY_TAGS = DublinCore.SUBJECT.getName();
+    protected static final String KEY_TAGS = "dc:subject";
 
     private static final String METADATA_SEPARATOR = ",";
 
@@ -215,6 +208,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
     }
 
     @Override
+    @SuppressWarnings( "deprecation" )
     public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
                                                      File sourceFile) throws Exception
     {
@@ -251,7 +245,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
             for (String tikaKey : metadata.names())
             {
                 // TODO review this change (part of MNT-15267) - should we really force string concatenation here !?
-                putRawValue(tikaKey, getMetadataValue(metadata, Property.internalText(tikaKey)), rawProperties);
+                putRawValue(tikaKey, getMetadataValue(metadata, tikaKey), rawProperties);
             }
 
             // Now, map the common Tika metadata keys onto
@@ -260,17 +254,17 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
             //  to work without needing any changes
 
             // The simple ones
-            putRawValue(KEY_AUTHOR, getMetadataValue(metadata, TikaCoreProperties.CREATOR), rawProperties);
-            putRawValue(KEY_TITLE, getMetadataValue(metadata, TikaCoreProperties.TITLE), rawProperties);
-            putRawValue(KEY_COMMENTS, getMetadataValue(metadata, TikaCoreProperties.COMMENTS), rawProperties);
+            putRawValue(KEY_AUTHOR, getMetadataValue(metadata, Metadata.AUTHOR), rawProperties);
+            putRawValue(KEY_TITLE, getMetadataValue(metadata, Metadata.TITLE), rawProperties);
+            putRawValue(KEY_COMMENTS, getMetadataValue(metadata, Metadata.COMMENTS), rawProperties);
 
             // Tags
             putRawValue(KEY_TAGS, getMetadataValues(metadata, KEY_TAGS), rawProperties);
 
             // Get the subject and description, despite things not
             //  being nearly as consistent as one might hope
-            String subject = getMetadataValue(metadata, OfficeOpenXMLCore.SUBJECT);
-            String description = getMetadataValue(metadata, TikaCoreProperties.DESCRIPTION);
+            String subject = getMetadataValue(metadata, Metadata.SUBJECT);
+            String description = getMetadataValue(metadata, Metadata.DESCRIPTION);
             if(subject != null && description != null)
             {
                 putRawValue(KEY_DESCRIPTION, description, rawProperties);
@@ -288,13 +282,13 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
             }
 
             // Try for the dates two different ways too
-            if(metadata.get(TikaCoreProperties.CREATED) != null)
+            if(metadata.get(Metadata.CREATION_DATE) != null)
             {
-                putRawValue(KEY_CREATED, metadata.get(TikaCoreProperties.CREATED), rawProperties);
+                putRawValue(KEY_CREATED, metadata.get(Metadata.CREATION_DATE), rawProperties);
             }
-            else if(metadata.get(TikaCoreProperties.MODIFIED) != null)
+            else if(metadata.get(Metadata.DATE) != null)
             {
-                putRawValue(KEY_CREATED, metadata.get(TikaCoreProperties.MODIFIED), rawProperties);
+                putRawValue(KEY_CREATED, metadata.get(Metadata.DATE), rawProperties);
             }
 
             // If people created a specific instance
@@ -394,25 +388,29 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
         return values.length == 0 ? null : (values.length == 1 ? values[0] : values);
     }
 
-    private String getMetadataValue(Metadata metadata, Property key)
+    private String getMetadataValue(Metadata metadata, String key)
     {
         if (metadata.isMultiValued(key))
         {
-            return distinct(metadata.getValues(key)).collect(Collectors.joining(", "));
+            String[] parts = metadata.getValues(key);
+
+            // use Set to prevent duplicates
+            Set<String> value = new LinkedHashSet<>(parts.length);
+
+            for (int i = 0; i < parts.length; i++)
+            {
+                value.add(parts[i]);
+            }
+
+            String valueStr = value.toString();
+
+            // remove leading/trailing braces []
+            return valueStr.substring(1, valueStr.length() - 1);
         }
         else
         {
             return metadata.get(key);
         }
-    }
-
-    protected static Stream<String> distinct(final String[] strings)
-    {
-        return Stream.of(strings)
-                     .filter(Objects::nonNull)
-                     .map(String::strip)
-                     .filter(s -> !s.isEmpty())
-                     .distinct();
     }
 
     /**
