@@ -48,7 +48,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -242,16 +241,7 @@ public class FFmpegControllerTest extends AbstractTransformerControllerTest
         File sourceFile = getTestFile("quick." + sourceExtension, true);
         String targetFileRef = UUID.randomUUID().toString();
 
-        // Transformation Request POJO
-        TransformRequest transformRequest = new TransformRequest();
-        transformRequest.setRequestId("1");
-        transformRequest.setSchema(1);
-        transformRequest.setClientData("Alfresco Digital Business Platform");
-        transformRequest.setTransformRequestOptions(new HashMap<>());
-        transformRequest.setSourceReference(sourceFileRef);
-        transformRequest.setSourceExtension(sourceExtension);
-        transformRequest.setSourceSize(sourceFile.length());
-        transformRequest.setTargetExtension(targetExtension);
+        TransformRequest transformRequest = createTransformRequest(sourceFileRef, sourceFile);
 
         // HTTP Request
         HttpHeaders headers = new HttpHeaders();
