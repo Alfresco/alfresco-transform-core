@@ -10,11 +10,9 @@ export VERSION=$(git describe --abbrev=0 --tags)
 
 mkdir -p deploy_dir
 
-# Download the WhiteSource report
-# mvn -B org.alfresco:whitesource-downloader-plugin:inventoryReport \
-#     -N \
-#     "-Dorg.whitesource.product=Transform Service" \
-#     -DsaveReportAs=deploy_dir/3rd-party.xlsx
+# Create third party license csv file and add it to the deploy directory.
+git clone --depth=1 https://github.com/Alfresco/third-party-license-overrides.git
+python3 ./third-party-license-overrides/thirdPartyLicenseCSVCreator.py --project "`pwd`" --version "${VERSION}" --combined --output "deploy_dir"
 
 echo "Local deploy directory content:"
 ls -lA deploy_dir

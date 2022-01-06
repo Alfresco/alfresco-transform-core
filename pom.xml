@@ -312,10 +312,15 @@
                                 <goal>add-third-party</goal>
                                 <goal>download-licenses</goal>
                             </goals>
+                            <phase>generate-resources</phase>
                             <configuration>
-                                <useMissingFile>true</useMissingFile>
+                                <failOnMissing>true</failOnMissing>
                                 <excludedScopes>provided,test</excludedScopes>
                                 <excludedGroups>org.alfresco</excludedGroups>
+                                <failIfWarning>false</failIfWarning>
+                                <includedLicenses>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/includedLicenses.txt</includedLicenses>
+                                <licenseMergesUrl>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/licenseMerges.txt</licenseMergesUrl>
+                                <overrideUrl>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/override-THIRD-PARTY.properties</overrideUrl>
                             </configuration>
                         </execution>
                         <execution>
