@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,12 +26,15 @@
  */
 package org.alfresco.transformer;
 
+import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.client.model.TransformRequestValidator;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.router.TransformStack;
+import org.alfresco.transform.router.TransformerDebug;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.model.FileRefResponse;
@@ -134,6 +137,9 @@ public abstract class AbstractTransformerController implements TransformControll
     @Autowired
     private TransformServiceRegistry transformRegistry;
 
+    @Autowired
+    private TransformerDebug transformerDebug;
+
     @GetMapping(value = "/transform/config")
     public ResponseEntity<TransformConfig> info()
     {
@@ -203,16 +209,18 @@ public abstract class AbstractTransformerController implements TransformControll
     public ResponseEntity<TransformReply> transform(@RequestBody TransformRequest request,
         @RequestParam(value = "timeout", required = false) Long timeout)
     {
-        logger.info("Received {}, timeout {} ms", request, timeout);
+        logger.trace("Received {}, timeout {} ms", request, timeout);
 
         final TransformReply reply = new TransformReply();
-        reply.setInternalContext(request.getInternalContext());
         reply.setRequestId(request.getRequestId());
         reply.setSourceReference(request.getSourceReference());
         reply.setSchema(request.getSchema());
         reply.setClientData(request.getClientData());
 
         final Errors errors = validateTransformRequest(request);
+        validateInternalContext(request, errors);
+        initialiseContext(request);
+        reply.setInternalContext(request.getInternalContext());
         if (!errors.getAllErrors().isEmpty())
         {
             reply.setStatus(BAD_REQUEST.value());
@@ -222,9 +230,11 @@ public abstract class AbstractTransformerController implements TransformControll
                 .map(Object::toString)
                 .collect(joining(", ")));
 
-            logger.error("Invalid request, sending {}", reply);
+            transformerDebug.logFailure(reply);
+            logger.trace("Invalid request, sending {}", reply);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
+        transformerDebug.pushTransform(request);
 
         // Load the source file
         File sourceFile;
@@ -237,7 +247,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(e.getStatusCode());
             reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
 
-            logger.error("Failed to load source file (TransformException), sending " + reply);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to load source file (TransformException), sending " + reply);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (HttpClientErrorException e)
@@ -245,8 +256,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(e.getStatusCode().value());
             reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
 
-            logger.error("Failed to load source file (HttpClientErrorException), sending " +
-                         reply, e);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to load source file (HttpClientErrorException), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (Exception e)
@@ -254,7 +265,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(INTERNAL_SERVER_ERROR.value());
             reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
 
-            logger.error("Failed to load source file (Exception), sending " + reply, e);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to load source file (Exception), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
 
@@ -266,10 +278,10 @@ public abstract class AbstractTransformerController implements TransformControll
         // Run the transformation
         try
         {
-
             String targetMimetype = request.getTargetMediaType();
             String sourceMimetype = request.getSourceMediaType();
             Map<String, String> transformOptions = request.getTransformRequestOptions();
+            transformerDebug.logOptions(request);
             String transformName = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
             transformImpl(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
         }
@@ -278,7 +290,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(e.getStatusCode());
             reply.setErrorDetails(messageWithCause("Failed at processing transformation", e));
 
-            logger.error("Failed to perform transform (TransformException), sending " + reply, e);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to perform transform (TransformException), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (Exception e)
@@ -286,7 +299,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(INTERNAL_SERVER_ERROR.value());
             reply.setErrorDetails(messageWithCause("Failed at processing transformation", e));
 
-            logger.error("Failed to perform transform (Exception), sending " + reply, e);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to perform transform (Exception), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
 
@@ -301,7 +315,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(e.getStatusCode());
             reply.setErrorDetails(messageWithCause("Failed at writing the transformed file", e));
 
-            logger.error("Failed to save target file (TransformException), sending " + reply, e);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to save target file (TransformException), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (HttpClientErrorException e)
@@ -309,8 +324,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(e.getStatusCode().value());
             reply.setErrorDetails(messageWithCause("Failed at writing the transformed file. ", e));
 
-            logger.error("Failed to save target file (HttpClientErrorException), sending " + reply,
-                e);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to save target file (HttpClientErrorException), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (Exception e)
@@ -318,7 +333,8 @@ public abstract class AbstractTransformerController implements TransformControll
             reply.setStatus(INTERNAL_SERVER_ERROR.value());
             reply.setErrorDetails(messageWithCause("Failed at writing the transformed file. ", e));
 
-            logger.error("Failed to save target file (Exception), sending " + reply, e);
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to save target file (Exception), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
 
@@ -343,7 +359,8 @@ public abstract class AbstractTransformerController implements TransformControll
         reply.setTargetReference(targetRef.getEntry().getFileRef());
         reply.setStatus(CREATED.value());
 
-        logger.info("Sending successful {}, timeout {} ms", reply, timeout);
+        transformerDebug.popTransform(reply);
+        logger.trace("Sending successful {}, timeout {} ms", reply, timeout);
         return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
     }
 
@@ -352,6 +369,21 @@ public abstract class AbstractTransformerController implements TransformControll
         DirectFieldBindingResult errors = new DirectFieldBindingResult(transformRequest, "request");
         transformRequestValidator.validate(transformRequest, errors);
         return errors;
+    }
+
+    private void validateInternalContext(TransformRequest request, Errors errors)
+    {
+        String errorMessage = InternalContext.checkForBasicErrors(request.getInternalContext(), "T-Request");
+        if (errorMessage != null)
+        {
+            errors.rejectValue("internalContext", null, errorMessage);
+        }
+    }
+
+    private void initialiseContext(TransformRequest request)
+    {
+        // If needed initialise the context enough to allow logging to take place without NPE checks
+        request.setInternalContext(InternalContext.initialise(request.getInternalContext()));
     }
 
     /**
@@ -422,7 +454,7 @@ public abstract class AbstractTransformerController implements TransformControll
         }
         else if (logger.isInfoEnabled())
         {
-            logger.info("Using transform name provided in the request: " + requestTransformName);
+            logger.trace("Using transform name provided in the request: " + requestTransformName);
         }
         return transformName;
     }

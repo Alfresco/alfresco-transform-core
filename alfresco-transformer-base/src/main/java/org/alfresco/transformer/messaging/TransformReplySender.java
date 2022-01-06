@@ -66,7 +66,7 @@ public class TransformReplySender
                 m.setJMSCorrelationID(correlationId);
                 return m;
             });
-            logger.info("Sent: {} - with correlation ID {}", reply, correlationId);
+            logger.trace("Sent: {} - with correlation ID {}", reply, correlationId);
         }
         catch (Exception e)
         {

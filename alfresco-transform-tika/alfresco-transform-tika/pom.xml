@@ -8,7 +8,7 @@
     <parent>
         <artifactId>alfresco-transform-core</artifactId>
         <groupId>org.alfresco</groupId>
-        <version>2.5.5-A1-SNAPSHOT</version>
+        <version>2.5.5-A2-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -54,16 +54,23 @@
             </exclusions>
         </dependency>
 
+        <!-- Needed for correct date/time formats -->
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.10.13</version>
+        </dependency>
+
         <!-- for Apache Tika Parsers - eg. encrypted PDF -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.69</version>
+            <version>1.70</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcmail-jdk15on</artifactId>
-            <version>1.69</version>
+            <version>1.70</version>
         </dependency>
 
         <!-- Apache POI -->
