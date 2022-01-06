@@ -4,7 +4,7 @@ The `.travis.yml` config file can be found in the root of the repository.
 
 
 ## Stages and Jobs
-1. **Build**: Java build with unit tests, integration tests and WhiteSource scan.
+1. **Build**: Java build with unit and integration tests.
 2. **Release**: Release with artifact deployment to Nexus and AWS Staging bucket.
 3. **Company Release**: Artifact deployment to AWS Release bucket.
 
