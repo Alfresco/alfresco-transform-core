@@ -37,6 +37,8 @@ import java.util.StringJoiner;
 public final class FFmpegOptionsBuilder
 {
     private String timeOffset;
+    private String duration;
+    
     private Integer framesNum;
 
     // TODO PoC - add other FFmpeg transform options ...
@@ -54,6 +56,12 @@ public final class FFmpegOptionsBuilder
         return this;
     }
 
+    public FFmpegOptionsBuilder withDuration(final String duration)
+    {
+        this.duration = duration;
+        return this;
+    }
+
     public String build()
     {
         StringJoiner args = new StringJoiner(" ");
@@ -66,6 +74,11 @@ public final class FFmpegOptionsBuilder
         if (framesNum != null)
         {
             args.add("-frames:v "+framesNum);
+        }
+
+        if (duration != null)
+        {
+            args.add("-t "+duration);
         }
 
         return args.toString();

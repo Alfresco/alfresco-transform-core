@@ -38,6 +38,8 @@ import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.alfresco.transformer.util.RequestParamMap.FRAMES_NUM;
+
 /**
  * Controller for the FFmpeg transformer.
  *
@@ -66,6 +68,14 @@ public class FFmpegController extends AbstractTransformerController
     private static final Logger logger = LoggerFactory.getLogger(
             FFmpegController
                     .class);
+
+    public static final String PREFIX_IMAGE = "image/";
+
+    public static final String FILE_EXT_PNG = "png";
+    public static final String FILE_EXT_JPG = "jpg";
+    public static final String FILE_EXT_JPEG = "jpeg";
+
+    private static final int DEFAULT_FRAMES_NUM_1 = 1;
 
     @Value("${transform.core.ffmpeg.exe}")
     private String execPath;
@@ -117,6 +127,34 @@ public class FFmpegController extends AbstractTransformerController
     public void transformImpl(String transformName, String sourceMimetype, String targetMimetype,
                                  Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
+        // TODO PoC FFmpeg - initially "single frame" for image target
+        if (isTargetImage(targetMimetype, targetFile))
+        {
+            transformOptions.put(FRAMES_NUM, Integer.toString(DEFAULT_FRAMES_NUM_1));
+        }
+
         commandExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+    }
+
+    // TODO PoC FFmpeg - refactor and enhance (for configured / supported image formats etc)
+    private boolean isTargetImage(String targetMimetype, File targetFile)
+    {
+        if ((targetMimetype != null) && (targetMimetype.startsWith(PREFIX_IMAGE)))
+        {
+            return true;
+        }
+
+        if (targetFile != null) {
+            String[] split = targetFile.getName().split("\\.");
+            if (split.length > 0) {
+                String ext = split[split.length - 1];
+
+                return (FILE_EXT_JPEG.equalsIgnoreCase(ext) ||
+                        FILE_EXT_JPG.equalsIgnoreCase(ext) ||
+                        FILE_EXT_PNG.equalsIgnoreCase(ext));
+            }
+        }
+
+        return false;
     }
 }

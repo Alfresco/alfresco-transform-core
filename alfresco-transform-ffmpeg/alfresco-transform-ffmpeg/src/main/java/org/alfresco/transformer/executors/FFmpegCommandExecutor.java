@@ -33,8 +33,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.alfresco.transformer.util.RequestParamMap.TIMEOUT;
-import static org.alfresco.transformer.util.RequestParamMap.TIME_OFFSET;
+import static org.alfresco.transformer.util.RequestParamMap.*;
+import static org.alfresco.transformer.util.Util.stringToInteger;
 import static org.alfresco.transformer.util.Util.stringToLong;
 
 /**
@@ -78,7 +78,9 @@ public class FFmpegCommandExecutor extends AbstractCommandExecutor
         RuntimeExec runtimeExec = new RuntimeExec();
         Map<String, String[]> commandsAndArguments = new HashMap<>();
 
-        // TODO PoC for FFmpeg - check against Gytheio: -y SPLIT:${sourceOptions} -i ${source} SPLIT:${targetOptions} ${target}
+        // TODO PoC for FFmpeg
+        //    - for now, current options are all target options (ie. after -i)
+        //    - check against Gytheio: -y SPLIT:${sourceOptions} -i ${source} SPLIT:${targetOptions} ${target}
         commandsAndArguments.put(".*",
               new String[]{EXE, "-y", "-i", "${source}", "SPLIT:${options}", "${target}"});
 
@@ -113,10 +115,16 @@ public class FFmpegCommandExecutor extends AbstractCommandExecutor
         String timeOffset = transformOptions.get(TIME_OFFSET);
         if (timeOffset != null)
         {
-            // TODO check target mimetype (to be supported image formats) for "single frame" option
             optionsBuilder.withTimeOffset(transformOptions.get(TIME_OFFSET));
-            optionsBuilder.withFramesNum(FRAMES_NUM_1);
         }
+
+        String duration = transformOptions.get(DURATION);
+        if (duration != null)
+        {
+            optionsBuilder.withDuration(transformOptions.get(DURATION));
+        }
+
+        optionsBuilder.withFramesNum(stringToInteger(transformOptions.get(FRAMES_NUM)));
 
         final String options = optionsBuilder.build();
 

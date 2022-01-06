@@ -1,7 +1,8 @@
 {
   "transformOptions": {
     "ffmpegOptions": [
-      {"value": {"name": "timeOffset"}}
+      {"value": {"name": "timeOffset"}},
+      {"value": {"name": "duration"}}
     ]
   },
   "transformers": [

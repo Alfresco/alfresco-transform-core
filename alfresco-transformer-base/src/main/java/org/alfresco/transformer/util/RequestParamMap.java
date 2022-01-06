@@ -75,4 +75,6 @@ public interface RequestParamMap
 
     // TODO PoC for FFmpeg
     String TIME_OFFSET             = "timeOffset";
+    String DURATION                = "duration";
+    String FRAMES_NUM              = "framesNum";
 }
