@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -33,7 +33,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.alfresco.transformer.util.RequestParamMap.START_PAGE;
 import static org.alfresco.transformer.util.RequestParamMap.TIMEOUT;
 import static org.alfresco.transformer.util.RequestParamMap.TIME_OFFSET;
 import static org.alfresco.transformer.util.Util.stringToLong;
@@ -41,6 +40,8 @@ import static org.alfresco.transformer.util.Util.stringToLong;
 /**
  * CommandExecutor implementation for running FFmpeg transformations. It runs the
  * transformation logic as a separate Shell process.
+ * 
+ * @author janv
  */
 // TODO PoC for FFmpeg
 public class FFmpegCommandExecutor extends AbstractCommandExecutor

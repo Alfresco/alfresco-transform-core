@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -79,6 +79,8 @@ import javax.annotation.PostConstruct;
 /**
  * Test the FFmpegController without a server.
  * Super class includes tests for the AbstractTransformerController.
+ * 
+ * @author janv
  */
 @WebMvcTest(FFmpegController.class)
 public class FFmpegControllerTest extends AbstractTransformerControllerTest

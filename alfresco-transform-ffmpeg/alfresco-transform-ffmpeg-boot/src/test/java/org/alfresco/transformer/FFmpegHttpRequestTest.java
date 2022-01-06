@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -31,6 +31,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 /**
  * Tests FFmpegController with a server test harness.
+ * 
+ * @author janv
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class FFmpegHttpRequestTest extends AbstractHttpRequestTest
