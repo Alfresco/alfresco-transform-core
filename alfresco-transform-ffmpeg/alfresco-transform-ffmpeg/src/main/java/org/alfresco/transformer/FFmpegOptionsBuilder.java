@@ -29,30 +29,39 @@ package org.alfresco.transformer;
 import java.util.StringJoiner;
 
 /**
- * FFmpeg options builder.
+ * FFmpeg options builder
  *
+ * https://ffmpeg.org/ffmpeg.html#Options including:
+ * - https://ffmpeg.org/ffmpeg.html#Main-options
+ * - https://ffmpeg.org/ffmpeg.html#Video-Options
+ * - https://ffmpeg.org/ffmpeg-utils.html#time-duration-syntax
+ * 
  * @author janv
  */
-// TODO PoC for FFmpeg
+// TODO PoC for FFmpeg - add other FFmpeg transform options (as needed) ...
 public final class FFmpegOptionsBuilder
 {
-    private String timeOffset;
-    private String duration;
-    
     private Integer framesNum;
 
-    // TODO PoC - add other FFmpeg transform options ...
-    private FFmpegOptionsBuilder() {}
+    // temporal
+    private String timeOffset;
+    private String duration;
 
-    public FFmpegOptionsBuilder withTimeOffset(final String timeOffset)
-    {
-        this.timeOffset = timeOffset;
-        return this;
-    }
+    // frame resolution
+    private Integer frameWidth;
+    private Integer frameHeight;
+
+    private FFmpegOptionsBuilder() {}
 
     public FFmpegOptionsBuilder withFramesNum(final Integer framesNum)
     {
         this.framesNum = framesNum;
+        return this;
+    }
+
+    public FFmpegOptionsBuilder withTimeOffset(final String timeOffset)
+    {
+        this.timeOffset = timeOffset;
         return this;
     }
 
@@ -62,23 +71,40 @@ public final class FFmpegOptionsBuilder
         return this;
     }
 
+    public FFmpegOptionsBuilder withFrameWidth(final Integer frameWidth)
+    {
+        this.frameWidth = frameWidth;
+        return this;
+    }
+
+    public FFmpegOptionsBuilder withFrameHeight(final Integer frameHeight)
+    {
+        this.frameHeight = frameHeight;
+        return this;
+    }
+
     public String build()
     {
         StringJoiner args = new StringJoiner(" ");
-
-        if (timeOffset != null)
-        {
-            args.add("-ss "+timeOffset);
-        }
 
         if (framesNum != null)
         {
             args.add("-frames:v "+framesNum);
         }
 
+        if (timeOffset != null)
+        {
+            args.add("-ss "+timeOffset);
+        }
+
         if (duration != null)
         {
             args.add("-t "+duration);
+        }
+
+        if ((frameWidth != null) && (frameHeight != null))
+        {
+            args.add("-s "+frameWidth+"x"+frameHeight);
         }
 
         return args.toString();

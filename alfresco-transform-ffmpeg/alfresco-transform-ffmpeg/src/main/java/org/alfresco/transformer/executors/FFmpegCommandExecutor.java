@@ -124,6 +124,9 @@ public class FFmpegCommandExecutor extends AbstractCommandExecutor
             optionsBuilder.withDuration(transformOptions.get(DURATION));
         }
 
+        optionsBuilder.withFrameWidth(stringToInteger(transformOptions.get(FRAME_WIDTH)));
+        optionsBuilder.withFrameHeight(stringToInteger(transformOptions.get(FRAME_HEIGHT)));
+
         optionsBuilder.withFramesNum(stringToInteger(transformOptions.get(FRAMES_NUM)));
 
         final String options = optionsBuilder.build();
