@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -102,8 +102,8 @@ public abstract class AbstractMetadataExtractsIT
             jsonObjectMapper.writerWithDefaultPrettyPrinter().writeValue(actualMetadataFile, actualMetadata);
 
             Map<String, Serializable> expectedMetadata = readExpectedMetadata(metadataFilename, actualMetadataFile);
-            assertEquals(expectedMetadata, actualMetadata, 
-                "The metadata did not match the expected value. It has been saved in "+actualMetadataFile.getAbsolutePath());
+            assertEquals(expectedMetadata, actualMetadata,
+                    sourceFile+": The metadata did not match the expected value. It has been saved in "+actualMetadataFile.getAbsolutePath());
             actualMetadataFile.delete();
         }
         catch (Exception e)
