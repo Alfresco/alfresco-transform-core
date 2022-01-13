@@ -7,3 +7,9 @@ transform:
     tika:
       pdfBox:
         notExtractBookmarksTextDefault: ${PDFBOX_NOTEXTRACTBOOKMARKS_DEFAULT:false}
+
+logging:
+  level:
+    # org.alfresco.util.exec.RuntimeExec: debug
+    org.alfresco.transformer.metadataExtractors.TikaAudioMetadataExtractor: debug
+    org.alfresco.transformer.metadataExtractors: debug

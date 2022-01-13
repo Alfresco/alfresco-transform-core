@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -271,28 +271,28 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
             //  being nearly as consistent as one might hope
             String subject = getMetadataValue(metadata, TikaCoreProperties.SUBJECT);
             String description = getMetadataValue(metadata, TikaCoreProperties.DESCRIPTION);
-            if(subject != null && description != null)
+            if (subject != null && description != null)
             {
                 putRawValue(KEY_DESCRIPTION, description, rawProperties);
                 putRawValue(KEY_SUBJECT, subject, rawProperties);
             }
-            else if(subject != null)
+            else if (subject != null)
             {
                 putRawValue(KEY_DESCRIPTION, subject, rawProperties);
                 putRawValue(KEY_SUBJECT, subject, rawProperties);
             }
-            else if(description != null)
+            else if (description != null)
             {
                 putRawValue(KEY_DESCRIPTION, description, rawProperties);
                 putRawValue(KEY_SUBJECT, description, rawProperties);
             }
 
             // Try for the dates two different ways too
-            if(metadata.get(TikaCoreProperties.CREATED) != null)
+            if (metadata.get(TikaCoreProperties.CREATED) != null)
             {
                 putRawValue(KEY_CREATED, metadata.get(TikaCoreProperties.CREATED), rawProperties);
             }
-            else if(metadata.get(TikaCoreProperties.MODIFIED) != null)
+            else if (metadata.get(TikaCoreProperties.MODIFIED) != null)
             {
                 putRawValue(KEY_CREATED, metadata.get(TikaCoreProperties.MODIFIED), rawProperties);
             }
@@ -458,7 +458,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
 
         public void characters(char[] ch, int start, int len)
         {
-            if(text != null)
+            if (text != null)
             {
                 text.append(ch, start, len);
             }
@@ -466,7 +466,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
 
         public void endElement(String namespace, String localname, String qname)
         {
-            if(text != null && text.length() > 0)
+            if (text != null && text.length() > 0)
             {
                 tags.put(qname, text.toString());
             }
