@@ -269,7 +269,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
 
             // Get the subject and description, despite things not
             //  being nearly as consistent as one might hope
-            String subject = getMetadataValue(metadata, OfficeOpenXMLCore.SUBJECT);
+            String subject = getMetadataValue(metadata, TikaCoreProperties.SUBJECT);
             String description = getMetadataValue(metadata, TikaCoreProperties.DESCRIPTION);
             if(subject != null && description != null)
             {
