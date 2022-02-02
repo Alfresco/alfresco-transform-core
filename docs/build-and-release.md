@@ -5,7 +5,7 @@ The `.travis.yml` config file can be found in the root of the repository.
 
 ## Stages and Jobs
 1. **Build**: Java build with unit and integration tests.
-2. **Release**: Release with artifact deployment to Nexus.
+2. **Release**: Release with artifact deployment to Nexus, DockerHub and Quay.io.
 
 
 ## Branches
