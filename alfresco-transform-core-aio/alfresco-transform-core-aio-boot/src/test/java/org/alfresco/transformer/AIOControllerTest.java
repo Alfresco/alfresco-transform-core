@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -38,7 +38,6 @@ import org.springframework.context.annotation.Import;
 @Import(AIOCustomConfig.class)
 public class AIOControllerTest //extends AbstractTransformerControllerTest 
 {
-
     @Autowired
     AIOController aioController;
 
@@ -64,6 +63,12 @@ public class AIOControllerTest //extends AbstractTransformerControllerTest
     @Test
     public void emptyTest()
     {
-        aioController.info();
+        aioController.info(null);
+    }
+
+    @Test
+    public void emptyTestWithIncludeCoreVersion()
+    {
+        aioController.info(true);
     }
 }

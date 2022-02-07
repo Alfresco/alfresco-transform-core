@@ -4,3 +4,4 @@ transform:
   core:
     config:
       location: classpath:misc_engine_config.json
+    version: @project:version@:

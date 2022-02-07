@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.File;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ import java.util.Map;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transformer.util.RequestParamMap.INCLUDE_CORE_VERSION;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
 import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -88,10 +90,12 @@ public class AIOController extends AbstractTransformerController
     }
 
     @Override
-    public ResponseEntity<TransformConfig> info()
+    public ResponseEntity<TransformConfig> info(
+            @RequestParam(value = INCLUDE_CORE_VERSION, required = false) Boolean includeCoreVersion)
     {
         logger.info("GET Transform Config.");
         TransformConfig transformConfig = transformRegistry.getTransformConfig();
+        transformConfig = coreVersionDecorator.decorate(transformConfig, includeCoreVersion);
         return new ResponseEntity<>(transformConfig, OK);
     }
 

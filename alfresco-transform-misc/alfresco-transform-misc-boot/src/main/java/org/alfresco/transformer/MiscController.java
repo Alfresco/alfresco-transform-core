@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -38,7 +38,7 @@ import java.util.Map;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transformer.transformers.HtmlParserContentTransformer.SOURCE_ENCODING;
+import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
 import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 
 @Controller
