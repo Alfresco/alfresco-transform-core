@@ -33,14 +33,13 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.util.StringUtils.getFilename;
 import static org.springframework.util.StringUtils.getFilenameExtension;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
@@ -220,6 +219,34 @@ public class FileManager
         request.setAttribute(SOURCE_FILE, file);
         save(multipartFile, file);
         LogEntry.setSource(filename, size);
+        return file;
+    }
+
+    /**
+     * Loads the file from Direct Access URL
+     *
+     * @param responseEntity response entity from Direct Access URL,
+     * @param filename       name of source file,
+     * @return the file containing the source content for the transformation
+     */
+    public static File createSourceFileFromDirectUrlResponse(HttpServletRequest request,
+                                                             final ResponseEntity<Resource> responseEntity,
+                                                             String filename)
+    {
+        long size = responseEntity.getHeaders().getContentLength();
+        final Resource body = responseEntity.getBody();
+        final File file = TempFileProvider.createTempFile("source_", "_" + filename);
+
+        if (body == null)
+        {
+            String message = "Source file is null or empty. "
+                    + "Transformation will fail and stop now as there is no content to be transformed.";
+            throw new TransformException(BAD_REQUEST.value(), message);
+        }
+
+        save(body, file);
+        LogEntry.setSource(filename, size);
+
         return file;
     }
 

@@ -67,11 +67,13 @@ import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTem
 import static org.alfresco.transformer.fs.FileManager.buildFile;
 import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
+import static org.alfresco.transformer.fs.FileManager.createSourceFileFromDirectUrlResponse;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.fs.FileManager.deleteFile;
 import static org.alfresco.transformer.fs.FileManager.getFilenameFromContentDisposition;
 import static org.alfresco.transformer.fs.FileManager.save;
+import static org.alfresco.transformer.util.RequestParamMap.DIRECT_URL;
 import static org.alfresco.transformer.util.RequestParamMap.FILE;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_EXTENSION;
@@ -148,12 +150,12 @@ public abstract class AbstractTransformerController implements TransformControll
         return new ResponseEntity<>(transformConfig, OK);
     }
 
-    @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
+    @PostMapping (value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
-                                              @RequestParam(FILE) MultipartFile sourceMultipartFile,
-                                              @RequestParam(TARGET_EXTENSION) String targetExtension,
-                                              @RequestParam(value = SOURCE_MIMETYPE, required = false) String sourceMimetype,
-                                              @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,
+                                              @RequestParam (FILE) MultipartFile sourceMultipartFile,
+                                              @RequestParam (TARGET_EXTENSION) String targetExtension,
+                                              @RequestParam (value = SOURCE_MIMETYPE, required = false) String sourceMimetype,
+                                              @RequestParam (value = TARGET_MIMETYPE, required = false) String targetMimetype,
                                               @RequestParam Map<String, String> requestParameters,
                                               @RequestParam (value = TEST_DELAY, required = false) Long testDelay,
 
@@ -167,10 +169,24 @@ public abstract class AbstractTransformerController implements TransformControll
                     + "targetExtension: '{}', requestParameters: {}", sourceMimetype, targetMimetype, targetExtension, requestParameters);
         }
 
-        final String targetFilename = createTargetFileName(
-                sourceMultipartFile.getOriginalFilename(), targetExtension);
+        final String directUrl = requestParameters.getOrDefault(DIRECT_URL, "");
+        File sourceFile;
+        String targetFilename;
+
+        if (directUrl.isBlank())
+        {
+            sourceFile = createSourceFile(request, sourceMultipartFile);
+            targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(), targetExtension);
+        } else
+        {
+            ResponseEntity<Resource> responseEntity = alfrescoSharedFileStoreClient
+                    .getContentViaDirectUrl(directUrl);
+            String filename = getTrimmedFilename(responseEntity);
+            sourceFile = createSourceFileFromDirectUrlResponse(request, responseEntity, filename);
+            targetFilename = createTargetFileName(filename, targetExtension);
+        }
         getProbeTestTransform().incrementTransformerCount();
-        final File sourceFile = createSourceFile(request, sourceMultipartFile);
+
         final File targetFile = createTargetFile(request, targetFilename);
 
         Map<String, String> transformOptions = getTransformOptions(requestParameters);
@@ -183,6 +199,12 @@ public abstract class AbstractTransformerController implements TransformControll
         time += LogEntry.addDelay(testDelay);
         getProbeTestTransform().recordTransformTime(time);
         return body;
+    }
+
+    private String getTrimmedFilename(ResponseEntity<Resource> responseEntity)
+    {
+        return getFilenameFromContentDisposition(responseEntity.getHeaders())
+                .replace("\"", "").trim();
     }
 
     protected Map<String, String> getTransformOptions(Map<String, String> requestParameters)
@@ -203,7 +225,7 @@ public abstract class AbstractTransformerController implements TransformControll
      * @param timeout Transformation timeout
      * @return A transformation reply
      */
-    @PostMapping(value = "/transform", produces = APPLICATION_JSON_VALUE)
+    @PostMapping (value = "/transform", produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<TransformReply> transform(@RequestBody TransformRequest request,
         @RequestParam(value = "timeout", required = false) Long timeout)

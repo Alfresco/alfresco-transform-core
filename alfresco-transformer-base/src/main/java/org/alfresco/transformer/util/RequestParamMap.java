@@ -72,4 +72,5 @@ public interface RequestParamMap
     String INCLUDE_CONTENTS        = "includeContents";
     String NOT_EXTRACT_BOOKMARKS_TEXT = "notExtractBookmarksText";
     String PAGE_LIMIT              = "pageLimit";
+    String DIRECT_URL              = "directUrl";
 }
