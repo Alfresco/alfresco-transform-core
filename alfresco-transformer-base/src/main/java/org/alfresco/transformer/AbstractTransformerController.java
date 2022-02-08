@@ -34,7 +34,9 @@ import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.router.TransformerDebug;
+import org.alfresco.transformer.clients.AlfrescoDirectAccessUrlClient;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
+import org.alfresco.transformer.fs.FileManager.TempFileProvider;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.model.FileRefResponse;
 import org.slf4j.Logger;
@@ -67,7 +69,6 @@ import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTem
 import static org.alfresco.transformer.fs.FileManager.buildFile;
 import static org.alfresco.transformer.fs.FileManager.createAttachment;
 import static org.alfresco.transformer.fs.FileManager.createSourceFile;
-import static org.alfresco.transformer.fs.FileManager.createSourceFileFromDirectUrlResponse;
 import static org.alfresco.transformer.fs.FileManager.createTargetFile;
 import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.fs.FileManager.deleteFile;
@@ -127,11 +128,13 @@ public abstract class AbstractTransformerController implements TransformControll
 
     // Request parameters that are not part of transform options
     public static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
-            TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, TEST_DELAY, TRANSFORM_NAME_PROPERTY);
+            TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, TEST_DELAY, TRANSFORM_NAME_PROPERTY, DIRECT_URL);
 
     @Autowired
     private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
 
+    @Autowired
+    private AlfrescoDirectAccessUrlClient alfrescoDirectAccessUrlClient;
     @Autowired
     private TransformRequestValidator transformRequestValidator;
 
@@ -179,7 +182,7 @@ public abstract class AbstractTransformerController implements TransformControll
             targetFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(), targetExtension);
         } else
         {
-            ResponseEntity<Resource> responseEntity = alfrescoSharedFileStoreClient
+            ResponseEntity<Resource> responseEntity = alfrescoDirectAccessUrlClient
                     .getContentViaDirectUrl(directUrl);
             String filename = getTrimmedFilename(responseEntity);
             sourceFile = createSourceFileFromDirectUrlResponse(request, responseEntity, filename);
@@ -205,6 +208,34 @@ public abstract class AbstractTransformerController implements TransformControll
     {
         return getFilenameFromContentDisposition(responseEntity.getHeaders())
                 .replace("\"", "").trim();
+    }
+
+    /**
+     * Loads the file from Direct Access URL
+     *
+     * @param responseEntity response entity from Direct Access URL,
+     * @param filename       name of source file,
+     * @return the file containing the source content for the transformation
+     */
+    public static File createSourceFileFromDirectUrlResponse(HttpServletRequest request,
+                                                             final ResponseEntity<Resource> responseEntity,
+                                                             String filename)
+    {
+        long size = responseEntity.getHeaders().getContentLength();
+        final Resource body = responseEntity.getBody();
+        final File file = TempFileProvider.createTempFile("source_", "_" + filename);
+
+        if (body == null)
+        {
+            String message = "Source file is null or empty. "
+                    + "Transformation will fail and stop now as there is no content to be transformed.";
+            throw new TransformException(BAD_REQUEST.value(), message);
+        }
+
+        save(body, file);
+        LogEntry.setSource(filename, size);
+
+        return file;
     }
 
     protected Map<String, String> getTransformOptions(Map<String, String> requestParameters)
