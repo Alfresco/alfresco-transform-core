@@ -26,21 +26,10 @@
  */
 package org.alfresco.transformer.clients;
 
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
-
-import java.io.File;
-
 import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.model.FileRefResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
