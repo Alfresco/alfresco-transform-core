@@ -34,6 +34,7 @@ import java.io.Reader;
 
 import javax.annotation.PostConstruct;
 
+import org.alfresco.transform.client.model.config.CoreVersionDecorator;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.registry.AbstractTransformRegistry;
 import org.alfresco.transform.client.registry.CombinedTransformConfig;
@@ -61,6 +62,12 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
     @Value("${transform.core.config.location:classpath:engine_config.json}")
     private String locationFromProperty;
 
+    @Value("${transform.core.version}")
+    private String coreVersion;
+
+    @Autowired
+    private CoreVersionDecorator coreVersionDecorator;
+
     private Resource engineConfig;
 
     @PostConstruct
@@ -82,7 +89,9 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
     {
         try (Reader reader = new InputStreamReader(engineConfig.getInputStream(), UTF_8))
         {
-            return jsonObjectMapper.readValue(reader, TransformConfig.class);
+            TransformConfig transformConfig = jsonObjectMapper.readValue(reader, TransformConfig.class);
+            coreVersionDecorator.setCoreVersionOnSingleStepTransformers(transformConfig.getTransformers(), coreVersion);
+            return transformConfig;
         }
         catch (IOException e)
         {

@@ -2,6 +2,6 @@ queue:
   engineRequestQueue: ${TRANSFORM_ENGINE_REQUEST_QUEUE:org.alfresco.transform.engine.misc.acs}
 transform:
   core:
+    version: @project.version@
     config:
       location: classpath:misc_engine_config.json
-    version: @project:version@:

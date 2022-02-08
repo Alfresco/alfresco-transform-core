@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import org.alfresco.transform.client.model.config.CoreVersionDecorator;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.executors.Transformer;
@@ -56,6 +57,9 @@ public class AIOController extends AbstractTransformerController
 
     @Autowired
     private  AIOTransformRegistry transformRegistry;
+
+    @Autowired
+    private CoreVersionDecorator coreVersionDecorator;
 
     @Override
     public String getTransformerName()
@@ -93,9 +97,9 @@ public class AIOController extends AbstractTransformerController
     public ResponseEntity<TransformConfig> info(
             @RequestParam(value = INCLUDE_CORE_VERSION, required = false) Boolean includeCoreVersion)
     {
-        logger.info("GET Transform Config.");
+        logger.info("GET Transform Config" + (includeCoreVersion != null && includeCoreVersion ? " including coreVersion" : ""));
         TransformConfig transformConfig = transformRegistry.getTransformConfig();
-        transformConfig = coreVersionDecorator.decorate(transformConfig, includeCoreVersion);
+        transformConfig = coreVersionDecorator.setOrClearCoreVersion(transformConfig, includeCoreVersion);
         return new ResponseEntity<>(transformConfig, OK);
     }
 

@@ -142,16 +142,15 @@ public abstract class AbstractTransformerController implements TransformControll
     private TransformerDebug transformerDebug;
 
     @Autowired
-    CoreVersionDecorator coreVersionDecorator;
+    private CoreVersionDecorator coreVersionDecorator;
 
     @GetMapping(value = "/transform/config")
     public ResponseEntity<TransformConfig> info(
             @RequestParam(value = INCLUDE_CORE_VERSION, required = false) Boolean includeCoreVersion)
     {
-        logger.info("GET Transform Config" + (includeCoreVersion ? " including coreVersion" : ""));
-        TransformConfig transformConfig =
-            ((TransformRegistryImpl) transformRegistry).getTransformConfig();
-        transformConfig = coreVersionDecorator.decorate(transformConfig, includeCoreVersion);
+        logger.info("GET Transform Config" + (includeCoreVersion != null && includeCoreVersion ? " including coreVersion" : ""));
+        TransformConfig transformConfig = ((TransformRegistryImpl) transformRegistry).getTransformConfig();
+        transformConfig = coreVersionDecorator.setOrClearCoreVersion(transformConfig, includeCoreVersion);
         return new ResponseEntity<>(transformConfig, OK);
     }
 

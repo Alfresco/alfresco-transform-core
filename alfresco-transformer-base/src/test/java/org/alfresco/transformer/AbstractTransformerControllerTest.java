@@ -56,6 +56,7 @@ import java.util.Set;
 import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.client.model.config.CoreVersionDecorator;
 import org.alfresco.transform.client.model.config.SupportedSourceAndTarget;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.model.config.TransformOption;
@@ -69,6 +70,7 @@ import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.ClassPathResource;
@@ -102,6 +104,9 @@ public abstract class AbstractTransformerControllerTest
 
     @SpyBean
     protected TransformServiceRegistry transformRegistry;
+
+    @Value("${transform.core.version}")
+    private String currentCoreVersion;
 
     protected String sourceExtension;
     protected String targetExtension;
@@ -407,6 +412,28 @@ public abstract class AbstractTransformerControllerTest
 
     @Test
     public void testGetTransformConfigInfo() throws Exception
+    {
+        TransformConfig expectedTransformConfig = objectMapper
+            .readValue(getTestFile(getEngineConfigName(), true),
+                TransformConfig.class);
+        expectedTransformConfig.getTransformers().forEach(transformer -> transformer.setCoreVersion(currentCoreVersion));
+
+        ReflectionTestUtils.setField(transformRegistry, "engineConfig",
+            new ClassPathResource(getEngineConfigName()));
+
+        String response = mockMvc
+            .perform(MockMvcRequestBuilders.get("/transform/config?includeCoreVersion=true"))
+            .andExpect(status().is(OK.value()))
+            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+            .andReturn().getResponse().getContentAsString();
+
+        TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
+        assertEquals(expectedTransformConfig, transformConfig);
+    }
+
+    @Test
+    // Test for case when T-Router or Repository is a version that does not expect it
+    public void testGetTransformConfigInfoExcludingCoreVersion() throws Exception
     {
         TransformConfig expectedTransformConfig = objectMapper
             .readValue(getTestFile(getEngineConfigName(), true),
