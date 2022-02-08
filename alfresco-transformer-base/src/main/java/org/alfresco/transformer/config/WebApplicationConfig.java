@@ -31,6 +31,7 @@ import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.router.TransformerDebug;
 import org.alfresco.transformer.TransformInterceptor;
 import org.alfresco.transformer.TransformRegistryImpl;
+import org.alfresco.transformer.clients.AlfrescoDirectAccessUrlClient;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,6 +66,12 @@ public class WebApplicationConfig implements WebMvcConfigurer
     public AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient()
     {
         return new AlfrescoSharedFileStoreClient();
+    }
+
+    @Bean
+    public AlfrescoDirectAccessUrlClient alfrescoDirectAccessUrlClient()
+    {
+        return new AlfrescoDirectAccessUrlClient();
     }
 
     @Bean
