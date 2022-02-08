@@ -3,11 +3,11 @@
 # TODO PoC for FFmpeg
 # The FFmpeg transformer uses FFmpeg. See license: https://github.com/FFmpeg/FFmpeg/blob/master/LICENSE.md
 
-# TODO PoC for FFmpeg - "migrate" from CentOS 8 to most recent supported CentoOS 7 (note: may mean using FFmpeg 3.x instead of 4.x)
-FROM alfresco/alfresco-base-java:11.0.10-openjdk-centos-8@sha256:343c8f63cf80c7af51785b93d6972b0c00087a1c0b995098cb8285c4d9db74b5
+# TODO PoC for FFmpeg - note: CentOS 7 may mean using FFmpeg 3.x instead of 4.x
+FROM alfresco/alfresco-base-java:11.0.13-openjdk-centos-7@sha256:c1e399d1bbb5d08e0905f1a9ef915ee7c5ea0c0ede11cc9bd7ca98532a9b27fa
 
 # TODO PoC for FFmpeg - update & download from Nexus
-#ARG FFMPEG_VERSION=4.2.5-2
+#ARG FFMPEG_VERSION=3.4.9
 #ENV FFMPEG_RPM_URL=https://download1.rpmfusion.org/free/el/updates/8/x86_64/f/ffmpeg-${FFMPEG_VERSION}.el7.x86_64.rpm
 #ENV FFMPEG_LICENSE_FILE=https://github.com/Alfresco/acs-community-packaging/blob/master/distribution/src/main/resources/licenses/3rd-party/TODO-license.txt
 
@@ -29,9 +29,7 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
 #    curl -s -S $FFMPEG_LICENSE_FILE -o FFmpeg-license.txt && \
     yum install -y epel-release && \
 #    yum localinstall -y ffmpeg-distribution-*linux.rpm && \
-    yum localinstall -y --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm && \
-    yum install -y dnf-plugins-core && \
-    yum config-manager --set-enabled powertools && \
+    yum localinstall -y --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm && \
     yum install -y ffmpeg && \
 #    rm -f ffmpeg-distribution-*.rpm && \
     yum clean all
