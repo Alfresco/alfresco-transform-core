@@ -57,6 +57,14 @@ public class AIOControllerTikaTest extends TikaControllerTest
 
 
     }
+
+    @Test
+    @Override
+    public void testGetTransformConfigInfoExcludingCoreVersion()
+    {
+        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
+    }
+
     @Test
     @Override
     public void testGetInfoFromConfigWithDuplicates()
