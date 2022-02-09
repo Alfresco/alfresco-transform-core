@@ -53,7 +53,8 @@ public class AlfrescoDirectAccessUrlClient
         {
             return restTemplate.getForEntity(directUrl,
                     Resource.class);
-        } catch (HttpClientErrorException e)
+        }
+        catch (HttpClientErrorException e)
         {
             throw new TransformException(e.getStatusCode().value(), e.getMessage(), e);
         }

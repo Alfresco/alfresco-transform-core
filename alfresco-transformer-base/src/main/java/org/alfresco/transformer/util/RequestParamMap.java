@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2020 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -72,5 +72,4 @@ public interface RequestParamMap
     String INCLUDE_CONTENTS        = "includeContents";
     String NOT_EXTRACT_BOOKMARKS_TEXT = "notExtractBookmarksText";
     String PAGE_LIMIT              = "pageLimit";
-    String DIRECT_URL              = "directUrl";
 }

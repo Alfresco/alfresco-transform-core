@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
+import static org.alfresco.transform.client.util.RequestParamMap.DIRECT_ACCESS_URL;
 import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTempFile;
 import static org.alfresco.transformer.fs.FileManager.buildFile;
 import static org.alfresco.transformer.fs.FileManager.createAttachment;
@@ -74,7 +75,6 @@ import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
 import static org.alfresco.transformer.fs.FileManager.deleteFile;
 import static org.alfresco.transformer.fs.FileManager.getFilenameFromContentDisposition;
 import static org.alfresco.transformer.fs.FileManager.save;
-import static org.alfresco.transformer.util.RequestParamMap.DIRECT_URL;
 import static org.alfresco.transformer.util.RequestParamMap.FILE;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_EXTENSION;
@@ -128,13 +128,14 @@ public abstract class AbstractTransformerController implements TransformControll
 
     // Request parameters that are not part of transform options
     public static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
-            TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, TEST_DELAY, TRANSFORM_NAME_PROPERTY, DIRECT_URL);
+            TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, TEST_DELAY, TRANSFORM_NAME_PROPERTY, DIRECT_ACCESS_URL);
 
     @Autowired
     private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
 
     @Autowired
     private AlfrescoDirectAccessUrlClient alfrescoDirectAccessUrlClient;
+
     @Autowired
     private TransformRequestValidator transformRequestValidator;
 
@@ -153,7 +154,7 @@ public abstract class AbstractTransformerController implements TransformControll
         return new ResponseEntity<>(transformConfig, OK);
     }
 
-    @PostMapping (value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
                                               @RequestParam(FILE) MultipartFile sourceMultipartFile,
                                               @RequestParam(TARGET_EXTENSION) String targetExtension,
@@ -172,7 +173,7 @@ public abstract class AbstractTransformerController implements TransformControll
                     + "targetExtension: '{}', requestParameters: {}", sourceMimetype, targetMimetype, targetExtension, requestParameters);
         }
 
-        final String directUrl = requestParameters.getOrDefault(DIRECT_URL, "");
+        final String directUrl = requestParameters.getOrDefault(DIRECT_ACCESS_URL, "");
 
         File sourceFile;
         String sourceFilename;
@@ -181,7 +182,8 @@ public abstract class AbstractTransformerController implements TransformControll
         {
             sourceFile = createSourceFile(request, sourceMultipartFile);
             sourceFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(), targetExtension);
-        } else {
+        }
+        else {
             ResponseEntity<Resource> responseEntity = alfrescoDirectAccessUrlClient
                     .getContentViaDirectUrl(directUrl);
             sourceFilename = getTrimmedFilename(responseEntity);
@@ -294,12 +296,13 @@ public abstract class AbstractTransformerController implements TransformControll
 
         try
         {
-            final String directUrl = request.getTransformRequestOptions().getOrDefault(DIRECT_URL, "");
+            final String directUrl = request.getTransformRequestOptions().getOrDefault(DIRECT_ACCESS_URL, "");
             if (directUrl.isBlank())
             {
                 sourceFile = loadSourceFile(request.getSourceReference(), request.getSourceExtension());
                 sourceFilename = sourceFile.getName();
-            } else {
+            }
+            else {
                 ResponseEntity<Resource> responseEntity = alfrescoDirectAccessUrlClient
                         .getContentViaDirectUrl(directUrl);
                 sourceFilename = getTrimmedFilename(responseEntity);

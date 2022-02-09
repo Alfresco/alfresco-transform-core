@@ -27,7 +27,8 @@
 package org.alfresco.transformer;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.alfresco.transformer.util.RequestParamMap.DIRECT_URL;
+
+import static org.alfresco.transform.client.util.RequestParamMap.DIRECT_ACCESS_URL;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -568,7 +569,7 @@ public abstract class AbstractTransformerControllerTest
         TransformRequest transformRequest = createTransformRequest(sourceFileRef, sourceFile);
         Map<String, String> transformRequestOptions = transformRequest.getTransformRequestOptions();
         String directUrl = "mocked/directUrl";
-        transformRequestOptions.put(DIRECT_URL, directUrl);
+        transformRequestOptions.put(DIRECT_ACCESS_URL, directUrl);
         transformRequest.setTransformRequestOptions(transformRequestOptions);
 
         // HTTP Request
@@ -622,7 +623,7 @@ public abstract class AbstractTransformerControllerTest
         when(alfrescoDirectAccessUrlClient.getContentViaDirectUrl(directUrl)).thenReturn(response);
 
         mockMvc.perform(
-                       mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension, DIRECT_URL, directUrl))
+                       mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension, DIRECT_ACCESS_URL, directUrl))
                .andExpect(status().is(OK.value()))
                .andExpect(content().bytes(expectedTargetFileBytes))
                .andExpect(header().string("Content-Disposition",
