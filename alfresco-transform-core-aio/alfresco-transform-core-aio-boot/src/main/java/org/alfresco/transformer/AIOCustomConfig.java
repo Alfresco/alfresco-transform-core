@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,7 +26,6 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transform.client.model.config.CoreVersionDecorator;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
@@ -85,12 +84,6 @@ public class AIOCustomConfig
 
     @Value("${transform.core.tika.pdfBox.notExtractBookmarksTextDefault:false}")
     private boolean notExtractBookmarksTextDefault;
-
-    @Bean
-    public CoreVersionDecorator coreVersionDecorator()
-    {
-        return new CoreVersionDecorator();
-    };
 
     /**
      *

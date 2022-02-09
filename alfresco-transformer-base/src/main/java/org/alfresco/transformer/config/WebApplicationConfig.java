@@ -27,7 +27,6 @@
 package org.alfresco.transformer.config;
 
 import org.alfresco.transform.client.model.TransformRequestValidator;
-import org.alfresco.transform.client.model.config.CoreVersionDecorator;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.router.TransformerDebug;
 import org.alfresco.transformer.TransformInterceptor;
@@ -73,12 +72,6 @@ public class WebApplicationConfig implements WebMvcConfigurer
     {
         return new TransformRequestValidator();
     }
-
-    @Bean
-    public CoreVersionDecorator coreVersionDecorator()
-    {
-        return new CoreVersionDecorator();
-    };
 
     @Bean
     public TransformServiceRegistry transformRegistry()

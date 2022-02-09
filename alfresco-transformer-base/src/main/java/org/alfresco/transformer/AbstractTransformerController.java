@@ -30,7 +30,6 @@ import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.client.model.TransformRequestValidator;
-import org.alfresco.transform.client.model.config.CoreVersionDecorator;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.exceptions.TransformException;
@@ -64,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
+import static org.alfresco.transform.client.model.config.CoreVersionDecorator.setOrClearCoreVersion;
 import static org.alfresco.transform.client.util.RequestParamMap.INCLUDE_CORE_VERSION;
 import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTempFile;
 import static org.alfresco.transformer.fs.FileManager.buildFile;
@@ -141,16 +141,13 @@ public abstract class AbstractTransformerController implements TransformControll
     @Autowired
     private TransformerDebug transformerDebug;
 
-    @Autowired
-    private CoreVersionDecorator coreVersionDecorator;
-
     @GetMapping(value = "/transform/config")
     public ResponseEntity<TransformConfig> info(
             @RequestParam(value = INCLUDE_CORE_VERSION, required = false) Boolean includeCoreVersion)
     {
         logger.info("GET Transform Config" + (includeCoreVersion != null && includeCoreVersion ? " including coreVersion" : ""));
         TransformConfig transformConfig = ((TransformRegistryImpl) transformRegistry).getTransformConfig();
-        transformConfig = coreVersionDecorator.setOrClearCoreVersion(transformConfig, includeCoreVersion);
+        transformConfig = setOrClearCoreVersion(transformConfig, includeCoreVersion);
         return new ResponseEntity<>(transformConfig, OK);
     }
 

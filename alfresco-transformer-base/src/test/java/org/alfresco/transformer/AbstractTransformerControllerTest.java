@@ -56,7 +56,6 @@ import java.util.Set;
 import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.client.model.config.CoreVersionDecorator;
 import org.alfresco.transform.client.model.config.SupportedSourceAndTarget;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.model.config.TransformOption;
@@ -201,7 +200,7 @@ public abstract class AbstractTransformerControllerTest
                     " does not exist in the resources directory");
         }
         // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication
-        if(testFileUrl!=null)
+        if (testFileUrl!=null)
         {
             // Each use of the tempDir should result in a unique directory being used
             testFile = new File(tempDir, testFilename);

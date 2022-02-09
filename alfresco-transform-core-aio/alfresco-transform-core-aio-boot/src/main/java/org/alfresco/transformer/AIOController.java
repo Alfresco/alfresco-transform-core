@@ -26,7 +26,6 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transform.client.model.config.CoreVersionDecorator;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.executors.Transformer;
@@ -44,6 +43,7 @@ import java.util.Map;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.client.model.config.CoreVersionDecorator.setOrClearCoreVersion;
 import static org.alfresco.transformer.util.RequestParamMap.INCLUDE_CORE_VERSION;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
 import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
@@ -57,9 +57,6 @@ public class AIOController extends AbstractTransformerController
 
     @Autowired
     private  AIOTransformRegistry transformRegistry;
-
-    @Autowired
-    private CoreVersionDecorator coreVersionDecorator;
 
     @Override
     public String getTransformerName()
@@ -99,7 +96,7 @@ public class AIOController extends AbstractTransformerController
     {
         logger.info("GET Transform Config" + (includeCoreVersion != null && includeCoreVersion ? " including coreVersion" : ""));
         TransformConfig transformConfig = transformRegistry.getTransformConfig();
-        transformConfig = coreVersionDecorator.setOrClearCoreVersion(transformConfig, includeCoreVersion);
+        transformConfig = setOrClearCoreVersion(transformConfig, includeCoreVersion);
         return new ResponseEntity<>(transformConfig, OK);
     }
 
@@ -113,7 +110,7 @@ public class AIOController extends AbstractTransformerController
         Transformer transformer = transformRegistry.getByTransformName(transformName);
         if (transformer == null)
         {
-            new TransformException(INTERNAL_SERVER_ERROR.value(), "No transformer mapping for - transform:"
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), "No transformer mapping for - transform:"
                     + transformName + " sourceMimetype:" + sourceMimetype + " targetMimetype:" + targetMimetype);
         }
 
