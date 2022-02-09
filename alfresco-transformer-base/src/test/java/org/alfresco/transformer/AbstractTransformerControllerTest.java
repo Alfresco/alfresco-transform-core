@@ -27,13 +27,18 @@
 package org.alfresco.transformer;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.alfresco.transformer.util.RequestParamMap.DIRECT_URL;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -52,6 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
@@ -64,7 +70,10 @@ import org.alfresco.transform.client.model.config.TransformOptionValue;
 import org.alfresco.transform.client.model.config.Transformer;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.router.TransformStack;
+import org.alfresco.transformer.clients.AlfrescoDirectAccessUrlClient;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
+import org.alfresco.transformer.model.FileRefEntity;
+import org.alfresco.transformer.model.FileRefResponse;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -72,6 +81,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -99,6 +112,9 @@ public abstract class AbstractTransformerControllerTest
 
     @MockBean
     protected AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
+
+    @MockBean
+    protected AlfrescoDirectAccessUrlClient alfrescoDirectAccessUrlClient;
 
     @SpyBean
     protected TransformServiceRegistry transformRegistry;
@@ -539,5 +555,77 @@ public abstract class AbstractTransformerControllerTest
         Transformer transformer = new Transformer();
         transformer.setSupportedSourceAndTargetList(supportedSourceAndTargetList);
         return transformer;
+    }
+
+    @Test
+    public void testPojoWithDauTransform() throws Exception
+    {
+        // Files
+        String sourceFileRef = UUID.randomUUID().toString();
+        File sourceFile = getTestFile("quick." + sourceExtension, true);
+        String targetFileRef = UUID.randomUUID().toString();
+
+        TransformRequest transformRequest = createTransformRequest(sourceFileRef, sourceFile);
+        Map<String, String> transformRequestOptions = transformRequest.getTransformRequestOptions();
+        String directUrl = "mocked/directUrl";
+        transformRequestOptions.put(DIRECT_URL, directUrl);
+        transformRequest.setTransformRequestOptions(transformRequestOptions);
+
+        // HTTP Request
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
+        ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
+                sourceFile), headers, OK);
+
+        when(alfrescoDirectAccessUrlClient.getContentViaDirectUrl(directUrl)).thenReturn(response);
+        when(alfrescoSharedFileStoreClient.saveFile(any()))
+                .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
+
+        // Update the Transformation Request with any specific params before sending it
+        updateTransformRequestWithSpecificOptions(transformRequest);
+
+        // Serialize and call the transformer
+        String tr = objectMapper.writeValueAsString(transformRequest);
+        String transformationReplyAsString = mockMvc
+                .perform(MockMvcRequestBuilders
+                        .post("/transform")
+                        .header(ACCEPT, APPLICATION_JSON_VALUE)
+                        .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                        .content(tr))
+                .andExpect(status().is(CREATED.value()))
+                .andReturn().getResponse().getContentAsString();
+
+        TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,
+                TransformReply.class);
+
+        // Assert the reply
+        assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
+        assertEquals(transformRequest.getClientData(), transformReply.getClientData());
+        assertEquals(transformRequest.getSchema(), transformReply.getSchema());
+    }
+
+    @Test
+    public void simpleDirectUrlTransformTest() throws Exception
+    {
+        ////Test requires to be not null.
+        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
+                expectedSourceFileBytes);
+        File dauSourceFile = getTestFile("quick." + sourceExtension, true);
+        String directUrl = "mocked/directUrl";
+
+        // HTTP Request
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
+        ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
+                dauSourceFile), headers, OK);
+
+        when(alfrescoDirectAccessUrlClient.getContentViaDirectUrl(directUrl)).thenReturn(response);
+
+        mockMvc.perform(
+                       mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension, DIRECT_URL, directUrl))
+               .andExpect(status().is(OK.value()))
+               .andExpect(content().bytes(expectedTargetFileBytes))
+               .andExpect(header().string("Content-Disposition",
+                       "attachment; filename*= UTF-8''quick." + targetExtension));
     }
 }

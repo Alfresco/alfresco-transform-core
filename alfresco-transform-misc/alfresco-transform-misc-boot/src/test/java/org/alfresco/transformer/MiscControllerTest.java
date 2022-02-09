@@ -531,4 +531,11 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         text = text.replaceAll("\\n", "");
         return text;
     }
+
+    @Test
+    @Override
+    public void testPojoWithDauTransform() throws Exception
+    {
+        //NOT APPLICABLE FOR MISC TRANSFORM
+    }
 }
