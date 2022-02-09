@@ -63,6 +63,8 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
+import static org.alfresco.transform.client.model.config.CoreVersionDecorator.setOrClearCoreVersion;
+import static org.alfresco.transform.client.util.RequestParamMap.INCLUDE_CORE_VERSION;
 import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTempFile;
 import static org.alfresco.transformer.fs.FileManager.buildFile;
 import static org.alfresco.transformer.fs.FileManager.createAttachment;
@@ -140,11 +142,12 @@ public abstract class AbstractTransformerController implements TransformControll
     private TransformerDebug transformerDebug;
 
     @GetMapping(value = "/transform/config")
-    public ResponseEntity<TransformConfig> info()
+    public ResponseEntity<TransformConfig> info(
+            @RequestParam(value = INCLUDE_CORE_VERSION, required = false) Boolean includeCoreVersion)
     {
-        logger.info("GET Transform Config.");
-        final TransformConfig transformConfig =
-            ((TransformRegistryImpl) transformRegistry).getTransformConfig();
+        logger.info("GET Transform Config" + (includeCoreVersion != null && includeCoreVersion ? " including coreVersion" : ""));
+        TransformConfig transformConfig = ((TransformRegistryImpl) transformRegistry).getTransformConfig();
+        transformConfig = setOrClearCoreVersion(transformConfig, includeCoreVersion);
         return new ResponseEntity<>(transformConfig, OK);
     }
 

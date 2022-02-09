@@ -45,13 +45,20 @@ public class AIOControllerMiscTest extends MiscControllerTest
         // just test that we are actually testing against the AIOController (instead of MiscController)
         assertTrue(controller instanceof AIOController, "Wrong controller wired for test");
     }
-    
+
     @Test
     @Override
     public void testGetTransformConfigInfo()
     {
-        // Ignore the test in super class as the way the AIO transformer provides config is fundamentality different.
+        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
+    }
+
+    @Test
+    @Override
+    public void testGetTransformConfigInfoExcludingCoreVersion()
+    {
+        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
     }
 
     @Test
