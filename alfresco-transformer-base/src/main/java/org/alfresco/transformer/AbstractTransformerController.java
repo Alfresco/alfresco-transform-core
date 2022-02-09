@@ -298,6 +298,7 @@ public abstract class AbstractTransformerController implements TransformControll
             if (directUrl.isBlank())
             {
                 sourceFile = loadSourceFile(request.getSourceReference(), request.getSourceExtension());
+                sourceFilename = sourceFile.getName();
             } else {
                 ResponseEntity<Resource> responseEntity = alfrescoDirectAccessUrlClient
                         .getContentViaDirectUrl(directUrl);
@@ -335,7 +336,7 @@ public abstract class AbstractTransformerController implements TransformControll
         }
 
         // Create local temp target file in order to run the transformation
-        final String targetFilename = createTargetFileName(sourceFile.getName(),
+        final String targetFilename = createTargetFileName(sourceFilename,
             request.getTargetExtension());
         final File targetFile = buildFile(targetFilename);
 
