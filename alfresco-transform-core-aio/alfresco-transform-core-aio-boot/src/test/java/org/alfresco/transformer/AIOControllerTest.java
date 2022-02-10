@@ -34,6 +34,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 
+import static org.alfresco.transform.client.util.RequestParamMap.CONFIG_VERSION_DEFAULT;
+import static org.alfresco.transform.client.util.RequestParamMap.CONFIG_VERSION_LATEST;
+
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
 public class AIOControllerTest //extends AbstractTransformerControllerTest 
@@ -63,12 +66,12 @@ public class AIOControllerTest //extends AbstractTransformerControllerTest
     @Test
     public void emptyTest()
     {
-        aioController.info(null);
+        aioController.info(Integer.valueOf(CONFIG_VERSION_DEFAULT));
     }
 
     @Test
-    public void emptyTestWithIncludeCoreVersion()
+    public void emptyTestWithLatestVersion()
     {
-        aioController.info(true);
+        aioController.info(CONFIG_VERSION_LATEST);
     }
 }
