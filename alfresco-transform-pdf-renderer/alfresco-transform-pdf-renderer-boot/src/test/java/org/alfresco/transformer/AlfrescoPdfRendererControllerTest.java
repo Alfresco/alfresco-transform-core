@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -221,7 +222,7 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
         expectedOptions = "--width=321 --height=654 --allow-enlargement --maintain-aspect-ratio --page=2";
         mockMvc
             .perform(MockMvcRequestBuilders
-                .multipart("/transform")
+                .multipart(ENDPOINT_TRANSFORM)
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
                 .param("targetMimetype", targetMimetype)
@@ -245,7 +246,7 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
         expectedOptions = "--width=321 --height=654 --page=2";
         mockMvc
             .perform(MockMvcRequestBuilders
-                .multipart("/transform")
+                .multipart(ENDPOINT_TRANSFORM)
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
                 .param("targetMimetype", targetMimetype)
@@ -277,7 +278,7 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
     {
         when(mockExecutionResult.getExitValue()).thenReturn(1);
 
-        mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", "xxx"))
+        mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", "xxx"))
                .andExpect(status().is(BAD_REQUEST.value()))
                .andExpect(status()
                    .reason(containsString("Transformer exit code was not 0: \nSTDERR")));
@@ -311,7 +312,7 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformerContro
         String tr = objectMapper.writeValueAsString(transformRequest);
         String transformationReplyAsString = mockMvc
             .perform(MockMvcRequestBuilders
-                .post("/transform")
+                .post(ENDPOINT_TRANSFORM)
                 .header(ACCEPT, APPLICATION_JSON_VALUE)
                 .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .content(tr))
