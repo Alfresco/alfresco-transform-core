@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -36,9 +36,6 @@ import java.util.Map;
  */
 public interface SelectableTransformer
 {
-    String SOURCE_ENCODING = "sourceEncoding";
-    String TARGET_ENCODING = "targetEncoding";
-
     default void transform(String sourceMimetype, String targetMimetype, Map<String, String> parameters,
                    File sourceFile, File targetFile) throws Exception
     {

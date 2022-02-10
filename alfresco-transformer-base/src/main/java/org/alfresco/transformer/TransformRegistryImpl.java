@@ -26,6 +26,7 @@
 package org.alfresco.transformer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.alfresco.transform.client.model.config.CoreVersionDecorator.setCoreVersionOnSingleStepTransformers;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.io.IOException;
@@ -61,6 +62,9 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
     @Value("${transform.core.config.location:classpath:engine_config.json}")
     private String locationFromProperty;
 
+    @Value("${transform.core.version}")
+    private String coreVersion;
+
     private Resource engineConfig;
 
     @PostConstruct
@@ -82,7 +86,9 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
     {
         try (Reader reader = new InputStreamReader(engineConfig.getInputStream(), UTF_8))
         {
-            return jsonObjectMapper.readValue(reader, TransformConfig.class);
+            TransformConfig transformConfig = jsonObjectMapper.readValue(reader, TransformConfig.class);
+            setCoreVersionOnSingleStepTransformers(transformConfig.getTransformers(), coreVersion);
+            return transformConfig;
         }
         catch (IOException e)
         {
