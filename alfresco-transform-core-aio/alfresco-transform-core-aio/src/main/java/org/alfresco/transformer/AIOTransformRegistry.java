@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -55,7 +55,6 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
 
     private static final String ENGINE_CONFIG_LOCATION_POSTFIX = "_engine_config.json";
 
-    @Value("${transform.core.version}")
     private String coreVersion;
 
     private CombinedTransformConfig combinedTransformConfig = new CombinedTransformConfig();
@@ -68,6 +67,11 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
 
     // Represents the mapping between a transform and a transformer, multiple mappings can point to the same transformer.
     private Map<String, Transformer> transformerEngineMapping = new HashMap();
+
+    public void setCoreVersion(String coreVersion)
+    {
+        this.coreVersion = coreVersion;
+    }
 
     /**
      * Adds a transformer's (T-Engine) config to the configuration and creates a map of transforms to the T-Engine.
