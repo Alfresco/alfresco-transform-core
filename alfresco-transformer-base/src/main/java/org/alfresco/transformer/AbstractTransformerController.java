@@ -209,7 +209,7 @@ public abstract class AbstractTransformerController implements TransformControll
      * @param timeout Transformation timeout
      * @return A transformation reply
      */
-    @PostMapping(value = "/transform", produces = APPLICATION_JSON_VALUE)
+    @PostMapping(value = ENDPOINT_TRANSFORM, produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<TransformReply> transform(@RequestBody TransformRequest request,
         @RequestParam(value = "timeout", required = false) Long timeout)

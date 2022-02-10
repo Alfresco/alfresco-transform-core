@@ -34,6 +34,7 @@ import org.alfresco.transform.client.registry.TransformCache;
 import org.alfresco.transformer.executors.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.alfresco.transform.client.model.config.CoreVersionDecorator.setCoreVersionOnSingleStepTransformers;
 
 /**
  * AIOTransformRegistry manages all of the sub transformers registered to it and provides aggregated TransformConfig.
@@ -52,6 +54,9 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
     private static final Logger log = LoggerFactory.getLogger(AIOTransformRegistry.class);
 
     private static final String ENGINE_CONFIG_LOCATION_POSTFIX = "_engine_config.json";
+
+    @Value("${transform.core.version}")
+    private String coreVersion;
 
     private CombinedTransformConfig combinedTransformConfig = new CombinedTransformConfig();
 
@@ -68,16 +73,17 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
      * Adds a transformer's (T-Engine) config to the configuration and creates a map of transforms to the T-Engine.
      * The name of this method is now misleading as the registry of transforms takes place in
      * {@link #registerCombinedTransformers()} .
-     * @param transformer The transformer implementation, this could be a single transformer
+     * @param tEngine The transformer implementation, this could be a single transformer
      *                    or a transformer managing multiple sub transformers. The transformer's configuration file will
      *                    be read based on the {@link Transformer#getTransformerId()} value.
      */
-    public void registerTransformer(final Transformer transformer) throws Exception
+    public void registerTransformer(final Transformer tEngine) throws Exception
     {
         // Load config for the transformer
-        String location = getTransformConfigLocation(transformer);
+        String location = getTransformConfigLocation(tEngine);
         TransformConfig transformConfig = loadTransformConfig(location);
-        String transformerId = transformer.getTransformerId();
+        setCoreVersionOnSingleStepTransformers(transformConfig.getTransformers(), coreVersion);
+        String transformerId = tEngine.getTransformerId();
         combinedTransformConfig.addTransformConfig(transformConfig, location, transformerId, this);
 
         // Map all of the transforms defined in the config to this Transformer implementation
@@ -90,7 +96,7 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
             {
                 log.debug("Overriding transform with name: '{}' originally defined in '{}'.", transformerName, originalTEngine.getTransformerId());
             }
-            transformerEngineMapping.put(transformerName, transformer);
+            transformerEngineMapping.put(transformerName, tEngine);
             log.debug("Registered transform with name: '{}' defined in '{}'.", transformerName, transformerId);
         }
     }
