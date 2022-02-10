@@ -32,6 +32,7 @@ import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +46,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 @Import(AIOCustomConfig.class)
 public class AIOControllerTest //extends AbstractTransformerControllerTest 
 {
+    @Value("${transform.core.version}")
+    private String coreVersion;
+
     @Autowired
     AIOController aioController;
 
@@ -72,7 +76,8 @@ public class AIOControllerTest //extends AbstractTransformerControllerTest
     {
         ResponseEntity<TransformConfig> responseEntity = aioController.info(Integer.valueOf(CONFIG_VERSION_DEFAULT));
         responseEntity.getBody().getTransformers().forEach(transformer -> {
-            assertNull(transformer.getCoreVersion());
+            assertNull(transformer.getCoreVersion(), transformer.getTransformerName() +
+                    " should have had a null coreValue but was " + transformer.getCoreVersion());
         });
     }
 
@@ -81,7 +86,8 @@ public class AIOControllerTest //extends AbstractTransformerControllerTest
     {
         ResponseEntity<TransformConfig> responseEntity = aioController.info(CONFIG_VERSION_LATEST);
         responseEntity.getBody().getTransformers().forEach(transformer -> {
-            assertNotNull(transformer.getCoreVersion());
+            assertNotNull(transformer.getCoreVersion(), transformer.getTransformerName() +
+                    " should have had a coreValue but was null. Should have been " + coreVersion);
         });
     }
 }
