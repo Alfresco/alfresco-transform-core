@@ -183,7 +183,7 @@ public abstract class AbstractTransformerController implements TransformControll
         String sourceFilename;
         if (directUrl.isBlank())
         {
-            if (sourceMultipartFile ==  null || sourceMultipartFile.isEmpty())
+            if (sourceMultipartFile ==  null)
             {
                 throw new TransformException(BAD_REQUEST.value(), "Required request part 'file' is not present");
             }
