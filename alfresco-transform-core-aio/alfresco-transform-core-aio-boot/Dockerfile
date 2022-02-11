@@ -52,7 +52,7 @@ RUN ln /usr/bin/alfresco-transform-core-aio-boot-${env.project_version}.jar /usr
     make && \
     make test && \
     make install) && \
-    yum -y autoremove perl-ExtUtils-MakeMaker make  && \
+    yum -y autoremove perl-ExtUtils-MakeMaker make && rm -rf ${EXIFTOOL_FOLDER} ${EXIFTOOL_FOLDER}.tgz && \
     yum clean all
 
 ADD target/generated-resources/licenses              /licenses
