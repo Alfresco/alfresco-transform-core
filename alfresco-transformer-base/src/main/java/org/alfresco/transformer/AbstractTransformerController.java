@@ -183,6 +183,10 @@ public abstract class AbstractTransformerController implements TransformControll
         String sourceFilename;
         if (directUrl.isBlank())
         {
+            if (sourceMultipartFile ==  null || sourceMultipartFile.isEmpty())
+            {
+                throw new TransformException(BAD_REQUEST.value(), "Required request part 'file' is not present");
+            }
             sourceFile = createSourceFile(request, sourceMultipartFile);
             sourceFilename = sourceMultipartFile.getOriginalFilename();
         }
@@ -210,22 +214,20 @@ public abstract class AbstractTransformerController implements TransformControll
 
     private File getSourceFileFromDirectUrl(String directUrl)
     {
-        File sourceFile;
-        if(directUrl.startsWith("https://") || directUrl.startsWith("http://"))
+        File sourceFile = createTempFile("tmp", ".tmp");
+        try
         {
-            sourceFile = createTempFile("tmp", ".tmp");
-            try
-            {
-                FileUtils.copyURLToFile(new URL(directUrl), sourceFile);
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+            FileUtils.copyURLToFile(new URL(directUrl), sourceFile);
         }
-        else
+        catch (IllegalArgumentException e)
         {
-            sourceFile = new File(directUrl);
+            throw new TransformException(BAD_REQUEST.value(), "Direct Access Url is invalid.", e);
         }
+        catch (IOException e)
+        {
+            throw new TransformException(BAD_REQUEST.value(), "Direct Access Url not found.", e);
+        }
+
         return sourceFile;
     }
 

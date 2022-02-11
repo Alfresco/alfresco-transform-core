@@ -56,18 +56,18 @@ public class TikaHttpRequestTest extends AbstractHttpRequestTest
     // Override method as Tika requires sourceMimetype
     // If not provided then sourceMimetype request parameter error will be thrown.
     @Override
-    protected void assertTransformError(boolean addFile, String errorMessage)
+    protected void assertTransformError(boolean addFile,
+                                        String errorMessage,
+                                        LinkedMultiValueMap<String, Object> additionalParams)
     {
         LinkedMultiValueMap<String, Object> parameters = new LinkedMultiValueMap<>();
-        if (addFile)
-        {
-            parameters.add("file", new ClassPathResource("quick." + getSourceExtension()));
-        }
         parameters.add("sourceMimetype", "application/pdf");
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MULTIPART_FORM_DATA);
-        HttpEntity<LinkedMultiValueMap<String, Object>> entity = new HttpEntity<>(parameters,
-            headers);
-        super.sendTranformationRequest(entity, errorMessage);
+
+        if (additionalParams != null)
+        {
+            parameters.addAll(additionalParams);
+        }
+
+        super.assertTransformError(addFile, errorMessage, parameters);
     }
 }

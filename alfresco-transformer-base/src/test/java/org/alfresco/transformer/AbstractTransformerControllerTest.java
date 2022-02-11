@@ -227,7 +227,8 @@ public abstract class AbstractTransformerControllerTest
         {
             return mockMvcRequestWithoutMockMultipartFile(url, params);
         }
-        else {
+        else
+        {
             return mockMvcRequestWithMockMultipartFile(url, sourceFile, params);
         }
     }
@@ -617,12 +618,10 @@ public abstract class AbstractTransformerControllerTest
         TransformRequest transformRequest = createTransformRequest(sourceFileRef, sourceFile);
         Map<String, String> transformRequestOptions = transformRequest.getTransformRequestOptions();
 
-        String directUrl = sourceFile.toPath().toString();
+        String directUrl = "file://" + sourceFile.toPath();
 
         transformRequestOptions.put(DIRECT_ACCESS_URL, directUrl);
         transformRequest.setTransformRequestOptions(transformRequestOptions);
-        transformRequest.setTargetMediaType(targetMimetype);
-        transformRequest.setSourceMediaType(sourceMimetype);
 
         when(alfrescoSharedFileStoreClient.saveFile(any()))
                 .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
@@ -654,13 +653,11 @@ public abstract class AbstractTransformerControllerTest
     public void httpTransformRequestUsingDirectAccessUrlTest() throws Exception
     {
         File dauSourceFile = getTestFile("quick." + sourceExtension, true);
-        String directUrl = dauSourceFile.toPath().toString();
+        String directUrl = "file://" + dauSourceFile.toPath();
 
         mockMvc.perform(
                        mockMvcRequest("/transform", null, "targetExtension", targetExtension, DIRECT_ACCESS_URL, directUrl))
                .andExpect(status().is(OK.value()))
-               .andExpect(content().bytes(expectedTargetFileBytes))
-               .andExpect(header().string("Content-Disposition",
-                       "attachment; filename*= UTF-8''quick." + targetExtension));
+               .andExpect(content().bytes(expectedTargetFileBytes));
     }
 }

@@ -26,11 +26,16 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transform.client.util.RequestParamMap.DIRECT_ACCESS_URL;
 import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Map;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -88,14 +93,15 @@ public abstract class AbstractHttpRequestTest
             result.contains("Error Page"));
     }
 
-    //'file' part is now optional.
     @Test
-    @Disabled
     public void noFileError()
     {
-        // Transformer name is not part of the title as this is checked by another handler
+        LinkedMultiValueMap<String, Object> parameters = new LinkedMultiValueMap<>();
+        parameters.add("targetExtension", ".tmp");
+
         assertTransformError(false,
-            "Required request part 'file' is not present");
+                getTransformerName() + " - Required request part 'file' is not present",
+                parameters);
     }
 
     @Test
@@ -107,10 +113,13 @@ public abstract class AbstractHttpRequestTest
     private void assertMissingParameter(String name)
     {
         assertTransformError(true,
-            getTransformerName() + " - Request parameter '" + name + "' is missing");
+            getTransformerName() + " - Request parameter '" + name + "' is missing",
+                null);
     }
 
-    protected void assertTransformError(boolean addFile, String errorMessage)
+    protected void assertTransformError(boolean addFile,
+                                        String errorMessage,
+                                        LinkedMultiValueMap<String, Object> additionalParams)
     {
         LinkedMultiValueMap<String, Object> parameters = new LinkedMultiValueMap<>();
         if (addFile)
@@ -118,12 +127,32 @@ public abstract class AbstractHttpRequestTest
             parameters.add("file",
                 new org.springframework.core.io.ClassPathResource("quick." + getSourceExtension()));
         }
+        if (additionalParams != null)
+        {
+            parameters.addAll(additionalParams);
+        }
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MULTIPART_FORM_DATA);
         HttpEntity<LinkedMultiValueMap<String, Object>> entity = new HttpEntity<>(parameters,
             headers);
 
         sendTranformationRequest(entity, errorMessage);
+    }
+
+    @Test
+    public void httpTransformRequestDirectAccessUrlNotFoundTest()
+    {
+        String directUrl = "https://expired/direct/access/url";
+
+        LinkedMultiValueMap<String, Object> parameters = new LinkedMultiValueMap<>();
+        parameters.add("targetExtension", ".tmp");
+        parameters.add(DIRECT_ACCESS_URL, directUrl);
+
+        assertTransformError(false,
+                getTransformerName() + " - Direct Access Url not found.",
+                parameters);
+
     }
 
     protected void sendTranformationRequest(
