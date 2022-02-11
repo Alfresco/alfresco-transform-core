@@ -44,7 +44,8 @@ import java.util.Map;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.client.model.config.CoreVersionDecorator.setOrClearCoreVersion;
-import static org.alfresco.transformer.util.RequestParamMap.INCLUDE_CORE_VERSION;
+import static org.alfresco.transform.client.util.RequestParamMap.CONFIG_VERSION_DEFAULT;
+import static org.alfresco.transformer.util.RequestParamMap.CONFIG_VERSION;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
 import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -92,11 +93,11 @@ public class AIOController extends AbstractTransformerController
 
     @Override
     public ResponseEntity<TransformConfig> info(
-            @RequestParam(value = INCLUDE_CORE_VERSION, required = false) Boolean includeCoreVersion)
+            @RequestParam(value = CONFIG_VERSION, defaultValue = CONFIG_VERSION_DEFAULT) int configVersion)
     {
-        logger.info("GET Transform Config" + (includeCoreVersion != null && includeCoreVersion ? " including coreVersion" : ""));
+        logger.info("GET Transform Config version: " + configVersion);
         TransformConfig transformConfig = transformRegistry.getTransformConfig();
-        transformConfig = setOrClearCoreVersion(transformConfig, includeCoreVersion);
+        transformConfig = setOrClearCoreVersion(transformConfig, configVersion);
         return new ResponseEntity<>(transformConfig, OK);
     }
 

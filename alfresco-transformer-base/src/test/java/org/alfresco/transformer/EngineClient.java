@@ -1,5 +1,5 @@
 /*
- *  Copyright 2015-2019 Alfresco Software, Ltd.  All rights reserved.
+ *  Copyright 2015-2022 Alfresco Software, Ltd.  All rights reserved.
  *
  *  License rights for this program may be obtained from Alfresco Software, Ltd.
  *  pursuant to a written agreement and any use of this program without such an
@@ -8,6 +8,7 @@
 package org.alfresco.transformer;
 
 import static java.util.Collections.emptyMap;
+import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import java.util.Map;
@@ -63,6 +64,6 @@ public class EngineClient
 
         final HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
 
-        return REST_TEMPLATE.postForEntity(engineUrl + "/transform", entity, Resource.class);
+        return REST_TEMPLATE.postForEntity(engineUrl + ENDPOINT_TRANSFORM, entity, Resource.class);
     }
 }

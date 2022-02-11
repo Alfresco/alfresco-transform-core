@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
@@ -125,7 +126,7 @@ public abstract class AbstractHttpRequestTest
     protected void sendTranformationRequest(
         final HttpEntity<LinkedMultiValueMap<String, Object>> entity, final String errorMessage)
     {
-        final ResponseEntity<String> response = restTemplate.exchange("/transform", POST, entity,
+        final ResponseEntity<String> response = restTemplate.exchange(ENDPOINT_TRANSFORM, POST, entity,
             String.class, "");
         assertEquals(errorMessage, getErrorMessage(response.getBody()));
     }

@@ -29,15 +29,26 @@ package org.alfresco.transformer;
 import java.io.IOException;
 
 import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.client.model.config.TransformConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.ResponseEntity;
+
+import static org.alfresco.transform.client.util.RequestParamMap.CONFIG_VERSION_DEFAULT;
+import static org.alfresco.transform.client.util.RequestParamMap.CONFIG_VERSION_LATEST;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
 public class AIOControllerTest //extends AbstractTransformerControllerTest 
 {
+    @Value("${transform.core.version}")
+    private String coreVersion;
+
     @Autowired
     AIOController aioController;
 
@@ -63,12 +74,20 @@ public class AIOControllerTest //extends AbstractTransformerControllerTest
     @Test
     public void emptyTest()
     {
-        aioController.info(null);
+        ResponseEntity<TransformConfig> responseEntity = aioController.info(Integer.valueOf(CONFIG_VERSION_DEFAULT));
+        responseEntity.getBody().getTransformers().forEach(transformer -> {
+            assertNull(transformer.getCoreVersion(), transformer.getTransformerName() +
+                    " should have had a null coreValue but was " + transformer.getCoreVersion());
+        });
     }
 
     @Test
-    public void emptyTestWithIncludeCoreVersion()
+    public void emptyTestWithLatestVersion()
     {
-        aioController.info(true);
+        ResponseEntity<TransformConfig> responseEntity = aioController.info(CONFIG_VERSION_LATEST);
+        responseEntity.getBody().getTransformers().forEach(transformer -> {
+            assertNotNull(transformer.getCoreVersion(), transformer.getTransformerName() +
+                    " should have had a coreValue but was null. Should have been " + coreVersion);
+        });
     }
 }

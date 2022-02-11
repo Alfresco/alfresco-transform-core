@@ -66,8 +66,11 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
 import static org.alfresco.transform.client.model.config.CoreVersionDecorator.setOrClearCoreVersion;
-import static org.alfresco.transform.client.util.RequestParamMap.INCLUDE_CORE_VERSION;
 import static org.alfresco.transform.client.util.RequestParamMap.DIRECT_ACCESS_URL;
+import static org.alfresco.transform.client.util.RequestParamMap.CONFIG_VERSION;
+import static org.alfresco.transform.client.util.RequestParamMap.CONFIG_VERSION_DEFAULT;
+import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
 import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTempFile;
 import static org.alfresco.transformer.fs.FileManager.buildFile;
 import static org.alfresco.transformer.fs.FileManager.createAttachment;
@@ -147,17 +150,17 @@ public abstract class AbstractTransformerController implements TransformControll
     @Autowired
     private TransformerDebug transformerDebug;
 
-    @GetMapping(value = "/transform/config")
+    @GetMapping(value = ENDPOINT_TRANSFORM_CONFIG)
     public ResponseEntity<TransformConfig> info(
-            @RequestParam(value = INCLUDE_CORE_VERSION, required = false) Boolean includeCoreVersion)
+            @RequestParam(value = CONFIG_VERSION, defaultValue = CONFIG_VERSION_DEFAULT) int configVersion)
     {
-        logger.info("GET Transform Config" + (includeCoreVersion != null && includeCoreVersion ? " including coreVersion" : ""));
+        logger.info("GET Transform Config version: " + configVersion);
         TransformConfig transformConfig = ((TransformRegistryImpl) transformRegistry).getTransformConfig();
-        transformConfig = setOrClearCoreVersion(transformConfig, includeCoreVersion);
+        transformConfig = setOrClearCoreVersion(transformConfig, configVersion);
         return new ResponseEntity<>(transformConfig, OK);
     }
 
-    @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = ENDPOINT_TRANSFORM, consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
                                               @RequestParam(FILE) MultipartFile sourceMultipartFile,
                                               @RequestParam(TARGET_EXTENSION) String targetExtension,
@@ -261,7 +264,7 @@ public abstract class AbstractTransformerController implements TransformControll
      * @param timeout Transformation timeout
      * @return A transformation reply
      */
-    @PostMapping(value = "/transform", produces = APPLICATION_JSON_VALUE)
+    @PostMapping(value = ENDPOINT_TRANSFORM, produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<TransformReply> transform(@RequestBody TransformRequest request,
         @RequestParam(value = "timeout", required = false) Long timeout)
