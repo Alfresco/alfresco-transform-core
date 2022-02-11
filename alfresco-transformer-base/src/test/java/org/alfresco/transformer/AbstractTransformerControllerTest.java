@@ -221,8 +221,9 @@ public abstract class AbstractTransformerControllerTest
     }
 
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
-                                                           String... params){
-        if(sourceFile == null)
+                                                           String... params)
+    {
+        if (sourceFile == null)
         {
             return mockMvcRequestWithoutMockMultipartFile(url, params);
         }

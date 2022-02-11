@@ -649,7 +649,6 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @Override
     public void httpTransformRequestUsingDirectAccessUrlTest() throws Exception
     {
-        // Preparation
         this.sourceExtension = PDF;
         this.targetExtension = TXT;
         this.sourceMimetype  = MIMETYPE_PDF;
