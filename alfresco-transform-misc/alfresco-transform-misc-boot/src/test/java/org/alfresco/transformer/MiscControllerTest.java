@@ -535,8 +535,9 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
 
     @Test
     @Override
-    public void testPojoWithDauTransform() throws Exception
+    public void queueTransformRequestUsingDirectAccessUrlTest() throws Exception
     {
-        //NOT APPLICABLE FOR MISC TRANSFORM
+        super.targetMimetype = this.targetMimetype;
+        super.queueTransformRequestUsingDirectAccessUrlTest();
     }
 }

@@ -38,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.ACCEPT;
-import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -73,7 +72,6 @@ import org.alfresco.transform.client.model.config.TransformOptionValue;
 import org.alfresco.transform.client.model.config.Transformer;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.router.TransformStack;
-import org.alfresco.transformer.clients.AlfrescoDirectAccessUrlClient;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.model.FileRefEntity;
 import org.alfresco.transformer.model.FileRefResponse;
@@ -85,10 +83,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -116,9 +110,6 @@ public abstract class AbstractTransformerControllerTest
 
     @MockBean
     protected AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
-
-    @MockBean
-    protected AlfrescoDirectAccessUrlClient alfrescoDirectAccessUrlClient;
 
     @SpyBean
     protected TransformServiceRegistry transformRegistry;
@@ -230,6 +221,34 @@ public abstract class AbstractTransformerControllerTest
     }
 
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
+                                                           String... params){
+        if(sourceFile == null)
+        {
+            return mockMvcRequestWithoutMockMultipartFile(url, params);
+        }
+        else {
+            return mockMvcRequestWithMockMultipartFile(url, sourceFile, params);
+        }
+    }
+
+    private MockHttpServletRequestBuilder mockMvcRequestWithoutMockMultipartFile(String url,
+                                                           String... params)
+    {
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM);
+
+        if (params.length % 2 != 0)
+        {
+            throw new IllegalArgumentException("each param should have a name and value.");
+        }
+        for (int i = 0; i < params.length; i += 2)
+        {
+            builder = builder.param(params[i], params[i + 1]);
+        }
+
+        return builder;
+    }
+
+    private MockHttpServletRequestBuilder mockMvcRequestWithMockMultipartFile(String url, MockMultipartFile sourceFile,
         String... params)
     {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM).file(
@@ -587,7 +606,7 @@ public abstract class AbstractTransformerControllerTest
     }
 
     @Test
-    public void testPojoWithDauTransform() throws Exception
+    public void queueTransformRequestUsingDirectAccessUrlTest() throws Exception
     {
         // Files
         String sourceFileRef = UUID.randomUUID().toString();
@@ -596,17 +615,14 @@ public abstract class AbstractTransformerControllerTest
 
         TransformRequest transformRequest = createTransformRequest(sourceFileRef, sourceFile);
         Map<String, String> transformRequestOptions = transformRequest.getTransformRequestOptions();
-        String directUrl = "mocked/directUrl";
+
+        String directUrl = sourceFile.toPath().toString();
+
         transformRequestOptions.put(DIRECT_ACCESS_URL, directUrl);
         transformRequest.setTransformRequestOptions(transformRequestOptions);
+        transformRequest.setTargetMediaType(targetMimetype);
+        transformRequest.setSourceMediaType(sourceMimetype);
 
-        // HTTP Request
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
-        ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
-                sourceFile), headers, OK);
-
-        when(alfrescoDirectAccessUrlClient.getContentViaDirectUrl(directUrl)).thenReturn(response);
         when(alfrescoSharedFileStoreClient.saveFile(any()))
                 .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
 
@@ -634,24 +650,13 @@ public abstract class AbstractTransformerControllerTest
     }
 
     @Test
-    public void simpleDirectUrlTransformTest() throws Exception
+    public void httpTransformRequestUsingDirectAccessUrlTest() throws Exception
     {
-        ////Test requires to be not null.
-        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
-                expectedSourceFileBytes);
         File dauSourceFile = getTestFile("quick." + sourceExtension, true);
-        String directUrl = "mocked/directUrl";
-
-        // HTTP Request
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
-        ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
-                dauSourceFile), headers, OK);
-
-        when(alfrescoDirectAccessUrlClient.getContentViaDirectUrl(directUrl)).thenReturn(response);
+        String directUrl = dauSourceFile.toPath().toString();
 
         mockMvc.perform(
-                       mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension, DIRECT_ACCESS_URL, directUrl))
+                       mockMvcRequest("/transform", null, "targetExtension", targetExtension, DIRECT_ACCESS_URL, directUrl))
                .andExpect(status().is(OK.value()))
                .andExpect(content().bytes(expectedTargetFileBytes))
                .andExpect(header().string("Content-Disposition",

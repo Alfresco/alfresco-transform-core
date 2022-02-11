@@ -34,11 +34,10 @@ import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.router.TransformerDebug;
-import org.alfresco.transformer.clients.AlfrescoDirectAccessUrlClient;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
-import org.alfresco.transformer.fs.FileManager.TempFileProvider;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.model.FileRefResponse;
+import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +58,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -139,9 +140,6 @@ public abstract class AbstractTransformerController implements TransformControll
     private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
 
     @Autowired
-    private AlfrescoDirectAccessUrlClient alfrescoDirectAccessUrlClient;
-
-    @Autowired
     private TransformRequestValidator transformRequestValidator;
 
     @Autowired
@@ -162,7 +160,7 @@ public abstract class AbstractTransformerController implements TransformControll
 
     @PostMapping(value = ENDPOINT_TRANSFORM, consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
-                                              @RequestParam(FILE) MultipartFile sourceMultipartFile,
+                                              @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
                                               @RequestParam(TARGET_EXTENSION) String targetExtension,
                                               @RequestParam(value = SOURCE_MIMETYPE, required = false) String sourceMimetype,
                                               @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,
@@ -183,17 +181,14 @@ public abstract class AbstractTransformerController implements TransformControll
 
         File sourceFile;
         String sourceFilename;
-
         if (directUrl.isBlank())
         {
             sourceFile = createSourceFile(request, sourceMultipartFile);
-            sourceFilename = createTargetFileName(sourceMultipartFile.getOriginalFilename(), targetExtension);
+            sourceFilename = sourceMultipartFile.getOriginalFilename();
         }
         else {
-            ResponseEntity<Resource> responseEntity = alfrescoDirectAccessUrlClient
-                    .getContentViaDirectUrl(directUrl);
-            sourceFilename = getTrimmedFilename(responseEntity);
-            sourceFile = createSourceFileFromDirectUrlResponse(responseEntity, sourceFilename);
+            sourceFile = getSourceFileFromDirectUrl(directUrl);
+            sourceFilename = sourceFile.getName();
         }
 
         final String targetFilename = createTargetFileName(sourceFilename, targetExtension);
@@ -213,37 +208,25 @@ public abstract class AbstractTransformerController implements TransformControll
         return body;
     }
 
-    private String getTrimmedFilename(ResponseEntity<Resource> responseEntity)
+    private File getSourceFileFromDirectUrl(String directUrl)
     {
-        return getFilenameFromContentDisposition(responseEntity.getHeaders())
-                .replace("\"", "").trim();
-    }
-
-    /**
-     * Loads the file from Direct Access URL
-     *
-     * @param responseEntity response entity from Direct Access URL,
-     * @param filename       name of source file,
-     * @return the file containing the source content for the transformation
-     */
-    public static File createSourceFileFromDirectUrlResponse(final ResponseEntity<Resource> responseEntity,
-                                                             String filename)
-    {
-        long size = responseEntity.getHeaders().getContentLength();
-        final Resource body = responseEntity.getBody();
-        final File file = TempFileProvider.createTempFile("source_", "_" + filename);
-
-        if (body == null)
+        File sourceFile;
+        if(directUrl.startsWith("https://") || directUrl.startsWith("http://"))
         {
-            String message = "Source file is null or empty. "
-                    + "Transformation will fail and stop now as there is no content to be transformed.";
-            throw new TransformException(BAD_REQUEST.value(), message);
+            sourceFile = createTempFile("tmp", ".tmp");
+            try
+            {
+                FileUtils.copyURLToFile(new URL(directUrl), sourceFile);
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
-
-        save(body, file);
-        LogEntry.setSource(filename, size);
-
-        return file;
+        else
+        {
+            sourceFile = new File(directUrl);
+        }
+        return sourceFile;
     }
 
     protected Map<String, String> getTransformOptions(Map<String, String> requestParameters)
@@ -298,23 +281,16 @@ public abstract class AbstractTransformerController implements TransformControll
 
         // Load the source file
         File sourceFile;
-        String sourceFilename;
-
         try
         {
             final String directUrl = request.getTransformRequestOptions().getOrDefault(DIRECT_ACCESS_URL, "");
             if (directUrl.isBlank())
             {
                 sourceFile = loadSourceFile(request.getSourceReference(), request.getSourceExtension());
-                sourceFilename = sourceFile.getName();
             }
             else {
-                ResponseEntity<Resource> responseEntity = alfrescoDirectAccessUrlClient
-                        .getContentViaDirectUrl(directUrl);
-                sourceFilename = getTrimmedFilename(responseEntity);
-                sourceFile = createSourceFileFromDirectUrlResponse(responseEntity, sourceFilename);
+                sourceFile = getSourceFileFromDirectUrl(directUrl);
             }
-
         }
         catch (TransformException e)
         {
@@ -345,7 +321,7 @@ public abstract class AbstractTransformerController implements TransformControll
         }
 
         // Create local temp target file in order to run the transformation
-        final String targetFilename = createTargetFileName(sourceFilename,
+        final String targetFilename = createTargetFileName(sourceFile.getName(),
             request.getTargetExtension());
         final File targetFile = buildFile(targetFilename);
 

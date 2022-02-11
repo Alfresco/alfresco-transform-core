@@ -32,6 +32,7 @@ import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -87,7 +88,9 @@ public abstract class AbstractHttpRequestTest
             result.contains("Error Page"));
     }
 
+    //'file' part is now optional.
     @Test
+    @Disabled
     public void noFileError()
     {
         // Transformer name is not part of the title as this is checked by another handler
