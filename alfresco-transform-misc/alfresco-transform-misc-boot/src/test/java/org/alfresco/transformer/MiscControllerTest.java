@@ -532,4 +532,12 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         text = text.replaceAll("\\n", "");
         return text;
     }
+
+    @Test
+    @Override
+    public void queueTransformRequestUsingDirectAccessUrlTest() throws Exception
+    {
+        super.targetMimetype = this.targetMimetype;
+        super.queueTransformRequestUsingDirectAccessUrlTest();
+    }
 }

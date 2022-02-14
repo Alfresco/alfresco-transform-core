@@ -27,6 +27,7 @@
 package org.alfresco.transformer;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.alfresco.transform.client.util.RequestParamMap.DIRECT_ACCESS_URL;
 import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG_LATEST;
 import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
@@ -34,9 +35,12 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -55,6 +59,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
@@ -68,6 +73,8 @@ import org.alfresco.transform.client.model.config.Transformer;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.router.TransformStack;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
+import org.alfresco.transformer.model.FileRefEntity;
+import org.alfresco.transformer.model.FileRefResponse;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -214,6 +221,36 @@ public abstract class AbstractTransformerControllerTest
     }
 
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
+                                                           String... params)
+    {
+        if (sourceFile == null)
+        {
+            return mockMvcRequestWithoutMockMultipartFile(url, params);
+        }
+        else
+        {
+            return mockMvcRequestWithMockMultipartFile(url, sourceFile, params);
+        }
+    }
+
+    private MockHttpServletRequestBuilder mockMvcRequestWithoutMockMultipartFile(String url,
+                                                           String... params)
+    {
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM);
+
+        if (params.length % 2 != 0)
+        {
+            throw new IllegalArgumentException("each param should have a name and value.");
+        }
+        for (int i = 0; i < params.length; i += 2)
+        {
+            builder = builder.param(params[i], params[i + 1]);
+        }
+
+        return builder;
+    }
+
+    private MockHttpServletRequestBuilder mockMvcRequestWithMockMultipartFile(String url, MockMultipartFile sourceFile,
         String... params)
     {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM).file(
@@ -568,5 +605,59 @@ public abstract class AbstractTransformerControllerTest
         Transformer transformer = new Transformer();
         transformer.setSupportedSourceAndTargetList(supportedSourceAndTargetList);
         return transformer;
+    }
+
+    @Test
+    public void queueTransformRequestUsingDirectAccessUrlTest() throws Exception
+    {
+        // Files
+        String sourceFileRef = UUID.randomUUID().toString();
+        File sourceFile = getTestFile("quick." + sourceExtension, true);
+        String targetFileRef = UUID.randomUUID().toString();
+
+        TransformRequest transformRequest = createTransformRequest(sourceFileRef, sourceFile);
+        Map<String, String> transformRequestOptions = transformRequest.getTransformRequestOptions();
+
+        String directUrl = "file://" + sourceFile.toPath();
+
+        transformRequestOptions.put(DIRECT_ACCESS_URL, directUrl);
+        transformRequest.setTransformRequestOptions(transformRequestOptions);
+
+        when(alfrescoSharedFileStoreClient.saveFile(any()))
+                .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
+
+        // Update the Transformation Request with any specific params before sending it
+        updateTransformRequestWithSpecificOptions(transformRequest);
+
+        // Serialize and call the transformer
+        String tr = objectMapper.writeValueAsString(transformRequest);
+        String transformationReplyAsString = mockMvc
+                .perform(MockMvcRequestBuilders
+                        .post("/transform")
+                        .header(ACCEPT, APPLICATION_JSON_VALUE)
+                        .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                        .content(tr))
+                .andExpect(status().is(CREATED.value()))
+                .andReturn().getResponse().getContentAsString();
+
+        TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,
+                TransformReply.class);
+
+        // Assert the reply
+        assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
+        assertEquals(transformRequest.getClientData(), transformReply.getClientData());
+        assertEquals(transformRequest.getSchema(), transformReply.getSchema());
+    }
+
+    @Test
+    public void httpTransformRequestUsingDirectAccessUrlTest() throws Exception
+    {
+        File dauSourceFile = getTestFile("quick." + sourceExtension, true);
+        String directUrl = "file://" + dauSourceFile.toPath();
+
+        mockMvc.perform(
+                       mockMvcRequest("/transform", null, "targetExtension", targetExtension, DIRECT_ACCESS_URL, directUrl))
+               .andExpect(status().is(OK.value()))
+               .andExpect(content().bytes(expectedTargetFileBytes));
     }
 }

@@ -644,4 +644,15 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         assertEquals(transformRequest.getClientData(), transformReply.getClientData());
         assertEquals(transformRequest.getSchema(), transformReply.getSchema());
     }
+
+    @Test
+    @Override
+    public void httpTransformRequestUsingDirectAccessUrlTest() throws Exception
+    {
+        this.sourceExtension = PDF;
+        this.targetExtension = TXT;
+        this.sourceMimetype  = MIMETYPE_PDF;
+        expectedTargetFileBytes = readTestFile(targetExtension);
+        super.httpTransformRequestUsingDirectAccessUrlTest();
+    }
 }
