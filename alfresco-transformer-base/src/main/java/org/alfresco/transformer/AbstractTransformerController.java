@@ -190,14 +190,14 @@ public abstract class AbstractTransformerController implements TransformControll
             sourceFile = createSourceFile(request, sourceMultipartFile);
             sourceFilename = sourceMultipartFile.getOriginalFilename();
         }
-        else {
+        else
+        {
             sourceFile = getSourceFileFromDirectUrl(directUrl);
             sourceFilename = sourceFile.getName();
         }
 
         final String targetFilename = createTargetFileName(sourceFilename, targetExtension);
         getProbeTestTransform().incrementTransformerCount();
-
         final File targetFile = createTargetFile(request, targetFilename);
 
         Map<String, String> transformOptions = getTransformOptions(requestParameters);
@@ -290,7 +290,8 @@ public abstract class AbstractTransformerController implements TransformControll
             {
                 sourceFile = loadSourceFile(request.getSourceReference(), request.getSourceExtension());
             }
-            else {
+            else
+            {
                 sourceFile = getSourceFileFromDirectUrl(directUrl);
             }
         }

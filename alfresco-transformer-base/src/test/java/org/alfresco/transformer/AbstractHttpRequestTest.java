@@ -30,14 +30,9 @@ import static org.alfresco.transform.client.util.RequestParamMap.DIRECT_ACCESS_U
 import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Map;
-
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -113,8 +108,7 @@ public abstract class AbstractHttpRequestTest
     private void assertMissingParameter(String name)
     {
         assertTransformError(true,
-            getTransformerName() + " - Request parameter '" + name + "' is missing",
-                null);
+            getTransformerName() + " - Request parameter '" + name + "' is missing", null);
     }
 
     protected void assertTransformError(boolean addFile,
