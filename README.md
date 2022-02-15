@@ -30,6 +30,11 @@ mvn clean install -Plocal,docker-it-setup
 ```
 > The `local` Maven profile builds local Docker images for each T-Engine.
 
+*NOTE*  for _alfresco-tika_ you can use alpine as base image:
+```bash
+mvn clean install -Plocal,docker-it-setup,tika,alpine
+```
+
 ### Artifacts
 
 #### Maven

@@ -9,7 +9,7 @@ mvn -B -U -Dmaven.wagon.http.pool=false \
     clean install \
     -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true \
     -DskipTests \
-    "-P$1,"
+    "-P$1"
 
 popd
 set +vex

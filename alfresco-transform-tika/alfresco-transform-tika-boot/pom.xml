@@ -12,7 +12,11 @@
     </parent>
 
     <properties>
+        <image.dockerFile>Dockerfile</image.dockerFile>
         <image.name>alfresco/alfresco-tika</image.name>
+        <image.tagBase>latest</image.tagBase>
+        <image.tagSuffix></image.tagSuffix>
+        <image.tag>${image.tagBase}${image.tagSuffix}</image.tag>
         <image.registry>quay.io</image.registry>
         <env.project_artifactId>${project.artifactId}</env.project_artifactId>
     </properties>
@@ -259,6 +263,7 @@
                                             <name>${image.name}:${image.tag}</name>
                                             <build>
                                                 <contextDir>${project.basedir}</contextDir>
+                                                <dockerFile>${image.dockerFile}</dockerFile>
                                                 <buildOptions>
                                                     <squash>true</squash>
                                                 </buildOptions>
@@ -288,6 +293,7 @@
                                     <registry>${image.registry}</registry>
                                     <build>
                                         <contextDir>${project.basedir}</contextDir>
+                                        <dockerFile>${image.dockerFile}</dockerFile>
                                         <buildOptions>
                                             <squash>true</squash>
                                         </buildOptions>
@@ -298,6 +304,7 @@
                                     <name>${image.name}:${image.tag}</name>
                                     <build>
                                         <contextDir>${project.basedir}</contextDir>
+                                        <dockerFile>${image.dockerFile}</dockerFile>
                                         <buildOptions>
                                             <squash>true</squash>
                                         </buildOptions>
@@ -334,6 +341,7 @@
                                     <registry>${image.registry}</registry>
                                     <build>
                                         <contextDir>${project.basedir}</contextDir>
+                                        <dockerFile>${image.dockerFile}</dockerFile>
                                         <buildOptions>
                                             <squash>true</squash>
                                         </buildOptions>
@@ -344,6 +352,7 @@
                                     <name>${image.name}:${project.version}</name>
                                     <build>
                                         <contextDir>${project.basedir}</contextDir>
+                                        <dockerFile>${image.dockerFile}</dockerFile>
                                         <buildOptions>
                                             <squash>true</squash>
                                         </buildOptions>
@@ -362,6 +371,14 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <id>alpine</id>
+            <properties>
+                <image.dockerFile>Dockerfile.alpine</image.dockerFile>
+                <image.tagSuffix>-alpine</image.tagSuffix>
+            </properties>
         </profile>
     </profiles>
 </project>

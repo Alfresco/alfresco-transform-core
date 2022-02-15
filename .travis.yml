@@ -65,6 +65,10 @@ jobs:
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: _ci/build.sh tika
       script: bash _ci/test.sh tika
+    - name: "Tika Alpine"
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh tika,alpine
+      script: bash _ci/test.sh tika,alpine
     - name: "All in One Transformer"
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: _ci/build.sh full-build

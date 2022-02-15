@@ -1,0 +1,32 @@
+# Image provides a container in which to run Tika transformations for Alfresco Content Services.
+
+# Tika is from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0.
+
+FROM alpine:3.13.7
+
+RUN apk add --no-cache openjdk11-jre exiftool
+
+ENV JAVA_OPTS=""
+
+# Set default user information
+ARG GROUPNAME=Alfresco
+ARG GROUPID=1000
+ARG TIKAUSERNAME=tika
+ARG USERID=33004
+
+COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
+
+ADD target/generated-resources/licenses              /licenses
+ADD target/generated-resources/licenses.xml          /licenses/
+ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
+COPY src/main/resources/licenses/3rd-party/ /
+ 
+RUN addgroup -g ${GROUPID} -S ${GROUPNAME} && \
+    adduser -u ${USERID} -G ${GROUPNAME} -S ${TIKAUSERNAME} && \
+    chgrp -R ${GROUPNAME} /usr/bin/${env.project_artifactId}-*.jar
+
+EXPOSE 8090
+
+USER ${TIKAUSERNAME}
+
+ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/${env.project_artifactId}-*.jar
