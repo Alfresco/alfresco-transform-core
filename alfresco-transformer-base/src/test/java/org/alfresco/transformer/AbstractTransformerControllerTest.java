@@ -660,9 +660,7 @@ public abstract class AbstractTransformerControllerTest
         ResultActions resultActions = mockMvc.perform(
                 mockMvcRequest(ENDPOINT_TRANSFORM, null)
                         .param("targetExtension", targetExtension)
-                        .param(DIRECT_ACCESS_URL, directUrl)
-                        .param("sourceMimetype", sourceMimetype)
-                        .param("targetMimetype", targetMimetype))
+                        .param(DIRECT_ACCESS_URL, directUrl))
                 .andExpect(status().is(OK.value()));
 
         if (expectedTargetFileBytes != null)
