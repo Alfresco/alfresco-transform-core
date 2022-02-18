@@ -153,6 +153,8 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     {
         sourceExtension = "pdf";
         targetExtension = "txt";
+        sourceMimetype = MIMETYPE_PDF;
+        targetMimetype = MIMETYPE_TEXT_PLAIN;
     }
 
     @Override
@@ -649,9 +651,6 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     @Override
     public void httpTransformRequestUsingDirectAccessUrlTest() throws Exception
     {
-        this.sourceExtension = PDF;
-        this.targetExtension = TXT;
-        this.sourceMimetype  = MIMETYPE_PDF;
         expectedTargetFileBytes = readTestFile(targetExtension);
         super.httpTransformRequestUsingDirectAccessUrlTest();
     }

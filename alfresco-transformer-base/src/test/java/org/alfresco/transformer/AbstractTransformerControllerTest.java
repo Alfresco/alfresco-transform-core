@@ -27,6 +27,7 @@
 package org.alfresco.transformer;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.client.util.RequestParamMap.DIRECT_ACCESS_URL;
 import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG_LATEST;
@@ -86,6 +87,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -655,9 +657,15 @@ public abstract class AbstractTransformerControllerTest
         File dauSourceFile = getTestFile("quick." + sourceExtension, true);
         String directUrl = "file://" + dauSourceFile.toPath();
 
-        mockMvc.perform(
-                       mockMvcRequest("/transform", null, "targetExtension", targetExtension, DIRECT_ACCESS_URL, directUrl))
-               .andExpect(status().is(OK.value()))
-               .andExpect(content().bytes(expectedTargetFileBytes));
+        ResultActions resultActions = mockMvc.perform(
+                mockMvcRequest(ENDPOINT_TRANSFORM, null)
+                        .param("targetExtension", targetExtension)
+                        .param(DIRECT_ACCESS_URL, directUrl))
+                .andExpect(status().is(OK.value()));
+
+        if (expectedTargetFileBytes != null)
+        {
+            resultActions.andExpect(content().bytes(expectedTargetFileBytes));
+        }
     }
 }
