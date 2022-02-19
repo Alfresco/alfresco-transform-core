@@ -3,7 +3,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>alfresco-transform-libreoffice</artifactId>
     <name>Alfresco LibreOffice Transformer</name>
-    <packaging>jar</packaging>
 
     <parent>
         <artifactId>alfresco-transform-core</artifactId>
@@ -18,12 +17,10 @@
             <artifactId>alfresco-transformer-base</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-jodconverter-core</artifactId>
@@ -44,15 +41,6 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
         </plugins>
     </build>
-
 </project>

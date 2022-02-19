@@ -1,8 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>alfresco-transform-tika-boot</artifactId>
     <name>Alfresco Tika Transformer Spring Boot</name>
-    <packaging>jar</packaging>
 
     <parent>
         <groupId>org.alfresco</groupId>
@@ -146,21 +146,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -169,7 +154,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.2</version>
                 <executions>
                     <execution>
                         <goals>
@@ -181,66 +165,85 @@
         </plugins>
     </build>
 
-
     <profiles>
         <profile>
-            <id>docker-it-setup</id>
+            <id>    docker-it-setup</id>
             <!-- raises an ActiveMq container for the Integration Tests -->
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                    </plugin>
+                    <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
-                        <configuration>
-                            <images>
-                                <image>
-                                    <alias>activemq</alias>
-                                    <name>alfresco/alfresco-activemq:5.16.1</name>
-                                    <run>
-                                        <hostname>activemq</hostname>
-                                        <ports>
-                                            <port>8161:8161</port>
-                                            <port>5672:5672</port>
-                                            <port>61616:61616</port>
-                                        </ports>
-                                        <wait>
-                                            <log>Apache ActiveMQ 5.16.1 .* started</log>
-                                            <time>20000</time>
-                                            <kill>500</kill>
-                                            <shutdown>100</shutdown>
-                                            <exec>
-                                                <preStop>kill 1</preStop>
-                                                <preStop>kill -9 1</preStop>
-                                            </exec>
-                                        </wait>
-                                    </run>
-                                </image>
+                        <executions>
+                            <execution>
+                                <id>before-integration-tests</id>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>start</goal>
+                                </goals>
+                                <configuration>
+                                    <images>
+                                        <image>
+                                            <alias>activemq</alias>
+                                            <name>alfresco/alfresco-activemq:5.16.1</name>
+                                            <run>
+                                                <hostname>activemq</hostname>
+                                                <ports>
+                                                    <port>8161:8161</port>
+                                                    <port>5672:5672</port>
+                                                    <port>61616:61616</port>
+                                                </ports>
+                                                <wait>
+                                                    <log>Apache ActiveMQ 5.16.1 .* started</log>
+                                                    <time>20000</time>
+                                                    <kill>500</kill>
+                                                    <shutdown>100</shutdown>
+                                                    <exec>
+                                                        <preStop>kill 1</preStop>
+                                                        <preStop>kill -9 1</preStop>
+                                                    </exec>
+                                                </wait>
+                                            </run>
+                                        </image>
 
-                                <image>
-                                    <alias>tika</alias>
-                                    <name>${image.name}:${image.tag}</name>
-                                    <run>
-                                        <ports>
-                                            <port>8090:8090</port>
-                                        </ports>
-                                        <wait>
-                                            <http>
-                                                <url>http://localhost:8090/transform/config</url>
-                                                <method>GET</method>
-                                                <status>200...299</status>
-                                            </http>
-                                            <time>300000</time>
-                                            <kill>500</kill>
-                                            <shutdown>100</shutdown>
-                                            <exec>
-                                                <preStop>kill 1</preStop>
-                                                <preStop>kill -9 1</preStop>
-                                            </exec>
-                                        </wait>
-                                    </run>
-                                </image>
-                            </images>
-                        </configuration>
+                                        <image>
+                                            <alias>tika</alias>
+                                            <name>${image.name}:${image.tag}</name>
+                                            <run>
+                                                <ports>
+                                                    <port>8090:8090</port>
+                                                </ports>
+                                                <wait>
+                                                    <http>
+                                                        <url>http://localhost:8090/transform/config</url>
+                                                        <method>GET</method>
+                                                        <status>200...299</status>
+                                                    </http>
+                                                    <time>300000</time>
+                                                    <kill>500</kill>
+                                                    <shutdown>100</shutdown>
+                                                    <exec>
+                                                        <preStop>kill 1</preStop>
+                                                        <preStop>kill -9 1</preStop>
+                                                    </exec>
+                                                </wait>
+                                            </run>
+                                        </image>
+                                    </images>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>after-integration-tests</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
@@ -253,26 +256,25 @@
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
-                        <configuration>
-                            <images>
-                                <image>
-                                    <name>${image.name}:${image.tag}</name>
-                                    <build>
-                                        <dockerFileDir>${project.basedir}/</dockerFileDir>
-                                        <buildOptions>
-                                            <squash>true</squash>
-                                        </buildOptions>
-                                    </build>
-                                </image>
-                            </images>
-                        </configuration>
                         <executions>
                             <execution>
                                 <id>build-image</id>
-                                <phase>package</phase>
                                 <goals>
                                     <goal>build</goal>
                                 </goals>
+                                <configuration>
+                                    <images>
+                                        <image>
+                                            <name>${image.name}:${image.tag}</name>
+                                            <build>
+                                                <contextDir>${project.basedir}</contextDir>
+                                                <buildOptions>
+                                                    <squash>true</squash>
+                                                </buildOptions>
+                                            </build>
+                                        </image>
+                                    </images>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -294,7 +296,7 @@
                                     <name>${image.name}:${image.tag}</name>
                                     <registry>${image.registry}</registry>
                                     <build>
-                                        <dockerFileDir>${project.basedir}/</dockerFileDir>
+                                        <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
                                             <squash>true</squash>
                                         </buildOptions>
@@ -304,7 +306,7 @@
                                 <image>
                                     <name>${image.name}:${image.tag}</name>
                                     <build>
-                                        <dockerFileDir>${project.basedir}/</dockerFileDir>
+                                        <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
                                             <squash>true</squash>
                                         </buildOptions>
@@ -313,13 +315,6 @@
                             </images>
                         </configuration>
                         <executions>
-                            <execution>
-                                <id>build-image</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>build</goal>
-                                </goals>
-                            </execution>
                             <execution>
                                 <id>push-image</id>
                                 <phase>install</phase>
@@ -341,13 +336,13 @@
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
                         <configuration>
-                            <images combine.self="override">
+                            <images>
                                 <!-- QuayIO image -->
                                 <image>
                                     <name>${image.name}:${project.version}</name>
                                     <registry>${image.registry}</registry>
                                     <build>
-                                        <dockerFileDir>${project.basedir}/</dockerFileDir>
+                                        <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
                                             <squash>true</squash>
                                         </buildOptions>
@@ -357,7 +352,7 @@
                                 <image>
                                     <name>${image.name}:${project.version}</name>
                                     <build>
-                                        <dockerFileDir>${project.basedir}/</dockerFileDir>
+                                        <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
                                             <squash>true</squash>
                                         </buildOptions>
@@ -368,7 +363,6 @@
                         <executions>
                             <execution>
                                 <id>build-push-image</id>
-                                <phase>deploy</phase>
                                 <goals>
                                     <goal>build</goal>
                                     <goal>push</goal>
