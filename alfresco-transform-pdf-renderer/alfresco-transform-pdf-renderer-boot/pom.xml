@@ -96,15 +96,14 @@
                         <artifactId>docker-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>before-integration-tests</id>
+                                <id>integration-tests</id>
                                 <goals>
-                                    <goal>stop</goal>
                                     <goal>start</goal>
+                                    <goal>stop</goal>
                                 </goals>
                                 <configuration>
                                     <images>
                                         <image>
-                                            <alias>activemq</alias>
                                             <name>alfresco/alfresco-activemq:5.16.1</name>
                                             <run>
                                                 <hostname>activemq</hostname>
@@ -125,9 +124,7 @@
                                                 </wait>
                                             </run>
                                         </image>
-
                                         <image>
-                                            <alias>alfresco-pdf-renderer</alias>
                                             <name>${image.name}:${image.tag}</name>
                                             <run>
                                                 <ports>
@@ -152,13 +149,6 @@
                                     </images>
                                 </configuration>
                             </execution>
-                            <execution>
-                                <id>after-integration-tests</id>
-                                <phase>post-integration-test</phase>
-                                <goals>
-                                    <goal>stop</goal>
-                                </goals>
-                            </execution>
                         </executions>
                     </plugin>
                 </plugins>
@@ -175,6 +165,7 @@
                         <executions>
                             <execution>
                                 <id>build-image</id>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>build</goal>
                                 </goals>
@@ -232,9 +223,9 @@
                         </configuration>
                         <executions>
                             <execution>
-                                <id>push-image</id>
                                 <phase>install</phase>
                                 <goals>
+                                    <goal>build</goal>
                                     <goal>push</goal>
                                 </goals>
                             </execution>
@@ -278,7 +269,6 @@
                         </configuration>
                         <executions>
                             <execution>
-                                <id>build-push-image</id>
                                 <goals>
                                     <goal>build</goal>
                                     <goal>push</goal>
