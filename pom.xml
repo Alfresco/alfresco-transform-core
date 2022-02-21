@@ -248,6 +248,15 @@
         </dependencies>
     </dependencyManagement>
 
+    <!-- ATS-981: Avoid CVE-2022-23181 with spring-boot-starter-web 2.6.3 -->
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>9.0.58</version>
+        </dependency>
+    </dependencies>
+
     <distributionManagement>
         <snapshotRepository>
             <id>alfresco-public-snapshots</id>
