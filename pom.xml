@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>2.5.7-A3-SNAPSHOT</version> 
+    <version>2.5.7-A4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <parent>
@@ -23,7 +23,7 @@
         <dependency.alfresco-jodconverter-core.version>3.0.1.12</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
         <dependency.alfresco-transform-model.version>1.4.10</dependency.alfresco-transform-model.version>
-        <dependency.activemq.version>5.16.3</dependency.activemq.version>
+        <dependency.activemq.version>5.16.4</dependency.activemq.version>
         <dependency.jackson.version>2.13.1</dependency.jackson.version>
         <dependency.jackson-databind.version>${dependency.jackson.version}</dependency.jackson-databind.version>
         <dependency.junit.version>4.13.2</dependency.junit.version>
@@ -248,6 +248,15 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <!-- ATS-981: Avoid CVE-2022-23181 with spring-boot-starter-web 2.6.3 -->
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>9.0.58</version>
+        </dependency>
+    </dependencies>
 
     <distributionManagement>
         <snapshotRepository>
