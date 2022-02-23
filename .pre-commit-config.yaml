@@ -10,9 +10,11 @@ repos:
       - id: fix-byte-order-marker
       - id: mixed-line-ending
         args: ['--fix=lf']
+        exclude: (templates|test/resources)/.*$
       - id: end-of-file-fixer
-        exclude: \.(pgm|pnm|ppm)$
+        exclude: (templates|test/resources)/.*$
       - id: trailing-whitespace
+        exclude: (templates|test/resources)/.*$
   - repo: https://github.com/sirosen/check-jsonschema
     rev: 0.13.0
     hooks:
