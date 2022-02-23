@@ -10,6 +10,7 @@ repos:
         args: ['--fix=lf']
       - id: end-of-file-fixer
         exclude: \.(pgm|pnm|ppm)$
+      - id: trailing-whitespace
   - repo: https://github.com/sirosen/check-jsonschema
     rev: 0.13.0
     hooks:
