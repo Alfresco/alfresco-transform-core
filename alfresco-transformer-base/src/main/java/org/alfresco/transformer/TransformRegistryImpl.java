@@ -87,7 +87,7 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
         try (Reader reader = new InputStreamReader(engineConfig.getInputStream(), UTF_8))
         {
             TransformConfig transformConfig = jsonObjectMapper.readValue(reader, TransformConfig.class);
-            setCoreVersionOnSingleStepTransformers(transformConfig.getTransformers(), coreVersion);
+            setCoreVersionOnSingleStepTransformers(transformConfig, coreVersion);
             return transformConfig;
         }
         catch (IOException e)
