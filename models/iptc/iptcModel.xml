@@ -28,7 +28,7 @@
          <title>IPTC</title>
          <properties>
 
-         	<!-- Start of IPTC Core -->
+            <!-- Start of IPTC Core -->
             <property name="photoshop:City">
                <type>d:text</type>
                <index enabled="true">
@@ -225,7 +225,7 @@
             <!-- End of IPTC Core -->
 
             <!-- Start of IPTC Ext -->
-			<property name="Iptc4xmpExt:AddlModelInfo">
+            <property name="Iptc4xmpExt:AddlModelInfo">
                <type>d:text</type>
             </property>
             <property name="Iptc4xmpExt:OrganisationInImageCode">

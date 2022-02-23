@@ -18,3 +18,9 @@ repos:
     hooks:
       - id: check-travis
       - id: check-github-workflows
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 2.4.0
+    hooks:
+      - id: editorconfig-checker
+        args: ['-disable-indent-size']
+        exclude: (\.(pgm|pnm|ppm|html|eml)|quick.txt)$
