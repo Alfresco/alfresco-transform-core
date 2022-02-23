@@ -1,5 +1,5 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.pre-commit.yml@v1.1.9
+  - source: Alfresco/alfresco-build-tools:.travis.pre-commit.yml@v1.2.0
 
 language: java
 jdk: openjdk11
@@ -27,6 +27,7 @@ branches:
     - /^ACS-.*$/
 
 stages:
+  - lint
   - name: Veracode Scan
     if: branch = master
   - build and test
