@@ -209,7 +209,7 @@
                   <tokenised>false</tokenised>
                </index>
             </property>
-            
+
             <!-- Deprecated by IPTC
             <property name="photoshop:Urgency">
                <type>d:text</type>
@@ -266,7 +266,7 @@
                   <tokenised>false</tokenised>
                </index>
             </property>
-            <!-- Deprecated by IPTC 
+            <!-- Deprecated by IPTC
             <property name="Iptc4xmpExt:DigitalSourcefileType">
                <type>d:text</type>
             </property>
@@ -615,7 +615,7 @@
 
          </properties>
       </aspect>
-      
+
    </aspects>
 
 </model>

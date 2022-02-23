@@ -50,24 +50,24 @@ import org.springframework.http.ResponseEntity;
  * Super class of metadata integration tests. Sub classes should provide the following:
  * <p>
  * <ul>
- * <li>A method providing a 
+ * <li>A method providing a
  * Stream of test files: {@code public static Stream<TestFileInfo> engineTransformations()}; </li>
  * <li> Provide expected json files (&lt;sourceFilename>"_metadata.json") as resources on the classpath.</li>
- * <li> Override the method {@code testTransformation(TestFileInfo testFileInfo)} such that it calls 
+ * <li> Override the method {@code testTransformation(TestFileInfo testFileInfo)} such that it calls
  * the super method as a {@code @ParameterizedTest} for example:</li> </ul>
  * <pre>
  * &#64;ParameterizedTest
- * 
+ *
  * &#64;MethodSource("engineTransformations")
- * 
+ *
  * &#64;Override
 
  * public void testTransformation(TestFileInfo testFileInfo)
- * 
- * { 
+ *
+ * {
  *      super.testTransformation(TestFileInfo testFileInfo)
  * }
- * </pre> 
+ * </pre>
  *
  * @author adavis
  * @author dedwards
@@ -81,7 +81,7 @@ public abstract class AbstractMetadataExtractsIT
 
     private final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
-    
+
     public void testTransformation(TestFileInfo testFileInfo)
     {
         final String sourceMimetype = testFileInfo.getMimeType();

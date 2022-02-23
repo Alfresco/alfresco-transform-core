@@ -22,9 +22,9 @@ yum -y install bzip2-devel freetype-devel libjpeg-devel libpng-devel libtiff-dev
     zlib-devel perl-devel perl-generators ghostscript-devel djvulibre-devel libwmf-devel jasper-devel \
     libtool-ltdl-devel libX11-devel libXext-devel libXt-devel lcms2-devel libxml2-devel librsvg2-devel \
     fftw-devel ilmbase-devel OpenEXR-devel libwebp-devel jbigkit-devel openjpeg2-devel graphviz-devel \
-    libraqm-devel LibRaw-devel 
+    libraqm-devel LibRaw-devel
 #  Installing indirect dependencies
-#    ImageMagick tests requite non default fonts  
+#    ImageMagick tests requite non default fonts
 yum groupinstall -y "fonts"
 #    ImageMagick spec requires ldconfig_scriptlets macro
 yum -y install epel-rpm-macros

@@ -59,7 +59,7 @@ public class TikaTransformationIT
         "xhtml", "application/xhtml+xml",
         "xml", "text/xml");
 
-    
+
 
     @ParameterizedTest
     @MethodSource("engineTransformations")
@@ -78,7 +78,7 @@ public class TikaTransformationIT
         {
             targetMimetype = extensionMimetype.get(entry.getMiddle());
         }
-        
+
 
         final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
             sourceFile, sourceMimetype, targetMimetype, targetExtension);
@@ -108,7 +108,7 @@ public class TikaTransformationIT
     // TODO unit tests for the following file types (for which is difficult to find file samples):
     //  *.ogx (application/ogg)
     //  *.cpio (application/x-cpio)
-    //  *.cdf (application/x-netcdf) 
+    //  *.cdf (application/x-netcdf)
     //  *.hdf (application/x-hdf)
     public static Stream<Triple<String, String, String>> engineTransformations()
     {

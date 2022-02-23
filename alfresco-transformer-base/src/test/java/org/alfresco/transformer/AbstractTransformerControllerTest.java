@@ -165,13 +165,13 @@ public abstract class AbstractTransformerControllerTest
         if (testFile != null)
         {
             try (var inputStream = new FileInputStream(testFile);
-                    var outputStream = new FileOutputStream(targetFile)) 
+                    var outputStream = new FileOutputStream(targetFile))
             {
                 FileChannel source = inputStream.getChannel();
                 FileChannel target = outputStream.getChannel();
                 target.transferFrom(source, 0, source.size());
 
-            } catch (Exception e) 
+            } catch (Exception e)
             {
                 throw e;
             }
@@ -182,13 +182,13 @@ public abstract class AbstractTransformerControllerTest
             if (testFile != null)
             {
                 try (var inputStream = new FileInputStream(testFile);
-                        var outputStream = new FileOutputStream(targetFile)) 
+                        var outputStream = new FileOutputStream(targetFile))
                 {
                     FileChannel source = inputStream.getChannel();
                     FileChannel target = outputStream.getChannel();
                     target.transferFrom(source, 0, source.size());
 
-                } catch (Exception e) 
+                } catch (Exception e)
                 {
                     throw e;
                 }

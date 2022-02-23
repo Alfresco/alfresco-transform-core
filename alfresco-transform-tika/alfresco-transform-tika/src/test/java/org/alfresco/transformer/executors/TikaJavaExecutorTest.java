@@ -81,7 +81,7 @@ public class TikaJavaExecutorTest {
         // when default set to false, with no options passed we should get a call method without NOT_EXTRACT_BOOKMARKS_TEXT
         verify(executorSpyDefaultFalse, times(1)).call(mockSourceFile, mockTargetFile, transformName, null, null,
                 TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + defaultEncoding);
-        
+
         // use transforms with notExtractBookmarksText set to true
         clearInvocations(executorSpyDefaultTrue, executorSpyDefaultFalse);
         transformOptions.put("notExtractBookmarksText", "true");

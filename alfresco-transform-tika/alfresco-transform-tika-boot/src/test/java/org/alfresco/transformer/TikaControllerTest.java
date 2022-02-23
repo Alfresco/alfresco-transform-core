@@ -225,7 +225,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
 
                 // Check the supplied source file has not been changed.
                 byte[] actualSourceFileBytes = readAllBytes(new File(actualSource).toPath());
-                assertArrayEquals(expectedSourceFileBytes, actualSourceFileBytes, 
+                assertArrayEquals(expectedSourceFileBytes, actualSourceFileBytes,
                     "Source file is not the same");
 
                 return mockExecutionResult;

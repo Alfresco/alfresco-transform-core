@@ -309,7 +309,7 @@ public class AIOTransformRegistryTest
         String roundTrip = clean(textWriter.toString());
 
         assertEquals(
-                checkText, roundTrip, 
+                checkText, roundTrip,
                 "Incorrect text in PDF when starting from text in " + encoding
         );
 

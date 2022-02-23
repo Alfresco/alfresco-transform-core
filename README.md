@@ -10,7 +10,7 @@ Contains the common transformer (T-Engine) code, plus a few actual implementatio
   [README](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-transformer-base/README.md)
 * `alfresco-transform-<name>` - multiple T-Engines; each one of them builds both a SpringBoot fat jar
  and a [Docker image](https://github.com/Alfresco/alfresco-transform-core#docker)
- 
+
 ### Documentation
 
 In addition to the subprojects (such as `alfresco-transformer-base` README above) some additional documentation can be found in:
@@ -52,7 +52,7 @@ and Alfresco Maven repository:
 ```
 
 #### Docker
-The core T-Engine images are available on Docker Hub. 
+The core T-Engine images are available on Docker Hub.
 
 Either as a single Core AIO (All-In-One) T-Engine:
 * [alfresco/alfresco-transform-core-aio](https://hub.docker.com/r/alfresco/alfresco-transform-core-aio)

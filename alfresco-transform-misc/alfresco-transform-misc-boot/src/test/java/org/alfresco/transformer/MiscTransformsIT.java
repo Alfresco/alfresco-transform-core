@@ -115,7 +115,7 @@ public class MiscTransformsIT
         testFile(MIMETYPE_IWORK_PAGES, "pages", "quick.pages"),
         testFile(MIMETYPE_RFC822, "eml", "quick.eml")
     ).collect(toMap(TestFileInfo::getMimeType, identity()));
-   
+
     public static Stream<SourceTarget> engineTransformations()
     {
         return Stream.of(

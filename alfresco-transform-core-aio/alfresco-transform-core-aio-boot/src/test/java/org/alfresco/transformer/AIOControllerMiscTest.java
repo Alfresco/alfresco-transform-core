@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Import;
 
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
-public class AIOControllerMiscTest extends MiscControllerTest 
+public class AIOControllerMiscTest extends MiscControllerTest
 {
     //Tests contained in MiscControllerTest
 

@@ -28,7 +28,7 @@ import org.springframework.web.client.RestTemplate;
 public class EngineClient
 {
     private static final RestTemplate REST_TEMPLATE = new RestTemplate();
-    
+
     public static ResponseEntity<Resource> sendTRequest(
         final String engineUrl, final String sourceFile,
         final String sourceMimetype, final String targetMimetype, final String targetExtension)

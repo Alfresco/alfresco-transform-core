@@ -52,8 +52,8 @@ public class MiscMetadataExtractsIT extends AbstractMetadataExtractsIT
     {
         super.testTransformation(testFileInfo);
     }
-    
-    private static Stream<TestFileInfo> engineTransformations() 
+
+    private static Stream<TestFileInfo> engineTransformations()
     {
         return Stream.of(
                 // HtmlMetadataExtractor

@@ -169,7 +169,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
         }).when(javaExecutor).convert(any(), any());
     }
 
-    
+
     protected void setJavaExecutor(AbstractTransformerController controller, LibreOfficeJavaExecutor javaExecutor)
     {
         ReflectionTestUtils.setField(controller, "javaExecutor", javaExecutor);

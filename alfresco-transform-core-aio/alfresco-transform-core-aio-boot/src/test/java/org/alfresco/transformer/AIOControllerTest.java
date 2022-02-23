@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 @WebMvcTest(AIOController.class)
 @Import(AIOCustomConfig.class)
-public class AIOControllerTest //extends AbstractTransformerControllerTest 
+public class AIOControllerTest //extends AbstractTransformerControllerTest
 {
     @Value("${transform.core.version}")
     private String coreVersion;

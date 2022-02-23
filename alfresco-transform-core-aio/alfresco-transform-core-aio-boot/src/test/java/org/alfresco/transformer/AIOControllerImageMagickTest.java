@@ -56,7 +56,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
 
     @BeforeEach @Override
     public void before() throws IOException
-    {       
+    {
         ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
         //Need to wire in the mocked commandExecutor into the controller...
@@ -67,7 +67,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
     }
 
     @Override
-    protected AbstractTransformerController getController() 
+    protected AbstractTransformerController getController()
     {
         return controller;
     }
@@ -97,7 +97,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
         // Ignore the test in super class as the AIO transforms will not be selected .
         // It is the mock that returns a zero length file for other transformers, when we supply an invalid targetExtension.
     }
-   
+
     @Test
     @Override
     public void testGetTransformConfigInfo()
@@ -129,7 +129,7 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
         // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
     }
-    
+
     @Test
     @Override
     public void testGetInfoFromConfigWithNoTransformOptions()
@@ -137,5 +137,5 @@ public class AIOControllerImageMagickTest extends ImageMagickControllerTest
         // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
     }
-    
+
 }

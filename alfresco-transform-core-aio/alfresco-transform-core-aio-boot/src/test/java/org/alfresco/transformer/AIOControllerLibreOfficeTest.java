@@ -48,7 +48,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 public class AIOControllerLibreOfficeTest extends LibreOfficeControllerTest
 {
     //Tests contained in LibreOfficeControllerTest
-    
+
     @Test
     public void testTestValidity()
     {
@@ -79,7 +79,7 @@ public class AIOControllerLibreOfficeTest extends LibreOfficeControllerTest
 
         return builder;
     }
-    
+
     @Test
     @Override
     public void testGetTransformConfigInfo()
