@@ -23,4 +23,4 @@ repos:
     hooks:
       - id: editorconfig-checker
         args: ['-disable-indent-size']
-        exclude: (\.(pgm|pnm|ppm|html|eml)|quick.txt)$
+        exclude: (templates|test/resources)/.*$
