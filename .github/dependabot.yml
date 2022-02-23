@@ -13,7 +13,6 @@ updates:
     time: "22:00"
     timezone: Europe/London
   open-pull-requests-limit: 99
-  ignore:
   registries:
   - maven-alfresco-internal
 - package-ecosystem: docker
