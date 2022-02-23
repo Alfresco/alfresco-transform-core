@@ -86,7 +86,7 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
         // Load config for the transformer
         String location = getTransformConfigLocation(tEngine);
         TransformConfig transformConfig = loadTransformConfig(location);
-        setCoreVersionOnSingleStepTransformers(transformConfig.getTransformers(), coreVersion);
+        setCoreVersionOnSingleStepTransformers(transformConfig, coreVersion);
         String transformerId = tEngine.getTransformerId();
         combinedTransformConfig.addTransformConfig(transformConfig, location, transformerId, this);
 
