@@ -17,5 +17,3 @@ The latest ("master") source files can also be found here:
 In the meantime, for convenience, a copy of the Alfresco IPTC content model (XML + message properties)
 is also provided here. These files can be configured to deploy the model into earlier versions of
 ACS (eg. 7.0.0) using static bootstrap mechanism.
-
-

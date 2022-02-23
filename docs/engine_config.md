@@ -165,4 +165,3 @@ Rendition provides values for options: Op1, Op2
 ```
 If we assume both transformers support the required source and target Media Types and
  *priority1* < *priority2*, Transformer 1 will be selected because its priority is higher.
-
