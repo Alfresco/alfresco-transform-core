@@ -104,5 +104,3 @@ public class MessagingConfig implements JmsListenerConfigurer
         return new ActiveMQQueue(engineRequestQueueValue);
     }
 }
-
-

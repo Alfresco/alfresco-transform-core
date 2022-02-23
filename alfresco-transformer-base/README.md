@@ -230,4 +230,3 @@ The build plan is available in [TravisCI](https://travis-ci.com/Alfresco/alfresc
 
 Please use [this guide](https://github.com/Alfresco/alfresco-repository/blob/master/CONTRIBUTING.md)
 to make a contribution to the project.
-

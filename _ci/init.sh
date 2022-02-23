@@ -17,4 +17,3 @@ sudo service docker restart
 popd
 set +vex
 echo "=========================== Finishing Init Script =========================="
-

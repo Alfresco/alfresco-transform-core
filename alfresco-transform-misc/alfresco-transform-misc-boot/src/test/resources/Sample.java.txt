@@ -48,4 +48,3 @@ public class Sample
         return new Sample(mimeType, extension, path, false);
     }
 }
-
