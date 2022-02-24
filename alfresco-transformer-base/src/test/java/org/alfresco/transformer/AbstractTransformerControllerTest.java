@@ -457,7 +457,11 @@ public abstract class AbstractTransformerControllerTest
         TransformConfig expectedTransformConfig = objectMapper
             .readValue(getTestFile(getEngineConfigName(), true),
                 TransformConfig.class);
-        expectedTransformConfig.getTransformers().forEach(transformer -> transformer.setCoreVersion(coreVersion));
+        expectedTransformConfig.getTransformers().forEach(transformer -> {
+            transformer.setCoreVersion(coreVersion);
+            transformer.getTransformOptions().add(DIRECT_ACCESS_URL);
+        });
+        expectedTransformConfig.getTransformOptions().put(DIRECT_ACCESS_URL, Set.of(new TransformOptionValue(false, DIRECT_ACCESS_URL)));
 
         ReflectionTestUtils.setField(transformRegistry, "engineConfig",
             new ClassPathResource(getEngineConfigName()));
