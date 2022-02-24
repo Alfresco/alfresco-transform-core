@@ -20,6 +20,11 @@ repos:
     hooks:
       - id: check-travis
       - id: check-github-workflows
+      - id: check-jsonschema
+        alias: check-dependabot
+        name: "Validate Dependabot Config"
+        files: '.github/dependabot\.yml$'
+        args: ["--schemafile", "https://json.schemastore.org/dependabot-2.0.json"]
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
     rev: 2.4.0
     hooks:
