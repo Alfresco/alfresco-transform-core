@@ -3,13 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>2.5.5-A2-SNAPSHOT</version>
+    <version>2.5.7-A5-SNAPSHOT</version> 
     <packaging>pom</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.2</version>
+        <version>2.6.3</version>
+        <relativePath />
     </parent>
 
     <properties>
@@ -18,22 +19,21 @@
         <maven.compiler.target>11</maven.compiler.target>
 
         <image.tag>latest</image.tag>
-        <dependency.pdfbox.version>2.0.24</dependency.pdfbox.version>
+        <dependency.pdfbox.version>2.0.25</dependency.pdfbox.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.12</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
-        <dependency.alfresco-transform-model.version>1.4.5</dependency.alfresco-transform-model.version>
-        <dependency.activemq.version>5.16.3</dependency.activemq.version>
+        <dependency.alfresco-transform-model.version>1.4.11</dependency.alfresco-transform-model.version>
+        <dependency.activemq.version>5.16.4</dependency.activemq.version>
         <dependency.jackson.version>2.13.1</dependency.jackson.version>
         <dependency.jackson-databind.version>${dependency.jackson.version}</dependency.jackson-databind.version>
         <dependency.junit.version>4.13.2</dependency.junit.version>
         <dependency.cxf.version>3.5.0</dependency.cxf.version>
-        <dependency.tika.version>1.26</dependency.tika.version>
+        <dependency.tika.version>2.2.1</dependency.tika.version>
         <dependency.poi.version>4.1.2</dependency.poi.version>
         <dependency.ooxml-schemas.version>1.4</dependency.ooxml-schemas.version>
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
     </properties>
-
 
     <profiles>
         <profile>
@@ -124,6 +124,7 @@
             </modules>
         </profile>
     </profiles>
+
     <scm>
         <connection>scm:git:https://github.com/Alfresco/alfresco-transform-core.git</connection>
         <developerConnection>scm:git:https://github.com/Alfresco/alfresco-transform-core.git</developerConnection>
@@ -231,7 +232,7 @@
             <dependency>
                 <groupId>com.github.junrar</groupId>
                 <artifactId>junrar</artifactId>
-                <version>7.4.0</version>
+                <version>7.4.1</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -259,6 +260,15 @@
         </dependencies>
     </dependencyManagement>
 
+    <!-- ATS-981: Avoid CVE-2022-23181 with spring-boot-starter-web 2.6.3 -->
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>9.0.58</version>
+        </dependency>
+    </dependencies>
+
     <distributionManagement>
         <snapshotRepository>
             <id>alfresco-public-snapshots</id>
@@ -275,7 +285,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.3.1</version>
                 <configuration>
                     <doclint>none</doclint>
                 </configuration>
@@ -301,6 +310,7 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
                     <version>2.5.3</version>
                     <configuration>
@@ -323,10 +333,15 @@
                                 <goal>add-third-party</goal>
                                 <goal>download-licenses</goal>
                             </goals>
+                            <phase>generate-resources</phase>
                             <configuration>
-                                <useMissingFile>true</useMissingFile>
+                                <failOnMissing>true</failOnMissing>
                                 <excludedScopes>provided,test</excludedScopes>
                                 <excludedGroups>org.alfresco</excludedGroups>
+                                <failIfWarning>true</failIfWarning>
+                                <includedLicenses>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/includedLicenses.txt</includedLicenses>
+                                <licenseMergesUrl>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/licenseMerges.txt</licenseMergesUrl>
+                                <overrideUrl>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/override-THIRD-PARTY.properties</overrideUrl>
                             </configuration>
                         </execution>
                         <execution>
@@ -377,15 +392,6 @@
                             <buildDirectory>${project.build.directory}</buildDirectory>
                         </systemPropertyVariables>
                     </configuration>
-                    <executions>
-                        <execution>
-                            <id>default-test</id>
-                            <goals>
-                                <goal>test</goal>
-                            </goals>
-                            <phase>test</phase>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -394,43 +400,12 @@
                         <forkCount>1</forkCount>
                         <reuseForks>true</reuseForks>
                     </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>integration-test</goal>
-                                <goal>verify</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>io.fabric8</groupId>
-                    <artifactId>fabric8-maven-plugin</artifactId>
-                    <version>4.4.0</version>
                 </plugin>
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
-                    <version>0.38.0</version>
-                    <extensions>true</extensions>
-                    <executions>
-                        <execution>
-                            <id>before-integration-tests</id>
-                            <phase>pre-integration-test</phase>
-                            <goals>
-                                <goal>stop</goal>
-                                <goal>start</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>after-integration-tests</id>
-                            <phase>post-integration-test</phase>
-                            <goals>
-                                <goal>stop</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
+                    <version>0.39.0</version>
+                 </plugin>
             </plugins>
         </pluginManagement>
     </build>

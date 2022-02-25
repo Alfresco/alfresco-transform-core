@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -28,6 +28,7 @@ package org.alfresco.transformer.metadataExtractors;
 
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.metadata.XMPDM;
 import org.apache.tika.parser.CompositeParser;
 import org.apache.tika.parser.Parser;
@@ -148,13 +149,12 @@ public class TikaAudioMetadataExtractor extends AbstractTikaMetadataExtractor
      * @param metadata     the metadata extracted from the file
      * @return          the description
      */
-    @SuppressWarnings("deprecation")
     private String generateDescription(Metadata metadata)
     {
         StringBuilder result = new StringBuilder();
-        if (metadata.get(Metadata.TITLE) != null)
+        if (metadata.get(TikaCoreProperties.TITLE) != null)
         {
-            result.append(metadata.get(Metadata.TITLE));
+            result.append(metadata.get(TikaCoreProperties.TITLE));
             if (metadata.get(XMPDM.ALBUM) != null)
             {
                 result

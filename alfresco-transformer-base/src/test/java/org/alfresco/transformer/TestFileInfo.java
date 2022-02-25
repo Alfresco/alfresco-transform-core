@@ -76,4 +76,10 @@ public class TestFileInfo
     {
         return new TestFileInfo(mimeType, extension, path, false);
     }
+
+    @Override
+    public String toString()
+    {
+        return path;
+    }
 }

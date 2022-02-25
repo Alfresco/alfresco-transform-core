@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -35,7 +35,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.alfresco.transformer.transformers.StringExtractingContentTransformer.SOURCE_ENCODING;
+import static org.alfresco.transform.client.util.RequestParamMap.SOURCE_ENCODING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HtmlParserContentTransformerTest

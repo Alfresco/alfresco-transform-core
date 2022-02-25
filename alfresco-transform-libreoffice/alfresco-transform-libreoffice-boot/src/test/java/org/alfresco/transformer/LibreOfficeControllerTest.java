@@ -27,6 +27,7 @@
 package org.alfresco.transformer;
 
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
+import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transformer.util.RequestParamMap.TARGET_EXTENSION;
 import static org.alfresco.transformer.util.RequestParamMap.TARGET_MIMETYPE;
@@ -200,7 +201,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
 
         mockMvc
             .perform(MockMvcRequestBuilders
-                .multipart("/transform")
+                .multipart(ENDPOINT_TRANSFORM)
                 .file(sourceFile)
                 .param(TARGET_EXTENSION, "xxx")
                 .param(SOURCE_MIMETYPE,sourceMimetype)
@@ -247,7 +248,7 @@ public class LibreOfficeControllerTest extends AbstractTransformerControllerTest
         String tr = objectMapper.writeValueAsString(transformRequest);
         String transformationReplyAsString = mockMvc
             .perform(MockMvcRequestBuilders
-                .post("/transform")
+                .post(ENDPOINT_TRANSFORM)
                 .header(ACCEPT, APPLICATION_JSON_VALUE)
                 .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .content(tr))

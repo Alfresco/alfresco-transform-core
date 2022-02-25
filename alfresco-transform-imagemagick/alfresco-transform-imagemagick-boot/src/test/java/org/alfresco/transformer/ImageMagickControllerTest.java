@@ -26,6 +26,7 @@
  */
 package org.alfresco.transformer;
 
+import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.alfresco.transformer.util.MimetypeMap.PREFIX_IMAGE;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -227,7 +228,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
         expectedOptions = "-auto-orient " + "-gravity " + value + " +repage";
         mockMvc
             .perform(MockMvcRequestBuilders
-                .multipart("/transform")
+                .multipart(ENDPOINT_TRANSFORM)
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
                 .param("targetMimetype", targetMimetype)
@@ -244,7 +245,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     {
         mockMvc
             .perform(MockMvcRequestBuilders
-                .multipart("/transform")
+                .multipart(ENDPOINT_TRANSFORM)
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
                 .param("targetMimetype", targetMimetype)
@@ -260,7 +261,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
         expectedSourceSuffix = "[2-3]";
         mockMvc
             .perform(MockMvcRequestBuilders
-                .multipart("/transform")
+                .multipart(ENDPOINT_TRANSFORM)
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
                 .param("targetMimetype", targetMimetype)
@@ -298,7 +299,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
         expectedSourceSuffix = "[2-3]";
         mockMvc
             .perform(MockMvcRequestBuilders
-                .multipart("/transform")
+                .multipart(ENDPOINT_TRANSFORM)
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
                 .param("targetMimetype", targetMimetype)
@@ -336,7 +337,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
         expectedOptions = "( horrible command / ); -auto-orient -resize 321x654";
         mockMvc
             .perform(MockMvcRequestBuilders
-                .multipart("/transform")
+                .multipart(ENDPOINT_TRANSFORM)
                 .file(sourceFile)
                 .param("targetExtension", targetExtension)
                 .param("targetMimetype", targetMimetype)
@@ -365,7 +366,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
     {
         when(mockExecutionResult.getExitValue()).thenReturn(1);
 
-        mockMvc.perform(mockMvcRequest("/transform", sourceFile, "targetExtension", "xxx"))
+        mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", "xxx"))
                .andExpect(status().is(BAD_REQUEST.value()))
                .andExpect(
                    status().reason(containsString("Transformer exit code was not 0: \nSTDERR")));
@@ -399,7 +400,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
         String tr = objectMapper.writeValueAsString(transformRequest);
         String transformationReplyAsString = mockMvc
             .perform(MockMvcRequestBuilders
-                .post("/transform")
+                .post(ENDPOINT_TRANSFORM)
                 .header(ACCEPT, APPLICATION_JSON_VALUE)
                 .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .content(tr))

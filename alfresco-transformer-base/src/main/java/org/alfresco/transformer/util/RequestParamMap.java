@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,7 +26,11 @@
  */
 package org.alfresco.transformer.util;
 
-public interface RequestParamMap
+/**
+ * Extends the list of transform options with historic request parameters or 'extra' parameters used in testing
+ * or communication in the all-in-one transformer.
+ */
+public interface RequestParamMap extends org.alfresco.transform.client.util.RequestParamMap
 {
     // This property can be sent by acs repository's legacy transformers to force a transform,
     // instead of letting this T-Engine determine it based on the request parameters.
@@ -35,43 +39,14 @@ public interface RequestParamMap
     // See ATS-731.
     @Deprecated
     String TRANSFORM_NAME_PROPERTY = "transformName";
-
     String TRANSFORM_NAME_PARAMETER = "alfresco.transform-name-parameter";
-    String FILE = "file";
 
-    String SOURCE_ENCODING          = "sourceEncoding";
+    String FILE = "file";
     String SOURCE_EXTENSION         = "sourceExtension";
     String SOURCE_MIMETYPE          = "sourceMimetype";
     String TARGET_EXTENSION         = "targetExtension";
     String TARGET_MIMETYPE          = "targetMimetype";
-    String TARGET_ENCODING          = "targetEncoding";
     String TEST_DELAY               = "testDelay";
-    String PAGE_REQUEST_PARAM       = "page";    
-    String WIDTH_REQUEST_PARAM      = "width";
-    String HEIGHT_REQUEST_PARAM     = "height";
-    String ALLOW_PDF_ENLARGEMENT    = "allowPdfEnlargement";
-    String MAINTAIN_PDF_ASPECT_RATIO = "maintainPdfAspectRatio";
-    String START_PAGE              = "startPage";
-    String END_PAGE                = "endPage";
-    String ALPHA_REMOVE            = "alphaRemove";
-    String AUTO_ORIENT             = "autoOrient";
-    String CROP_GRAVITY            = "cropGravity";
-    String CROP_WIDTH              = "cropWidth";
-    String CROP_HEIGHT             = "cropHeight";
-    String CROP_PERCENTAGE         = "cropPercentage";
-    String CROP_X_OFFSET           = "cropXOffset";
-    String CROP_Y_OFFSET           = "cropYOffset";
-    String THUMBNAIL               = "thumbnail";
-    String RESIZE_WIDTH            = "resizeWidth";
-    String RESIZE_HEIGHT           = "resizeHeight";
-    String RESIZE_PERCENTAGE       = "resizePercentage";
-    String ALLOW_ENLARGEMENT       = "allowEnlargement";
-    String MAINTAIN_ASPECT_RATIO   = "maintainAspectRatio";
-    String COMMAND_OPTIONS         = "commandOptions";
-    String TIMEOUT                 = "timeout";
-    String INCLUDE_CONTENTS        = "includeContents";
-    String NOT_EXTRACT_BOOKMARKS_TEXT = "notExtractBookmarksText";
-    String PAGE_LIMIT              = "pageLimit";
 
     // TODO PoC for FFmpeg - effectively target options (note: if we need specific source options, may need extra set)
     String TIME_OFFSET             = "timeOffset";
@@ -79,4 +54,5 @@ public interface RequestParamMap
     String FRAMES_NUM              = "framesNum";
     String FRAME_WIDTH             = "frameWidth";
     String FRAME_HEIGHT            = "frameHeight";
+
 }

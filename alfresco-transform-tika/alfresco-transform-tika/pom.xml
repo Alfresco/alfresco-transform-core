@@ -3,12 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>alfresco-transform-tika</artifactId>
     <name>Alfresco Tika Transformer</name>
-    <packaging>jar</packaging>
 
     <parent>
         <artifactId>alfresco-transform-core</artifactId>
         <groupId>org.alfresco</groupId>
-        <version>2.5.5-A2-SNAPSHOT</version>
+        <version>2.5.7-A5-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -27,13 +26,9 @@
         </dependency>
         <dependency>
             <groupId>org.apache.tika</groupId>
-            <artifactId>tika-parsers</artifactId>
+            <artifactId>tika-parsers-standard-package</artifactId>
             <version>${dependency.tika.version}</version>
             <exclusions>
-                <exclusion>
-                    <groupId>com.tdunning</groupId>
-                    <artifactId>json</artifactId>
-                </exclusion>
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcprov-jdk15on</artifactId>
@@ -41,11 +36,6 @@
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcmail-jdk15on</artifactId>
-                </exclusion>
-                <!-- TODO ATS-534 check transformations not affected by this missing quartz lib -->
-                <exclusion>
-                    <groupId>org.quartz-scheduler</groupId>
-                    <artifactId>quartz</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>xml-apis</groupId>
@@ -126,14 +116,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>

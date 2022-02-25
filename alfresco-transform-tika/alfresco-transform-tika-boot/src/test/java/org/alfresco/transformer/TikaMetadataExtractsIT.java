@@ -548,4 +548,28 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
 
         );
     }
+
+    @ParameterizedTest
+    @MethodSource("tika2_2_1_upgradeFailures")
+    public void testTika_2_2_1_upgradeFailures(TestFileInfo testFileInfo)
+    {
+        super.testTransformation(testFileInfo);
+    }
+
+    private static Stream<TestFileInfo> tika2_2_1_upgradeFailures()
+    {
+        // When we upgraded to Tika 2.2.1 from 2.2.0:
+        // - the original OfficeOpenXMLCore.SUBJECT raw metadata value started being null.
+        // - the replacement TikaCoreProperties.SUBJECT raw metadata changed into a multi value
+        // The following test files were the ones that failed.
+        return Stream.of(
+                testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS_TEMPLATE, "otg", "quick.otg"),
+                testFile(MIMETYPE_OPENOFFICE1_WRITER, "sxw", "quick.sxw"),
+                testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS, "odg", "quick.odg"),
+                testFile(MIMETYPE_OPENDOCUMENT_TEXT, "odt", "quick.odt"),
+                testFile(MIMETYPE_OPENDOCUMENT_TEXT_TEMPLATE, "ott", "quick.ott"),
+                testFile(MIMETYPE_OPENDOCUMENT_FORMULA, "odf", "quick.odf"),
+                testFile(MIMETYPE_PDF, "pdf", "quick.pdf")
+        );
+    }
 }

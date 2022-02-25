@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -35,6 +35,7 @@ import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORD
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_RFC822;
 import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -490,7 +491,7 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
             "test_file." + sourceExtension, sourceMimetype, content);
 
         final MockHttpServletRequestBuilder requestBuilder = super
-            .mockMvcRequest("/transform", sourceFile)
+            .mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile)
             .param("targetExtension", targetExtension)
             .param("targetMimetype", targetMimetype)
             .param("sourceMimetype", sourceMimetype);
@@ -530,5 +531,13 @@ public class MiscControllerTest extends AbstractTransformerControllerTest
         text = text.replaceAll("\\r", "");
         text = text.replaceAll("\\n", "");
         return text;
+    }
+
+    @Test
+    @Override
+    public void queueTransformRequestUsingDirectAccessUrlTest() throws Exception
+    {
+        super.targetMimetype = this.targetMimetype;
+        super.queueTransformRequestUsingDirectAccessUrlTest();
     }
 }

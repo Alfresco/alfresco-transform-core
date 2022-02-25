@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -85,6 +85,9 @@ public class AIOCustomConfig
     @Value("${transform.core.tika.pdfBox.notExtractBookmarksTextDefault:false}")
     private boolean notExtractBookmarksTextDefault;
 
+    @Value("${transform.core.version}")
+    private String coreVersion;
+
     /**
      *
      * @return Override the TransformRegistryImpl used in {@link AbstractTransformerController}
@@ -94,13 +97,14 @@ public class AIOCustomConfig
     public TransformServiceRegistry aioTransformRegistry() throws Exception
     {
         AIOTransformRegistry aioTransformRegistry = new AIOTransformRegistry();
+        aioTransformRegistry.setCoreVersion(coreVersion);
 
         // T-Engines are sorted by name so they are combined in the same order as in the T-Router
         // and Content Repository with individual T-Engines. See TransformersConfigRegistry#retrieveRemoteConfig and
         // LocalTransformServiceRegistry#getTEngineUrlsSortedByName.
         for (Transformer tEngine : getTEnginesSortedByName())
         {
-            aioTransformRegistry.registerTransformer(tEngine); // now a poor name - should be combinedTransformers
+            aioTransformRegistry.registerTransformer(tEngine); // now a poor name - should be combineTransformers
         }
         aioTransformRegistry.registerCombinedTransformers();
         return aioTransformRegistry;

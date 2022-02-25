@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2021 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -27,6 +27,8 @@
 package org.alfresco.transformer.metadataExtractors;
 
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.Office;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.microsoft.OfficeParser;
 import org.slf4j.Logger;
@@ -40,7 +42,7 @@ import java.util.Map;
  *
  * Configuration:   (see OfficeMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
  *
- * This extracter uses the POI library to extract the following:
+ * This extractor uses the POI library to extract the following:
  * <pre>
  *   <b>author:</b>             --      cm:author
  *   <b>title:</b>              --      cm:title
@@ -91,23 +93,20 @@ public class OfficeMetadataExtractor extends AbstractTikaMetadataExtractor
         return new OfficeParser();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected Map<String, Serializable> extractSpecific(Metadata metadata,
                                                         Map<String, Serializable> properties, Map<String,String> headers)
     {
-        putRawValue(KEY_CREATE_DATETIME, metadata.get(Metadata.CREATION_DATE), properties);
-        putRawValue(KEY_LAST_SAVE_DATETIME, metadata.get(Metadata.LAST_SAVED), properties);
-        putRawValue(KEY_EDIT_TIME, metadata.get(Metadata.EDIT_TIME), properties);
-        putRawValue(KEY_FORMAT, metadata.get(Metadata.FORMAT), properties);
-        putRawValue(KEY_KEYWORDS, metadata.get(Metadata.KEYWORDS), properties);
-        putRawValue(KEY_LAST_AUTHOR, metadata.get(Metadata.LAST_AUTHOR), properties);
-        putRawValue(KEY_LAST_PRINTED, metadata.get(Metadata.LAST_PRINTED), properties);
-//       putRawValue(KEY_OS_VERSION, metadata.get(Metadata.OS_VERSION), properties);
-//       putRawValue(KEY_THUMBNAIL, metadata.get(Metadata.THUMBNAIL), properties);
-        putRawValue(KEY_PAGE_COUNT, metadata.get(Metadata.PAGE_COUNT), properties);
-        putRawValue(KEY_PARAGRAPH_COUNT, metadata.get(Metadata.PARAGRAPH_COUNT), properties);
-        putRawValue(KEY_WORD_COUNT, metadata.get(Metadata.WORD_COUNT), properties);
+        putRawValue(KEY_CREATE_DATETIME, metadata.get(TikaCoreProperties.CREATED), properties);
+        putRawValue(KEY_LAST_SAVE_DATETIME, metadata.get(TikaCoreProperties.MODIFIED), properties);
+        putRawValue(KEY_EDIT_TIME, metadata.get(TikaCoreProperties.MODIFIED), properties);
+        putRawValue(KEY_FORMAT, metadata.get(TikaCoreProperties.FORMAT), properties);
+        putRawValue(KEY_KEYWORDS, metadata.get(TikaCoreProperties.SUBJECT), properties);
+        putRawValue(KEY_LAST_AUTHOR, metadata.get(TikaCoreProperties.MODIFIER), properties);
+        putRawValue(KEY_LAST_PRINTED, metadata.get(TikaCoreProperties.PRINT_DATE), properties);
+        putRawValue(KEY_PAGE_COUNT, metadata.get(Office.PAGE_COUNT), properties);
+        putRawValue(KEY_PARAGRAPH_COUNT, metadata.get(Office.PARAGRAPH_COUNT), properties);
+        putRawValue(KEY_WORD_COUNT, metadata.get(Office.WORD_COUNT), properties);
         return properties;
     }
 }

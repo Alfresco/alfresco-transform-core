@@ -38,16 +38,17 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
+
 @Configuration
 public class WebApplicationConfig implements WebMvcConfigurer
 {
-
     @Override
     public void addInterceptors(InterceptorRegistry registry)
     {
         registry
             .addInterceptor(transformInterceptor())
-            .addPathPatterns("/transform", "/live", "/ready");
+            .addPathPatterns(ENDPOINT_TRANSFORM, "/live", "/ready");
     }
 
     @Bean

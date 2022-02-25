@@ -33,11 +33,11 @@ import org.alfresco.transform.client.model.TransformRequestValidator;
 import org.alfresco.transform.client.model.config.TransformConfig;
 import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transform.router.TransformStack;
 import org.alfresco.transform.router.TransformerDebug;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.model.FileRefResponse;
+import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,12 +58,20 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
+import static org.alfresco.transform.client.model.config.CoreVersionDecorator.setOrClearCoreVersion;
+import static org.alfresco.transform.client.util.RequestParamMap.DIRECT_ACCESS_URL;
+import static org.alfresco.transform.client.util.RequestParamMap.CONFIG_VERSION;
+import static org.alfresco.transform.client.util.RequestParamMap.CONFIG_VERSION_DEFAULT;
+import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
 import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTempFile;
 import static org.alfresco.transformer.fs.FileManager.buildFile;
 import static org.alfresco.transformer.fs.FileManager.createAttachment;
@@ -126,7 +134,7 @@ public abstract class AbstractTransformerController implements TransformControll
 
     // Request parameters that are not part of transform options
     public static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
-            TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, TEST_DELAY, TRANSFORM_NAME_PROPERTY);
+            TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, TEST_DELAY, TRANSFORM_NAME_PROPERTY, DIRECT_ACCESS_URL);
 
     @Autowired
     private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
@@ -140,27 +148,28 @@ public abstract class AbstractTransformerController implements TransformControll
     @Autowired
     private TransformerDebug transformerDebug;
 
-    @GetMapping(value = "/transform/config")
-    public ResponseEntity<TransformConfig> info()
+    @GetMapping(value = ENDPOINT_TRANSFORM_CONFIG)
+    public ResponseEntity<TransformConfig> info(
+            @RequestParam(value = CONFIG_VERSION, defaultValue = CONFIG_VERSION_DEFAULT) int configVersion)
     {
-        logger.info("GET Transform Config.");
-        final TransformConfig transformConfig =
-            ((TransformRegistryImpl) transformRegistry).getTransformConfig();
+        logger.info("GET Transform Config version: " + configVersion);
+        TransformConfig transformConfig = ((TransformRegistryImpl) transformRegistry).getTransformConfig();
+        transformConfig = setOrClearCoreVersion(transformConfig, configVersion);
         return new ResponseEntity<>(transformConfig, OK);
     }
 
-    @PostMapping(value = "/transform", consumes = MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = ENDPOINT_TRANSFORM, consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
-                                              @RequestParam(FILE) MultipartFile sourceMultipartFile,
+                                              @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
                                               @RequestParam(TARGET_EXTENSION) String targetExtension,
                                               @RequestParam(value = SOURCE_MIMETYPE, required = false) String sourceMimetype,
                                               @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,
                                               @RequestParam Map<String, String> requestParameters,
-                                              @RequestParam (value = TEST_DELAY, required = false) Long testDelay,
+                                              @RequestParam(value = TEST_DELAY, required = false) Long testDelay,
 
                                               // The TRANSFORM_NAME_PROPERTY param allows ACS legacy transformers to specify which transform to use,
                                               // It can be removed once legacy transformers are removed from ACS.
-                                              @RequestParam (value = TRANSFORM_NAME_PROPERTY, required = false) String requestTransformName)
+                                              @RequestParam(value = TRANSFORM_NAME_PROPERTY, required = false) String requestTransformName)
     {
         if (logger.isDebugEnabled())
         {
@@ -168,10 +177,27 @@ public abstract class AbstractTransformerController implements TransformControll
                     + "targetExtension: '{}', requestParameters: {}", sourceMimetype, targetMimetype, targetExtension, requestParameters);
         }
 
-        final String targetFilename = createTargetFileName(
-                sourceMultipartFile.getOriginalFilename(), targetExtension);
+        final String directUrl = requestParameters.getOrDefault(DIRECT_ACCESS_URL, "");
+
+        File sourceFile;
+        String sourceFilename;
+        if (directUrl.isBlank())
+        {
+            if (sourceMultipartFile ==  null)
+            {
+                throw new TransformException(BAD_REQUEST.value(), "Required request part 'file' is not present");
+            }
+            sourceFile = createSourceFile(request, sourceMultipartFile);
+            sourceFilename = sourceMultipartFile.getOriginalFilename();
+        }
+        else
+        {
+            sourceFile = getSourceFileFromDirectUrl(directUrl);
+            sourceFilename = sourceFile.getName();
+        }
+
+        final String targetFilename = createTargetFileName(sourceFilename, targetExtension);
         getProbeTestTransform().incrementTransformerCount();
-        final File sourceFile = createSourceFile(request, sourceMultipartFile);
         final File targetFile = createTargetFile(request, targetFilename);
 
         Map<String, String> transformOptions = getTransformOptions(requestParameters);
@@ -184,6 +210,25 @@ public abstract class AbstractTransformerController implements TransformControll
         time += LogEntry.addDelay(testDelay);
         getProbeTestTransform().recordTransformTime(time);
         return body;
+    }
+
+    private File getSourceFileFromDirectUrl(String directUrl)
+    {
+        File sourceFile = createTempFile("tmp", ".tmp");
+        try
+        {
+            FileUtils.copyURLToFile(new URL(directUrl), sourceFile);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new TransformException(BAD_REQUEST.value(), "Direct Access Url is invalid.", e);
+        }
+        catch (IOException e)
+        {
+            throw new TransformException(BAD_REQUEST.value(), "Direct Access Url not found.", e);
+        }
+
+        return sourceFile;
     }
 
     protected Map<String, String> getTransformOptions(Map<String, String> requestParameters)
@@ -204,7 +249,7 @@ public abstract class AbstractTransformerController implements TransformControll
      * @param timeout Transformation timeout
      * @return A transformation reply
      */
-    @PostMapping(value = "/transform", produces = APPLICATION_JSON_VALUE)
+    @PostMapping(value = ENDPOINT_TRANSFORM, produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<TransformReply> transform(@RequestBody TransformRequest request,
         @RequestParam(value = "timeout", required = false) Long timeout)
@@ -240,7 +285,15 @@ public abstract class AbstractTransformerController implements TransformControll
         File sourceFile;
         try
         {
-            sourceFile = loadSourceFile(request.getSourceReference(), request.getSourceExtension());
+            final String directUrl = request.getTransformRequestOptions().getOrDefault(DIRECT_ACCESS_URL, "");
+            if (directUrl.isBlank())
+            {
+                sourceFile = loadSourceFile(request.getSourceReference(), request.getSourceExtension());
+            }
+            else
+            {
+                sourceFile = getSourceFileFromDirectUrl(directUrl);
+            }
         }
         catch (TransformException e)
         {
@@ -280,7 +333,7 @@ public abstract class AbstractTransformerController implements TransformControll
         {
             String targetMimetype = request.getTargetMediaType();
             String sourceMimetype = request.getSourceMediaType();
-            Map<String, String> transformOptions = request.getTransformRequestOptions();
+            Map<String, String> transformOptions = getTransformOptions(request.getTransformRequestOptions());
             transformerDebug.logOptions(request);
             String transformName = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
             transformImpl(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);

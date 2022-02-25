@@ -13,7 +13,7 @@ Contains the common transformer (T-Engine) code, plus a few actual implementatio
  
 ### Documentation
 
-In addition to the sub-projects (such as `alfresco-transformer-base` README above) some additional documentation can be found in:
+In addition to the subprojects (such as `alfresco-transformer-base` README above) some additional documentation can be found in:
 
 * [this project's docs](docs) folder
 * [ACS Packaging docs](https://github.com/Alfresco/acs-packaging/tree/master/docs) folder
@@ -68,7 +68,7 @@ You can find examples of using Core AIO in the reference ACS Deployment for Dock
 * [ACS Community](https://github.com/Alfresco/acs-deployment/blob/master/docker-compose/community-docker-compose.yml)
 * [ACS Enterprise](https://github.com/Alfresco/acs-deployment/blob/master/docker-compose/docker-compose.yml)
 
-You can find examples of using the indivudal T-Engines in the reference ACS Deployment for Helm / Kubernetes:
+You can find examples of using the individual T-Engines in the reference ACS Deployment for Helm / Kubernetes:
 * [ACS Community](https://github.com/Alfresco/acs-deployment/blob/master/helm/alfresco-content-services/community_values.yaml)
 * [ACS Enterprise](https://github.com/Alfresco/acs-deployment/blob/master/helm/alfresco-content-services/values.yaml)
 

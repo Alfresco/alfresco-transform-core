@@ -27,6 +27,7 @@
 package org.alfresco.transformer;
 
 import static java.nio.file.Files.readAllBytes;
+import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.alfresco.transformer.executors.Tika.ARCHIVE;
 import static org.alfresco.transformer.executors.Tika.CSV;
 import static org.alfresco.transformer.executors.Tika.DOC;
@@ -152,6 +153,8 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     {
         sourceExtension = "pdf";
         targetExtension = "txt";
+        sourceMimetype = MIMETYPE_PDF;
+        targetMimetype = MIMETYPE_TEXT_PLAIN;
     }
 
     @Override
@@ -249,9 +252,9 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
 
         System.out.println("Test " + transform + " " + sourceExtension + " to " + targetExtension);
         MockHttpServletRequestBuilder requestBuilder = includeContents == null
-                                                       ? mockMvcRequest("/transform", sourceFile,
+                                                       ? mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile,
             "targetExtension", this.targetExtension)
-                                                       : mockMvcRequest("/transform", sourceFile,
+                                                       : mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile,
             "targetExtension", this.targetExtension, INCLUDE_CONTENTS, includeContents.toString());
         MvcResult result = mockMvc.perform(requestBuilder)
                                   .andExpect(status().is(OK.value()))
@@ -368,7 +371,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         targetEncoding = "rubbish";
         mockMvc.perform(
-            mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension))
+            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
                .andExpect(status().is(INTERNAL_SERVER_ERROR.value()));
     }
 
@@ -553,7 +556,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
                  "\"{http://www.alfresco.org/model/content/1.0}created\":\"created1\"}";
 
         MockHttpServletRequestBuilder requestBuilder =
-                super.mockMvcRequest("/transform", sourceFile,
+                super.mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile,
                         "targetExtension", XSLX,
                         "metadata", metadata,
                         "targetMimetype", MIMETYPE_METADATA_EMBED,
@@ -583,7 +586,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
     {
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         mockMvc.perform(
-            mockMvcRequest("/transform", sourceFile, "targetExtension", targetExtension).param(
+            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension).param(
                 NOT_EXTRACT_BOOKMARKS_TEXT, "true"))
                .andExpect(status().is(OK.value()))
                .andExpect(header().string("Content-Disposition",
@@ -628,7 +631,7 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         String tr = objectMapper.writeValueAsString(transformRequest);
         String transformationReplyAsString = mockMvc
             .perform(MockMvcRequestBuilders
-                .post("/transform")
+                .post(ENDPOINT_TRANSFORM)
                 .header(ACCEPT, APPLICATION_JSON_VALUE)
                 .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .content(tr))
@@ -642,5 +645,13 @@ public class TikaControllerTest extends AbstractTransformerControllerTest
         assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
         assertEquals(transformRequest.getClientData(), transformReply.getClientData());
         assertEquals(transformRequest.getSchema(), transformReply.getSchema());
+    }
+
+    @Test
+    @Override
+    public void httpTransformRequestUsingDirectAccessUrlTest() throws Exception
+    {
+        expectedTargetFileBytes = readTestFile(targetExtension);
+        super.httpTransformRequestUsingDirectAccessUrlTest();
     }
 }

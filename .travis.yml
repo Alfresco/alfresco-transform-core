@@ -21,7 +21,6 @@ branches:
     - master
     - /^SP\/.+$/
     - /^HF\/.+$/
-    - company_release
     - /^ATS-.*$/
     - /^ACS-.*$/
 
@@ -30,7 +29,6 @@ stages:
     if: branch = master
   - build and test
   - release
-  - company_release
 
 before_install: bash _ci/init.sh
 
@@ -47,6 +45,7 @@ jobs:
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: travis_wait 20 mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
       script: mvn -B -U clean deploy -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
+
 # TODO PoC for Video/Audio transforms (using FFmpeg)
     - name: "Transform Video/Audio (FFmpeg)"
       stage: build and test
@@ -54,54 +53,36 @@ jobs:
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: _ci/build.sh ffmpeg
       script: bash _ci/test.sh ffmpeg
-#    - name: "ImageMagick"
-#      stage: build and test
-#      if: branch NOT IN (company_release)
-#      before_script: travis_wait bash _ci/cache_artifacts.sh
-#      install: _ci/build.sh imagemagick
-#      script: bash _ci/test.sh imagemagick
-#    - name: "LibreOffice"
-#      stage: build and test
-#      if: branch NOT IN (company_release)
-#      before_script: travis_wait bash _ci/cache_artifacts.sh
-#      install: _ci/build.sh libreoffice
-#      script: bash _ci/test.sh libreoffice
-#    - name: "Transform Misc"
-#      stage: build and test
-#      if: branch NOT IN (company_release)
-#      before_script: travis_wait bash _ci/cache_artifacts.sh
-#      install: _ci/build.sh misc
-#      script: bash _ci/test.sh misc
-#    - name: "PDF Renderer"
-#      stage: build and test
-#      if: branch NOT IN (company_release)
-#      before_script: travis_wait bash _ci/cache_artifacts.sh
-#      install: _ci/build.sh pdf-renderer
-#      script: bash _ci/test.sh pdf-renderer
-#    - name: "Tika"
-#      stage: build and test
-#      if: branch NOT IN (company_release)
-#      before_script: travis_wait bash _ci/cache_artifacts.sh
-#      install: _ci/build.sh tika
-#      script: bash _ci/test.sh tika
-#    - name: "All in One Transformer"
-#      stage: build and test
-#      if: branch NOT IN (company_release)
-#      before_script: travis_wait bash _ci/cache_artifacts.sh
-#      install: _ci/build.sh full-build
-#      script:  travis_wait 30 bash _ci/test.sh aio-test
-    # - name: "WhiteSource"
-    #   stage: build and test
-    #   if: branch NOT IN (company_release)
-    #   script: bash _ci/whitesource.sh
-    # - name: "Source Clear Scan (SCA)"
-    #   if: branch NOT IN (company_release)
-    #   install: skip
-    #   script: travis_wait 30 bash _ci/sourceclear.sh
+
+    - name: "ImageMagick"
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh imagemagick
+      script: bash _ci/test.sh imagemagick
+    - name: "LibreOffice"
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh libreoffice
+      script: bash _ci/test.sh libreoffice
+    - name: "Transform Misc"
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh misc
+      script: bash _ci/test.sh misc
+    - name: "PDF Renderer"
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh pdf-renderer
+      script: bash _ci/test.sh pdf-renderer
+    - name: "Tika"
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh tika
+      script: bash _ci/test.sh tika
+    - name: "All in One Transformer"
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh full-build
+      script:  travis_wait 30 bash _ci/test.sh aio-test
+
 #    - name: "Static Analysis (SAST)"
 #      stage: build and test
 # TODO ATS-721: comment out until it is possible to run concurrent SAST scans
-#    if: branch NOT IN (company_release) AND type != pull_request
+#    if: type != pull_request
 #      if: branch = master AND type != pull_request
 #      before_install:
 #      - bash _ci/static_analysis_init.sh
@@ -113,34 +94,3 @@ jobs:
       if: commit_message ~= /\[trigger release\]/ AND branch ~= /^(master|SP\/.+|HF\/.+)$/
       before_script: travis_wait bash _ci/cache_artifacts.sh
       script: travis_wait 55 bash _ci/release.sh
-      before_deploy: source _ci/prepare_staging_deploy.sh
-      deploy:
-        provider: s3
-        access_key_id: "${STAGING_AWS_ACCESS_KEY}"
-        secret_access_key: "${STAGING_AWS_SECRET_KEY}"
-        bucket: "alfresco-artefacts-staging"
-        skip_cleanup: true
-        region: "eu-west-1"
-        local_dir: "deploy_dir"
-        upload-dir: "enterprise/AlfrescoTransformServices/TransformEngines/${VERSION}"
-        on:
-          all_branches: true
-
-    - name: "Company Release"
-      stage: company_release
-      if: branch = company_release
-      before_install: bash _ci/init.sh
-      install: echo "NoOp"
-      script: echo "NoOp"
-      before_deploy: source _ci/prepare_release_deploy.sh
-      deploy:
-        provider: s3
-        access_key_id: "${RELEASE_AWS_ACCESS_KEY}"
-        secret_access_key: "${RELEASE_AWS_SECRET_KEY}"
-        bucket: "eu.dl.alfresco.com"
-        skip_cleanup: true
-        region: "eu-west-1"
-        local_dir: "deploy_dir"
-        upload-dir: "release/enterprise/AlfrescoTransformServices/TransformEngines/${VERSION}"
-        on:
-          branch: company_release
