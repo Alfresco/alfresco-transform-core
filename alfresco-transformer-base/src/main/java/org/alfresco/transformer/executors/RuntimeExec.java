@@ -648,7 +648,7 @@ public class RuntimeExec
         }
         logger.debug("Result: " + result.toString());
 
-        // close output stream (connected to input stream of native subprocess) 
+        // close output stream (connected to input stream of native subprocess)
     }
 
     /**
@@ -983,4 +983,3 @@ public class RuntimeExec
         }
     }
 }
-

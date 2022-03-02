@@ -62,10 +62,10 @@ import static org.alfresco.transformer.executors.Tika.TARGET_MIMETYPE;
 public class TikaJavaExecutor implements JavaExecutor
 {
     private boolean notExtractBookmarksTextDefault;
-    
+
     private static final String ID = "tika";
 
-    public static final String LICENCE = 
+    public static final String LICENCE =
         "This transformer uses Tika from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt\n" +
         "This transformer uses ExifTool by Phil Harvey. See license at https://exiftool.org/#license. or in /Perl-Artistic-License.txt";
 
@@ -101,7 +101,7 @@ public class TikaJavaExecutor implements JavaExecutor
         }
     }
 
-    public TikaJavaExecutor() 
+    public TikaJavaExecutor()
     {
         this(false);
     }

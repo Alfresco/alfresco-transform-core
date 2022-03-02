@@ -56,7 +56,7 @@ public class AlfrescoPdfRendererTransformationIT
 
     private static final Map<String, TestFileInfo> TEST_FILES = Stream.of(
         testFile("application/pdf","pdf","quick.pdf"),
-        testFile("application/illustrator","ai","quickCS3.ai")  ,      
+        testFile("application/illustrator","ai","quickCS3.ai")  ,
         testFile("application/illustrator","ai","quickCS5.ai")
     ).collect(toMap(TestFileInfo::getPath, identity()));
 

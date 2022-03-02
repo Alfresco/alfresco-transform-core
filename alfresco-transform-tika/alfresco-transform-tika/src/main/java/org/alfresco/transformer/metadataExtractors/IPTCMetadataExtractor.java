@@ -44,35 +44,35 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
 {
 
     private static final Logger logger = LoggerFactory.getLogger(IPTCMetadataExtractor.class);
-    
+
     private static Set<String> IPTC_DATE_KEYS = Set.of("XMP-photoshop:DateCreated", "XMP-iptcExt:ArtworkDateCreated");
 
     private static final Pattern YEAR_IPTC = Pattern.compile("(\\d{4}[:|-]\\d{2}[:|-]\\d{2})");
 
     private ExifToolParser parser;
 
-    public IPTCMetadataExtractor() 
+    public IPTCMetadataExtractor()
     {
         super(logger);
     }
 
     @Override
-    protected Parser getParser() 
+    protected Parser getParser()
     {
         if (this.parser == null) {
             this.parser = new ExifToolParser();
         }
-        return this.parser;  
+        return this.parser;
     }
 
     /**
-     * Because some of the mimetypes that IPTCMetadataExtractor now parse, were previously handled 
-     * by TikaAutoMetadataExtractor we call the TikaAutoMetadataExtractor.extractSpecific method to 
+     * Because some of the mimetypes that IPTCMetadataExtractor now parse, were previously handled
+     * by TikaAutoMetadataExtractor we call the TikaAutoMetadataExtractor.extractSpecific method to
      * ensure that the returned properties contains the expected entries.
      */
     @Override
     protected Map<String, Serializable> extractSpecific(Metadata metadata, Map<String, Serializable> properties,
-            Map<String, String> headers) 
+            Map<String, String> headers)
     {
         properties = new TikaAutoMetadataExtractor().extractSpecific(metadata, properties, headers);
         ExifToolParser etParser = (ExifToolParser)this.getParser();
@@ -109,7 +109,7 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
 
     /**
      * Converts a date or date time strings into Iso8601 format <p>
-     * 
+     *
      * @param dateStrings
      * @return dateStrings in Iso8601 format
      * @see #iptcToIso8601DateString
@@ -139,7 +139,7 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
      * @param dateStr
      * @return dateStr in Iso8601 format
      */
-    protected String iptcToIso8601DateString(String dateStr) 
+    protected String iptcToIso8601DateString(String dateStr)
     {
         char timeSeparator = 'T';
         Matcher yearMatcher = YEAR_IPTC.matcher(dateStr);
@@ -147,7 +147,7 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
         {
             String year = yearMatcher.group(1);
             dateStr = yearMatcher.replaceFirst(year.replaceAll(":", "-"));
-            if (dateStr.length()>year.length() && dateStr.charAt(year.length())!=timeSeparator) 
+            if (dateStr.length()>year.length() && dateStr.charAt(year.length())!=timeSeparator)
             {
                 dateStr = dateStr.replace(dateStr.charAt(year.length()), timeSeparator);
             }

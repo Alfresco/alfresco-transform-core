@@ -3,22 +3,22 @@ info:
   description: |
     **Alfresco Transform Engines REST API**
 
-    Transform Request & Response API to allow a source file to be transformed into a 
-    target file, given a set of transform options. 
-    
+    Transform Request & Response API to allow a source file to be transformed into a
+    target file, given a set of transform options.
+
     The new JSON-based Transform Engines API is used by the Alfresco Transform Service (ATS).
-    ATS provides an independently-scalable transform service, initially used by ACS 
+    ATS provides an independently-scalable transform service, initially used by ACS
     Content Repository, as part of the overall Alfresco Digital Business Platform (DBP).
-    
+
     Note: Each kind of Transform Engine implements this Transform Engines API, including:
-    
+
     * ImageMagick
     * LibreOffice
     * PDF Renderer
     * Tika
-    
+
     In the future, this Transform Engines API may form the basis for adding custom Transform Engines.
-    
+
   version: '1'
   title: Alfresco Transform Engines REST API
 basePath: /alfresco/api/-default-/private/transformer/versions/1
@@ -34,22 +34,22 @@ paths:
       summary: Transform Engines API
       description: |
         **Note:** available with Alfresco Transform Engines 2.0 and newer versions.
-        
-        This endpoint supports both JSON and Multipart. The JSON API is used within the 
-        Alfresco Transform Service (eg. ACS 6.1). The Multipart API remains for backwards 
+
+        This endpoint supports both JSON and Multipart. The JSON API is used within the
+        Alfresco Transform Service (eg. ACS 6.1). The Multipart API remains for backwards
         compatibility (eg. ACS 6.0).
-        
+
         **Using JSON (application/json -> application/json)**
-        
-        The ACS Content Repository 6.1 (or higher) provides the option to offload 
+
+        The ACS Content Repository 6.1 (or higher) provides the option to offload
         supported transformations to the Alfresco Transform Service.
-         
-        The JSON API is used within the Alfresco Transform Service. It relies on the 
-        source and target files being stored and retrieved via the Alfresco Shared File 
-        Store (see also [alfresco-sfs.yaml](https://github.com/Alfresco/alfresco-shared-file-store/blob/master/docs/api-definitions/alfresco-sfs.yaml)).       
-        
+
+        The JSON API is used within the Alfresco Transform Service. It relies on the
+        source and target files being stored and retrieved via the Alfresco Shared File
+        Store (see also [alfresco-sfs.yaml](https://github.com/Alfresco/alfresco-shared-file-store/blob/master/docs/api-definitions/alfresco-sfs.yaml)).
+
         Here's a pseudo-example transform request:
-        
+
         ```JSON
         {
           "schema": 1,
@@ -68,9 +68,9 @@ paths:
           }
         }
         ```
-        
+
         Here's a pseudo-example response of a successful transform:
-        
+
         ```JSON
         {
           "schema": 1,
@@ -81,9 +81,9 @@ paths:
           "targetReference": "5bc81e48-e17a-4727-bd1c-3a279aa6b421"
         }
         ```
-        
+
         Here's a pseudo-example response of a failed transform:
-        
+
         ```JSON
         {
           "schema": 1,
@@ -94,21 +94,21 @@ paths:
           "sourceReference": "598387b8-d85d-4557-816e-50f44c969e04"
         }
         ```
-        
+
         **Using Multipart (multipart/form-data -> application/octet-stream)**
-        
-        The Multipart API remains for backwards compatibility (eg. ACS 6.0). It requires 
-        the source file to be uploaded via multipart/form-data (along with transformation 
+
+        The Multipart API remains for backwards compatibility (eg. ACS 6.0). It requires
+        the source file to be uploaded via multipart/form-data (along with transformation
         options). The target file is returned as a binary response (application/octet-steam).
-        
+
       operationId: transformOperation
       parameters:
         - in: body
           name: transformRequest
-          description: The Transform Request including source reference and transform options 
+          description: The Transform Request including source reference and transform options
           required: true
           schema:
-            $ref: '#/definitions/transformRequest'      
+            $ref: '#/definitions/transformRequest'
       consumes:
         - application/json
         - multipart/form-data
@@ -194,7 +194,7 @@ definitions:
       transformRequestOptions:
         type: object
         additionalProperties:
-          type: string        
+          type: string
   transformReply:
     type: object
     properties:

@@ -164,38 +164,38 @@ public class ImageMagickTransformationIT {
             .build();
 
     private static final Map<String, TestFileInfo> TEST_FILES = Stream.of(
-            testFile(MIMETYPE_IMAGE_BMP, "bmp", "quick.bmp"), 
+            testFile(MIMETYPE_IMAGE_BMP, "bmp", "quick.bmp"),
             testFile(MIMETYPE_APPLICATION_EPS, "eps", "quick.eps"),
-            testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"), 
+            testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"),
             testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quick.jpg"),
-            testFile(MIMETYPE_IMAGE_PBM, "pbm", "quick.pbm"), 
+            testFile(MIMETYPE_IMAGE_PBM, "pbm", "quick.pbm"),
             testFile(MIMETYPE_IMAGE_PGM, "pgm", "quick.pgm"),
-            testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"), 
+            testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"),
             testFile(MIMETYPE_IMAGE_PNM, "pnm", "quick.pnm"),
-            testFile(MIMETYPE_IMAGE_PPM, "ppm", "quick.ppm"), 
+            testFile(MIMETYPE_IMAGE_PPM, "ppm", "quick.ppm"),
             testFile(MIMETYPE_IMAGE_XBM, "xbm", "quick.xbm"),
-            testFile(MIMETYPE_IMAGE_XPM, "xpm", "quick.xpm"), 
+            testFile(MIMETYPE_IMAGE_XPM, "xpm", "quick.xpm"),
             testFile(MIMETYPE_IMAGE_PSD, "psd", "quick.psd"),
-            testFile(MIMETYPE_IMAGE_TIFF, "tiff", "quick.tiff"), 
+            testFile(MIMETYPE_IMAGE_TIFF, "tiff", "quick.tiff"),
             testFile(MIMETYPE_IMAGE_XWD, "xwd", "quick.xwd")
         ).collect(toMap(TestFileInfo::getPath, identity()));
 
     public static Stream<Pair<TestFileInfo, Pair<String,String>>> engineTransformations() {
         return Stream
             .of(
-                allTargets("quick.bmp", targetExtensions), 
+                allTargets("quick.bmp", targetExtensions),
                 allTargets("quick.eps", targetExtensions),
-                allTargets("quick.gif", targetExtensions), 
+                allTargets("quick.gif", targetExtensions),
                 allTargets("quick.jpg", targetExtensions),
-                allTargets("quick.pbm", targetExtensions), 
+                allTargets("quick.pbm", targetExtensions),
                 allTargets("quick.pgm", targetExtensions),
-                allTargets("quick.png", targetExtensions), 
+                allTargets("quick.png", targetExtensions),
                 allTargets("quick.pnm", targetExtensions),
-                allTargets("quick.ppm", targetExtensions), 
+                allTargets("quick.ppm", targetExtensions),
                 allTargets("quick.psd", targetExtensionsForPSD),
-                allTargets("quick.tiff", targetExtensions), 
+                allTargets("quick.tiff", targetExtensions),
                 allTargets("quick.xbm", targetExtensions),
-                allTargets("quick.xpm", targetExtensions), 
+                allTargets("quick.xpm", targetExtensions),
                 allTargets("quick.xwd", targetExtensions)
             ).flatMap(identity());
     }
@@ -208,7 +208,7 @@ public class ImageMagickTransformationIT {
         String targetExtension = entry.getRight().getLeft();
         String sourceMimetype = entry.getLeft().getMimeType();
         String targetMimetype = entry.getRight().getRight();
-        
+
         final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
             sourceFile, sourceMimetype, targetMimetype, targetExtension);
         try
@@ -238,5 +238,5 @@ public class ImageMagickTransformationIT {
             .map(k -> Pair.of(TEST_FILES.get(sourceFile), k));
     }
 
-    
+
 }

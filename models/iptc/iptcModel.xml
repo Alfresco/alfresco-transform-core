@@ -28,7 +28,7 @@
          <title>IPTC</title>
          <properties>
 
-         	<!-- Start of IPTC Core -->
+            <!-- Start of IPTC Core -->
             <property name="photoshop:City">
                <type>d:text</type>
                <index enabled="true">
@@ -209,7 +209,7 @@
                   <tokenised>false</tokenised>
                </index>
             </property>
-            
+
             <!-- Deprecated by IPTC
             <property name="photoshop:Urgency">
                <type>d:text</type>
@@ -225,7 +225,7 @@
             <!-- End of IPTC Core -->
 
             <!-- Start of IPTC Ext -->
-			<property name="Iptc4xmpExt:AddlModelInfo">
+            <property name="Iptc4xmpExt:AddlModelInfo">
                <type>d:text</type>
             </property>
             <property name="Iptc4xmpExt:OrganisationInImageCode">
@@ -266,7 +266,7 @@
                   <tokenised>false</tokenised>
                </index>
             </property>
-            <!-- Deprecated by IPTC 
+            <!-- Deprecated by IPTC
             <property name="Iptc4xmpExt:DigitalSourcefileType">
                <type>d:text</type>
             </property>
@@ -615,7 +615,7 @@
 
          </properties>
       </aspect>
-      
+
    </aspects>
 
 </model>

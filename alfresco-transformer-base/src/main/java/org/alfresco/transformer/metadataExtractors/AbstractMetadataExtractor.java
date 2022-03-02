@@ -86,7 +86,7 @@ import java.util.TreeMap;
  *
  * The transform results in a new version of supplied source file that contains the metadata supplied in the transform
  * options.
- * 
+ *
  * @author Jesper Steen Møller
  * @author Derek Hulley
  * @author adavis

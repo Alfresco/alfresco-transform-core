@@ -33,10 +33,10 @@ import org.junit.jupiter.api.Test;
 public class ExifToolParserTest {
 
     ExifToolParser exifToolParser = new ExifToolParser();
-    
+
     @Test
     public void testFindSeparator() {
-        
+
         String testCommand = "env FOO=${OUTPUT} exiftool -args -G1 " + ExifToolParser.SEPARATOR_SETTING
                 + " \"|||\" ${INPUT}";
         String expected = "|||";

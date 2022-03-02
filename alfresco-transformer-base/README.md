@@ -38,8 +38,8 @@ src/main/java/org/alfresco/transformer/Application.java
         <tr><td><div style="text-align:right">abc:height</div></td><td><input type="text" name="height" value="" /></td></tr>
         <tr><td><div style="text-align:right">timeout</div></td><td><input type="text" name="timeout" value="" /></td></tr>
         <tr><td></td><td><input type="submit" value="Transform" /></td></tr>
-	  </table>
-	</form>
+      </table>
+    </form>
   </div>
   <div>
     <a href="/log">Log entries</a>
@@ -158,22 +158,22 @@ Transform requests are handled by the *AbstractTransformerController*, but are e
 **Example JSON request body**
 ```javascript
 var transformRequest = {
-	"requestId": "1",
-	"sourceReference": "2f9ed237-c734-4366-8c8b-6001819169a4",
-	"sourceMediaType": "application/pdf",
-	"sourceSize": 123456,
-	"sourceExtension": "pdf",
-	"targetMediaType": "text/plain",
-	"targetExtension": "txt",
-	"clientType": "ACS",
-	"clientData": "Yo No Soy Marinero, Soy Capitan, Soy Capitan!",
-	"schema": 1,
-	"transformRequestOptions": {
-		"targetMimetype": "text/plain",
-		"targetEncoding": "UTF-8",
-		"abc:width": "120",
-		"abc:height": "200"
-	}
+    "requestId": "1",
+    "sourceReference": "2f9ed237-c734-4366-8c8b-6001819169a4",
+    "sourceMediaType": "application/pdf",
+    "sourceSize": 123456,
+    "sourceExtension": "pdf",
+    "targetMediaType": "text/plain",
+    "targetExtension": "txt",
+    "clientType": "ACS",
+    "clientData": "Yo No Soy Marinero, Soy Capitan, Soy Capitan!",
+    "schema": 1,
+    "transformRequestOptions": {
+        "targetMimetype": "text/plain",
+        "targetEncoding": "UTF-8",
+        "abc:width": "120",
+        "abc:height": "200"
+    }
 }
 ```
 
@@ -230,4 +230,3 @@ The build plan is available in [TravisCI](https://travis-ci.com/Alfresco/alfresc
 
 Please use [this guide](https://github.com/Alfresco/alfresco-repository/blob/master/CONTRIBUTING.md)
 to make a contribution to the project.
-

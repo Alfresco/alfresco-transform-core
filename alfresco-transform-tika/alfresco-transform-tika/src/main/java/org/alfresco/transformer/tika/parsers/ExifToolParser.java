@@ -65,7 +65,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 public class ExifToolParser extends ExternalParser {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(ExifToolParser.class);
 
     private static final String EXIFTOOL_PARSER_CONFIG = "parsers/external/config/exiftool-parser.xml";
@@ -138,7 +138,7 @@ public class ExifToolParser extends ExternalParser {
     }
 
     /**
-     * Adapted from {@link org.apache.tika.parser.external.ExternalParser} 
+     * Adapted from {@link org.apache.tika.parser.external.ExternalParser}
      * due to errors attempting to {@link #extractMetadata} from the errorStream in original implementation.  <p>
      * Executes the configured external command and passes the given document
      *  stream as a simple XHTML document to the given SAX content handler.
@@ -155,9 +155,9 @@ public class ExifToolParser extends ExternalParser {
             TikaInputStream tis = TikaInputStream.get(stream, tmp);
             if (this.getSupportedTypes().contains(mediaType)) {
                 parse(tis, xhtml, metadata, tmp);
-            }       
+            }
             switch (mediaType.getType()+"/"+mediaType.getSubtype()) {
-                case MIMETYPE_IMAGE_JPEG: 
+                case MIMETYPE_IMAGE_JPEG:
                     parseAdditional(new JpegParser(), tis, handler, metadata, context, mediaType);
                     break;
                 case MIMETYPE_IMAGE_TIFF:

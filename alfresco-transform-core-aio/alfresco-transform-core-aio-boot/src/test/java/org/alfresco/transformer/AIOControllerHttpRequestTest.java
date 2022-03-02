@@ -34,13 +34,13 @@ public class AIOControllerHttpRequestTest extends  AbstractHttpRequestTest
 {
 
     @Override
-    protected String getTransformerName() 
+    protected String getTransformerName()
     {
         return "All in One Transformer";
     }
 
     @Override
-    protected String getSourceExtension() 
+    protected String getSourceExtension()
     {
         // Currently using same extension as ImageMagick tests
         return "jpg";

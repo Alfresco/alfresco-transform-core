@@ -85,7 +85,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * Test the ImageMagickController without a server.
  * Super class includes tests for the AbstractTransformerController.
  */
-// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in the application context, 
+// Specifying class for @WebMvcTest() will break AIO tests, without specifying it will use all controllers in the application context,
 // currently only ImageMagickController.class
 @WebMvcTest()
 public class ImageMagickControllerTest extends AbstractTransformerControllerTest
@@ -173,7 +173,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                 assertNotNull(actualSource);
                 assertNotNull(actualTarget);
                 if (expectedSourceSuffix != null) {
-                    assertTrue(actualSource.endsWith(expectedSourceSuffix), 
+                    assertTrue(actualSource.endsWith(expectedSourceSuffix),
                         "The source file \"" + actualSource + "\" should have ended in \"" + expectedSourceSuffix + "\"");
                     actualSource = actualSource.substring(0, actualSource.length() - expectedSourceSuffix.length());
                 }
@@ -304,7 +304,7 @@ public class ImageMagickControllerTest extends AbstractTransformerControllerTest
                 .param("targetExtension", targetExtension)
                 .param("targetMimetype", targetMimetype)
                 .param("sourceMimetype", sourceMimetype)
-                
+
                 .param("startPage", "2")
                 .param("endPage", "3")
 

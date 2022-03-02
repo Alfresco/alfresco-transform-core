@@ -115,7 +115,7 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 testFile(MIMETYPE_IMAGE_RAW_RW2, "rw2", "20140629_145035_Flower.RW2"),
                 testFile(MIMETYPE_IMAGE_RAW_NEF, "nef", "20150408_074941_Bush.NEF"),
                 testFile(MIMETYPE_IMAGE_RAW_RAF, "raf", "20160502_190928_London_Underground.RAF"),
-                
+
                 // DWGMetadataExtractor
                 testFile(MIMETYPE_APP_DWG, "dwg", "quick2010CustomProps.dwg"),
 

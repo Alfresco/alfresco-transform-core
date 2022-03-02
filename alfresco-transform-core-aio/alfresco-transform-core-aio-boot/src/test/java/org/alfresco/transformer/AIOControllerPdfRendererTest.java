@@ -78,7 +78,7 @@ public class AIOControllerPdfRendererTest extends AlfrescoPdfRendererControllerT
         // just test that we are actually testing against the AIOController (instead of MiscController)
         assertTrue(controller instanceof AIOController, "Wrong controller wired for test");
     }
-    
+
     @Test
     @Override
     public void testGetTransformConfigInfo()
@@ -108,7 +108,7 @@ public class AIOControllerPdfRendererTest extends AlfrescoPdfRendererControllerT
         // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 
     }
-    
+
     @Test
     @Override
     public void testGetInfoFromConfigWithNoTransformOptions()

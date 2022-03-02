@@ -18,7 +18,7 @@ COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz && \
     tar xf alfresco-pdf-renderer-linux.tgz -C /usr/bin && \
-	rm -f alfresco-pdf-renderer-linux.tgz && \
+    rm -f alfresco-pdf-renderer-linux.tgz && \
     yum clean all
 
 ADD target/generated-resources/licenses              /licenses

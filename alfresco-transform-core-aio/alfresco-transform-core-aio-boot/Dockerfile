@@ -43,7 +43,7 @@ RUN ln /usr/bin/alfresco-transform-core-aio-boot-${env.project_version}.jar /usr
     rm -rf libreoffice-dist-*linux.gz LibreOffice_*_Linux_x86-64_rpm && \
     curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz && \
     tar xf alfresco-pdf-renderer-linux.tgz -C /usr/bin && \
-	rm -f alfresco-pdf-renderer-linux.tgz && \
+    rm -f alfresco-pdf-renderer-linux.tgz && \
     curl -s -S $EXIFTOOL_URL -o ${EXIFTOOL_FOLDER}.tgz && \
     tar xzf ${EXIFTOOL_FOLDER}.tgz && \
     yum -y install perl perl-ExtUtils-MakeMaker make && \
