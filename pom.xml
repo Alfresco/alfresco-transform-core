@@ -45,6 +45,8 @@
                 <module>alfresco-transformer-base</module>
                 <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick</module>
                 <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot</module>
+                <module>alfresco-transform-ffmpeg/alfresco-transform-ffmpeg</module>
+                <module>alfresco-transform-ffmpeg/alfresco-transform-ffmpeg-boot</module>
                 <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice</module>
                 <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice-boot</module>
                 <module>alfresco-transform-misc/alfresco-transform-misc</module>
@@ -69,6 +71,15 @@
                 <module>alfresco-transformer-base</module>
                 <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick</module>
                 <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot</module>
+            </modules>
+        </profile>
+        <!-- TODO PoC for Video/Audio transforms (using FFmpeg) -->
+        <profile>
+            <id>ffmpeg</id>
+            <modules>
+                <module>alfresco-transformer-base</module>
+                <module>alfresco-transform-ffmpeg/alfresco-transform-ffmpeg</module>
+                <module>alfresco-transform-ffmpeg/alfresco-transform-ffmpeg-boot</module>
             </modules>
         </profile>
         <profile>
@@ -376,6 +387,7 @@
                             <LIBREOFFICE_TEMPLATE_PROFILE_DIR />
                             <LIBREOFFICE_IS_ENABLED>true</LIBREOFFICE_IS_ENABLED>
                             <PDF_RENDERER_EXE>/usr/bin/alfresco-pdf-renderer</PDF_RENDERER_EXE>
+                            <FFMPEG_EXE>/usr/bin/ffmpeg</FFMPEG_EXE>
                             <SERVER_PORT>8090</SERVER_PORT>
                             <buildDirectory>${project.build.directory}</buildDirectory>
                         </systemPropertyVariables>

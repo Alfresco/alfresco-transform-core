@@ -47,4 +47,12 @@ public interface RequestParamMap extends org.alfresco.transform.client.util.Requ
     String TARGET_EXTENSION         = "targetExtension";
     String TARGET_MIMETYPE          = "targetMimetype";
     String TEST_DELAY               = "testDelay";
+
+    // TODO PoC for FFmpeg - effectively target options (note: if we need specific source options, may need extra set)
+    String TIME_OFFSET             = "timeOffset";
+    String DURATION                = "duration";
+    String FRAMES_NUM              = "framesNum";
+    String FRAME_WIDTH             = "frameWidth";
+    String FRAME_HEIGHT            = "frameHeight";
+
 }

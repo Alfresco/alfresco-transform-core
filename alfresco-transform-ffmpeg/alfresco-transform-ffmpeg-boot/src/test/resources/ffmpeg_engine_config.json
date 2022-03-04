@@ -1,0 +1,24 @@
+{
+  "transformOptions": {
+    "ffmpegOptions": [
+      {"value": {"name": "timeOffset"}},
+      {"value": {"name": "duration"}}
+    ]
+  },
+  "transformers": [
+    {
+      "transformerName": "ffmpeg",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "video/mp4",                                  "targetMediaType": "video/avi" },
+        {"sourceMediaType": "video/mp4",                                  "targetMediaType": "audio/mpeg" },
+        {"sourceMediaType": "video/mp4",                                  "targetMediaType": "image/png" },
+        {"sourceMediaType": "video/mp4",                                  "targetMediaType": "image/jpeg" },
+        {"sourceMediaType": "video/mp4",                                  "targetMediaType": "image/gif" },
+        {"sourceMediaType": "video/quicktime",                            "targetMediaType": "video/mp4" }
+      ],
+      "transformOptions": [
+        "ffmpegOptions"
+      ]
+    }
+  ]
+}

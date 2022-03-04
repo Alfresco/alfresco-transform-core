@@ -1,0 +1,30 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+	<div>
+        <h2>Alfresco FFmpeg Test Transformation</h2>
+		<form method="POST" enctype="multipart/form-data" action="/transform">
+			<table>
+                <tr><td><div style="text-align:right">file *</div></td><td><input type="file" name="file" /></td></tr>
+                <tr><td><div style="text-align:right">targetExtension *</div></td><td><input type="text" name="targetExtension" value="" /></td></tr>
+
+				<tr><td><div style="text-align:right">timeOffset</div></td><td><input type="text" name="timeOffset" value="" />  (eg. S or HH:MM:SS)</td></tr>
+				<tr><td><div style="text-align:right">duration</div></td><td><input type="text" name="duration" value="" />  (eg. S or HH:MM:SS)</td></tr>
+
+				<tr><td><div style="text-align:right">frameWidth</div></td><td><input type="text" name="frameWidth" value="" /></td></tr>
+				<tr><td><div style="text-align:right">frameHeight</div></td><td><input type="text" name="frameHeight" value="" /></td></tr>
+
+				<tr><td><div style="text-align:right">timeout</div></td><td><input type="text" name="timeout" value="" /></td></tr>
+				<tr><td><div style="text-align:right">testDelay</div></td><td><input type="text" name="testDelay" value="" /></td></tr>
+
+				<tr><td></td><td><input type="submit" value="Transform" /></td></tr>
+			</table>
+		</form>
+	</div>
+
+    <div>
+        <a href="/log">Log entries</a>
+    </div>
+
+</body>
+</html>

@@ -39,12 +39,19 @@ jobs:
       install: skip
       script: travis_wait 30 bash _ci/source_clear.sh
 
-    - stage: Build and Test
-      name: "Core & Base Snapshot deployment" # This is to separate the snapshot deployment from the following jobs, to prevent duplication on nexus
+    - name: "Core & Base Snapshot deployment" # This is to separate the snapshot deployment from the following jobs, to prevent duplication on nexus
+      stage: build and test
       if: branch = master AND type != pull_request
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: travis_wait 20 mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
       script: mvn -B -U clean deploy -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
+
+# TODO PoC for Video/Audio transforms (using FFmpeg)
+    - name: "Transform Video/Audio (FFmpeg)"
+      before_script: travis_wait bash _ci/cache_artifacts.sh
+      install: _ci/build.sh ffmpeg
+      script: bash _ci/test.sh ffmpeg
+
     - name: "ImageMagick"
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: _ci/build.sh imagemagick
@@ -69,7 +76,9 @@ jobs:
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: _ci/build.sh full-build
       script:  travis_wait 30 bash _ci/test.sh aio-test
+
 #    - name: "Static Analysis (SAST)"
+#      stage: build and test
 # TODO ATS-721: comment out until it is possible to run concurrent SAST scans
 #    if: type != pull_request
 #      if: branch = master AND type != pull_request
