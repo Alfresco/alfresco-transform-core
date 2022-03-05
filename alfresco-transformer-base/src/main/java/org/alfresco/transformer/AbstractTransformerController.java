@@ -64,6 +64,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.joining;
 import static org.alfresco.transform.client.model.config.CoreVersionDecorator.setOrClearCoreVersion;
@@ -148,6 +149,8 @@ public abstract class AbstractTransformerController implements TransformControll
     @Autowired
     private TransformerDebug transformerDebug;
 
+    private AtomicInteger httpRequestCount = new AtomicInteger(1);
+
     @GetMapping(value = ENDPOINT_TRANSFORM_CONFIG)
     public ResponseEntity<TransformConfig> info(
             @RequestParam(value = CONFIG_VERSION, defaultValue = CONFIG_VERSION_DEFAULT) int configVersion)
@@ -202,14 +205,26 @@ public abstract class AbstractTransformerController implements TransformControll
 
         Map<String, String> transformOptions = getTransformOptions(requestParameters);
         String transformName = getTransformerName(sourceMimetype, targetMimetype, requestTransformName, sourceFile, transformOptions);
-        transformImpl(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+        String reference = "e"+Integer.toString(httpRequestCount.getAndIncrement());
+        transformerDebug.pushTransform(reference, sourceMimetype, targetMimetype, sourceFile, transformName);
+        transformerDebug.logOptions(reference, transformOptions);
+        try
+        {
+            transformImpl(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
 
-        final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
-        LogEntry.setTargetSize(targetFile.length());
-        long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
-        time += LogEntry.addDelay(testDelay);
-        getProbeTestTransform().recordTransformTime(time);
-        return body;
+            final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
+            LogEntry.setTargetSize(targetFile.length());
+            long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
+            time += LogEntry.addDelay(testDelay);
+            getProbeTestTransform().recordTransformTime(time);
+            transformerDebug.popTransform(reference, time);
+            return body;
+        }
+        catch (Throwable t)
+        {
+            transformerDebug.logFailure(reference, t.getMessage());
+            throw t;
+        }
     }
 
     private File getSourceFileFromDirectUrl(String directUrl)
