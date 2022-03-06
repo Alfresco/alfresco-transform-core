@@ -135,7 +135,7 @@ public abstract class AbstractTransformerController implements TransformControll
 
     // Request parameters that are not part of transform options
     public static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
-            TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, TEST_DELAY, TRANSFORM_NAME_PROPERTY);
+            TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, TEST_DELAY, TRANSFORM_NAME_PROPERTY, DIRECT_ACCESS_URL);
 
     @Autowired
     private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
@@ -205,9 +205,9 @@ public abstract class AbstractTransformerController implements TransformControll
 
         Map<String, String> transformOptions = getTransformOptions(requestParameters);
         String transformName = getTransformerName(sourceMimetype, targetMimetype, requestTransformName, sourceFile, transformOptions);
-        String reference = "e"+Integer.toString(httpRequestCount.getAndIncrement());
+        String reference = "e"+httpRequestCount.getAndIncrement();
         transformerDebug.pushTransform(reference, sourceMimetype, targetMimetype, sourceFile, transformName);
-        transformerDebug.logOptions(reference, transformOptions);
+        transformerDebug.logOptions(reference, requestParameters);
         try
         {
             transformImpl(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
