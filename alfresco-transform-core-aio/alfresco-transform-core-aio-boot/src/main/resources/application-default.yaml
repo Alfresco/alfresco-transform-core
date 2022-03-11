@@ -6,7 +6,7 @@ transform:
     pdfrenderer:
         exe: ${PDFRENDERER_EXE:/usr/bin/alfresco-pdf-renderer}
     libreoffice:
-        path: ${LIBREOFFICE_HOME:/opt/libreoffice7.0}
+        path: ${LIBREOFFICE_HOME:/opt/libreoffice7.2}
         maxTasksPerProcess: ${LIBREOFFICE_MAX_TASKS_PER_PROCESS:200}
         timeout: ${LIBREOFFICE_TIMEOUT:1200000}
         portNumbers: ${LIBREOFFICE_PORT_NUMBERS:8100}

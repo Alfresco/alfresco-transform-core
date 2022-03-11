@@ -4,9 +4,10 @@
 
 FROM alfresco/alfresco-base-java:jre11-centos7-202203071429
 
-ARG LIBREOFFICE_VERSION=7.0.6
+ARG LIBREOFFICE_VERSION=7.2.5
 
-ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz
+#ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz
+ENV LIBREOFFICE_RPM_URL=https://download.documentfoundation.org/libreoffice/stable/7.2.5/rpm/x86_64/LibreOffice_7.2.5_Linux_x86-64_rpm.tar.gz
 ENV JAVA_OPTS=""
 
 # Set default user information
