@@ -48,13 +48,14 @@ RUN ln /usr/bin/alfresco-transform-core-aio-boot-${env.project_version}.jar /usr
 	rm -f alfresco-pdf-renderer-linux.tgz && \
     curl -s -S $EXIFTOOL_URL -o ${EXIFTOOL_FOLDER}.tgz && \
     tar xzf ${EXIFTOOL_FOLDER}.tgz && \
-    yum -y install perl perl-ExtUtils-MakeMaker make && \
+    yum -y install perl && \
     (cd ./${EXIFTOOL_FOLDER} && \
     perl Makefile.PL && \
     make && \
     make test && \
     make install) && \
-    yum -y autoremove perl-ExtUtils-MakeMaker make && rm -rf ${EXIFTOOL_FOLDER} ${EXIFTOOL_FOLDER}.tgz && \
+    # yum -y autoremove make && \
+    rm -rf ${EXIFTOOL_FOLDER} ${EXIFTOOL_FOLDER}.tgz && \
     yum clean all
 
 ADD target/generated-resources/licenses              /licenses
