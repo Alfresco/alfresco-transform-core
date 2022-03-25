@@ -25,7 +25,7 @@
         <dependency.alfresco-transform-model.version>1.4.16</dependency.alfresco-transform-model.version>
         <dependency.activemq.version>5.16.4</dependency.activemq.version>
         <dependency.jackson.version>2.13.2</dependency.jackson.version>
-        <dependency.jackson-databind.version>${dependency.jackson.version}</dependency.jackson-databind.version>
+        <dependency.jackson-databind.version>2.13.2.1</dependency.jackson-databind.version>
         <dependency.junit.version>4.13.2</dependency.junit.version>
         <dependency.cxf.version>3.5.1</dependency.cxf.version>
         <dependency.tika.version>2.2.1</dependency.tika.version>
