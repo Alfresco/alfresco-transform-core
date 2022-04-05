@@ -22,7 +22,7 @@
         <dependency.pdfbox.version>2.0.25</dependency.pdfbox.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.12</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
-        <dependency.activemq.version>5.16.4</dependency.activemq.version>
+        <dependency.activemq.version>5.17.0</dependency.activemq.version>
         <dependency.jackson.version>2.13.2</dependency.jackson.version>
         <dependency.jackson-databind.version>2.13.2.2</dependency.jackson-databind.version>
         <dependency.junit.version>4.13.2</dependency.junit.version>
