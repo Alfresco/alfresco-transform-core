@@ -1,12 +1,16 @@
 ## Alfresco Transform Core
 [![Build Status](https://travis-ci.com/Alfresco/alfresco-transform-core.svg?branch=master)](https://travis-ci.com/Alfresco/alfresco-transform-core)
 
-Contains the common transformer (T-Engine) code, plus a few actual implementations.
+Contains the common transformer (T-Engine) code, plus a few implementations.
 
 ### Sub-projects
 
+* `alfresco-transform-model` - library packaged as a jar file which contains the data model of json
+ configuration files and messages sent between clients, T-Engines and T-Router. Also contains code to
+ work out which transform should be used for a combination of configuration files; see the sub-project's
+  [README](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-transform-model/README.md)
 * `alfresco-transformer-base` - library packaged as a jar file which contains code that is common
- to all the transformers; see the sub-project's
+  to all the transformers; see the sub-project's
   [README](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-transformer-base/README.md)
 * `alfresco-transform-<name>` - multiple T-Engines; each one of them builds both a SpringBoot fat jar
  and a [Docker image](https://github.com/Alfresco/alfresco-transform-core#docker)
@@ -37,6 +41,12 @@ The artifacts can be obtained by:
 * downloading from [Alfresco repository](https://artifacts.alfresco.com/nexus/content/groups/public)
 * getting as Maven dependency by adding the dependency to your pom file:
 ```xml
+<dependency>
+    <groupId>org.alfresco</groupId>
+    <artifactId>alfresco-transform-model</artifactId>
+    <version>version</version>
+</dependency>
+
 <dependency>
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transformer-base</artifactId>

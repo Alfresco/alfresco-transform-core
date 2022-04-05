@@ -24,7 +24,7 @@ Travis CI builds differ by branch:
   include the _Release_ stage;
   - PR builds where the latest commit contains the `[trigger release]` tag will execute dry runs 
   of the release jobs (no artifacts will be published until the PR is actually merged).
-* `ATS-*` branches:
+* `ATS-*` / `ACS-*` branches:
   - regular builds which include only the _Build_ and _Tests_ stages;
 
 All other branches are ignored.
