@@ -126,6 +126,6 @@ public class  ImageMagickController extends AbstractTransformerController
     public void transformImpl(String transformName, String sourceMimetype, String targetMimetype,
                                  Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
-        commandExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+        commandExecutor.transformExtractOrEmbed(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }

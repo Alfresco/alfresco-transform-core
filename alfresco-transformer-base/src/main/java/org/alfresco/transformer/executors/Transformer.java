@@ -51,12 +51,12 @@ public interface Transformer
      */
     String getTransformerId();
 
-    default void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                           File sourceFile, File targetFile) throws TransformException
+    default void transformExtractOrEmbed(String transformName, String sourceMimetype, String targetMimetype,
+                                         Map<String, String> transformOptions,
+                                         File sourceFile, File targetFile) throws TransformException
     {
         try
         {
-            final String transformName = transformOptions.remove(TRANSFORM_NAME_PARAMETER);
             if (MIMETYPE_METADATA_EXTRACT.equals(targetMimetype))
             {
                 extractMetadata(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);

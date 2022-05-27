@@ -40,7 +40,6 @@ import java.util.Map;
 import static org.alfresco.transformer.executors.Tika.PDF_BOX;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_PDF;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 
 /**
  * Controller for the Docker based Tika transformers.
@@ -107,7 +106,6 @@ public class TikaController extends AbstractTransformerController
     public void transformImpl(String transformName, String sourceMimetype, String targetMimetype,
                                  Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
-        transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
-        javaExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+        javaExecutor.transformExtractOrEmbed(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }

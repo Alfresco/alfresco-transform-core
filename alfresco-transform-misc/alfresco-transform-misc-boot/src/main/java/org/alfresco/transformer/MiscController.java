@@ -83,7 +83,6 @@ public class MiscController extends AbstractTransformerController
     public void transformImpl(String transformName, String sourceMimetype, String targetMimetype,
                                  Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
-        transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
-        transformer.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+        transformer.transformExtractOrEmbed(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }

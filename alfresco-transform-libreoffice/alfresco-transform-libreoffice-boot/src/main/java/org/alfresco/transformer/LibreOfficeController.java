@@ -128,6 +128,6 @@ public class LibreOfficeController extends AbstractTransformerController
     public void transformImpl(String transformName, String sourceMimetype, String targetMimetype,
                                  Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
-        javaExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+        javaExecutor.transformExtractOrEmbed(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }
