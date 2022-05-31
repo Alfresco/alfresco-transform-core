@@ -4,7 +4,7 @@ package org.alfresco.transformer.executors;
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -52,11 +52,17 @@ public interface Transformer
     String getTransformerId();
 
     default void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                           File sourceFile, File targetFile) throws TransformException
+                           File sourceFile, File targetFile) throws TransformException {
+        final String transformName = transformOptions.remove(TRANSFORM_NAME_PARAMETER);
+        transformExtractOrEmbed(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+    }
+
+    default void transformExtractOrEmbed(String transformName, String sourceMimetype, String targetMimetype,
+                                         Map<String, String> transformOptions,
+                                         File sourceFile, File targetFile) throws TransformException
     {
         try
         {
-            final String transformName = transformOptions.remove(TRANSFORM_NAME_PARAMETER);
             if (MIMETYPE_METADATA_EXTRACT.equals(targetMimetype))
             {
                 extractMetadata(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);

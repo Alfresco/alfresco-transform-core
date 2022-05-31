@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -126,6 +126,6 @@ public class  ImageMagickController extends AbstractTransformerController
     public void transformImpl(String transformName, String sourceMimetype, String targetMimetype,
                                  Map<String, String> transformOptions, File sourceFile, File targetFile)
     {
-        commandExecutor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+        commandExecutor.transformExtractOrEmbed(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }
