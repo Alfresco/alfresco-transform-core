@@ -2,7 +2,7 @@
 
 # ImageMagick is from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt.
 
-FROM alfresco/alfresco-base-java:jre11-rockylinux8-202203101229
+FROM alfresco/alfresco-base-java:jre11-rockylinux8-202205121725
 
 # TODO ATS-986 - update to 7.1.0-16 (once "imgemagick-distribution/7.1.0-16-linux.rpm" and "imgemagick-distribution/7.1.0-16-libs-linux.rpm" available in Nexus)
 ARG IMAGEMAGICK_VERSION=7.1.0-7

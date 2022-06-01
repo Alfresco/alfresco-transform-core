@@ -45,41 +45,39 @@ jobs:
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: travis_wait 20 mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
       script: mvn -B -U clean deploy -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
+
     - name: "ImageMagick"
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: _ci/build.sh imagemagick
       script: bash _ci/test.sh imagemagick
+
     - name: "LibreOffice"
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: _ci/build.sh libreoffice
       script: bash _ci/test.sh libreoffice
+
     - name: "Transform Misc"
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: _ci/build.sh misc
       script: bash _ci/test.sh misc
+
     - name: "PDF Renderer"
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: _ci/build.sh pdf-renderer
       script: bash _ci/test.sh pdf-renderer
+
     - name: "Tika"
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: _ci/build.sh tika
       script: bash _ci/test.sh tika
+
     - name: "All in One Transformer"
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: _ci/build.sh full-build
       script:  travis_wait 30 bash _ci/test.sh aio-test
-#    - name: "Static Analysis (SAST)"
-# TODO ATS-721: comment out until it is possible to run concurrent SAST scans
-#    if: type != pull_request
-#      if: branch = master AND type != pull_request
-#      before_install:
-#      - bash _ci/static_analysis_init.sh
-#      - bash _ci/init.sh
-#      script: bash _ci/static_analysis.sh
 
     - name: "Release"
       stage: release
-      if: commit_message ~= /\[trigger release\]/ AND branch ~= /^(master|SP\/.+|HF\/.+)$/
+      if: commit_message ~= /\[release\]/ AND branch ~= /^(master|SP\/.+|HF\/.+)$/
       before_script: travis_wait bash _ci/cache_artifacts.sh
       script: travis_wait 55 bash _ci/release.sh

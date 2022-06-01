@@ -71,12 +71,9 @@ public class AIOController extends AbstractTransformerController
         return getTransformerName() + " available";
     }
 
-    // TODO ATS-713 Currently uses the Misc probeTest. The implementation will need to be changed such that the test can be selected based on the required transform
     @Override
     public ProbeTestTransform getProbeTestTransform() 
     {
-        // HtmlParserContentTransformer html -> text
-        // See the Javadoc on this method and Probes.md for the choice of these values.
         return new ProbeTestTransform(this, "quick.html", "quick.txt",
             119, 30, 150, 1024,
             60 * 2 + 1, 60 * 2)
@@ -120,7 +117,6 @@ public class AIOController extends AbstractTransformerController
             logger.debug("Performing transform with name '{}' using transformer with id '{}'.", transformName, transformer.getTransformerId());
         }
 
-        transformOptions.put(TRANSFORM_NAME_PARAMETER, transformName);
-        transformer.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+        transformer.transformExtractOrEmbed(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 }

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -184,9 +184,8 @@ public class AIOTransformRegistryTest
 
             Map<String, String> parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
-            parameters.put(TRANSFORM_NAME_PARAMETER, "html");
             Transformer transformer = aioTransformerRegistry.getByTransformName("html");
-            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
+            transformer.transformExtractOrEmbed("html", SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
 
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
@@ -198,9 +197,8 @@ public class AIOTransformRegistryTest
 
             tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
             parameters = new HashMap<>();
-            parameters.put(TRANSFORM_NAME_PARAMETER, "html");
             parameters.put(SOURCE_ENCODING, "UTF-8");
-            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
+            transformer.transformExtractOrEmbed("html", SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
@@ -211,9 +209,8 @@ public class AIOTransformRegistryTest
 
             tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
             parameters = new HashMap<>();
-            parameters.put(TRANSFORM_NAME_PARAMETER, "html");
             parameters.put(SOURCE_ENCODING, "UTF-16");
-            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
+            transformer.transformExtractOrEmbed("html", SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
@@ -237,9 +234,8 @@ public class AIOTransformRegistryTest
             tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
 
             parameters = new HashMap<>();
-            parameters.put(TRANSFORM_NAME_PARAMETER, "html");
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
-            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
+            transformer.transformExtractOrEmbed("html", SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
             tmpD.delete();
@@ -295,9 +291,8 @@ public class AIOTransformRegistryTest
         // Transform to PDF
         Map<String, String> parameters = new HashMap<>();
         parameters.put(PAGE_LIMIT, pageLimit);
-        parameters.put(TRANSFORM_NAME_PARAMETER, "textToPdf");
         Transformer transformer = aioTransformerRegistry.getByTransformName("textToPdf");
-        transformer.transform("text/plain", "application/pdf", parameters, sourceFile, targetFile);
+        transformer.transformExtractOrEmbed("textToPdf", "text/plain", "application/pdf", parameters, sourceFile, targetFile);
 
         // Read back in the PDF and check it
         PDDocument doc = PDDocument.load(targetFile);

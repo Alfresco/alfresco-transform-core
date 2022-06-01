@@ -352,6 +352,7 @@ public abstract class AbstractTransformerController implements TransformControll
             transformerDebug.logOptions(request);
             String transformName = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
             transformImpl(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+            reply.getInternalContext().setCurrentSourceSize(targetFile.length());
         }
         catch (TransformException e)
         {
