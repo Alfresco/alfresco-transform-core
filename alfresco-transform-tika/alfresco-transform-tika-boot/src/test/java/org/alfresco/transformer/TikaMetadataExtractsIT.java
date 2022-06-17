@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,51 +26,51 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_APP_DWG;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OUTLOOK_MSG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_APP_DWG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OUTLOOK_MSG;
 import static org.alfresco.transformer.TestFileInfo.testFile;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_AUDIO_MP4;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_EXCEL;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_BMP;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_GIF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_PNG;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_TIFF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IWORK_KEYNOTE;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IWORK_NUMBERS;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IWORK_PAGES;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_MP3;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_FORMULA;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_GRAPHICS;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_GRAPHICS_TEMPLATE;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_PRESENTATION;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_PRESENTATION_TEMPLATE;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_SPREADSHEET;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_SPREADSHEET_TEMPLATE;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_TEXT;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENDOCUMENT_TEXT_TEMPLATE;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENOFFICE1_WRITER;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_PRESENTATION;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_OPENXML_WORDPROCESSING;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_PDF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_PPT;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VIDEO_3GP;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VIDEO_3GP2;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VIDEO_FLV;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VIDEO_MP4;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VIDEO_QUICKTIME;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VISIO;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_VORBIS;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_WORD;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_ZIP;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_RAF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_ARW;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_CR2;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_RW2;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_NEF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_AUDIO_MP4;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_EXCEL;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_BMP;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_GIF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_TIFF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_KEYNOTE;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_NUMBERS;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_PAGES;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_MP3;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENDOCUMENT_FORMULA;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENDOCUMENT_GRAPHICS;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENDOCUMENT_GRAPHICS_TEMPLATE;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENDOCUMENT_PRESENTATION;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENDOCUMENT_PRESENTATION_TEMPLATE;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENDOCUMENT_SPREADSHEET;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENDOCUMENT_SPREADSHEET_TEMPLATE;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENDOCUMENT_TEXT;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENDOCUMENT_TEXT_TEMPLATE;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENOFFICE1_WRITER;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_PRESENTATION;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_SPREADSHEET;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PPT;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_VIDEO_3GP;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_VIDEO_3GP2;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_VIDEO_FLV;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_VIDEO_MP4;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_VIDEO_QUICKTIME;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_VISIO;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_VORBIS;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_XML;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_ZIP;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_RAF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_ARW;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_CR2;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_RW2;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_NEF;
 
 import java.util.stream.Stream;
 

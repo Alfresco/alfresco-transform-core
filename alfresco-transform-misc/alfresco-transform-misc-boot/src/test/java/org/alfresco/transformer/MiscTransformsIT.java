@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -29,31 +29,31 @@ package org.alfresco.transformer;
 import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_DITA;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_EXCEL;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_GIF;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_PNG;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IMAGE_TIFF;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_KEYNOTE;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_NUMBERS;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_IWORK_PAGES;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_JAVASCRIPT;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_PRESENTATION;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_SPREADSHEET;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OUTLOOK_MSG;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PPT;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_RFC822;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_CSS;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_CSV;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_JAVASCRIPT;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_MEDIAWIKI;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_WORD;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_XML;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_DITA;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_EXCEL;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_GIF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_TIFF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_KEYNOTE;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_NUMBERS;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_PAGES;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_JAVASCRIPT;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_PRESENTATION;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_SPREADSHEET;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OUTLOOK_MSG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PPT;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_RFC822;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_CSS;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_CSV;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_JAVASCRIPT;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_MEDIAWIKI;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_XML;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
 import static org.alfresco.transformer.TestFileInfo.testFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;

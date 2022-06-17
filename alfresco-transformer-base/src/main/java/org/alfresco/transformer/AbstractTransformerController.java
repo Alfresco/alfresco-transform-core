@@ -26,14 +26,14 @@
  */
 package org.alfresco.transformer;
 
+import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.client.model.TransformRequestValidator;
-import org.alfresco.transform.client.model.config.TransformConfig;
-import org.alfresco.transform.client.registry.TransformServiceRegistry;
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transform.router.TransformerDebug;
+import org.alfresco.transform.messages.TransformRequestValidator;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.registry.TransformServiceRegistry;
+import org.alfresco.transform.common.TransformException;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transformer.logging.LogEntry;
 import org.alfresco.transformer.model.FileRefResponse;
@@ -67,12 +67,12 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.joining;
-import static org.alfresco.transform.client.model.config.CoreVersionDecorator.setOrClearCoreVersion;
-import static org.alfresco.transform.client.util.RequestParamMap.DIRECT_ACCESS_URL;
-import static org.alfresco.transform.client.util.RequestParamMap.CONFIG_VERSION;
-import static org.alfresco.transform.client.util.RequestParamMap.CONFIG_VERSION_DEFAULT;
-import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
-import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
+import static org.alfresco.transform.config.CoreVersionDecorator.setOrClearCoreVersion;
+import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
+import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION;
+import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
 import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTempFile;
 import static org.alfresco.transformer.fs.FileManager.buildFile;
 import static org.alfresco.transformer.fs.FileManager.createAttachment;

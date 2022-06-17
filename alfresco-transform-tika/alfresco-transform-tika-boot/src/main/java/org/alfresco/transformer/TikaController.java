@@ -38,8 +38,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.alfresco.transformer.executors.Tika.PDF_BOX;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_PDF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 
 /**
  * Controller for the Docker based Tika transformers.

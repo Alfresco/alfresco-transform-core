@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -263,7 +263,7 @@ public class TextToPdfContentTransformerTest
                     l = is.read(bytes);
                     off = 0;
                     // When we read the first block, change the offset if we don't want the BOM and also work out
-                    // if the byte endian need to be switch. The source bytes allways start with a standard BOM.
+                    // if the byte endian need to be switch. The source bytes always start with a standard BOM.
                     if (firstRead)
                     {
                         firstRead = false;

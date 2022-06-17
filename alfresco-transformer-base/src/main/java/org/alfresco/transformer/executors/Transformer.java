@@ -27,13 +27,13 @@ package org.alfresco.transformer.executors;
  * #L%
  */
 
-import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.common.TransformException;
 
 import java.io.File;
 import java.util.Map;
 
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_METADATA_EMBED;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_METADATA_EXTRACT;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_METADATA_EMBED;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_METADATA_EXTRACT;
 import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;

@@ -29,7 +29,7 @@ package org.alfresco.transformer;
 import java.io.IOException;
 
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.client.model.config.TransformConfig;
+import org.alfresco.transform.config.TransformConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,8 +37,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 
-import static org.alfresco.transform.client.util.RequestParamMap.CONFIG_VERSION_DEFAULT;
-import static org.alfresco.transform.client.util.RequestParamMap.CONFIG_VERSION_LATEST;
+import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
+import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_LATEST;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 

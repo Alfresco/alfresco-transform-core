@@ -35,7 +35,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.alfresco.transform.client.util.RequestParamMap.SOURCE_ENCODING;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HtmlParserContentTransformerTest

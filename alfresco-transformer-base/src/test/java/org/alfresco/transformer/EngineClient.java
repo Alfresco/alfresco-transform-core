@@ -8,7 +8,7 @@
 package org.alfresco.transformer;
 
 import static java.util.Collections.emptyMap;
-import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import java.util.Map;

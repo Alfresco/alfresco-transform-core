@@ -26,8 +26,8 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 
 import java.util.UUID;
 

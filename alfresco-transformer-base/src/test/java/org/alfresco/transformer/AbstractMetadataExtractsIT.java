@@ -28,7 +28,7 @@ package org.alfresco.transformer;
 
 import static java.text.MessageFormat.format;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_METADATA_EXTRACT;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_METADATA_EXTRACT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;

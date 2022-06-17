@@ -26,9 +26,9 @@
  */
 package org.alfresco.transformer.config;
 
-import org.alfresco.transform.client.model.TransformRequestValidator;
-import org.alfresco.transform.client.registry.TransformServiceRegistry;
-import org.alfresco.transform.router.TransformerDebug;
+import org.alfresco.transform.messages.TransformRequestValidator;
+import org.alfresco.transform.registry.TransformServiceRegistry;
+import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transformer.TransformInterceptor;
 import org.alfresco.transformer.TransformRegistryImpl;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
@@ -38,7 +38,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 
 @Configuration
 public class WebApplicationConfig implements WebMvcConfigurer

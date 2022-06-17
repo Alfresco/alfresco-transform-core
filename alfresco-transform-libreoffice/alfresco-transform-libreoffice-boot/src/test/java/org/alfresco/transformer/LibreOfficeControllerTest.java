@@ -26,8 +26,8 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transformer.util.RequestParamMap.TARGET_EXTENSION;
 import static org.alfresco.transformer.util.RequestParamMap.TARGET_MIMETYPE;

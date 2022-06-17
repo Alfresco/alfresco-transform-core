@@ -27,14 +27,13 @@
 package org.alfresco.transformer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.alfresco.transform.client.model.config.TransformConfig;
-import org.alfresco.transform.client.registry.AbstractTransformRegistry;
-import org.alfresco.transform.client.registry.CombinedTransformConfig;
-import org.alfresco.transform.client.registry.TransformCache;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.registry.AbstractTransformRegistry;
+import org.alfresco.transform.registry.CombinedTransformConfig;
+import org.alfresco.transform.registry.TransformCache;
 import org.alfresco.transformer.executors.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.alfresco.transform.client.model.config.CoreVersionDecorator.setCoreVersionOnSingleStepTransformers;
+import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionOnSingleStepTransformers;
 
 /**
  * AIOTransformRegistry manages all of the sub transformers registered to it and provides aggregated TransformConfig.
@@ -91,7 +90,7 @@ public class AIOTransformRegistry extends AbstractTransformRegistry
         combinedTransformConfig.addTransformConfig(transformConfig, location, transformerId, this);
 
         // Map all of the transforms defined in the config to this Transformer implementation
-        for (org.alfresco.transform.client.model.config.Transformer transformerConfig : transformConfig.getTransformers())
+        for (org.alfresco.transform.config.Transformer transformerConfig : transformConfig.getTransformers())
         {
             String transformerName = transformerConfig.getTransformerName();
             // A later tEngine 'might' override one that has already been defined. That is fine.

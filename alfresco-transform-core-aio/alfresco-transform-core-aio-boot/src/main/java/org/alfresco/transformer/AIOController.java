@@ -26,8 +26,8 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transform.client.model.config.TransformConfig;
-import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.common.TransformException;
 import org.alfresco.transformer.executors.Transformer;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.slf4j.Logger;
@@ -41,13 +41,12 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.client.model.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transform.client.model.config.CoreVersionDecorator.setOrClearCoreVersion;
-import static org.alfresco.transform.client.util.RequestParamMap.CONFIG_VERSION_DEFAULT;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.config.CoreVersionDecorator.setOrClearCoreVersion;
+import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
 import static org.alfresco.transformer.util.RequestParamMap.CONFIG_VERSION;
 import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
-import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 

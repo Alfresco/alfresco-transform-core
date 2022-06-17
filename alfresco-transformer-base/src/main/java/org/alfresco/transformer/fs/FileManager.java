@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -42,7 +42,7 @@ import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.common.TransformException;
 import org.alfresco.transformer.logging.LogEntry;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;

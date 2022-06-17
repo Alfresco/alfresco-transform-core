@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.common.TransformException;
 import org.alfresco.transformer.AbstractTransformerController;
 import org.alfresco.transformer.logging.LogEntry;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * <p><b>K8s probes</b>: A readiness probe indicates if the pod should accept request. <b>It does not indicate that a pod is
  * ready after startup</b>. The liveness probe indicates when to kill the pod. <b>Both probes are called throughout the
  * lifetime of the pod</b> and a <b>liveness probes can take place before a readiness probe.</b> The k8s
- * <b>initialDelaySeconds field is not fully honoured</b> as it multiplied by a random number, so is
+ * <b>initialDelaySeconds field is not fully honoured</b> as it is multiplied by a random number, so is
  * actually a maximum initial delay in seconds, but could be 0. </p>
  *
  * <p>Live and readiness probes might do test transforms. The first 6 requests result in a transformation

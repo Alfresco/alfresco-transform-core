@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -27,7 +27,7 @@
 package org.alfresco.transformer;
 
 import com.google.common.collect.ImmutableList;
-import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.common.TransformException;
 
 import java.util.List;
 import java.util.StringJoiner;

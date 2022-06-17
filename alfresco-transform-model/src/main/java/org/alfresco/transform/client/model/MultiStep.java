@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Model
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -31,6 +31,8 @@ import java.util.List;
  * @author Lucian Tuca
  * created on 19/12/2018
  */
+// This class is in the package org.alfresco.transform.messages in HxP because that is more readable, but in
+// org.alfresco.transform.client.model in Alfresco for backward compatibility.
 public class MultiStep implements Serializable
 {
     private String initialRequestId;

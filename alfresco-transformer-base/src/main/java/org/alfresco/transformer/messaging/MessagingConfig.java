@@ -29,7 +29,7 @@ package org.alfresco.transformer.messaging;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 
-import org.alfresco.transform.client.model.TransformRequestValidator;
+import org.alfresco.transform.messages.TransformRequestValidator;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

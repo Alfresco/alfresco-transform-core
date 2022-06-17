@@ -26,8 +26,7 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.transform.client.util.RequestParamMap.ENDPOINT_TRANSFORM;
-import static org.alfresco.transformer.util.MimetypeMap.PREFIX_IMAGE;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -91,6 +90,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 public class ImageMagickControllerTest extends AbstractTransformerControllerTest
 {
     private static final String ENGINE_CONFIG_NAME = "imagemagick_engine_config.json";
+
+    private String PREFIX_IMAGE = "image/";
 
     @Mock
     protected ExecutionResult mockExecutionResult;

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -65,14 +65,14 @@ import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_HTML;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_PNG;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_TIFF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_CSV;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XHTML;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_XML;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_TIFF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_CSV;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_XHTML;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_XML;
 
 /**
  * Stripped down command line Tika transformers. Not actually run as a separate process, but the code fits the patten

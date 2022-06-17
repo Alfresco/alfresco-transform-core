@@ -42,7 +42,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.util.Map;
 
-import static org.alfresco.transform.client.util.RequestParamMap.SOURCE_ENCODING;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 
 /**
  * Content transformer which wraps the HTML Parser library for

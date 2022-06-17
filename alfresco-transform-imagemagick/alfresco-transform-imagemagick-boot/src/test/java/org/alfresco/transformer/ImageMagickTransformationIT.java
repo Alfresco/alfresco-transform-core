@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -32,39 +32,39 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
 import static org.alfresco.transformer.TestFileInfo.testFile;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_APPLICATION_EPS;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_BMP;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_CGM;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_GIF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_IEF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_JP2;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_PBM;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_PGM;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_PNG;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_PNM;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_PPJ;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_PPM;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_PSD;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAS;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_3FR;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_ARW;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_CR2;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_DNG;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_K25;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_MRW;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_NEF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_ORF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_PEF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_R3D;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_RAF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_RW2;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_RWL;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_RAW_X3F;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_TIFF;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_XBM;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_XPM;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_XWD;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_APPLICATION_EPS;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_BMP;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_CGM;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_GIF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_IEF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JP2;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PBM;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PGM;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNM;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PPJ;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PPM;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PSD;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAS;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_3FR;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_ARW;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_CR2;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_DNG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_K25;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_MRW;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_NEF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_ORF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_PEF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_R3D;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_RAF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_RW2;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_RWL;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_X3F;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_TIFF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_XBM;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_XPM;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_XWD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;

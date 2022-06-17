@@ -26,7 +26,7 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transform.client.registry.TransformServiceRegistry;
+import org.alfresco.transform.registry.TransformServiceRegistry;
 import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
 import org.alfresco.transformer.executors.PdfRendererCommandExecutor;

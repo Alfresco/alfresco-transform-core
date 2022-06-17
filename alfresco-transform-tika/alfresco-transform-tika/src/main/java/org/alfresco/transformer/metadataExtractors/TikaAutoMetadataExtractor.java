@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,7 +26,7 @@
  */
 package org.alfresco.transformer.metadataExtractors;
 
-import org.alfresco.transformer.util.MimetypeMap;
+import org.alfresco.transform.common.Mimetype;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TIFF;
@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.io.Serializable;
 import java.util.Map;
 
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transformer.executors.Tika.readTikaConfig;
 
 /**
@@ -100,7 +101,7 @@ public class TikaAutoMetadataExtractor extends AbstractTikaMetadataExtractor
     protected Map<String, Serializable> extractSpecific(Metadata metadata,
                                                         Map<String, Serializable> properties, Map<String,String> headers)
     {
-        if (MimetypeMap.MIMETYPE_IMAGE_JPEG.equals(metadata.get(Metadata.CONTENT_TYPE)))
+        if (MIMETYPE_IMAGE_JPEG.equals(metadata.get(Metadata.CONTENT_TYPE)))
         {
             //check if the image has exif information
             if (metadata.get(EXIF_IMAGE_WIDTH_TAG) != null

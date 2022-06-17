@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Model
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+// This class is in the package org.alfresco.transform.messages in HxP because that is more readable, but in
+// org.alfresco.transform.client.model in Alfresco for backward compatibility.
 public class TransformRequest implements Serializable
 {
     private String requestId;

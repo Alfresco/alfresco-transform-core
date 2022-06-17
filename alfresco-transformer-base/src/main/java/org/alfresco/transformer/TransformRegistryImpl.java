@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Repository
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,7 +26,7 @@
 package org.alfresco.transformer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.alfresco.transform.client.model.config.CoreVersionDecorator.setCoreVersionOnSingleStepTransformers;
+import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionOnSingleStepTransformers;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.io.IOException;
@@ -35,11 +35,11 @@ import java.io.Reader;
 
 import javax.annotation.PostConstruct;
 
-import org.alfresco.transform.client.model.config.TransformConfig;
-import org.alfresco.transform.client.registry.AbstractTransformRegistry;
-import org.alfresco.transform.client.registry.CombinedTransformConfig;
-import org.alfresco.transform.client.registry.TransformCache;
-import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.registry.AbstractTransformRegistry;
+import org.alfresco.transform.registry.CombinedTransformConfig;
+import org.alfresco.transform.registry.TransformCache;
+import org.alfresco.transform.common.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
