@@ -19,7 +19,7 @@
         <maven.compiler.target>11</maven.compiler.target>
 
         <image.tag>latest</image.tag>
-        <dependency.pdfbox.version>2.0.26</dependency.pdfbox.version>
+        <dependency.pdfbox.version>2.0.25</dependency.pdfbox.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.12</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
         <dependency.activemq.version>5.16.4</dependency.activemq.version>
@@ -28,7 +28,7 @@
         <dependency.junit.version>4.13.2</dependency.junit.version>
         <dependency.cxf.version>3.5.2</dependency.cxf.version>
         <dependency.tika.version>2.4.1</dependency.tika.version>
-        <dependency.poi.version>5.2.2</dependency.poi.version>
+        <dependency.poi.version>4.1.2</dependency.poi.version>
         <dependency.ooxml-schemas.version>1.4</dependency.ooxml-schemas.version>
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
