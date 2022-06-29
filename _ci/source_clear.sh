@@ -5,7 +5,7 @@ PS4="\[\e[35m\]+ \[\e[m\]"
 set +e -v -x
 pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 
-mvn -B -U clean install \
+mvn -B -U -q clean install \
     -DskipTests \
     -Dmaven.javadoc.skip=true \
     com.srcclr:srcclr-maven-plugin:scan \
