@@ -95,10 +95,10 @@ public class TikaOfficeDetectParser implements Parser
         }
 
         // Which is it?
-        if (initial4[0] == POIFSConstants.OOXML_FILE_HEADER[0] &&
-            initial4[1] == POIFSConstants.OOXML_FILE_HEADER[1] &&
-            initial4[2] == POIFSConstants.OOXML_FILE_HEADER[2] &&
-            initial4[3] == POIFSConstants.OOXML_FILE_HEADER[3])
+        if (initial4[0] == 0x50 &&
+            initial4[1] == 0x4B &&
+            initial4[2] == 0x03 &&
+            initial4[3] == 0x04)
         {
             ooxmlParser.parse(wrapped, handler, metadata, parseContext);
         }
