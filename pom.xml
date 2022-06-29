@@ -27,7 +27,7 @@
         <dependency.jackson-databind.version>2.13.2.2</dependency.jackson-databind.version>
         <dependency.junit.version>4.13.2</dependency.junit.version>
         <dependency.cxf.version>3.5.2</dependency.cxf.version>
-        <dependency.tika.version>2.4.1</dependency.tika.version>
+        <dependency.tika.version>2.2.1</dependency.tika.version>
         <dependency.poi.version>5.2.2</dependency.poi.version>
         <dependency.ooxml-schemas.version>1.4</dependency.ooxml-schemas.version>
 
