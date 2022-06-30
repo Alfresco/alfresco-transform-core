@@ -24,7 +24,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.office;
+package org.alfresco.transform.libreoffice;
 
 import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;

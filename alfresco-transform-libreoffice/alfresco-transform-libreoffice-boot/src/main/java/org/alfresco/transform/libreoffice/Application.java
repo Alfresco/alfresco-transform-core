@@ -24,10 +24,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.office;
+package org.alfresco.transform.libreoffice;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import org.alfresco.transform.office.transformers.LibreOfficeJavaExecutor;
+import org.alfresco.transform.libreoffice.transformers.LibreOfficeJavaExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

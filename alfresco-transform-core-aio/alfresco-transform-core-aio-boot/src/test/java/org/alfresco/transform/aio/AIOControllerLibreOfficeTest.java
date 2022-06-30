@@ -30,11 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
 
-import org.alfresco.transform.aio.AIOController;
-import org.alfresco.transform.aio.AIOCustomConfig;
-import org.alfresco.transform.aio.AIOTransformRegistry;
-import org.alfresco.transform.office.LibreOfficeControllerTest;
-import org.alfresco.transform.office.transformers.LibreOfficeJavaExecutor;
+import org.alfresco.transform.libreoffice.LibreOfficeControllerTest;
+import org.alfresco.transform.libreoffice.transformers.LibreOfficeJavaExecutor;
 import org.alfresco.transform.base.executors.Transformer;
 import org.alfresco.transformer.AbstractTransformerController;
 import org.junit.jupiter.api.Test;

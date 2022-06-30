@@ -24,26 +24,25 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.office;
+package org.alfresco.transform.libreoffice.transformers;
 
-import org.alfresco.transformer.AbstractHttpRequestTest;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.artofsolving.jodconverter.office.OfficeManager;
 
-/**
- * Tests LibreOfficeController with a server test harness.
- */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class LibreOfficeHttpRequestTest extends AbstractHttpRequestTest
+///////// THIS FILE WAS A COPY OF THE CODE IN alfresco-repository /////////////
+
+public interface JodConverter
 {
-    @Override
-    protected String getTransformerName()
-    {
-        return "LibreOffice";
-    }
+    /**
+     * Gets the JodConverter OfficeManager.
+     *
+     * @return
+     */
+    OfficeManager getOfficeManager();
 
-    @Override
-    protected String getSourceExtension()
-    {
-        return "doc";
-    }
+    /**
+     * This method returns a boolean indicating whether the JodConverter connection to OOo is available.
+     *
+     * @return <code>true</code> if available, else <code>false</code>
+     */
+    boolean isAvailable();
 }

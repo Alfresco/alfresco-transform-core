@@ -24,7 +24,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.office;
+package org.alfresco.transform.libreoffice;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
@@ -60,7 +60,7 @@ import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transformer.AbstractTransformerController;
 import org.alfresco.transformer.AbstractTransformerControllerTest;
-import org.alfresco.transform.office.transformers.LibreOfficeJavaExecutor;
+import org.alfresco.transform.libreoffice.transformers.LibreOfficeJavaExecutor;
 import org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
 import org.alfresco.transformer.model.FileRefEntity;
 import org.alfresco.transformer.model.FileRefResponse;

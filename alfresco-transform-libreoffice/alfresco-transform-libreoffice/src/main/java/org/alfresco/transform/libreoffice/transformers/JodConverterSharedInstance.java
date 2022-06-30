@@ -24,7 +24,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.office.transformers;
+package org.alfresco.transform.libreoffice.transformers;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;

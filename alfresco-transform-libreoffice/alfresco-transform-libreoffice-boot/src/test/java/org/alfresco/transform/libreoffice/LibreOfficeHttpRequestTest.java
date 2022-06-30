@@ -24,37 +24,26 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.office;
+package org.alfresco.transform.libreoffice;
 
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
-
-import java.util.UUID;
-
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transformer.AbstractQueueTransformServiceIT;
+import org.alfresco.transformer.AbstractHttpRequestTest;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * @author Lucian Tuca
- * created on 15/01/2019
+ * Tests LibreOfficeController with a server test harness.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                properties = {"activemq.url=nio://localhost:61616"})
-public class LibreOfficeQueueTransformServiceIT extends AbstractQueueTransformServiceIT
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class LibreOfficeHttpRequestTest extends AbstractHttpRequestTest
 {
     @Override
-    protected TransformRequest buildRequest()
+    protected String getTransformerName()
     {
-        return TransformRequest
-            .builder()
-            .withRequestId(UUID.randomUUID().toString())
-            .withSourceMediaType(MIMETYPE_OPENXML_WORDPROCESSING)
-            .withTargetMediaType(MIMETYPE_OPENXML_WORDPROCESSING)
-            .withTargetExtension("doc")
-            .withSchema(1)
-            .withClientData("ACS")
-            .withSourceReference(UUID.randomUUID().toString())
-            .withSourceSize(32L)
-            .build();
+        return "LibreOffice";
+    }
+
+    @Override
+    protected String getSourceExtension()
+    {
+        return "doc";
     }
 }
