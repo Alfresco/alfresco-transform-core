@@ -26,9 +26,6 @@
  */
 package org.alfresco.transformer.util;
 
-/**
- *
- */
 public class Util
 {
     /**

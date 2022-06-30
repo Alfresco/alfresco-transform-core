@@ -1,0 +1,22 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div>
+    <div th:if="${message} == null">
+        <h2>Error Page</h2>
+    </div>
+    <div th:if="${message}">
+        <h2 th:text="${#strings.substring(message,0,#strings.indexOf(message,' - '))} + ' Error Page'"></h2>
+        <h3 th:text="${#strings.substring(message,#strings.indexOf(message,' - ')+3)}"></h3>
+    </div>
+    <p th:text="${status} + ' - ' + ${error}"></p>
+</div>
+
+<div>
+    <br/>
+    <a href="/">Test Transformation</a>
+    <a href="/log">Log entries</a>
+</div>
+
+</body>
+</html>

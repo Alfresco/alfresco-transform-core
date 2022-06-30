@@ -43,6 +43,7 @@
             <modules>
                 <module>alfresco-transform-model</module>
                 <module>alfresco-transformer-base</module>
+                <module>t-engine-base</module>
                 <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick</module>
                 <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot</module>
                 <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice</module>
@@ -62,6 +63,7 @@
             <modules>
                 <module>alfresco-transform-model</module>
                 <module>alfresco-transformer-base</module>
+                <module>t-engine-base</module>
             </modules>
         </profile>
         <profile>
@@ -69,6 +71,7 @@
             <modules>
                 <module>alfresco-transform-model</module>
                 <module>alfresco-transformer-base</module>
+                <module>t-engine-base</module>
                 <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick</module>
                 <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot</module>
             </modules>
@@ -78,6 +81,7 @@
             <modules>
                 <module>alfresco-transform-model</module>
                 <module>alfresco-transformer-base</module>
+                <module>t-engine-base</module>
                 <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice</module>
                 <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice-boot</module>
             </modules>
@@ -87,6 +91,7 @@
             <modules>
                 <module>alfresco-transform-model</module>
                 <module>alfresco-transformer-base</module>
+                <module>t-engine-base</module>
                 <module>alfresco-transform-misc/alfresco-transform-misc</module>
                 <module>alfresco-transform-misc/alfresco-transform-misc-boot</module>
             </modules>
@@ -96,6 +101,7 @@
             <modules>
                 <module>alfresco-transform-model</module>
                 <module>alfresco-transformer-base</module>
+                <module>t-engine-base</module>
                 <module>alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer</module>
                 <module>alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer-boot</module>
             </modules>
@@ -105,6 +111,7 @@
             <modules>
                 <module>alfresco-transform-model</module>
                 <module>alfresco-transformer-base</module>
+                <module>t-engine-base</module>
                 <module>alfresco-transform-tika/alfresco-transform-tika</module>
                 <module>alfresco-transform-tika/alfresco-transform-tika-boot</module>
             </modules>
@@ -115,6 +122,7 @@
             <modules>
                 <module>alfresco-transform-model</module>
                 <module>alfresco-transformer-base</module>
+                <module>t-engine-base</module>
                 <module>alfresco-transform-core-aio/alfresco-transform-core-aio</module>
                 <module>alfresco-transform-core-aio/alfresco-transform-core-aio-boot</module>
             </modules>
