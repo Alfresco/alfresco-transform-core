@@ -95,7 +95,7 @@ public class TikaOfficeDetectParser implements Parser
         }
 
         // Which is it?
-        if(FileMagic.valueOf(initial4) == FileMagic.OOXML)
+        if (FileMagic.valueOf(initial4) == FileMagic.OOXML)
         {
             ooxmlParser.parse(wrapped, handler, metadata, parseContext);
         }
