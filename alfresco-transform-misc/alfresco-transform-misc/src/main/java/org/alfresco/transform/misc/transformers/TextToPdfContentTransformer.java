@@ -26,7 +26,8 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import org.alfresco.transformer.util.RequestParamMap;
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.common.TransformException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -34,6 +35,7 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.tools.TextToPDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -50,6 +52,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.alfresco.transform.common.RequestParamMap.PAGE_LIMIT;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 
 /**
@@ -62,15 +65,14 @@ import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
  * @author Derek Hulley
  * @author eknizat
  */
-public class TextToPdfContentTransformer implements SelectableTransformer
+@Component
+public class TextToPdfContentTransformer implements CustomTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(TextToPdfContentTransformer.class);
 
     private static final int UTF16_READ_AHEAD_BYTES = 16; // 8 characters including BOM if it exists
     private static final byte FE = (byte) 0xFE;
     private static final byte FF = (byte) 0xFF;
-
-    public static final String PAGE_LIMIT = RequestParamMap.PAGE_LIMIT;
 
     private final PagedTextToPDF transformer;
 
@@ -106,6 +108,17 @@ public class TextToPdfContentTransformer implements SelectableTransformer
     }
 
     @Override
+    public String getTransformerName()
+    {
+        return "textToPdf";
+    }
+
+    @Override public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
+            String targetMimetype, String targetEncoding, OutputStream outputStream,
+            Map<String, String> transformOptions) throws Exception
+    {
+        throw new TransformException(500, "TODO textToPdf transform");
+    }
     public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
                           final File sourceFile, final File targetFile) throws Exception
     {

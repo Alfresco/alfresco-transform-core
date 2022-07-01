@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
 import java.io.Serializable;
 import java.util.Map;
 
-import static org.alfresco.transform.tika.metadataExtractors.AbstractTikaMetadataExtractor.Type.EXTRACTOR;
+import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
 
 /**
  * Outlook MAPI format email metadata extractor.

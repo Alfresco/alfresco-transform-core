@@ -45,7 +45,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.StringJoiner;
 
-import static org.alfresco.transform.tika.metadataExtractors.AbstractTikaMetadataExtractor.Type.EXTRACTOR;
+import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
 
 /**
  * POI-based metadata extractor for Office 07 documents. See http://poi.apache.org/ for information on POI.

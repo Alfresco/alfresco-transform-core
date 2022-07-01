@@ -26,11 +26,14 @@
  */
 package org.alfresco.transform.base;
 
+import org.alfresco.transform.common.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.base.probes.ProbeTestTransform;
 
 /**
- * The interface to the custom transform code applied on top of a base t-engine.
+ * Interface to be implemented by transform specific code. Provides information about the t-engine as a whole.
+ * Also see {@link CustomTransformer} which provides the code that performs transformation. There may be several
+ * in a single t-engine.
  */
 public interface TransformEngine
 {
@@ -45,7 +48,8 @@ public interface TransformEngine
     String getStartupMessage();
 
     /**
-     * @return a definition of what the t-engine supports. Normally read from a json Resource on the classpath.
+     * @return a definition of what the t-engine supports. Normally read from a json Resource on the classpath using a
+     * {@link TransformConfigResourceReader}.
      */
     TransformConfig getTransformConfig();
 

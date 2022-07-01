@@ -26,15 +26,20 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.common.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
@@ -58,10 +63,15 @@ import static org.alfresco.transform.common.RequestParamMap.TARGET_ENCODING;
  * @author Derek Hulley
  * @author eknizat
  */
-public class StringExtractingContentTransformer implements SelectableTransformer
+@Component
+public class StringExtractingContentTransformer implements CustomTransformer
 {
-
     private static final Logger logger = LoggerFactory.getLogger(StringExtractingContentTransformer.class);
+
+    public String getTransformerName()
+    {
+        return "string";
+    }
 
     /**
      * Text to text conversions are done directly using the content reader and writer string
@@ -72,6 +82,13 @@ public class StringExtractingContentTransformer implements SelectableTransformer
      * be unformatted but valid.
      */
     @Override
+    public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
+            String targetMimetype, String targetEncoding, OutputStream outputStream,
+            Map<String, String> transformOptions) throws Exception
+    {
+        throw new TransformException(500, "TODO string transform");
+    }
+
     public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
                           final File sourceFile, final File targetFile) throws Exception
     {

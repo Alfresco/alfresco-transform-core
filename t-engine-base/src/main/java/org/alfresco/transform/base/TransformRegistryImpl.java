@@ -65,7 +65,7 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
                         .sorted(Comparator.comparing(TransformEngine::getTransformEngineName))
                         .forEach(transformEngine -> {
                             TransformConfig transformConfig = transformEngine.getTransformConfig();
-                            if (transformConfig != null)
+                            if (transformConfig != null) // if not a wrapping TransformEngine like all-in-one
                             {
                                 setCoreVersionOnSingleStepTransformers(transformConfig, coreVersion);
                                 combinedTransformConfig.addTransformConfig(transformConfig,

@@ -26,10 +26,17 @@
  */
 package org.alfresco.transform.base;
 
+import org.alfresco.transform.config.TransformConfig;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
+/**
+ * Interface to be implemented by transform specific code. The {@code transformerName} should match the transformerName
+ * in the {@link TransformConfig} returned by the {@link TransformEngine}. So that it is automatically picked up, it
+ * must exist in a package under {@code org.alfresco.transform} and have the Spring {@code @Component} annotation.
+ */
 public interface CustomTransformer
 {
     String getTransformerName();

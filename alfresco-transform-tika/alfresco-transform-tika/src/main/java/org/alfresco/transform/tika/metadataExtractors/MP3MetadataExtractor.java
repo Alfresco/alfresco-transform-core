@@ -38,8 +38,6 @@ import org.springframework.stereotype.Component;
 import java.io.Serializable;
 import java.util.Map;
 
-import static org.alfresco.transform.tika.metadataExtractors.AbstractTikaMetadataExtractor.Type.EXTRACTOR;
-
 /**
  * MP3 file metadata extractor.
  *

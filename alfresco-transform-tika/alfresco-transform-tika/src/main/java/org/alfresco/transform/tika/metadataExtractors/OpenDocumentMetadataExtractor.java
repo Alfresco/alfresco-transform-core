@@ -26,9 +26,6 @@
  */
 package org.alfresco.transform.tika.metadataExtractors;
 
-import static org.alfresco.transform.tika.metadataExtractors.AbstractTikaMetadataExtractor.Type.EXTRACTOR;
-import static org.apache.tika.metadata.DublinCore.NAMESPACE_URI_DC;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
@@ -50,6 +47,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
+import static org.apache.tika.metadata.DublinCore.NAMESPACE_URI_DC;
 
 /**
  * {@code "application/vnd.oasis.opendocument..."} and {@code "applicationvnd.oasis.opendocument..."} metadata extractor.

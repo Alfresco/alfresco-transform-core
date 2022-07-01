@@ -28,6 +28,13 @@ import org.alfresco.transform.config.CoreVersionDecorator;
  */
 public interface RequestParamMap
 {
+    // html parameter names
+    String FILE = "file";
+    String SOURCE_EXTENSION         = "sourceExtension";
+    String TARGET_EXTENSION         = "targetExtension";
+    String SOURCE_MIMETYPE          = "sourceMimetype";
+    String TARGET_MIMETYPE          = "targetMimetype";
+
     // Transform options used in the core transformers.
     String SOURCE_ENCODING          = "sourceEncoding";
     String TARGET_ENCODING          = "targetEncoding";

@@ -26,9 +26,12 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import org.alfresco.transformer.fs.FileManager;
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.fs.FileManager;
+import org.alfresco.transform.common.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -43,6 +46,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Map;
@@ -64,8 +68,8 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
  * This code is based on a class of the same name originally implemented in alfresco-repository.
  * </p>
  */
-public class EMLTransformer implements SelectableTransformer
-
+@Component
+public class EMLTransformer implements CustomTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(EMLTransformer.class);
 
@@ -73,6 +77,18 @@ public class EMLTransformer implements SelectableTransformer
     private static final String DEFAULT_ENCODING = "UTF-8";
 
     @Override
+    public String getTransformerName()
+    {
+        return "rfc822";
+    }
+
+    @Override public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
+            String targetMimetype, String targetEncoding, OutputStream outputStream,
+            Map<String, String> transformOptions) throws Exception
+    {
+        throw new TransformException(500, "TODO rfc822 transform");
+    }
+
     public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
                           final File sourceFile, final File targetFile) throws Exception
     {

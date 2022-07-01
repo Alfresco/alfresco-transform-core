@@ -37,14 +37,11 @@ import java.util.Map;
  *
  * @author Cezar Leahu
  */
-public interface CommandExecutor extends Transformer
+public interface CommandExecutor
 {
     void run(Map<String, String> properties, File targetFile, Long timeout);
 
-    String version();
-
-    default void run(String options, File sourceFile, File targetFile,
-        Long timeout)
+    default void run(String options, File sourceFile, File targetFile, Long timeout)
     {
         LogEntry.setOptions(options);
 
@@ -56,8 +53,7 @@ public interface CommandExecutor extends Transformer
         run(properties, targetFile, timeout);
     }
 
-    default void run(String options, File sourceFile, String pageRange, File targetFile,
-        Long timeout)
+    default void run(String options, File sourceFile, String pageRange, File targetFile, Long timeout)
     {
         LogEntry.setOptions(pageRange + (pageRange.isEmpty() ? "" : " ") + options);
 

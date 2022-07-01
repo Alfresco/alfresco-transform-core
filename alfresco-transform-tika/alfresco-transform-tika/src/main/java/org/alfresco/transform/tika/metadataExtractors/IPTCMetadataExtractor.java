@@ -26,13 +26,6 @@
  */
 package org.alfresco.transform.tika.metadataExtractors;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.alfresco.transform.tika.parsers.ExifToolParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.Metadata;
@@ -41,7 +34,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static org.alfresco.transform.tika.metadataExtractors.AbstractTikaMetadataExtractor.Type.EXTRACTOR;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
 
 @Component
 public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor

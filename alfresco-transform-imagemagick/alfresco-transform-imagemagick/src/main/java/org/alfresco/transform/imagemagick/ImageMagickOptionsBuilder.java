@@ -32,8 +32,8 @@ import org.alfresco.transform.common.TransformException;
 import java.util.List;
 import java.util.StringJoiner;
 
-import static org.alfresco.transformer.util.Util.stringToBoolean;
-import static org.alfresco.transformer.util.Util.stringToInteger;
+import static org.alfresco.transform.base.util.Util.stringToBoolean;
+import static org.alfresco.transform.base.util.Util.stringToInteger;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 /**

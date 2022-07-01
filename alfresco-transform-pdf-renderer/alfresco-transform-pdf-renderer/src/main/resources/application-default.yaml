@@ -1,0 +1,7 @@
+queue:
+  engineRequestQueue: ${TRANSFORM_ENGINE_REQUEST_QUEUE:org.alfresco.transform.engine.alfresco-pdf-renderer.acs}
+transform:
+  core:
+    version: @project.version@
+    pdfrenderer:
+      exe: ${PDFRENDERER_EXE:/usr/bin/alfresco-pdf-renderer}

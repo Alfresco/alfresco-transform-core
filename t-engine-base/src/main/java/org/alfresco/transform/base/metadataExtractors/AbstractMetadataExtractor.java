@@ -29,6 +29,7 @@ package org.alfresco.transform.base.metadataExtractors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.common.TransformException;
 import org.slf4j.Logger;
 
@@ -49,6 +50,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+
+import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
 
 /**
  * Helper methods for metadata extract and embed.
@@ -93,7 +96,7 @@ import java.util.TreeMap;
  * @author Derek Hulley
  * @author adavis
  */
-public abstract class AbstractMetadataExtractor
+public abstract class AbstractMetadataExtractor implements CustomTransformer
 {
     private static final String EXTRACT = "extract";
     private static final String EMBED = "embed";
@@ -118,8 +121,16 @@ public abstract class AbstractMetadataExtractor
     private ThreadLocal<Map<String, Set<String>>> extractMapping = new ThreadLocal<>();
     private Map<String, Set<String>> embedMapping;
 
-    public AbstractMetadataExtractor(Logger logger)
+    public enum Type
     {
+        EXTRACTOR, EMBEDDER
+    }
+
+    private final Type type;
+
+    public AbstractMetadataExtractor(Type type, Logger logger)
+    {
+        this.type = type;
         this.logger = logger;
         defaultExtractMapping = Collections.emptyMap();
         embedMapping = Collections.emptyMap();
@@ -134,9 +145,22 @@ public abstract class AbstractMetadataExtractor
         }
     }
 
+    @Override
+    public String getTransformerName()
+    {
+        return getClass().getSimpleName();
+    }
+
     public abstract Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
                                                               File sourceFile) throws Exception;
 
+    public void embedMetadata(String sourceMimetype, Map<String, String> transformOptions,
+            String sourceEncoding, InputStream inputStream,
+            String targetEncoding, OutputStream outputStream) throws Exception
+    {
+        // TODO
+        throw new TransformException(500, "TODO embedMetadata");
+    }
     public void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
                               File sourceFile, File targetFile) throws Exception
     {
@@ -467,6 +491,21 @@ public abstract class AbstractMetadataExtractor
         // It passed all the tests
         destination.put(key, value);
         return true;
+    }
+
+    @Override
+    public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
+            String targetMimetype, String targetEncoding, OutputStream outputStream,
+            Map<String, String> transformOptions) throws Exception
+    {
+        if (type == EXTRACTOR)
+        {
+            extractMetadata(sourceMimetype, transformOptions, sourceEncoding, inputStream, targetEncoding, outputStream);
+        }
+        else
+        {
+            embedMetadata(sourceMimetype, transformOptions, sourceEncoding, inputStream, targetEncoding, outputStream);
+        }
     }
 
     public void extractMetadata(String sourceMimetype, Map<String, String> transformOptions,

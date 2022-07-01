@@ -44,6 +44,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -94,11 +96,11 @@ import static org.alfresco.transform.base.fs.FileManager.createTargetFileName;
 import static org.alfresco.transform.base.fs.FileManager.deleteFile;
 import static org.alfresco.transform.base.fs.FileManager.getFilenameFromContentDisposition;
 import static org.alfresco.transform.base.fs.FileManager.save;
-import static org.alfresco.transform.base.util.RequestParamMap.FILE;
-import static org.alfresco.transform.base.util.RequestParamMap.SOURCE_ENCODING;
-import static org.alfresco.transform.base.util.RequestParamMap.SOURCE_EXTENSION;
-import static org.alfresco.transform.base.util.RequestParamMap.SOURCE_MIMETYPE;
-import static org.alfresco.transform.base.util.RequestParamMap.TARGET_MIMETYPE;
+import static org.alfresco.transform.common.RequestParamMap.FILE;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_EXTENSION;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
+import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -176,6 +178,22 @@ public class TransformController
             customTransformers.forEach(customTransformer -> customTransformersByName.put(customTransformer.getTransformerName(),
                     customTransformer));
         }
+    }
+
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void startup()
+    {
+        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        if (transformEngines != null)
+        {
+            transformEngines.stream()
+                            .map(transformEngine -> transformEngine.getStartupMessage())
+                            .forEach(message -> Arrays.stream(message.split("\\n")).forEach(logger::info));
+        }
+        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+        logger.info("Starting application components... Done");
     }
 
     /**

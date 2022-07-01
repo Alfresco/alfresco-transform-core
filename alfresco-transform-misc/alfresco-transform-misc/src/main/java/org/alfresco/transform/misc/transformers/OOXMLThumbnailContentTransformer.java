@@ -26,6 +26,8 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.common.TransformException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.openxml4j.opc.PackageRelationship;
@@ -33,10 +35,12 @@ import org.apache.poi.openxml4j.opc.PackageRelationshipCollection;
 import org.apache.poi.openxml4j.opc.PackageRelationshipTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
@@ -53,12 +57,25 @@ import java.util.Map;
  * @author Nick Burch
  * @author eknizat
  */
-public class OOXMLThumbnailContentTransformer implements SelectableTransformer
+@Component
+public class OOXMLThumbnailContentTransformer implements CustomTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(
         OOXMLThumbnailContentTransformer.class);
 
+    public String getTransformerName()
+    {
+        return "ooXmlThumbnail";
+    }
+
     @Override
+    public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
+            String targetMimetype, String targetEncoding, OutputStream outputStream,
+            Map<String, String> transformOptions) throws Exception
+    {
+        throw new TransformException(500, "TODO ooXmlThumbnail transform");
+    }
+
     public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
                           final File sourceFile, final File targetFile) throws Exception
     {

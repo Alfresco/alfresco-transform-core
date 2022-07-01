@@ -43,8 +43,8 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.alfresco.transformer.util.RequestParamMap.PAGE_LIMIT;
-import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
+import static org.alfresco.transform.common.RequestParamMap.PAGE_LIMIT;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TextToPdfContentTransformerTest

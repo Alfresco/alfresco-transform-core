@@ -26,53 +26,59 @@
  */
 package org.alfresco.transform.misc;
 
+import com.google.common.collect.ImmutableMap;
 import org.alfresco.transform.base.TransformEngine;
 import org.alfresco.transform.base.probes.ProbeTestTransform;
 import org.alfresco.transform.common.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
+import static org.alfresco.transform.base.logging.StandardMessages.COMMUNITY_LICENCE;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 
 @Component
 public class MiscTransformEngine implements TransformEngine
 {
-    private static final String LICENCE =
-            "This transformer uses Tika from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt\n" +
-                    "This transformer uses ExifTool by Phil Harvey. See license at https://exiftool.org/#license. or in /Perl-Artistic-License.txt";
+    private final Map<String, String> transformOptions = ImmutableMap.of(SOURCE_ENCODING, "UTF-8");
 
     @Autowired
     private TransformConfigResourceReader transformConfigResourceReader;
-    @Value("${transform.core.config.location:classpath:engine_config.json}")
-    private String engineConfigLocation;
 
     @Override
     public String getTransformEngineName()
     {
-        return "0001-Tika";
+        return "0050-Misc";
     }
 
     @Override
-    public String getStartupMessage() {
-        return LICENCE;
+    public String getStartupMessage()
+    {
+        return COMMUNITY_LICENCE +
+                "This transformer uses libraries from Apache. " +
+                "See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\\\ 2.0.txt\\n" +
+                "Additional libraries used:\n" +
+                "* htmlparser http://htmlparser.sourceforge.net/license.html";
     }
 
     @Override
     public TransformConfig getTransformConfig()
     {
-        return transformConfigResourceReader.read(engineConfigLocation);
+        return transformConfigResourceReader.read("classpath:misc_engine_config.json");
     }
 
     @Override
     public ProbeTestTransform getLivenessAndReadinessProbeTestTransform()
     {
-        return new ProbeTestTransform("quick.pdf", "quick.txt",
-                MIMETYPE_PDF, MIMETYPE_TEXT_PLAIN, Collections.emptyMap(),
-                60, 16, 400, 10240, 60 * 30 + 1, 60 * 15 + 20);
+        return new ProbeTestTransform("quick.html", "quick.txt",
+                MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, transformOptions,
+                119, 30, 150, 1024, 60 * 2 + 1, 60 * 2);
     }
 }

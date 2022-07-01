@@ -38,9 +38,9 @@ import org.springframework.stereotype.Component;
 import java.io.Serializable;
 import java.util.Map;
 
+import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.tika.transformers.Tika.readTikaConfig;
-import static org.alfresco.transform.tika.metadataExtractors.AbstractTikaMetadataExtractor.Type.EXTRACTOR;
 
 /**
  * A Metadata Extractor which makes use of the Apache Tika auto-detection to select the best parser to extract the

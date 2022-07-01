@@ -24,7 +24,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.pdfRenderer;
+package org.alfresco.transform.pdfrenderer;
 
 import static org.alfresco.transformer.util.Util.stringToBoolean;
 import static org.alfresco.transformer.util.Util.stringToInteger;

@@ -35,9 +35,6 @@ import java.util.Map;
 
 import org.alfresco.transform.common.TransformException;
 
-/**
- *
- */
 public abstract class AbstractCommandExecutor implements CommandExecutor
 {
     protected RuntimeExec transformCommand = createTransformCommand();
@@ -64,28 +61,5 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
             throw new TransformException(INTERNAL_SERVER_ERROR.value(),
                 "Transformer failed to create an output file");
         }
-    }
-
-    @Override
-    public String version()
-    {
-        if (checkCommand != null)
-        {
-            final ExecutionResult result = checkCommand.execute();
-            if (result.getExitValue() != 0 && result.getStdErr() != null && result.getStdErr().length() > 0)
-            {
-                throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                    "Transformer version check exit code was not 0: \n" + result);
-            }
-
-            final String version = result.getStdOut().trim();
-            if (version.isEmpty())
-            {
-                throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                    "Transformer version check failed to create any output");
-            }
-            return version;
-        }
-        return "Version not checked";
     }
 }

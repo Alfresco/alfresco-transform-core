@@ -40,6 +40,12 @@ import java.io.Reader;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
+/**
+ * Reads {@link TransformConfig} from a {@json} file. Typically used by {@code TransformEngine.getTransformConfig()}.
+ * <pre>
+ *     transformConfigResourceReader.read("classpath:pdfrenderer_engine_config.json");
+ * </pre>
+ */
 @Component
 public class TransformConfigResourceReader
 {

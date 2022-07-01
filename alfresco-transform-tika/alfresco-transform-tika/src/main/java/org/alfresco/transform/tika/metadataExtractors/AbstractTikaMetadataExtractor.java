@@ -27,8 +27,8 @@
 package org.alfresco.transform.tika.metadataExtractors;
 
 import org.alfresco.transform.base.CustomTransformer;
-import org.alfresco.transform.common.TransformException;
 import org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor;
+import org.alfresco.transform.common.TransformException;
 import org.apache.tika.embedder.Embedder;
 import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.metadata.DublinCore;
@@ -69,8 +69,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.alfresco.transform.tika.metadataExtractors.AbstractTikaMetadataExtractor.Type.EXTRACTOR;
-
 /**
  * The parent of all Metadata Extractors which use Apache Tika under the hood. This handles all the
  * common parts of processing the files, and the common mappings.
@@ -101,17 +99,9 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
     private final DateTimeFormatter tikaUTCDateFormater;
     private final DateTimeFormatter tikaDateFormater;
 
-    public static enum Type
-    {
-        EXTRACTOR, EMBEDDER
-    }
-
-    private final Type type;
-
     public AbstractTikaMetadataExtractor(Type type, Logger logger)
     {
-        super(logger);
-        this.type = type;
+        super(type, logger);
 
         // TODO Once TIKA-451 is fixed this list will get nicer
         DateTimeParser[] parsersUTC = {
@@ -128,26 +118,6 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
 
         tikaUTCDateFormater = new DateTimeFormatterBuilder().append(null, parsersUTC).toFormatter().withZone(DateTimeZone.UTC);
         tikaDateFormater = new DateTimeFormatterBuilder().append(null, parsers).toFormatter();
-    }
-
-    @Override
-    public String getTransformerName() {
-        return getClass().getSimpleName();
-    }
-
-    @Override
-    public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
-            String targetMimetype, String targetEncoding, OutputStream outputStream,
-            Map<String, String> transformOptions) throws Exception
-    {
-        if (type == EXTRACTOR)
-        {
-            extractMetadata(sourceMimetype, transformOptions, sourceEncoding, inputStream, targetEncoding, outputStream);
-        }
-        else
-        {
-            embedMetadata(sourceMimetype, transformOptions, sourceEncoding, inputStream, targetEncoding, outputStream);
-        }
     }
 
     /**

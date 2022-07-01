@@ -41,10 +41,5 @@ public interface RequestParamMap extends org.alfresco.transform.common.RequestPa
     String TRANSFORM_NAME_PROPERTY = "transformName";
     String TRANSFORM_NAME_PARAMETER = "alfresco.transform-name-parameter";
 
-    String FILE = "file";
-    String SOURCE_EXTENSION         = "sourceExtension";
-    String SOURCE_MIMETYPE          = "sourceMimetype";
-    String TARGET_EXTENSION         = "targetExtension";
-    String TARGET_MIMETYPE          = "targetMimetype";
     String TEST_DELAY               = "testDelay";
 }

@@ -24,9 +24,11 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer.metadataExtractors;
+package org.alfresco.transform.misc.metadataExtractors;
 
-import org.alfresco.transform.misc.transformers.SelectableTransformer;
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor;
+import org.alfresco.transform.common.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,10 +41,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
 
 /**
  * Metadata extractor for HTML and XHTML.
@@ -61,7 +66,7 @@ import java.util.Map;
  * @author Derek Hulley
  * @author adavis
  */
-public class HtmlMetadataExtractor extends AbstractMetadataExtractor implements SelectableTransformer
+public class HtmlMetadataExtractor extends AbstractMetadataExtractor implements CustomTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(HtmlMetadataExtractor.class);
 
@@ -71,10 +76,22 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractor implements 
 
     public HtmlMetadataExtractor()
     {
-        super(logger);
+        super(EXTRACTOR, logger);
     }
 
     @Override
+    public String getTransformerName()
+    {
+        return getClass().getSimpleName();
+    }
+
+    @Override public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
+            String targetMimetype, String targetEncoding, OutputStream outputStream,
+            Map<String, String> transformOptions) throws Exception
+    {
+        throw new TransformException(500, "TODO HtmlMetadataExtractor transform");
+    }
+
     public void extractMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
                                 File sourceFile, File targetFile) throws Exception
     {

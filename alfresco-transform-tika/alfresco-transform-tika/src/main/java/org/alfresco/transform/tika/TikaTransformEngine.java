@@ -31,41 +31,38 @@ import org.alfresco.transform.base.probes.ProbeTestTransform;
 import org.alfresco.transform.common.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 
+import static org.alfresco.transform.base.logging.StandardMessages.COMMUNITY_LICENCE;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 
 @Component
 public class TikaTransformEngine implements TransformEngine
 {
-    private static final String LICENCE =
-            "This transformer uses Tika from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt\n" +
-            "This transformer uses ExifTool by Phil Harvey. See license at https://exiftool.org/#license. or in /Perl-Artistic-License.txt";
-
     @Autowired
     private TransformConfigResourceReader transformConfigResourceReader;
-    @Value("${transform.core.config.location:classpath:engine_config.json}")
-    private String engineConfigLocation;
 
     @Override
     public String getTransformEngineName()
     {
-        return "0001-Tika";
+        return "0010-Tika";
     }
 
     @Override
-    public String getStartupMessage() {
-        return LICENCE;
+    public String getStartupMessage()
+    {
+        return COMMUNITY_LICENCE +
+                "This transformer uses Tika from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt\n" +
+                "This transformer uses ExifTool by Phil Harvey. See license at https://exiftool.org/#license. or in /Perl-Artistic-License.txt";
     }
 
     @Override
     public TransformConfig getTransformConfig()
     {
-        return transformConfigResourceReader.read(engineConfigLocation);
+        return transformConfigResourceReader.read("classpath:tika_engine_config.json");
     }
 
     @Override

@@ -27,15 +27,20 @@
 package org.alfresco.transform.misc.transformers;
 
 import com.google.common.collect.ImmutableList;
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.common.TransformException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -58,7 +63,8 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
  * @author eknizat
  * @since 4.0
  */
-public class AppleIWorksContentTransformer implements SelectableTransformer
+@Component
+public class AppleIWorksContentTransformer implements CustomTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(
         AppleIWorksContentTransformer.class);
@@ -69,10 +75,22 @@ public class AppleIWorksContentTransformer implements SelectableTransformer
     private static final List<String> JPG_PATHS = ImmutableList.of(
         "QuickLook/Thumbnail.jpg", // iWorks 2008/9
         "preview.jpg");            // iWorks 2013/14 (720 x 552) We use the best quality image. Others are:
-    //                (225 x 173) preview-web.jpg
-    //                 (53 x  41) preview-micro.jpg
+                                   //                (225 x 173) preview-web.jpg
+                                   //                 (53 x  41) preview-micro.jpg
 
     @Override
+    public String getTransformerName()
+    {
+        return "appleIWorks";
+    }
+
+    @Override public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
+            String targetMimetype, String targetEncoding, OutputStream outputStream,
+            Map<String, String> transformOptions) throws Exception
+    {
+        throw new TransformException(500, "TODO appleIWorks transform");
+    }
+
     public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
                           final File sourceFile, final File targetFile)
     {

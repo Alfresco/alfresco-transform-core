@@ -20,12 +20,12 @@
     <dependencies>
         <dependency>
             <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-transformer-base</artifactId>
+            <artifactId>alfresco-t-engine-base</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-transformer-base</artifactId>
+            <artifactId>alfresco-t-engine-base</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>

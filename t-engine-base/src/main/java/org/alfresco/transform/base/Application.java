@@ -43,16 +43,13 @@ import org.springframework.context.event.EventListener;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.alfresco.transform.base.logging.StandardMessages.LICENCE;
+import static org.alfresco.transform.base.logging.StandardMessages.COMMUNITY_LICENCE;
 
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class})
 public class Application
 {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
-
-    @Autowired(required = false)
-    private List<TransformEngine> transformEngines;
 
     @Value("${container.name}")
     private String containerName;
@@ -66,20 +63,5 @@ public class Application
     public static void main(String[] args)
     {
         SpringApplication.run(Application.class, args);
-    }
-
-    @EventListener(ApplicationReadyEvent.class)
-    public void startup()
-    {
-        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-        Arrays.stream(LICENCE.split("\\n")).forEach(logger::info);
-        if (transformEngines != null) {
-            transformEngines.stream()
-                            .map(transformEngine -> transformEngine.getStartupMessage())
-                            .forEach(message -> Arrays.stream(message.split("\\n")).forEach(logger::info));
-        }
-        logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-
-        logger.info("Starting application components... Done");
     }
 }

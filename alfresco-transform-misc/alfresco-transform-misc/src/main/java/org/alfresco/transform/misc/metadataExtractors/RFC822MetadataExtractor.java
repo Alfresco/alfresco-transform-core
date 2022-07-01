@@ -24,9 +24,11 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transformer.metadataExtractors;
+package org.alfresco.transform.misc.metadataExtractors;
 
-import org.alfresco.transform.misc.transformers.SelectableTransformer;
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor;
+import org.alfresco.transform.common.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +40,7 @@ import javax.mail.internet.MimeUtility;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
@@ -45,6 +48,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
 
 /**
  * Metadata extractor for RFC822 mime emails.
@@ -66,9 +71,9 @@ import java.util.Set;
  * @author Derek Hulley
  * @author adavis
  */
-public class RFC822MetadataExtractor extends AbstractMetadataExtractor implements SelectableTransformer
+public class RFC822MetadataExtractor extends AbstractMetadataExtractor implements CustomTransformer
 {
-    private static final Logger logger = LoggerFactory.getLogger(HtmlMetadataExtractor.class);
+    private static final Logger logger = LoggerFactory.getLogger(RFC822MetadataExtractor.class);
 
     protected static final String KEY_MESSAGE_FROM = "messageFrom";
     protected static final String KEY_MESSAGE_TO = "messageTo";
@@ -79,10 +84,16 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractor implement
 
     public RFC822MetadataExtractor()
     {
-        super(logger);
+        super(EXTRACTOR, logger);
     }
 
-    @Override
+    @Override public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
+            String targetMimetype, String targetEncoding, OutputStream outputStream,
+            Map<String, String> transformOptions) throws Exception
+    {
+        throw new TransformException(500, "TODO RFC822MetadataExtractor transform");
+    }
+
     public void extractMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
                                 File sourceFile, File targetFile) throws Exception
     {

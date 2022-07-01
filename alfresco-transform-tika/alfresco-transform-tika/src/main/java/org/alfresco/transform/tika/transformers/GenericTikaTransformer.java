@@ -28,7 +28,7 @@ package org.alfresco.transform.tika.transformers;
 
 import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.logging.LogEntry;
-import org.alfresco.transform.base.util.RequestParamMap;
+import org.alfresco.transform.common.RequestParamMap;
 import org.alfresco.transform.common.TransformException;
 import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.parser.Parser;

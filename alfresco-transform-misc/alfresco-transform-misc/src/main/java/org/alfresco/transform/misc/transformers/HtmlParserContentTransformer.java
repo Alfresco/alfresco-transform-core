@@ -26,15 +26,20 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.common.TransformException;
 import org.htmlparser.Parser;
 import org.htmlparser.beans.StringBean;
 import org.htmlparser.util.ParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URLConnection;
@@ -71,12 +76,26 @@ import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
  * @see org.htmlparser.beans.StringBean
  * @see <a href="http://sourceforge.net/tracker/?func=detail&aid=1644504&group_id=24399&atid=381401">HTML Parser</a>
  */
-public class HtmlParserContentTransformer implements SelectableTransformer
+@Component
+public class HtmlParserContentTransformer implements CustomTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(
         HtmlParserContentTransformer.class);
 
     @Override
+    public String getTransformerName()
+    {
+        return "html";
+    }
+
+    @Override
+    public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
+            String targetMimetype, String targetEncoding, OutputStream outputStream,
+            Map<String, String> transformOptions) throws Exception
+    {
+        throw new TransformException(500, "TODO html transform");
+    }
+
     public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
                           final File sourceFile, final File targetFile) throws Exception
     {
