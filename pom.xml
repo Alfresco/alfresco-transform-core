@@ -3,6 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
+    <name>Alfresco Transform Core</name>
     <version>2.6.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -41,90 +42,72 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>t-engine-base</module>
-                <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick</module>
-                <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot</module>
-                <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice</module>
-                <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice-boot</module>
-                <module>alfresco-transform-misc/alfresco-transform-misc</module>
-                <module>alfresco-transform-misc/alfresco-transform-misc-boot</module>
-                <module>alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer</module>
-                <module>alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer-boot</module>
-                <module>alfresco-transform-tika/alfresco-transform-tika</module>
-                <module>alfresco-transform-tika/alfresco-transform-tika-boot</module>
-                <module>alfresco-transform-core-aio/alfresco-transform-core-aio</module>
-                <module>alfresco-transform-core-aio/alfresco-transform-core-aio-boot</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/imagemagick</module>
+                <module>engines/libreoffice</module>
+                <module>engines/misc</module>
+                <module>engines/pdfrenderer</module>
+                <module>engines/tika</module>
+                <module>engines/aio</module>
+                <module>deprecated/alfresco-transformer-base</module>
             </modules>
         </profile>
         <profile>
             <id>base</id>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>t-engine-base</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>deprecated/alfresco-transformer-base</module>
             </modules>
         </profile>
         <profile>
             <id>imagemagick</id>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>t-engine-base</module>
-                <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick</module>
-                <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/imagemagick</module>
             </modules>
         </profile>
         <profile>
             <id>libreoffice</id>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>t-engine-base</module>
-                <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice</module>
-                <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice-boot</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/libreoffice</module>
             </modules>
         </profile>
         <profile>
             <id>misc</id>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>t-engine-base</module>
-                <module>alfresco-transform-misc/alfresco-transform-misc</module>
-                <module>alfresco-transform-misc/alfresco-transform-misc-boot</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/misc</module>
             </modules>
         </profile>
         <profile>
             <id>pdf-renderer</id>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>t-engine-base</module>
-                <module>alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer</module>
-                <module>alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer-boot</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/pdfrenderer</module>
             </modules>
         </profile>
         <profile>
             <id>tika</id>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>t-engine-base</module>
-                <module>alfresco-transform-tika/alfresco-transform-tika</module>
-                <module>alfresco-transform-tika/alfresco-transform-tika-boot</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/tika</module>
             </modules>
         </profile>
         <profile>
             <!-- Should only be run after all other snapshot images have been build  -->
             <id>aio-test</id>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>t-engine-base</module>
-                <module>alfresco-transform-core-aio/alfresco-transform-core-aio</module>
-                <module>alfresco-transform-core-aio/alfresco-transform-core-aio-boot</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/aio</module>
             </modules>
         </profile>
     </profiles>

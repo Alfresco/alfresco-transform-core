@@ -9,15 +9,15 @@ Contains the common transformer (T-Engine) code, plus a few implementations.
  configuration files and messages sent between clients, T-Engines and T-Router. Also contains code to
  work out which transform should be used for a combination of configuration files; see the sub-project's
   [README](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-transform-model/README.md)
-* `alfresco-t-engine-base` - library packaged as a jar file which contains code that is common
+* `alfresco-base-t-engine` - library packaged as a jar file which contains code that is common
   to all the transformers; see the sub-project's
-  [README](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-t-engine-base/README.md)
+  [README](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-base-t-engine/README.md)
 * `alfresco-transform-<name>` - multiple T-Engines; each one of them builds both a SpringBoot fat jar
  and a [Docker image](https://github.com/Alfresco/alfresco-transform-core#docker)
  
 ### Documentation
 
-In addition to the subprojects (such as `alfresco-t-engine-base` README above) some additional documentation can be found in:
+In addition to the subprojects (such as `alfresco-base-t-engine` README above) some additional documentation can be found in:
 
 * [this project's docs](docs) folder
 * [ACS Packaging docs](https://github.com/Alfresco/acs-packaging/tree/master/docs) folder
@@ -49,7 +49,7 @@ The artifacts can be obtained by:
 
 <dependency>
     <groupId>org.alfresco</groupId>
-    <artifactId>alfresco-t-engine-base</artifactId>
+    <artifactId>alfresco-base-t-engine</artifactId>
     <version>version</version>
 </dependency>
 ```
