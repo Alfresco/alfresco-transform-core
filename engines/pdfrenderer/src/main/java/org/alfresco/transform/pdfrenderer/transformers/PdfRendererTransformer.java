@@ -26,9 +26,10 @@
  */
 package org.alfresco.transform.pdfrenderer.transformers;
 
-import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.executors.AbstractCommandExecutor;
 import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.alfresco.transform.common.TransformException;
 import org.alfresco.transform.pdfrenderer.PdfRendererOptionsBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,7 +55,7 @@ import static org.alfresco.transform.common.RequestParamMap.WIDTH_REQUEST_PARAM;
  * transformation logic as a separate Shell process.
  */
 @Component
-public class PdfRendererTransformer extends AbstractCommandExecutor implements CustomTransformer
+public class PdfRendererTransformer extends AbstractCommandExecutor implements CustomTransformerFileAdaptor
 {
     @Value("${transform.core.pdfrenderer.exe}")
     private String exe;
@@ -103,14 +104,7 @@ public class PdfRendererTransformer extends AbstractCommandExecutor implements C
     }
 
     @Override
-    public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
-            String targetMimetype, String targetEncoding, OutputStream outputStream,
-            Map<String, String> transformOptions) throws Exception
-    {
-        throw new TransformException(500, "TODO PdfRenderer transform");
-    }
-    public void transform(String transformName, String sourceMimetype, String targetMimetype,
-                          Map<String, String> transformOptions,
+    public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
                           File sourceFile, File targetFile) throws TransformException
     {
         final String options = PdfRendererOptionsBuilder

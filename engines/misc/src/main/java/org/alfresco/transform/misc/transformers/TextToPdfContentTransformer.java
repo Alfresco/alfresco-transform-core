@@ -26,8 +26,8 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import org.alfresco.transform.base.CustomTransformer;
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -66,7 +66,7 @@ import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
  * @author eknizat
  */
 @Component
-public class TextToPdfContentTransformer implements CustomTransformer
+public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
 {
     private static final Logger logger = LoggerFactory.getLogger(TextToPdfContentTransformer.class);
 
@@ -113,17 +113,13 @@ public class TextToPdfContentTransformer implements CustomTransformer
         return "textToPdf";
     }
 
-    @Override public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
-            String targetMimetype, String targetEncoding, OutputStream outputStream,
-            Map<String, String> transformOptions) throws Exception
-    {
-        throw new TransformException(500, "TODO textToPdf transform");
-    }
-    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
+    @Override
+    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String,
+                          String> transformOptions,
                           final File sourceFile, final File targetFile) throws Exception
     {
-        String sourceEncoding = parameters.get(SOURCE_ENCODING);
-        String stringPageLimit = parameters.get(PAGE_LIMIT);
+        String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
+        String stringPageLimit = transformOptions.get(PAGE_LIMIT);
         int pageLimit = -1;
         if (stringPageLimit != null)
         {

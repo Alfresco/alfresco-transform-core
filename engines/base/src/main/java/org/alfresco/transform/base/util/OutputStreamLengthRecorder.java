@@ -24,35 +24,35 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform;
+package org.alfresco.transform.base.util;
 
-import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transformer.probes.ProbeTestTransform;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-import java.util.Set;
-
-/**
- * The interface to the custom transform code applied on top of a base t-engine.
- */
-public interface TransformEngine
+public class OutputStreamLengthRecorder extends FilterOutputStream
 {
-    /**
-     * @return the name of the t-engine. The t-router reads config from t-engines in name order.
-     */
-    String getTransformEngineName();
+    private long byteCount;
 
-    /**
-     * @return a definition of what the t-engine supports. Normally read from a json Resource on the classpath.
-     */
-    TransformConfig getTransformConfig();
+    public OutputStreamLengthRecorder(OutputStream outputStream)
+    {
+        super(outputStream);
+    }
 
-    /**
-     * @return actual transform codes.
-     */
-    Set<CustomTransformer> getTransformers();
+    public long getLength()
+    {
+        return byteCount;
+    }
 
-    /**
-     * @return a ProbeTestTransform (will do a quick transform) for k8 liveness and readiness probes.
-     */
-    ProbeTestTransform getLivenessAndReadinessProbeTestTransform();
+    public void write(int b) throws IOException
+    {
+        super.write(b);
+        byteCount++;
+    }
+
+    public void write(byte b[], int off, int len) throws IOException
+    {
+        super.write(b, off, len);
+        byteCount += len;
+    }
 }

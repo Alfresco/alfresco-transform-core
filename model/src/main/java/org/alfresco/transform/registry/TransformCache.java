@@ -74,19 +74,19 @@ public class TransformCache
         return transforms;
     }
 
-    public void cache(final String transformerName, final String sourceMimetype,
+    public void cache(final String renditionName, final String sourceMimetype,
         final List<SupportedTransform> transformListBySize)
     {
         cachedSupportedTransformList
-            .get(transformerName)
+            .get(renditionName)
             .put(sourceMimetype, transformListBySize);
     }
 
-    public List<SupportedTransform> retrieveCached(final String transformerName,
+    public List<SupportedTransform> retrieveCached(final String renditionName,
         final String sourceMimetype)
     {
         return cachedSupportedTransformList
-            .computeIfAbsent(transformerName, k -> new ConcurrentHashMap<>())
+            .computeIfAbsent(renditionName, k -> new ConcurrentHashMap<>())
             .get(sourceMimetype);
     }
 

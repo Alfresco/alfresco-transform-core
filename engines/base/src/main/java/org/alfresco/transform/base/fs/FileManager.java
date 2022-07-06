@@ -26,6 +26,8 @@
  */
 package org.alfresco.transform.base.fs;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.alfresco.transform.common.ExtensionService.getExtensionForMimetype;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
@@ -35,9 +37,11 @@ import static org.springframework.util.StringUtils.getFilenameExtension;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
@@ -58,11 +62,43 @@ public class FileManager
     public static final String TARGET_FILE = "targetFile";
     private static final String FILENAME = "filename=";
 
-    public static File createTargetFile(HttpServletRequest request, String filename)
+    public static File createSourceFile(HttpServletRequest request, InputStream inputStream, String sourceMimetype)
     {
-        File file = buildFile(filename);
-        request.setAttribute(TARGET_FILE, file);
-        return file;
+        try
+        {
+            String extension = "."+getExtensionForMimetype(sourceMimetype);
+            File file = TempFileProvider.createTempFile("source_", extension);
+            Files.copy(inputStream, file.toPath(), REPLACE_EXISTING);
+            if (request != null)
+            {
+                request.setAttribute(SOURCE_FILE, file);
+            }
+            LogEntry.setSource(file.getName(), file.length());
+            return file;
+        }
+        catch (Exception e)
+        {
+            throw new TransformException(INSUFFICIENT_STORAGE.value(), "Failed to store the source file", e);
+        }
+    }
+
+    public static File createTargetFile(HttpServletRequest request, String sourceMimetype, String targetMimetype)
+    {
+        try
+        {
+            String extension = "."+ExtensionService.getExtensionForTargetMimetype(targetMimetype, sourceMimetype);
+            File file = TempFileProvider.createTempFile("target_", extension);
+            if (request != null)
+            {
+                request.setAttribute(TARGET_FILE, file);
+            }
+            LogEntry.setTarget(file.getName());
+            return file;
+        }
+        catch (Exception e)
+        {
+            throw new TransformException(INSUFFICIENT_STORAGE.value(), "Failed to create the target file", e);
+        }
     }
 
     public static File buildFile(String filename)
@@ -97,8 +133,7 @@ public class FileManager
     {
         try
         {
-            Files.copy(multipartFile.getInputStream(), file.toPath(),
-                StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(multipartFile.getInputStream(), file.toPath(), REPLACE_EXISTING);
         }
         catch (IOException e)
         {
@@ -111,7 +146,7 @@ public class FileManager
     {
         try
         {
-            Files.copy(body.getInputStream(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(body.getInputStream(), file.toPath(), REPLACE_EXISTING);
         }
         catch (IOException e)
         {
@@ -176,16 +211,46 @@ public class FileManager
         return sourceFilename.substring(0, sourceFilename.length() - ext.length() - 1) + '.' + targetExtension;
     }
 
-    public static File createSourceFile(HttpServletRequest request, MultipartFile multipartFile)
+    public static InputStream getMultipartFileInputStream(MultipartFile sourceMultipartFile)
     {
-        String filename = multipartFile.getOriginalFilename();
-        long size = multipartFile.getSize();
-        filename = checkFilename(true, filename);
-        File file = TempFileProvider.createTempFile("source_", "_" + filename);
-        request.setAttribute(SOURCE_FILE, file);
-        save(multipartFile, file);
-        LogEntry.setSource(filename, size);
-        return file;
+        InputStream inputStream;
+        if (sourceMultipartFile ==  null)
+        {
+            throw new TransformException(BAD_REQUEST.value(), "Required request part 'file' is not present");
+        }
+        try
+        {
+            inputStream = sourceMultipartFile.getInputStream();
+        }
+        catch (IOException e)
+        {
+            throw new TransformException(BAD_REQUEST.value(), "Unable to read the sourceMultipartFile.", e);
+        }
+        return inputStream;
+    }
+
+    public static InputStream getDirectAccessUrlInputStream(String directUrl)
+    {
+        try
+        {
+            return new URL(directUrl).openStream();
+        }
+        catch (IOException e)
+        {
+            throw new TransformException(BAD_REQUEST.value(), "Direct Access Url is invalid.", e);
+        }
+    }
+
+    public static void copyFileToOutputStream(File targetFile, OutputStream outputStream)
+    {
+        try
+        {
+            Files.copy(targetFile.toPath(), outputStream);
+        }
+        catch (IOException e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR.value(), "Failed to copy targetFile to outputStream.", e);
+        }
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

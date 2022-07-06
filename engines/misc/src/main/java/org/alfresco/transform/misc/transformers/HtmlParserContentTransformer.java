@@ -26,8 +26,7 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import org.alfresco.transform.base.CustomTransformer;
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.htmlparser.Parser;
 import org.htmlparser.beans.StringBean;
 import org.htmlparser.util.ParserException;
@@ -38,8 +37,6 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URLConnection;
@@ -77,7 +74,7 @@ import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
  * @see <a href="http://sourceforge.net/tracker/?func=detail&aid=1644504&group_id=24399&atid=381401">HTML Parser</a>
  */
 @Component
-public class HtmlParserContentTransformer implements CustomTransformer
+public class HtmlParserContentTransformer implements CustomTransformerFileAdaptor
 {
     private static final Logger logger = LoggerFactory.getLogger(
         HtmlParserContentTransformer.class);
@@ -89,17 +86,11 @@ public class HtmlParserContentTransformer implements CustomTransformer
     }
 
     @Override
-    public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
-            String targetMimetype, String targetEncoding, OutputStream outputStream,
-            Map<String, String> transformOptions) throws Exception
-    {
-        throw new TransformException(500, "TODO html transform");
-    }
-
-    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
+    public void transform(final String sourceMimetype, final String targetMimetype,
+                          final Map<String, String> transformOptions,
                           final File sourceFile, final File targetFile) throws Exception
     {
-        String sourceEncoding = parameters.get(SOURCE_ENCODING);
+        String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
         checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
 
         if (logger.isDebugEnabled())

@@ -26,8 +26,7 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import org.alfresco.transform.base.CustomTransformer;
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -37,9 +36,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
@@ -64,7 +61,7 @@ import static org.alfresco.transform.common.RequestParamMap.TARGET_ENCODING;
  * @author eknizat
  */
 @Component
-public class StringExtractingContentTransformer implements CustomTransformer
+public class StringExtractingContentTransformer implements CustomTransformerFileAdaptor
 {
     private static final Logger logger = LoggerFactory.getLogger(StringExtractingContentTransformer.class);
 
@@ -82,18 +79,11 @@ public class StringExtractingContentTransformer implements CustomTransformer
      * be unformatted but valid.
      */
     @Override
-    public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
-            String targetMimetype, String targetEncoding, OutputStream outputStream,
-            Map<String, String> transformOptions) throws Exception
-    {
-        throw new TransformException(500, "TODO string transform");
-    }
-
-    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
+    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> transformOptions,
                           final File sourceFile, final File targetFile) throws Exception
     {
-        String sourceEncoding = parameters.get(SOURCE_ENCODING);
-        String targetEncoding = parameters.get(TARGET_ENCODING);
+        String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
+        String targetEncoding = transformOptions.get(TARGET_ENCODING);
 
         if (logger.isDebugEnabled())
         {

@@ -26,9 +26,8 @@
  */
 package org.alfresco.transform.tika.metadataExtractors;
 
-import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor;
-import org.alfresco.transform.common.TransformException;
 import org.apache.tika.embedder.Embedder;
 import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.metadata.DublinCore;
@@ -54,7 +53,6 @@ import org.xml.sax.Locator;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -84,7 +82,7 @@ import java.util.stream.Stream;
  * @author Nick Burch
  * @author adavis
  */
-public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtractor implements CustomTransformer
+public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtractor
 {
     protected static final String KEY_AUTHOR = "author";
     protected static final String KEY_TITLE = "title";
@@ -310,22 +308,15 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
         return rawProperties;
     }
 
-    public void embedMetadata(String sourceMimetype, Map<String, String> transformOptions,
-            String sourceEncoding, InputStream inputStream,
-            String targetEncoding, OutputStream outputStream) throws Exception
-    {
-        // TODO
-        throw new TransformException(500, "TODO embedMetadata");
-    }
-
     /**
      * @deprecated The content repository's TikaPoweredMetadataExtracter provides no non test implementations.
      *             This code exists in case there are custom implementations, that need to be converted to T-Engines.
      *             It is simply a copy and paste from the content repository and has received limited testing.
      */
     @Override
-    public void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                              File sourceFile, File targetFile) throws Exception
+    public void embedMetadata(String sourceMimetype, InputStream inputStream,
+            String targetMimetype, OutputStream outputStream,
+            Map<String, String> transformOptions, TransformManager transformManager) throws Exception
     {
         Embedder embedder = getEmbedder();
         if (embedder == null)
@@ -334,12 +325,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
         }
 
         Metadata metadataToEmbed = getTikaMetadata(transformOptions);
-
-        try (InputStream inputStream = new FileInputStream(sourceFile);
-             OutputStream outputStream = new FileOutputStream(targetFile))
-        {
-            embedder.embed(metadataToEmbed, inputStream, outputStream, null);
-        }
+        embedder.embed(metadataToEmbed, inputStream, outputStream, null);
     }
 
     private Metadata getTikaMetadata(Map<String, String> transformOptions)

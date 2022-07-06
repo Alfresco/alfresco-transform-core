@@ -24,15 +24,32 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform;
+package org.alfresco.transform.base.util;
 
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformManager;
+
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
-public interface CustomTransformer
+/**
+ * Helper interface for older code that uses Files rather than InputStreams and OutputStreams.
+ * If you, can refactor your code to NOT use Files.
+ */
+public interface CustomTransformerFileAdaptor extends CustomTransformer
 {
-    void transform(String transformerName, String sourceMimetype, String targetMimetype,
-                   Map<String, String> transformOptions,
-                   InputStream inputStream, OutputStream outputStream) throws Exception;
+    @Override
+    default void transform(String sourceMimetype, InputStream inputStream,
+            String targetMimetype, OutputStream outputStream,
+            Map<String, String> transformOptions, TransformManager transformManager) throws Exception
+    {
+        File sourceFile = transformManager.createSourceFile();
+        File targetFile = transformManager.createTargetFile();
+        transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+    }
+
+    void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+            File sourceFile, File targetFile) throws Exception;
 }

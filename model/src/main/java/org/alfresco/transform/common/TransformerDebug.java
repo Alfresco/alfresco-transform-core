@@ -80,9 +80,14 @@ public class TransformerDebug
 
     public void pushTransform(String reference, String sourceMimetype, String targetMimetype, File sourceFile, String transformerName)
     {
+        final long sourceSizeInBytes = sourceFile.length();
+        pushTransform(reference, sourceMimetype, targetMimetype, sourceSizeInBytes, transformerName);
+    }
+
+    public void pushTransform(String reference, String sourceMimetype, String targetMimetype, long sourceSizeInBytes, String transformerName)
+    {
         if (logger.isDebugEnabled())
         {
-            final long sourceSizeInBytes = sourceFile.length();
             String message = getPaddedReference(reference) +
                     getMimetypeExt(sourceMimetype) +
                     getTargetMimetypeExt(targetMimetype, sourceMimetype) + ' ' +

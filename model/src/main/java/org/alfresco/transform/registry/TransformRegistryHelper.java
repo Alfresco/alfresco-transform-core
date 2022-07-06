@@ -75,20 +75,20 @@ class TransformRegistryHelper
     // been discarded.
     static List<SupportedTransform> retrieveTransformListBySize(final TransformCache data,
         final String sourceMimetype, final String targetMimetype,
-        Map<String, String> actualOptions, String transformerName)
+        Map<String, String> actualOptions, String renditionName)
     {
         if (actualOptions == null)
         {
             actualOptions = emptyMap();
         }
-        if (transformerName != null && transformerName.trim().isEmpty())
+        if (renditionName != null && renditionName.trim().isEmpty())
         {
-            transformerName = null;
+            renditionName = null;
         }
 
         final List<SupportedTransform> cachedTransformList =
-            transformerName == null ? null :
-            data.retrieveCached(transformerName, sourceMimetype);
+            renditionName == null ? null :
+            data.retrieveCached(renditionName, sourceMimetype);
         if (cachedTransformList != null)
         {
             return cachedTransformList;
@@ -99,9 +99,9 @@ class TransformRegistryHelper
             targetMimetype,
             filterTimeout(actualOptions));
 
-        if (transformerName != null)
+        if (renditionName != null)
         {
-            data.cache(transformerName, sourceMimetype, builtTransformList);
+            data.cache(renditionName, sourceMimetype, builtTransformList);
         }
 
         return builtTransformList;
@@ -111,13 +111,12 @@ class TransformRegistryHelper
         final TransformCache data, final String sourceMimetype, final String targetMimetype,
         final Map<String, String> actualOptions)
     {
-
-        if(sourceMimetype == null)
+        if (sourceMimetype == null)
         {
           throw new TransformException(400, "Null value provided for sourceMimetype, please provide a value");
         }
 
-        if(targetMimetype == null)
+        if (targetMimetype == null)
         {
           throw new TransformException(400, "Null value provided for tragetMimetype, please provide a value");
         }

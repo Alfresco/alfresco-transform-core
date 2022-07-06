@@ -26,9 +26,9 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.fs.FileManager;
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -69,7 +69,7 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
  * </p>
  */
 @Component
-public class EMLTransformer implements CustomTransformer
+public class EMLTransformer implements CustomTransformerFileAdaptor
 {
     private static final Logger logger = LoggerFactory.getLogger(EMLTransformer.class);
 
@@ -82,15 +82,9 @@ public class EMLTransformer implements CustomTransformer
         return "rfc822";
     }
 
-    @Override public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
-            String targetMimetype, String targetEncoding, OutputStream outputStream,
-            Map<String, String> transformOptions) throws Exception
-    {
-        throw new TransformException(500, "TODO rfc822 transform");
-    }
-
-    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
-                          final File sourceFile, final File targetFile) throws Exception
+    @Override
+    public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                          File sourceFile, File targetFile) throws Exception
     {
         logger.debug("Performing RFC822 to text transform.");
         // Use try with resource

@@ -33,7 +33,8 @@ import org.alfresco.transform.base.probes.ProbeTestTransform;
 /**
  * Interface to be implemented by transform specific code. Provides information about the t-engine as a whole.
  * Also see {@link CustomTransformer} which provides the code that performs transformation. There may be several
- * in a single t-engine.
+ * in a single t-engine. So that it is automatically picked up, it must exist in a package under
+ * {@code org.alfresco.transform} and have the Spring {@code @Component} annotation.
  */
 public interface TransformEngine
 {

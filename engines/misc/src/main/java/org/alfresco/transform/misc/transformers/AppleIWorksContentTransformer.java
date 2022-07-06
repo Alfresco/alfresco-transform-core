@@ -27,8 +27,8 @@
 package org.alfresco.transform.misc.transformers;
 
 import com.google.common.collect.ImmutableList;
-import org.alfresco.transform.base.CustomTransformer;
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.slf4j.Logger;
@@ -64,7 +64,7 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
  * @since 4.0
  */
 @Component
-public class AppleIWorksContentTransformer implements CustomTransformer
+public class AppleIWorksContentTransformer implements CustomTransformerFileAdaptor
 {
     private static final Logger logger = LoggerFactory.getLogger(
         AppleIWorksContentTransformer.class);
@@ -84,15 +84,9 @@ public class AppleIWorksContentTransformer implements CustomTransformer
         return "appleIWorks";
     }
 
-    @Override public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
-            String targetMimetype, String targetEncoding, OutputStream outputStream,
-            Map<String, String> transformOptions) throws Exception
-    {
-        throw new TransformException(500, "TODO appleIWorks transform");
-    }
-
-    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
-                          final File sourceFile, final File targetFile)
+    @Override
+    public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                          File sourceFile, File targetFile)
     {
         logger.debug("Performing IWorks to jpeg transform with sourceMimetype={} targetMimetype={}",
             sourceMimetype, targetMimetype);

@@ -49,7 +49,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class GenericTikaTransformerTest
 {
-    private class TikaTestTransformer extends GenericTikaTransformer
+    private static class TikaTestTransformer extends GenericTikaTransformer
     {
         @Override
         protected Parser getParser()
@@ -61,7 +61,7 @@ public class GenericTikaTransformerTest
         {
             this.notExtractBookmarksTextDefault = notExtractBookmarksTextDefault;
         }
-    };
+    }
 
     @Test
     public void testNotExtractBookmarkTextDefault() throws Exception
@@ -83,9 +83,9 @@ public class GenericTikaTransformerTest
         Map<String, String> transformOptions = new HashMap<>();
 
         // use empty transformOptions to test defaults
-        executorSpyDefaultTrue.transform(transformName, sourceMimetype, targetMimetype, transformOptions,
+        executorSpyDefaultTrue.transform(sourceMimetype, targetMimetype, transformOptions,
                 mockSourceFile, mockTargetFile);
-        executorSpyDefaultFalse.transform(transformName, sourceMimetype, targetMimetype, transformOptions,
+        executorSpyDefaultFalse.transform(sourceMimetype, targetMimetype, transformOptions,
                 mockSourceFile, mockTargetFile);
 
         // when default set to true, with no options passed we should get a call method with NOT_EXTRACT_BOOKMARKS_TEXT
@@ -99,9 +99,9 @@ public class GenericTikaTransformerTest
         // use transforms with notExtractBookmarksText set to true
         clearInvocations(executorSpyDefaultTrue, executorSpyDefaultFalse);
         transformOptions.put("notExtractBookmarksText", "true");
-        executorSpyDefaultTrue.transform(transformName, sourceMimetype, targetMimetype, transformOptions,
+        executorSpyDefaultTrue.transform(sourceMimetype, targetMimetype, transformOptions,
                 mockSourceFile, mockTargetFile);
-        executorSpyDefaultFalse.transform(transformName, sourceMimetype, targetMimetype, transformOptions,
+        executorSpyDefaultFalse.transform(sourceMimetype, targetMimetype, transformOptions,
                 mockSourceFile, mockTargetFile);
 
         // both call methods should have NOT_EXTRACT_BOOKMARKS_TEXT
@@ -114,8 +114,8 @@ public class GenericTikaTransformerTest
         // use transforms with notExtractBookmarksText set to false
         clearInvocations(executorSpyDefaultTrue, executorSpyDefaultFalse);
         transformOptions.replace("notExtractBookmarksText", "true", "false");
-        executorSpyDefaultTrue.transform(transformName, sourceMimetype, targetMimetype, transformOptions, mockSourceFile, mockTargetFile);
-        executorSpyDefaultFalse.transform(transformName, sourceMimetype, targetMimetype, transformOptions, mockSourceFile, mockTargetFile);
+        executorSpyDefaultTrue.transform(sourceMimetype, targetMimetype, transformOptions, mockSourceFile, mockTargetFile);
+        executorSpyDefaultFalse.transform(sourceMimetype, targetMimetype, transformOptions, mockSourceFile, mockTargetFile);
 
         // both call methods should have NOT_EXTRACT_BOOKMARKS_TEXT
         verify(executorSpyDefaultTrue, times(1)).call(mockSourceFile, mockTargetFile, transformName, null, null,
@@ -124,11 +124,11 @@ public class GenericTikaTransformerTest
         verify(executorSpyDefaultFalse, times(1)).call(mockSourceFile, mockTargetFile, transformName, null, null,
                 TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + defaultEncoding);
 
-        // use full set of pdfbox transformOptions just to be safe
+        // useful set of pdfbox transformOptions just to be safe
         clearInvocations(executorSpyDefaultTrue, executorSpyDefaultFalse);
         transformOptions.put("targetEncoding", "anyEncoding");
-        executorSpyDefaultTrue.transform(transformName, sourceMimetype, targetMimetype, transformOptions, mockSourceFile, mockTargetFile);
-        executorSpyDefaultFalse.transform(transformName, sourceMimetype, targetMimetype, transformOptions, mockSourceFile, mockTargetFile);
+        executorSpyDefaultTrue.transform(sourceMimetype, targetMimetype, transformOptions, mockSourceFile, mockTargetFile);
+        executorSpyDefaultFalse.transform(sourceMimetype, targetMimetype, transformOptions, mockSourceFile, mockTargetFile);
 
         // both call methods should have NOT_EXTRACT_BOOKMARKS_TEXT but the encoding will change
         verify(executorSpyDefaultTrue, times(1)).call(mockSourceFile, mockTargetFile, transformName, null, null,

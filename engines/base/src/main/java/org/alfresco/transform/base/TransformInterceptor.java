@@ -55,7 +55,6 @@ public class TransformInterceptor extends HandlerInterceptorAdapter
     public void afterCompletion(HttpServletRequest request,
         HttpServletResponse response, Object handler, Exception ex)
     {
-        // TargetFile cannot be deleted until completion, otherwise 0 bytes are sent.
         deleteFile(request, SOURCE_FILE);
         deleteFile(request, TARGET_FILE);
 

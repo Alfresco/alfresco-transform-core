@@ -26,11 +26,12 @@
  */
 package org.alfresco.transform.imagemagick.transformers;
 
-import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.executors.AbstractCommandExecutor;
 import org.alfresco.transform.base.executors.RuntimeExec;
-import org.alfresco.transform.imagemagick.ImageMagickOptionsBuilder;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.imagemagick.ImageMagickOptionsBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +64,7 @@ import static org.alfresco.transform.common.RequestParamMap.THUMBNAIL;
 import static org.alfresco.transform.common.RequestParamMap.TIMEOUT;
 
 @Component
-public class ImageMagickTransformer extends AbstractCommandExecutor implements CustomTransformer
+public class ImageMagickTransformer extends AbstractCommandExecutor implements CustomTransformerFileAdaptor
 {
     @Value("${transform.core.imagemagick.exe}")
     private String exe;
@@ -150,14 +151,7 @@ public class ImageMagickTransformer extends AbstractCommandExecutor implements C
     }
 
     @Override
-    public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
-            String targetMimetype, String targetEncoding, OutputStream outputStream,
-            Map<String, String> transformOptions) throws Exception
-    {
-        throw new TransformException(500, "TODO ImageMagick transform");
-    }
-    public void transform(String transformName, String sourceMimetype, String targetMimetype,
-                          Map<String, String> transformOptions,
+    public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
                           File sourceFile, File targetFile) throws TransformException
     {
         final String options = ImageMagickOptionsBuilder

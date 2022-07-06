@@ -26,7 +26,9 @@
  */
 package org.alfresco.transform.base;
 
+import org.alfresco.transform.base.fs.FileManager;
 import org.alfresco.transform.base.probes.ProbeTestTransform;
+import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
 import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
@@ -38,7 +40,6 @@ import org.alfresco.transform.common.TransformException;
 import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.model.FileRefResponse;
-import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
@@ -65,13 +66,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -82,6 +86,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.joining;
+import static org.alfresco.transform.base.fs.FileManager.createTargetFile;
+import static org.alfresco.transform.common.RequestParamMap.TARGET_ENCODING;
 import static org.alfresco.transform.config.CoreVersionDecorator.setOrClearCoreVersion;
 import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
 import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION;
@@ -89,11 +95,7 @@ import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAU
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
 import static org.alfresco.transform.base.fs.FileManager.TempFileProvider.createTempFile;
-import static org.alfresco.transform.base.fs.FileManager.buildFile;
-import static org.alfresco.transform.base.fs.FileManager.createAttachment;
-import static org.alfresco.transform.base.fs.FileManager.createSourceFile;
-import static org.alfresco.transform.base.fs.FileManager.createTargetFile;
-import static org.alfresco.transform.base.fs.FileManager.createTargetFileName;
+import static org.alfresco.transform.base.fs.FileManager.getDirectAccessUrlInputStream;
 import static org.alfresco.transform.base.fs.FileManager.deleteFile;
 import static org.alfresco.transform.base.fs.FileManager.getFilenameFromContentDisposition;
 import static org.alfresco.transform.base.fs.FileManager.save;
@@ -280,7 +282,7 @@ public class TransformController
     }
 
     @PostMapping(value = ENDPOINT_TRANSFORM, consumes = MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Resource> transform(HttpServletRequest request,
+    public StreamingResponseBody transform(HttpServletRequest request,
                                               @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
                                               @RequestParam(value = SOURCE_MIMETYPE, required = false) String sourceMimetype,
                                               @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,
@@ -291,51 +293,55 @@ public class TransformController
             logger.debug("Processing request via HTTP endpoint. Params: sourceMimetype: '{}', targetMimetype: '{}', "
                     + "requestParameters: {}", sourceMimetype, targetMimetype, requestParameters);
         }
-
-        final String directUrl = requestParameters.getOrDefault(DIRECT_ACCESS_URL, "");
-
-        File sourceFile;
-        String sourceFilename;
-        if (directUrl.isBlank())
-        {
-            if (sourceMultipartFile ==  null)
-            {
-                throw new TransformException(BAD_REQUEST.value(), "Required request part 'file' is not present");
-            }
-            sourceFile = createSourceFile(request, sourceMultipartFile);
-            sourceFilename = sourceMultipartFile.getOriginalFilename();
-        }
-        else
-        {
-            sourceFile = getSourceFileFromDirectUrl(directUrl);
-            sourceFilename = sourceFile.getName();
-        }
-
-        final String targetFilename = createTargetFileName(sourceFilename, sourceMimetype, targetMimetype);
         probeTestTransform.incrementTransformerCount();
-        final File targetFile = createTargetFile(request, targetFilename);
 
+        // Obtain the source
+        final String directUrl = requestParameters.getOrDefault(DIRECT_ACCESS_URL, "");
+        InputStream inputStream = directUrl.isBlank()
+                ? FileManager.getMultipartFileInputStream(sourceMultipartFile)
+                : getDirectAccessUrlInputStream(directUrl);
+        long sourceSizeInBytes = -1L; // TODO pass in t-options or just ignore for http request as the repo will have checked.
         Map<String, String> transformOptions = getTransformOptions(requestParameters);
-        String transformName = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
+        String transformName = getTransformerName(sourceSizeInBytes, sourceMimetype, targetMimetype, transformOptions);
+        CustomTransformer customTransformer = getCustomTransformer(transformName);
+        String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
+        String targetEncoding = transformOptions.get(TARGET_ENCODING); // TODO not normally set
         String reference = "e"+httpRequestCount.getAndIncrement();
-        transformerDebug.pushTransform(reference, sourceMimetype, targetMimetype, sourceFile, transformName);
+        transformerDebug.pushTransform(reference, sourceMimetype, targetMimetype, sourceSizeInBytes, transformName);
         transformerDebug.logOptions(reference, requestParameters);
-        try
-        {
-            transformImpl(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
 
-            final ResponseEntity<Resource> body = createAttachment(targetFilename, targetFile);
-            LogEntry.setTargetSize(targetFile.length());
-            long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
-            probeTestTransform.recordTransformTime(time);
-            transformerDebug.popTransform(reference, time);
-            return body;
-        }
-        catch (Throwable t)
-        {
-            transformerDebug.logFailure(reference, t.getMessage());
-            throw t;
-        }
+        return os -> {
+            OutputStreamLengthRecorder outputStream = new OutputStreamLengthRecorder(os);
+            try
+            {
+                TransformManagerImpl transformManager = TransformManagerImpl.builder()
+                        .withRequest(request)
+                        .withSourceMimetype(sourceMimetype)
+                        .withTargetMimetype(targetMimetype)
+                        .withInputStream(inputStream)
+                        .withOutputStream(outputStream)
+                        .build();
+
+                customTransformer.transform(sourceMimetype, inputStream,
+                        targetMimetype, outputStream, transformOptions, transformManager);
+
+                transformManager.ifUsedCopyTargetFileToOutputStream();
+
+                LogEntry.setTargetSize(outputStream.getLength());
+                long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
+
+                transformManager.deleteSourceFileIfExists();
+                transformManager.deleteTargetFileIfExists();
+
+                probeTestTransform.recordTransformTime(time);
+                transformerDebug.popTransform(reference, time);
+            }
+            catch (Exception e)
+            {
+                transformerDebug.logFailure(reference, e.getMessage());
+                throw new RuntimeException(e);
+            }
+        };
     }
 
     /**
@@ -353,89 +359,68 @@ public class TransformController
     public ResponseEntity<TransformReply> transform(@RequestBody TransformRequest request,
         @RequestParam(value = "timeout", required = false) Long timeout)
     {
+        long start = System.currentTimeMillis();
         logger.trace("Received {}, timeout {} ms", request, timeout);
+        probeTestTransform.incrementTransformerCount();
+        TransformReply reply = createBasicTransformReply(request);
 
-        final TransformReply reply = new TransformReply();
-        reply.setRequestId(request.getRequestId());
-        reply.setSourceReference(request.getSourceReference());
-        reply.setSchema(request.getSchema());
-        reply.setClientData(request.getClientData());
-
-        final Errors errors = validateTransformRequest(request);
-        validateInternalContext(request, errors);
-        initialiseContext(request);
-        reply.setInternalContext(request.getInternalContext());
-        if (!errors.getAllErrors().isEmpty())
+        if (isTransformRequestValid(request, reply) == false)
         {
-            reply.setStatus(BAD_REQUEST.value());
-            reply.setErrorDetails(errors
-                .getAllErrors()
-                .stream()
-                .map(Object::toString)
-                .collect(joining(", ")));
-
-            transformerDebug.logFailure(reply);
-            logger.trace("Invalid request, sending {}", reply);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
+
+        InputStream inputStream = getInputStream(request, reply);
+        if (inputStream == null)
+        {
+            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+        }
+
+        String targetMimetype = request.getTargetMediaType();
+        String sourceMimetype = request.getSourceMediaType();
+        File targetFile = createTargetFile(null, sourceMimetype, targetMimetype);
         transformerDebug.pushTransform(request);
 
-        // Load the source file
-        File sourceFile;
         try
         {
-            final String directUrl = request.getTransformRequestOptions().getOrDefault(DIRECT_ACCESS_URL, "");
-            if (directUrl.isBlank())
-            {
-                sourceFile = loadSourceFile(request.getSourceReference(), request.getSourceExtension());
-            }
-            else
-            {
-                sourceFile = getSourceFileFromDirectUrl(directUrl);
-            }
-        }
-        catch (TransformException e)
-        {
-            reply.setStatus(e.getStatusCode());
-            reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
+            OutputStreamLengthRecorder outputStream =
+                    new OutputStreamLengthRecorder(new BufferedOutputStream(new FileOutputStream(targetFile)));
 
-            transformerDebug.logFailure(reply);
-            logger.trace("Failed to load source file (TransformException), sending " + reply);
-            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
-        }
-        catch (HttpClientErrorException e)
-        {
-            reply.setStatus(e.getStatusCode().value());
-            reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
-
-            transformerDebug.logFailure(reply);
-            logger.trace("Failed to load source file (HttpClientErrorException), sending " + reply, e);
-            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
-        }
-        catch (Exception e)
-        {
-            reply.setStatus(INTERNAL_SERVER_ERROR.value());
-            reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
-
-            transformerDebug.logFailure(reply);
-            logger.trace("Failed to load source file (Exception), sending " + reply, e);
-            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
-        }
-
-        // Create local temp target file in order to run the transformation
-        final String targetFilename = createTargetFileName(sourceFile.getName(), request.getTargetMediaType(), request.getSourceMediaType());
-        final File targetFile = buildFile(targetFilename);
-
-        // Run the transformation
-        try
-        {
-            String targetMimetype = request.getTargetMediaType();
-            String sourceMimetype = request.getSourceMediaType();
+            long sourceSizeInBytes = request.getSourceSize();
             Map<String, String> transformOptions = getTransformOptions(request.getTransformRequestOptions());
+            String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
+            String targetEncoding = transformOptions.get(TARGET_ENCODING); // TODO not normally set
             transformerDebug.logOptions(request);
-            String transformName = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
-            transformImpl(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
-            reply.getInternalContext().setCurrentSourceSize(targetFile.length());
+            String transformName = getTransformerName(sourceSizeInBytes, sourceMimetype, targetMimetype, transformOptions);
+            CustomTransformer customTransformer = getCustomTransformer(transformName);
+
+            TransformManagerImpl transformManager = TransformManagerImpl.builder()
+                    .withSourceMimetype(sourceMimetype)
+                    .withTargetMimetype(targetMimetype)
+                    .withInputStream(inputStream)
+                    .withOutputStream(outputStream)
+                    .withTargetFile(targetFile)
+                    .build();
+
+            customTransformer.transform(sourceMimetype, inputStream,
+                    targetMimetype, outputStream, transformOptions, transformManager);
+
+            transformManager.ifUsedCopyTargetFileToOutputStream();
+
+            reply.getInternalContext().setCurrentSourceSize(outputStream.getLength());
+
+            if (saveTargetFileInSharedFileStore(targetFile, reply) == false)
+            {
+                return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+            }
+
+            transformManager.deleteSourceFileIfExists();
+            transformManager.deleteTargetFileIfExists();
+
+            probeTestTransform.recordTransformTime(System.currentTimeMillis()-start);
+            transformerDebug.popTransform(reply);
+
+            logger.trace("Sending successful {}, timeout {} ms", reply, timeout);
+            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
         catch (TransformException e)
         {
@@ -455,65 +440,38 @@ public class TransformController
             logger.trace("Failed to perform transform (Exception), sending " + reply, e);
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
+    }
 
-        // Write the target file
-        FileRefResponse targetRef;
-        try
+    private boolean isTransformRequestValid(TransformRequest request, TransformReply reply)
+    {
+        final Errors errors = validateTransformRequest(request);
+        validateInternalContext(request, errors);
+        reply.setInternalContext(request.getInternalContext());
+        if (!errors.getAllErrors().isEmpty())
         {
-            targetRef = alfrescoSharedFileStoreClient.saveFile(targetFile);
-        }
-        catch (TransformException e)
-        {
-            reply.setStatus(e.getStatusCode());
-            reply.setErrorDetails(messageWithCause("Failed at writing the transformed file", e));
-
-            transformerDebug.logFailure(reply);
-            logger.trace("Failed to save target file (TransformException), sending " + reply, e);
-            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
-        }
-        catch (HttpClientErrorException e)
-        {
-            reply.setStatus(e.getStatusCode().value());
-            reply.setErrorDetails(messageWithCause("Failed at writing the transformed file. ", e));
+            reply.setStatus(BAD_REQUEST.value());
+            reply.setErrorDetails(errors
+                .getAllErrors()
+                .stream()
+                .map(Object::toString)
+                .collect(joining(", ")));
 
             transformerDebug.logFailure(reply);
-            logger.trace("Failed to save target file (HttpClientErrorException), sending " + reply, e);
-            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+            logger.trace("Invalid request, sending {}", reply);
+            return false;
         }
-        catch (Exception e)
-        {
-            reply.setStatus(INTERNAL_SERVER_ERROR.value());
-            reply.setErrorDetails(messageWithCause("Failed at writing the transformed file. ", e));
+        return true;
+    }
 
-            transformerDebug.logFailure(reply);
-            logger.trace("Failed to save target file (Exception), sending " + reply, e);
-            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
-        }
-
-        try
-        {
-            deleteFile(targetFile);
-        }
-        catch (Exception e)
-        {
-            logger.error("Failed to delete local temp target file '{}'. Error will be ignored ",
-                targetFile, e);
-        }
-        try
-        {
-            deleteFile(sourceFile);
-        }
-        catch (Exception e)
-        {
-            logger.error("Failed to delete source local temp file " + sourceFile, e);
-        }
-
-        reply.setTargetReference(targetRef.getEntry().getFileRef());
-        reply.setStatus(CREATED.value());
-
-        transformerDebug.popTransform(reply);
-        logger.trace("Sending successful {}, timeout {} ms", reply, timeout);
-        return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+    private TransformReply createBasicTransformReply(TransformRequest request)
+    {
+        TransformReply reply = new TransformReply();
+        reply.setRequestId(request.getRequestId());
+        reply.setSourceReference(request.getSourceReference());
+        reply.setSchema(request.getSchema());
+        reply.setClientData(request.getClientData());
+        reply.setInternalContext(request.getInternalContext());
+        return reply;
     }
 
     private Errors validateTransformRequest(final TransformRequest transformRequest)
@@ -530,6 +488,7 @@ public class TransformController
         {
             errors.rejectValue("internalContext", null, errorMessage);
         }
+        initialiseContext(request);
     }
 
     private void initialiseContext(TransformRequest request)
@@ -538,31 +497,114 @@ public class TransformController
         request.setInternalContext(InternalContext.initialise(request.getInternalContext()));
     }
 
-    private File getSourceFileFromDirectUrl(String directUrl)
-    {
-        File sourceFile = createTempFile("tmp", ".tmp");
-        try
-        {
-            FileUtils.copyURLToFile(new URL(directUrl), sourceFile);
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new TransformException(BAD_REQUEST.value(), "Direct Access Url is invalid.", e);
-        }
-        catch (IOException e)
-        {
-            throw new TransformException(BAD_REQUEST.value(), "Direct Access Url not found.", e);
-        }
-
-        return sourceFile;
-    }
-
     protected Map<String, String> getTransformOptions(Map<String, String> requestParameters)
     {
         Map<String, String> transformOptions = new HashMap<>(requestParameters);
         transformOptions.keySet().removeAll(NON_TRANSFORM_OPTION_REQUEST_PARAMETERS);
         transformOptions.values().removeIf(v -> v.isEmpty());
         return transformOptions;
+    }
+
+    private InputStream getSharedFileStoreInputStream(String sourceReference)
+    {
+        ResponseEntity<Resource> responseEntity = alfrescoSharedFileStoreClient.retrieveFile(sourceReference);
+        final Resource body = responseEntity.getBody();
+        if (body == null)
+        {
+            String message = "Source file with reference: " + sourceReference + " is null or empty.";
+            logger.warn(message);
+            throw new TransformException(BAD_REQUEST.value(), message);
+        }
+
+        try
+        {
+            return body.getInputStream();
+        }
+        catch (IOException e)
+        {
+            String message = "Shared File Store reference is invalid.";
+            logger.warn(message);
+            throw new TransformException(BAD_REQUEST.value(), message, e);
+        }
+    }
+
+    private InputStream getInputStream(TransformRequest request, TransformReply reply)
+    {
+        final String directUrl = request.getTransformRequestOptions().getOrDefault(DIRECT_ACCESS_URL, "");
+        InputStream inputStream = null;
+        try
+        {
+            inputStream = directUrl.isBlank()
+                    ? getSharedFileStoreInputStream(request.getSourceReference())
+                    : getDirectAccessUrlInputStream(directUrl);
+        }
+        catch (TransformException e)
+        {
+            reply.setStatus(e.getStatusCode());
+            reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
+
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to load source file (TransformException), sending " + reply);
+        }
+        catch (HttpClientErrorException e)
+        {
+            reply.setStatus(e.getStatusCode().value());
+            reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
+
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to load source file (HttpClientErrorException), sending " + reply, e);
+        }
+        return inputStream;
+    }
+
+    private boolean saveTargetFileInSharedFileStore(File targetFile, TransformReply reply)
+    {
+        FileRefResponse targetRef;
+        try
+        {
+            targetRef = alfrescoSharedFileStoreClient.saveFile(targetFile);
+        }
+        catch (TransformException e)
+        {
+            reply.setStatus(e.getStatusCode());
+            reply.setErrorDetails(messageWithCause("Failed at writing the transformed file", e));
+
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to save target file (TransformException), sending " + reply, e);
+            return false;
+        }
+        catch (HttpClientErrorException e)
+        {
+            reply.setStatus(e.getStatusCode().value());
+            reply.setErrorDetails(messageWithCause("Failed at writing the transformed file. ", e));
+
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to save target file (HttpClientErrorException), sending " + reply, e);
+            return false;
+        }
+        catch (Exception e)
+        {
+            reply.setStatus(INTERNAL_SERVER_ERROR.value());
+            reply.setErrorDetails(messageWithCause("Failed at writing the transformed file. ", e));
+
+            transformerDebug.logFailure(reply);
+            logger.trace("Failed to save target file (Exception), sending " + reply, e);
+            return false;
+        }
+
+        try
+        {
+            deleteFile(targetFile);
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to delete local temp target file. Error will be ignored ", e);
+        }
+
+        reply.setTargetReference(targetRef.getEntry().getFileRef());
+        reply.setStatus(CREATED.value());
+        
+        return true;
     }
 
     /**
@@ -574,9 +616,7 @@ public class TransformController
      */
     private File loadSourceFile(final String sourceReference, final String sourceExtension)
     {
-        ResponseEntity<Resource> responseEntity = alfrescoSharedFileStoreClient
-            .retrieveFile(sourceReference);
-        probeTestTransform.incrementTransformerCount();
+        ResponseEntity<Resource> responseEntity = alfrescoSharedFileStoreClient.retrieveFile(sourceReference);
 
         HttpHeaders headers = responseEntity.getHeaders();
         String filename = getFilenameFromContentDisposition(headers);
@@ -621,7 +661,7 @@ public class TransformController
         return sb.toString();
     }
 
-    private String getTransformerName(final File sourceFile, final String sourceMimetype,
+    private String getTransformerName(long sourceSizeInBytes, final String sourceMimetype,
         final String targetMimetype, final Map<String, String> transformOptions)
     {
         // The transformOptions always contains sourceEncoding when sent to a T-Engine, even though it should not be
@@ -630,7 +670,6 @@ public class TransformController
         String sourceEncoding = transformOptions.remove(SOURCE_ENCODING);
         try
         {
-            final long sourceSizeInBytes = sourceFile.length();
             final String transformerName = transformRegistry.findTransformerName(sourceMimetype,
                     sourceSizeInBytes, targetMimetype, transformOptions, null);
             if (transformerName == null)
@@ -646,6 +685,16 @@ public class TransformController
                 transformOptions.put(SOURCE_ENCODING, sourceEncoding);
             }
         }
+    }
+
+    private CustomTransformer getCustomTransformer(String transformName)
+    {
+        CustomTransformer customTransformer = customTransformersByName.get(transformName);
+        if (customTransformer == null)
+        {
+            throw new TransformException(BAD_REQUEST.value(), "Custom Transformer "+customTransformer+" not found");
+        }
+        return customTransformer;
     }
 
     public void transformImpl(String transformName, String sourceMimetype, String targetMimetype,

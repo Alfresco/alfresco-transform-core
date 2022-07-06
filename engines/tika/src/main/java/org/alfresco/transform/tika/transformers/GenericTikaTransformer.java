@@ -26,10 +26,9 @@
  */
 package org.alfresco.transform.tika.transformers;
 
-import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.logging.LogEntry;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.alfresco.transform.common.RequestParamMap;
-import org.alfresco.transform.common.TransformException;
 import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.parser.Parser;
 import org.slf4j.Logger;
@@ -38,21 +37,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.StringJoiner;
 
 import static java.lang.Boolean.parseBoolean;
 
-public abstract class GenericTikaTransformer implements CustomTransformer
+public abstract class GenericTikaTransformer implements CustomTransformerFileAdaptor
 {
     private static final Logger logger = LoggerFactory.getLogger(GenericTikaTransformer.class);
 
     @Value("${transform.core.tika.pdfBox.notExtractBookmarksTextDefault:false}")
     boolean notExtractBookmarksTextDefault;
-
     @Autowired
     protected Tika tika;
 
@@ -71,15 +67,7 @@ public abstract class GenericTikaTransformer implements CustomTransformer
     }
 
     @Override
-    public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
-            String targetMimetype, String targetEncoding, OutputStream outputStream,
-            Map<String, String> transformOptions) throws Exception
-    {
-        // TODO
-        throw new TransformException(500, "TODO GenericTikaTransformer transform with InputStreams");
-    }
-
-    public void transform(String transformName, String sourceMimetype, String targetMimetype,
+    public void transform(String sourceMimetype, String targetMimetype,
             Map<String, String> transformOptions, File sourceFile, File targetFile)
             throws Exception
     {
@@ -92,7 +80,8 @@ public abstract class GenericTikaTransformer implements CustomTransformer
         {
             logger.trace("notExtractBookmarksText default value has been overridden to {}", notExtractBookmarksTextDefault);
         }
-        call(sourceFile, targetFile, transformName,
+        String transformerName = getTransformerName();
+        call(sourceFile, targetFile, transformerName,
                 includeContents ? Tika.INCLUDE_CONTENTS : null,
                 notExtractBookmarksText ? Tika.NOT_EXTRACT_BOOKMARKS_TEXT : null,
                 Tika.TARGET_MIMETYPE + targetMimetype, Tika.TARGET_ENCODING + targetEncoding);

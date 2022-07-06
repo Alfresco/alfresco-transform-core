@@ -27,6 +27,7 @@
 package org.alfresco.transform.misc.metadataExtractors;
 
 import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor;
 import org.alfresco.transform.common.TransformException;
 import org.slf4j.Logger;
@@ -85,19 +86,6 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractor implement
     public RFC822MetadataExtractor()
     {
         super(EXTRACTOR, logger);
-    }
-
-    @Override public void transform(String sourceMimetype, String sourceEncoding, InputStream inputStream,
-            String targetMimetype, String targetEncoding, OutputStream outputStream,
-            Map<String, String> transformOptions) throws Exception
-    {
-        throw new TransformException(500, "TODO RFC822MetadataExtractor transform");
-    }
-
-    public void extractMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                                File sourceFile, File targetFile) throws Exception
-    {
-        extractMetadata(sourceMimetype, transformOptions, sourceFile, targetFile);
     }
 
     @Override
