@@ -33,7 +33,6 @@ import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.TransformManager;
 import org.slf4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -64,19 +63,17 @@ import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExt
  *
  * The transform results in a Map of extracted properties encoded as json being returned to the content repository.
  * <ul>
- *   <li>The content repository will use a transform in preference to any metadata extractors it might have defined
- *   locally for the same MIMETYPE.</li>
- *   <li>The T-Engine's Controller class will call a method in a class that extends {@link AbstractMetadataExtractor}
- *   based on the source and target mediatypes in the normal way.</li>
- *   <li>The method extracts ALL available metadata is extracted from the document and then calls
- *   {@link #mapMetadataAndWrite(File, Map, Map)}.</li>
+ *   <li>The method extracts ALL available metadata from the document with
+ *   {@link #extractMetadata(String, InputStream, String, OutputStream, Map, TransformManager)} and then calls
+ *   {@link #mapMetadataAndWrite(OutputStream, Map, Map)}.</li>
  *   <li>Selected values from the available metadata are mapped into content repository property names and values,
  *   depending on what is defined in a {@code "<classname>_metadata_extract.properties"} file.</li>
  *   <li>The selected values are set back to the content repository as a JSON representation of a Map, where the values
  *   are applied to the source node.</li>
  * </ul>
  * To support the same functionality as metadata extractors configured inside the content repository,
- * extra key value pairs may be returned from {@link #extractMetadata}. These are:
+ * extra key value pairs may be returned from {@link #extractMetadata(String, InputStream, String, OutputStream, Map, TransformManager)}.
+ * These are:
  * <ul>
  *     <li>{@code "sys:overwritePolicy"} which can specify the
  *     {@code org.alfresco.repo.content.metadata.MetadataExtracter.OverwritePolicy} name. Defaults to "PRAGMATIC".</li>
@@ -89,7 +86,8 @@ import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExt
  * If a transform specifies that it can convert from {@code "<MIMETYPE>"} to {@code "alfresco-metadata-embed"}, it is
  * indicating that it can embed metadata in {@code <MIMETYPE>}.
  *
- * The transform results in a new version of supplied source file that contains the metadata supplied in the transform
+ * The transform calls {@link #embedMetadata(String, InputStream, String, OutputStream, Map, TransformManager)}
+ * which should results in a new version of supplied source file that contains the metadata supplied in the transform
  * options.
  * 
  * @author Jesper Steen Møller
@@ -162,24 +160,13 @@ public abstract class AbstractMetadataExtractor implements CustomTransformer
         }
         else
         {
-            extractMetadata(sourceMimetype, inputStream, targetMimetype, outputStream, transformOptions, transformManager);
+            extractMapAndWriteMetadata(sourceMimetype, inputStream, targetMimetype, outputStream, transformOptions, transformManager);
         }
     }
 
-    public void embedMetadata(String sourceMimetype, InputStream inputStream,
-            String targetMimetype, OutputStream outputStream,
-            Map<String, String> transformOptions, TransformManager transformManager) throws Exception
-    {
-        File sourceFile = transformManager.createSourceFile();
-        File targetFile = transformManager.createTargetFile();
-        embedMetadata(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
-    }
-
-    public void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                              File sourceFile, File targetFile) throws Exception
-    {
-        // Default nothing, as embedding is not supported in most cases
-    }
+    public abstract void embedMetadata(String sourceMimetype, InputStream inputStream, String targetMimetype,
+            OutputStream outputStream, Map<String, String> transformOptions, TransformManager transformManager)
+            throws Exception;
 
     protected Map<String, Serializable> getMetadata(Map<String, String> transformOptions)
     {
@@ -507,31 +494,18 @@ public abstract class AbstractMetadataExtractor implements CustomTransformer
         return true;
     }
 
-    public void extractMetadata(String sourceMimetype, InputStream inputStream,
-            String targetMimetype, OutputStream outputStream,
-            Map<String, String> transformOptions, TransformManager transformManager) throws Exception
+    private void extractMapAndWriteMetadata(String sourceMimetype, InputStream inputStream, String targetMimetype,
+            OutputStream outputStream, Map<String, String> transformOptions, TransformManager transformManager)
+            throws Exception
     {
-        File sourceFile = transformManager.createSourceFile();
-        File targetFile = transformManager.createTargetFile();
-        extractMetadata(sourceMimetype, transformOptions, sourceFile, targetFile);
-    }
-
-    /**
-     * The {@code transformOptions} may contain a replacement set of mappings. These will be used in place of the
-     * default mappings from read from file if supplied.
-     */
-    public void extractMetadata(String sourceMimetype, Map<String, String> transformOptions, File sourceFile,
-                                File targetFile) throws Exception
-    {
-        Map<String, Set<String>> mapping = getExtractMappingFromOptions(transformOptions, defaultExtractMapping);
-
         // Use a ThreadLocal to avoid changing method signatures of methods that currently call getExtractMapping.
+        Map<String, Set<String>> mapping = getExtractMappingFromOptions(transformOptions, defaultExtractMapping);
         try
         {
             extractMapping.set(mapping);
-            Map<String, Serializable> metadata = extractMetadata(sourceMimetype, transformOptions, sourceFile);
-            mapMetadataAndWrite(targetFile, metadata, mapping);
-
+            Map<String, Serializable> metadata = extractMetadata(sourceMimetype, inputStream, targetMimetype,
+                    outputStream, transformOptions, transformManager);
+            mapMetadataAndWrite(outputStream, metadata, mapping);
         }
         finally
         {
@@ -539,8 +513,9 @@ public abstract class AbstractMetadataExtractor implements CustomTransformer
         }
     }
 
-    public abstract Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
-            File sourceFile) throws Exception;
+    public abstract Map<String, Serializable> extractMetadata(String sourceMimetype, InputStream inputStream,
+            String targetMimetype, OutputStream outputStream, Map<String, String> transformOptions,
+            TransformManager transformManager) throws Exception;
 
     private Map<String, Set<String>> getExtractMappingFromOptions(Map<String, String> transformOptions, Map<String,
             Set<String>> defaultExtractMapping)
@@ -561,17 +536,7 @@ public abstract class AbstractMetadataExtractor implements CustomTransformer
         return defaultExtractMapping;
     }
 
-    /**
-     * @deprecated use {@link #extractMetadata(String, Map, File, File)} rather than calling this method.
-     * By default call the overloaded method with the default {@code extractMapping}.
-     */
-    @Deprecated
-    public void mapMetadataAndWrite(File targetFile, Map<String, Serializable> metadata) throws IOException
-    {
-        mapMetadataAndWrite(targetFile, metadata, defaultExtractMapping);
-    }
-
-    public void mapMetadataAndWrite(File targetFile, Map<String, Serializable> metadata,
+    public void mapMetadataAndWrite(OutputStream outputStream, Map<String, Serializable> metadata,
                                     Map<String, Set<String>> extractMapping) throws IOException
     {
         if (logger.isDebugEnabled())
@@ -581,7 +546,7 @@ public abstract class AbstractMetadataExtractor implements CustomTransformer
         }
 
         metadata = mapRawToSystem(metadata, extractMapping);
-        writeMetadata(targetFile, metadata);
+        writeMetadata(outputStream, metadata);
     }
 
     /**
@@ -633,9 +598,9 @@ public abstract class AbstractMetadataExtractor implements CustomTransformer
         return new TreeMap<String, Serializable>(systemProperties);
     }
 
-    private void writeMetadata(File targetFile, Map<String, Serializable> results)
+    private void writeMetadata(OutputStream outputStream, Map<String, Serializable> results)
             throws IOException
     {
-        jsonObjectMapper.writeValue(targetFile, results);
+        jsonObjectMapper.writeValue(outputStream, results);
     }
 }

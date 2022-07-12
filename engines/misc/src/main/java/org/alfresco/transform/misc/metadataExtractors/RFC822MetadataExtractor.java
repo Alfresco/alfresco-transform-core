@@ -29,7 +29,6 @@ package org.alfresco.transform.misc.metadataExtractors;
 import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor;
-import org.alfresco.transform.common.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,102 +88,108 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractor implement
     }
 
     @Override
-    public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
-                                                     File sourceFile) throws Exception
+    public void embedMetadata(String sourceMimetype, InputStream inputStream, String targetMimetype,
+            OutputStream outputStream, Map<String, String> transformOptions, TransformManager transformManager)
+            throws Exception
+    {
+        // Only used for extract, so may be empty.
+    }
+
+    @Override
+    public Map<String, Serializable> extractMetadata(String sourceMimetype, InputStream inputStream,
+            String targetMimetype, OutputStream outputStream, Map<String, String> transformOptions,
+            TransformManager transformManager) throws Exception
     {
         final Map<String, Serializable> rawProperties = new HashMap<>();
 
-        try (InputStream is = new FileInputStream(sourceFile))
+        MimeMessage mimeMessage = new MimeMessage(null, inputStream);
+
+        if (mimeMessage != null)
         {
-            MimeMessage mimeMessage = new MimeMessage(null, is);
+            /**
+             * Extract RFC822 values that doesn't match to headers and need to be encoded.
+             * Or those special fields that require some code to extract data
+             */
+            String tmp = InternetAddress.toString(mimeMessage.getFrom());
+            tmp = tmp != null ? MimeUtility.decodeText(tmp) : null;
+            putRawValue(KEY_MESSAGE_FROM, tmp, rawProperties);
 
-            if (mimeMessage != null)
+            tmp = InternetAddress.toString(mimeMessage.getRecipients(RecipientType.TO));
+            tmp = tmp != null ? MimeUtility.decodeText(tmp) : null;
+            putRawValue(KEY_MESSAGE_TO, tmp, rawProperties);
+
+            tmp = InternetAddress.toString(mimeMessage.getRecipients(RecipientType.CC));
+            tmp = tmp != null ? MimeUtility.decodeText(tmp) : null;
+            putRawValue(KEY_MESSAGE_CC, tmp, rawProperties);
+
+            putRawValue(KEY_MESSAGE_SENT, mimeMessage.getSentDate(), rawProperties);
+
+            /**
+             * Received field from RFC 822
+             *
+             * "Received"    ":"        ; one per relay
+             *   ["from" domain]        ; sending host
+             *   ["by"   domain]        ; receiving host
+             *   ["via"  atom]          ; physical path
+             *  ("with" atom)           ; link/mail protocol
+             *   ["id"   msg-id]        ; receiver msg id
+             *   ["for"  addr-spec]     ; initial form
+             * ";"    date-time         ; time received
+             */
+            Date rxDate = mimeMessage.getReceivedDate();
+
+            if(rxDate != null)
             {
-                /**
-                 * Extract RFC822 values that doesn't match to headers and need to be encoded.
-                 * Or those special fields that require some code to extract data
-                 */
-                String tmp = InternetAddress.toString(mimeMessage.getFrom());
-                tmp = tmp != null ? MimeUtility.decodeText(tmp) : null;
-                putRawValue(KEY_MESSAGE_FROM, tmp, rawProperties);
-
-                tmp = InternetAddress.toString(mimeMessage.getRecipients(RecipientType.TO));
-                tmp = tmp != null ? MimeUtility.decodeText(tmp) : null;
-                putRawValue(KEY_MESSAGE_TO, tmp, rawProperties);
-
-                tmp = InternetAddress.toString(mimeMessage.getRecipients(RecipientType.CC));
-                tmp = tmp != null ? MimeUtility.decodeText(tmp) : null;
-                putRawValue(KEY_MESSAGE_CC, tmp, rawProperties);
-
-                putRawValue(KEY_MESSAGE_SENT, mimeMessage.getSentDate(), rawProperties);
-
-                /**
-                 * Received field from RFC 822
-                 *
-                 * "Received"    ":"        ; one per relay
-                 *   ["from" domain]        ; sending host
-                 *   ["by"   domain]        ; receiving host
-                 *   ["via"  atom]          ; physical path
-                 *  ("with" atom)           ; link/mail protocol
-                 *   ["id"   msg-id]        ; receiver msg id
-                 *   ["for"  addr-spec]     ; initial form
-                 * ";"    date-time         ; time received
-                 */
-                Date rxDate = mimeMessage.getReceivedDate();
-
-                if(rxDate != null)
+                // The email implementation extracted the received date for us.
+                putRawValue(KEY_MESSAGE_RECEIVED, rxDate, rawProperties);
+            }
+            else
+            {
+                // the email implementation did not parse the received date for us.
+                String[] rx = mimeMessage.getHeader("received");
+                if(rx != null && rx.length > 0)
                 {
-                    // The email implementation extracted the received date for us.
-                    putRawValue(KEY_MESSAGE_RECEIVED, rxDate, rawProperties);
-                }
-                else
-                {
-                    // the email implementation did not parse the received date for us.
-                    String[] rx = mimeMessage.getHeader("received");
-                    if(rx != null && rx.length > 0)
+                    String lastReceived = rx[0];
+                    lastReceived = MimeUtility.unfold(lastReceived);
+                    int x = lastReceived.lastIndexOf(';');
+                    if(x > 0)
                     {
-                        String lastReceived = rx[0];
-                        lastReceived = MimeUtility.unfold(lastReceived);
-                        int x = lastReceived.lastIndexOf(';');
-                        if(x > 0)
-                        {
-                            String dateStr = lastReceived.substring(x + 1).trim();
-                            putRawValue(KEY_MESSAGE_RECEIVED, dateStr, rawProperties);
-                        }
+                        String dateStr = lastReceived.substring(x + 1).trim();
+                        putRawValue(KEY_MESSAGE_RECEIVED, dateStr, rawProperties);
                     }
                 }
+            }
 
-                String[] subj = mimeMessage.getHeader("Subject");
-                if (subj != null && subj.length > 0)
+            String[] subj = mimeMessage.getHeader("Subject");
+            if (subj != null && subj.length > 0)
+            {
+                String decodedSubject = subj[0];
+                try
                 {
-                    String decodedSubject = subj[0];
-                    try
-                    {
-                        decodedSubject = MimeUtility.decodeText(decodedSubject);
-                    }
-                    catch (UnsupportedEncodingException e)
-                    {
-                        logger.warn(e.toString());
-                    }
-                    putRawValue(KEY_MESSAGE_SUBJECT, decodedSubject, rawProperties);
+                    decodedSubject = MimeUtility.decodeText(decodedSubject);
                 }
-
-                /*
-                 * Extract values from all header fields, including extension fields "X-"
-                 */
-                Set<String> keys = getExtractMapping().keySet();
-                @SuppressWarnings("unchecked")
-                Enumeration<Header> headers = mimeMessage.getAllHeaders();
-                while (headers.hasMoreElements())
+                catch (UnsupportedEncodingException e)
                 {
-                    Header header = (Header) headers.nextElement();
-                    if (keys.contains(header.getName()))
-                    {
-                        tmp = header.getValue();
-                        tmp = tmp != null ? MimeUtility.decodeText(tmp) : null;
+                    logger.warn(e.toString());
+                }
+                putRawValue(KEY_MESSAGE_SUBJECT, decodedSubject, rawProperties);
+            }
 
-                        putRawValue(header.getName(), tmp, rawProperties);
-                    }
+            /*
+             * Extract values from all header fields, including extension fields "X-"
+             */
+            Set<String> keys = getExtractMapping().keySet();
+            @SuppressWarnings("unchecked")
+            Enumeration<Header> headers = mimeMessage.getAllHeaders();
+            while (headers.hasMoreElements())
+            {
+                Header header = (Header) headers.nextElement();
+                if (keys.contains(header.getName()))
+                {
+                    tmp = header.getValue();
+                    tmp = tmp != null ? MimeUtility.decodeText(tmp) : null;
+
+                    putRawValue(header.getName(), tmp, rawProperties);
                 }
             }
         }

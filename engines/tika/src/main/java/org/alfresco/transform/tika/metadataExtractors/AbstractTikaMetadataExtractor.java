@@ -51,7 +51,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -215,95 +214,93 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
     }
 
     @Override
-    public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
-                                                     File sourceFile) throws Exception
+    public Map<String, Serializable> extractMetadata(String sourceMimetype, InputStream inputStream,
+            String targetMimetype, OutputStream outputStream, Map<String, String> transformOptions,
+            TransformManager transformManager) throws Exception
     {
         Map<String, Serializable> rawProperties = new HashMap<>();
 
-        try (InputStream is = new FileInputStream(sourceFile))
+        Parser parser = getParser();
+
+        Metadata metadata = new Metadata();
+        metadata.add(Metadata.CONTENT_TYPE, sourceMimetype);
+
+        ParseContext context = buildParseContext(metadata, sourceMimetype);
+
+        ContentHandler handler;
+        Map<String,String> headers = null;
+        if (needHeaderContents())
         {
-            Parser parser = getParser();
-
-            Metadata metadata = new Metadata();
-            metadata.add(Metadata.CONTENT_TYPE, sourceMimetype);
-
-            ParseContext context = buildParseContext(metadata, sourceMimetype);
-
-            ContentHandler handler;
-            Map<String,String> headers = null;
-            if (needHeaderContents())
-            {
-                MapCaptureContentHandler headerCapture =
-                        new MapCaptureContentHandler();
-                headers = headerCapture.tags;
-                handler = new HeadContentHandler(headerCapture);
-            }
-            else
-            {
-                handler = new NullContentHandler();
-            }
-
-            parser.parse(is, handler, metadata, context);
-
-            // First up, copy all the Tika metadata over
-            // This allows people to map any of the Tika
-            //  keys onto their own content model
-            for (String tikaKey : metadata.names())
-            {
-                // TODO review this change (part of MNT-15267) - should we really force string concatenation here !?
-                putRawValue(tikaKey, getMetadataValue(metadata, Property.internalText(tikaKey)), rawProperties);
-            }
-
-            // Now, map the common Tika metadata keys onto
-            //  the common Alfresco metadata keys. This allows
-            //  existing mapping properties files to continue
-            //  to work without needing any changes
-
-            // The simple ones
-            putRawValue(KEY_AUTHOR, getMetadataValue(metadata, TikaCoreProperties.CREATOR), rawProperties);
-            putRawValue(KEY_TITLE, getMetadataValue(metadata, TikaCoreProperties.TITLE), rawProperties);
-            putRawValue(KEY_COMMENTS, getMetadataValue(metadata, TikaCoreProperties.COMMENTS), rawProperties);
-
-            // Tags
-            putRawValue(KEY_TAGS, getMetadataValues(metadata, KEY_TAGS), rawProperties);
-
-            // Get the subject and description, despite things not
-            //  being nearly as consistent as one might hope
-            String subject = getMetadataValue(metadata, TikaCoreProperties.SUBJECT);
-            String description = getMetadataValue(metadata, TikaCoreProperties.DESCRIPTION);
-            if (subject != null && description != null)
-            {
-                putRawValue(KEY_DESCRIPTION, description, rawProperties);
-                putRawValue(KEY_SUBJECT, subject, rawProperties);
-            }
-            else if (subject != null)
-            {
-                putRawValue(KEY_DESCRIPTION, subject, rawProperties);
-                putRawValue(KEY_SUBJECT, subject, rawProperties);
-            }
-            else if (description != null)
-            {
-                putRawValue(KEY_DESCRIPTION, description, rawProperties);
-                putRawValue(KEY_SUBJECT, description, rawProperties);
-            }
-
-            // Try for the dates two different ways too
-            if (metadata.get(TikaCoreProperties.CREATED) != null)
-            {
-                putRawValue(KEY_CREATED, metadata.get(TikaCoreProperties.CREATED), rawProperties);
-            }
-            else if (metadata.get(TikaCoreProperties.MODIFIED) != null)
-            {
-                putRawValue(KEY_CREATED, metadata.get(TikaCoreProperties.MODIFIED), rawProperties);
-            }
-
-            // If people created a specific instance
-            //  (eg OfficeMetadataExtractor), then allow that
-            //  instance to map the Tika keys onto its
-            //  existing namespace so that older properties
-            //  files continue to map correctly
-            rawProperties = extractSpecific(metadata, rawProperties, headers);
+            MapCaptureContentHandler headerCapture =
+                    new MapCaptureContentHandler();
+            headers = headerCapture.tags;
+            handler = new HeadContentHandler(headerCapture);
         }
+        else
+        {
+            handler = new NullContentHandler();
+        }
+
+        parser.parse(inputStream, handler, metadata, context);
+
+        // First up, copy all the Tika metadata over
+        // This allows people to map any of the Tika
+        //  keys onto their own content model
+        for (String tikaKey : metadata.names())
+        {
+            // TODO review this change (part of MNT-15267) - should we really force string concatenation here !?
+            putRawValue(tikaKey, getMetadataValue(metadata, Property.internalText(tikaKey)), rawProperties);
+        }
+
+        // Now, map the common Tika metadata keys onto
+        //  the common Alfresco metadata keys. This allows
+        //  existing mapping properties files to continue
+        //  to work without needing any changes
+
+        // The simple ones
+        putRawValue(KEY_AUTHOR, getMetadataValue(metadata, TikaCoreProperties.CREATOR), rawProperties);
+        putRawValue(KEY_TITLE, getMetadataValue(metadata, TikaCoreProperties.TITLE), rawProperties);
+        putRawValue(KEY_COMMENTS, getMetadataValue(metadata, TikaCoreProperties.COMMENTS), rawProperties);
+
+        // Tags
+        putRawValue(KEY_TAGS, getMetadataValues(metadata, KEY_TAGS), rawProperties);
+
+        // Get the subject and description, despite things not
+        //  being nearly as consistent as one might hope
+        String subject = getMetadataValue(metadata, TikaCoreProperties.SUBJECT);
+        String description = getMetadataValue(metadata, TikaCoreProperties.DESCRIPTION);
+        if (subject != null && description != null)
+        {
+            putRawValue(KEY_DESCRIPTION, description, rawProperties);
+            putRawValue(KEY_SUBJECT, subject, rawProperties);
+        }
+        else if (subject != null)
+        {
+            putRawValue(KEY_DESCRIPTION, subject, rawProperties);
+            putRawValue(KEY_SUBJECT, subject, rawProperties);
+        }
+        else if (description != null)
+        {
+            putRawValue(KEY_DESCRIPTION, description, rawProperties);
+            putRawValue(KEY_SUBJECT, description, rawProperties);
+        }
+
+        // Try for the dates two different ways too
+        if (metadata.get(TikaCoreProperties.CREATED) != null)
+        {
+            putRawValue(KEY_CREATED, metadata.get(TikaCoreProperties.CREATED), rawProperties);
+        }
+        else if (metadata.get(TikaCoreProperties.MODIFIED) != null)
+        {
+            putRawValue(KEY_CREATED, metadata.get(TikaCoreProperties.MODIFIED), rawProperties);
+        }
+
+        // If people created a specific instance
+        //  (eg OfficeMetadataExtractor), then allow that
+        //  instance to map the Tika keys onto its
+        //  existing namespace so that older properties
+        //  files continue to map correctly
+        rawProperties = extractSpecific(metadata, rawProperties, headers);
 
         return rawProperties;
     }

@@ -29,7 +29,6 @@ package org.alfresco.transform.misc.metadataExtractors;
 import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor;
-import org.alfresco.transform.common.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,8 +86,17 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractor implements 
     }
 
     @Override
-    public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
-                                                     File sourceFile) throws Exception
+    public void embedMetadata(String sourceMimetype, InputStream inputStream, String targetMimetype,
+            OutputStream outputStream, Map<String, String> transformOptions, TransformManager transformManager)
+            throws Exception
+    {
+        // Only used for extract, so may be empty.
+    }
+
+    @Override
+    public Map<String, Serializable> extractMetadata(String sourceMimetype, InputStream inputStream,
+            String targetMimetype, OutputStream outputStream, Map<String, String> transformOptions,
+            TransformManager transformManager) throws Exception
     {
         final Map<String, Serializable> rawProperties = new HashMap<>();
 
@@ -175,10 +183,10 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractor implements 
             rawProperties.clear();
             Reader r = null;
 
-            try (InputStream cis = new FileInputStream(sourceFile))
+            try
             {
                 // TODO: for now, use default charset; we should attempt to map from html meta-data
-                r = new InputStreamReader(cis, charsetGuess);
+                r = new InputStreamReader(inputStream, charsetGuess);
                 HTMLEditorKit.Parser parser = new ParserDelegator();
                 parser.parse(r, callback, tries > 0);
                 break;
