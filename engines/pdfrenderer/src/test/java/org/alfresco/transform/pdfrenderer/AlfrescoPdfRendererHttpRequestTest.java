@@ -39,7 +39,7 @@ public class AlfrescoPdfRendererHttpRequestTest extends AbstractHttpRequestTest
     @Override
     protected String getTransformerName()
     {
-        return "Alfresco PDF Renderer";
+        return "0040-PdfRenderer";
     }
 
     @Override

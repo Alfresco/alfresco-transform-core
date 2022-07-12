@@ -13,13 +13,13 @@ For more details on build a custom T-Engine, please refer to the current docs in
 A transformer project is expected to provide the following files:
 
 ~~~
-src/main/resources/templates/transformForm.html
+src/main/resources/templates/test.html
 src/main/java/org/alfresco/transformer/<TransformerName>Controller.java
 src/main/java/org/alfresco/transformer/Application.java
 ~~~
 
-* transformForm.html - A simple test page using [thymeleaf](http://www.thymeleaf.org) that gathers request
-  parameters so they may be used to test the transformer.
+* test.html - A simple test page using [thymeleaf](http://www.thymeleaf.org) that gathers request
+  parameters, so they may be used to test the transformer.
 
 ~~~
 <html xmlns:th="http://www.thymeleaf.org">
@@ -42,7 +42,7 @@ src/main/java/org/alfresco/transformer/Application.java
 	</form>
   </div>
   <div>
-    <a href="/log">Log entries</a>
+    <a href="/log">Log</a>
   </div>
 </body>
 </html>

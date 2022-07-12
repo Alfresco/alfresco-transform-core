@@ -38,7 +38,7 @@ public class LibreOfficeHttpRequestTest extends AbstractHttpRequestTest
     @Override
     protected String getTransformerName()
     {
-        return "LibreOffice";
+        return "0020-LibreOffice";
     }
 
     @Override

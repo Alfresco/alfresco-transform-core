@@ -6,16 +6,20 @@
         <h2>Error Page</h2>
     </div>
     <div th:if="${message}">
-        <h2 th:text="${#strings.substring(message,0,#strings.indexOf(message,' - '))} + ' Error Page'"></h2>
-        <h3 th:text="${#strings.substring(message,#strings.indexOf(message,' - ')+3)}"></h3>
+        <h2 th:text="${message}"></h2>
+<!--        <h2 th:text="${#strings.substring(message,0,#strings.indexOf(message,' - '))} + ' Error Page'"></h2>-->
+<!--        <h3 th:text="${#strings.substring(message,#strings.indexOf(message,' - ')+3)}"></h3>-->
     </div>
     <p th:text="${status} + ' - ' + ${error}"></p>
 </div>
 
 <div>
     <br/>
-    <a href="/">Test Transformation</a>
-    <a href="/log">Log entries</a>
+    <a href="/">Test</a>
+    <a href="/log">Log</a>
+    <a href="/ready">Ready</a>
+    <a href="/live">Live</a>
+    <a href="/transform/config?configVersion=9999">Config</a>
 </div>
 
 </body>

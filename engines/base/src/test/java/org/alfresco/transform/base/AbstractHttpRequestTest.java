@@ -35,6 +35,7 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
@@ -46,6 +47,7 @@ import org.springframework.util.LinkedMultiValueMap;
  * Super class for testing controllers with a server. Includes tests for the Controller itself.
  * Note: Currently uses json rather than HTML as json is returned by this spring boot test harness.
  */
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes={org.alfresco.transform.base.Application.class})
 public abstract class AbstractHttpRequestTest
 {
     @LocalServerPort
@@ -63,7 +65,7 @@ public abstract class AbstractHttpRequestTest
     {
         String result = restTemplate.getForObject("http://localhost:" + port + "/", String.class);
 
-        String title = getTransformerName() + ' ' + "Test Transformation";
+        String title = "Test Transformation";
         assertTrue("\"" + title + "\" should be part of the page title", result.contains(title));
     }
 
@@ -84,8 +86,7 @@ public abstract class AbstractHttpRequestTest
             String.class);
 
         String title = getTransformerName() + ' ' + "Error Page";
-        assertTrue("\"" + title + "\" should be part of the page title",
-            result.contains("Error Page"));
+        assertTrue("\"" + title + "\" should be part of the page title", result.contains("Error Page"));
     }
 
     @Test
@@ -97,12 +98,6 @@ public abstract class AbstractHttpRequestTest
         assertTransformError(false,
                 getTransformerName() + " - Required request part 'file' is not present",
                 parameters);
-    }
-
-    @Test
-    public void noTargetExtensionError()
-    {
-        assertMissingParameter("targetExtension");
     }
 
     private void assertMissingParameter(String name)

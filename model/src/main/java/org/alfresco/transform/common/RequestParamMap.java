@@ -77,8 +77,10 @@ public interface RequestParamMap
 
     // Endpoints
     String ENDPOINT_TRANSFORM = "/transform";
+    String ENDPOINT_TEST = "/test";
     String ENDPOINT_TRANSFORM_CONFIG = "/transform/config";
     String ENDPOINT_TRANSFORM_CONFIG_LATEST = ENDPOINT_TRANSFORM_CONFIG + "?" + CONFIG_VERSION + "=" + CONFIG_VERSION_LATEST;
-    String ENDPOINT_TRANSFORM_LOG = "/log";
-    String ENDPOINT_TRANSFORM_TEST = "/";
+    String ENDPOINT_ERROR = "/error";
+    String ENDPOINT_LOG = "/log";
+    String ENDPOINT_ROOT = "/";
 }

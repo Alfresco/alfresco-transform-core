@@ -26,20 +26,20 @@
  */
 package org.alfresco.transform.base;
 
+import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transform.base.fs.FileManager;
+import org.alfresco.transform.base.logging.LogEntry;
+import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.base.probes.ProbeTestTransform;
 import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
-import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.messages.TransformRequestValidator;
-import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.registry.TransformServiceRegistry;
 import org.alfresco.transform.common.TransformException;
-import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
-import org.alfresco.transform.base.logging.LogEntry;
-import org.alfresco.transform.base.model.FileRefResponse;
+import org.alfresco.transform.common.TransformerDebug;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.messages.TransformRequestValidator;
+import org.alfresco.transform.registry.TransformServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
@@ -86,24 +86,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.joining;
-import static org.alfresco.transform.base.fs.FileManager.createTargetFile;
-import static org.alfresco.transform.common.RequestParamMap.TARGET_ENCODING;
-import static org.alfresco.transform.config.CoreVersionDecorator.setOrClearCoreVersion;
-import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
-import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION;
-import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
 import static org.alfresco.transform.base.fs.FileManager.TempFileProvider.createTempFile;
-import static org.alfresco.transform.base.fs.FileManager.getDirectAccessUrlInputStream;
+import static org.alfresco.transform.base.fs.FileManager.createTargetFile;
 import static org.alfresco.transform.base.fs.FileManager.deleteFile;
+import static org.alfresco.transform.base.fs.FileManager.getDirectAccessUrlInputStream;
 import static org.alfresco.transform.base.fs.FileManager.getFilenameFromContentDisposition;
 import static org.alfresco.transform.base.fs.FileManager.save;
+import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION;
+import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
+import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_ERROR;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_LOG;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_ROOT;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TEST;
 import static org.alfresco.transform.common.RequestParamMap.FILE;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_EXTENSION;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
+import static org.alfresco.transform.common.RequestParamMap.TARGET_ENCODING;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
+import static org.alfresco.transform.config.CoreVersionDecorator.setOrClearCoreVersion;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -221,16 +225,16 @@ public class TransformController
     /**
      * Test UI page to perform a transform.
      */
-    @GetMapping("/")
-    public String transformForm(Model model)
+    @GetMapping(ENDPOINT_ROOT)
+    public String test(Model model)
     {
-        return "transformForm";
+        return "test";
     }
 
     /**
      * Test UI error page.
      */
-    @GetMapping("/error")
+    @GetMapping(ENDPOINT_ERROR)
     public String error()
     {
         return "error"; // the name of the template
@@ -239,7 +243,7 @@ public class TransformController
     /**
      * Test UI log page.
      */
-    @GetMapping("/log")
+    @GetMapping(ENDPOINT_LOG)
     String log(Model model)
     {
         model.addAttribute("title", transformEngine.getTransformEngineName() + " Log Entries");
@@ -279,6 +283,46 @@ public class TransformController
         TransformConfig transformConfig = ((TransformRegistryImpl) transformRegistry).getTransformConfig();
         transformConfig = setOrClearCoreVersion(transformConfig, configVersion);
         return new ResponseEntity<>(transformConfig, OK);
+    }
+
+    @PostMapping(value = ENDPOINT_TEST, consumes = MULTIPART_FORM_DATA_VALUE)
+    public StreamingResponseBody test(HttpServletRequest request,
+            @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
+            @RequestParam(value = SOURCE_MIMETYPE, required = false) String sourceMimetype,
+            @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,
+            @RequestParam Map<String, String> origRequestParameters)
+    {
+        Map<String, String> requestParameters = new HashMap<>();
+        sourceMimetype = overrideMimetypeFromExtension(origRequestParameters, SOURCE_MIMETYPE, sourceMimetype);
+        targetMimetype = overrideMimetypeFromExtension(origRequestParameters, TARGET_MIMETYPE, targetMimetype);
+        origRequestParameters.forEach((name, value) ->
+        {
+            if (name.startsWith("value") == false)
+            {
+                if (name.startsWith("name"))
+                {
+                    String suffix = name.substring("name".length());
+                    name = value;
+                    value = origRequestParameters.get("value" + suffix);
+                }
+                if (name != null && !name.isBlank() && value != null && !value.isBlank())
+                {
+                    requestParameters.put(name, value);
+                }
+            }
+        });
+        return transform(request, sourceMultipartFile, sourceMimetype, targetMimetype, requestParameters);
+    }
+
+    private String overrideMimetypeFromExtension(Map<String, String> origRequestParameters, String name, String value)
+    {
+        String override = origRequestParameters.remove("_"+ name);
+        if (override != null && !override.isBlank())
+        {
+            value = override;
+            origRequestParameters.put(name, value);
+        }
+        return value;
     }
 
     @PostMapping(value = ENDPOINT_TRANSFORM, consumes = MULTIPART_FORM_DATA_VALUE)

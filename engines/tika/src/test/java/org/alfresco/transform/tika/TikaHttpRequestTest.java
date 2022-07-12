@@ -34,13 +34,12 @@ import org.springframework.util.LinkedMultiValueMap;
 /**
  * Tests TikaController with a server test harness.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class TikaHttpRequestTest extends AbstractHttpRequestTest
 {
     @Override
     protected String getTransformerName()
     {
-        return "Tika";
+        return "0010-Tika";
     }
 
     @Override

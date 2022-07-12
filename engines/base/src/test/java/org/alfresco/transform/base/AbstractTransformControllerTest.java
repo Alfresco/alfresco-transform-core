@@ -80,6 +80,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.ClassPathResource;
@@ -98,6 +99,7 @@ import com.google.common.collect.ImmutableSet;
 /**
  * Super class for testing controllers without a server. Includes tests for the Controller itself.
  */
+//@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes={org.alfresco.transform.base.config.WebApplicationConfig.class})
 public abstract class AbstractTransformControllerTest
 {
     @TempDir // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication

@@ -235,9 +235,13 @@ public class FileManager
         {
             return new URL(directUrl).openStream();
         }
-        catch (IOException e)
+        catch (IllegalArgumentException e)
         {
             throw new TransformException(BAD_REQUEST.value(), "Direct Access Url is invalid.", e);
+        }
+        catch (IOException e)
+        {
+            throw new TransformException(BAD_REQUEST.value(), "Direct Access Url not found.", e);
         }
     }
 

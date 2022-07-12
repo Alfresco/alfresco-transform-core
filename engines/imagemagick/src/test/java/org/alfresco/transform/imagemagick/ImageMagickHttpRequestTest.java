@@ -38,7 +38,7 @@ public class ImageMagickHttpRequestTest extends AbstractHttpRequestTest
     @Override
     protected String getTransformerName()
     {
-        return "ImageMagick";
+        return "0030-ImageMagick";
     }
 
     @Override

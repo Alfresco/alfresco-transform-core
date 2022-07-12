@@ -38,7 +38,7 @@ public class MiscTransformerHttpRequestTest extends AbstractHttpRequestTest
     @Override
     protected String getTransformerName()
     {
-        return "Miscellaneous Transformers";
+        return "0050-Misc";
     }
 
     @Override

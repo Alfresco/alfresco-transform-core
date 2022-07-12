@@ -36,7 +36,7 @@ public class AIOControllerHttpRequestTest extends AbstractHttpRequestTest
     @Override
     protected String getTransformerName() 
     {
-        return "All in One Transformer";
+        return "0060-AllInOne";
     }
 
     @Override
