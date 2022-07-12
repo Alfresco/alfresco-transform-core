@@ -32,7 +32,7 @@ import java.io.PushbackInputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.poi.poifs.common.POIFSConstants;
+import org.apache.poi.poifs.filesystem.FileMagic;
 import org.apache.poi.util.IOUtils;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
@@ -95,10 +95,7 @@ public class TikaOfficeDetectParser implements Parser
         }
 
         // Which is it?
-        if (initial4[0] == POIFSConstants.OOXML_FILE_HEADER[0] &&
-            initial4[1] == POIFSConstants.OOXML_FILE_HEADER[1] &&
-            initial4[2] == POIFSConstants.OOXML_FILE_HEADER[2] &&
-            initial4[3] == POIFSConstants.OOXML_FILE_HEADER[3])
+        if (FileMagic.valueOf(initial4) == FileMagic.OOXML)
         {
             ooxmlParser.parse(wrapped, handler, metadata, parseContext);
         }
