@@ -27,11 +27,11 @@
 package org.alfresco.transform.aio;
 
 import org.alfresco.transform.base.AbstractHttpRequestTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class AIOControllerHttpRequestTest extends AbstractHttpRequestTest
+/**
+ * Tests All-In-One with a server test harness that talks to the TransformController using http.
+ */
+public class AIOHttpRequestTest extends AbstractHttpRequestTest
 {
     @Override
     protected String getTransformerName() 
@@ -42,7 +42,6 @@ public class AIOControllerHttpRequestTest extends AbstractHttpRequestTest
     @Override
     protected String getSourceExtension() 
     {
-        // Currently using same extension as ImageMagick tests
         return "jpg";
     }
 }

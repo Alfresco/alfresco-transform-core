@@ -31,9 +31,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 /**
- * Tests AlfrescoPdfRendererController with a server test harness.
+ * Tests PdfRenderer with a server test harness that talks to the TransformController using http.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class AlfrescoPdfRendererHttpRequestTest extends AbstractHttpRequestTest
 {
     @Override

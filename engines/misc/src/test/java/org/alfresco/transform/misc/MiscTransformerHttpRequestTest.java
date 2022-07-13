@@ -27,12 +27,10 @@
 package org.alfresco.transform.misc;
 
 import org.alfresco.transform.base.AbstractHttpRequestTest;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * Tests MiscController with a server test harness.
+ * Tests Misc with a server test harness that talks to the TransformController using http.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class MiscTransformerHttpRequestTest extends AbstractHttpRequestTest
 {
     @Override
