@@ -227,7 +227,7 @@ public class ProbeTestTransform
         File targetFile = getTargetFile(request);
 
         String transformName = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
-        controller.transformImpl(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+//        controller.transformImpl(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
 
         long time = System.currentTimeMillis() - start;
         String message = "Transform " + time + "ms";

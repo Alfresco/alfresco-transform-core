@@ -1,7 +1,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 	<div>
-		<h2>Test Transformations</h2>
+        <h2 th:text="${title}"></h2>
         <form method="POST" enctype="multipart/form-data" action="/test">
             <table>
                 <tr><td><div style="text-align:right">file</div></td><td><input type="file" name="file" /></td></tr>

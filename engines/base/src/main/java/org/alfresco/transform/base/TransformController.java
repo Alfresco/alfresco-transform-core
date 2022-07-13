@@ -66,6 +66,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.annotation.PostConstruct;
@@ -228,16 +229,18 @@ public class TransformController
     @GetMapping(ENDPOINT_ROOT)
     public String test(Model model)
     {
-        return "test";
+        model.addAttribute("title", transformEngine.getTransformEngineName() + " Test Page");
+        return "test"; // display test.html
     }
 
     /**
      * Test UI error page.
      */
     @GetMapping(ENDPOINT_ERROR)
-    public String error()
+    public String error(Model model)
     {
-        return "error"; // the name of the template
+        model.addAttribute("title", transformEngine.getTransformEngineName() + " Error Page");
+        return "error"; // display error.html
     }
 
     /**
@@ -252,7 +255,7 @@ public class TransformController
         {
             model.addAttribute("log", log);
         }
-        return "log"; // the name of the template
+        return "log"; // display log.html
     }
 
     /**
@@ -398,8 +401,6 @@ public class TransformController
      * @param timeout Transformation timeout
      * @return A transformation reply
      */
-    @PostMapping(value = ENDPOINT_TRANSFORM, produces = APPLICATION_JSON_VALUE)
-    @ResponseBody
     public ResponseEntity<TransformReply> transform(@RequestBody TransformRequest request,
         @RequestParam(value = "timeout", required = false) Long timeout)
     {
@@ -741,12 +742,6 @@ public class TransformController
         return customTransformer;
     }
 
-    public void transformImpl(String transformName, String sourceMimetype, String targetMimetype,
-            Map<String, String> transformOptions, File sourceFile, File targetFile)
-    {
-        //javaExecutor.transformExtractOrEmbed(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
-    }
-
     @ExceptionHandler(TypeMismatchException.class)
     public void handleParamsTypeMismatch(HttpServletResponse response, MissingServletRequestParameterException e) throws IOException
     {
@@ -766,18 +761,25 @@ public class TransformController
 
         logger.error(message, e);
         LogEntry.setStatusCodeAndMessage(statusCode, message);
-        response.sendError(statusCode, transformEngine.getTransformEngineName() + " - " + message);
+        response.sendError(statusCode, message);
     }
 
     @ExceptionHandler(TransformException.class)
-    public void transformExceptionWithMessage(HttpServletResponse response, TransformException e) throws IOException
+    public ModelAndView transformExceptionWithMessage(HttpServletResponse response, TransformException e)
+            throws IOException
     {
         final String message = e.getMessage();
         final int statusCode = e.getStatusCode();
 
-        logger.error(message, e);
+        logger.error(message);
         long time = LogEntry.setStatusCodeAndMessage(statusCode, message);
         probeTestTransform.recordTransformTime(time);
-        response.sendError(statusCode, transformEngine.getTransformEngineName() + " - " + message);
+        response.sendError(statusCode, message);
+
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("title", transformEngine.getTransformEngineName() + " Error Page");
+        mav.addObject("message", message);
+        mav.setViewName("error"); // display error.html
+        return mav;
     }
 }

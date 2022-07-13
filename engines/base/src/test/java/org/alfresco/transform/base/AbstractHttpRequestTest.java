@@ -65,7 +65,7 @@ public abstract class AbstractHttpRequestTest
     {
         String result = restTemplate.getForObject("http://localhost:" + port + "/", String.class);
 
-        String title = "Test Transformation";
+        String title = getTransformerName() + " Test Page";
         assertTrue("\"" + title + "\" should be part of the page title", result.contains(title));
     }
 
@@ -75,7 +75,7 @@ public abstract class AbstractHttpRequestTest
         String result = restTemplate.getForObject("http://localhost:" + port + "/log",
             String.class);
 
-        String title = getTransformerName() + ' ' + "Log";
+        String title = getTransformerName() + " Log";
         assertTrue("\"" + title + "\" should be part of the page title", result.contains(title));
     }
 
@@ -85,8 +85,8 @@ public abstract class AbstractHttpRequestTest
         String result = restTemplate.getForObject("http://localhost:" + port + "/error",
             String.class);
 
-        String title = getTransformerName() + ' ' + "Error Page";
-        assertTrue("\"" + title + "\" should be part of the page title", result.contains("Error Page"));
+        String title = getTransformerName() + " Error Page";
+        assertTrue("\"" + title + "\" should be part of the page title", result.contains(title));
     }
 
     @Test
@@ -95,15 +95,8 @@ public abstract class AbstractHttpRequestTest
         LinkedMultiValueMap<String, Object> parameters = new LinkedMultiValueMap<>();
         parameters.add("targetExtension", ".tmp");
 
-        assertTransformError(false,
-                getTransformerName() + " - Required request part 'file' is not present",
+        assertTransformError(false, "Required request part 'file' is not present",
                 parameters);
-    }
-
-    private void assertMissingParameter(String name)
-    {
-        assertTransformError(true,
-            getTransformerName() + " - Request parameter '" + name + "' is missing", null);
     }
 
     protected void assertTransformError(boolean addFile,
@@ -138,10 +131,7 @@ public abstract class AbstractHttpRequestTest
         parameters.add("targetExtension", ".tmp");
         parameters.add(DIRECT_ACCESS_URL, directUrl);
 
-        assertTransformError(false,
-                getTransformerName() + " - Direct Access Url not found.",
-                parameters);
-
+        assertTransformError(false, "Direct Access Url not found.", parameters);
     }
 
     protected void sendTranformationRequest(
