@@ -111,9 +111,9 @@ public class TransformHandler
     private TransformServiceRegistry transformRegistry;
     @Autowired
     private TransformerDebug transformerDebug;
-    @Autowired
-    private TransformEngine transformEngine;
+
     private AtomicInteger httpRequestCount = new AtomicInteger(1);
+    private TransformEngine transformEngine;
     private ProbeTestTransform probeTestTransform;
     private Map<String, CustomTransformer> customTransformersByName = new HashMap<>();
 

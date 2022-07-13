@@ -36,7 +36,7 @@ import java.util.Map;
 
 /**
  * Helper interface for older code that uses Files rather than InputStreams and OutputStreams.
- * If you, can refactor your code to NOT use Files.
+ * If you can, refactor your code to NOT use Files.
  */
 public interface CustomTransformerFileAdaptor extends CustomTransformer
 {

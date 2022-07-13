@@ -28,8 +28,6 @@ package org.alfresco.transform.base;
 
 import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.probes.ProbeTestTransform;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.common.TransformException;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.registry.TransformServiceRegistry;
