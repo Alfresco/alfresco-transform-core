@@ -27,23 +27,10 @@
 
 package org.alfresco.transform.base;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.base.messaging.TransformMessageConverter;
 import org.alfresco.transform.base.messaging.TransformReplySender;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.activemq.command.ActiveMQObjectMessage;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,10 +42,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jms.support.converter.MessageConversionException;
 
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
 public class QueueTransformServiceTest
 {
     @Mock
-    private TransformController transformController;
+    private TransformHandler transformHandler;
     @Mock
     private TransformMessageConverter transformMessageConverter;
     @Mock
@@ -78,7 +78,7 @@ public class QueueTransformServiceTest
     {
         queueTransformService.receive(null);
 
-        verifyNoMoreInteractions(transformController);
+        verifyNoMoreInteractions(transformHandler);
         verifyNoMoreInteractions(transformMessageConverter);
         verifyNoMoreInteractions(transformReplySender);
     }
@@ -88,7 +88,7 @@ public class QueueTransformServiceTest
     {
         queueTransformService.receive(new ActiveMQObjectMessage());
 
-        verifyNoMoreInteractions(transformController);
+        verifyNoMoreInteractions(transformHandler);
         verifyNoMoreInteractions(transformMessageConverter);
         verifyNoMoreInteractions(transformReplySender);
     }
@@ -116,7 +116,7 @@ public class QueueTransformServiceTest
         verify(transformMessageConverter).fromMessage(msg);
         verify(transformReplySender).send(destination, reply, msg.getCorrelationId());
 
-        verifyNoMoreInteractions(transformController);
+        verifyNoMoreInteractions(transformHandler);
     }
 
     @Test
@@ -143,7 +143,7 @@ public class QueueTransformServiceTest
         verify(transformMessageConverter).fromMessage(msg);
         verify(transformReplySender).send(destination, reply, msg.getCorrelationId());
 
-        verifyNoMoreInteractions(transformController);
+        verifyNoMoreInteractions(transformHandler);
     }
 
     @Test
@@ -170,7 +170,7 @@ public class QueueTransformServiceTest
         verify(transformMessageConverter).fromMessage(msg);
         verify(transformReplySender).send(destination, reply, msg.getCorrelationId());
 
-        verifyNoMoreInteractions(transformController);
+        verifyNoMoreInteractions(transformHandler);
     }
 
     @Test
@@ -188,12 +188,12 @@ public class QueueTransformServiceTest
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
         doReturn(new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus())))
-            .when(transformController).transform(request, null);
+            .when(transformHandler).handleMessageRequest(request, null);
 
         queueTransformService.receive(msg);
 
         verify(transformMessageConverter).fromMessage(msg);
-        verify(transformController).transform(request, null);
+        verify(transformHandler).handleMessageRequest(request, null);
         verify(transformReplySender).send(destination, reply);
     }
 
@@ -206,7 +206,7 @@ public class QueueTransformServiceTest
 
         queueTransformService.receive(msg);
 
-        verifyNoMoreInteractions(transformController);
+        verifyNoMoreInteractions(transformHandler);
         verifyNoMoreInteractions(transformMessageConverter);
         verifyNoMoreInteractions(transformReplySender);
     }
@@ -229,12 +229,12 @@ public class QueueTransformServiceTest
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
         doReturn(new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus())))
-            .when(transformController).transform(request, null);
+            .when(transformHandler).handleMessageRequest(request, null);
 
         queueTransformService.receive(msg);
 
         verify(transformMessageConverter).fromMessage(msg);
-        verify(transformController).transform(request, null);
+        verify(transformHandler).handleMessageRequest(request, null);
         verify(transformReplySender).send(destination, reply);
     }
 }

@@ -26,35 +26,28 @@
  */
 package org.alfresco.transform.base.fs;
 
+import org.alfresco.transform.base.logging.LogEntry;
+import org.alfresco.transform.common.ExtensionService;
+import org.alfresco.transform.common.TransformException;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.Arrays;
+
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.alfresco.transform.common.ExtensionService.getExtensionForMimetype;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.util.StringUtils.getFilename;
-import static org.springframework.util.StringUtils.getFilenameExtension;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.Arrays;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.alfresco.transform.common.ExtensionService;
-import org.alfresco.transform.common.TransformException;
-import org.alfresco.transform.base.logging.LogEntry;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.util.UriUtils;
 
 public class FileManager
 {
@@ -101,44 +94,11 @@ public class FileManager
         }
     }
 
-    public static File buildFile(String filename)
-    {
-        filename = checkFilename(false, filename);
-        LogEntry.setTarget(filename);
-        return TempFileProvider.createTempFile("target_", "_" + filename);
-    }
-
     public static void deleteFile(final File file) throws Exception
     {
         if (!file.delete())
         {
             throw new Exception("Failed to delete file");
-        }
-    }
-
-    private static String checkFilename(boolean source, String filename)
-    {
-        filename = getFilename(filename);
-        if (filename == null || filename.isEmpty())
-        {
-            String sourceOrTarget = source ? "source" : "target";
-            int statusCode = source ? BAD_REQUEST.value() : INTERNAL_SERVER_ERROR.value();
-            throw new TransformException(statusCode,
-                "The " + sourceOrTarget + " filename was not supplied");
-        }
-        return filename;
-    }
-
-    private static void save(MultipartFile multipartFile, File file)
-    {
-        try
-        {
-            Files.copy(multipartFile.getInputStream(), file.toPath(), REPLACE_EXISTING);
-        }
-        catch (IOException e)
-        {
-            throw new TransformException(INSUFFICIENT_STORAGE.value(),
-                "Failed to store the source file", e);
         }
     }
 
@@ -152,28 +112,6 @@ public class FileManager
         {
             throw new TransformException(INSUFFICIENT_STORAGE.value(),
                 "Failed to store the source file", e);
-        }
-    }
-
-    private static Resource load(File file)
-    {
-        try
-        {
-            Resource resource = new UrlResource(file.toURI());
-            if (resource.exists() || resource.isReadable())
-            {
-                return resource;
-            }
-            else
-            {
-                throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                    "Could not read the target file: " + file.getPath());
-            }
-        }
-        catch (MalformedURLException e)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                "The target filename was malformed: " + file.getPath(), e);
         }
     }
 
@@ -191,24 +129,6 @@ public class FileManager
                              .orElse("");
         }
         return filename;
-    }
-
-    public static String createTargetFileName(final String fileName, String sourceMimetype, String targetMimetype)
-    {
-        String targetExtension = ExtensionService.getExtensionForTargetMimetype(targetMimetype, sourceMimetype);
-        final String sourceFilename = getFilename(fileName);
-
-        if (sourceFilename == null || sourceFilename.isEmpty())
-        {
-            return null;
-        }
-
-        final String ext = getFilenameExtension(sourceFilename);
-        if (ext == null || ext.isEmpty())
-        {
-            return sourceFilename + '.' + targetExtension;
-        }
-        return sourceFilename.substring(0, sourceFilename.length() - ext.length() - 1) + '.' + targetExtension;
     }
 
     public static InputStream getMultipartFileInputStream(MultipartFile sourceMultipartFile)
@@ -265,15 +185,6 @@ public class FileManager
         {
             file.delete();
         }
-    }
-
-    public static ResponseEntity<Resource> createAttachment(String targetFilename, File
-        targetFile)
-    {
-        Resource targetResource = load(targetFile);
-        targetFilename = UriUtils.encodePath(getFilename(targetFilename), "UTF-8");
-        return ResponseEntity.ok().header(CONTENT_DISPOSITION,
-            "attachment; filename*= UTF-8''" + targetFilename).body(targetResource);
     }
 
     /**

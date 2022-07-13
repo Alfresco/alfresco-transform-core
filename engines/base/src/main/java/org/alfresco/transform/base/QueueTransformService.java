@@ -26,20 +26,11 @@
  */
 package org.alfresco.transform.base;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-
-import java.util.Optional;
-
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-
+import org.alfresco.transform.base.messaging.TransformMessageConverter;
+import org.alfresco.transform.base.messaging.TransformReplySender;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.common.TransformException;
-import org.alfresco.transform.base.messaging.TransformMessageConverter;
-import org.alfresco.transform.base.messaging.TransformReplySender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +39,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
+
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
  * Queue Transformer service.
@@ -64,14 +63,10 @@ public class QueueTransformService
 {
     private static final Logger logger = LoggerFactory.getLogger(QueueTransformService.class);
 
-    // TODO: I know this is not smart but all the the transformation logic is in the Controller.
-    // The controller also manages the probes. There's tons of refactoring needed there, hence this. Sorry.
     @Autowired
-    private TransformController transformController;
-
+    private TransformHandler transformHandler;
     @Autowired
     private TransformMessageConverter transformMessageConverter;
-
     @Autowired
     private TransformReplySender transformReplySender;
 
@@ -129,9 +124,7 @@ public class QueueTransformService
             return;
         }
 
-        TransformReply reply = transformController.transform(transformRequest.get(), null)
-                                                  .getBody();
-
+        TransformReply reply = transformHandler.handleMessageRequest(transformRequest.get(), null).getBody();
         transformReplySender.send(replyToDestinationQueue, reply);
     }
 

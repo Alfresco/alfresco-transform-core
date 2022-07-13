@@ -38,7 +38,6 @@ import java.util.Collections;
 import static org.alfresco.transform.base.logging.StandardMessages.COMMUNITY_LICENCE;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 
 @Component
 public class PdfRendererTransformEngine implements TransformEngine

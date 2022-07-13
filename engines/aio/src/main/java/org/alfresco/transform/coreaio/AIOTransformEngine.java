@@ -27,19 +27,16 @@
 package org.alfresco.transform.coreaio;
 
 import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.TransformRegistryImpl;
 import org.alfresco.transform.base.probes.ProbeTestTransform;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.alfresco.transform.base.logging.StandardMessages.COMMUNITY_LICENCE;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 
