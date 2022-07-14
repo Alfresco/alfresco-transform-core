@@ -65,6 +65,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
@@ -158,72 +159,48 @@ public class Tika
     }
 
     // Extracts parameters form args
-    public void transform(Parser parser, DocumentSelector documentSelector, String[] args)
+    void transform(Parser parser, DocumentSelector documentSelector, InputStream inputStream,
+            OutputStream outputStream, String[] args)
     {
-        String transform = null;
         String targetMimetype = null;
         String targetEncoding = null;
-        String sourceFilename = null;
-        String targetFilename = null;
         Boolean includeContents = null;
         Boolean notExtractBookmarksText = null;
 
         for (String arg : args)
         {
-            if (arg.startsWith("--"))
+            if (Objects.isNull(arg))
             {
-                if (INCLUDE_CONTENTS.startsWith(arg))
-                {
-                    getValue(arg, false, includeContents, INCLUDE_CONTENTS);
-                    includeContents = true;
-                }
-                else if (arg.startsWith(TARGET_ENCODING))
-                {
-                    targetEncoding = getValue(arg, true, targetEncoding, TARGET_ENCODING);
-                }
-                else if (arg.startsWith(TARGET_MIMETYPE))
-                {
-                    targetMimetype = getValue(arg, true, targetMimetype, TARGET_MIMETYPE);
-                }
-                else if (arg.startsWith(NOT_EXTRACT_BOOKMARKS_TEXT))
-                {
-                    getValue(arg, false, notExtractBookmarksText, NOT_EXTRACT_BOOKMARKS_TEXT);
-                    notExtractBookmarksText = true;
-                }
-                else
-                {
-                    throw new IllegalArgumentException("Unexpected argument " + arg);
-                }
+                // ignore
+            }
+            else if (arg.startsWith(INCLUDE_CONTENTS))
+            {
+                getValue(arg, false, includeContents, INCLUDE_CONTENTS);
+                includeContents = true;
+            }
+            else if (arg.startsWith(TARGET_ENCODING))
+            {
+                targetEncoding = getValue(arg, true, targetEncoding, TARGET_ENCODING);
+            }
+            else if (arg.startsWith(TARGET_MIMETYPE))
+            {
+                targetMimetype = getValue(arg, true, targetMimetype, TARGET_MIMETYPE);
+            }
+            else if (arg.startsWith(NOT_EXTRACT_BOOKMARKS_TEXT))
+            {
+                getValue(arg, false, notExtractBookmarksText, NOT_EXTRACT_BOOKMARKS_TEXT);
+                notExtractBookmarksText = true;
             }
             else
             {
-                if (transform == null)
-                {
-                    transform = arg;
-                }
-                else if (sourceFilename == null)
-                {
-                    sourceFilename = arg;
-                }
-                else if (targetFilename == null)
-                {
-                    targetFilename = arg;
-                }
-                else
-                {
-                    throw new IllegalArgumentException("Unexpected argument " + arg);
-                }
+                throw new IllegalArgumentException("Unexpected argument " + arg);
             }
-        }
-        if (targetFilename == null)
-        {
-            throw new IllegalArgumentException("Missing arguments");
         }
         includeContents = includeContents == null ? false : includeContents;
         notExtractBookmarksText = notExtractBookmarksText == null ? false : notExtractBookmarksText;
 
-        transform(parser, documentSelector, includeContents, notExtractBookmarksText, sourceFilename,
-            targetFilename, targetMimetype, targetEncoding);
+        transform(parser, documentSelector, includeContents, notExtractBookmarksText, inputStream,
+            outputStream, targetMimetype, targetEncoding);
     }
 
     private String getValue(String arg, boolean valueExpected, Object value, String optionName)
@@ -247,20 +224,17 @@ public class Tika
     private void transform(Parser parser, DocumentSelector documentSelector,
         Boolean includeContents,
         Boolean notExtractBookmarksText,
-        String sourceFilename,
-        String targetFilename, String targetMimetype, String targetEncoding)
+        InputStream inputStream,
+        OutputStream outputStream, String targetMimetype, String targetEncoding)
     {
-
-        try (InputStream is = new BufferedInputStream(new FileInputStream(sourceFilename));
-             OutputStream os = new FileOutputStream(targetFilename);
-             Writer ow = new BufferedWriter(new OutputStreamWriter(os, targetEncoding)))
+        try (Writer ow = new BufferedWriter(new OutputStreamWriter(outputStream, targetEncoding)))
         {
             Metadata metadata = new Metadata();
             ParseContext context = buildParseContext(documentSelector, includeContents,
                 notExtractBookmarksText);
             ContentHandler handler = getContentHandler(targetMimetype, ow);
 
-            parser.parse(is, handler, metadata, context);
+            parser.parse(inputStream, handler, metadata, context);
         }
         catch (SAXException | TikaException | IOException e)
         {

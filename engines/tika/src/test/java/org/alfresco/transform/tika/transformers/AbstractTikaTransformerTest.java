@@ -37,19 +37,21 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.alfresco.transform.base.TransformManager;
 import org.apache.tika.parser.Parser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class GenericTikaTransformerTest
+public class AbstractTikaTransformerTest
 {
-    private static class TikaTestTransformer extends GenericTikaTransformer
+    private static class TikaTestTransformer extends AbstractTikaTransformer
     {
         @Override
         protected Parser getParser()
@@ -66,75 +68,71 @@ public class GenericTikaTransformerTest
     @Test
     public void testNotExtractBookmarkTextDefault() throws Exception
     {
-        GenericTikaTransformer executorSpyDefaultTrue = spy(new TikaTestTransformer(true));
-        GenericTikaTransformer executorSpyDefaultFalse = spy(new TikaTestTransformer(false));
+        AbstractTikaTransformer executorSpyDefaultTrue = spy(new TikaTestTransformer(true));
+        AbstractTikaTransformer executorSpyDefaultFalse = spy(new TikaTestTransformer(false));
 
-        File mockSourceFile = mock(File.class);
-        File mockTargetFile = mock(File.class);
-        String transformName = "transformName";
+        InputStream mockInputStream = mock(InputStream.class);
+        OutputStream mockOutputStream = mock(OutputStream.class);
+        TransformManager mockTransformManager = mock(TransformManager.class);
         String sourceMimetype = "sourceMimetype";
         String targetMimetype = "targetMimetype";
         String defaultEncoding = "UTF-8";
 
         // no need to continue execution passed here or check values as we're checking the correct params passed to this method later.
-        lenient().doNothing().when(executorSpyDefaultTrue).call(any(), any(), any(), any(), any(), any(), any());
-        lenient().doNothing().when(executorSpyDefaultFalse).call(any(), any(), any(), any(), any(), any(), any());
+        lenient().doNothing().when(executorSpyDefaultTrue).call(any(), any(), any(), any(), any(), any());
+        lenient().doNothing().when(executorSpyDefaultFalse).call(any(), any(), any(), any(), any(), any());
 
         Map<String, String> transformOptions = new HashMap<>();
 
         // use empty transformOptions to test defaults
-        executorSpyDefaultTrue.transform(sourceMimetype, targetMimetype, transformOptions,
-                mockSourceFile, mockTargetFile);
-        executorSpyDefaultFalse.transform(sourceMimetype, targetMimetype, transformOptions,
-                mockSourceFile, mockTargetFile);
+        executorSpyDefaultTrue.transform(sourceMimetype, mockInputStream, targetMimetype, mockOutputStream, transformOptions, mockTransformManager);
+        executorSpyDefaultFalse.transform(sourceMimetype, mockInputStream, targetMimetype, mockOutputStream, transformOptions, mockTransformManager);
 
         // when default set to true, with no options passed we should get a call method with NOT_EXTRACT_BOOKMARKS_TEXT
-        verify(executorSpyDefaultTrue, times(1)).call(mockSourceFile, mockTargetFile, transformName, null,
+        verify(executorSpyDefaultTrue, times(1)).call(mockInputStream, mockOutputStream, null,
                 NOT_EXTRACT_BOOKMARKS_TEXT, TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + defaultEncoding);
 
         // when default set to false, with no options passed we should get a call method without NOT_EXTRACT_BOOKMARKS_TEXT
-        verify(executorSpyDefaultFalse, times(1)).call(mockSourceFile, mockTargetFile, transformName, null, null,
+        verify(executorSpyDefaultFalse, times(1)).call(mockInputStream, mockOutputStream, null, null,
                 TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + defaultEncoding);
         
         // use transforms with notExtractBookmarksText set to true
         clearInvocations(executorSpyDefaultTrue, executorSpyDefaultFalse);
         transformOptions.put("notExtractBookmarksText", "true");
-        executorSpyDefaultTrue.transform(sourceMimetype, targetMimetype, transformOptions,
-                mockSourceFile, mockTargetFile);
-        executorSpyDefaultFalse.transform(sourceMimetype, targetMimetype, transformOptions,
-                mockSourceFile, mockTargetFile);
+        executorSpyDefaultTrue.transform(sourceMimetype, mockInputStream, targetMimetype, mockOutputStream, transformOptions, mockTransformManager);
+        executorSpyDefaultFalse.transform(sourceMimetype, mockInputStream, targetMimetype, mockOutputStream, transformOptions, mockTransformManager);
 
         // both call methods should have NOT_EXTRACT_BOOKMARKS_TEXT
-        verify(executorSpyDefaultTrue, times(1)).call(mockSourceFile, mockTargetFile, transformName, null,
+        verify(executorSpyDefaultTrue, times(1)).call(mockInputStream, mockOutputStream, null,
                 NOT_EXTRACT_BOOKMARKS_TEXT, TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + defaultEncoding);
 
-        verify(executorSpyDefaultFalse, times(1)).call(mockSourceFile, mockTargetFile, transformName, null,
+        verify(executorSpyDefaultFalse, times(1)).call(mockInputStream, mockOutputStream, null,
                 NOT_EXTRACT_BOOKMARKS_TEXT, TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + defaultEncoding);
 
         // use transforms with notExtractBookmarksText set to false
         clearInvocations(executorSpyDefaultTrue, executorSpyDefaultFalse);
         transformOptions.replace("notExtractBookmarksText", "true", "false");
-        executorSpyDefaultTrue.transform(sourceMimetype, targetMimetype, transformOptions, mockSourceFile, mockTargetFile);
-        executorSpyDefaultFalse.transform(sourceMimetype, targetMimetype, transformOptions, mockSourceFile, mockTargetFile);
+        executorSpyDefaultTrue.transform(sourceMimetype, mockInputStream, targetMimetype, mockOutputStream, transformOptions, mockTransformManager);
+        executorSpyDefaultFalse.transform(sourceMimetype, mockInputStream, targetMimetype, mockOutputStream, transformOptions, mockTransformManager);
 
         // both call methods should have NOT_EXTRACT_BOOKMARKS_TEXT
-        verify(executorSpyDefaultTrue, times(1)).call(mockSourceFile, mockTargetFile, transformName, null, null,
+        verify(executorSpyDefaultTrue, times(1)).call(mockInputStream, mockOutputStream, null, null,
                 TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + defaultEncoding);
 
-        verify(executorSpyDefaultFalse, times(1)).call(mockSourceFile, mockTargetFile, transformName, null, null,
+        verify(executorSpyDefaultFalse, times(1)).call(mockInputStream, mockOutputStream, null, null,
                 TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + defaultEncoding);
 
         // useful set of pdfbox transformOptions just to be safe
         clearInvocations(executorSpyDefaultTrue, executorSpyDefaultFalse);
         transformOptions.put("targetEncoding", "anyEncoding");
-        executorSpyDefaultTrue.transform(sourceMimetype, targetMimetype, transformOptions, mockSourceFile, mockTargetFile);
-        executorSpyDefaultFalse.transform(sourceMimetype, targetMimetype, transformOptions, mockSourceFile, mockTargetFile);
+        executorSpyDefaultTrue.transform(sourceMimetype, mockInputStream, targetMimetype, mockOutputStream, transformOptions, mockTransformManager);
+        executorSpyDefaultFalse.transform(sourceMimetype, mockInputStream, targetMimetype, mockOutputStream, transformOptions, mockTransformManager);
 
         // both call methods should have NOT_EXTRACT_BOOKMARKS_TEXT but the encoding will change
-        verify(executorSpyDefaultTrue, times(1)).call(mockSourceFile, mockTargetFile, transformName, null, null,
+        verify(executorSpyDefaultTrue, times(1)).call(mockInputStream, mockOutputStream, null, null,
                 TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + "anyEncoding");
 
-        verify(executorSpyDefaultFalse, times(1)).call(mockSourceFile, mockTargetFile, transformName, null, null,
+        verify(executorSpyDefaultFalse, times(1)).call(mockInputStream, mockOutputStream, null, null,
                 TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + "anyEncoding");
     }
 }

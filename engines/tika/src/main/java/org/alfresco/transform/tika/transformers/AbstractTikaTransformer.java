@@ -26,8 +26,9 @@
  */
 package org.alfresco.transform.tika.transformers;
 
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.logging.LogEntry;
-import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.alfresco.transform.common.RequestParamMap;
 import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.parser.Parser;
@@ -36,16 +37,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.io.File;
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.lang.Boolean.parseBoolean;
 
-public abstract class GenericTikaTransformer implements CustomTransformerFileAdaptor
+public abstract class AbstractTikaTransformer implements CustomTransformer
 {
-    private static final Logger logger = LoggerFactory.getLogger(GenericTikaTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractTikaTransformer.class);
 
     @Value("${transform.core.tika.pdfBox.notExtractBookmarksTextDefault:false}")
     boolean notExtractBookmarksTextDefault;
@@ -67,9 +70,9 @@ public abstract class GenericTikaTransformer implements CustomTransformerFileAda
     }
 
     @Override
-    public void transform(String sourceMimetype, String targetMimetype,
-            Map<String, String> transformOptions, File sourceFile, File targetFile)
-            throws Exception
+    public void transform(String sourceMimetype, InputStream inputStream,
+            String targetMimetype, OutputStream outputStream,
+            Map<String, String> transformOptions, TransformManager transformManager) throws Exception
     {
         final boolean includeContents = parseBoolean(
                 transformOptions.getOrDefault(RequestParamMap.INCLUDE_CONTENTS, "false"));
@@ -80,56 +83,26 @@ public abstract class GenericTikaTransformer implements CustomTransformerFileAda
         {
             logger.trace("notExtractBookmarksText default value has been overridden to {}", notExtractBookmarksTextDefault);
         }
-        String transformerName = getTransformerName();
-        call(sourceFile, targetFile, transformerName,
+        call(inputStream, outputStream,
                 includeContents ? Tika.INCLUDE_CONTENTS : null,
                 notExtractBookmarksText ? Tika.NOT_EXTRACT_BOOKMARKS_TEXT : null,
                 Tika.TARGET_MIMETYPE + targetMimetype, Tika.TARGET_ENCODING + targetEncoding);
     }
 
-    void call(File sourceFile, File targetFile, String... args)
+    void call(InputStream inputStream, OutputStream outputStream, String... args)
     {
         Parser parser = getParser();
         DocumentSelector documentSelector = getDocumentSelector();
-        args = buildArgs(sourceFile, targetFile, args);
-        tika.transform(parser, documentSelector, args);
+        logArgs(args);
+        tika.transform(parser, documentSelector, inputStream, outputStream, args);
     }
 
-    private static String[] buildArgs(File sourceFile, File targetFile, String[] args)
+    private void logArgs(String[] args)
     {
-        ArrayList<String> methodArgs = new ArrayList<>(args.length + 2);
         StringJoiner sj = new StringJoiner(" ");
-        for (String arg : args)
-        {
-            addArg(methodArgs, sj, arg);
-        }
-
-        addFileArg(methodArgs, sj, sourceFile);
-        addFileArg(methodArgs, sj, targetFile);
-
+        Arrays.stream(args)
+                .filter(Objects::nonNull)
+                .forEach(arg -> sj.add(arg));
         LogEntry.setOptions(sj.toString());
-
-        return methodArgs.toArray(new String[0]);
-    }
-
-    private static void addArg(ArrayList<String> methodArgs, StringJoiner sj, String arg)
-    {
-        if (arg != null)
-        {
-            sj.add(arg);
-            methodArgs.add(arg);
-        }
-    }
-
-    private static void addFileArg(ArrayList<String> methodArgs, StringJoiner sj, File arg)
-    {
-        if (arg != null)
-        {
-            String path = arg.getAbsolutePath();
-            int i = path.lastIndexOf('.');
-            String ext = i == -1 ? "???" : path.substring(i + 1);
-            sj.add(ext);
-            methodArgs.add(path);
-        }
     }
 }

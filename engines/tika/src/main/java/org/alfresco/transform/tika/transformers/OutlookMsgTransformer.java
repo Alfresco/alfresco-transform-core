@@ -30,7 +30,7 @@ import org.apache.tika.parser.Parser;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OutlookMsgTransformer extends GenericTikaTransformer
+public class OutlookMsgTransformer extends AbstractTikaTransformer
 {
     @Override
     protected Parser getParser()

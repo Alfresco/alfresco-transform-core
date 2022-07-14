@@ -137,9 +137,6 @@ public class TikaControllerTest extends AbstractTransformControllerTest
     @Mock
     private RuntimeExec mockTransformCommand;
 
-    @Mock
-    private RuntimeExec mockCheckCommand;
-
     private String targetEncoding = "UTF-8";
     private String targetMimetype = MIMETYPE_TEXT_PLAIN;
 

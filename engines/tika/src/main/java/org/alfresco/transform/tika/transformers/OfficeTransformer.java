@@ -30,7 +30,7 @@ import org.apache.tika.parser.Parser;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OfficeTransformer extends GenericTikaTransformer
+public class OfficeTransformer extends AbstractTikaTransformer
 {
     @Override
     protected Parser getParser()

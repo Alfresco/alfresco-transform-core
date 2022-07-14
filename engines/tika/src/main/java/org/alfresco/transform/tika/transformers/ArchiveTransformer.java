@@ -29,10 +29,8 @@ package org.alfresco.transform.tika.transformers;
 import org.apache.tika.parser.Parser;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-
 @Component
-public class ArchiveTransformer extends GenericTikaTransformer
+public class ArchiveTransformer extends AbstractTikaTransformer
 {
     @Override
     protected Parser getParser()

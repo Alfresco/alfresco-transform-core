@@ -31,7 +31,7 @@ import org.apache.tika.parser.Parser;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PdfBoxTransformer extends GenericTikaTransformer
+public class PdfBoxTransformer extends AbstractTikaTransformer
 {
     @Override
     protected Parser getParser()

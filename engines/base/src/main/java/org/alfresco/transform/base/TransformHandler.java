@@ -56,6 +56,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -187,17 +188,14 @@ public class TransformHandler
         }
         probeTestTransform.incrementTransformerCount();
 
-        // Obtain the source
         final String directUrl = requestParameters.getOrDefault(DIRECT_ACCESS_URL, "");
-        InputStream inputStream = directUrl.isBlank()
+        InputStream inputStream = new BufferedInputStream(directUrl.isBlank()
                 ? FileManager.getMultipartFileInputStream(sourceMultipartFile)
-                : getDirectAccessUrlInputStream(directUrl);
+                : getDirectAccessUrlInputStream(directUrl));
         long sourceSizeInBytes = -1L; // TODO pass in t-options or just ignore for http request as the repo will have checked.
         Map<String, String> transformOptions = getTransformOptions(requestParameters);
         String transformName = getTransformerName(sourceSizeInBytes, sourceMimetype, targetMimetype, transformOptions);
         CustomTransformer customTransformer = getCustomTransformer(transformName);
-        String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
-        String targetEncoding = transformOptions.get(TARGET_ENCODING); // TODO not normally set
         String reference = "e"+httpRequestCount.getAndIncrement();
         transformerDebug.pushTransform(reference, sourceMimetype, targetMimetype, sourceSizeInBytes, transformName);
         transformerDebug.logOptions(reference, requestParameters);
@@ -254,72 +252,76 @@ public class TransformHandler
             return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
 
-        String targetMimetype = request.getTargetMediaType();
-        String sourceMimetype = request.getSourceMediaType();
-        File targetFile = createTargetFile(null, sourceMimetype, targetMimetype);
-        transformerDebug.pushTransform(request);
-
         try
         {
-            OutputStreamLengthRecorder outputStream =
-                    new OutputStreamLengthRecorder(new BufferedOutputStream(new FileOutputStream(targetFile)));
+            String targetMimetype = request.getTargetMediaType();
+            String sourceMimetype = request.getSourceMediaType();
+            File targetFile = createTargetFile(null, sourceMimetype, targetMimetype);
+            transformerDebug.pushTransform(request);
 
-            long sourceSizeInBytes = request.getSourceSize();
-            Map<String, String> transformOptions = getTransformOptions(request.getTransformRequestOptions());
-            String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
-            String targetEncoding = transformOptions.get(TARGET_ENCODING); // TODO not normally set
-            transformerDebug.logOptions(request);
-            String transformName = getTransformerName(sourceSizeInBytes, sourceMimetype, targetMimetype, transformOptions);
-            CustomTransformer customTransformer = getCustomTransformer(transformName);
-
-            TransformManagerImpl transformManager = TransformManagerImpl.builder()
-                                                                        .withSourceMimetype(sourceMimetype)
-                                                                        .withTargetMimetype(targetMimetype)
-                                                                        .withInputStream(inputStream)
-                                                                        .withOutputStream(outputStream)
-                                                                        .withTargetFile(targetFile)
-                                                                        .build();
-
-            customTransformer.transform(sourceMimetype, inputStream,
-                    targetMimetype, outputStream, transformOptions, transformManager);
-
-            transformManager.ifUsedCopyTargetFileToOutputStream();
-
-            reply.getInternalContext().setCurrentSourceSize(outputStream.getLength());
-
-            if (saveTargetFileInSharedFileStore(targetFile, reply) == false)
+            try (OutputStreamLengthRecorder outputStream = new OutputStreamLengthRecorder(new BufferedOutputStream(
+                    new FileOutputStream(targetFile))))
             {
+                long sourceSizeInBytes = request.getSourceSize();
+                Map<String, String> transformOptions = getTransformOptions(request.getTransformRequestOptions());
+                transformerDebug.logOptions(request);
+                String transformName = getTransformerName(sourceSizeInBytes, sourceMimetype, targetMimetype, transformOptions);
+                CustomTransformer customTransformer = getCustomTransformer(transformName);
+
+                TransformManagerImpl transformManager = TransformManagerImpl.builder()
+                                                                            .withSourceMimetype(sourceMimetype)
+                                                                            .withTargetMimetype(targetMimetype)
+                                                                            .withInputStream(inputStream)
+                                                                            .withOutputStream(outputStream)
+                                                                            .withTargetFile(targetFile)
+                                                                            .build();
+
+                customTransformer.transform(sourceMimetype, inputStream,
+                        targetMimetype, outputStream, transformOptions, transformManager);
+
+                transformManager.ifUsedCopyTargetFileToOutputStream();
+
+                reply.getInternalContext().setCurrentSourceSize(outputStream.getLength());
+
+                if (saveTargetFileInSharedFileStore(targetFile, reply) == false)
+                {
+                    return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+                }
+
+                transformManager.deleteSourceFileIfExists();
+                transformManager.deleteTargetFileIfExists();
+
+                probeTestTransform.recordTransformTime(System.currentTimeMillis()-start);
+                transformerDebug.popTransform(reply);
+
+                logger.trace("Sending successful {}, timeout {} ms", reply, timeout);
                 return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
             }
+            catch (TransformException e)
+            {
+                reply.setStatus(e.getStatusCode());
+                reply.setErrorDetails(messageWithCause("Failed at processing transformation", e));
 
-            transformManager.deleteSourceFileIfExists();
-            transformManager.deleteTargetFileIfExists();
+                transformerDebug.logFailure(reply);
+                logger.trace("Failed to perform transform (TransformException), sending " + reply, e);
+                return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+            }
+            catch (Exception e)
+            {
+                reply.setStatus(INTERNAL_SERVER_ERROR.value());
+                reply.setErrorDetails(messageWithCause("Failed at processing transformation", e));
 
-            probeTestTransform.recordTransformTime(System.currentTimeMillis()-start);
-            transformerDebug.popTransform(reply);
-
-            logger.trace("Sending successful {}, timeout {} ms", reply, timeout);
-            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+                transformerDebug.logFailure(reply);
+                logger.trace("Failed to perform transform (Exception), sending " + reply, e);
+                return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+            }
         }
-        catch (TransformException e)
+        finally
         {
-            reply.setStatus(e.getStatusCode());
-            reply.setErrorDetails(messageWithCause("Failed at processing transformation", e));
-
-            transformerDebug.logFailure(reply);
-            logger.trace("Failed to perform transform (TransformException), sending " + reply, e);
-            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
-        }
-        catch (Exception e)
-        {
-            reply.setStatus(INTERNAL_SERVER_ERROR.value());
-            reply.setErrorDetails(messageWithCause("Failed at processing transformation", e));
-
-            transformerDebug.logFailure(reply);
-            logger.trace("Failed to perform transform (Exception), sending " + reply, e);
-            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+            closeInputStreamWithoutException(inputStream);
         }
     }
+
     private boolean isTransformRequestValid(TransformRequest request, TransformReply reply)
     {
         final Errors errors = validateTransformRequest(request);
@@ -412,9 +414,9 @@ public class TransformHandler
         InputStream inputStream = null;
         try
         {
-            inputStream = directUrl.isBlank()
+            inputStream = new BufferedInputStream(directUrl.isBlank()
                     ? getSharedFileStoreInputStream(request.getSourceReference())
-                    : getDirectAccessUrlInputStream(directUrl);
+                    : getDirectAccessUrlInputStream(directUrl));
         }
         catch (TransformException e)
         {
@@ -573,5 +575,16 @@ public class TransformHandler
             throw new TransformException(BAD_REQUEST.value(), "Custom Transformer "+customTransformer+" not found");
         }
         return customTransformer;
+    }
+
+    private void closeInputStreamWithoutException(InputStream inputStream) {
+        try
+        {
+            inputStream.close();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 }
