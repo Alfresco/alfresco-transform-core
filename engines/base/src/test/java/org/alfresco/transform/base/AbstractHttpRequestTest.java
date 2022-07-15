@@ -44,8 +44,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 
 /**
- * Super class for testing controllers with a server. Includes tests for the Controller itself.
- * Note: Currently uses json rather than HTML as json is returned by this spring boot test harness.
+ * Super class with a server test harness, which talks to the TransformController using http.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes={org.alfresco.transform.base.Application.class})
 public abstract class AbstractHttpRequestTest

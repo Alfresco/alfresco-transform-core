@@ -21,23 +21,25 @@
  */
 package org.alfresco.transform.common;
 
+import org.springframework.http.HttpStatus;
+
 public class TransformException extends RuntimeException
 {
-    private final int statusCode;
+    private final HttpStatus statusCode;
 
-    public TransformException(int statusCode, String message)
+    public TransformException(HttpStatus statusCode, String message)
     {
         super(message);
         this.statusCode = statusCode;
     }
 
-    public TransformException(int statusCode, String message, Throwable cause)
+    public TransformException(HttpStatus statusCode, String message, Throwable cause)
     {
         super(message, cause);
         this.statusCode = statusCode;
     }
 
-    public int getStatusCode()
+    public HttpStatus getStatusCode()
     {
         return statusCode;
     }

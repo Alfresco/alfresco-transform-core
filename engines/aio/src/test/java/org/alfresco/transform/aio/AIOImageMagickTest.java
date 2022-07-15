@@ -26,33 +26,35 @@
  */
 package org.alfresco.transform.aio;
 
-import org.alfresco.transform.pdfrenderer.AlfrescoPdfRendererControllerTest;
-import org.alfresco.transform.registry.AbstractTransformRegistry;
+import org.alfresco.transform.base.TransformRegistryImpl;
+import org.alfresco.transform.imagemagick.ImageMagickTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import java.util.Map;
+import java.io.IOException;
 
-@WebMvcTest()
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
- * Test the AIOController PDF Renderer transforms without a server.
- * Super class includes tests for the TransformController.
+ * Test ImageMagick functionality in All-In-One.
  */
-public class AIOControllerPdfRendererTest extends AlfrescoPdfRendererControllerTest
+public class AIOImageMagickTest extends ImageMagickTest
 {
-    @Autowired AbstractTransformRegistry transformRegistry;
+    @Autowired TransformRegistryImpl transformRegistry;
 
-    @Override
-    protected void setFields()
-    {
+    @BeforeEach @Override
+    public void before() throws IOException
+    {       
 //        ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
 //        ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
 //        //Need to wire in the mocked commandExecutor into the controller...
-//        Map<String,Transformer> transformers = transformRegistry.getTransformerEngineMapping();
-//        transformers.replace("pdfrenderer", commandExecutor);
+//        Map<String, Transformer> transformers = transformRegistry.getTransformerEngineMapping();
+//        transformers.replace("imagemagick", commandExecutor);
+//
+//        mockTransformCommand("jpg", "png", "image/jpeg", true);
     }
 
     @Override
@@ -66,6 +68,14 @@ public class AIOControllerPdfRendererTest extends AlfrescoPdfRendererControllerT
         return builder;
     }
 
+//    @Test
+//    @Override
+//    public void noTargetFileTest()
+//    {
+//        // Ignore the test in super class as the AIO transforms will not be selected .
+//        // It is the mock that returns a zero length file for other transformers, when we supply an invalid targetExtension.
+//    }
+//
 //    @Test
 //    @Override
 //    public void testGetTransformConfigInfo()

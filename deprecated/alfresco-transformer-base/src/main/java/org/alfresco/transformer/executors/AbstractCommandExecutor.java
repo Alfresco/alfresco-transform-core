@@ -55,14 +55,12 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
 
         if (result.getExitValue() != 0 && result.getStdErr() != null && result.getStdErr().length() > 0)
         {
-            throw new TransformException(BAD_REQUEST.value(),
-                "Transformer exit code was not 0: \n" + result.getStdErr());
+            throw new TransformException(BAD_REQUEST, "Transformer exit code was not 0: \n" + result.getStdErr());
         }
 
         if (!targetFile.exists() || targetFile.length() == 0)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                "Transformer failed to create an output file");
+            throw new TransformException(INTERNAL_SERVER_ERROR, Transformer failed to create an output file");
         }
     }
 
@@ -74,14 +72,14 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
             final ExecutionResult result = checkCommand.execute();
             if (result.getExitValue() != 0 && result.getStdErr() != null && result.getStdErr().length() > 0)
             {
-                throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                    "Transformer version check exit code was not 0: \n" + result);
+                throw new TransformException(INTERNAL_SERVER_ERROR,
+                        "Transformer version check exit code was not 0: \n" + result);
             }
 
             final String version = result.getStdOut().trim();
             if (version.isEmpty())
             {
-                throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+                throw new TransformException(INTERNAL_SERVER_ERROR,
                     "Transformer version check failed to create any output");
             }
             return version;

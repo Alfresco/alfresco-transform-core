@@ -35,6 +35,7 @@ import org.alfresco.transform.registry.TransformServiceRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -42,7 +43,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 
 @Configuration
-@ComponentScan(basePackages = {"org.alfresco.transform"})
+@ComponentScan(
+        basePackages = {"org.alfresco.transform"},
+        excludeFilters = @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*Test.*"))
 public class WebApplicationConfig implements WebMvcConfigurer
 {
     @Override

@@ -35,6 +35,7 @@ import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
 import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.common.ExtensionService;
 import org.alfresco.transform.common.TransformException;
 import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.messages.TransformRequestValidator;
@@ -43,9 +44,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
@@ -62,6 +63,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -70,23 +72,18 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.joining;
-import static org.alfresco.transform.base.fs.FileManager.TempFileProvider.createTempFile;
 import static org.alfresco.transform.base.fs.FileManager.createTargetFile;
 import static org.alfresco.transform.base.fs.FileManager.deleteFile;
 import static org.alfresco.transform.base.fs.FileManager.getDirectAccessUrlInputStream;
-import static org.alfresco.transform.base.fs.FileManager.getFilenameFromContentDisposition;
-import static org.alfresco.transform.base.fs.FileManager.save;
 import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_EXTENSION;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
-import static org.alfresco.transform.common.RequestParamMap.TARGET_ENCODING;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.util.StringUtils.getFilenameExtension;
 
 /**
  * Handles the transform requests from either http or a message.
@@ -178,39 +175,44 @@ public class TransformHandler
         return probeTestTransform;
     }
 
-    public StreamingResponseBody handleHttpRequest(HttpServletRequest request, MultipartFile sourceMultipartFile,
-            String sourceMimetype, String targetMimetype, Map<String, String> requestParameters)
+    public ResponseEntity<StreamingResponseBody> handleHttpRequest(HttpServletRequest request,
+            MultipartFile sourceMultipartFile, String sourceMimetype, String targetMimetype,
+            Map<String, String> requestParameters)
     {
-        if (logger.isDebugEnabled())
+        return createResponseEntity(targetMimetype, os ->
         {
-            logger.debug("Processing request via HTTP endpoint. Params: sourceMimetype: '{}', targetMimetype: '{}', "
-                    + "requestParameters: {}", sourceMimetype, targetMimetype, requestParameters);
-        }
-        probeTestTransform.incrementTransformerCount();
+            TransformManagerImpl transformManager = null;
+            String reference = "e" + httpRequestCount.getAndIncrement();
 
-        final String directUrl = requestParameters.getOrDefault(DIRECT_ACCESS_URL, "");
-        InputStream inputStream = new BufferedInputStream(directUrl.isBlank()
-                ? FileManager.getMultipartFileInputStream(sourceMultipartFile)
-                : getDirectAccessUrlInputStream(directUrl));
-        long sourceSizeInBytes = -1L; // TODO pass in t-options or just ignore for http request as the repo will have checked.
-        Map<String, String> transformOptions = getTransformOptions(requestParameters);
-        String transformName = getTransformerName(sourceSizeInBytes, sourceMimetype, targetMimetype, transformOptions);
-        CustomTransformer customTransformer = getCustomTransformer(transformName);
-        String reference = "e"+httpRequestCount.getAndIncrement();
-        transformerDebug.pushTransform(reference, sourceMimetype, targetMimetype, sourceSizeInBytes, transformName);
-        transformerDebug.logOptions(reference, requestParameters);
-
-        return os -> {
-            OutputStreamLengthRecorder outputStream = new OutputStreamLengthRecorder(os);
             try
             {
-                TransformManagerImpl transformManager = TransformManagerImpl.builder()
-                                                                            .withRequest(request)
-                                                                            .withSourceMimetype(sourceMimetype)
-                                                                            .withTargetMimetype(targetMimetype)
-                                                                            .withInputStream(inputStream)
-                                                                            .withOutputStream(outputStream)
-                                                                            .build();
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Processing request via HTTP endpoint. Params: sourceMimetype: '{}', targetMimetype: '{}', "
+                            + "requestParameters: {}", sourceMimetype, targetMimetype, requestParameters);
+                }
+                probeTestTransform.incrementTransformerCount();
+
+                final String directUrl = requestParameters.getOrDefault(DIRECT_ACCESS_URL, "");
+                InputStream inputStream = new BufferedInputStream(directUrl.isBlank() ?
+                        FileManager.getMultipartFileInputStream(sourceMultipartFile) :
+                        getDirectAccessUrlInputStream(directUrl));
+                long sourceSizeInBytes = -1L; // Ignore for http requests as the Alfresco repo will have checked.
+                Map<String, String> transformOptions = getTransformOptions(requestParameters);
+                String transformName = getTransformerName(sourceSizeInBytes, sourceMimetype, targetMimetype, transformOptions);
+                CustomTransformer customTransformer = getCustomTransformer(transformName);
+                transformerDebug.pushTransform(reference, sourceMimetype, targetMimetype, sourceSizeInBytes, transformName);
+                transformerDebug.logOptions(reference, requestParameters);
+
+                OutputStreamLengthRecorder outputStream = new OutputStreamLengthRecorder(os);
+                transformManager = TransformManagerImpl.builder()
+                                                       .withRequest(request)
+                                                       .withSourceMimetype(sourceMimetype)
+                                                       .withTargetMimetype(targetMimetype)
+                                                       .withInputStream(inputStream)
+                                                       .withOutputStream(outputStream)
+                                                       .build();
+                transformManager.setOutputStream(outputStream);
 
                 customTransformer.transform(sourceMimetype, inputStream,
                         targetMimetype, outputStream, transformOptions, transformManager);
@@ -220,127 +222,122 @@ public class TransformHandler
                 LogEntry.setTargetSize(outputStream.getLength());
                 long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
 
-                transformManager.deleteSourceFileIfExists();
-                transformManager.deleteTargetFileIfExists();
-
                 probeTestTransform.recordTransformTime(time);
                 transformerDebug.popTransform(reference, time);
+            }
+            catch (TransformException e)
+            {
+                transformerDebug.logFailure(reference, e.getMessage());
+                throw e;
             }
             catch (Exception e)
             {
                 transformerDebug.logFailure(reference, e.getMessage());
                 throw new RuntimeException(e);
             }
-        };
+            finally
+            {
+                deleteTmpFiles(transformManager);
+            }
+        });
     }
 
     public ResponseEntity<TransformReply> handleMessageRequest(TransformRequest request, Long timeout)
     {
         long start = System.currentTimeMillis();
-        logger.trace("Received {}, timeout {} ms", request, timeout);
-        probeTestTransform.incrementTransformerCount();
-        TransformReply reply = createBasicTransformReply(request);
-
-        if (isTransformRequestValid(request, reply) == false)
-        {
-            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
-        }
-
-        InputStream inputStream = getInputStream(request, reply);
-        if (inputStream == null)
-        {
-            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
-        }
+        InputStream inputStream = null;
+        TransformManagerImpl transformManager = null;
+        TransformReply reply = createBasicTransformReply(request);;
 
         try
         {
+            logger.trace("Received {}, timeout {} ms", request, timeout);
+            probeTestTransform.incrementTransformerCount();
+            checkTransformRequestValid(request, reply);
+            inputStream = getInputStream(request, reply);
             String targetMimetype = request.getTargetMediaType();
             String sourceMimetype = request.getSourceMediaType();
             File targetFile = createTargetFile(null, sourceMimetype, targetMimetype);
             transformerDebug.pushTransform(request);
 
+            long sourceSizeInBytes = request.getSourceSize();
+            Map<String, String> transformOptions = getTransformOptions(request.getTransformRequestOptions());
+            transformerDebug.logOptions(request);
+            String transformName = getTransformerName(sourceSizeInBytes, sourceMimetype, targetMimetype, transformOptions);
+            CustomTransformer customTransformer = getCustomTransformer(transformName);
+
             try (OutputStreamLengthRecorder outputStream = new OutputStreamLengthRecorder(new BufferedOutputStream(
                     new FileOutputStream(targetFile))))
             {
-                long sourceSizeInBytes = request.getSourceSize();
-                Map<String, String> transformOptions = getTransformOptions(request.getTransformRequestOptions());
-                transformerDebug.logOptions(request);
-                String transformName = getTransformerName(sourceSizeInBytes, sourceMimetype, targetMimetype, transformOptions);
-                CustomTransformer customTransformer = getCustomTransformer(transformName);
+                transformManager = TransformManagerImpl.builder()
+                                                       .withSourceMimetype(sourceMimetype)
+                                                       .withTargetMimetype(targetMimetype)
+                                                       .withInputStream(inputStream)
+                                                       .withOutputStream(outputStream)
+                                                       .withTargetFile(targetFile)
+                                                       .build();
 
-                TransformManagerImpl transformManager = TransformManagerImpl.builder()
-                                                                            .withSourceMimetype(sourceMimetype)
-                                                                            .withTargetMimetype(targetMimetype)
-                                                                            .withInputStream(inputStream)
-                                                                            .withOutputStream(outputStream)
-                                                                            .withTargetFile(targetFile)
-                                                                            .build();
-
-                customTransformer.transform(sourceMimetype, inputStream,
-                        targetMimetype, outputStream, transformOptions, transformManager);
+                customTransformer.transform(sourceMimetype, inputStream, targetMimetype, outputStream, transformOptions,
+                        transformManager);
 
                 transformManager.ifUsedCopyTargetFileToOutputStream();
 
                 reply.getInternalContext().setCurrentSourceSize(outputStream.getLength());
 
-                if (saveTargetFileInSharedFileStore(targetFile, reply) == false)
-                {
-                    return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
-                }
-
-                transformManager.deleteSourceFileIfExists();
-                transformManager.deleteTargetFileIfExists();
-
-                probeTestTransform.recordTransformTime(System.currentTimeMillis()-start);
-                transformerDebug.popTransform(reply);
-
-                logger.trace("Sending successful {}, timeout {} ms", reply, timeout);
-                return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+                saveTargetFileInSharedFileStore(targetFile, reply);
             }
-            catch (TransformException e)
-            {
-                reply.setStatus(e.getStatusCode());
-                reply.setErrorDetails(messageWithCause("Failed at processing transformation", e));
-
-                transformerDebug.logFailure(reply);
-                logger.trace("Failed to perform transform (TransformException), sending " + reply, e);
-                return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
-            }
-            catch (Exception e)
-            {
-                reply.setStatus(INTERNAL_SERVER_ERROR.value());
-                reply.setErrorDetails(messageWithCause("Failed at processing transformation", e));
-
-                transformerDebug.logFailure(reply);
-                logger.trace("Failed to perform transform (Exception), sending " + reply, e);
-                return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
-            }
+        }
+        catch (TransformException e)
+        {
+            return createFailedResponseEntity(reply, e, e.getStatusCode().value());
+        }
+        catch (Exception e)
+        {
+            return createFailedResponseEntity(reply, e, INTERNAL_SERVER_ERROR.value());
         }
         finally
         {
+            deleteTmpFiles(transformManager);
             closeInputStreamWithoutException(inputStream);
+
+            probeTestTransform.recordTransformTime(System.currentTimeMillis()-start);
+            transformerDebug.popTransform(reply);
+
+            logger.trace("Sending successful {}, timeout {} ms", reply, timeout);
+            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
         }
     }
 
-    private boolean isTransformRequestValid(TransformRequest request, TransformReply reply)
+    private ResponseEntity<TransformReply> createFailedResponseEntity(TransformReply reply, Exception e,
+            int status) {
+        reply.setStatus(status);
+        reply.setErrorDetails(messageWithCause("Transform failed", e));
+
+        transformerDebug.logFailure(reply);
+        logger.trace("Transform failed. Sending " + reply, e);
+        return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+    }
+
+    private void deleteTmpFiles(TransformManagerImpl transformManager)
+    {
+        if (transformManager != null)
+        {
+            transformManager.deleteSourceFileIfExists();
+            transformManager.deleteTargetFileIfExists();
+        }
+    }
+
+    private void checkTransformRequestValid(TransformRequest request, TransformReply reply)
     {
         final Errors errors = validateTransformRequest(request);
         validateInternalContext(request, errors);
         reply.setInternalContext(request.getInternalContext());
+
         if (!errors.getAllErrors().isEmpty())
         {
-            reply.setStatus(BAD_REQUEST.value());
-            reply.setErrorDetails(errors
-                    .getAllErrors()
-                    .stream()
-                    .map(Object::toString)
-                    .collect(joining(", ")));
-
-            transformerDebug.logFailure(reply);
-            logger.trace("Invalid request, sending {}", reply);
-            return false;
+            String errorDetails = errors.getAllErrors().stream().map(Object::toString).collect(joining(", "));
+            throw new TransformException(BAD_REQUEST, errorDetails);
         }
-        return true;
     }
 
     private TransformReply createBasicTransformReply(TransformRequest request)
@@ -393,7 +390,7 @@ public class TransformHandler
         {
             String message = "Source file with reference: " + sourceReference + " is null or empty.";
             logger.warn(message);
-            throw new TransformException(BAD_REQUEST.value(), message);
+            throw new TransformException(BAD_REQUEST, message);
         }
 
         try
@@ -404,40 +401,30 @@ public class TransformHandler
         {
             String message = "Shared File Store reference is invalid.";
             logger.warn(message);
-            throw new TransformException(BAD_REQUEST.value(), message, e);
+            throw new TransformException(BAD_REQUEST, message, e);
         }
     }
 
     private InputStream getInputStream(TransformRequest request, TransformReply reply)
     {
         final String directUrl = request.getTransformRequestOptions().getOrDefault(DIRECT_ACCESS_URL, "");
-        InputStream inputStream = null;
         try
         {
-            inputStream = new BufferedInputStream(directUrl.isBlank()
+            return new BufferedInputStream(directUrl.isBlank()
                     ? getSharedFileStoreInputStream(request.getSourceReference())
                     : getDirectAccessUrlInputStream(directUrl));
         }
         catch (TransformException e)
         {
-            reply.setStatus(e.getStatusCode());
-            reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
-
-            transformerDebug.logFailure(reply);
-            logger.trace("Failed to load source file (TransformException), sending " + reply);
+            throw new TransformException(e.getStatusCode(), messageWithCause("Failed to read the source", e));
         }
         catch (HttpClientErrorException e)
         {
-            reply.setStatus(e.getStatusCode().value());
-            reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
-
-            transformerDebug.logFailure(reply);
-            logger.trace("Failed to load source file (HttpClientErrorException), sending " + reply, e);
+            throw new TransformException(e.getStatusCode(), messageWithCause("Failed to read the source", e));
         }
-        return inputStream;
     }
 
-    private boolean saveTargetFileInSharedFileStore(File targetFile, TransformReply reply)
+    private void saveTargetFileInSharedFileStore(File targetFile, TransformReply reply)
     {
         FileRefResponse targetRef;
         try
@@ -446,81 +433,19 @@ public class TransformHandler
         }
         catch (TransformException e)
         {
-            reply.setStatus(e.getStatusCode());
-            reply.setErrorDetails(messageWithCause("Failed at writing the transformed file", e));
-
-            transformerDebug.logFailure(reply);
-            logger.trace("Failed to save target file (TransformException), sending " + reply, e);
-            return false;
+            throw new TransformException(e.getStatusCode(), messageWithCause("Failed writing to SFS", e));
         }
         catch (HttpClientErrorException e)
         {
-            reply.setStatus(e.getStatusCode().value());
-            reply.setErrorDetails(messageWithCause("Failed at writing the transformed file. ", e));
-
-            transformerDebug.logFailure(reply);
-            logger.trace("Failed to save target file (HttpClientErrorException), sending " + reply, e);
-            return false;
+            throw new TransformException(e.getStatusCode(), messageWithCause("Failed writing to SFS", e));
         }
         catch (Exception e)
         {
-            reply.setStatus(INTERNAL_SERVER_ERROR.value());
-            reply.setErrorDetails(messageWithCause("Failed at writing the transformed file. ", e));
-
-            transformerDebug.logFailure(reply);
-            logger.trace("Failed to save target file (Exception), sending " + reply, e);
-            return false;
-        }
-
-        try
-        {
-            deleteFile(targetFile);
-        }
-        catch (Exception e)
-        {
-            logger.error("Failed to delete local temp target file. Error will be ignored ", e);
+            throw new TransformException(INTERNAL_SERVER_ERROR, messageWithCause("Failed writing to SFS", e));
         }
 
         reply.setTargetReference(targetRef.getEntry().getFileRef());
         reply.setStatus(CREATED.value());
-
-        return true;
-    }
-
-    /**
-     * Loads the file with the specified sourceReference from Alfresco Shared File Store
-     *
-     * @param sourceReference reference to the file in Alfresco Shared File Store
-     * @param sourceExtension default extension if the file in Alfresco Shared File Store has none
-     * @return the file containing the source content for the transformation
-     */
-    private File loadSourceFile(final String sourceReference, final String sourceExtension)
-    {
-        ResponseEntity<Resource> responseEntity = alfrescoSharedFileStoreClient.retrieveFile(sourceReference);
-
-        HttpHeaders headers = responseEntity.getHeaders();
-        String filename = getFilenameFromContentDisposition(headers);
-
-        String extension = getFilenameExtension(filename) != null ? getFilenameExtension(filename) : sourceExtension;
-        MediaType contentType = headers.getContentType();
-        long size = headers.getContentLength();
-
-        final Resource body = responseEntity.getBody();
-        if (body == null)
-        {
-            String message = "Source file with reference: " + sourceReference + " is null or empty. "
-                    + "Transformation will fail and stop now as there is no content to be transformed.";
-            logger.warn(message);
-            throw new TransformException(BAD_REQUEST.value(), message);
-        }
-        final File file = createTempFile("source_", "." + extension);
-
-        logger.debug("Read source content {} length={} contentType={}",
-                sourceReference, size, contentType);
-
-        save(body, file);
-        LogEntry.setSource(filename, size);
-        return file;
     }
 
     private static String messageWithCause(final String prefix, Throwable e)
@@ -554,7 +479,7 @@ public class TransformHandler
                     sourceSizeInBytes, targetMimetype, transformOptions, null);
             if (transformerName == null)
             {
-                throw new TransformException(BAD_REQUEST.value(), "No transforms were able to handle the request");
+                throw new TransformException(BAD_REQUEST, "No transforms were able to handle the request");
             }
             return transformerName;
         }
@@ -572,19 +497,35 @@ public class TransformHandler
         CustomTransformer customTransformer = customTransformersByName.get(transformName);
         if (customTransformer == null)
         {
-            throw new TransformException(BAD_REQUEST.value(), "Custom Transformer "+customTransformer+" not found");
+            throw new TransformException(INTERNAL_SERVER_ERROR, "Custom Transformer "+transformName+" not found");
         }
         return customTransformer;
     }
 
-    private void closeInputStreamWithoutException(InputStream inputStream) {
-        try
+    private void closeInputStreamWithoutException(InputStream inputStream)
+    {
+        if (inputStream != null)
         {
-            inputStream.close();
+            try
+            {
+                inputStream.close();
+            }
+            catch (IOException e)
+            {
+                throw new RuntimeException(e);
+            }
         }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
+    }
+
+    private ResponseEntity<StreamingResponseBody> createResponseEntity(String targetMimetype,
+            StreamingResponseBody body)
+    {
+        String extension = ExtensionService.getExtensionForMimetype(targetMimetype);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDisposition(
+                ContentDisposition.attachment()
+                                  .filename("transform."+ extension, StandardCharsets.UTF_8)
+                                  .build());
+        return ResponseEntity.ok().headers(headers).body(body);
     }
 }

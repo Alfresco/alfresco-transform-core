@@ -26,34 +26,29 @@
  */
 package org.alfresco.transform.aio;
 
-import org.alfresco.transform.libreoffice.LibreOfficeControllerTest;
-//import org.alfresco.transform.libreoffice.transformers.LibreOfficeTransformer;
+import org.alfresco.transform.pdfrenderer.PdfRendererTest;
 import org.alfresco.transform.registry.AbstractTransformRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import java.util.Map;
-
-@WebMvcTest()
 /**
- * Test the AIOController without a server.
- * Super class includes tests for the LibreOfficeController and TransformController.
+ * Test PdfRenderer functionality in All-In-One.
  */
-public class AIOControllerLibreOfficeTest extends LibreOfficeControllerTest
+public class AIOPdfRendererTest extends PdfRendererTest
 {
-//    @Autowired AbstractTransformRegistry transformRegistry;
-//
-//    @Override
-//    // Used by the super class to mock the javaExecutor, a different implementation is required here
-//    protected void setJavaExecutor(TransformController controller, LibreOfficeTransformer javaExecutor)
-//    {
-//        //Need to wire in the mocked javaExecutor into the controller...
+    @Autowired AbstractTransformRegistry transformRegistry;
+
+    @Override
+    protected void setFields()
+    {
+//        ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
+//        ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
+//        //Need to wire in the mocked commandExecutor into the controller...
 //        Map<String,Transformer> transformers = transformRegistry.getTransformerEngineMapping();
-//        transformers.replace("libreoffice", javaExecutor);
-//        // No need to set the transform registry to the controller as it is @Autowired in
-//    }
+//        transformers.replace("pdfrenderer", commandExecutor);
+    }
 
     @Override
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
@@ -65,7 +60,7 @@ public class AIOControllerLibreOfficeTest extends LibreOfficeControllerTest
 
         return builder;
     }
-    
+
 //    @Test
 //    @Override
 //    public void testGetTransformConfigInfo()
@@ -86,12 +81,14 @@ public class AIOControllerLibreOfficeTest extends LibreOfficeControllerTest
 //    {
 //        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 //    }
+//
 //    @Test
 //    @Override
 //    public void testGetInfoFromConfigWithEmptyTransformOptions()
 //    {
 //        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
 //    }
+//
 //    @Test
 //    @Override
 //    public void testGetInfoFromConfigWithNoTransformOptions()

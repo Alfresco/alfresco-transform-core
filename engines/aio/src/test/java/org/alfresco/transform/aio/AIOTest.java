@@ -26,7 +26,7 @@
  */
 package org.alfresco.transform.aio;
 
-import org.alfresco.transform.base.AbstractTransformControllerTest;
+import org.alfresco.transform.base.AbstractBaseTest;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.config.TransformConfig;
 import org.junit.jupiter.api.Test;
@@ -41,8 +41,10 @@ import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_LATES
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-@WebMvcTest()
-public class AIOControllerTest extends AbstractTransformControllerTest
+/**
+ * Test All-In-One.
+ */
+public class AIOTest extends AbstractBaseTest
 {
     @Value("${transform.core.version}")
     private String coreVersion;

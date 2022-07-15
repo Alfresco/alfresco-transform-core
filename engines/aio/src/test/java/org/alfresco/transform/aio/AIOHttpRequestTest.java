@@ -29,7 +29,7 @@ package org.alfresco.transform.aio;
 import org.alfresco.transform.base.AbstractHttpRequestTest;
 
 /**
- * Tests All-In-One with a server test harness that talks to the TransformController using http.
+ * Tests All-In-One using http and a server test harness.
  */
 public class AIOHttpRequestTest extends AbstractHttpRequestTest
 {

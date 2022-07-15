@@ -26,16 +26,13 @@
  */
 package org.alfresco.transform.aio;
 
-import org.alfresco.transform.tika.TikaControllerTest;
-import org.junit.jupiter.api.Test;
+import org.alfresco.transform.tika.TikaTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
-@WebMvcTest()
 /**
- * Test the AIOController Tika transforms without a server.
- * Super class includes tests for the TransformController.
+ * Test Tika functionality in All-In-One.
  */
-public class AIOControllerTikaTest extends TikaControllerTest
+public class AIOTikaTest extends TikaTest
 {
 //    @Test
 //    @Override

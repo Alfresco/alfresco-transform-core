@@ -45,6 +45,7 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.util.StringUtils.getFilenameExtension;
 
@@ -59,8 +60,7 @@ import javax.annotation.PostConstruct;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.base.TransformController;
-import org.alfresco.transform.base.AbstractTransformControllerTest;
+import org.alfresco.transform.base.AbstractBaseTest;
 import org.alfresco.transform.pdfrenderer.transformers.PdfRendererTransformer;
 import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
@@ -70,23 +70,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
- * Test the AlfrescoPdfRendererController without a server.
- * Super class includes tests for the TransformController.
+ * Test PdfRenderer.
  */
-@WebMvcTest()
-public class AlfrescoPdfRendererControllerTest extends AbstractTransformControllerTest
+public class PdfRendererTest extends AbstractBaseTest
 {
     private static final String ENGINE_CONFIG_NAME = "pdfrenderer_engine_config.json";
 
@@ -143,10 +140,9 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformControll
 
         expectedOptions = null;
         expectedSourceSuffix = null;
-        expectedSourceFileBytes = readTestFile(sourceExtension);
+        sourceFileBytes = readTestFile(sourceExtension);
         expectedTargetFileBytes = readTargetFileBytes ? readTestFile(targetExtension) : null;
-        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
-            expectedSourceFileBytes);
+        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
 
         when(mockTransformCommand.execute(any(), anyLong())).thenAnswer(
             (Answer<RuntimeExec.ExecutionResult>) invocation -> {
@@ -195,7 +191,7 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformControll
 
                 // Check the supplied source file has not been changed.
                 byte[] actualSourceFileBytes = Files.readAllBytes(new File(actualSource).toPath());
-                assertTrue(Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes),
+                assertTrue(Arrays.equals(sourceFileBytes, actualSourceFileBytes),
                     "Source file is not the same");
 
                 return mockExecutionResult;
@@ -224,10 +220,12 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformControll
                 .param("height", "654")
                 .param("allowPdfEnlargement", "true")
                 .param("maintainPdfAspectRatio", "true"))
-            .andExpect(status().is(OK.value()))
+            .andExpect(request().asyncStarted())
+            .andDo(MvcResult::getAsyncResult)
+            .andExpect(status().isOk())
             .andExpect(content().bytes(expectedTargetFileBytes))
             .andExpect(header().string("Content-Disposition",
-                "attachment; filename*= UTF-8''quick." + targetExtension));
+                "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Test
@@ -248,10 +246,12 @@ public class AlfrescoPdfRendererControllerTest extends AbstractTransformControll
                 .param("height", "654")
                 .param("allowPdfEnlargement", "false")
                 .param("maintainPdfAspectRatio", "false"))
-            .andExpect(status().is(OK.value()))
+               .andExpect(request().asyncStarted())
+            .andDo(MvcResult::getAsyncResult)
+            .andExpect(status().isOk())
             .andExpect(content().bytes(expectedTargetFileBytes))
             .andExpect(header().string("Content-Disposition",
-                "attachment; filename*= UTF-8''quick." + targetExtension));
+                "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Override

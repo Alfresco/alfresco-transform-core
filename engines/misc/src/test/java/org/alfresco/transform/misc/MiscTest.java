@@ -26,13 +26,12 @@
  */
 package org.alfresco.transform.misc;
 
-import org.alfresco.transform.base.AbstractTransformControllerTest;
+import org.alfresco.transform.base.AbstractBaseTest;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -56,10 +55,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest()
-public class MiscControllerTest extends AbstractTransformControllerTest
+/**
+ * Test Misc.
+ */
+public class MiscTest extends AbstractBaseTest
 {
     protected final String sourceEncoding = "UTF-8";
     protected final String targetEncoding = "UTF-8";
@@ -75,11 +77,9 @@ public class MiscControllerTest extends AbstractTransformControllerTest
         targetExtension = "txt";
         expectedOptions = null;
         expectedSourceSuffix = null;
-        expectedSourceFileBytes = readTestFile(sourceExtension);
+        sourceFileBytes = readTestFile(sourceExtension);
         expectedTargetFileBytes = Files.readAllBytes(getTestFile("quick2." + targetExtension, true).toPath());
-        //expectedTargetFileBytes = null;
-        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
-            expectedSourceFileBytes);
+        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
     }
 
     @Override
@@ -505,11 +505,13 @@ public class MiscControllerTest extends AbstractTransformControllerTest
         }
 
         return mockMvc.perform(requestBuilder)
-                      .andExpect(status().is(OK.value()))
+                      .andExpect(request().asyncStarted())
+                      .andDo(MvcResult::getAsyncResult)
+                      .andExpect(status().isOk())
                       .andExpect(header().string("Content-Disposition",
-                          "attachment; filename*= " +
+                          "attachment; filename*=" +
                           (targetEncoding == null ? "UTF-8" : targetEncoding) +
-                          "''test_file." + targetExtension))
+                          "''transform." + targetExtension))
                       .andReturn();
     }
 

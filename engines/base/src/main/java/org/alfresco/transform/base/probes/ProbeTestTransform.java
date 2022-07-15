@@ -238,7 +238,7 @@ public class ProbeTestTransform
 
         if (time > maxTime)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+            throw new TransformException(INTERNAL_SERVER_ERROR,
                 getMessagePrefix(isLiveProbe) +
                 message + " which is more than " + livenessPercent +
                 "% slower than the normal value of " + normalTime + "ms");
@@ -260,7 +260,7 @@ public class ProbeTestTransform
                 sourceSizeInBytes, targetMimetype, transformOptions, null);
         if (transformerName == null)
         {
-            throw new TransformException(BAD_REQUEST.value(), "No transforms were able to handle the request");
+            throw new TransformException(BAD_REQUEST, "No transforms were able to handle the request");
         }
         return transformerName;
     }
@@ -269,14 +269,14 @@ public class ProbeTestTransform
     {
         if (die.get())
         {
-            throw new TransformException(TOO_MANY_REQUESTS.value(),
+            throw new TransformException(TOO_MANY_REQUESTS,
                 getMessagePrefix(isLiveProbe) + "Transformer requested to die. A transform took " +
                 "longer than " + (maxTransformTime * 1000) + " seconds");
         }
 
         if (maxTransformCount > 0 && transformCount.get() > maxTransformCount)
         {
-            throw new TransformException(TOO_MANY_REQUESTS.value(),
+            throw new TransformException(TOO_MANY_REQUESTS,
                 getMessagePrefix(isLiveProbe) + "Transformer requested to die. It has performed " +
                 "more than " + maxTransformCount + " transformations");
         }
@@ -293,7 +293,7 @@ public class ProbeTestTransform
         }
         catch (IOException e)
         {
-            throw new TransformException(INSUFFICIENT_STORAGE.value(),
+            throw new TransformException(INSUFFICIENT_STORAGE,
                 getMessagePrefix(isLiveProbe) + "Failed to store the source file", e);
         }
         long length = sourceFile.length();
@@ -349,13 +349,13 @@ public class ProbeTestTransform
         String probeMessage = getProbeMessage(isLiveProbe);
         if (!targetFile.exists() || !targetFile.isFile())
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+            throw new TransformException(INTERNAL_SERVER_ERROR,
                 probeMessage + "Target File \"" + targetFile.getAbsolutePath() + "\" did not exist");
         }
         long length = targetFile.length();
         if (length < minExpectedLength || length > maxExpectedLength)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+            throw new TransformException(INTERNAL_SERVER_ERROR,
                 probeMessage + "Target File \"" + targetFile.getAbsolutePath() +
                 "\" was the wrong size (" + length + "). Needed to be between " +
                 minExpectedLength + " and " + maxExpectedLength);

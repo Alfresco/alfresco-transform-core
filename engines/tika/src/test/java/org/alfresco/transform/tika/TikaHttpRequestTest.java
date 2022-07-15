@@ -30,7 +30,7 @@ import org.alfresco.transform.base.AbstractHttpRequestTest;
 import org.springframework.util.LinkedMultiValueMap;
 
 /**
- * Tests Tika with a server test harness that talks to the TransformController using http.
+ * Tests Tika using http and a server test harness.
  */
 public class TikaHttpRequestTest extends AbstractHttpRequestTest
 {

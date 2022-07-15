@@ -254,7 +254,7 @@ public final class ImageMagickOptionsBuilder
             }
             else if (!GRAVITY_VALUES.contains(cropGravity))
             {
-                throw new TransformException(BAD_REQUEST.value(), "Invalid cropGravity value");
+                throw new TransformException(BAD_REQUEST, "Invalid cropGravity value");
             }
         }
 

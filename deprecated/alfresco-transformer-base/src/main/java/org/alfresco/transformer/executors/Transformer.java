@@ -82,20 +82,20 @@ public interface Transformer
         }
         catch (IllegalArgumentException e)
         {
-            throw new TransformException(BAD_REQUEST.value(), getMessage(e), e);
+            throw new TransformException(BAD_REQUEST, getMessage(e), e);
         }
         catch (Exception e)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), getMessage(e), e);
+            throw new TransformException(INTERNAL_SERVER_ERROR, getMessage(e), e);
         }
         if (!targetFile.exists())
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+            throw new TransformException(INTERNAL_SERVER_ERROR,
                     "Transformer failed to create an output file. Target file does not exist.");
         }
         if (sourceFile.length() > 0 && targetFile.length() == 0)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
+            throw new TransformException(INTERNAL_SERVER_ERROR,
                     "Transformer failed to create an output file. Target file is empty but source file was not empty.");
         }
     }

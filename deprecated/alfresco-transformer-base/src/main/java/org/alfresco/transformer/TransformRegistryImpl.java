@@ -92,8 +92,7 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
         }
         catch (IOException e)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                "Could not read " + locationFromProperty, e);
+            throw new TransformException(INTERNAL_SERVER_ERROR, "Could not read " + locationFromProperty, e);
         }
     }
 

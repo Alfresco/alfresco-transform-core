@@ -63,7 +63,7 @@ public class TransformConfigResourceReader
         }
         catch (IOException e)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), "Could not read " + engineConfigLocation, e);
+            throw new TransformException(INTERNAL_SERVER_ERROR, "Could not read " + engineConfigLocation, e);
         }
     }
 }

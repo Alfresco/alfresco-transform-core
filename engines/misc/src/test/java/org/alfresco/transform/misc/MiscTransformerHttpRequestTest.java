@@ -29,7 +29,7 @@ package org.alfresco.transform.misc;
 import org.alfresco.transform.base.AbstractHttpRequestTest;
 
 /**
- * Tests Misc with a server test harness that talks to the TransformController using http.
+ * Tests Misc using http and a server test harness.
  */
 public class MiscTransformerHttpRequestTest extends AbstractHttpRequestTest
 {

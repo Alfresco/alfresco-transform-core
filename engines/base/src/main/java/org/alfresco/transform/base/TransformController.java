@@ -195,7 +195,7 @@ public class TransformController
     }
 
     @PostMapping(value = ENDPOINT_TRANSFORM, consumes = MULTIPART_FORM_DATA_VALUE)
-    public StreamingResponseBody transform(HttpServletRequest request,
+    public ResponseEntity<StreamingResponseBody> transform(HttpServletRequest request,
                                               @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
                                               @RequestParam(value = SOURCE_MIMETYPE, required = false) String sourceMimetype,
                                               @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,
@@ -206,7 +206,7 @@ public class TransformController
     }
 
     @PostMapping(value = ENDPOINT_TEST, consumes = MULTIPART_FORM_DATA_VALUE)
-    public StreamingResponseBody testTransform(HttpServletRequest request,
+    public ResponseEntity<StreamingResponseBody> testTransform(HttpServletRequest request,
             @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
             @RequestParam(value = SOURCE_MIMETYPE, required = false) String sourceMimetype,
             @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,
@@ -274,7 +274,7 @@ public class TransformController
             throws IOException
     {
         final String message = e.getMessage();
-        final int statusCode = e.getStatusCode();
+        final int statusCode = e.getStatusCode().value();
 
         logger.error(message);
         long time = LogEntry.setStatusCodeAndMessage(statusCode, message);

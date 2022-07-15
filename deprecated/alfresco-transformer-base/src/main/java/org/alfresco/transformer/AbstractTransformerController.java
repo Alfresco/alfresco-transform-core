@@ -188,7 +188,7 @@ public abstract class AbstractTransformerController implements TransformControll
         {
             if (sourceMultipartFile ==  null)
             {
-                throw new TransformException(BAD_REQUEST.value(), "Required request part 'file' is not present");
+                throw new TransformException(BAD_REQUEST, "Required request part 'file' is not present");
             }
             sourceFile = createSourceFile(request, sourceMultipartFile);
             sourceFilename = sourceMultipartFile.getOriginalFilename();
@@ -236,11 +236,11 @@ public abstract class AbstractTransformerController implements TransformControll
         }
         catch (IllegalArgumentException e)
         {
-            throw new TransformException(BAD_REQUEST.value(), "Direct Access Url is invalid.", e);
+            throw new TransformException(BAD_REQUEST, "Direct Access Url is invalid.", e);
         }
         catch (IOException e)
         {
-            throw new TransformException(BAD_REQUEST.value(), "Direct Access Url not found.", e);
+            throw new TransformException(BAD_REQUEST, "Direct Access Url not found.", e);
         }
 
         return sourceFile;
@@ -312,7 +312,7 @@ public abstract class AbstractTransformerController implements TransformControll
         }
         catch (TransformException e)
         {
-            reply.setStatus(e.getStatusCode());
+            reply.setStatus(e.getStatusCode().value());
             reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
 
             transformerDebug.logFailure(reply);
@@ -356,7 +356,7 @@ public abstract class AbstractTransformerController implements TransformControll
         }
         catch (TransformException e)
         {
-            reply.setStatus(e.getStatusCode());
+            reply.setStatus(e.getStatusCode().value());
             reply.setErrorDetails(messageWithCause("Failed at processing transformation", e));
 
             transformerDebug.logFailure(reply);
@@ -381,7 +381,7 @@ public abstract class AbstractTransformerController implements TransformControll
         }
         catch (TransformException e)
         {
-            reply.setStatus(e.getStatusCode());
+            reply.setStatus(e.getStatusCode().value());
             reply.setErrorDetails(messageWithCause("Failed at writing the transformed file", e));
 
             transformerDebug.logFailure(reply);
@@ -481,7 +481,7 @@ public abstract class AbstractTransformerController implements TransformControll
             String message = "Source file with reference: " + sourceReference + " is null or empty. "
                              + "Transformation will fail and stop now as there is no content to be transformed.";
             logger.warn(message);
-            throw new TransformException(BAD_REQUEST.value(), message);
+            throw new TransformException(BAD_REQUEST, message);
         }
         final File file = createTempFile("source_", "." + extension);
 
@@ -542,8 +542,7 @@ public abstract class AbstractTransformerController implements TransformControll
                     sourceSizeInBytes, targetMimetype, transformOptions, null);
             if (transformerName == null)
             {
-                throw new TransformException(BAD_REQUEST.value(),
-                        "No transforms were able to handle the request");
+                throw new TransformException(BAD_REQUEST, "No transforms were able to handle the request");
             }
             return transformerName;
         }

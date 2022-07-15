@@ -111,7 +111,7 @@ public class QueueTransformService
         catch (TransformException e)
         {
             logger.error(e.getMessage(), e);
-            replyWithError(replyToDestinationQueue, HttpStatus.valueOf(e.getStatusCode()),
+            replyWithError(replyToDestinationQueue, HttpStatus.valueOf(e.getStatusCode().value()),
                 e.getMessage(), correlationId);
             return;
         }
@@ -148,23 +148,21 @@ public class QueueTransformService
             String message =
                 "MessageConversionException during T-Request deserialization of message with correlationID "
                 + correlationId + ": ";
-            throw new TransformException(BAD_REQUEST.value(), message + e.getMessage());
+            throw new TransformException(BAD_REQUEST, message + e.getMessage());
         }
         catch (JMSException e)
         {
             String message =
                 "JMSException during T-Request deserialization of message with correlationID "
                 + correlationId + ": ";
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                message + e.getMessage());
+            throw new TransformException(INTERNAL_SERVER_ERROR, message + e.getMessage());
         }
         catch (Exception e)
         {
             String message =
                 "Exception during T-Request deserialization of message with correlationID "
                 + correlationId + ": ";
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                message + e.getMessage());
+            throw new TransformException(INTERNAL_SERVER_ERROR, message + e.getMessage());
         }
     }
 

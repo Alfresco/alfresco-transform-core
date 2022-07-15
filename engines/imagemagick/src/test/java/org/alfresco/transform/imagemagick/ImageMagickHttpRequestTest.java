@@ -29,7 +29,7 @@ package org.alfresco.transform.imagemagick;
 import org.alfresco.transform.base.AbstractHttpRequestTest;
 
 /**
- * Tests ImageMagick with a server test harness that talks to the TransformController using http.
+ * Tests ImageMagick using http and a server test harness.
  */
 public class ImageMagickHttpRequestTest extends AbstractHttpRequestTest
 {

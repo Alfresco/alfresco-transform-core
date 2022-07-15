@@ -140,7 +140,7 @@ public class LibreOfficeTransformer implements CustomTransformerFileAdaptor
         }
         catch (OfficeException e)
         {
-            throw new TransformException(BAD_REQUEST.value(),
+            throw new TransformException(BAD_REQUEST,
                 "LibreOffice server conversion failed: \n" +
                 "   from file: " + sourceFile + "\n" +
                 "   to file: " + targetFile, e);
@@ -165,8 +165,7 @@ public class LibreOfficeTransformer implements CustomTransformerFileAdaptor
 
         if (!targetFile.exists() || targetFile.length() == 0L)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                "Transformer failed to create an output file");
+            throw new TransformException(INTERNAL_SERVER_ERROR, "Transformer failed to create an output file");
         }
     }
 
@@ -200,8 +199,7 @@ public class LibreOfficeTransformer implements CustomTransformerFileAdaptor
         }
         catch (IOException iox)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(),
-                "Error creating empty PDF file", iox);
+            throw new TransformException(INTERNAL_SERVER_ERROR, "Error creating empty PDF file", iox);
         }
     }
 
@@ -222,7 +220,7 @@ public class LibreOfficeTransformer implements CustomTransformerFileAdaptor
         }
         catch (OfficeException e)
         {
-            throw new TransformException(BAD_REQUEST.value(),
+            throw new TransformException(BAD_REQUEST,
                     "LibreOffice metadata extract failed: \n" +
                             "   from file: " + sourceFile, e);
         }
@@ -244,7 +242,7 @@ public class LibreOfficeTransformer implements CustomTransformerFileAdaptor
         }
         catch (IOException e)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), "Failed to write metadata to targetFile", e);
+            throw new TransformException(INTERNAL_SERVER_ERROR, "Failed to write metadata to targetFile", e);
         }
     }
 }

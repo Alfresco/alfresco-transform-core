@@ -24,26 +24,8 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.pdfrenderer;
+package org.alfresco.transform.base.components;
 
-import org.alfresco.transform.base.AbstractHttpRequestTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-
-/**
- * Tests PdfRenderer using http and a server test harness.
- */
-public class AlfrescoPdfRendererHttpRequestTest extends AbstractHttpRequestTest
+public class TestTransformerPdf2Png extends AbstractTestTransformer
 {
-    @Override
-    protected String getTransformerName()
-    {
-        return "0040-PdfRenderer";
-    }
-
-    @Override
-    protected String getSourceExtension()
-    {
-        return "pdf";
-    }
 }

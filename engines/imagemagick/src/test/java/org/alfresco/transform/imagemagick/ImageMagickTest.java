@@ -44,6 +44,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.util.StringUtils.getFilenameExtension;
 
@@ -59,8 +60,7 @@ import javax.annotation.PostConstruct;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.imagemagick.transformers.ImageMagickTransformer;
-import org.alfresco.transform.base.TransformController;
-import org.alfresco.transform.base.AbstractTransformControllerTest;
+import org.alfresco.transform.base.AbstractBaseTest;
 import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
 import org.alfresco.transform.base.model.FileRefEntity;
@@ -71,23 +71,20 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
- * Test the ImageMagickController without a server.
- * Super class includes tests for the TransformController.
+ * Test ImageMagick.
  */
-@WebMvcTest()
-public class ImageMagickControllerTest extends AbstractTransformControllerTest
+public class ImageMagickTest extends AbstractBaseTest
 {
     private static final String ENGINE_CONFIG_NAME = "imagemagick_engine_config.json";
 
@@ -153,10 +150,9 @@ public class ImageMagickControllerTest extends AbstractTransformControllerTest
 
         expectedOptions = null;
         expectedSourceSuffix = null;
-        expectedSourceFileBytes = readTestFile(sourceExtension);
+        sourceFileBytes = readTestFile(sourceExtension);
         expectedTargetFileBytes = readTargetFileBytes ? readTestFile(targetExtension) : null;
-        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
-            expectedSourceFileBytes);
+        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
 
         when(mockTransformCommand.execute(any(), anyLong())).thenAnswer(
             (Answer<RuntimeExec.ExecutionResult>) invocation -> {
@@ -202,7 +198,7 @@ public class ImageMagickControllerTest extends AbstractTransformControllerTest
 
                 // Check the supplied source file has not been changed.
                 byte[] actualSourceFileBytes = Files.readAllBytes(new File(actualSource).toPath());
-                assertTrue(Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes),
+                assertTrue(Arrays.equals(sourceFileBytes, actualSourceFileBytes),
                         "Source file is not the same");
 
                 return mockExecutionResult;
@@ -226,10 +222,12 @@ public class ImageMagickControllerTest extends AbstractTransformControllerTest
                 .param("targetMimetype", targetMimetype)
                 .param("sourceMimetype", sourceMimetype)
                 .param("cropGravity", value))
-            .andExpect(status().is(OK.value()))
+            .andExpect(request().asyncStarted())
+            .andDo(MvcResult::getAsyncResult)
+            .andExpect(status().isOk())
             .andExpect(content().bytes(expectedTargetFileBytes))
             .andExpect(header().string("Content-Disposition",
-                "attachment; filename*= UTF-8''quick." + targetExtension));
+                "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Test
@@ -278,10 +276,12 @@ public class ImageMagickControllerTest extends AbstractTransformControllerTest
                 .param("resizePercentage", "true")
                 .param("allowEnlargement", "true")
                 .param("maintainAspectRatio", "false"))
-            .andExpect(status().is(OK.value()))
+            .andExpect(request().asyncStarted())
+            .andDo(MvcResult::getAsyncResult)
+            .andExpect(status().isOk())
             .andExpect(content().bytes(expectedTargetFileBytes))
             .andExpect(header().string("Content-Disposition",
-                "attachment; filename*= UTF-8''quick." + targetExtension));
+                "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Test
@@ -316,10 +316,12 @@ public class ImageMagickControllerTest extends AbstractTransformControllerTest
                 .param("resizePercentage", "false")
                 .param("allowEnlargement", "false")
                 .param("maintainAspectRatio", "true"))
-            .andExpect(status().is(OK.value()))
+            .andExpect(request().asyncStarted())
+            .andDo(MvcResult::getAsyncResult)
+            .andExpect(status().isOk())
             .andExpect(content().bytes(expectedTargetFileBytes))
             .andExpect(header().string("Content-Disposition",
-                "attachment; filename*= UTF-8''quick." + targetExtension));
+                "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Test
@@ -338,10 +340,12 @@ public class ImageMagickControllerTest extends AbstractTransformControllerTest
                 .param("resizeWidth", "321")
                 .param("resizeHeight", "654")
                 .param("commandOptions", "( horrible command / );"))
-            .andExpect(status().is(OK.value()))
+            .andExpect(request().asyncStarted())
+            .andDo(MvcResult::getAsyncResult)
+            .andExpect(status().isOk())
             .andExpect(content().bytes(expectedTargetFileBytes))
             .andExpect(header().string("Content-Disposition",
-                "attachment; filename*= UTF-8''quick." + targetExtension));
+                "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Override

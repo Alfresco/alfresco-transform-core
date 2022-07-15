@@ -46,6 +46,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
@@ -80,12 +81,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -96,10 +100,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 /**
- * Super class for testing controllers without a server. Includes tests for the Controller itself.
+ * Super class for testing.
  */
-//@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes={org.alfresco.transform.base.config.WebApplicationConfig.class})
-public abstract class AbstractTransformControllerTest
+@SpringBootTest(classes={org.alfresco.transform.base.Application.class})
+@AutoConfigureMockMvc
+public abstract class AbstractBaseTest
 {
     @TempDir // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication
     public File tempDir;
@@ -132,7 +137,7 @@ public abstract class AbstractTransformControllerTest
     protected String expectedOptions;
     protected String expectedSourceSuffix;
     protected Long expectedTimeout = 0L;
-    protected byte[] expectedSourceFileBytes;
+    protected byte[] sourceFileBytes;
 
     /**
      * The expected result. Taken resting target quick file's bytes.
@@ -147,18 +152,12 @@ public abstract class AbstractTransformControllerTest
         String targetExtension, String sourceMimetype,
         boolean readTargetFileBytes) throws IOException;
 
-    protected TransformController getController()
-    {
-        return controller;
-    }
-
     protected ProbeTestTransform getProbeTestTransform()
     {
         return controller.probeTestTransform;
     }
 
-    protected abstract void updateTransformRequestWithSpecificOptions(
-        TransformRequest transformRequest);
+    protected abstract void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest);
 
     /**
      * This method ends up being the core of the mock.
@@ -173,10 +172,14 @@ public abstract class AbstractTransformControllerTest
     public void generateTargetFileFromResourceFile(String actualTargetExtension, File testFile,
         File targetFile) throws IOException
     {
+        if (testFile == null)
+        {
+            testFile = getTestFile("quick." + actualTargetExtension, false);
+        }
         if (testFile != null)
         {
             try (var inputStream = new FileInputStream(testFile);
-                    var outputStream = new FileOutputStream(targetFile)) 
+                 var outputStream = new FileOutputStream(targetFile))
             {
                 FileChannel source = inputStream.getChannel();
                 FileChannel target = outputStream.getChannel();
@@ -185,24 +188,6 @@ public abstract class AbstractTransformControllerTest
             } catch (Exception e) 
             {
                 throw e;
-            }
-        }
-        else
-        {
-            testFile = getTestFile("quick." + actualTargetExtension, false);
-            if (testFile != null)
-            {
-                try (var inputStream = new FileInputStream(testFile);
-                        var outputStream = new FileOutputStream(targetFile)) 
-                {
-                    FileChannel source = inputStream.getChannel();
-                    FileChannel target = outputStream.getChannel();
-                    target.transferFrom(source, 0, source.size());
-
-                } catch (Exception e) 
-                {
-                    throw e;
-                }
             }
         }
     }
@@ -233,8 +218,7 @@ public abstract class AbstractTransformControllerTest
         return testFileUrl == null ? null : testFile;
     }
 
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
-                                                           String... params)
+    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
     {
         if (sourceFile == null)
         {
@@ -246,10 +230,9 @@ public abstract class AbstractTransformControllerTest
         }
     }
 
-    private MockHttpServletRequestBuilder mockMvcRequestWithoutMockMultipartFile(String url,
-                                                           String... params)
+    private MockHttpServletRequestBuilder mockMvcRequestWithoutMockMultipartFile(String url, String... params)
     {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM);
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(url);
 
         if (params.length % 2 != 0)
         {
@@ -266,8 +249,7 @@ public abstract class AbstractTransformControllerTest
     private MockHttpServletRequestBuilder mockMvcRequestWithMockMultipartFile(String url, MockMultipartFile sourceFile,
         String... params)
     {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM).file(
-            sourceFile);
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM).file(sourceFile);
 
         if (params.length % 2 != 0)
         {
@@ -309,27 +291,13 @@ public abstract class AbstractTransformControllerTest
     public void simpleTransformTest() throws Exception
     {
         mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
-               .andExpect(status().is(OK.value()))
+            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
+               .andExpect(request().asyncStarted())
+               .andDo(MvcResult::getAsyncResult)
+               .andExpect(status().isOk())
                .andExpect(content().bytes(expectedTargetFileBytes))
                .andExpect(header().string("Content-Disposition",
-                   "attachment; filename*= UTF-8''quick." + targetExtension));
-    }
-
-    @Test
-    public void testDelayTest() throws Exception
-    {
-        long start = System.currentTimeMillis();
-        mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension,
-            "testDelay", "400"))
-               .andExpect(status().is(OK.value()))
-               .andExpect(content().bytes(expectedTargetFileBytes))
-               .andExpect(header().string("Content-Disposition",
-                   "attachment; filename*= UTF-8''quick." + targetExtension));
-        long ms = System.currentTimeMillis() - start;
-        System.out.println("Transform incluing test delay was " + ms);
-        assertTrue(ms >= 400, "Delay sending the result back was too small " + ms);
-        assertTrue(ms <= 500,"Delay sending the result back was too big " + ms);
+                   "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Test
@@ -343,40 +311,42 @@ public abstract class AbstractTransformControllerTest
     // Looks dangerous but is okay as we only use the final filename
     public void dotDotSourceFilenameTest() throws Exception
     {
-        sourceFile = new MockMultipartFile("file", "../quick." + sourceExtension, sourceMimetype,
-            expectedSourceFileBytes);
+        sourceFile = new MockMultipartFile("file", "../quick." + sourceExtension, sourceMimetype, sourceFileBytes);
 
         mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
-               .andExpect(status().is(OK.value()))
+            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
+               .andExpect(request().asyncStarted())
+               .andDo(MvcResult::getAsyncResult)
+               .andExpect(status().isOk())
                .andExpect(content().bytes(expectedTargetFileBytes))
                .andExpect(header().string("Content-Disposition",
-                   "attachment; filename*= UTF-8''quick." + targetExtension));
+                   "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Test
     // Is okay, as the target filename is built up from the whole source filename and the targetExtension
     public void noExtensionSourceFilenameTest() throws Exception
     {
-        sourceFile = new MockMultipartFile("file", "../quick", sourceMimetype,
-            expectedSourceFileBytes);
+        sourceFile = new MockMultipartFile("file", "../quick", sourceMimetype, sourceFileBytes);
 
         mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
-               .andExpect(status().is(OK.value()))
+            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
+               .andExpect(request().asyncStarted())
+               .andDo(MvcResult::getAsyncResult)
+               .andExpect(status().isOk())
                .andExpect(content().bytes(expectedTargetFileBytes))
                .andExpect(header().string("Content-Disposition",
-                   "attachment; filename*= UTF-8''quick." + targetExtension));
+                   "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Test
     // Invalid file name that ends in /
     public void badSourceFilenameTest() throws Exception
     {
-        sourceFile = new MockMultipartFile("file", "abc/", sourceMimetype, expectedSourceFileBytes);
+        sourceFile = new MockMultipartFile("file", "abc/", sourceMimetype, sourceFileBytes);
 
         mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
+            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
                .andExpect(status().is(BAD_REQUEST.value()))
                .andExpect(status().reason(containsString("The source filename was not supplied")));
     }
@@ -384,26 +354,17 @@ public abstract class AbstractTransformControllerTest
     @Test
     public void blankSourceFilenameTest() throws Exception
     {
-        sourceFile = new MockMultipartFile("file", "", sourceMimetype, expectedSourceFileBytes);
+        sourceFile = new MockMultipartFile("file", "", sourceMimetype, sourceFileBytes);
 
         mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
+            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
                .andExpect(status().is(BAD_REQUEST.value()));
-    }
-
-    @Test
-    public void noTargetExtensionTest() throws Exception
-    {
-        mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
-               .andExpect(status().is(BAD_REQUEST.value()))
-               .andExpect(status().reason(
-                   containsString("Request parameter 'targetExtension' is missing")));
     }
 
     @Test
     public void calculateMaxTime() throws Exception
     {
-        ProbeTestTransform probeTestTransform = getController().probeTestTransform;
+        ProbeTestTransform probeTestTransform = controller.probeTestTransform;
         probeTestTransform.setLivenessPercent(110);
 
         long[][] values = new long[][]{
@@ -479,7 +440,9 @@ public abstract class AbstractTransformControllerTest
 
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG_LATEST))
-            .andExpect(status().is(OK.value()))
+            .andExpect(request().asyncStarted())
+            .andDo(MvcResult::getAsyncResult)
+            .andExpect(status().isOk())
             .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
             .andReturn().getResponse().getContentAsString();
 
@@ -500,7 +463,9 @@ public abstract class AbstractTransformControllerTest
 
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
-            .andExpect(status().is(OK.value()))
+            .andExpect(request().asyncStarted())
+            .andDo(MvcResult::getAsyncResult)
+            .andExpect(status().isOk())
             .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
             .andReturn().getResponse().getContentAsString();
 
@@ -518,7 +483,9 @@ public abstract class AbstractTransformControllerTest
 
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
-            .andExpect(status().is(OK.value()))
+            .andExpect(request().asyncStarted())
+            .andDo(MvcResult::getAsyncResult)
+            .andExpect(status().isOk())
             .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
             .andReturn().getResponse().getContentAsString();
 
@@ -545,7 +512,9 @@ public abstract class AbstractTransformControllerTest
 
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
-            .andExpect(status().is(OK.value()))
+            .andExpect(request().asyncStarted())
+            .andDo(MvcResult::getAsyncResult)
+            .andExpect(status().isOk())
             .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
             .andReturn().getResponse().getContentAsString();
 
@@ -568,7 +537,9 @@ public abstract class AbstractTransformControllerTest
 
         String response = mockMvc
             .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
-            .andExpect(status().is(OK.value()))
+            .andExpect(request().asyncStarted())
+            .andDo(MvcResult::getAsyncResult)
+            .andExpect(status().isOk())
             .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
             .andReturn().getResponse().getContentAsString();
 

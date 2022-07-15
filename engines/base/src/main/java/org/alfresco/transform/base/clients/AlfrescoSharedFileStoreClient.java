@@ -70,7 +70,7 @@ public class AlfrescoSharedFileStoreClient
         }
         catch (HttpClientErrorException e)
         {
-            throw new TransformException(e.getStatusCode().value(), e.getMessage(), e);
+            throw new TransformException(e.getStatusCode(), e.getMessage(), e);
         }
     }
 
@@ -97,7 +97,7 @@ public class AlfrescoSharedFileStoreClient
         }
         catch (HttpClientErrorException e)
         {
-            throw new TransformException(e.getStatusCode().value(), e.getMessage(), e);
+            throw new TransformException(e.getStatusCode(), e.getMessage(), e);
         }
     }
 }

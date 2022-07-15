@@ -44,7 +44,6 @@ public class EngineClient
     {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MULTIPART_FORM_DATA);
-        //headers.setAccept(ImmutableList.of(MULTIPART_FORM_DATA));
 
         final MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file", new ClassPathResource(sourceFile));

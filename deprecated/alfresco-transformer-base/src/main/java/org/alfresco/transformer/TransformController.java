@@ -210,7 +210,7 @@ public interface TransformController
         TransformException e) throws IOException
     {
         final String message = e.getMessage();
-        final int statusCode = e.getStatusCode();
+        final int statusCode = e.getStatusCode().value();
 
         logger.error(message, e);
 

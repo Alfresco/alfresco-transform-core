@@ -21,11 +21,10 @@
  */
 package org.alfresco.transform.registry;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptySet;
-import static java.util.Map.Entry;
-import static java.util.stream.Collectors.toMap;
+import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.config.TransformOption;
+import org.alfresco.transform.config.TransformOptionGroup;
+import org.alfresco.transform.config.TransformOptionValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,10 +34,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import org.alfresco.transform.config.TransformOption;
-import org.alfresco.transform.config.TransformOptionGroup;
-import org.alfresco.transform.config.TransformOptionValue;
-import org.alfresco.transform.common.TransformException;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
+import static java.util.Map.Entry;
+import static java.util.stream.Collectors.toMap;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 class TransformRegistryHelper
 {
@@ -113,12 +114,12 @@ class TransformRegistryHelper
     {
         if (sourceMimetype == null)
         {
-          throw new TransformException(400, "Null value provided for sourceMimetype, please provide a value");
+          throw new TransformException(BAD_REQUEST, "Null value provided for sourceMimetype, please provide a value");
         }
 
         if (targetMimetype == null)
         {
-          throw new TransformException(400, "Null value provided for tragetMimetype, please provide a value");
+          throw new TransformException(BAD_REQUEST, "Null value provided for targetMimetype, please provide a value");
         }
 
         final Map<String, List<SupportedTransform>> targetMap = data.retrieveTransforms(

@@ -30,8 +30,11 @@ import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.common.ExtensionService;
 import org.alfresco.transform.common.TransformException;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -39,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 
@@ -71,7 +75,7 @@ public class FileManager
         }
         catch (Exception e)
         {
-            throw new TransformException(INSUFFICIENT_STORAGE.value(), "Failed to store the source file", e);
+            throw new TransformException(INSUFFICIENT_STORAGE, "Failed to store the source file", e);
         }
     }
 
@@ -90,7 +94,7 @@ public class FileManager
         }
         catch (Exception e)
         {
-            throw new TransformException(INSUFFICIENT_STORAGE.value(), "Failed to create the target file", e);
+            throw new TransformException(INSUFFICIENT_STORAGE, "Failed to create the target file", e);
         }
     }
 
@@ -110,8 +114,7 @@ public class FileManager
         }
         catch (IOException e)
         {
-            throw new TransformException(INSUFFICIENT_STORAGE.value(),
-                "Failed to store the source file", e);
+            throw new TransformException(INSUFFICIENT_STORAGE, "Failed to store the source file", e);
         }
     }
 
@@ -136,7 +139,7 @@ public class FileManager
         InputStream inputStream;
         if (sourceMultipartFile ==  null)
         {
-            throw new TransformException(BAD_REQUEST.value(), "Required request part 'file' is not present");
+            throw new TransformException(BAD_REQUEST, "Required request part 'file' is not present");
         }
         try
         {
@@ -144,7 +147,7 @@ public class FileManager
         }
         catch (IOException e)
         {
-            throw new TransformException(BAD_REQUEST.value(), "Unable to read the sourceMultipartFile.", e);
+            throw new TransformException(BAD_REQUEST, "Unable to read the sourceMultipartFile.", e);
         }
         return inputStream;
     }
@@ -157,11 +160,11 @@ public class FileManager
         }
         catch (IllegalArgumentException e)
         {
-            throw new TransformException(BAD_REQUEST.value(), "Direct Access Url is invalid.", e);
+            throw new TransformException(BAD_REQUEST, "Direct Access Url is invalid.", e);
         }
         catch (IOException e)
         {
-            throw new TransformException(BAD_REQUEST.value(), "Direct Access Url not found.", e);
+            throw new TransformException(BAD_REQUEST, "Direct Access Url not found.", e);
         }
     }
 
@@ -173,7 +176,7 @@ public class FileManager
         }
         catch (IOException e)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR.value(), "Failed to copy targetFile to outputStream.", e);
+            throw new TransformException(INTERNAL_SERVER_ERROR, "Failed to copy targetFile to outputStream.", e);
         }
     }
 

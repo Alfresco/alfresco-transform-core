@@ -26,62 +26,16 @@
  */
 package org.alfresco.transform.aio;
 
-import org.alfresco.transform.base.TransformRegistryImpl;
-import org.alfresco.transform.config.Transformer;
-import org.alfresco.transform.imagemagick.ImageMagickControllerTest;
-import org.alfresco.transform.registry.AbstractTransformRegistry;
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-import java.io.IOException;
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.alfresco.transform.misc.MiscTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+
 /**
- * Test the AIOController ImageMagick transforms without a server.
- * Super class includes tests for the TransformController.
+ * Test Misc functionality in All-In-One.
  */
-@WebMvcTest()
-public class AIOControllerImageMagickTest extends ImageMagickControllerTest
+public class AIOMiscTest extends MiscTest
 {
-    @Autowired TransformRegistryImpl transformRegistry;
-
-    @BeforeEach @Override
-    public void before() throws IOException
-    {       
-//        ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
-//        ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
-//        //Need to wire in the mocked commandExecutor into the controller...
-//        Map<String, Transformer> transformers = transformRegistry.getTransformerEngineMapping();
-//        transformers.replace("imagemagick", commandExecutor);
-//
-//        mockTransformCommand("jpg", "png", "image/jpeg", true);
-    }
-
-    @Override
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
-        String... params)
-    {
-        final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
-            .param("targetMimetype", targetMimetype)
-            .param("sourceMimetype", sourceMimetype);
-
-        return builder;
-    }
-
-//    @Test
-//    @Override
-//    public void noTargetFileTest()
-//    {
-//        // Ignore the test in super class as the AIO transforms will not be selected .
-//        // It is the mock that returns a zero length file for other transformers, when we supply an invalid targetExtension.
-//    }
-//
 //    @Test
 //    @Override
 //    public void testGetTransformConfigInfo()

@@ -59,7 +59,7 @@ import javax.annotation.PostConstruct;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.libreoffice.transformers.LibreOfficeTransformer;
-import org.alfresco.transform.base.AbstractTransformControllerTest;
+import org.alfresco.transform.base.AbstractBaseTest;
 import org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
@@ -69,7 +69,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -79,11 +78,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
- * Test the LibreOfficeController without a server.
- * Super class includes tests for the TransformController.
+ * Test LibreOffice.
  */
-@WebMvcTest()
-public class LibreOfficeControllerTest extends AbstractTransformControllerTest
+public class LibreOfficeTest extends AbstractBaseTest
 {
     protected static final String ENGINE_CONFIG_NAME = "libreoffice_engine_config.json";
     protected String targetMimetype = MIMETYPE_PDF;
@@ -132,12 +129,11 @@ public class LibreOfficeControllerTest extends AbstractTransformControllerTest
         // The following is based on super.mockTransformCommand(...)
         // This is because LibreOffice used JodConverter rather than a RuntimeExec
 
-        expectedSourceFileBytes = Files.readAllBytes(
+        sourceFileBytes = Files.readAllBytes(
             getTestFile("quick." + sourceExtension, true).toPath());
         expectedTargetFileBytes = Files.readAllBytes(
             getTestFile("quick." + targetExtension, true).toPath());
-        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
-            expectedSourceFileBytes);
+        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
 
         doAnswer(invocation ->
         {
@@ -160,7 +156,7 @@ public class LibreOfficeControllerTest extends AbstractTransformControllerTest
 
             // Check the supplied source file has not been changed.
             byte[] actualSourceFileBytes = Files.readAllBytes(sourceFile.toPath());
-            assertTrue(Arrays.equals(expectedSourceFileBytes, actualSourceFileBytes), "Source file is not the same");
+            assertTrue(Arrays.equals(sourceFileBytes, actualSourceFileBytes), "Source file is not the same");
 
             return null;
         }).when(javaExecutor).convert(any(), any());

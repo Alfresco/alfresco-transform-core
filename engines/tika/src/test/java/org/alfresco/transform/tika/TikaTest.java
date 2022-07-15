@@ -26,8 +26,7 @@
  */
 package org.alfresco.transform.tika;
 
-import org.alfresco.transform.base.AbstractTransformControllerTest;
-import org.alfresco.transform.base.TransformController;
+import org.alfresco.transform.base.AbstractBaseTest;
 import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
@@ -41,7 +40,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -116,11 +114,9 @@ import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 import static org.springframework.util.StringUtils.getFilenameExtension;
 
 /**
- * Test the TikaController without a server.
- * Super class includes tests for the TransformController.
+ * Test Tika.
  */
-@WebMvcTest()
-public class TikaControllerTest extends AbstractTransformControllerTest
+public class TikaTest extends AbstractBaseTest
 {
     private static final String ENGINE_CONFIG_NAME = "tika_engine_config.json";
     private static final String EXPECTED_XHTML_CONTENT_CONTAINS = "<p>The quick brown fox jumps over the lazy dog</p>";
@@ -166,10 +162,9 @@ public class TikaControllerTest extends AbstractTransformControllerTest
 
         expectedOptions = null;
         expectedSourceSuffix = null;
-        expectedSourceFileBytes = readTestFile(sourceExtension);
+        sourceFileBytes = readTestFile(sourceExtension);
         expectedTargetFileBytes = readTargetFileBytes ? readTestFile(targetExtension) : null;
-        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype,
-            expectedSourceFileBytes);
+        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
 
         when(mockTransformCommand.execute(any(), anyLong())).thenAnswer(
             (Answer<RuntimeExec.ExecutionResult>) invocation -> {
@@ -217,7 +212,7 @@ public class TikaControllerTest extends AbstractTransformControllerTest
 
                 // Check the supplied source file has not been changed.
                 byte[] actualSourceFileBytes = readAllBytes(new File(actualSource).toPath());
-                Assertions.assertArrayEquals(expectedSourceFileBytes, actualSourceFileBytes,
+                Assertions.assertArrayEquals(sourceFileBytes, actualSourceFileBytes,
                     "Source file is not the same");
 
                 return mockExecutionResult;
@@ -245,7 +240,7 @@ public class TikaControllerTest extends AbstractTransformControllerTest
         MvcResult result = mockMvc.perform(requestBuilder)
                                   .andExpect(MockMvcResultMatchers.status().is(OK.value()))
                                   .andExpect(MockMvcResultMatchers.header().string("Content-Disposition",
-                                      "attachment; filename*= UTF-8''quick." + this.targetExtension)).
+                                      "attachment; filename*=UTF-8''transform." + this.targetExtension)).
                                       andReturn();
         String content = result.getResponse().getContentAsString();
         assertTrue(content.contains(expectedContentContains),
@@ -270,7 +265,6 @@ public class TikaControllerTest extends AbstractTransformControllerTest
     public void testImmutableEmptyMap()
     {
         // See ACS-373
-        TransformController controller = getController();
         ProbeTestTransform probeTestTransform = getProbeTestTransform();
         ReflectionTestUtils.setField(probeTestTransform, "livenessTransformEnabled", true);
         probeTestTransform.doTransformOrNothing(httpServletRequest, true, controller);
@@ -282,14 +276,6 @@ public class TikaControllerTest extends AbstractTransformControllerTest
     {
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         super.simpleTransformTest();
-    }
-
-    @Test
-    @Override
-    public void testDelayTest() throws Exception
-    {
-        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
-        super.testDelayTest();
     }
 
     @Test
@@ -552,7 +538,7 @@ public class TikaControllerTest extends AbstractTransformControllerTest
         MvcResult result = mockMvc.perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().is(OK.value()))
                 .andExpect(MockMvcResultMatchers.header().string("Content-Disposition",
-                        "attachment; filename*= UTF-8''quick." + targetExtension)).
+                        "attachment; filename*=UTF-8''transform." + targetExtension)).
                         andReturn();
 
         byte[] bytes = result.getResponse().getContentAsByteArray();
@@ -577,7 +563,7 @@ public class TikaControllerTest extends AbstractTransformControllerTest
                 NOT_EXTRACT_BOOKMARKS_TEXT, "true"))
                .andExpect(MockMvcResultMatchers.status().is(OK.value()))
                .andExpect(MockMvcResultMatchers.header().string("Content-Disposition",
-                   "attachment; filename*= UTF-8''quick." + targetExtension));
+                   "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Override

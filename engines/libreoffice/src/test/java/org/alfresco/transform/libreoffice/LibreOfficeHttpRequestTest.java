@@ -29,7 +29,7 @@ package org.alfresco.transform.libreoffice;
 import org.alfresco.transform.base.AbstractHttpRequestTest;
 
 /**
- * Tests LibreOffice with a server test harness that talks to the TransformController using http.
+ * Tests LibreOffice using http and a server test harness.
  */
 public class LibreOfficeHttpRequestTest extends AbstractHttpRequestTest
 {

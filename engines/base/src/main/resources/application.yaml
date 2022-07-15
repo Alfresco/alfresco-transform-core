@@ -59,3 +59,10 @@ management:
 container:
   name: ${HOSTNAME:t-engine}
 
+async-task-executor:
+  core-pool-size: 1
+  max-pool-size: 2147483647
+  keep-alive-seconds: 60
+  queue-capacity: 2147483647
+  allow-core-thread-time-out: false
+  prestart-all-core-threads: false
