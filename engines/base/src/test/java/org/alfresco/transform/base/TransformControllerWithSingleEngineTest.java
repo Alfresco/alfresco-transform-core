@@ -103,7 +103,7 @@ public class TransformControllerWithSingleEngineTest
     private String coreVersion;
 
     @Test
-    public void initEngine() throws Exception
+    public void testInitEngine() throws Exception
     {
         assertEquals(TestTransformEngineTwoTransformers.class.getSimpleName(),
                 transformController.transformEngine.getClass().getSimpleName());
@@ -111,7 +111,7 @@ public class TransformControllerWithSingleEngineTest
     }
 
     @Test
-    public void startupLogsIncludeEngineMessages() throws Exception
+    public void testStartupLogsIncludeEngineMessages()
     {
         StringJoiner controllerLogMessages = getLogMessagesFor(TransformController.class);
 
@@ -148,7 +148,7 @@ public class TransformControllerWithSingleEngineTest
     }
 
     @Test
-    public void versionEndpointIncludesAvailable() throws Exception
+    public void testVersionEndpointIncludesAvailable() throws Exception
     {
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_VERSION))
                .andExpect(status().isOk())
