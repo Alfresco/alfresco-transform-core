@@ -32,6 +32,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import org.alfresco.transform.base.components.TestTransformEngineTwoTransformers;
 import org.alfresco.transform.base.components.TestTransformerPdf2Png;
 import org.alfresco.transform.base.components.TestTransformerTxT2Pdf;
@@ -39,7 +40,6 @@ import org.alfresco.transform.config.TransformConfig;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
@@ -52,6 +52,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_BMP;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_ERROR;
@@ -59,18 +60,23 @@ import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_LIVE;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_LOG;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_READY;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_ROOT;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TEST;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG_LATEST;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_VERSION;
-import static org.alfresco.transform.common.RequestParamMap.FILE;
 import static org.alfresco.transform.common.RequestParamMap.PAGE_REQUEST_PARAM;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
@@ -241,7 +247,7 @@ public class TransformControllerWithSingleEngineTest
     @Test
     public void testTransformEndpoint() throws Exception
     {
-        mockMvc.perform(
+        MvcResult mvcResult = mockMvc.perform(
             MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
                 .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
                     "Start".getBytes(StandardCharsets.UTF_8)))
@@ -249,7 +255,9 @@ public class TransformControllerWithSingleEngineTest
                 .param(TARGET_MIMETYPE, MIMETYPE_PDF)
                 .param(PAGE_REQUEST_PARAM, "1"))
             .andExpect(request().asyncStarted())
-            .andDo(MvcResult::getAsyncResult)
+            .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
             .andExpect(status().isOk())
             .andExpect(header().string("Content-Disposition",
             "attachment; filename*=UTF-8''transform." + "pdf"))
@@ -259,23 +267,41 @@ public class TransformControllerWithSingleEngineTest
     @Test
     public void testTestTransformEndpointConvertsRequestParameters() throws Exception
     {
-        // TODO
-    }
+        TransformHandler orig = transformController.transformHandler;
+        try
+        {
+            TransformHandler spy = spy(orig);
+            transformController.transformHandler = spy;
 
-    @Test
-    public void testInterceptOfTypeMismatchException() throws Exception
-    {
-        String message =
-            mockMvc.perform(
-                MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM+"?"+FILE+"=NotaMultipartFile"))
-//                    .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
-//                    .param(TARGET_MIMETYPE, MIMETYPE_PDF)
-//                   .param(PAGE_REQUEST_PARAM, "1")
-                   .andExpect(status().isBadRequest())
-                   .andReturn()
-                   .getResponse()
-                   .getContentAsString();
-        assertTrue(message.contains("Request parameter "+PAGE_REQUEST_PARAM+" is of the wrong type"));
+            MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.multipart(ENDPOINT_TEST)
+                    .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
+                        "Start".getBytes(StandardCharsets.UTF_8)))
+                    .param(SOURCE_MIMETYPE, MIMETYPE_IMAGE_BMP)
+                    .param("_"+SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
+                    .param(TARGET_MIMETYPE, MIMETYPE_PDF)
+                    .param("_"+TARGET_MIMETYPE, "")
+                    .param(PAGE_REQUEST_PARAM, "replaced")
+                    .param("name1", "hasNoValueSoRemoved").param("value1", "")
+                    .param("name2", PAGE_REQUEST_PARAM).param("value2", "1")
+                    .param("name3", SOURCE_ENCODING).param("value3", "UTF-8"))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+            // Do the dispatch, just in case not doing it leaves it in a strange state.
+            mockMvc.perform(asyncDispatch(mvcResult));
+
+            verify(spy).handleHttpRequest(any(), any(), eq(MIMETYPE_TEXT_PLAIN), eq(MIMETYPE_PDF),
+                eq(ImmutableMap.of(
+                    SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN,
+                    TARGET_MIMETYPE, MIMETYPE_PDF,
+                    PAGE_REQUEST_PARAM, "1",
+                    SOURCE_ENCODING, "UTF-8")));
+        }
+        finally
+        {
+            transformController.transformHandler = orig;
+        }
     }
 
     @Test
@@ -290,24 +316,21 @@ public class TransformControllerWithSingleEngineTest
     }
 
     @Test
-    public void testInterceptOfTransformException() throws Exception
+    public void testInterceptOfTransformException_noTransformers() throws Exception
     {
-        mockMvc.perform(
-                   MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
-                                         .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
-                                             "Start".getBytes(StandardCharsets.UTF_8)))
-                                         .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
-                                         .param(TARGET_MIMETYPE, MIMETYPE_PDF)
-                                         .param("unknown", "1"))
-//               .andExpect(status().isBadRequest())
-               .andExpect(status().reason(containsString("No transforms were able to handle the request")));
+        MvcResult mvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
+               .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
+                    "Start".getBytes(StandardCharsets.UTF_8)))
+               .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
+               .param(TARGET_MIMETYPE, MIMETYPE_PDF)
+               .param("unknown", "1"))
+               .andExpect(request().asyncStarted())
+               .andReturn();
 
-
-//        mockMvc.perform(
-//               MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
-//                   .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
-//                       "Start".getBytes(StandardCharsets.UTF_8))))
-//               .andExpect(status().isBadRequest())
-//               .andExpect(status().reason(containsString("Request parameter '"+SOURCE_MIMETYPE+"' is missing")));
+        mockMvc.perform(asyncDispatch(mvcResult))
+               .andExpect(status().isBadRequest())
+               .andExpect(content().string(containsString("TwoTransformers Error Page")))
+               .andExpect(content().string(containsString("No transforms were able to handle the request")));
     }
 }

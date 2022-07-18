@@ -95,7 +95,7 @@ public class TransformController
     @Autowired
     private TransformServiceRegistry transformRegistry;
     @Autowired
-    private TransformHandler transformHandler;
+    TransformHandler transformHandler;
     @Autowired
     private String coreVersion;
 
@@ -200,8 +200,8 @@ public class TransformController
     @PostMapping(value = ENDPOINT_TRANSFORM, consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<StreamingResponseBody> transform(HttpServletRequest request,
                                               @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
-                                              @RequestParam(value = SOURCE_MIMETYPE, required = true) String sourceMimetype,
-                                              @RequestParam(value = TARGET_MIMETYPE, required = true) String targetMimetype,
+                                              @RequestParam(value = SOURCE_MIMETYPE) String sourceMimetype,
+                                              @RequestParam(value = TARGET_MIMETYPE) String targetMimetype,
                                               @RequestParam Map<String, String> requestParameters)
     {
         return transformHandler.handleHttpRequest(request, sourceMultipartFile, sourceMimetype,
@@ -250,19 +250,9 @@ public class TransformController
         return value;
     }
 
-    @ExceptionHandler(TypeMismatchException.class)
-    public void handleParamsTypeMismatch(HttpServletResponse response, MissingServletRequestParameterException e) throws IOException
-    {
-        final String message = format("Request parameter ''{0}'' is of the wrong type", e.getParameterName());
-        final int statusCode = BAD_REQUEST.value();
-
-        logger.error(message, e);
-        LogEntry.setStatusCodeAndMessage(statusCode, message);
-        response.sendError(statusCode, transformEngine.getTransformEngineName() + " - " + message);
-    }
-
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public void handleMissingParams(HttpServletResponse response, MissingServletRequestParameterException e) throws IOException
+    public void handleMissingParams(HttpServletResponse response, MissingServletRequestParameterException e)
+        throws IOException
     {
         final String message = format("Request parameter ''{0}'' is missing", e.getParameterName());
         final int statusCode = BAD_REQUEST.value();
