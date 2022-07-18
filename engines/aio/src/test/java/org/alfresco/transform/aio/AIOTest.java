@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  */
 public class AIOTest extends AbstractBaseTest
 {
-    @Value("${transform.core.version}")
+    @Autowired
     private String coreVersion;
 
     //@Override

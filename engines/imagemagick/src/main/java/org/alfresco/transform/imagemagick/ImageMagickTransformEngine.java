@@ -27,7 +27,7 @@
 package org.alfresco.transform.imagemagick;
 
 import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.probes.ProbeTestTransform;
+import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.common.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,9 +66,9 @@ public class ImageMagickTransformEngine implements TransformEngine
     }
 
     @Override
-    public ProbeTestTransform getLivenessAndReadinessProbeTestTransform()
+    public ProbeTransform getProbeTransform()
     {
-        return new ProbeTestTransform("quick.jpg", "quick.png",
+        return new ProbeTransform("quick.jpg", "quick.png",
                 MIMETYPE_IMAGE_JPEG, MIMETYPE_IMAGE_PNG, Collections.emptyMap(),
                 35593, 1024, 150, 1024, 60 * 15 + 1, 60 * 15);
     }

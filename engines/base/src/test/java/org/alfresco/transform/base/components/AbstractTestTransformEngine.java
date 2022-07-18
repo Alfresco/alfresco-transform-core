@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.probes.ProbeTestTransform;
+import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.config.SupportedSourceAndTarget;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.config.TransformOptionValue;
@@ -57,46 +57,16 @@ public abstract class AbstractTestTransformEngine implements TransformEngine
 
     @Override public String getStartupMessage()
     {
-        return "Startup";
+        return "Startup "+getTransformEngineName()+
+                "\nLine 2 "+getTransformEngineName()+
+                "\nLine 3";
     }
 
-    @Override public TransformConfig getTransformConfig()
+    @Override public ProbeTransform getProbeTransform()
     {
-        String docOptions = "docOptions";
-        String imageOptions = "imageOptions";
-        return TransformConfig.builder()
-//            .withTransformOptions(ImmutableMap.of(
-//                docOptions, ImmutableSet.of(
-//                    new TransformOptionValue(false, "page")),
-//                imageOptions, ImmutableSet.of(
-//                    new TransformOptionValue(false, "width"),
-//                    new TransformOptionValue(false, "height"))))
-            .withTransformers(ImmutableList.of(
-                Transformer.builder()
-                   .withTransformerName("TxT2Pdf")
-                   .withSupportedSourceAndTargetList(ImmutableSet.of(
-                       SupportedSourceAndTarget.builder()
-                           .withSourceMediaType(MIMETYPE_TEXT_PLAIN)
-                           .withTargetMediaType(MIMETYPE_PDF)
-                           .build()))
-//                    .withTransformOptions(ImmutableSet.of(docOptions))
-                   .build(),
-                Transformer.builder()
-                   .withTransformerName("Pdf2Png")
-                   .withSupportedSourceAndTargetList(ImmutableSet.of(
-                       SupportedSourceAndTarget.builder()
-                           .withSourceMediaType(MIMETYPE_PDF)
-                           .withTargetMediaType(MIMETYPE_IMAGE_PNG)
-                           .build()))
-//                   .withTransformOptions(ImmutableSet.of(imageOptions))
-                   .build()))
-            .build();
-    }
-
-    @Override public ProbeTestTransform getLivenessAndReadinessProbeTestTransform()
-    {
-        return new ProbeTestTransform("quick.html", "quick.txt",
+        return new ProbeTransform("quick.html", "quick.txt",
                 MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, ImmutableMap.of(SOURCE_ENCODING, "UTF-8"),
-                119, 30, 150, 1024, 60 * 2 + 1, 60 * 2);
+                119, 30, 150, 1024, 60 * 2 + 1,
+                60 * 2);
     }
 }

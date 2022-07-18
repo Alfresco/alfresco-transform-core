@@ -27,7 +27,7 @@
 package org.alfresco.transform.pdfrenderer;
 
 import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.probes.ProbeTestTransform;
+import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.common.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,9 +65,9 @@ public class PdfRendererTransformEngine implements TransformEngine
     }
 
     @Override
-    public ProbeTestTransform getLivenessAndReadinessProbeTestTransform()
+    public ProbeTransform getProbeTransform()
     {
-        return new ProbeTestTransform("quick.pdf", "quick.png",
+        return new ProbeTransform("quick.pdf", "quick.png",
                 MIMETYPE_PDF, MIMETYPE_IMAGE_PNG, Collections.emptyMap(),
                 7455, 1024, 150, 10240, 60 * 20 + 1, 60 * 15 - 15);
     }

@@ -52,6 +52,11 @@ public enum CoreFunction
         return comparableVersion.compareTo(fromVersion) >= 0 && comparableVersion.compareTo(toVersion) <= 0;
     }
 
+    public static String standardizeCoreVersion(String version)
+    {
+        return newComparableVersion(version, NO_VERSION).toString();
+    }
+
     CoreFunction(String fromVersion, String toVersion)
     {
         this.fromVersion = newComparableVersion(fromVersion, NO_VERSION);

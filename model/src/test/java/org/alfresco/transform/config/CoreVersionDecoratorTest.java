@@ -32,6 +32,7 @@ import java.util.Set;
 
 import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
 import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
+import static org.alfresco.transform.config.CoreFunction.standardizeCoreVersion;
 import static org.alfresco.transform.config.CoreVersionDecorator.CONFIG_VERSION_INCLUDES_CORE_VERSION;
 import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionOnMultiStepTransformers;
 import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionOnSingleStepTransformers;
@@ -212,5 +213,14 @@ class CoreVersionDecoratorTest
         assertEquals(newTransformConfig("2.5.7", "2.5.7", "2.5.7", "2.5.7", "2.5.7",
                 true, true),
                 setOrClearCoreVersion(transformConfigWithCoreVersion, CONFIG_VERSION_INCLUDES_CORE_VERSION));
+    }
+
+    @Test
+    void standardizeCoreVersionTest()
+    {
+        assertEquals("2.5.7", standardizeCoreVersion("2.5.7"));
+        assertEquals("2.5.7", standardizeCoreVersion("2.5.7-SNAPSHOT"));
+        assertEquals("2", standardizeCoreVersion("2"));
+        assertEquals("2.5.7", standardizeCoreVersion("2.5.7-A-SNAPSHOT"));
     }
 }

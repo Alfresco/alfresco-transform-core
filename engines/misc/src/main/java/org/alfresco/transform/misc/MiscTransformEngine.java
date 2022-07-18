@@ -28,7 +28,7 @@ package org.alfresco.transform.misc;
 
 import com.google.common.collect.ImmutableMap;
 import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.probes.ProbeTestTransform;
+import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.common.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,9 +71,9 @@ public class MiscTransformEngine implements TransformEngine
     }
 
     @Override
-    public ProbeTestTransform getLivenessAndReadinessProbeTestTransform()
+    public ProbeTransform getProbeTransform()
     {
-        return new ProbeTestTransform("quick.html", "quick.txt",
+        return new ProbeTransform("quick.html", "quick.txt",
                 MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, transformOptions,
                 119, 30, 150, 1024, 60 * 2 + 1, 60 * 2);
     }

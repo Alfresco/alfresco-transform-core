@@ -67,14 +67,15 @@ public class CoreVersionDecorator
             Set.of(new TransformOptionValue(false, DIRECT_ACCESS_URL));
 
     /**
-     * Returns a {@link TransformConfig} that includes or excludes the {@code coreVersion} field.
+     * Returns a new {@link TransformConfig} that includes or excludes the {@code coreVersion} field and
+     * associated elements like directAccessUrl.
      */
     public static TransformConfig setOrClearCoreVersion(TransformConfig transformConfig, int configVersion)
     {
         boolean includeCoreVersion = configVersion >= 2;
 
         Map<String, Set<TransformOption>> transformOptions = new HashMap<>(transformConfig.getTransformOptions());
-        return TransformConfig.builder()
+        transformConfig = TransformConfig.builder()
                 // We may need to create new Transformers as we must not change the original.
                 .withTransformers(transformConfig.getTransformers().stream()
                 .map(transformer -> {
@@ -85,7 +86,7 @@ public class CoreVersionDecorator
                                 .withCoreVersion(includeCoreVersion ? transformer.getCoreVersion() : null)
                                 .withTransformOptions(setOrClearCoreTransformOptions(
                                         includeCoreVersion ? transformer.getCoreVersion() : null,
-                                        transformOptions, transformer.getTransformOptions()))
+                                        transformer.getTransformOptions()))
                                 // Original values
                                 .withTransformerName(transformer.getTransformerName())
                                 .withTransformerPipeline(transformer.getTransformerPipeline())
@@ -104,19 +105,20 @@ public class CoreVersionDecorator
                 .withOverrideSupported(transformConfig.getOverrideSupported())
                 .withSupportedDefaults(transformConfig.getSupportedDefaults())
                 .build();
+        addOrRemoveDirectAccessUrlOption(transformConfig.getTransformOptions(), transformConfig.getTransformers());
+        return transformConfig;
     }
 
     public static void setCoreVersionOnSingleStepTransformers(TransformConfig transformConfig, String coreVersion)
     {
-        Map<String, Set<TransformOption>> transformOptions = transformConfig.getTransformOptions();
         List<Transformer> transformers = transformConfig.getTransformers();
         transformers.stream()
-                .filter(CoreVersionDecorator::isSingleStep)
-                .forEach(transformer -> {
+                    .filter(CoreVersionDecorator::isSingleStep)
+                    .forEach(transformer -> {
                     transformer.setCoreVersion(coreVersion);
-                    transformer.setTransformOptions(setOrClearCoreTransformOptions(coreVersion,
-                            transformOptions, transformer.getTransformOptions()));
+                    transformer.setTransformOptions(setOrClearCoreTransformOptions(coreVersion, transformer.getTransformOptions()));
                 });
+        addOrRemoveDirectAccessUrlOption(transformConfig.getTransformOptions(), transformers);
     }
 
     /**
@@ -147,31 +149,41 @@ public class CoreVersionDecorator
                     String coreVersion = NO_VERSION.equals(minCoreVersion) ? null : minCoreVersion.toString();
                     transformer.setCoreVersion(coreVersion);
                     transformer.setTransformOptions(setOrClearCoreTransformOptions(transformer.getCoreVersion(),
-                            transformOptions, transformer.getTransformOptions()));
+                        transformer.getTransformOptions()));
                 });
+        addOrRemoveDirectAccessUrlOption(transformOptions, transformers);
     }
 
-    private static Set<String> setOrClearCoreTransformOptions(String coreVersion, Map<String,
-            Set<TransformOption>> transformOptions, Set<String> transformerTransformOptions)
+    private static Set<String> setOrClearCoreTransformOptions(String coreVersion, Set<String> transformerTransformOptions)
     {
-        // If we have more options being added in future, consider adding an interface that will be implemented by
+        // If we have more options being added in the future, consider adding an interface that will be implemented by
         // different implementations for each coreVersion and then iterate over them here.
         transformerTransformOptions = new HashSet<>(transformerTransformOptions);
         if (CoreFunction.DIRECT_ACCESS_URL.isSupported(coreVersion))
         {
-            // Added to the Transform config if any Transformers support it.
-            transformOptions.put(DIRECT_ACCESS_URL, DIRECT_ACCESS_URL_TRANSFORM_OPTIONS);
-
             // Add DIRECT_ACCESS_URL to a copy of this Transformer's transform options.
             transformerTransformOptions.add(DIRECT_ACCESS_URL);
         }
         else
         {
-            transformOptions.remove(DIRECT_ACCESS_URL);
             transformerTransformOptions.remove(DIRECT_ACCESS_URL);
         }
 
         return transformerTransformOptions;
+    }
+
+    private static void addOrRemoveDirectAccessUrlOption(Map<String, Set<TransformOption>> transformOptions,
+        List<Transformer> transformers)
+    {
+        if (transformers.stream()
+            .anyMatch(transformer -> CoreFunction.DIRECT_ACCESS_URL.isSupported(transformer.getCoreVersion())))
+        {
+            transformOptions.put(DIRECT_ACCESS_URL, DIRECT_ACCESS_URL_TRANSFORM_OPTIONS);
+        }
+        else
+        {
+            transformOptions.remove(DIRECT_ACCESS_URL);
+        }
     }
 
     private static boolean isSingleStep(Transformer transformer)

@@ -30,7 +30,7 @@ import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transform.base.fs.FileManager;
 import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.model.FileRefResponse;
-import org.alfresco.transform.base.probes.ProbeTestTransform;
+import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
 import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
@@ -73,7 +73,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.joining;
 import static org.alfresco.transform.base.fs.FileManager.createTargetFile;
-import static org.alfresco.transform.base.fs.FileManager.deleteFile;
 import static org.alfresco.transform.base.fs.FileManager.getDirectAccessUrlInputStream;
 import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
@@ -112,7 +111,7 @@ public class TransformHandler
 
     private AtomicInteger httpRequestCount = new AtomicInteger(1);
     private TransformEngine transformEngine;
-    private ProbeTestTransform probeTestTransform;
+    private ProbeTransform probeTransform;
     private Map<String, CustomTransformer> customTransformersByName = new HashMap<>();
 
     @PostConstruct
@@ -147,7 +146,7 @@ public class TransformHandler
     {
         if (transformEngine != null)
         {
-            probeTestTransform = transformEngine.getLivenessAndReadinessProbeTestTransform();
+            probeTransform = transformEngine.getProbeTransform();
         }
     }
 
@@ -170,9 +169,9 @@ public class TransformHandler
         return transformEngine;
     }
 
-    public ProbeTestTransform getProbeTestTransform()
+    public ProbeTransform getProbeTestTransform()
     {
-        return probeTestTransform;
+        return probeTransform;
     }
 
     public ResponseEntity<StreamingResponseBody> handleHttpRequest(HttpServletRequest request,
@@ -191,7 +190,7 @@ public class TransformHandler
                     logger.debug("Processing request via HTTP endpoint. Params: sourceMimetype: '{}', targetMimetype: '{}', "
                             + "requestParameters: {}", sourceMimetype, targetMimetype, requestParameters);
                 }
-                probeTestTransform.incrementTransformerCount();
+                probeTransform.incrementTransformerCount();
 
                 final String directUrl = requestParameters.getOrDefault(DIRECT_ACCESS_URL, "");
                 InputStream inputStream = new BufferedInputStream(directUrl.isBlank() ?
@@ -222,7 +221,7 @@ public class TransformHandler
                 LogEntry.setTargetSize(outputStream.getLength());
                 long time = LogEntry.setStatusCodeAndMessage(OK.value(), "Success");
 
-                probeTestTransform.recordTransformTime(time);
+                probeTransform.recordTransformTime(time);
                 transformerDebug.popTransform(reference, time);
             }
             catch (TransformException e)
@@ -252,7 +251,7 @@ public class TransformHandler
         try
         {
             logger.trace("Received {}, timeout {} ms", request, timeout);
-            probeTestTransform.incrementTransformerCount();
+            probeTransform.incrementTransformerCount();
             checkTransformRequestValid(request, reply);
             inputStream = getInputStream(request, reply);
             String targetMimetype = request.getTargetMediaType();
@@ -300,7 +299,7 @@ public class TransformHandler
             deleteTmpFiles(transformManager);
             closeInputStreamWithoutException(inputStream);
 
-            probeTestTransform.recordTransformTime(System.currentTimeMillis()-start);
+            probeTransform.recordTransformTime(System.currentTimeMillis()-start);
             transformerDebug.popTransform(reply);
 
             logger.trace("Sending successful {}, timeout {} ms", reply, timeout);

@@ -62,7 +62,7 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
     @Value("${transform.core.config.location:classpath:engine_config.json}")
     private String locationFromProperty;
 
-    @Value("${transform.core.version}")
+    @Autowired
     private String coreVersion;
 
     private Resource engineConfig;

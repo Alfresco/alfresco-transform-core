@@ -32,6 +32,8 @@ import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.messages.TransformRequestValidator;
 import org.alfresco.transform.registry.TransformServiceRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -41,6 +43,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.config.CoreFunction.standardizeCoreVersion;
 
 @Configuration
 @ComponentScan(
@@ -48,6 +51,9 @@ import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
         excludeFilters = @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*Test.*"))
 public class WebApplicationConfig implements WebMvcConfigurer
 {
+    @Value("${transform.core.version}")
+    private String coreVersionString;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry)
     {
@@ -90,5 +96,11 @@ public class WebApplicationConfig implements WebMvcConfigurer
     public TransformerDebug transformerDebug()
     {
         return new TransformerDebug().setIsTEngine(true);
+    }
+
+    @Bean
+    public String coreVersion()
+    {
+        return standardizeCoreVersion(coreVersionString);
     }
 }

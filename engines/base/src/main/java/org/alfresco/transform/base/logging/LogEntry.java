@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 public final class LogEntry
 {
     private static final Logger logger = LoggerFactory.getLogger(LogEntry.class);
-    // TODO allow ProbeTestTransform to find out if there are any transforms running longer than the max time.
+    // TODO allow ProbeTransform to find out if there are any transforms running longer than the max time.
 
     private static final AtomicInteger count = new AtomicInteger(0);
     private static final Deque<LogEntry> log = new ConcurrentLinkedDeque<>();

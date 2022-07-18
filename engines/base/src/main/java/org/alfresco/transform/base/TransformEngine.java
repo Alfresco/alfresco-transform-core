@@ -26,7 +26,7 @@
  */
 package org.alfresco.transform.base;
 
-import org.alfresco.transform.base.probes.ProbeTestTransform;
+import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.common.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 
@@ -55,7 +55,7 @@ public interface TransformEngine
     TransformConfig getTransformConfig();
 
     /**
-     * @return a ProbeTestTransform (will do a quick transform) for k8 liveness and readiness probes.
+     * @return a ProbeTransform (will do a quick transform) for k8 liveness and readiness probes.
      */
-    ProbeTestTransform getLivenessAndReadinessProbeTestTransform();
+    ProbeTransform getProbeTransform();
 }

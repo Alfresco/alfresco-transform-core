@@ -27,7 +27,7 @@
 package org.alfresco.transform.base;
 
 import org.alfresco.transform.base.logging.LogEntry;
-import org.alfresco.transform.base.probes.ProbeTestTransform;
+import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.common.TransformException;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.registry.TransformServiceRegistry;
@@ -66,11 +66,14 @@ import static java.text.MessageFormat.format;
 import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION;
 import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_ERROR;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_LIVE;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_LOG;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_READY;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_ROOT;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TEST;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_VERSION;
 import static org.alfresco.transform.common.RequestParamMap.FILE;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
@@ -93,17 +96,17 @@ public class TransformController
     private TransformServiceRegistry transformRegistry;
     @Autowired
     private TransformHandler transformHandler;
-    @Value("${transform.core.version}")
+    @Autowired
     private String coreVersion;
 
-    private TransformEngine transformEngine;
-    ProbeTestTransform probeTestTransform;
+    TransformEngine transformEngine;
+    ProbeTransform probeTransform;
 
     @PostConstruct
     private void init()
     {
         transformEngine = transformHandler.getTransformEngine();
-        probeTestTransform = transformHandler.getProbeTestTransform();
+        probeTransform = transformHandler.getProbeTestTransform();
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -122,7 +125,7 @@ public class TransformController
     /**
      * @return a string that may be used in client debug.
      */
-    @RequestMapping("/version")
+    @RequestMapping(ENDPOINT_VERSION)
     @ResponseBody
     public String version()
     {
@@ -167,21 +170,21 @@ public class TransformController
     /**
      * Kubernetes readiness probe.
      */
-    @GetMapping("/ready")
+    @GetMapping(ENDPOINT_READY)
     @ResponseBody
     public String ready(HttpServletRequest request)
     {
-        return probeTestTransform.doTransformOrNothing(request, false, this);
+        return probeTransform.doTransformOrNothing(request, false, this);
     }
 
     /**
      * Kubernetes liveness probe.
      */
-    @GetMapping("/live")
+    @GetMapping(ENDPOINT_LIVE)
     @ResponseBody
     public String live(HttpServletRequest request)
     {
-        return probeTestTransform.doTransformOrNothing(request, true, this);
+        return probeTransform.doTransformOrNothing(request, true, this);
     }
 
     @GetMapping(value = ENDPOINT_TRANSFORM_CONFIG)
@@ -197,8 +200,8 @@ public class TransformController
     @PostMapping(value = ENDPOINT_TRANSFORM, consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<StreamingResponseBody> transform(HttpServletRequest request,
                                               @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
-                                              @RequestParam(value = SOURCE_MIMETYPE, required = false) String sourceMimetype,
-                                              @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,
+                                              @RequestParam(value = SOURCE_MIMETYPE, required = true) String sourceMimetype,
+                                              @RequestParam(value = TARGET_MIMETYPE, required = true) String targetMimetype,
                                               @RequestParam Map<String, String> requestParameters)
     {
         return transformHandler.handleHttpRequest(request, sourceMultipartFile, sourceMimetype,
@@ -270,7 +273,7 @@ public class TransformController
     }
 
     @ExceptionHandler(TransformException.class)
-    public ModelAndView transformExceptionWithMessage(HttpServletResponse response, TransformException e)
+    public ModelAndView handleTransformException(HttpServletResponse response, TransformException e)
             throws IOException
     {
         final String message = e.getMessage();
@@ -278,7 +281,7 @@ public class TransformController
 
         logger.error(message);
         long time = LogEntry.setStatusCodeAndMessage(statusCode, message);
-        probeTestTransform.recordTransformTime(time);
+        probeTransform.recordTransformTime(time);
         response.sendError(statusCode, message);
 
         ModelAndView mav = new ModelAndView();

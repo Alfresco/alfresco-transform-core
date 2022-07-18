@@ -80,6 +80,9 @@ public interface RequestParamMap
     String ENDPOINT_TEST = "/test";
     String ENDPOINT_TRANSFORM_CONFIG = "/transform/config";
     String ENDPOINT_TRANSFORM_CONFIG_LATEST = ENDPOINT_TRANSFORM_CONFIG + "?" + CONFIG_VERSION + "=" + CONFIG_VERSION_LATEST;
+    String ENDPOINT_VERSION = "/version";
+    String ENDPOINT_READY = "/ready";
+    String ENDPOINT_LIVE = "/live";
     String ENDPOINT_ERROR = "/error";
     String ENDPOINT_LOG = "/log";
     String ENDPOINT_ROOT = "/";

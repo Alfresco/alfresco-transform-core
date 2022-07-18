@@ -27,7 +27,7 @@
 package org.alfresco.transform.tika;
 
 import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.probes.ProbeTestTransform;
+import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.common.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,9 +66,9 @@ public class TikaTransformEngine implements TransformEngine
     }
 
     @Override
-    public ProbeTestTransform getLivenessAndReadinessProbeTestTransform()
+    public ProbeTransform getProbeTransform()
     {
-        return new ProbeTestTransform("quick.pdf", "quick.txt",
+        return new ProbeTransform("quick.pdf", "quick.txt",
                 MIMETYPE_PDF, MIMETYPE_TEXT_PLAIN, Collections.emptyMap(),
                 60, 16, 400, 10240, 60 * 30 + 1, 60 * 15 + 20);
     }

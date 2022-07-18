@@ -212,7 +212,7 @@ public class Transformer
 
         public Builder withCoreVersion(final String coreVersion)
         {
-            transformer.coreVersion = coreVersion;
+            transformer.setCoreVersion(coreVersion);
             return this;
         }
 

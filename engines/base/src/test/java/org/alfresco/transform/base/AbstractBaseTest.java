@@ -62,7 +62,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.alfresco.transform.base.probes.ProbeTestTransform;
+import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
@@ -124,7 +124,7 @@ public abstract class AbstractBaseTest
     @SpyBean
     protected TransformServiceRegistry transformRegistry;
 
-    @Value("${transform.core.version}")
+    @Autowired
     private String coreVersion;
 
     protected String sourceExtension;
@@ -152,9 +152,9 @@ public abstract class AbstractBaseTest
         String targetExtension, String sourceMimetype,
         boolean readTargetFileBytes) throws IOException;
 
-    protected ProbeTestTransform getProbeTestTransform()
+    protected ProbeTransform getProbeTestTransform()
     {
-        return controller.probeTestTransform;
+        return controller.probeTransform;
     }
 
     protected abstract void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest);
@@ -364,8 +364,8 @@ public abstract class AbstractBaseTest
     @Test
     public void calculateMaxTime() throws Exception
     {
-        ProbeTestTransform probeTestTransform = controller.probeTestTransform;
-        probeTestTransform.setLivenessPercent(110);
+        ProbeTransform probeTransform = controller.probeTransform;
+        probeTransform.setLivenessPercent(110);
 
         long[][] values = new long[][]{
             {5000, 0, Long.MAX_VALUE}, // 1st transform is ignored
@@ -384,9 +384,9 @@ public abstract class AbstractBaseTest
             long expectedNormalTime = v[1];
             long expectedMaxTime = v[2];
 
-            probeTestTransform.calculateMaxTime(time, true);
-            assertEquals(expectedNormalTime, probeTestTransform.getNormalTime());
-            assertEquals(expectedMaxTime, probeTestTransform.getMaxTime());
+            probeTransform.calculateMaxTime(time, true);
+            assertEquals(expectedNormalTime, probeTransform.getNormalTime());
+            assertEquals(expectedMaxTime, probeTransform.getMaxTime());
         }
     }
 

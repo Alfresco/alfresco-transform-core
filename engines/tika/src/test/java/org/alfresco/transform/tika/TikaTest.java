@@ -30,7 +30,7 @@ import org.alfresco.transform.base.AbstractBaseTest;
 import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
-import org.alfresco.transform.base.probes.ProbeTestTransform;
+import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.poi.ooxml.POIXMLProperties;
@@ -265,9 +265,9 @@ public class TikaTest extends AbstractBaseTest
     public void testImmutableEmptyMap()
     {
         // See ACS-373
-        ProbeTestTransform probeTestTransform = getProbeTestTransform();
-        ReflectionTestUtils.setField(probeTestTransform, "livenessTransformEnabled", true);
-        probeTestTransform.doTransformOrNothing(httpServletRequest, true, controller);
+        ProbeTransform probeTransform = getProbeTestTransform();
+        ReflectionTestUtils.setField(probeTransform, "livenessTransformEnabled", true);
+        probeTransform.doTransformOrNothing(httpServletRequest, true, controller);
     }
 
     @Test

@@ -27,7 +27,7 @@
 package org.alfresco.transform.libreoffice;
 
 import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.probes.ProbeTestTransform;
+import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.common.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,9 +67,9 @@ public class LibreOfficeTransformEngine implements TransformEngine
     }
 
     @Override
-    public ProbeTestTransform getLivenessAndReadinessProbeTestTransform()
+    public ProbeTransform getProbeTransform()
     {
-        return new ProbeTestTransform("quick.doc", "quick.pdf",
+        return new ProbeTransform("quick.doc", "quick.pdf",
                 MIMETYPE_WORD, MIMETYPE_PDF, Collections.emptyMap(),
                 11817, 1024, 150, 10240, 60 * 30 + 1, 60 * 15 + 20);
     }

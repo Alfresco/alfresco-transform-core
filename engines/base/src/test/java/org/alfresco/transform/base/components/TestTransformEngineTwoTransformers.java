@@ -26,6 +26,78 @@
  */
 package org.alfresco.transform.base.components;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import org.alfresco.transform.config.SupportedSourceAndTarget;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.TransformOptionValue;
+import org.alfresco.transform.config.TransformStep;
+import org.alfresco.transform.config.Transformer;
+
+import java.util.List;
+
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+
 public class TestTransformEngineTwoTransformers extends AbstractTestTransformEngine
 {
+    @Override public TransformConfig getTransformConfig()
+    {
+        String docOptions = "docOptions";
+        String imageOptions = "imageOptions";
+        return TransformConfig.builder()
+            .withTransformOptions(ImmutableMap.of(
+                docOptions, ImmutableSet.of(
+                    new TransformOptionValue(false, "page")),
+                imageOptions, ImmutableSet.of(
+                    new TransformOptionValue(false, "width"),
+                    new TransformOptionValue(false, "height"))))
+            .withTransformers(ImmutableList.of(
+                Transformer.builder()
+                    .withTransformerName("TxT2Pdf")
+                    .withSupportedSourceAndTargetList(ImmutableSet.of(
+                        SupportedSourceAndTarget.builder()
+                            .withSourceMediaType(MIMETYPE_TEXT_PLAIN)
+                            .withTargetMediaType(MIMETYPE_PDF)
+                            .build()))
+                        .withTransformOptions(ImmutableSet.of(docOptions))
+                    .build(),
+            Transformer.builder()
+                .withTransformerName("Pdf2Png")
+                .withSupportedSourceAndTargetList(ImmutableSet.of(
+                    SupportedSourceAndTarget.builder()
+                        .withSourceMediaType(MIMETYPE_PDF)
+                        .withTargetMediaType(MIMETYPE_IMAGE_PNG)
+                        .build()))
+                .withTransformOptions(ImmutableSet.of(imageOptions))
+                .build(),
+            Transformer.builder()
+                .withTransformerName("Txt2PngViaPdf")
+                .withTransformerPipeline(List.of(
+                    new TransformStep("TxT2Pdf", MIMETYPE_PDF),
+                    new TransformStep("Pdf2Png", null)))
+                .withSupportedSourceAndTargetList(ImmutableSet.of(
+                    SupportedSourceAndTarget.builder()
+                        .withSourceMediaType(MIMETYPE_TEXT_PLAIN)
+                        .withTargetMediaType(MIMETYPE_PDF)
+                        .build()))
+                .withTransformOptions(ImmutableSet.of(imageOptions))
+                .build(),
+            Transformer.builder() // Unavailable until Pdf2Jpg is added
+                .withTransformerName("Txt2JpgViaPdf")
+                .withTransformerPipeline(List.of(
+                    new TransformStep("TxT2Pdf", MIMETYPE_PDF),
+                    new TransformStep("Pdf2Jpg", null)))
+                .withSupportedSourceAndTargetList(ImmutableSet.of(
+                    SupportedSourceAndTarget.builder()
+                        .withSourceMediaType(MIMETYPE_TEXT_PLAIN)
+                        .withTargetMediaType(MIMETYPE_IMAGE_JPEG)
+                        .build()))
+                .withTransformOptions(ImmutableSet.of(imageOptions))
+                .build()))
+            .build();
+    }
 }

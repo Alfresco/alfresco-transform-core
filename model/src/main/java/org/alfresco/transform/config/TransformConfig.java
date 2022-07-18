@@ -56,7 +56,7 @@ public class TransformConfig
 
     public void setTransformOptions(Map<String, Set<TransformOption>> transformOptions)
     {
-        this.transformOptions = transformOptions;
+        this.transformOptions = new HashMap<>(transformOptions);
     }
 
     public List<Transformer> getTransformers()
@@ -143,7 +143,7 @@ public class TransformConfig
 
         public Builder withTransformOptions(final Map<String, Set<TransformOption>> transformOptions)
         {
-            transformConfig.transformOptions = transformOptions;
+            transformConfig.setTransformOptions(transformOptions);
             return this;
         }
 

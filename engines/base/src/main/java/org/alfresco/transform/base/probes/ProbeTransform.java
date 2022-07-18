@@ -81,9 +81,9 @@ import org.springframework.beans.factory.annotation.Autowired;
  * <li>livenessTransformPeriodSeconds The number of seconds between test transforms done for live probes</li>
  * </ul>
  */
-public class ProbeTestTransform
+public class ProbeTransform
 {
-    private final Logger logger = LoggerFactory.getLogger(ProbeTestTransform.class);
+    private final Logger logger = LoggerFactory.getLogger(ProbeTransform.class);
 
     @Autowired
     private TransformServiceRegistry transformRegistry;
@@ -124,7 +124,7 @@ public class ProbeTestTransform
         return maxTime;
     }
 
-    public ProbeTestTransform(String sourceFilename, String targetFilename,
+    public ProbeTransform(String sourceFilename, String targetFilename,
         String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
         long expectedLength, long plusOrMinus, int livenessPercent, long maxTransforms, long maxTransformSeconds,
         long livenessTransformPeriodSeconds)

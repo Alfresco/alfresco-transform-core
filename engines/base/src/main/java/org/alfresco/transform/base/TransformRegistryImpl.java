@@ -50,7 +50,7 @@ public class TransformRegistryImpl extends AbstractTransformRegistry
     @Autowired(required = false)
     private List<TransformEngine> transformEngines;
 
-    @Value("${transform.core.version}")
+    @Autowired
     private String coreVersion;
 
     private TransformConfig transformConfigBeforeIncompleteTransformsAreRemoved;
