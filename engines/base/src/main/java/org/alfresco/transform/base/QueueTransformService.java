@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
@@ -80,12 +81,12 @@ public class QueueTransformService
         }
 
         final String correlationId = tryRetrieveCorrelationId(msg);
-        Destination replyToDestinationQueue;
+        Destination replyToQueue;
 
         try
         {
-            replyToDestinationQueue = msg.getJMSReplyTo();
-            if (replyToDestinationQueue == null)
+            replyToQueue = msg.getJMSReplyTo();
+            if (replyToQueue == null)
             {
                 logger.error(
                     "Cannot find 'replyTo' destination queue for message with correlationID {}. Stopping. ",
@@ -111,7 +112,7 @@ public class QueueTransformService
         catch (TransformException e)
         {
             logger.error(e.getMessage(), e);
-            replyWithError(replyToDestinationQueue, HttpStatus.valueOf(e.getStatusCode().value()),
+            replyWithError(replyToQueue, HttpStatus.valueOf(e.getStatus().value()),
                 e.getMessage(), correlationId);
             return;
         }
@@ -119,13 +120,12 @@ public class QueueTransformService
         if (!transformRequest.isPresent())
         {
             logger.error("T-Request from message with correlationID {} is null!", correlationId);
-            replyWithInternalSvErr(replyToDestinationQueue,
+            replyWithInternalSvErr(replyToQueue,
                 "JMS exception during T-Request deserialization: ", correlationId);
             return;
         }
 
-        TransformReply reply = transformHandler.handleMessageRequest(transformRequest.get(), null).getBody();
-        transformReplySender.send(replyToDestinationQueue, reply);
+        transformHandler.handleMessageRequest(transformRequest.get(), null, replyToQueue);
     }
 
     /**
@@ -172,7 +172,7 @@ public class QueueTransformService
         replyWithError(destination, INTERNAL_SERVER_ERROR, msg, correlationId);
     }
 
-    private void replyWithError(final Destination destination, final HttpStatus status,
+    private void replyWithError(final Destination replyToQueue, final HttpStatus status,
         final String msg,
         final String correlationId)
     {
@@ -182,7 +182,7 @@ public class QueueTransformService
             .withErrorDetails(msg)
             .build();
 
-        transformReplySender.send(destination, reply, correlationId);
+        transformReplySender.send(replyToQueue, reply, correlationId);
     }
 
     private static String tryRetrieveCorrelationId(final Message msg)

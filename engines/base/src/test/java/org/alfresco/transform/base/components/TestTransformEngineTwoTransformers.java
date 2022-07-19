@@ -82,7 +82,7 @@ public class TestTransformEngineTwoTransformers extends AbstractTestTransformEng
                 .withSupportedSourceAndTargetList(ImmutableSet.of(
                     SupportedSourceAndTarget.builder()
                         .withSourceMediaType(MIMETYPE_TEXT_PLAIN)
-                        .withTargetMediaType(MIMETYPE_PDF)
+                        .withTargetMediaType(MIMETYPE_IMAGE_PNG)
                         .build()))
                 .withTransformOptions(ImmutableSet.of(imageOptions))
                 .build(),

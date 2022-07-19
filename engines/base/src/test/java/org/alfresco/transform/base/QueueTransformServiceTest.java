@@ -188,12 +188,12 @@ public class QueueTransformServiceTest
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
         doReturn(new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus())))
-            .when(transformHandler).handleMessageRequest(request, null);
+            .when(transformHandler).handleMessageRequest(request, null, null);
 
         queueTransformService.receive(msg);
 
         verify(transformMessageConverter).fromMessage(msg);
-        verify(transformHandler).handleMessageRequest(request, null);
+        verify(transformHandler).handleMessageRequest(request, null, null);
         verify(transformReplySender).send(destination, reply);
     }
 
@@ -229,12 +229,12 @@ public class QueueTransformServiceTest
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
         doReturn(new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus())))
-            .when(transformHandler).handleMessageRequest(request, null);
+            .when(transformHandler).handleMessageRequest(request, null, null);
 
         queueTransformService.receive(msg);
 
         verify(transformMessageConverter).fromMessage(msg);
-        verify(transformHandler).handleMessageRequest(request, null);
+        verify(transformHandler).handleMessageRequest(request, null, null);
         verify(transformReplySender).send(destination, reply);
     }
 }

@@ -26,33 +26,28 @@
  */
 package org.alfresco.transform.base.probes;
 
-import static org.alfresco.transform.base.fs.FileManager.SOURCE_FILE;
-import static org.alfresco.transform.base.fs.FileManager.TARGET_FILE;
-import static org.alfresco.transform.base.fs.FileManager.TempFileProvider.createTempFile;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
+import org.alfresco.transform.base.TransformHandler;
+import org.alfresco.transform.base.logging.LogEntry;
+import org.alfresco.transform.common.TransformException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.alfresco.transform.base.TransformController;
-import org.alfresco.transform.common.TransformException;
-import org.alfresco.transform.registry.TransformServiceRegistry;
-import org.alfresco.transform.base.logging.LogEntry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import static org.alfresco.transform.base.fs.FileManager.TempFileProvider.createTempFile;
+import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
 /**
  * Provides test transformations and the logic used by k8 liveness and readiness probes.
@@ -84,9 +79,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ProbeTransform
 {
     private final Logger logger = LoggerFactory.getLogger(ProbeTransform.class);
-
-    @Autowired
-    private TransformServiceRegistry transformRegistry;
 
     private static final int AVERAGE_OVER_TRANSFORMS = 5;
     private final String sourceFilename;
@@ -133,7 +125,7 @@ public class ProbeTransform
         this.targetFilename = targetFilename;
         this.sourceMimetype = sourceMimetype;
         this.targetMimetype = targetMimetype;
-        this.transformOptions = transformOptions;
+        this.transformOptions = new HashMap(transformOptions);
         minExpectedLength = Math.max(0, expectedLength - plusOrMinus);
         maxExpectedLength = expectedLength + plusOrMinus;
 
@@ -180,7 +172,8 @@ public class ProbeTransform
     }
 
     // We don't want to be doing test transforms every few seconds, but do want frequent live probes.
-    public String doTransformOrNothing(HttpServletRequest request, boolean isLiveProbe, TransformController controller)
+    public String doTransformOrNothing(HttpServletRequest request, boolean isLiveProbe,
+        TransformHandler transformHandler)
     {
         // If not initialised OR it is a live probe and we are scheduled to to do a test transform.
         probeCount++;
@@ -192,7 +185,7 @@ public class ProbeTransform
         return (isLiveProbe && livenessTransformPeriod > 0 &&
                 (transCount <= AVERAGE_OVER_TRANSFORMS || nextTransformTime < System.currentTimeMillis()))
                || !initialised.get()
-               ? doTransform(request, isLiveProbe, controller)
+               ? doTransform(isLiveProbe, transformHandler)
                : doNothing(isLiveProbe);
     }
 
@@ -200,7 +193,6 @@ public class ProbeTransform
     {
         String probeMessage = getProbeMessage(isLiveProbe);
         String message = "Success - No transform.";
-        LogEntry.setStatusCodeAndMessage(OK.value(), probeMessage + message);
         if (!isLiveProbe && !readySent.getAndSet(true))
         {
             logger.trace("{}{}", probeMessage, message);
@@ -208,7 +200,7 @@ public class ProbeTransform
         return message;
     }
 
-    private String doTransform(HttpServletRequest request, boolean isLiveProbe, TransformController controller)
+    private String doTransform(boolean isLiveProbe, TransformHandler transformHandler)
     {
         checkMaxTransformTimeAndCount(isLiveProbe);
 
@@ -223,12 +215,9 @@ public class ProbeTransform
             while (nextTransformTime < start);
         }
 
-        File sourceFile = getSourceFile(request, isLiveProbe);
-        File targetFile = getTargetFile(request);
-
-        String transformName = getTransformerName(sourceFile, sourceMimetype, targetMimetype, transformOptions);
-//        controller.transformImpl(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
-
+        File sourceFile = getSourceFile(isLiveProbe);
+        File targetFile = getTargetFile();
+        transformHandler.handleProbRequest(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
         long time = System.currentTimeMillis() - start;
         String message = "Transform " + time + "ms";
         checkTargetFile(targetFile, isLiveProbe, message);
@@ -249,20 +238,7 @@ public class ProbeTransform
 
         checkMaxTransformTimeAndCount(isLiveProbe);
 
-        return getProbeMessage(isLiveProbe) + message;
-    }
-
-    private String getTransformerName(final File sourceFile, final String sourceMimetype,
-            final String targetMimetype, final Map<String, String> transformOptions)
-    {
-        final long sourceSizeInBytes = sourceFile.length();
-        final String transformerName = transformRegistry.findTransformerName(sourceMimetype,
-                sourceSizeInBytes, targetMimetype, transformOptions, null);
-        if (transformerName == null)
-        {
-            throw new TransformException(BAD_REQUEST, "No transforms were able to handle the request");
-        }
-        return transformerName;
+        return getProbeMessage(isLiveProbe) + "Success - "+message;
     }
 
     private void checkMaxTransformTimeAndCount(boolean isLiveProbe)
@@ -282,12 +258,11 @@ public class ProbeTransform
         }
     }
 
-    private File getSourceFile(HttpServletRequest request, boolean isLiveProbe)
+    private File getSourceFile(boolean isLiveProbe)
     {
         incrementTransformerCount();
         File sourceFile = createTempFile("source_", "_" + sourceFilename);
-        request.setAttribute(SOURCE_FILE, sourceFile);
-        try (InputStream inputStream = this.getClass().getResourceAsStream('/' + sourceFilename))
+        try (InputStream inputStream = getClass().getResourceAsStream('/' + sourceFilename))
         {
             Files.copy(inputStream, sourceFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
@@ -301,10 +276,9 @@ public class ProbeTransform
         return sourceFile;
     }
 
-    private File getTargetFile(HttpServletRequest request)
+    private File getTargetFile()
     {
         File targetFile = createTempFile("target_", "_" + targetFilename);
-        request.setAttribute(TARGET_FILE, targetFile);
         LogEntry.setTarget(targetFilename);
         return targetFile;
     }
@@ -353,6 +327,7 @@ public class ProbeTransform
                 probeMessage + "Target File \"" + targetFile.getAbsolutePath() + "\" did not exist");
         }
         long length = targetFile.length();
+        targetFile.delete();
         if (length < minExpectedLength || length > maxExpectedLength)
         {
             throw new TransformException(INTERNAL_SERVER_ERROR,
@@ -360,8 +335,6 @@ public class ProbeTransform
                 "\" was the wrong size (" + length + "). Needed to be between " +
                 minExpectedLength + " and " + maxExpectedLength);
         }
-        LogEntry.setTargetSize(length);
-        LogEntry.setStatusCodeAndMessage(OK.value(), probeMessage + "Success - " + message);
     }
 
     private String getMessagePrefix(boolean isLiveProbe)

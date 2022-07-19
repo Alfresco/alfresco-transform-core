@@ -267,7 +267,7 @@ public class TikaTest extends AbstractBaseTest
         // See ACS-373
         ProbeTransform probeTransform = getProbeTestTransform();
         ReflectionTestUtils.setField(probeTransform, "livenessTransformEnabled", true);
-        probeTransform.doTransformOrNothing(httpServletRequest, true, controller);
+        probeTransform.doTransformOrNothing(httpServletRequest, true, transformHandler);
     }
 
     @Test

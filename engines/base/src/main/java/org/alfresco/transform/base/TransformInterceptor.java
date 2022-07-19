@@ -44,20 +44,10 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 public class TransformInterceptor extends HandlerInterceptorAdapter
 {
     @Override
-    public boolean preHandle(HttpServletRequest request,
-        HttpServletResponse response, Object handler)
-    {
-        LogEntry.start();
-        return true;
-    }
-
-    @Override
     public void afterCompletion(HttpServletRequest request,
         HttpServletResponse response, Object handler, Exception ex)
     {
         deleteFile(request, SOURCE_FILE);
         deleteFile(request, TARGET_FILE);
-
-        LogEntry.complete();
     }
 }

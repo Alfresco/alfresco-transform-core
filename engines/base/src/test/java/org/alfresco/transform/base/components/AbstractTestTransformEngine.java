@@ -26,19 +26,11 @@
  */
 package org.alfresco.transform.base.components;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import org.alfresco.transform.base.TransformEngine;
 import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.config.SupportedSourceAndTarget;
-import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.config.TransformOptionValue;
-import org.alfresco.transform.config.Transformer;
 import org.springframework.boot.test.context.TestComponent;
 
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
@@ -64,9 +56,9 @@ public abstract class AbstractTestTransformEngine implements TransformEngine
 
     @Override public ProbeTransform getProbeTransform()
     {
-        return new ProbeTransform("quick.html", "quick.txt",
-                MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, ImmutableMap.of(SOURCE_ENCODING, "UTF-8"),
-                119, 30, 150, 1024, 60 * 2 + 1,
+        return new ProbeTransform("quick.txt", "quick.pdf",
+                MIMETYPE_TEXT_PLAIN, MIMETYPE_PDF, ImmutableMap.of(SOURCE_ENCODING, "UTF-8"),
+                46, 0, 150, 1024, 1,
                 60 * 2);
     }
 }

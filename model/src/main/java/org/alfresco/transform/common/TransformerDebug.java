@@ -104,7 +104,14 @@ public class TransformerDebug
             InternalContext internalContext = reply.getInternalContext();
             String reference = TransformStack.getReference(internalContext);
             long elapsedTime = TransformStack.getElapsedTime(internalContext);
+            popTransform(reference, elapsedTime);
+        }
+    }
 
+    public void popTransform(String reference, long elapsedTime)
+    {
+        if (logger.isDebugEnabled())
+        {
             String message = getPaddedReference(reference) + "Finished in " + ms(elapsedTime);
             if (isTopLevel(reference) || isTEngine())
             {
@@ -115,15 +122,6 @@ public class TransformerDebug
                 logger.trace(message);
             }
             // We don't append the Finished message to ClientData as that would be too much
-        }
-    }
-
-    public void popTransform(String reference, long elapsedTime)
-    {
-        if (logger.isDebugEnabled())
-        {
-            String message = getPaddedReference(reference) + "Finished in " + ms(elapsedTime);
-            logger.debug(message);
         }
     }
 

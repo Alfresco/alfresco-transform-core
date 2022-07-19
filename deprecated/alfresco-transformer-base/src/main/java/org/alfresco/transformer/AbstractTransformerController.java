@@ -312,7 +312,7 @@ public abstract class AbstractTransformerController implements TransformControll
         }
         catch (TransformException e)
         {
-            reply.setStatus(e.getStatusCode().value());
+            reply.setStatus(e.getStatusCode());
             reply.setErrorDetails(messageWithCause("Failed at reading the source file", e));
 
             transformerDebug.logFailure(reply);
@@ -356,7 +356,7 @@ public abstract class AbstractTransformerController implements TransformControll
         }
         catch (TransformException e)
         {
-            reply.setStatus(e.getStatusCode().value());
+            reply.setStatus(e.getStatusCode());
             reply.setErrorDetails(messageWithCause("Failed at processing transformation", e));
 
             transformerDebug.logFailure(reply);
@@ -381,7 +381,7 @@ public abstract class AbstractTransformerController implements TransformControll
         }
         catch (TransformException e)
         {
-            reply.setStatus(e.getStatusCode().value());
+            reply.setStatus(e.getStatusCode());
             reply.setErrorDetails(messageWithCause("Failed at writing the transformed file", e));
 
             transformerDebug.logFailure(reply);

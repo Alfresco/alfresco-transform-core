@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -172,7 +173,7 @@ public class TransformController
     @ResponseBody
     public String ready(HttpServletRequest request)
     {
-        return probeTransform.doTransformOrNothing(request, false, this);
+        return probeTransform.doTransformOrNothing(request, false, transformHandler);
     }
 
     /**
@@ -182,7 +183,7 @@ public class TransformController
     @ResponseBody
     public String live(HttpServletRequest request)
     {
-        return probeTransform.doTransformOrNothing(request, true, this);
+        return probeTransform.doTransformOrNothing(request, true, transformHandler);
     }
 
     @GetMapping(value = ENDPOINT_TRANSFORM_CONFIG)
@@ -253,11 +254,8 @@ public class TransformController
         throws IOException
     {
         final String message = format("Request parameter ''{0}'' is missing", e.getParameterName());
-        final int statusCode = BAD_REQUEST.value();
-
         logger.error(message, e);
-        LogEntry.setStatusCodeAndMessage(statusCode, message);
-        response.sendError(statusCode, message);
+        response.sendError(BAD_REQUEST.value(), message);
     }
 
     @ExceptionHandler(TransformException.class)
@@ -265,12 +263,8 @@ public class TransformController
             throws IOException
     {
         final String message = e.getMessage();
-        final int statusCode = e.getStatusCode().value();
-
         logger.error(message);
-        long time = LogEntry.setStatusCodeAndMessage(statusCode, message);
-        probeTransform.recordTransformTime(time);
-        response.sendError(statusCode, message);
+        response.sendError(e.getStatus().value(), message);
 
         ModelAndView mav = new ModelAndView();
         mav.addObject("title", transformEngine.getTransformEngineName() + " Error Page");

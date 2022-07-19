@@ -116,7 +116,7 @@ public class QueueTransformService
         catch (TransformException e)
         {
             logger.error(e.getMessage(), e);
-            replyWithError(replyToDestinationQueue, HttpStatus.valueOf(e.getStatusCode().value()),
+            replyWithError(replyToDestinationQueue, HttpStatus.valueOf(e.getStatusCode()),
                 e.getMessage(), correlationId);
             return;
         }

@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 /**
  * Provides setter and getter methods to allow the current Thread to set various log properties and for these
@@ -148,14 +149,19 @@ public final class LogEntry
         currentLogEntry.get().options = options;
     }
 
-    public static long setStatusCodeAndMessage(int statusCode, String message)
+    public static long setStatusCodeAndMessage(HttpStatus status, String message)
     {
         LogEntry logEntry = currentLogEntry.get();
-        logEntry.statusCode = statusCode;
+        logEntry.statusCode = status.value();
         logEntry.message = message;
         logEntry.durationTransform = System.currentTimeMillis() - logEntry.start - logEntry.durationStreamIn;
 
         return logEntry.durationTransform;
+    }
+
+    public static long getTransformDuration()
+    {
+        return currentLogEntry.get().durationTransform;
     }
 
     public static void complete()

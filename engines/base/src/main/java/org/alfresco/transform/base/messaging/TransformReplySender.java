@@ -56,8 +56,7 @@ public class TransformReplySender
         send(destination, reply, reply.getRequestId());
     }
 
-    public void send(final Destination destination, final TransformReply reply,
-        final String correlationId)
+    public void send(final Destination destination, final TransformReply reply, final String correlationId)
     {
         try
         {
@@ -70,8 +69,7 @@ public class TransformReplySender
         }
         catch (Exception e)
         {
-            logger.error(
-                "Failed to send T-Reply " + reply + " - for correlation ID " + correlationId, e);
+            logger.error("Failed to send T-Reply " + reply + " - for correlation ID " + correlationId, e);
         }
     }
 }

@@ -25,22 +25,40 @@ import org.springframework.http.HttpStatus;
 
 public class TransformException extends RuntimeException
 {
-    private final HttpStatus statusCode;
+    private final HttpStatus status;
 
     public TransformException(HttpStatus statusCode, String message)
     {
         super(message);
-        this.statusCode = statusCode;
+        this.status = statusCode;
     }
 
-    public TransformException(HttpStatus statusCode, String message, Throwable cause)
+    public TransformException(HttpStatus status, String message, Throwable cause)
     {
         super(message, cause);
-        this.statusCode = statusCode;
+        this.status = status;
     }
 
-    public HttpStatus getStatusCode()
+    @Deprecated
+    public TransformException(int statusCode, String message)
     {
-        return statusCode;
+        this(HttpStatus.valueOf(statusCode), message);
+    }
+
+    @Deprecated
+    public TransformException(int statusCode, String message, Throwable cause)
+    {
+        this(HttpStatus.valueOf(statusCode), message, cause);
+    }
+
+    @Deprecated
+    public int getStatusCode()
+    {
+        return status.value();
+    }
+
+    public HttpStatus getStatus()
+    {
+        return status;
     }
 }

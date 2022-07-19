@@ -27,6 +27,7 @@
 package org.alfresco.transform.base;
 
 import org.alfresco.transform.base.fs.FileManager;
+import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -36,6 +37,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * Manages the input and output streams and any temporary files that have been created, which will need to be deleted.
+ */
 @Component
 public class TransformManagerImpl implements TransformManager
 {
@@ -43,13 +47,14 @@ public class TransformManagerImpl implements TransformManager
 
     private HttpServletRequest request;
     private InputStream inputStream;
-    private OutputStream outputStream;
+    private OutputStreamLengthRecorder outputStreamLengthRecorder;
     private String sourceMimetype;
     private String targetMimetype;
     private File sourceFile;
     private File targetFile;
     private boolean createSourceFileCalled;
     private boolean createTargetFileCalled;
+    private boolean sourceFileCreated;
     private boolean targetFileCreated;
 
     private TransformManagerImpl()
@@ -60,11 +65,12 @@ public class TransformManagerImpl implements TransformManager
     {
         request = null;
         inputStream = null;
-        outputStream = null;
+        outputStreamLengthRecorder = null;
         sourceFile = null;
         targetFile = null;
         createSourceFileCalled = false;
         createTargetFileCalled = false;
+        sourceFileCreated = false;
         targetFileCreated = false;
     }
 
@@ -73,14 +79,26 @@ public class TransformManagerImpl implements TransformManager
         this.request = request;
     }
 
-    public void setInputStream(InputStream inputStream)
+    public InputStream setInputStream(InputStream inputStream)
     {
         this.inputStream = inputStream;
+        return inputStream;
     }
 
-    public void setOutputStream(OutputStream outputStream)
+    public OutputStream getOutputStream()
     {
-        this.outputStream = outputStream;
+        return outputStreamLengthRecorder;
+    }
+
+    public OutputStream setOutputStream(OutputStream outputStream)
+    {
+        this.outputStreamLengthRecorder = new OutputStreamLengthRecorder(outputStream);
+        return outputStream;
+    }
+
+    public Long getOutputLength()
+    {
+        return outputStreamLengthRecorder.getLength();
     }
 
     public void setSourceMimetype(String sourceMimetype)
@@ -107,19 +125,21 @@ public class TransformManagerImpl implements TransformManager
         return targetFile;
     }
 
-    void setTargetFile(File targetFile)
+    File setTargetFile(File targetFile)
     {
         this.targetFile = targetFile;
+        return targetFile;
     }
 
-    public boolean isCreateSourceFileCalled()
+
+    public void setTargetFileCreated()
     {
-        return createSourceFileCalled;
+        targetFileCreated = true;
     }
 
-    public boolean isCreateTargetFileCalled()
+    public void setSourceFileCreated()
     {
-        return createTargetFileCalled;
+        sourceFileCreated = true;
     }
 
     @Override public File createSourceFile()
@@ -133,6 +153,7 @@ public class TransformManagerImpl implements TransformManager
         if (sourceFile == null)
         {
             sourceFile = FileManager.createSourceFile(request, inputStream, sourceMimetype);
+            sourceFileCreated = true;
         }
         return sourceFile;
     }
@@ -157,22 +178,22 @@ public class TransformManagerImpl implements TransformManager
     {
         if (targetFileCreated)
         {
-            FileManager.copyFileToOutputStream(targetFile, outputStream);
+            FileManager.copyFileToOutputStream(targetFile, outputStreamLengthRecorder);
         }
     }
 
-    public void deleteSourceFileIfExists()
+    public void deleteSourceFileIfCreated()
     {
-        if (sourceFile != null && sourceFile.delete() == false)
+        if (sourceFile != null && sourceFileCreated && !sourceFile.delete())
         {
             logger.error("Failed to delete temporary source file "+sourceFile.getPath());
         }
         sourceFile = null;
     }
 
-    public void deleteTargetFileIfExists()
+    public void deleteTargetFileIfCreated()
     {
-        if (targetFile != null && targetFile.delete() == false)
+        if (targetFile != null && targetFileCreated && !targetFile.delete())
         {
             logger.error("Failed to delete temporary target file "+targetFile.getPath());
         }
@@ -189,6 +210,7 @@ public class TransformManagerImpl implements TransformManager
                     " Fragments may only be sent with asynchronous requests. This a synchronous http request");
         }
 
+        // TODO send the current output as a TransformResponse and then start a new one.
         throw new UnsupportedOperationException("Not currently supported");
     }
 
@@ -224,15 +246,21 @@ public class TransformManagerImpl implements TransformManager
             return this;
         }
 
-        public Builder withOutputStream(OutputStream outputStream)
+        public Builder withOutputStream(OutputStreamLengthRecorder outputStream)
         {
-            transformManager.outputStream = outputStream;
+            transformManager.setOutputStream(outputStream);
             return this;
         }
 
         public Builder withRequest(HttpServletRequest request)
         {
             transformManager.request = request;
+            return this;
+        }
+
+        public Builder withSourceFile(File sourceFile)
+        {
+            transformManager.sourceFile = sourceFile;
             return this;
         }
 
