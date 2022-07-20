@@ -51,9 +51,9 @@ import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 /**
  * Provides test transformations and the logic used by k8 liveness and readiness probes.
  *
- * <p><b>K8s probes</b>: A readiness probe indicates if the pod should accept request. <b>It does not indicate that a pod is
- * ready after startup</b>. The liveness probe indicates when to kill the pod. <b>Both probes are called throughout the
- * lifetime of the pod</b> and a <b>liveness probes can take place before a readiness probe.</b> The k8s
+ * <p><b>K8s probes</b>: A readiness probe indicates if the pod should accept request. <b>It does not indicate that a
+ * pod is ready after startup</b>. The liveness probe indicates when to kill the pod. <b>Both probes are called
+ * throughout the lifetime of the pod</b> and a <b>liveness probes can take place before a readiness probe.</b> The k8s
  * <b>initialDelaySeconds field is not fully honoured</b> as it is multiplied by a random number, so is
  * actually a maximum initial delay in seconds, but could be 0. </p>
  *
@@ -81,7 +81,6 @@ public class ProbeTransform
 
     private static final int AVERAGE_OVER_TRANSFORMS = 5;
     private final String sourceFilename;
-    private final String targetFilename;
     private final String sourceMimetype;
     private final String targetMimetype;
     private final Map<String, String> transformOptions;
@@ -115,13 +114,11 @@ public class ProbeTransform
         return maxTime;
     }
 
-    public ProbeTransform(String sourceFilename, String targetFilename,
-        String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+    public ProbeTransform(String sourceFilename, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
         long expectedLength, long plusOrMinus, int livenessPercent, long maxTransforms, long maxTransformSeconds,
         long livenessTransformPeriodSeconds)
     {
         this.sourceFilename = sourceFilename;
-        this.targetFilename = targetFilename;
         this.sourceMimetype = sourceMimetype;
         this.targetMimetype = targetMimetype;
         this.transformOptions = new HashMap(transformOptions);
@@ -271,14 +268,14 @@ public class ProbeTransform
                 getMessagePrefix(isLiveProbe) + "Failed to store the source file", e);
         }
         long length = sourceFile.length();
-        LogEntry.setSource(sourceFilename, length);
+        LogEntry.setSource(sourceFile.getName(), length);
         return sourceFile;
     }
 
     private File getTargetFile()
     {
-        File targetFile = createTempFile("target_", "_" + targetFilename);
-        LogEntry.setTarget(targetFilename);
+        File targetFile = createTempFile("target_", "_" + sourceFilename);
+        LogEntry.setTarget(targetFile.getName());
         return targetFile;
     }
 

@@ -68,8 +68,7 @@ public class TikaTransformEngine implements TransformEngine
     @Override
     public ProbeTransform getProbeTransform()
     {
-        return new ProbeTransform("quick.pdf", "quick.txt",
-                MIMETYPE_PDF, MIMETYPE_TEXT_PLAIN, Collections.emptyMap(),
+        return new ProbeTransform("quick.pdf", MIMETYPE_PDF, MIMETYPE_TEXT_PLAIN, Collections.emptyMap(),
                 60, 16, 400, 10240, 60 * 30 + 1, 60 * 15 + 20);
     }
 }

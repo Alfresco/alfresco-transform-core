@@ -1,0 +1,19 @@
+{
+  "transformOptions": {
+    "helloOptions": [
+      {"value": {"name": "language"}},
+      {"value": {"name": "sourceEncoding"}}
+    ]
+  },
+  "transformers": [
+    {
+      "transformerName": "hello",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "text/plain", "targetMediaType": "text/plain" }
+      ],
+      "transformOptions": [
+        "helloOptions"
+      ]
+    }
+  ]
+}

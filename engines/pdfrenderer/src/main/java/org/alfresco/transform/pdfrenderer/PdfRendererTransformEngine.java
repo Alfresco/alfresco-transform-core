@@ -67,8 +67,7 @@ public class PdfRendererTransformEngine implements TransformEngine
     @Override
     public ProbeTransform getProbeTransform()
     {
-        return new ProbeTransform("quick.pdf", "quick.png",
-                MIMETYPE_PDF, MIMETYPE_IMAGE_PNG, Collections.emptyMap(),
+        return new ProbeTransform("quick.pdf", MIMETYPE_PDF, MIMETYPE_IMAGE_PNG, Collections.emptyMap(),
                 7455, 1024, 150, 10240, 60 * 20 + 1, 60 * 15 - 15);
     }
 }

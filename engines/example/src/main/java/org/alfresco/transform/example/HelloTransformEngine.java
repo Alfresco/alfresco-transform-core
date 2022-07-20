@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2022 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -24,8 +24,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.libreoffice;
+package org.alfresco.transform.example;
 
+import com.google.common.collect.ImmutableMap;
 import org.alfresco.transform.base.TransformEngine;
 import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.common.TransformConfigResourceReader;
@@ -33,14 +34,8 @@ import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-
-import static org.alfresco.transform.base.logging.StandardMessages.COMMUNITY_LICENCE;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
-
 @Component
-public class LibreOfficeTransformEngine implements TransformEngine
+public class HelloTransformEngine implements TransformEngine
 {
     @Autowired
     private TransformConfigResourceReader transformConfigResourceReader;
@@ -48,28 +43,26 @@ public class LibreOfficeTransformEngine implements TransformEngine
     @Override
     public String getTransformEngineName()
     {
-        return "0020-LibreOffice";
+        return "0200_hello";
     }
 
     @Override
     public String getStartupMessage()
     {
-        return COMMUNITY_LICENCE +
-                "This transformer uses LibreOffice from The Document Foundation. " +
-                "See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt";
+        return "Startup "+getTransformEngineName()+"\nNo 3rd party licenses";
     }
 
     @Override
     public TransformConfig getTransformConfig()
     {
-
-        return transformConfigResourceReader.read("classpath:libreoffice_engine_config.json");
+        return transformConfigResourceReader.read("classpath:hello_engine_config.json");
     }
 
     @Override
     public ProbeTransform getProbeTransform()
     {
-        return new ProbeTransform("quick.doc", MIMETYPE_WORD, MIMETYPE_PDF, Collections.emptyMap(),
-                11817, 1024, 150, 10240, 60 * 30 + 1, 60 * 15 + 20);
+        return new ProbeTransform("jane.txt", "text/plain", "text/plain",
+            ImmutableMap.of("sourceEncoding", "UTF-8", "language", "English"),
+            11, 10, 150, 1024, 1, 60 * 2);
     }
 }

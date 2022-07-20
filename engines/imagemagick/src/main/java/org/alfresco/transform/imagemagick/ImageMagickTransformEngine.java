@@ -68,8 +68,7 @@ public class ImageMagickTransformEngine implements TransformEngine
     @Override
     public ProbeTransform getProbeTransform()
     {
-        return new ProbeTransform("quick.jpg", "quick.png",
-                MIMETYPE_IMAGE_JPEG, MIMETYPE_IMAGE_PNG, Collections.emptyMap(),
+        return new ProbeTransform("quick.jpg", MIMETYPE_IMAGE_JPEG, MIMETYPE_IMAGE_PNG, Collections.emptyMap(),
                 35593, 1024, 150, 1024, 60 * 15 + 1, 60 * 15);
     }
 }

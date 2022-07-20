@@ -50,7 +50,9 @@ public interface TransformEngine
 
     /**
      * @return a definition of what the t-engine supports. Normally read from a json Resource on the classpath using a
-     * {@link TransformConfigResourceReader}.
+     * {@link TransformConfigResourceReader}. To combine to code from multiple t-engine into a single t-engine
+     * include all the TransformEngines and CustomTransform implementations, plus a wrapper TransformEngine for the
+     * others. The wrapper should return {@code null} from this method.
      */
     TransformConfig getTransformConfig();
 

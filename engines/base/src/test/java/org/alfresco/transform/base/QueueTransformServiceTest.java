@@ -46,11 +46,14 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -187,13 +190,13 @@ public class QueueTransformServiceTest
             .build();
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
-        doReturn(new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus())))
-            .when(transformHandler).handleMessageRequest(request, null, null);
+        doAnswer(invocation -> {transformReplySender.send(destination, reply); return null;})
+            .when(transformHandler).handleMessageRequest(request, null, destination);
 
         queueTransformService.receive(msg);
 
         verify(transformMessageConverter).fromMessage(msg);
-        verify(transformHandler).handleMessageRequest(request, null, null);
+        verify(transformHandler).handleMessageRequest(request, null, destination);
         verify(transformReplySender).send(destination, reply);
     }
 
@@ -228,13 +231,13 @@ public class QueueTransformServiceTest
             .build();
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
-        doReturn(new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus())))
-            .when(transformHandler).handleMessageRequest(request, null, null);
+        doAnswer(invocation -> {transformReplySender.send(destination, reply); return null;})
+            .when(transformHandler).handleMessageRequest(request, null, destination);
 
         queueTransformService.receive(msg);
 
         verify(transformMessageConverter).fromMessage(msg);
-        verify(transformHandler).handleMessageRequest(request, null, null);
+        verify(transformHandler).handleMessageRequest(request, null, destination);
         verify(transformReplySender).send(destination, reply);
     }
 }

@@ -46,7 +46,8 @@ import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 
 public class FakeTransformEngineWithTwoCustomTransformers extends AbstractFakeTransformEngine
 {
-    @Override public TransformConfig getTransformConfig()
+    @Override
+    public TransformConfig getTransformConfig()
     {
         String docOptions = "docOptions";
         String imageOptions = "imageOptions";
@@ -103,11 +104,11 @@ public class FakeTransformEngineWithTwoCustomTransformers extends AbstractFakeTr
             .build();
     }
 
-    @Override public ProbeTransform getProbeTransform()
+    @Override
+    public ProbeTransform getProbeTransform()
     {
-        return new ProbeTransform("quick.txt", "quick.pdf",
-            MIMETYPE_TEXT_PLAIN, MIMETYPE_PDF, ImmutableMap.of(SOURCE_ENCODING, "UTF-8"),
-            46, 0, 150, 1024, 1,
-            60 * 2);
+        return new ProbeTransform("quick.txt", MIMETYPE_TEXT_PLAIN, MIMETYPE_PDF,
+            ImmutableMap.of(SOURCE_ENCODING, "UTF-8"), 46, 0,
+            150, 1024, 1, 60 * 2);
     }
 }

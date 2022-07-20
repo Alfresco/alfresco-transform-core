@@ -1,233 +1,147 @@
-# Common code for Transform Engines
+# Common base code for T-Engines
 
-This project contains code that is common between all the ACS T-Engine transformers that run as Spring Boot process (optionally within their own
-Docker containers). It performs common actions such as logging, throttling requests and handling the streaming of content to and from the container.
+This project provides a common base for T-Engines and supersedes the
+[original base](https://github.com/Alfresco/alfresco-transform-core/blob/master/deprecated/alfresco-transformer-base). 
 
-For more details on build a custom T-Engine, please refer to the current docs in ACS Packaging, including:
+This project provides a base Spring Boot application (as a jar) to which transform
+specific code may be added. It includes actions such as communication between
+components and logging.
+
+For more details on build a custom T-Engine and T-Config, please refer to the docs in ACS Packaging, including:
 
 * [ATS Configuration](https://github.com/Alfresco/acs-packaging/blob/master/docs/custom-transforms-and-renditions.md#ats-configuration)
 * [Creating a T-Engine](https://github.com/Alfresco/acs-packaging/blob/master/docs/creating-a-t-engine.md)
 
 ## Overview
 
-A transformer project is expected to provide the following files:
+A T-Engine project which extends this base is expected to provide the following:
 
-~~~
-src/main/resources/templates/test.html
-src/main/java/org/alfresco/transformer/<TransformerName>Controller.java
-src/main/java/org/alfresco/transformer/Application.java
-~~~
+* An implementation of the [TransformEngine](https://github.com/Alfresco/alfresco-transform-core/blob/master/engines/base/src/main/java/org/alfresco/transform/base/TransformEngine.java)
+  interface to describe the T-Engine. 
+* Implementations of the [CustomTransformer](engines/base/src/main/java/org/alfresco/transform/base/CustomTransformer.java)
+  interface with the actual transform code. 
+ 
+The `TransformEngine` and `CustomTransformer` implementations should have an
+`@Component` annotation and be in or below the`org.alfresco.transform` package, so
+that they will be discovered by the base T-Engine.
 
-* test.html - A simple test page using [thymeleaf](http://www.thymeleaf.org) that gathers request
-  parameters, so they may be used to test the transformer.
+The `TransformEngine.getTransformConfig()` method typically reads a `json` file.
+The names in the config should match the names returned by the `CustomTransformer`
+implementations.
 
-~~~
-<html xmlns:th="http://www.thymeleaf.org">
-<body>
-  <div>
-    <h2>Test Transformation</h2>
-    <form method="POST" enctype="multipart/form-data" action="/transform">
-      <table>
-        <tr><td><div style="text-align:right">file *</div></td><td><input type="file" name="file" /></td></tr>
-        <tr><td><div style="text-align:right">file *</div></td><td><input type="file" name="file" /></td></tr>
-        <tr><td><div style="text-align:right">sourceExtension *</div></td><td><input type="text" name="sourceExtension" value="" /></td></tr>
-        <tr><td><div style="text-align:right">targetExtension *</div></td><td><input type="text" name="targetExtension" value="" /></td></tr>
-        <tr><td><div style="text-align:right">sourceMimetype *</div></td><td><input type="text" name="sourceMimetype" value="" /></td></tr>
-        <tr><td><div style="text-align:right">targetMimetype *</div></td><td><input type="text" name="targetMimetype" value="" /></td></tr>
-        <tr><td><div style="text-align:right">abc:width</div></td><td><input type="text" name="width" value="" /></td></tr>
-        <tr><td><div style="text-align:right">abc:height</div></td><td><input type="text" name="height" value="" /></td></tr>
-        <tr><td><div style="text-align:right">timeout</div></td><td><input type="text" name="timeout" value="" /></td></tr>
-        <tr><td></td><td><input type="submit" value="Transform" /></td></tr>
-	  </table>
-	</form>
-  </div>
-  <div>
-    <a href="/log">Log</a>
-  </div>
-</body>
-</html>
-~~~
 
-* *TransformerName*Controller.java - A [Spring Boot](https://projects.spring.io/spring-boot/) Controller that
-  extends TransformController to handel requests. It implements a few methods including *transformImpl*
-  which is intended to perform the actual transform. Generally the transform is done in a sub class of
-  *JavaExecutor*, when a Java library is being used or *AbstractCommandExecutor*, when an external process is used.
-  Both are sub interfaces of *Transformer*.
+**Example TransformEngine**
 
-~~~
-...
-@Controller
-public class TransformerNameController extends TransformController
+The `TransformEngineName` is important if the config from multiple T-Engines is being
+combined as they are sorted by name.
+```
+package org.alfresco.transform.example;
+
+import com.google.common.collect.ImmutableMap;
+import org.alfresco.transform.base.TransformEngine;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.common.TransformConfigResourceReader;
+import org.alfresco.transform.config.TransformConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class HelloTransformEngine implements TransformEngine
 {
-    private static final Logger logger = LoggerFactory.getLogger(TransformerNameController.class);
+    @Autowired
+    private TransformConfigResourceReader transformConfigResourceReader;
 
-    TransformerNameExecutor executor;
-
-    @PostConstruct
-    private void init()
+    @Override
+    public String getTransformEngineName()
     {
-        executor = new TransformerNameExecutor();
+        return "0200_hello";
     }
 
+    @Override
+    public String getStartupMessage()
+    {
+        return "Startup "+getTransformEngineName()+"\nNo 3rd party licenses";
+    }
+
+    @Override
+    public TransformConfig getTransformConfig()
+    {
+        return transformConfigResourceReader.read("classpath:hello_engine_config.json");
+    }
+
+    @Override
+    public ProbeTransform getProbeTransform()
+    {
+        return new ProbeTransform("jane.txt", "text/plain", "text/plain",
+            ImmutableMap.of("sourceEncoding", "UTF-8", "language", "English"),
+            11, 10, 150, 1024, 1, 60 * 2);
+    }
+}
+```
+
+**Example CustomTransformer**
+```
+package org.alfresco.transform.example;
+
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformManager;
+import org.springframework.stereotype.Component;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Map;
+
+@Component
+public class HelloTransformer implements CustomTransformer
+{
     @Override
     public String getTransformerName()
     {
-        return "Transformer Name";
+        return "hello";
     }
 
     @Override
-    public String version()
+    public void transform(String sourceMimetype, InputStream inputStream, String targetMimetype,
+            OutputStream outputStream, Map<String, String> transformOptions, TransformManager transformManager)
+            throws Exception
     {
-        return commandExecutor.version();
+        String name = new String(inputStream.readAllBytes(), transformOptions.get("sourceEncoding"));
+        String greeting = String.format(getGreeting(transformOptions.get("language")), name);
+        byte[] bytes = greeting.getBytes(transformOptions.get("sourceEncoding"));
+        outputStream.write(bytes, 0, bytes.length);
     }
 
-    @Override
-    public ProbeTestTransform getProbeTestTransform()
+    private String getGreeting(String language)
     {
-        // See the Javadoc on this method and Probes.md for the choice of these values.
-        return new ProbeTestTransform(this, "quick.pdf", "quick.png",
-            7455, 1024, 150, 10240, 60 * 20 + 1, 60 * 15 - 15)
-        {
-            @Override
-            protected void executeTransformCommand(File sourceFile, File targetFile)
-            {
-                transformImpl(null, null, null, Collections.emptyMap(), sourceFile, targetFile);
-            }
-        };
+        return "Hello %s";
     }
-
-    @Override
-    public void transformImpl(String transformName, String sourceMimetype, String targetMimetype,
-                                 Map<String, String> transformOptions, File sourceFile, File targetFile)
-    {
-        executor.transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
-    }
-}
-~~~
-
-* *TransformerName*Executer.java - *JavaExecutor* and *CommandExecutor* sub classes need to extract values from
-  *transformOptions* and use them in a call to an external process or as parameters to a library call.
-~~~
-...
-public class TransformerNameExecutor extends AbstractCommandExecutor
-{
-    ...
-    @Override
-    public void transform(String transformName, String sourceMimetype, String targetMimetype,
-                          Map<String, String> transformOptions,
-                          File sourceFile, File targetFile) throws TransformException
-    {
-        final String options = TransformerNameOptionsBuilder
-                .builder()
-                .withWidth(transformOptions.get(WIDTH_REQUEST_PARAM))
-                .withHeight(transformOptions.get(HEIGHT_REQUEST_PARAM))
-                .build();
-
-        Long timeout = stringToLong(transformOptions.get(TIMEOUT));
-
-        run(options, sourceFile, targetFile, timeout);
-    }
-}
-~~~
-
-* Application.java - [Spring Boot](https://projects.spring.io/spring-boot/) expects to find an Application in
- a project's source files. The following may be used:
-
-~~~
-package org.alfresco.transformer;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
-public class Application
-{
-    public static void main(String[] args)
-    {
-        SpringApplication.run(Application.class, args);
-    }
-}
-~~~
-
-Transform requests are handled by the *TransformController*, but are either:
- * POST requests (a direct http request from a client) where the transform options are passed as parameters, the source is supplied as a multipart file and
-   the response is a file download.
- * POST request (a request via a message queue) where the transform options are supplied as JSON and the response is also JSON.
-   The source and target content is read from a location accessible to both the client and the transfomer.
-
-**Example JSON request body**
-```javascript
-var transformRequest = {
-	"requestId": "1",
-	"sourceReference": "2f9ed237-c734-4366-8c8b-6001819169a4",
-	"sourceMediaType": "application/pdf",
-	"sourceSize": 123456,
-	"sourceExtension": "pdf",
-	"targetMediaType": "text/plain",
-	"targetExtension": "txt",
-	"clientType": "ACS",
-	"clientData": "Yo No Soy Marinero, Soy Capitan, Soy Capitan!",
-	"schema": 1,
-	"transformRequestOptions": {
-		"targetMimetype": "text/plain",
-		"targetEncoding": "UTF-8",
-		"abc:width": "120",
-		"abc:height": "200"
-	}
 }
 ```
 
-**Example JSON response body**
-
-```javascript
-var transformReply = {
-    "requestId": "1",
-    "status": 201,
-    "errorDetails": null,
-    "sourceReference": "2f9ed237-c734-4366-8c8b-6001819169a4",
-    "targetReference": "34d69ff0-7eaa-4741-8a9f-e1915e6995bf",
-    "clientType": "ACS",
-    "clientData": "Yo No Soy Marinero, Soy Capitan, Soy Capitan!",
-    "schema": 1
+**Example T-Config** `resources/hello_engine_config.json`
+```json
+{
+  "transformOptions": {
+    "helloOptions": [
+      {"value": {"name": "language"}},
+      {"value": {"name": "sourceEncoding"}}
+    ]
+  },
+  "transformers": [
+    {
+      "transformerName": "hello",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "text/plain", "targetMediaType": "text/plain" }
+      ],
+      "transformOptions": [
+        "helloOptions"
+      ]
+    }
+  ]
 }
 ```
 
-## Building and testing
-
-The project can be built by running the Maven command:
-
-~~~
-mvn clean install
-~~~
-
-## Artifacts
-
-The artifacts can be obtained by:
-
-* downloading from the [Alfresco repository](https://artifacts.alfresco.com/nexus/content/groups/public/)
-* Adding a Maven dependency to your pom file.
-
-~~~
-<dependency>
-  <groupId>org.alfresco</groupId>
-  <artifactId>alfresco-base-t-engine</artifactId>
-  <version>1.0</version>
-</dependency>
-~~~
-
-and the Alfresco Maven repository:
-
-~~~
-<repository>
-  <id>alfresco-maven-repo</id>
-  <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
-</repository>
-~~~
-
-The build plan is available in [TravisCI](https://travis-ci.com/Alfresco/alfresco-transform-core).
-
-## Contributing guide
-
-Please use [this guide](https://github.com/Alfresco/alfresco-repository/blob/master/CONTRIBUTING.md)
-to make a contribution to the project.
-
+**Example `ProbeTransform` test file** `jane.txt`
+```json
+Jane
+```

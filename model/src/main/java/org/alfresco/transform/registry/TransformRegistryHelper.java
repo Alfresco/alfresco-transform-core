@@ -87,9 +87,9 @@ class TransformRegistryHelper
             renditionName = null;
         }
 
-        final List<SupportedTransform> cachedTransformList =
-            renditionName == null ? null :
-            data.retrieveCached(renditionName, sourceMimetype);
+        final List<SupportedTransform> cachedTransformList = renditionName == null
+            ? null
+            : data.retrieveCached(renditionName, sourceMimetype);
         if (cachedTransformList != null)
         {
             return cachedTransformList;

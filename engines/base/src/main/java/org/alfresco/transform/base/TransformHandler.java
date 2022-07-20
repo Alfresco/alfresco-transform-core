@@ -74,6 +74,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 import static org.alfresco.transform.base.fs.FileManager.createTargetFile;
@@ -638,7 +639,10 @@ public class TransformHandler
                     sourceSizeInBytes, targetMimetype, transformOptions, null);
             if (transformerName == null)
             {
-                throw new TransformException(BAD_REQUEST, "No transforms were able to handle the request");
+                throw new TransformException(BAD_REQUEST, "No transforms were able to handle the request: "+
+                        sourceMimetype+" -> "+targetMimetype+transformOptions.entrySet().stream()
+                            .map(entry -> entry.getKey()+"="+entry.getValue())
+                            .collect(Collectors.joining(", ", " with ", "")));
             }
             return transformerName;
         }

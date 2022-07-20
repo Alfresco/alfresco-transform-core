@@ -50,6 +50,7 @@
                 <module>engines/pdfrenderer</module>
                 <module>engines/tika</module>
                 <module>engines/aio</module>
+                <module>engines/example</module>
                 <module>deprecated/alfresco-transformer-base</module>
             </modules>
         </profile>
@@ -58,6 +59,7 @@
             <modules>
                 <module>model</module>
                 <module>engines/base</module>
+                <module>engines/example</module>
                 <module>deprecated/alfresco-transformer-base</module>
             </modules>
         </profile>
@@ -108,6 +110,14 @@
                 <module>model</module>
                 <module>engines/base</module>
                 <module>engines/aio</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>example</id>
+            <modules>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/example</module>
             </modules>
         </profile>
     </profiles>
