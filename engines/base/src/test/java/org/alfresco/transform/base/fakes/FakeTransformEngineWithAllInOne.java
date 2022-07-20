@@ -24,8 +24,25 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.base.components;
+package org.alfresco.transform.base.fakes;
 
-public class TestTransformerTxT2Pdf extends AbstractTestTransformer
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.config.TransformConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+
+public class FakeTransformEngineWithAllInOne extends AbstractFakeTransformEngine
 {
+    @Autowired
+    private FakeTransformEngineWithTwoCustomTransformers oneOfTheTransformEngines;
+
+    @Override public TransformConfig getTransformConfig()
+    {
+        // Has no config of its own. The combined config of the others is returned from the t-engine.
+        return null;
+    }
+
+    @Override public ProbeTransform getProbeTransform()
+    {
+        return oneOfTheTransformEngines.getProbeTransform();
+    }
 }

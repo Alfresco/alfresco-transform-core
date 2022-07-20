@@ -24,14 +24,13 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.base.components;
+package org.alfresco.transform.base.fakes;
 
 import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.TransformManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -44,7 +43,7 @@ import java.util.stream.Collectors;
  * to the output. The output is always a String regardless of the stated mimetypes.
  */
 @TestComponent
-public abstract class AbstractTestTransformer implements CustomTransformer
+public abstract class AbstractFakeTransformer implements CustomTransformer
 {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 

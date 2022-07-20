@@ -24,8 +24,27 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.base.components;
+package org.alfresco.transform.base.fakes;
 
-public class TestTransformerPdf2Png extends AbstractTestTransformer
+import org.alfresco.transform.base.TransformEngine;
+import org.springframework.boot.test.context.TestComponent;
+
+/**
+ * Subclass MUST be named FakeTransformEngineWith\<something>.
+ */
+@TestComponent
+public abstract class AbstractFakeTransformEngine implements TransformEngine
 {
+    @Override public String getTransformEngineName()
+    {
+        String simpleClassName = getClass().getSimpleName();
+        return simpleClassName.substring("FakeTransformEngineWith".length());
+    }
+
+    @Override public String getStartupMessage()
+    {
+        return "Startup "+getTransformEngineName()+
+                "\nLine 2 "+getTransformEngineName()+
+                "\nLine 3";
+    }
 }

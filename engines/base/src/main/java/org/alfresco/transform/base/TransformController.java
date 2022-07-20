@@ -57,6 +57,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,11 +115,19 @@ public class TransformController
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
         if (transformEngines != null)
         {
-            Arrays.stream(transformEngine.getStartupMessage().split("\\n")).forEach(logger::info);
+            logSplitMessage(transformEngine.getStartupMessage());
+            transformEngines.stream()
+                            .filter(te -> te != transformEngine)
+                            .sorted(Comparator.comparing(TransformEngine::getTransformEngineName))
+                            .forEach(te -> logSplitMessage(te.getStartupMessage()));
         }
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-
         logger.info("Starting application components... Done");
+    }
+
+    private void logSplitMessage(String message)
+    {
+        Arrays.stream(message.split("\\n")).forEach(logger::info);
     }
 
     /**

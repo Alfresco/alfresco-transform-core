@@ -46,7 +46,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.alfresco.transform.base.fs.FileManager.TempFileProvider.createTempFile;
 import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
 /**
