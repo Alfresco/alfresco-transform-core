@@ -1,16 +1,16 @@
 ## T-Engine configuration
 
 T-Engines provide a */transform/config* end point for clients (e.g. Transform-Router or 
-Alfresco-Repository) that indicate what is supported. T-Engines store this 
+Repository) that indicate what is supported. T-Engines store this 
 configuration as a JSON resource file named *engine_config.json*.
 
-The config can be found under `alfresco-transform-core\<t-engine-name>\src\main\resources
-\engine_config.json`; current configuration files are:
-* [Pdf-Renderer T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-docker-alfresco-pdf-renderer/src/main/resources/engine_config.json).
-* [ImageMagick T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-docker-imagemagick/src/main/resources/engine_config.json).
-* [Libreoffice T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-docker-libreoffice/src/main/resources/engine_config.json).
-* [Tika T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-docker-tika/src/main/resources/engine_config.json).
-* [Misc T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/alfresco-docker-transform-misc/src/main/resources/engine_config.json).
+The config can be found under `alfresco-transform-core/engines/<t-engine-name>/src/main/resources
+/<t-engine-name>_engine_config.json`; current configuration files are:
+* [Pdf-Renderer T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/engines/pdfrenderer/src/main/resources/pdfrenderer_engine_config.json).
+* [ImageMagick T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/engines/imagemagick/src/main/resources/imagemagick_engine_config.json).
+* [Libreoffice T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/engines/libreoffice/src/main/resources/libreoffice_engine_config.json).
+* [Tika T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/engines/tika/src/main/resources/tika_engine_config.json).
+* [Misc T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/engines/misc/src/main/resources/misc_engine_config.json).
 
 *Snippet from Tika T-engine configuration:*
 ```json
@@ -64,9 +64,7 @@ The config can be found under `alfresco-transform-core\<t-engine-name>\src\main\
   T-Engines. In this example there are two groups of options called **tikaOptions**
   and **pdfboxOptions** which has a group of options **targetEncoding** and
   **notExtractBookmarksText**. Unless an option has a **"required": true** field it is
-  considered to be optional. You don't need to specify *sourceMimetype*,
-  *targetMimetype*, *sourceExtension* or *targetExtension* as options as 
-  these are automatically added.
+  considered to be optional.
   
   *Snippet from ImageMagick T-engine configuration:*
 ```json
@@ -92,11 +90,6 @@ The config can be found under `alfresco-transform-core\<t-engine-name>\src\main\
    characteristic. In the above snippet all the options for crop are defined under a group, it is recommended to
    use this approach as it is easier to read. A transformOptionsGroup can contain one or more transformOptionsValue 
    and transformOptionsGroup. 
-  
-  **Limitations**:
-  * For a transformOptions to be referenced in a different T-engine, another transformer
-  with the complete definition of the transformOptions needs to return the config to the client.
-  * In a transformOptions definition it is not allowed to use a reference to another tranformOption.
   
 ### Transformers
 * **transformers** - A list of transformer definitions.

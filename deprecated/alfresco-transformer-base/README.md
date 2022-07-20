@@ -1,7 +1,11 @@
-# Common code for Transform Engines
+# Common code for Transform Engines (Deprecated)
 
-This project contains code that is common between all the ACS T-Engine transformers that run as Spring Boot process (optionally within their own
-Docker containers). It performs common actions such as logging, throttling requests and handling the streaming of content to and from the container.
+This project holds the original code that was common to all ACS T-Engine transformers. Although
+it is still possible to create T-Engines this way, the newer `engine/base` project provides a
+simpler way to do it.
+
+This project provides a base Spring Boot process (optionally within their own Docker containers).
+It performs common actions such as logging, throttling requests and handling the streaming of content to and from the container.
 
 For more details on build a custom T-Engine, please refer to the current docs in ACS Packaging, including:
 

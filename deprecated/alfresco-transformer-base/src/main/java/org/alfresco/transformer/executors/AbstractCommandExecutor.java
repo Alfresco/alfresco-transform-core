@@ -60,7 +60,7 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
 
         if (!targetFile.exists() || targetFile.length() == 0)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR, Transformer failed to create an output file");
+            throw new TransformException(INTERNAL_SERVER_ERROR, "Transformer failed to create an output file");
         }
     }
 
