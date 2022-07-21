@@ -168,8 +168,7 @@ public class ProbeTransform
     }
 
     // We don't want to be doing test transforms every few seconds, but do want frequent live probes.
-    public String doTransformOrNothing(HttpServletRequest request, boolean isLiveProbe,
-        TransformHandler transformHandler)
+    public String doTransformOrNothing(HttpServletRequest request, boolean isLiveProbe, TransformHandler transformHandler)
     {
         // If not initialised OR it is a live probe and we are scheduled to to do a test transform.
         probeCount++;

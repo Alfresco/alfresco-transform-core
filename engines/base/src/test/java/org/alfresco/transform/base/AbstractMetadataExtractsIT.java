@@ -51,9 +51,9 @@ import org.springframework.http.ResponseEntity;
  * <p>
  * <ul>
  * <li>A method providing a 
- * Stream of test files: {@code public static Stream<TestFileInfo> engineTransformations()}; </li>
+ * Stream of test files: {@code public static Stream<FileInfo> engineTransformations()}; </li>
  * <li> Provide expected json files (&lt;sourceFilename>"_metadata.json") as resources on the classpath.</li>
- * <li> Override the method {@code testTransformation(TestFileInfo testFileInfo)} such that it calls 
+ * <li> Override the method {@code testTransformation(FileInfo testFileInfo)} such that it calls
  * the super method as a {@code @ParameterizedTest} for example:</li> </ul>
  * <pre>
  * &#64;ParameterizedTest
@@ -62,10 +62,10 @@ import org.springframework.http.ResponseEntity;
  * 
  * &#64;Override
 
- * public void testTransformation(TestFileInfo testFileInfo)
+ * public void testTransformation(FileInfo testFileInfo)
  * 
  * { 
- *      super.testTransformation(TestFileInfo testFileInfo)
+ *      super.testTransformation(FileInfo testFileInfo)
  * }
  * </pre> 
  *
@@ -82,10 +82,10 @@ public abstract class AbstractMetadataExtractsIT
     private final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
     
-    public void testTransformation(TestFileInfo testFileInfo)
+    public void testTransformation(FileInfo fileInfo)
     {
-        final String sourceMimetype = testFileInfo.getMimeType();
-        final String sourceFile = testFileInfo.getPath();
+        final String sourceMimetype = fileInfo.getMimeType();
+        final String sourceFile = fileInfo.getPath();
 
         final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
                 sourceFile, sourceMimetype, targetMimetype, targetExtension);

@@ -262,15 +262,6 @@ public class TikaTest extends AbstractBaseTest
     HttpServletRequest httpServletRequest;
 
     @Test
-    public void testImmutableEmptyMap()
-    {
-        // See ACS-373
-        ProbeTransform probeTransform = getProbeTestTransform();
-        ReflectionTestUtils.setField(probeTransform, "livenessTransformEnabled", true);
-        probeTransform.doTransformOrNothing(httpServletRequest, true, transformHandler);
-    }
-
-    @Test
     @Override
     public void simpleTransformTest() throws Exception
     {
@@ -318,14 +309,6 @@ public class TikaTest extends AbstractBaseTest
     {
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         super.blankSourceFilenameTest();
-    }
-
-    @Test
-    @Override
-    public void noTargetExtensionTest() throws Exception
-    {
-        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
-        super.noTargetExtensionTest();
     }
 
     @Test

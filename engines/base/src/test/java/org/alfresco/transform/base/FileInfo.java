@@ -29,14 +29,14 @@ package org.alfresco.transform.base;
 /**
  * @author Cezar Leahu
  */
-public class TestFileInfo
+public class FileInfo
 {
     private final String mimeType;
     private final String extension;
     private final String path;
     private final boolean exactMimeType;
 
-    public TestFileInfo(final String mimeType, final String extension, final String path,
+    public FileInfo(final String mimeType, final String extension, final String path,
         final boolean exactMimeType)
     {
         this.mimeType = mimeType;
@@ -65,16 +65,16 @@ public class TestFileInfo
         return exactMimeType;
     }
 
-    public static TestFileInfo testFile(final String mimeType, final String extension,
+    public static FileInfo testFile(final String mimeType, final String extension,
         final String path, final boolean exactMimeType)
     {
-        return new TestFileInfo(mimeType, extension, path, exactMimeType);
+        return new FileInfo(mimeType, extension, path, exactMimeType);
     }
 
-    public static TestFileInfo testFile(final String mimeType, final String extension,
+    public static FileInfo testFile(final String mimeType, final String extension,
         final String path)
     {
-        return new TestFileInfo(mimeType, extension, path, false);
+        return new FileInfo(mimeType, extension, path, false);
     }
 
     @Override

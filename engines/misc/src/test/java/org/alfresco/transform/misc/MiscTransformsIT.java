@@ -55,7 +55,7 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_XML;
 import static org.alfresco.transform.base.EngineClient.sendTRequest;
-import static org.alfresco.transform.base.TestFileInfo.testFile;
+import static org.alfresco.transform.base.FileInfo.testFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;
@@ -63,8 +63,8 @@ import static org.springframework.http.HttpStatus.OK;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.alfresco.transform.base.FileInfo;
 import org.alfresco.transform.base.SourceTarget;
-import org.alfresco.transform.base.TestFileInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
@@ -80,7 +80,7 @@ public class MiscTransformsIT
     private static final Logger logger = LoggerFactory.getLogger(MiscTransformsIT.class);
     private static final String ENGINE_URL = "http://localhost:8090";
 
-    private static final Map<String, TestFileInfo> TEST_FILES = Stream.of(
+    private static final Map<String, FileInfo> TEST_FILES = Stream.of(
         testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"),
         testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quick.jpg"),
         testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"),
@@ -116,7 +116,7 @@ public class MiscTransformsIT
         testFile(MIMETYPE_IWORK_NUMBERS, "number", "quick.numbers"),
         testFile(MIMETYPE_IWORK_PAGES, "pages", "quick.pages"),
         testFile(MIMETYPE_RFC822, "eml", "quick.eml")
-    ).collect(toMap(TestFileInfo::getMimeType, identity()));
+    ).collect(toMap(FileInfo::getMimeType, identity()));
    
     public static Stream<SourceTarget> engineTransformations()
     {

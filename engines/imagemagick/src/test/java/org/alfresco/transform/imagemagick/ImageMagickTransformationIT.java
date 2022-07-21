@@ -31,7 +31,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.alfresco.transform.base.EngineClient.sendTRequest;
-import static org.alfresco.transform.base.TestFileInfo.testFile;
+import static org.alfresco.transform.base.FileInfo.testFile;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_APPLICATION_EPS;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_BMP;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_CGM;
@@ -76,7 +76,7 @@ import java.util.stream.Stream;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import org.alfresco.transform.base.TestFileInfo;
+import org.alfresco.transform.base.FileInfo;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -164,7 +164,7 @@ public class ImageMagickTransformationIT {
             .add(Pair.of("xwd", MIMETYPE_IMAGE_XWD))
             .build();
 
-    private static final Map<String, TestFileInfo> TEST_FILES = Stream.of(
+    private static final Map<String, FileInfo> TEST_FILES = Stream.of(
             testFile(MIMETYPE_IMAGE_BMP, "bmp", "quick.bmp"), 
             testFile(MIMETYPE_APPLICATION_EPS, "eps", "quick.eps"),
             testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"), 
@@ -179,9 +179,9 @@ public class ImageMagickTransformationIT {
             testFile(MIMETYPE_IMAGE_PSD, "psd", "quick.psd"),
             testFile(MIMETYPE_IMAGE_TIFF, "tiff", "quick.tiff"), 
             testFile(MIMETYPE_IMAGE_XWD, "xwd", "quick.xwd")
-        ).collect(toMap(TestFileInfo::getPath, identity()));
+        ).collect(toMap(FileInfo::getPath, identity()));
 
-    public static Stream<Pair<TestFileInfo, Pair<String,String>>> engineTransformations() {
+    public static Stream<Pair<FileInfo, Pair<String,String>>> engineTransformations() {
         return Stream
             .of(
                 allTargets("quick.bmp", targetExtensions), 
@@ -203,7 +203,7 @@ public class ImageMagickTransformationIT {
 
     @ParameterizedTest
     @MethodSource("engineTransformations")
-    public void testTransformation(Pair<TestFileInfo, Pair<String, String>> entry)
+    public void testTransformation(Pair<FileInfo, Pair<String, String>> entry)
     {
         String sourceFile = entry.getLeft().getPath();
         String targetExtension = entry.getRight().getLeft();
@@ -232,7 +232,7 @@ public class ImageMagickTransformationIT {
         }
     }
 
-    private static Stream<Pair<TestFileInfo, Pair<String,String>>> allTargets(final String sourceFile, List<Pair<String,String>> targetExtensionsList)
+    private static Stream<Pair<FileInfo, Pair<String,String>>> allTargets(final String sourceFile, List<Pair<String,String>> targetExtensionsList)
     {
         return targetExtensionsList
             .stream()

@@ -30,7 +30,7 @@ import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.alfresco.transform.base.EngineClient.sendTRequest;
-import static org.alfresco.transform.base.TestFileInfo.testFile;
+import static org.alfresco.transform.base.FileInfo.testFile;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_EXCEL;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_SVG;
@@ -71,7 +71,7 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.alfresco.transform.base.TestFileInfo;
+import org.alfresco.transform.base.FileInfo;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -87,7 +87,7 @@ public class LibreOfficeTransformationIT
 {
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeTransformationIT.class);
     private static final String ENGINE_URL = "http://localhost:8090";
-    private static final Set<TestFileInfo> spreadsheetTargets = ImmutableSet.of(
+    private static final Set<FileInfo> spreadsheetTargets = ImmutableSet.of(
         testFile(MIMETYPE_TEXT_CSV, "csv",null),
         testFile(MIMETYPE_HTML,"html",null),
         testFile(MIMETYPE_OPENDOCUMENT_SPREADSHEET,"ods",null),
@@ -96,7 +96,7 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_EXCEL,"xls",null)
     );
 
-    private static final Set<TestFileInfo> documentsTargets = ImmutableSet.of(
+    private static final Set<FileInfo> documentsTargets = ImmutableSet.of(
         testFile(MIMETYPE_WORD,"doc",null),
         testFile(MIMETYPE_HTML,"html",null),
         testFile(MIMETYPE_OPENDOCUMENT_TEXT,"odt",null),
@@ -104,27 +104,27 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_RTF,"rtf",null)
     );
 
-    private static final Set<TestFileInfo> graphicTargets = ImmutableSet.of(
+    private static final Set<FileInfo> graphicTargets = ImmutableSet.of(
         testFile(MIMETYPE_PDF,"pdf",null),
         testFile(MIMETYPE_IMAGE_SVG,"svg",null)
     );
 
-    private static final Set<TestFileInfo> presentationTargets = ImmutableSet.of(
+    private static final Set<FileInfo> presentationTargets = ImmutableSet.of(
         testFile(MIMETYPE_HTML,"html",null),
         testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION,"odp",null),
         testFile(MIMETYPE_PPT,"ppt",null),
         testFile(MIMETYPE_PDF,"pdf",null)
     );
 
-    private static final Set<TestFileInfo> pdfTarget = ImmutableSet.of(
+    private static final Set<FileInfo> pdfTarget = ImmutableSet.of(
         testFile(MIMETYPE_PDF,"pdf",null)
     );
 
-    private static final Set<TestFileInfo> txtTarget = ImmutableSet.of(
+    private static final Set<FileInfo> txtTarget = ImmutableSet.of(
             testFile(MIMETYPE_TEXT_PLAIN,"txt",null)
     );
 
-    private static final Map<String,TestFileInfo> TEST_FILES = Stream.of(
+    private static final Map<String, FileInfo> TEST_FILES = Stream.of(
         testFile(MIMETYPE_WORD                                 ,"doc"  ,"quick.doc"),
         testFile(MIMETYPE_OPENXML_WORDPROCESSING               ,"docx" ,"quick.docx"),
         testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS                ,"odg"  ,"quick.odg"),
@@ -153,9 +153,9 @@ public class LibreOfficeTransformationIT
         testFile(MIMETYPE_SXC                                  ,"sxc" ,"quick.sxc"),
         testFile(MIMETYPE_SXI                                  ,"sxi" ,"quick.sxi"),
         testFile(MIMETYPE_TSV                                  ,"tsv"  ,"sample.tsv")
-    ).collect(toMap(TestFileInfo::getPath, identity()));
+    ).collect(toMap(FileInfo::getPath, identity()));
 
-    public static Stream<Pair<TestFileInfo, TestFileInfo>> engineTransformations()
+    public static Stream<Pair<FileInfo, FileInfo>> engineTransformations()
     {
         return Stream
             .of(
@@ -198,7 +198,7 @@ public class LibreOfficeTransformationIT
 
     @ParameterizedTest
     @MethodSource("engineTransformations")
-    public void testTransformation(final Pair<TestFileInfo, TestFileInfo> entry)
+    public void testTransformation(final Pair<FileInfo, FileInfo> entry)
     {
         final String sourceFile = entry.getLeft().getPath();
         final String targetExtension = entry.getRight().getExtension();
@@ -218,8 +218,8 @@ public class LibreOfficeTransformationIT
         }
     }
 
-    private static Stream<Pair<TestFileInfo, TestFileInfo>> allTargets(final String sourceFile,
-        final Set<TestFileInfo> mimetypes)
+    private static Stream<Pair<FileInfo, FileInfo>> allTargets(final String sourceFile,
+        final Set<FileInfo> mimetypes)
     {
         return mimetypes
             .stream()

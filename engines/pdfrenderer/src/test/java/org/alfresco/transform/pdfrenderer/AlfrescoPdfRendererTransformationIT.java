@@ -30,7 +30,7 @@ import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.alfresco.transform.base.EngineClient.sendTRequest;
-import static org.alfresco.transform.base.TestFileInfo.testFile;
+import static org.alfresco.transform.base.FileInfo.testFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;
@@ -38,7 +38,7 @@ import static org.springframework.http.HttpStatus.OK;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.alfresco.transform.base.TestFileInfo;
+import org.alfresco.transform.base.FileInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
@@ -55,11 +55,11 @@ public class AlfrescoPdfRendererTransformationIT
         AlfrescoPdfRendererTransformationIT.class);
     private static final String ENGINE_URL = "http://localhost:8090";
 
-    private static final Map<String, TestFileInfo> TEST_FILES = Stream.of(
+    private static final Map<String, FileInfo> TEST_FILES = Stream.of(
         testFile("application/pdf","pdf","quick.pdf"),
         testFile("application/illustrator","ai","quickCS3.ai")  ,      
         testFile("application/illustrator","ai","quickCS5.ai")
-    ).collect(toMap(TestFileInfo::getPath, identity()));
+    ).collect(toMap(FileInfo::getPath, identity()));
 
     public static Stream<String> engineTransformations()
     {
