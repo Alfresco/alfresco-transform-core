@@ -39,8 +39,6 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
  * @author David Edwards
  * created on 21/04/2020
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                properties = {"activemq.url=nio://localhost:61616"})
 public class AIOQueueTransformServiceIT extends AbstractQueueTransformServiceIT
 {
     @Override

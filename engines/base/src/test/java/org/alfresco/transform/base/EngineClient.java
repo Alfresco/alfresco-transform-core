@@ -33,8 +33,7 @@ public class EngineClient
         final String engineUrl, final String sourceFile,
         final String sourceMimetype, final String targetMimetype, final String targetExtension)
     {
-        return sendTRequest(engineUrl, sourceFile, sourceMimetype, targetMimetype, targetExtension,
-            emptyMap());
+        return sendTRequest(engineUrl, sourceFile, sourceMimetype, targetMimetype, targetExtension, emptyMap());
     }
 
     public static ResponseEntity<Resource> sendTRequest(

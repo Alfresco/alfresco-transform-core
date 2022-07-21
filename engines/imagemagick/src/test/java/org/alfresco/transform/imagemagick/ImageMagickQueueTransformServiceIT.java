@@ -39,8 +39,6 @@ import org.springframework.boot.test.context.SpringBootTest;
  * @author Lucian Tuca
  * created on 15/01/2019
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                properties = {"activemq.url=nio://localhost:61616"})
 public class ImageMagickQueueTransformServiceIT extends AbstractQueueTransformServiceIT
 {
     @Override

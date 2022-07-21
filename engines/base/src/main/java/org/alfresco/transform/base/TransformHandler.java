@@ -123,7 +123,7 @@ public class TransformHandler
     private Map<String, CustomTransformer> customTransformersByName = new HashMap<>();
 
     @PostConstruct
-    public void init()
+    private void init()
     {
         initTransformEngine();
         initProbeTestTransform();
@@ -312,7 +312,7 @@ public class TransformHandler
                 @Override
                 protected InputStream getInputStream(TransformManagerImpl transformManager)
                 {
-                    return getInputStreamFromHttp(requestParameters, sourceMultipartFile, transformManager);
+                    return getInputStreamForHandleHttpRequest(requestParameters, sourceMultipartFile, transformManager);
                 }
 
                 @Override
@@ -348,13 +348,13 @@ public class TransformHandler
                 transformManager.setSourceFile(sourceFile);
                 transformManager.setTargetFile(targetFile);
                 transformManager.setSourceFileCreated();
-                // we don't want to delete the target file.
+                // We don't want to delete the target file, so don't call setTargetFileCreated()
             }
 
             @Override
             protected InputStream getInputStream(TransformManagerImpl transformManager)
             {
-                return getInputStreamFromProb(sourceFile, transformManager);
+                return getInputStreamForHandleProbRequest(sourceFile, transformManager);
             }
 
             @Override
@@ -389,7 +389,7 @@ public class TransformHandler
             @Override
             protected InputStream getInputStream(TransformManagerImpl transformManager)
             {
-                return getInputStreamFromMessage(request, transformManager);
+                return getInputStreamForHandleMessageRequest(request, transformManager);
             }
 
             @Override
@@ -538,8 +538,8 @@ public class TransformHandler
         }
     }
 
-    private InputStream getInputStreamFromHttp(Map<String, String> requestParameters, MultipartFile sourceMultipartFile,
-        TransformManagerImpl transformManager)
+    private InputStream getInputStreamForHandleHttpRequest(Map<String, String> requestParameters,
+        MultipartFile sourceMultipartFile, TransformManagerImpl transformManager)
     {
         final String directUrl = requestParameters.getOrDefault(DIRECT_ACCESS_URL, "");
         return transformManager.setInputStream(new BufferedInputStream(directUrl.isBlank() ?
@@ -547,7 +547,7 @@ public class TransformHandler
             getDirectAccessUrlInputStream(directUrl)));
     }
 
-    private InputStream getInputStreamFromProb(File sourceFile, TransformManagerImpl transformManager)
+    private InputStream getInputStreamForHandleProbRequest(File sourceFile, TransformManagerImpl transformManager)
     {
         try
         {
@@ -559,7 +559,8 @@ public class TransformHandler
         }
     }
 
-    private InputStream getInputStreamFromMessage(TransformRequest request, TransformManagerImpl transformManager)
+    private InputStream getInputStreamForHandleMessageRequest(TransformRequest request,
+        TransformManagerImpl transformManager)
     {
         final String directUrl = request.getTransformRequestOptions().getOrDefault(DIRECT_ACCESS_URL, "");
         try

@@ -91,7 +91,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     FakeTransformerPdf2Png.class,
     FakeTransformEngineWithOneCustomTransformer.class,
     FakeTransformerPdf2Jpg.class})
-public class AllInOneTransformControllerTest
+public class TransformControllerAllInOneTest
 {
     @Autowired
     private MockMvc mockMvc;

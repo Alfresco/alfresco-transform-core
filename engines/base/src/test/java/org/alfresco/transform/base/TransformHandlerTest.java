@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2022 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -24,26 +24,16 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.pdfrenderer;
+package org.alfresco.transform.base;
 
-import org.alfresco.transform.base.AbstractHttpRequestTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MockMvc;
 
-/**
- * Tests PdfRenderer using http and a server test harness.
- */
-public class AlfrescoPdfRendererHttpRequestTest extends AbstractHttpRequestTest
+public class TransformHandlerTest
 {
-    @Override
-    protected String getTransformerName()
-    {
-        return "0040-PdfRenderer";
-    }
+    @Autowired
+    private MockMvc mockMvc;
 
-    @Override
-    protected String getSourceExtension()
-    {
-        return "pdf";
-    }
+    @Autowired
+    private TransformHandler transformHandler;
 }

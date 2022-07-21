@@ -85,7 +85,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Testing base t-engine TransformController functionality.
  *
- * Also see {@link AllInOneTransformControllerTest}.
+ * Also see {@link TransformControllerAllInOneTest}.
  */
 @AutoConfigureMockMvc
 @SpringBootTest(classes={org.alfresco.transform.base.Application.class})

@@ -26,41 +26,34 @@
  */
 package org.alfresco.transform.tika;
 
-import static java.text.MessageFormat.format;
-import static java.util.function.Function.identity;
-import static org.alfresco.transform.base.EngineClient.sendTRequest;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.springframework.http.HttpStatus.OK;
-
-import java.util.Map;
-import java.util.stream.Stream;
-
 import com.google.common.collect.ImmutableMap;
-
 import org.alfresco.transform.base.EngineClient;
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static java.text.MessageFormat.format;
+import static java.util.function.Function.identity;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.springframework.http.HttpStatus.OK;
 
 /**
  * @author Cezar Leahu
  */
 public class TikaTransformationIT
 {
-    private static final Logger logger = LoggerFactory.getLogger(TikaTransformationIT.class);
     private static final String ENGINE_URL = "http://localhost:8090";
     private static final Map<String, String> extensionMimetype = ImmutableMap.of(
         "html", "text/html",
         "txt", "text/plain",
         "xhtml", "application/xhtml+xml",
         "xml", "text/xml");
-
-    
 
     @ParameterizedTest
     @MethodSource("engineTransformations")
@@ -77,9 +70,8 @@ public class TikaTransformationIT
         }
         else
         {
-            targetMimetype = extensionMimetype.get(entry.getMiddle());
+            targetMimetype = extensionMimetype.get(targetExtension);
         }
-        
 
         final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
             sourceFile, sourceMimetype, targetMimetype, targetExtension);

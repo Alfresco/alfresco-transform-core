@@ -35,8 +35,6 @@ import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.base.AbstractQueueTransformServiceIT;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                properties = {"activemq.url=nio://localhost:61616"})
 public class MiscQueueTransformServiceIT extends AbstractQueueTransformServiceIT
 {
     @Override
