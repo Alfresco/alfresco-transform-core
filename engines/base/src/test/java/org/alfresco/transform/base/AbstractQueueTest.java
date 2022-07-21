@@ -45,13 +45,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.core.JmsTemplate;
 
 /**
+ * Checks that a t-engine can respond to its message queue. This is really just checking that
+ * ${queue.engineRequestQueue} has been configured. The transform request can (and does fail).
+ *
  * @author Lucian Tuca
  * created on 15/01/2019
  */
 @SpringBootTest(classes={org.alfresco.transform.base.Application.class},
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {"activemq.url=nio://localhost:61616"})
-public abstract class AbstractQueueTransformServiceIT
+public abstract class AbstractQueueTest
 {
     @Autowired
     private Queue engineRequestQueue;
@@ -79,7 +82,6 @@ public abstract class AbstractQueueTransformServiceIT
                 "transformerName",
                 request.getSourceMediaType(),
                 request.getTargetMediaType()));
-//        TransformStack.setReference(request.getInternalContext(), reference);
 
         jmsTemplate.convertAndSend(engineRequestQueue, request, m -> {
             m.setJMSCorrelationID(request.getRequestId());
@@ -89,6 +91,9 @@ public abstract class AbstractQueueTransformServiceIT
 
         this.jmsTemplate.setReceiveTimeout(1_000);
         TransformReply reply = (TransformReply) this.jmsTemplate.receiveAndConvert(testingQueue);
+
+        // The transform may fail (for example the SFS is unavailable), but we check we get a response with the
+        // correct id, so we know that the message was processed.
         assertEquals(request.getRequestId(), reply.getRequestId());
     }
 

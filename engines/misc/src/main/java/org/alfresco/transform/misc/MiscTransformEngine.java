@@ -73,7 +73,7 @@ public class MiscTransformEngine implements TransformEngine
     @Override
     public ProbeTransform getProbeTransform()
     {
-        return new ProbeTransform("quick.html", MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, transformOptions,
+        return new ProbeTransform("probe.html", MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, transformOptions,
                 119, 30, 150, 1024, 60 * 2 + 1, 60 * 2);
     }
 }

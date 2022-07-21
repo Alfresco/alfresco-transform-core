@@ -61,7 +61,7 @@ public class HelloTransformEngine implements TransformEngine
     @Override
     public ProbeTransform getProbeTransform()
     {
-        return new ProbeTransform("jane.txt", "text/plain", "text/plain",
+        return new ProbeTransform("probe.txt", "text/plain", "text/plain",
             ImmutableMap.of("sourceEncoding", "UTF-8", "language", "English"),
             11, 10, 150, 1024, 1, 60 * 2);
     }

@@ -51,7 +51,9 @@ import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 /**
- * Super class with a server test harness, which talks to the TransformController using http.
+ * Very basic requests to the TransformController using http. No longer extended in t-engines as all http interaction
+ * is now done by the base. Also see {@link TransformControllerTest} and {@link TransformHandlerTest} for more extensive
+ * tests.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes={org.alfresco.transform.base.Application.class})
@@ -59,7 +61,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
     FakeTransformEngineWithTwoCustomTransformers.class,
     FakeTransformerTxT2Pdf.class,
     FakeTransformerPdf2Png.class})
-public class HttpRequestTest
+public class HttpTest
 {
     @Autowired
     private TestRestTemplate restTemplate;

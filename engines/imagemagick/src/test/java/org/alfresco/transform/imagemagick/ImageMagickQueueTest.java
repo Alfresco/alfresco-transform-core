@@ -32,14 +32,13 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
 import java.util.UUID;
 
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.base.AbstractQueueTransformServiceIT;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.alfresco.transform.base.AbstractQueueTest;
 
 /**
  * @author Lucian Tuca
  * created on 15/01/2019
  */
-public class ImageMagickQueueTransformServiceIT extends AbstractQueueTransformServiceIT
+public class ImageMagickQueueTest extends AbstractQueueTest
 {
     @Override
     protected TransformRequest buildRequest()

@@ -2,7 +2,6 @@ queue:
   engineRequestQueue: ${TRANSFORM_ENGINE_REQUEST_QUEUE:org.alfresco.transform.engine.libreoffice.acs}
 transform:
   core:
-    version: @project.version@
     libreoffice:
       path: ${LIBREOFFICE_HOME:/opt/libreoffice7.2}
       maxTasksPerProcess: ${LIBREOFFICE_MAX_TASKS_PER_PROCESS:200}

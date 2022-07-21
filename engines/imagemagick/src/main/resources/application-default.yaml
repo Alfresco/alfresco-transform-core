@@ -2,7 +2,6 @@ queue:
   engineRequestQueue: ${TRANSFORM_ENGINE_REQUEST_QUEUE:org.alfresco.transform.engine.imagemagick.acs}
 transform:
   core:
-    version: @project.version@
     imagemagick:
       root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.0.10}
       dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.0.10/lib}

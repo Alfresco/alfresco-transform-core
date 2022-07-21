@@ -19,8 +19,9 @@ A T-Engine project which extends this base is expected to provide the following:
 * An implementation of the [TransformEngine](https://github.com/Alfresco/alfresco-transform-core/blob/master/engines/base/src/main/java/org/alfresco/transform/base/TransformEngine.java)
   interface to describe the T-Engine. 
 * Implementations of the [CustomTransformer](engines/base/src/main/java/org/alfresco/transform/base/CustomTransformer.java)
-  interface with the actual transform code. 
- 
+  interface with the actual transform code.
+* An `application-default.yaml` file to define a unique name for the message queue to the T-Engine.
+
 The `TransformEngine` and `CustomTransformer` implementations should have an
 `@Component` annotation and be in or below the`org.alfresco.transform` package, so
 that they will be discovered by the base T-Engine.
@@ -72,7 +73,7 @@ public class HelloTransformEngine implements TransformEngine
     @Override
     public ProbeTransform getProbeTransform()
     {
-        return new ProbeTransform("jane.txt", "text/plain", "text/plain",
+        return new ProbeTransform("probe.txt", "text/plain", "text/plain",
             ImmutableMap.of("sourceEncoding", "UTF-8", "language", "English"),
             11, 10, 150, 1024, 1, 60 * 2);
     }
@@ -141,7 +142,15 @@ public class HelloTransformer implements CustomTransformer
 }
 ```
 
-**Example `ProbeTransform` test file** `jane.txt`
+**Example properties** `resources/application-default.yaml`
+
+As can be seen the following defines a default which can be overridden by an environment variable.
+```yaml
+queue:
+  engineRequestQueue: ${TRANSFORM_ENGINE_REQUEST_QUEUE:org.alfresco.transform.engine.libreoffice.acs}
+```
+
+**Example ProbeTransform test file** `resources/probe.txt`
 ```json
 Jane
 ```

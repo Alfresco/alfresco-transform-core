@@ -69,7 +69,7 @@ public class LibreOfficeTransformEngine implements TransformEngine
     @Override
     public ProbeTransform getProbeTransform()
     {
-        return new ProbeTransform("quick.doc", MIMETYPE_WORD, MIMETYPE_PDF, Collections.emptyMap(),
+        return new ProbeTransform("probe.jpg", MIMETYPE_WORD, MIMETYPE_PDF, Collections.emptyMap(),
                 11817, 1024, 150, 10240, 60 * 30 + 1, 60 * 15 + 20);
     }
 }

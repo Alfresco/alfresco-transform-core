@@ -24,18 +24,21 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.misc;
+package org.alfresco.transform.aio;
+
+import org.alfresco.transform.base.AbstractQueueTest;
+import org.alfresco.transform.client.model.TransformRequest;
+
+import java.util.UUID;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 
-import java.util.UUID;
-
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.base.AbstractQueueTransformServiceIT;
-import org.springframework.boot.test.context.SpringBootTest;
-
-public class MiscQueueTransformServiceIT extends AbstractQueueTransformServiceIT
+/**
+ * @author David Edwards
+ * created on 21/04/2020
+ */
+public class AIOQueueTest extends AbstractQueueTest
 {
     @Override
     protected TransformRequest buildRequest()
@@ -49,6 +52,7 @@ public class MiscQueueTransformServiceIT extends AbstractQueueTransformServiceIT
             .withSchema(1)
             .withClientData("ACS")
             .withSourceReference(UUID.randomUUID().toString())
-            .withSourceSize(32L).build();
+            .withSourceSize(32L)
+            .build();
     }
 }

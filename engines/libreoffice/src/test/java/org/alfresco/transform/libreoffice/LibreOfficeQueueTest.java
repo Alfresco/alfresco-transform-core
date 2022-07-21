@@ -24,22 +24,20 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.pdfrenderer;
+package org.alfresco.transform.libreoffice;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 
 import java.util.UUID;
 
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.base.AbstractQueueTransformServiceIT;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.alfresco.transform.base.AbstractQueueTest;
 
 /**
  * @author Lucian Tuca
  * created on 15/01/2019
  */
-public class AlfrescoPdfRendererQueueTransformServiceIT extends AbstractQueueTransformServiceIT
+public class LibreOfficeQueueTest extends AbstractQueueTest
 {
     @Override
     protected TransformRequest buildRequest()
@@ -48,11 +46,12 @@ public class AlfrescoPdfRendererQueueTransformServiceIT extends AbstractQueueTra
             .builder()
             .withRequestId(UUID.randomUUID().toString())
             .withSourceMediaType(MIMETYPE_OPENXML_WORDPROCESSING)
-            .withTargetMediaType(MIMETYPE_PDF)
-            .withTargetExtension("pdf")
+            .withTargetMediaType(MIMETYPE_OPENXML_WORDPROCESSING)
+            .withTargetExtension("doc")
             .withSchema(1)
             .withClientData("ACS")
             .withSourceReference(UUID.randomUUID().toString())
-            .withSourceSize(32L).build();
+            .withSourceSize(32L)
+            .build();
     }
 }

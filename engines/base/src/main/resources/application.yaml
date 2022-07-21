@@ -29,12 +29,7 @@ transform:
 logging:
   level:
     # org.alfresco.util.exec.RuntimeExec: debug
-    org.alfresco.transformer.LibreOfficeController: debug
-    org.alfresco.transformer.JodConverterSharedInstance: debug
-    org.alfresco.transformer.AlfrescoPdfRendererController: debug
-    org.alfresco.transformer.ImageMagickController: debug
-    org.alfresco.transformer.TikaController: debug
-    org.alfresco.transformer.MiscellaneousTransformersController: debug
+    # org.alfresco.transform.base.metadataExtractors: debug
     org.alfresco.transform.common.TransformerDebug: debug
 
 fileStoreUrl: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
