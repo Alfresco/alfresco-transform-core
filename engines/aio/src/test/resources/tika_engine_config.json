@@ -987,7 +987,7 @@
       ]
     },
     {
-      "transformerName": "SamplePoiMetadataEmbedder",
+      "transformerName": "PoiMetadataEmbedder",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",          "targetMediaType": "alfresco-metadata-embed"}
       ],

@@ -58,6 +58,7 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_VISIO_2013;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORDPERFECT;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_XHTML;
 import static org.alfresco.transform.common.TransformerDebug.MIMETYPE_METADATA_EMBED;
 import static org.alfresco.transform.common.TransformerDebug.MIMETYPE_METADATA_EXTRACT;
 
@@ -116,7 +117,8 @@ public class ExtensionService
             Map.entry(MIMETYPE_DITA,                                "dita"),
             Map.entry(MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE,        "xltx"),
             Map.entry(MIMETYPE_IMAGE_SVG,                           "svg"),
-            Map.entry(MIMETYPE_TEXT_PLAIN,                          "txt")
+            Map.entry(MIMETYPE_TEXT_PLAIN,                          "txt"),
+            Map.entry(MIMETYPE_XHTML,                               "xhtml")
     );
 
     public static String getExtensionForTargetMimetype(String targetMimetype, String sourceMimetype)

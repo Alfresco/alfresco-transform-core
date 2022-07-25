@@ -59,36 +59,6 @@ import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExt
  *   <b>created:</b>                --      cm:created
  *   <b>Any custom property:</b>    --      [not mapped]
  * </pre>
- *
- * Uses Apache Tika
- *
- * Also includes a sample POI metadata embedder to demonstrate it is possible to add custom T-Engines that will add
- * metadata. This is not production code so no supported mimetypes exist in the {@code tika_engine_config.json}.
- * Adding the following would make it available:
- *
- * <pre>
- * {
- *   "transformOptions": {
- *     ...
- *     "metadataEmbedOptions": [
- *       {"value": {"name": "metadata", "required": true}}
- *     ]
- *   },
- *   "transformers": [
- *     ...
- *     {
- *       "transformerName": "SamplePoiMetadataEmbedder",
- *       "supportedSourceAndTargetList": [
- *         ...
- *         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "targetMediaType": "alfresco-metadata-embed"}
- *       ],
- *       "transformOptions": [
- *         "metadataEmbedOptions"
- *       ]
- *     }
- *   ]
- * }
- * </pre>
 
  * @author Nick Burch
  * @author Neil McErlean
@@ -109,71 +79,5 @@ public class PoiMetadataExtractor extends AbstractTikaMetadataExtractor
     protected Parser getParser()
     {
         return new OOXMLParser();
-    }
-
-    @Override
-    protected Embedder getEmbedder()
-    {
-        return new SamplePoiEmbedder();
-    }
-
-    private static class SamplePoiEmbedder implements Embedder
-    {
-        private static final Set<MediaType> SUPPORTED_EMBED_TYPES =
-                Collections.singleton(MediaType.application("vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
-
-        @Override
-        public Set<MediaType> getSupportedEmbedTypes(ParseContext parseContext)
-        {
-            return SUPPORTED_EMBED_TYPES;
-        }
-
-        @Override
-        public void embed(Metadata metadata, InputStream inputStream, OutputStream outputStream, ParseContext parseContext)
-                throws IOException
-        {
-            XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
-            POIXMLProperties props = workbook.getProperties();
-
-            POIXMLProperties.CoreProperties coreProp = props.getCoreProperties();
-            POIXMLProperties.CustomProperties custProp = props.getCustomProperties();
-
-            for (String name : metadata.names())
-            {
-                metadata.isMultiValued("description");
-                String value = null;
-                if (metadata.isMultiValued(name))
-                {
-                    String[] values = metadata.getValues(name);
-                    StringJoiner sj = new StringJoiner(", ");
-                    for (String s : values)
-                    {
-                        sj.add(s);
-                    }
-                    value = sj.toString();
-                }
-                else
-                {
-                    value = metadata.get(name);
-                }
-                switch (name)
-                {
-                    case "author":
-                        coreProp.setCreator(value);
-                        break;
-                    case "title":
-                        coreProp.setTitle(value);
-                        break;
-                    case "description":
-                        coreProp.setDescription(value);
-                        break;
-                    // There are other core values but this is sample code, so we will assume it is a custom value.
-                    default:
-                        custProp.addProperty(name, value);
-                        break;
-                }
-            }
-            workbook.write(outputStream);
-        }
     }
 }

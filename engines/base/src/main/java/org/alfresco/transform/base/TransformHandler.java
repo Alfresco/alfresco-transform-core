@@ -189,7 +189,7 @@ public class TransformHandler
             MultipartFile sourceMultipartFile, String sourceMimetype, String targetMimetype,
             Map<String, String> requestParameters)
     {
-        return createResponseEntity(targetMimetype, os ->
+        return createResponseEntity(sourceMimetype, targetMimetype, os ->
         {
             new TransformProcess(this, sourceMimetype, targetMimetype, requestParameters,
                 "e" + httpRequestCount.getAndIncrement())
@@ -216,7 +216,7 @@ public class TransformHandler
                 @Override
                 protected OutputStream getOutputStream()
                 {
-                    return transformManager.setOutputStream(os);
+                    return os;
                 }
 
                 @Override
@@ -538,10 +538,10 @@ public class TransformHandler
         return customTransformer;
     }
 
-    private ResponseEntity<StreamingResponseBody> createResponseEntity(String targetMimetype,
+    private ResponseEntity<StreamingResponseBody> createResponseEntity(String sourceMimetype, String targetMimetype,
             StreamingResponseBody body)
     {
-        String extension = ExtensionService.getExtensionForMimetype(targetMimetype);
+        String extension = ExtensionService.getExtensionForTargetMimetype(targetMimetype, sourceMimetype);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentDisposition(
                 ContentDisposition.attachment()

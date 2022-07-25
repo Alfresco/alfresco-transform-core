@@ -36,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.jms.Destination;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.OutputStream;
 import java.util.Map;
 
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -70,7 +71,6 @@ abstract class TransformProcess extends TransformStreamHandler
         transformHandler.getProbeTransform().incrementTransformerCount();
     }
 
-    @Override
     public void handleTransformRequest()
     {
         transformManager.setSourceMimetype(sourceMimetype);

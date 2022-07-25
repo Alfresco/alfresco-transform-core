@@ -34,11 +34,9 @@ import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.poi.ooxml.POIXMLProperties;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -53,10 +51,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 import java.util.UUID;
 
-import static java.nio.file.Files.readAllBytes;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_METADATA_EMBED;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_PRESENTATION;
@@ -91,14 +87,13 @@ import static org.alfresco.transform.tika.transformers.Tika.TIKA_AUTO;
 import static org.alfresco.transform.tika.transformers.Tika.TXT;
 import static org.alfresco.transform.tika.transformers.Tika.XHTML;
 import static org.alfresco.transform.tika.transformers.Tika.XML;
-import static org.alfresco.transform.tika.transformers.Tika.XSLX;
+import static org.alfresco.transform.tika.transformers.Tika.XLSX;
 import static org.alfresco.transform.tika.transformers.Tika.ZIP;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
@@ -109,7 +104,8 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
-import static org.springframework.util.StringUtils.getFilenameExtension;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 /**
  * Test Tika.
@@ -179,7 +175,11 @@ public class TikaTest extends AbstractBaseTest
             "targetExtension", this.targetExtension)
                                                        : mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile,
             "targetExtension", this.targetExtension, INCLUDE_CONTENTS, includeContents.toString());
-        MvcResult result = mockMvc.perform(requestBuilder)
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+                                     .andExpect(request().asyncStarted())
+                                     .andReturn();
+
+        MvcResult result = mockMvc.perform(asyncDispatch(mvcResult))
                                   .andExpect(MockMvcResultMatchers.status().is(OK.value()))
                                   .andExpect(MockMvcResultMatchers.header().string("Content-Disposition",
                                       "attachment; filename*=UTF-8''transform." + this.targetExtension)).
@@ -252,9 +252,17 @@ public class TikaTest extends AbstractBaseTest
     {
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         targetEncoding = "rubbish";
-        mockMvc.perform(
+//        mockMvc.perform(
+//            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
+//               .andExpect(MockMvcResultMatchers.status().is(INTERNAL_SERVER_ERROR.value()));
+
+        MvcResult mvcResult = mockMvc.perform(
             mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
-               .andExpect(MockMvcResultMatchers.status().is(INTERNAL_SERVER_ERROR.value()));
+            .andExpect(request().asyncStarted())
+            .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+            .andExpect(MockMvcResultMatchers.status().is(INTERNAL_SERVER_ERROR.value()));
     }
 
     // --- Archive ---
@@ -381,7 +389,7 @@ public class TikaTest extends AbstractBaseTest
     @Test
     public void xslxToCsvPoiTest() throws Exception
     {
-        transform(POI, XSLX, CSV, MIMETYPE_OPENXML_SPREADSHEET, MIMETYPE_TEXT_CSV, null,
+        transform(POI, XLSX, CSV, MIMETYPE_OPENXML_SPREADSHEET, MIMETYPE_TEXT_CSV, null,
             EXPECTED_CSV_CONTENT_CONTAINS);
     }
 
@@ -429,7 +437,7 @@ public class TikaTest extends AbstractBaseTest
     @Test
     public void xlsxEmbedTest() throws Exception
     {
-        mockTransformCommand(XSLX, XSLX, MIMETYPE_OPENXML_SPREADSHEET, false);
+        mockTransformCommand(XLSX, XLSX, MIMETYPE_OPENXML_SPREADSHEET, false);
 
         String metadata =
                 "{\"{http://www.alfresco.org/model/content/1.0}author\":\"author1\"," +
@@ -439,12 +447,16 @@ public class TikaTest extends AbstractBaseTest
 
         MockHttpServletRequestBuilder requestBuilder =
                 super.mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile,
-                        "targetExtension", XSLX,
+                        "targetExtension", XLSX,
                         "metadata", metadata,
                         "targetMimetype", MIMETYPE_METADATA_EMBED,
                         "sourceMimetype", MIMETYPE_OPENXML_SPREADSHEET);
 
-        MvcResult result = mockMvc.perform(requestBuilder)
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+                                     .andExpect(request().asyncStarted())
+                                     .andReturn();
+
+        MvcResult result = mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(MockMvcResultMatchers.status().is(OK.value()))
                 .andExpect(MockMvcResultMatchers.header().string("Content-Disposition",
                         "attachment; filename*=UTF-8''transform." + targetExtension)).

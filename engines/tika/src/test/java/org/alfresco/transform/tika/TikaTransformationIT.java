@@ -152,7 +152,7 @@ public class TikaTransformationIT
                 allTargets("quick.txt", "text/plain"),
                 allTargets("quick.vsd", "application/vnd.visio"),
                 allTargets("quick.xls", "application/vnd.ms-excel"),
-                allTargets("quick.xslx",
+                allTargets("quick.xlsx",
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
                 allTargets("quick.zip", "application/zip"),
                 allTargets("quick.tar", "application/x-tar"),

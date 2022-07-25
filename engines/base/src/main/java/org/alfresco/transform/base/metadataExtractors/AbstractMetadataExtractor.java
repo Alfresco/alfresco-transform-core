@@ -374,6 +374,8 @@ public abstract class AbstractMetadataExtractor implements CustomTransformer
         String className = this.getClass().getName();
         String shortClassName = className.split("\\.")[className.split("\\.").length - 1];
         shortClassName = shortClassName.replace('$', '-');
+        // The embedder uses the reverse of the extractor's data.
+        shortClassName = shortClassName.replace("Embedder", "Extractor");
 
         return shortClassName + "_metadata_" + suffix + ".properties";
     }

@@ -54,14 +54,12 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
-import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URL;
 import java.util.List;
@@ -103,7 +101,7 @@ public class Tika
     public static final String PPTX = "pptx";
     public static final String TXT = "txt";
     public static final String XHTML = "xhtml";
-    public static final String XSLX = "xslx";
+    public static final String XLSX = "xlsx";
     public static final String XML = "xml";
     public static final String ZIP = "zip";
 
@@ -235,6 +233,10 @@ public class Tika
             ContentHandler handler = getContentHandler(targetMimetype, ow);
 
             parser.parse(inputStream, handler, metadata, context);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new IllegalStateException("Unsupported encoding "+e.getMessage(), e);
         }
         catch (SAXException | TikaException | IOException e)
         {
