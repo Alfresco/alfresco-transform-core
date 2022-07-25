@@ -53,7 +53,6 @@ import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -80,12 +79,6 @@ public class MiscTest extends AbstractBaseTest
         sourceFileBytes = readTestFile(sourceExtension);
         expectedTargetFileBytes = Files.readAllBytes(getTestFile("quick2." + targetExtension, true).toPath());
         sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
-    }
-
-    @Override
-    public String getEngineConfigName()
-    {
-        return ENGINE_CONFIG_NAME;
     }
 
     @Override

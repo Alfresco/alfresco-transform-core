@@ -53,6 +53,7 @@ public class AIOQueueTest extends AbstractQueueTest
             .withClientData("ACS")
             .withSourceReference(UUID.randomUUID().toString())
             .withSourceSize(32L)
+            .withInternalContextForTransformEngineTests()
             .build();
     }
 }

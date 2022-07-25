@@ -26,19 +26,19 @@
  */
 package org.alfresco.transform.base;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithAllInOne;
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithOneCustomTransformer;
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
 import org.alfresco.transform.base.fakes.FakeTransformerPdf2Jpg;
 import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
 import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -66,10 +66,6 @@ import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -77,10 +73,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Testing base t-engine TransformController functionality where there are multiple TransformEngines brought together
+ * Testing TransformController functionality where there are multiple TransformEngines brought together
  * in a single t-engine.
  *
- * Contains a subset of tests also in {@link TransformControllerTest}.
+ * Repeats a set of tests from {@link TransformControllerTest}, which tests the single TransformEngine case.
  */
 @AutoConfigureMockMvc
 @SpringBootTest(classes={org.alfresco.transform.base.Application.class})
@@ -103,7 +99,7 @@ public class TransformControllerAllInOneTest
     private String coreVersion;
 
     @Test
-    public void testInitEngine() throws Exception
+    public void testInitEngine()
     {
         assertEquals(FakeTransformEngineWithAllInOne.class.getSimpleName(),
                 transformController.transformEngine.getClass().getSimpleName());

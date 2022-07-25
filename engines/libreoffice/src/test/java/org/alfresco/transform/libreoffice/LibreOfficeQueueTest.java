@@ -52,6 +52,7 @@ public class LibreOfficeQueueTest extends AbstractQueueTest
             .withClientData("ACS")
             .withSourceReference(UUID.randomUUID().toString())
             .withSourceSize(32L)
+            .withInternalContextForTransformEngineTests()
             .build();
     }
 }

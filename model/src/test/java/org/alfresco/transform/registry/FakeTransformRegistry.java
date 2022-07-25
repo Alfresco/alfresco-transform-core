@@ -33,7 +33,7 @@ import java.util.Set;
 /**
  * Helper class for testing an {@link AbstractTransformRegistry}.
  */
-public class TestTransformRegistry extends AbstractTransformRegistry
+public class FakeTransformRegistry extends AbstractTransformRegistry
 {
     private static final String READ_FROM_A = "readFromA";
     private static final String BASE_URL_B = "baseUrlB";

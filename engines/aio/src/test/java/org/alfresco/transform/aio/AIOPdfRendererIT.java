@@ -26,8 +26,8 @@
  */
 package org.alfresco.transform.aio;
 
-import org.alfresco.transform.pdfrenderer.AlfrescoPdfRendererTransformationIT;
+import org.alfresco.transform.pdfrenderer.PdfRendererTransformationIT;
 
-public class AIOPdfRendererIT extends AlfrescoPdfRendererTransformationIT
+public class AIOPdfRendererIT extends PdfRendererTransformationIT
 {
 }

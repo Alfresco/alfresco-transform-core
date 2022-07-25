@@ -27,7 +27,6 @@
 package org.alfresco.transform.base;
 
 import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
-import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.messaging.TransformReplySender;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.base.probes.ProbeTransform;
@@ -84,11 +83,11 @@ import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_EXTENSION;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
+import static org.alfresco.transform.common.RequestParamMap.TARGET_EXTENSION;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.OK;
 
 /**
  * Handles the transform requests from either http or a message.
@@ -97,15 +96,14 @@ import static org.springframework.http.HttpStatus.OK;
 public class TransformHandler
 {
     private static final Logger logger = LoggerFactory.getLogger(TransformHandler.class);
+
     private static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
-            TARGET_MIMETYPE, SOURCE_MIMETYPE, DIRECT_ACCESS_URL);
+        TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, DIRECT_ACCESS_URL);
 
     @Autowired(required = false)
     private List<TransformEngine> transformEngines;
-
     @Autowired(required = false)
     private List<CustomTransformer> customTransformers;
-
     @Autowired
     private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
     @Autowired
@@ -177,121 +175,14 @@ public class TransformHandler
         return transformEngine;
     }
 
-    public ProbeTransform getProbeTestTransform()
+    public ProbeTransform getProbeTransform()
     {
         return probeTransform;
     }
 
-    private abstract class TransformProcess
+    public TransformerDebug getTransformerDebug()
     {
-        protected final String sourceMimetype;
-        protected final String targetMimetype;
-        private final Map<String, String> transformOptions;
-        protected String reference;
-
-        TransformProcess(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, String reference)
-        {
-            this.sourceMimetype = sourceMimetype;
-            this.targetMimetype = targetMimetype;
-            this.transformOptions = cleanTransformOptions(transformOptions);
-            this.reference = reference;
-        }
-        void handleTransformRequest()
-        {
-            LogEntry.start();
-            probeTransform.incrementTransformerCount();
-
-            TransformManagerImpl transformManager = TransformManagerImpl.builder()
-                    .withSourceMimetype(sourceMimetype)
-                    .withTargetMimetype(targetMimetype)
-                    .build();
-            InputStream inputStream = null;
-            try
-            {
-                init(transformManager);
-
-                inputStream = getInputStream(transformManager);
-                long sourceSizeInBytes = getSourceSize();
-                String transformName = getTransformerName(sourceSizeInBytes, sourceMimetype, targetMimetype, transformOptions);
-                CustomTransformer customTransformer = getCustomTransformer(transformName);
-
-                transformerDebugPushTransform(sourceSizeInBytes, transformOptions, transformName);
-
-                OutputStream outputStream = getOutputStream(transformManager);
-                try
-                {
-                    customTransformer.transform(sourceMimetype, inputStream,
-                        targetMimetype, outputStream, transformOptions, transformManager);
-                    transformManager.ifUsedCopyTargetFileToOutputStream();
-
-                    sendTransformResponse(transformManager);
-
-                    LogEntry.setTargetSize(transformManager.getOutputLength());
-                    LogEntry.setStatusCodeAndMessage(OK, "Success");
-                }
-                finally
-                {
-                    closeOutputStream(transformManager);
-                }
-            }
-            catch (TransformException e)
-            {
-                transformerDebug.logFailure(reference, e.getMessage());
-                LogEntry.setStatusCodeAndMessage(e.getStatus(), e.getMessage());
-                handleTransformException(e, e.getStatus());
-            }
-            catch (Exception e)
-            {
-                transformerDebug.logFailure(reference, e.getMessage());
-                LogEntry.setStatusCodeAndMessage(INTERNAL_SERVER_ERROR, e.getMessage());
-                handleException(e, INTERNAL_SERVER_ERROR);
-            }
-            finally
-            {
-                closeInputStreamWithoutException(inputStream);
-                deleteTmpFiles(transformManager);
-
-                long time = LogEntry.getTransformDuration();
-                probeTransform.recordTransformTime(time);
-                transformerDebug.popTransform(reference, time);
-                LogEntry.complete();
-            }
-        }
-
-        protected abstract void init(TransformManagerImpl transformManager);
-
-        protected abstract InputStream getInputStream(TransformManagerImpl transformManager);
-
-        protected abstract long getSourceSize();
-
-        protected void transformerDebugPushTransform(long sourceSizeInBytes, Map<String, String> transformOptions, String transformName)
-        {
-            transformerDebug.pushTransform(reference, sourceMimetype, targetMimetype, sourceSizeInBytes, transformName);
-            transformerDebug.logOptions(reference, transformOptions);
-        }
-
-        protected abstract OutputStream getOutputStream(TransformManagerImpl transformManager)
-            throws FileNotFoundException;
-
-        protected void sendTransformResponse(TransformManagerImpl transformManager)
-        {
-            // Only used in handleMessageRequest(...)
-        }
-
-        protected void closeOutputStream(TransformManagerImpl transformManager) throws IOException
-        {
-            transformManager.getOutputStream().close();
-        }
-
-        protected void handleTransformException(TransformException e, HttpStatus status)
-        {
-            throw e;
-        }
-
-        protected void handleException(Exception e, HttpStatus status)
-        {
-            throw new RuntimeException(e);
-        }
+        return transformerDebug;
     }
 
     public ResponseEntity<StreamingResponseBody> handleHttpRequest(HttpServletRequest request,
@@ -300,19 +191,20 @@ public class TransformHandler
     {
         return createResponseEntity(targetMimetype, os ->
         {
-            new TransformProcess(sourceMimetype, targetMimetype, requestParameters,
+            new TransformProcess(this, sourceMimetype, targetMimetype, requestParameters,
                 "e" + httpRequestCount.getAndIncrement())
             {
                 @Override
-                protected void init(TransformManagerImpl transformManager)
+                protected void init() throws IOException
                 {
                     transformManager.setRequest(request);
+                    super.init();
                 }
 
                 @Override
-                protected InputStream getInputStream(TransformManagerImpl transformManager)
+                protected InputStream getInputStream()
                 {
-                    return getInputStreamForHandleHttpRequest(requestParameters, sourceMultipartFile, transformManager);
+                    return getInputStreamForHandleHttpRequest(requestParameters, sourceMultipartFile);
                 }
 
                 @Override
@@ -322,13 +214,13 @@ public class TransformHandler
                 }
 
                 @Override
-                protected OutputStream getOutputStream(TransformManagerImpl transformManager)
+                protected OutputStream getOutputStream()
                 {
                     return transformManager.setOutputStream(os);
                 }
 
                 @Override
-                protected void closeOutputStream(TransformManagerImpl transformManager) throws IOException
+                protected void closeOutputStream() throws IOException
                 {
                     // Do nothing as the Spring mvc handles this for HttpServletRequest
                 }
@@ -339,22 +231,22 @@ public class TransformHandler
     public void handleProbRequest(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
         File sourceFile, File targetFile)
     {
-        new TransformProcess(sourceMimetype, targetMimetype, transformOptions,
+        new TransformProcess(this, sourceMimetype, targetMimetype, transformOptions,
             "p" + httpRequestCount.getAndIncrement())
         {
             @Override
-            protected void init(TransformManagerImpl transformManager)
+            protected void init() throws IOException
             {
                 transformManager.setSourceFile(sourceFile);
                 transformManager.setTargetFile(targetFile);
-                transformManager.setSourceFileCreated();
-                // We don't want to delete the target file, so don't call setTargetFileCreated()
+                transformManager.keepTargetFile();
+                super.init();
             }
 
             @Override
-            protected InputStream getInputStream(TransformManagerImpl transformManager)
+            protected InputStream getInputStream()
             {
-                return getInputStreamForHandleProbRequest(sourceFile, transformManager);
+                return getInputStreamForHandleProbRequest(sourceFile);
             }
 
             @Override
@@ -364,39 +256,31 @@ public class TransformHandler
             }
 
             @Override
-            protected OutputStream getOutputStream(TransformManagerImpl transformManager)
-                throws FileNotFoundException
+            protected OutputStream getOutputStream() throws IOException
             {
-                return getOutputStreamFromFile(targetFile, transformManager);
+                return getOutputStreamFromFile(targetFile);
             }
         }.handleTransformRequest();
     }
 
-    public void handleMessageRequest(TransformRequest request, Long timeout, Destination replyToQueue)
+    public TransformReply handleMessageRequest(TransformRequest request, Long timeout, Destination replyToQueue)
     {
-        new TransformProcess(request.getSourceMediaType(), request.getTargetMediaType(),
+        TransformReply reply = createBasicTransformReply(request);
+        new TransformProcess(this, request.getSourceMediaType(), request.getTargetMediaType(),
             request.getTransformRequestOptions(), "unset")
         {
-            TransformReply reply = createBasicTransformReply(request);
-
             @Override
-            protected void init(TransformManagerImpl transformManager)
+            protected void init() throws IOException
             {
                 checkTransformRequestValid(request, reply);
                 reference = TransformStack.getReference(reply.getInternalContext());
+                super.init();
             }
 
             @Override
-            protected InputStream getInputStream(TransformManagerImpl transformManager)
+            protected InputStream getInputStream()
             {
-                return getInputStreamForHandleMessageRequest(request, transformManager);
-            }
-
-            @Override
-            protected void transformerDebugPushTransform(long sourceSizeInBytes, Map<String, String> transformOptions, String transformName)
-            {
-                transformerDebug.pushTransform(request);
-                transformerDebug.logOptions(request);
+                return getInputStreamForHandleMessageRequest(request);
             }
 
             @Override
@@ -406,12 +290,10 @@ public class TransformHandler
             }
 
             @Override
-            protected OutputStream getOutputStream(TransformManagerImpl transformManager)
-                throws FileNotFoundException
+            protected OutputStream getOutputStream() throws IOException
             {
                 File targetFile = transformManager.setTargetFile(createTargetFile(null, sourceMimetype, targetMimetype));
-                transformManager.setTargetFileCreated();
-                return getOutputStreamFromFile(targetFile, transformManager);
+                return getOutputStreamFromFile(targetFile);
             }
 
             protected void sendTransformResponse(TransformManagerImpl transformManager)
@@ -428,11 +310,12 @@ public class TransformHandler
             }
 
             @Override
-            protected void handleException(Exception e, HttpStatus status)
+            protected void handleException(Exception e)
             {
-                sendFailedResponse(reply, e, status, replyToQueue);
+                sendFailedResponse(reply, e, INTERNAL_SERVER_ERROR, replyToQueue);
             }
         }.handleTransformRequest();
+        return reply;
     }
 
     private void sendSuccessfulResponse(Long timeout, TransformReply reply, Destination replyToQueue)
@@ -449,15 +332,6 @@ public class TransformHandler
         transformerDebug.logFailure(reply);
         logger.trace("Transform failed. Sending " + reply, e);
         transformReplySender.send(replyToQueue, reply);
-    }
-
-    private void deleteTmpFiles(TransformManagerImpl transformManager)
-    {
-        if (transformManager != null)
-        {
-            transformManager.deleteSourceFileIfCreated();
-            transformManager.deleteTargetFileIfCreated();
-        }
     }
 
     private void checkTransformRequestValid(TransformRequest request, TransformReply reply)
@@ -507,7 +381,7 @@ public class TransformHandler
         request.setInternalContext(InternalContext.initialise(request.getInternalContext()));
     }
 
-    private Map<String, String> cleanTransformOptions(Map<String, String> requestParameters)
+    public Map<String, String> cleanTransformOptions(Map<String, String> requestParameters)
     {
         Map<String, String> transformOptions = new HashMap<>(requestParameters);
         transformOptions.keySet().removeAll(NON_TRANSFORM_OPTION_REQUEST_PARAMETERS);
@@ -539,19 +413,19 @@ public class TransformHandler
     }
 
     private InputStream getInputStreamForHandleHttpRequest(Map<String, String> requestParameters,
-        MultipartFile sourceMultipartFile, TransformManagerImpl transformManager)
+        MultipartFile sourceMultipartFile)
     {
         final String directUrl = requestParameters.getOrDefault(DIRECT_ACCESS_URL, "");
-        return transformManager.setInputStream(new BufferedInputStream(directUrl.isBlank() ?
-            getMultipartFileInputStream(sourceMultipartFile) :
-            getDirectAccessUrlInputStream(directUrl)));
+        return new BufferedInputStream(directUrl.isBlank()
+            ? getMultipartFileInputStream(sourceMultipartFile)
+            : getDirectAccessUrlInputStream(directUrl));
     }
 
-    private InputStream getInputStreamForHandleProbRequest(File sourceFile, TransformManagerImpl transformManager)
+    private InputStream getInputStreamForHandleProbRequest(File sourceFile)
     {
         try
         {
-            return transformManager.setInputStream(new BufferedInputStream(new FileInputStream(sourceFile)));
+            return new BufferedInputStream(new FileInputStream(sourceFile));
         }
         catch (FileNotFoundException e)
         {
@@ -559,15 +433,14 @@ public class TransformHandler
         }
     }
 
-    private InputStream getInputStreamForHandleMessageRequest(TransformRequest request,
-        TransformManagerImpl transformManager)
+    private InputStream getInputStreamForHandleMessageRequest(TransformRequest request)
     {
         final String directUrl = request.getTransformRequestOptions().getOrDefault(DIRECT_ACCESS_URL, "");
         try
         {
-            return transformManager.setInputStream(new BufferedInputStream(directUrl.isBlank()
+            return new BufferedInputStream(directUrl.isBlank()
                     ? getSharedFileStoreInputStream(request.getSourceReference())
-                    : getDirectAccessUrlInputStream(directUrl)));
+                    : getDirectAccessUrlInputStream(directUrl));
         }
         catch (TransformException e)
         {
@@ -579,10 +452,9 @@ public class TransformHandler
         }
     }
 
-    private OutputStream getOutputStreamFromFile(File targetFile, TransformManagerImpl transformManager)
-        throws FileNotFoundException
+    private OutputStream getOutputStreamFromFile(File targetFile) throws IOException
     {
-        return transformManager.setOutputStream(new BufferedOutputStream(new FileOutputStream(targetFile)));
+        return new BufferedOutputStream(new FileOutputStream(targetFile));
     }
 
     private void saveTargetFileInSharedFileStore(File targetFile, TransformReply reply)
@@ -627,8 +499,8 @@ public class TransformHandler
         return sb.toString();
     }
 
-    private String getTransformerName(long sourceSizeInBytes, final String sourceMimetype,
-            final String targetMimetype, final Map<String, String> transformOptions)
+    public String getTransformerName(final String sourceMimetype, long sourceSizeInBytes, final String targetMimetype,
+        final Map<String, String> transformOptions)
     {
         // The transformOptions always contains sourceEncoding when sent to a T-Engine, even though it should not be
         // used to select a transformer. Similar to source and target mimetypes and extensions, but these are not
@@ -656,7 +528,7 @@ public class TransformHandler
         }
     }
 
-    private CustomTransformer getCustomTransformer(String transformName)
+    public CustomTransformer getCustomTransformer(String transformName)
     {
         CustomTransformer customTransformer = customTransformersByName.get(transformName);
         if (customTransformer == null)
@@ -664,21 +536,6 @@ public class TransformHandler
             throw new TransformException(INTERNAL_SERVER_ERROR, "Custom Transformer "+transformName+" not found");
         }
         return customTransformer;
-    }
-
-    private void closeInputStreamWithoutException(InputStream inputStream)
-    {
-        if (inputStream != null)
-        {
-            try
-            {
-                inputStream.close();
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     private ResponseEntity<StreamingResponseBody> createResponseEntity(String targetMimetype,

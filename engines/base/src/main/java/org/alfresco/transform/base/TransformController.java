@@ -28,6 +28,8 @@ package org.alfresco.transform.base;
 
 import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.common.TransformException;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.registry.TransformServiceRegistry;
@@ -44,6 +46,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -80,6 +83,7 @@ import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 import static org.alfresco.transform.config.CoreVersionDecorator.setOrClearCoreVersion;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 /**
@@ -106,7 +110,7 @@ public class TransformController
     private void init()
     {
         transformEngine = transformHandler.getTransformEngine();
-        probeTransform = transformHandler.getProbeTestTransform();
+        probeTransform = transformHandler.getProbeTransform();
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -205,6 +209,18 @@ public class TransformController
         return new ResponseEntity<>(transformConfig, OK);
     }
 
+    // Only used for testing, but could be used in place of the /transform endpoint used by Alfresco Repository's
+    // 'Local Transforms'. In production, TransformRequests are processed is via a message queue.
+    @PostMapping(value = ENDPOINT_TRANSFORM, produces = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<TransformReply> transform(@RequestBody TransformRequest request,
+        @RequestParam(value = "timeout", required = false) Long timeout)
+    {
+        TransformReply reply = transformHandler.handleMessageRequest(request, timeout, null);
+        return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+    }
+
+    // Used by Alfresco Repository's 'Local Transforms'. Uploads the content and downloads the result.
     @PostMapping(value = ENDPOINT_TRANSFORM, consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<StreamingResponseBody> transform(HttpServletRequest request,
                                               @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
@@ -216,6 +232,7 @@ public class TransformController
                 targetMimetype, requestParameters);
     }
 
+    // Used the t-engine's simple html test UI.
     @PostMapping(value = ENDPOINT_TEST, consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<StreamingResponseBody> testTransform(HttpServletRequest request,
             @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,

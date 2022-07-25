@@ -96,7 +96,7 @@ public class OverrideTransformConfigTests
 
     private final CombinedTransformConfig config = new CombinedTransformConfig();
 
-    private final TestTransformRegistry registry = new TestTransformRegistry();
+    private final FakeTransformRegistry registry = new FakeTransformRegistry();
 
     @Test
     public void testRemoveTransformers()

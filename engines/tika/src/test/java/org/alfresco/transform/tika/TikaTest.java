@@ -30,7 +30,6 @@ import org.alfresco.transform.base.AbstractBaseTest;
 import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
-import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.poi.ooxml.POIXMLProperties;
@@ -45,7 +44,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -146,12 +144,6 @@ public class TikaTest extends AbstractBaseTest
     }
 
     @Override
-    public String getEngineConfigName()
-    {
-        return ENGINE_CONFIG_NAME;
-    }
-
-    @Override
     protected void mockTransformCommand(String sourceExtension,
         String targetExtension, String sourceMimetype,
         boolean readTargetFileBytes) throws IOException
@@ -166,57 +158,7 @@ public class TikaTest extends AbstractBaseTest
         expectedTargetFileBytes = readTargetFileBytes ? readTestFile(targetExtension) : null;
         sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
 
-        when(mockTransformCommand.execute(any(), anyLong())).thenAnswer(
-            (Answer<RuntimeExec.ExecutionResult>) invocation -> {
-                Map<String, String> actualProperties = invocation.getArgument(0);
-                assertEquals(3, actualProperties.size(),"There should be 3 properties");
-
-                String actualOptions = actualProperties.get("options");
-                String actualSource = actualProperties.get("source");
-                String actualTarget = actualProperties.get("target");
-                String actualTargetExtension = getFilenameExtension(actualTarget);
-
-                assertNotNull(actualSource);
-                assertNotNull(actualTarget);
-                if (expectedSourceSuffix != null)
-                {
-                    assertTrue(actualSource.endsWith(expectedSourceSuffix),
-                        "The source file \"" + actualSource + "\" should have ended in \"" + expectedSourceSuffix + "\"");
-                    actualSource = actualSource.substring(0,
-                        actualSource.length() - expectedSourceSuffix.length());
-                }
-
-                assertNotNull(actualOptions);
-                if (expectedOptions != null)
-                {
-                    Assertions.assertEquals(expectedOptions, actualOptions, "expectedOptions");
-                }
-
-                Long actualTimeout = invocation.getArgument(1);
-                assertNotNull(actualTimeout);
-                if (expectedTimeout != null)
-                {
-                    Assertions.assertEquals(expectedTimeout, actualTimeout, "expectedTimeout");
-                }
-
-                // Copy a test file into the target file location if it exists
-                int i = actualTarget.lastIndexOf('_');
-                if (i >= 0)
-                {
-                    String testFilename = actualTarget.substring(i + 1);
-                    File testFile = getTestFile(testFilename, false);
-                    File targetFile = new File(actualTarget);
-                    generateTargetFileFromResourceFile(actualTargetExtension, testFile,
-                        targetFile);
-                }
-
-                // Check the supplied source file has not been changed.
-                byte[] actualSourceFileBytes = readAllBytes(new File(actualSource).toPath());
-                Assertions.assertArrayEquals(sourceFileBytes, actualSourceFileBytes,
-                    "Source file is not the same");
-
-                return mockExecutionResult;
-            });
+        // Tika transform is not mocked. It is run for real.
 
         when(mockExecutionResult.getExitValue()).thenReturn(0);
         when(mockExecutionResult.getStdErr()).thenReturn("STDERROR");
@@ -293,22 +235,6 @@ public class TikaTest extends AbstractBaseTest
     {
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         super.noExtensionSourceFilenameTest();
-    }
-
-    @Test
-    @Override
-    public void badSourceFilenameTest() throws Exception
-    {
-        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
-        super.badSourceFilenameTest();
-    }
-
-    @Test
-    @Override
-    public void blankSourceFilenameTest() throws Exception
-    {
-        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
-        super.blankSourceFilenameTest();
     }
 
     @Test

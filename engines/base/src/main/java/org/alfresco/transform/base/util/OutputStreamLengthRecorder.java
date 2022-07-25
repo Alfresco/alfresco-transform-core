@@ -44,6 +44,11 @@ public class OutputStreamLengthRecorder extends FilterOutputStream
         return byteCount;
     }
 
+    public void setByteCount(long byteCount)
+    {
+        this.byteCount = byteCount;
+    }
+
     public void write(int b) throws IOException
     {
         super.write(b);
@@ -53,6 +58,5 @@ public class OutputStreamLengthRecorder extends FilterOutputStream
     public void write(byte b[], int off, int len) throws IOException
     {
         super.write(b, off, len);
-        byteCount += len;
     }
 }

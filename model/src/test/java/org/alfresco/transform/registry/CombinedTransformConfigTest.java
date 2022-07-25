@@ -21,15 +21,20 @@
  */
 package org.alfresco.transform.registry;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.alfresco.transform.common.TransformConfigResourceReader;
 import org.alfresco.transform.config.SupportedSourceAndTarget;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.config.TransformStep;
 import org.alfresco.transform.config.Transformer;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -201,7 +206,16 @@ public class CombinedTransformConfigTest
         }
     };
 
-    private final TestTransformRegistry registry = new TestTransformRegistry();
+    private final FakeTransformRegistry registry = new FakeTransformRegistry();
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    private TransformConfig readTransformConfigFromResource(String filename) throws IOException
+    {
+        return objectMapper.readValue(
+            getClass().getClassLoader().getResourceAsStream(filename),
+            TransformConfig.class);
+    }
 
     private String expectedWildcardError(String errorReason)
     {
@@ -889,8 +903,62 @@ public class CombinedTransformConfigTest
         config.addTransformConfig(transformConfig, READ_FROM_B, BASE_URL_B, registry);
         config.combineTransformerConfig(registry);
 
-        String expected = expectedWildcardError("the step transforms don't support any");
+        assertEquals(expectedWildcardError("the step transforms don't support any"), registry.errorMessages.get(0));
+    }
+
+    @Test
+    public void testJsonComplete() throws Exception
+    {
+        TransformConfig transformConfig = readTransformConfigFromResource("engine_config_complete.json");
+
+        config.addTransformConfig(transformConfig, READ_FROM_B, BASE_URL_B, registry);
+        config.combineTransformerConfig(registry);
+        TransformConfig combinedTransformConfig = config.buildTransformConfig();
+
+        assertEquals(0, registry.errorMessages.size());
+        assertEquals(1, combinedTransformConfig.getTransformers().size());
+        assertEquals(1, combinedTransformConfig.getTransformOptions().size());
+    }
+
+    @Test
+    public void testJsonDuplicateOptionsAndSupportedMimetypes() throws Exception
+    {
+        TransformConfig transformConfig = readTransformConfigFromResource("engine_config_with_duplicates.json");
+
+        config.addTransformConfig(transformConfig, READ_FROM_B, BASE_URL_B, registry);
+        config.combineTransformerConfig(registry);
+        TransformConfig combinedTransformConfig = config.buildTransformConfig();
+
+        assertEquals(0, registry.errorMessages.size());
+        assertEquals(1, combinedTransformConfig.getTransformers().size());
+        assertEquals(1, combinedTransformConfig.getTransformOptions().size());
+    }
+
+    @Test
+    public void testJsonNoOptions() throws Exception
+    {
+        TransformConfig transformConfig = readTransformConfigFromResource("engine_config_no_transform_options.json");
+
+        config.addTransformConfig(transformConfig, READ_FROM_B, BASE_URL_B, registry);
+        config.combineTransformerConfig(registry);
+        TransformConfig combinedTransformConfig = config.buildTransformConfig();
+
+        assertEquals(0, registry.errorMessages.size());
+        assertEquals(1, combinedTransformConfig.getTransformers().size());
+        assertEquals(0, combinedTransformConfig.getTransformOptions().size());
+    }
+
+    @Test
+    public void testJsonIncompleteNoTransformName() throws Exception
+    {
+        TransformConfig transformConfig = readTransformConfigFromResource("engine_config_incomplete.json");
+
+        config.addTransformConfig(transformConfig, READ_FROM_B, BASE_URL_B, registry);
+        config.combineTransformerConfig(registry);
+        TransformConfig combinedTransformConfig = config.buildTransformConfig();
+
         assertEquals(1, registry.errorMessages.size());
-        assertEquals(expected, registry.errorMessages.get(0));
+        assertEquals("Transformer names may not be null. Read from readFromB", registry.errorMessages.get(0));
+        assertEquals(0, combinedTransformConfig.getTransformers().size());
     }
 }

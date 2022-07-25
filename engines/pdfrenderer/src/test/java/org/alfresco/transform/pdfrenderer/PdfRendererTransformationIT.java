@@ -49,10 +49,9 @@ import org.springframework.http.ResponseEntity;
 /**
  * @author Cezar Leahu
  */
-public class AlfrescoPdfRendererTransformationIT
+public class PdfRendererTransformationIT
 {
-    private static final Logger logger = LoggerFactory.getLogger(
-        AlfrescoPdfRendererTransformationIT.class);
+    private static final Logger logger = LoggerFactory.getLogger(PdfRendererTransformationIT.class);
     private static final String ENGINE_URL = "http://localhost:8090";
 
     private static final Map<String, FileInfo> TEST_FILES = Stream.of(

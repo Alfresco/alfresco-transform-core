@@ -33,25 +33,43 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
 import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
 import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
+import org.alfresco.transform.base.model.FileRefEntity;
+import org.alfresco.transform.base.model.FileRefResponse;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.config.TransformConfig;
+import org.codehaus.plexus.util.FileUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.stubbing.Answer;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringJoiner;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.alfresco.transform.base.AbstractBaseTest.getTestFile;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_BMP;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
@@ -76,6 +94,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -83,7 +107,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Testing base t-engine TransformController functionality.
+ * Tests the endpoints of the TransformController. Testing of transforms is limit as in that is covered by
+ * {@link TransformHandlerTest}.
  *
  * Also see {@link TransformControllerAllInOneTest}.
  */
@@ -103,6 +128,29 @@ public class TransformControllerTest
     protected ObjectMapper objectMapper;
     @Autowired
     private String coreVersion;
+    @TempDir
+    public File tempDir;
+    @MockBean
+    protected AlfrescoSharedFileStoreClient fakeSfsClient;
+    @BeforeEach
+    public void fakeSfsClient()
+    {
+        final Map<String,File> sfsRef2File = new HashMap<>();
+        when(fakeSfsClient.saveFile(any())).thenAnswer((Answer) invocation -> {
+            File originalFile = (File) invocation.getArguments()[0];
+
+            // Make a copy as the original might get deleted
+            File fileCopy = new File(tempDir, originalFile.getName()+"copy");
+            FileUtils.copyFile(originalFile, fileCopy);
+
+            String fileRef = UUID.randomUUID().toString();
+            sfsRef2File.put(fileRef, fileCopy);
+            return new FileRefResponse(new FileRefEntity(fileRef));
+        });
+        when(fakeSfsClient.retrieveFile(any())).thenAnswer((Answer) invocation ->
+            ResponseEntity.ok().header(CONTENT_DISPOSITION,"attachment; filename*=UTF-8''transform.tmp")
+            .body((Resource) new UrlResource(sfsRef2File.get(invocation.getArguments()[0]).toURI())));
+    }
 
     @Test
     public void testInitEngine() throws Exception
@@ -228,6 +276,7 @@ public class TransformControllerTest
         TransformConfig config = objectMapper.readValue(
             mockMvc.perform(MockMvcRequestBuilders.get(url))
                    .andExpect(status().isOk())
+                   .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
                    .andReturn()
                    .getResponse()
                    .getContentAsString(), TransformConfig.class);
@@ -248,7 +297,44 @@ public class TransformControllerTest
     }
 
     @Test
-    public void testTransformEndpoint() throws Exception
+    public void testTransformEndpointThatUsesTransformRequests() throws Exception
+    {
+        File sourceFile = getTestFile("quick.txt", true, tempDir);
+        String sourceFileRef = fakeSfsClient.saveFile(sourceFile).getEntry().getFileRef();
+
+        TransformRequest transformRequest = TransformRequest.builder()
+                .withRequestId("1")
+                .withSchema(1)
+                .withClientData("Alfresco Digital Business Platform")
+//                .withTransformRequestOptions(ImmutableMap.of(DIRECT_ACCESS_URL, "file://"+sourceFile.toPath()))
+                .withSourceReference(sourceFileRef)
+                .withSourceMediaType(MIMETYPE_TEXT_PLAIN)
+                .withSourceSize(sourceFile.length())
+                .withTargetMediaType(MIMETYPE_PDF)
+                .withInternalContextForTransformEngineTests()
+                .build();
+
+        String transformRequestJson = objectMapper.writeValueAsString(transformRequest);
+        String transformReplyJson = mockMvc
+                .perform(MockMvcRequestBuilders
+                        .post(ENDPOINT_TRANSFORM)
+                        .header(ACCEPT, APPLICATION_JSON_VALUE)
+                        .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                        .content(transformRequestJson))
+                .andExpect(status().is(CREATED.value()))
+                .andReturn().getResponse().getContentAsString();
+        TransformReply transformReply = objectMapper.readValue(transformReplyJson, TransformReply.class);
+        String newValue = new String(fakeSfsClient.retrieveFile(transformReply.getTargetReference()).getBody()
+                .getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+
+        assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
+        assertEquals(transformRequest.getClientData(), transformReply.getClientData());
+        assertEquals(transformRequest.getSchema(), transformReply.getSchema());
+        assertEquals("Original Text -> TxT2Pdf()", newValue);
+    }
+
+    @Test
+    public void testTransformEndpointThatUploadsAndDownloadsContent() throws Exception
     {
         MvcResult mvcResult = mockMvc.perform(
             MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
@@ -268,7 +354,7 @@ public class TransformControllerTest
     }
 
     @Test
-    public void testTestTransformEndpointConvertsRequestParameters() throws Exception
+    public void testTestTransformEndpointWhichConvertsRequestParameters() throws Exception
     {
         TransformHandler orig = transformController.transformHandler;
         try

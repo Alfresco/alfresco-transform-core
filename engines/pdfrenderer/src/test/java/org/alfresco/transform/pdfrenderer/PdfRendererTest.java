@@ -123,12 +123,6 @@ public class PdfRendererTest extends AbstractBaseTest
     }
 
     @Override
-    public String getEngineConfigName()
-    {
-        return ENGINE_CONFIG_NAME;
-    }
-
-    @Override
     public void mockTransformCommand(String sourceExtension,
         String targetExtension, String sourceMimetype,
         boolean readTargetFileBytes) throws IOException

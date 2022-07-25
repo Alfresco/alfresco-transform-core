@@ -26,28 +26,29 @@
  */
 package org.alfresco.transform.base;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG_LATEST;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.ACCEPT;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
+import org.alfresco.transform.base.model.FileRefEntity;
+import org.alfresco.transform.base.model.FileRefResponse;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.client.model.InternalContext;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.messages.TransformStack;
+import org.alfresco.transform.registry.TransformServiceRegistry;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -57,47 +58,28 @@ import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
-import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.client.model.InternalContext;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.config.SupportedSourceAndTarget;
-import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.config.TransformOption;
-import org.alfresco.transform.config.TransformOptionGroup;
-import org.alfresco.transform.config.TransformOptionValue;
-import org.alfresco.transform.config.Transformer;
-import org.alfresco.transform.registry.TransformServiceRegistry;
-import org.alfresco.transform.messages.TransformStack;
-import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
-import org.alfresco.transform.base.model.FileRefEntity;
-import org.alfresco.transform.base.model.FileRefResponse;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Super class for testing.
@@ -106,7 +88,9 @@ import com.google.common.collect.ImmutableSet;
 @AutoConfigureMockMvc
 public abstract class AbstractBaseTest
 {
-    @TempDir // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication
+    // Added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test
+    // resource duplication
+    @TempDir
     public File tempDir;
 
     @Autowired
@@ -159,6 +143,32 @@ public abstract class AbstractBaseTest
 
     protected abstract void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest);
 
+//    static void assertConfig(String url, String expectedTransformers, String expectedOptions,
+//        MockMvc mockMvc, ObjectMapper objectMapper) throws Exception
+//    {
+//        TransformConfig config = objectMapper.readValue(
+//            mockMvc.perform(MockMvcRequestBuilders.get(url))
+//                   .andExpect(status().isOk())
+//                   .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+//                   .andReturn()
+//                   .getResponse()
+//                   .getContentAsString(), TransformConfig.class);
+//
+//        // Gets a list of transformerNames,coreVersion,optionNames
+//        assertEquals(expectedTransformers,
+//            config.getTransformers().stream()
+//                  .map(t -> t.getTransformerName()+","
+//                                +t.getCoreVersion()+","
+//                                +t.getTransformOptions().stream().sorted().collect(Collectors.joining(",")))
+//                  .sorted()
+//                  .collect(Collectors.joining("\n")));
+//
+//        assertEquals(expectedOptions,
+//            config.getTransformOptions().keySet().stream()
+//                  .sorted()
+//                  .collect(Collectors.joining(",")));
+//    }
+//
     /**
      * This method ends up being the core of the mock.
      * It copies content from an existing file in the resources folder to the desired location
@@ -199,16 +209,22 @@ public abstract class AbstractBaseTest
 
     protected File getTestFile(String testFilename, boolean required) throws IOException
     {
+        return getTestFile(testFilename, required, tempDir);
+    }
+
+    public static File getTestFile(String testFilename, boolean required, File tempDir) throws IOException
+    {
         File testFile = null;
-        ClassLoader classLoader = getClass().getClassLoader();
+        ClassLoader classLoader = AbstractBaseTest.class.getClassLoader();
         URL testFileUrl = classLoader.getResource(testFilename);
         if (required && testFileUrl == null)
         {
             throw new IOException("The test file " + testFilename +
                     " does not exist in the resources directory");
         }
-        // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication
-        if (testFileUrl!=null)
+        // Added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test
+        // resource duplication
+        if (testFileUrl != null)
         {
             // Each use of the tempDir should result in a unique directory being used
             testFile = new File(tempDir, testFilename);
@@ -265,26 +281,19 @@ public abstract class AbstractBaseTest
 
     protected TransformRequest createTransformRequest(String sourceFileRef, File sourceFile)
     {
-        TransformRequest transformRequest = new TransformRequest();
-        transformRequest.setRequestId("1");
-        transformRequest.setSchema(1);
-        transformRequest.setClientData("Alfresco Digital Business Platform");
-        transformRequest.setTransformRequestOptions(options);
-        transformRequest.setSourceReference(sourceFileRef);
-        transformRequest.setSourceExtension(sourceExtension);
-        transformRequest.setSourceMediaType(sourceMimetype);
-        transformRequest.setSourceSize(sourceFile.length());
-        transformRequest.setTargetExtension(targetExtension);
-        transformRequest.setTargetMediaType(targetMimetype);
-        transformRequest.setInternalContext(InternalContext.initialise(null));
-        transformRequest.getInternalContext().getMultiStep().setInitialRequestId("123");
-        transformRequest.getInternalContext().getMultiStep().setInitialSourceMediaType(sourceMimetype);
-        TransformStack.setInitialTransformRequestOptions(transformRequest.getInternalContext(), options);
-        TransformStack.setInitialSourceReference(transformRequest.getInternalContext(), sourceFileRef);
-        TransformStack.addTransformLevel(transformRequest.getInternalContext(),
-                TransformStack.levelBuilder(TransformStack.PIPELINE_FLAG)
-                        .withStep("transformerName", sourceMimetype, targetMimetype));
-        return transformRequest;
+        return TransformRequest.builder()
+        .withRequestId("1")
+        .withSchema(1)
+        .withClientData("Alfresco Digital Business Platform")
+        .withTransformRequestOptions(options)
+        .withSourceReference(sourceFileRef)
+        .withSourceExtension(sourceExtension)
+        .withSourceMediaType(sourceMimetype)
+        .withSourceSize(sourceFile.length())
+        .withTargetExtension(targetExtension)
+        .withTargetMediaType(targetMimetype)
+        .withInternalContextForTransformEngineTests()
+        .build();
     }
 
     @Test
@@ -340,28 +349,6 @@ public abstract class AbstractBaseTest
     }
 
     @Test
-    // Invalid file name that ends in /
-    public void badSourceFilenameTest() throws Exception
-    {
-        sourceFile = new MockMultipartFile("file", "abc/", sourceMimetype, sourceFileBytes);
-
-        mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
-               .andExpect(status().is(BAD_REQUEST.value()))
-               .andExpect(status().reason(containsString("The source filename was not supplied")));
-    }
-
-    @Test
-    public void blankSourceFilenameTest() throws Exception
-    {
-        sourceFile = new MockMultipartFile("file", "", sourceMimetype, sourceFileBytes);
-
-        mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
-               .andExpect(status().is(BAD_REQUEST.value()));
-    }
-
-    @Test
     public void calculateMaxTime() throws Exception
     {
         ProbeTransform probeTransform = controller.probeTransform;
@@ -414,187 +401,6 @@ public abstract class AbstractBaseTest
         assertEquals(BAD_REQUEST.value(), transformReply.getStatus());
     }
 
-    /**
-     *
-     * @return transformer specific engine config name
-     */
-    public String getEngineConfigName()
-    {
-        return "engine_config.json";
-    }
-
-    @Test
-    public void testGetTransformConfigInfo() throws Exception
-    {
-        TransformConfig expectedTransformConfig = objectMapper
-            .readValue(getTestFile(getEngineConfigName(), true),
-                TransformConfig.class);
-        expectedTransformConfig.getTransformers().forEach(transformer -> {
-            transformer.setCoreVersion(coreVersion);
-            transformer.getTransformOptions().add(DIRECT_ACCESS_URL);
-        });
-        expectedTransformConfig.getTransformOptions().put(DIRECT_ACCESS_URL, Set.of(new TransformOptionValue(false, DIRECT_ACCESS_URL)));
-
-        ReflectionTestUtils.setField(transformRegistry, "engineConfig",
-            new ClassPathResource(getEngineConfigName()));
-
-        String response = mockMvc
-            .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG_LATEST))
-            .andExpect(request().asyncStarted())
-            .andDo(MvcResult::getAsyncResult)
-            .andExpect(status().isOk())
-            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-            .andReturn().getResponse().getContentAsString();
-
-        TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
-        assertEquals(expectedTransformConfig, transformConfig);
-    }
-
-    @Test
-    // Test for case when T-Router or Repository is a version that does not expect it
-    public void testGetTransformConfigInfoExcludingCoreVersion() throws Exception
-    {
-        TransformConfig expectedTransformConfig = objectMapper
-            .readValue(getTestFile(getEngineConfigName(), true),
-                TransformConfig.class);
-
-        ReflectionTestUtils.setField(transformRegistry, "engineConfig",
-            new ClassPathResource(getEngineConfigName()));
-
-        String response = mockMvc
-            .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
-            .andExpect(request().asyncStarted())
-            .andDo(MvcResult::getAsyncResult)
-            .andExpect(status().isOk())
-            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-            .andReturn().getResponse().getContentAsString();
-
-        TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
-        assertEquals(expectedTransformConfig, transformConfig);
-    }
-
-    @Test
-    public void testGetInfoFromConfigWithDuplicates() throws Exception
-    {
-        TransformConfig expectedResult = buildCompleteTransformConfig();
-
-        ReflectionTestUtils.setField(transformRegistry, "engineConfig",
-            new ClassPathResource("engine_config_with_duplicates.json"));
-
-        String response = mockMvc
-            .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
-            .andExpect(request().asyncStarted())
-            .andDo(MvcResult::getAsyncResult)
-            .andExpect(status().isOk())
-            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-            .andReturn().getResponse().getContentAsString();
-
-        TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
-
-        assertNotNull(transformConfig);
-        assertEquals(expectedResult, transformConfig);
-        assertEquals(3, transformConfig.getTransformOptions().get("engineXOptions").size());
-        assertEquals(1,
-            transformConfig.getTransformers().get(0).getSupportedSourceAndTargetList().size());
-        assertEquals(1,
-            transformConfig.getTransformers().get(0).getTransformOptions().size());
-    }
-
-    @Test
-    public void testGetInfoFromConfigWithEmptyTransformOptions() throws Exception
-    {
-        Transformer transformer = buildTransformer("application/pdf", "image/png");
-        TransformConfig expectedResult = new TransformConfig();
-        expectedResult.setTransformers(ImmutableList.of(transformer));
-
-        ReflectionTestUtils.setField(transformRegistry, "engineConfig",
-            new ClassPathResource("engine_config_incomplete.json"));
-
-        String response = mockMvc
-            .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
-            .andExpect(request().asyncStarted())
-            .andDo(MvcResult::getAsyncResult)
-            .andExpect(status().isOk())
-            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-            .andReturn().getResponse().getContentAsString();
-
-        TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
-
-        assertNotNull(transformConfig);
-        assertEquals(expectedResult, transformConfig);
-    }
-
-    @Test
-    public void testGetInfoFromConfigWithNoTransformOptions() throws Exception
-    {
-        Transformer transformer = buildTransformer("application/pdf", "image/png");
-        transformer.setTransformerName("engineX");
-        TransformConfig expectedResult = new TransformConfig();
-        expectedResult.setTransformers(ImmutableList.of(transformer));
-
-        ReflectionTestUtils.setField(transformRegistry, "engineConfig",
-            new ClassPathResource("engine_config_no_transform_options.json"));
-
-        String response = mockMvc
-            .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
-            .andExpect(request().asyncStarted())
-            .andDo(MvcResult::getAsyncResult)
-            .andExpect(status().isOk())
-            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-            .andReturn().getResponse().getContentAsString();
-
-        TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
-
-        assertNotNull(transformConfig);
-        assertEquals(expectedResult, transformConfig);
-    }
-
-    private TransformConfig buildCompleteTransformConfig()
-    {
-        TransformConfig expectedResult = new TransformConfig();
-
-        Set<TransformOption> transformOptionGroup = ImmutableSet.of(
-            new TransformOptionValue(false, "cropGravity"));
-        Set<TransformOption> transformOptions = ImmutableSet.of(
-            new TransformOptionValue(false, "page"),
-            new TransformOptionValue(false, "width"),
-            new TransformOptionGroup(false, transformOptionGroup));
-        Map<String, Set<TransformOption>> transformOptionsMap = ImmutableMap.of("engineXOptions",
-            transformOptions);
-
-        Transformer transformer = buildTransformer("application/pdf", "image/png", "engineXOptions",
-            "engineX");
-        List<Transformer> transformers = ImmutableList.of(transformer);
-
-        expectedResult.setTransformOptions(transformOptionsMap);
-        expectedResult.setTransformers(transformers);
-
-        return expectedResult;
-    }
-
-    private Transformer buildTransformer(String sourceMediaType, String targetMediaType,
-        String transformOptions, String transformerName)
-    {
-        Transformer transformer = buildTransformer(sourceMediaType, targetMediaType);
-        transformer.setTransformerName(transformerName);
-        transformer.setTransformOptions(ImmutableSet.of(transformOptions));
-
-        return transformer;
-    }
-
-    private Transformer buildTransformer(String sourceMediaType, String targetMediaType)
-    {
-        Set<SupportedSourceAndTarget> supportedSourceAndTargetList = ImmutableSet.of(
-            SupportedSourceAndTarget.builder()
-                .withSourceMediaType(sourceMediaType)
-                .withTargetMediaType(targetMediaType)
-                .build());
-
-        Transformer transformer = new Transformer();
-        transformer.setSupportedSourceAndTargetList(supportedSourceAndTargetList);
-        return transformer;
-    }
-
     @Test
     public void queueTransformRequestUsingDirectAccessUrlTest() throws Exception
     {
@@ -609,7 +415,7 @@ public abstract class AbstractBaseTest
         String directUrl = "file://" + sourceFile.toPath();
 
         transformRequestOptions.put(DIRECT_ACCESS_URL, directUrl);
-        transformRequest.setTransformRequestOptions(transformRequestOptions);
+//        transformRequest.setTransformRequestOptions(transformRequestOptions);
 
         when(alfrescoSharedFileStoreClient.saveFile(any()))
                 .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
@@ -621,15 +427,13 @@ public abstract class AbstractBaseTest
         String tr = objectMapper.writeValueAsString(transformRequest);
         String transformationReplyAsString = mockMvc
                 .perform(MockMvcRequestBuilders
-                        .post("/transform")
+                        .post(ENDPOINT_TRANSFORM)
                         .header(ACCEPT, APPLICATION_JSON_VALUE)
                         .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                         .content(tr))
                 .andExpect(status().is(CREATED.value()))
                 .andReturn().getResponse().getContentAsString();
-
-        TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,
-                TransformReply.class);
+        TransformReply transformReply = objectMapper.readValue(transformationReplyAsString, TransformReply.class);
 
         // Assert the reply
         assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
@@ -643,11 +447,16 @@ public abstract class AbstractBaseTest
         File dauSourceFile = getTestFile("quick." + sourceExtension, true);
         String directUrl = "file://" + dauSourceFile.toPath();
 
-        ResultActions resultActions = mockMvc.perform(
-                mockMvcRequest(ENDPOINT_TRANSFORM, null)
-                        .param("targetExtension", targetExtension)
-                        .param(DIRECT_ACCESS_URL, directUrl))
-                .andExpect(status().is(OK.value()));
+        MvcResult mvcResult = mockMvc.perform(
+             mockMvcRequest(ENDPOINT_TRANSFORM, null)
+            .param(DIRECT_ACCESS_URL, directUrl))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+
+        ResultActions resultActions = mockMvc.perform(asyncDispatch(mvcResult))
+            .andExpect(status().isOk())
+            .andExpect(header().string("Content-Disposition",
+                "attachment; filename*=UTF-8''transform."+targetExtension));
 
         if (expectedTargetFileBytes != null)
         {

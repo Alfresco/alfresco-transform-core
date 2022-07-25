@@ -31,6 +31,7 @@ import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.mail.Header;
 import javax.mail.internet.InternetAddress;
@@ -71,6 +72,7 @@ import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExt
  * @author Derek Hulley
  * @author adavis
  */
+@Component
 public class RFC822MetadataExtractor extends AbstractMetadataExtractor implements CustomTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(RFC822MetadataExtractor.class);

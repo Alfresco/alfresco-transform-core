@@ -52,6 +52,8 @@ public class TikaQueueTest extends AbstractQueueTest
             .withSchema(1)
             .withClientData("ACS")
             .withSourceReference(UUID.randomUUID().toString())
-            .withSourceSize(32L).build();
+            .withSourceSize(32L)
+            .withInternalContextForTransformEngineTests()
+            .build();
     }
 }

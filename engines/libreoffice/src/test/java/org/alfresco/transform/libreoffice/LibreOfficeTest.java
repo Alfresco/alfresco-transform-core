@@ -169,12 +169,6 @@ public class LibreOfficeTest extends AbstractBaseTest
 //    }
 
     @Override
-    public String getEngineConfigName()
-    {
-        return ENGINE_CONFIG_NAME;
-    }
-
-    @Override
     protected void mockTransformCommand(String sourceExtension, String targetExtension,
         String sourceMimetype, boolean readTargetFileBytes)
     {

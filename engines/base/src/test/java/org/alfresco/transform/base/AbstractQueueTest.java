@@ -46,7 +46,8 @@ import org.springframework.jms.core.JmsTemplate;
 
 /**
  * Checks that a t-engine can respond to its message queue. This is really just checking that
- * ${queue.engineRequestQueue} has been configured. The transform request can (and does fail).
+ * ${queue.engineRequestQueue} has been configured. The transform request can (and does fail
+ * because the shared file store does not exist).
  *
  * @author Lucian Tuca
  * created on 15/01/2019
@@ -66,22 +67,6 @@ public abstract class AbstractQueueTest
     public void queueTransformServiceIT()
     {
         TransformRequest request = buildRequest();
-
-        // Router.initialiseContext(TransformRequest)
-        request.setInternalContext(InternalContext.initialise(request.getInternalContext()));
-        request.setTargetExtension(ExtensionService.getExtensionForTargetMimetype(request.getTargetMediaType(),
-            request.getSourceMediaType()));
-        request.getInternalContext().getMultiStep().setInitialRequestId(request.getRequestId());
-        request.getInternalContext().getMultiStep().setInitialSourceMediaType(request.getSourceMediaType());
-        request.getInternalContext().setTransformRequestOptions(request.getTransformRequestOptions());
-        setInitialTransformRequestOptions(request.getInternalContext(), request.getTransformRequestOptions());
-        TransformStack.setInitialSourceReference(request.getInternalContext(), request.getSourceReference());
-
-        TransformStack.addTransformLevel(request.getInternalContext(), levelBuilder(PIPELINE_FLAG) // pipeline of 1
-            .withStep(
-                "transformerName",
-                request.getSourceMediaType(),
-                request.getTargetMediaType()));
 
         jmsTemplate.convertAndSend(engineRequestQueue, request, m -> {
             m.setJMSCorrelationID(request.getRequestId());

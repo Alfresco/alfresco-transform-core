@@ -30,6 +30,7 @@ import org.alfresco.transform.base.AbstractBaseTest;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.config.TransformConfig;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.ResponseEntity;
@@ -51,13 +52,13 @@ public class AIOTest extends AbstractBaseTest
 
     //@Override
     protected void mockTransformCommand(String sourceExtension, String targetExtension, String sourceMimetype,
-            boolean readTargetFileBytes) throws IOException {
-        // TODO Auto-generated method stub
+            boolean readTargetFileBytes) throws IOException
+    {
     }
 
     //@Override
-    protected void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest) {
-        // TODO Auto-generated method stub
+    protected void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest)
+    {
     }
 
     @Test

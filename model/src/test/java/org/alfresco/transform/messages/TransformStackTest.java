@@ -88,7 +88,7 @@ class TransformStackTest
     {
         MockitoAnnotations.openMocks(this);
 
-        // Repeat what is done by Router.initialiseContext
+        // Repeat what is done by Router.initialiseContextWhenReceivedByRouter
         internalContext.setMultiStep(new MultiStep());
         internalContext.getMultiStep().setTransformsToBeDone(new ArrayList<>());
         TransformStack.setInitialTransformRequestOptions(internalContext, options);

@@ -34,11 +34,12 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Manages the input and output streams and any temporary files that have been created, which will need to be deleted.
+ * Manages the input and output streams and any temporary files that have been created.
  */
 @Component
 public class TransformManagerImpl implements TransformManager
@@ -52,27 +53,11 @@ public class TransformManagerImpl implements TransformManager
     private String targetMimetype;
     private File sourceFile;
     private File targetFile;
+    private boolean keepTargetFile;
     private boolean createSourceFileCalled;
     private boolean createTargetFileCalled;
-    private boolean sourceFileCreated;
-    private boolean targetFileCreated;
-
-    private TransformManagerImpl()
-    {
-    }
-
-    public void init()
-    {
-        request = null;
-        inputStream = null;
-        outputStreamLengthRecorder = null;
-        sourceFile = null;
-        targetFile = null;
-        createSourceFileCalled = false;
-        createTargetFileCalled = false;
-        sourceFileCreated = false;
-        targetFileCreated = false;
-    }
+    private Boolean startedWithSourceFile;
+    private Boolean startedWithTargetFile;
 
     public void setRequest(HttpServletRequest request)
     {
@@ -82,6 +67,10 @@ public class TransformManagerImpl implements TransformManager
     public InputStream setInputStream(InputStream inputStream)
     {
         this.inputStream = inputStream;
+        if (startedWithSourceFile == null)
+        {
+            startedWithSourceFile = false;
+        }
         return inputStream;
     }
 
@@ -92,8 +81,12 @@ public class TransformManagerImpl implements TransformManager
 
     public OutputStream setOutputStream(OutputStream outputStream)
     {
-        this.outputStreamLengthRecorder = new OutputStreamLengthRecorder(outputStream);
-        return outputStream;
+        outputStreamLengthRecorder = new OutputStreamLengthRecorder(outputStream);
+        if (startedWithTargetFile == null)
+        {
+            startedWithTargetFile = false;
+        }
+        return outputStreamLengthRecorder;
     }
 
     public Long getOutputLength()
@@ -119,27 +112,30 @@ public class TransformManagerImpl implements TransformManager
     public void setSourceFile(File sourceFile)
     {
         this.sourceFile = sourceFile;
+        if (startedWithSourceFile == null)
+        {
+            startedWithSourceFile = true;
+        }
     }
 
-    public File getTargetFile() {
+    public File getTargetFile()
+    {
         return targetFile;
     }
 
     File setTargetFile(File targetFile)
     {
         this.targetFile = targetFile;
+        if (startedWithTargetFile == null)
+        {
+            startedWithTargetFile = true;
+        }
         return targetFile;
     }
 
-
-    public void setTargetFileCreated()
+    public void keepTargetFile()
     {
-        targetFileCreated = true;
-    }
-
-    public void setSourceFileCreated()
-    {
-        sourceFileCreated = true;
+        keepTargetFile = true;
     }
 
     @Override public File createSourceFile()
@@ -153,7 +149,6 @@ public class TransformManagerImpl implements TransformManager
         if (sourceFile == null)
         {
             sourceFile = FileManager.createSourceFile(request, inputStream, sourceMimetype);
-            sourceFileCreated = true;
         }
         return sourceFile;
     }
@@ -169,36 +164,45 @@ public class TransformManagerImpl implements TransformManager
         if (targetFile == null)
         {
             targetFile = FileManager.createTargetFile(request, sourceMimetype, targetMimetype);
-            targetFileCreated = true;
         }
         return targetFile;
     }
 
-    public void ifUsedCopyTargetFileToOutputStream()
+    public void copyTargetFileToOutputStream() throws IOException
     {
-        if (targetFileCreated)
+        if (targetFile != null)
         {
-            FileManager.copyFileToOutputStream(targetFile, outputStreamLengthRecorder);
+            if (startedWithTargetFile == false)
+            {
+                FileManager.copyFileToOutputStream(targetFile, outputStreamLengthRecorder);
+            }
+            else if (createTargetFileCalled)
+            {
+                outputStreamLengthRecorder.setByteCount(targetFile.length());
+            }
+            else
+            {
+                outputStreamLengthRecorder.flush();
+            }
         }
     }
 
-    public void deleteSourceFileIfCreated()
+    public void deleteSourceFile()
     {
-        if (sourceFile != null && sourceFileCreated && !sourceFile.delete())
+        if (sourceFile != null && !sourceFile.delete())
         {
             logger.error("Failed to delete temporary source file "+sourceFile.getPath());
         }
         sourceFile = null;
     }
 
-    public void deleteTargetFileIfCreated()
+    public void deleteTargetFile()
     {
-        if (targetFile != null && targetFileCreated && !targetFile.delete())
+        if (!keepTargetFile && targetFile != null && !targetFile.delete())
         {
             logger.error("Failed to delete temporary target file "+targetFile.getPath());
         }
         targetFile = null;
-        targetFileCreated = false;
     }
 
     @Override
@@ -212,62 +216,5 @@ public class TransformManagerImpl implements TransformManager
 
         // TODO send the current output as a TransformResponse and then start a new one.
         throw new UnsupportedOperationException("Not currently supported");
-    }
-
-    public static Builder builder()
-    {
-        return new Builder();
-    }
-
-    public static class Builder
-    {
-        private final TransformManagerImpl transformManager = new TransformManagerImpl();
-
-        public TransformManagerImpl build()
-        {
-            return transformManager;
-        }
-
-        public Builder withSourceMimetype(String sourceMimetype)
-        {
-            transformManager.sourceMimetype = sourceMimetype;
-            return this;
-        }
-
-        public Builder withTargetMimetype(String targetMimetype)
-        {
-            transformManager.targetMimetype = targetMimetype;
-            return this;
-        }
-
-        public Builder withInputStream(InputStream inputStream)
-        {
-            transformManager.inputStream = inputStream;
-            return this;
-        }
-
-        public Builder withOutputStream(OutputStreamLengthRecorder outputStream)
-        {
-            transformManager.setOutputStream(outputStream);
-            return this;
-        }
-
-        public Builder withRequest(HttpServletRequest request)
-        {
-            transformManager.request = request;
-            return this;
-        }
-
-        public Builder withSourceFile(File sourceFile)
-        {
-            transformManager.sourceFile = sourceFile;
-            return this;
-        }
-
-        public Builder withTargetFile(File targetFile)
-        {
-            transformManager.targetFile = targetFile;
-            return this;
-        }
     }
 }

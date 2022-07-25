@@ -61,7 +61,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
     FakeTransformEngineWithTwoCustomTransformers.class,
     FakeTransformerTxT2Pdf.class,
     FakeTransformerPdf2Png.class})
-public class HttpTest
+public class RestTest
 {
     @Autowired
     private TestRestTemplate restTemplate;
