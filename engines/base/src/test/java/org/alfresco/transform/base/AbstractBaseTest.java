@@ -333,7 +333,6 @@ public abstract class AbstractBaseTest
     }
 
     @Test
-    // Is okay, as the target filename is built up from the whole source filename and the targetExtension
     public void noExtensionSourceFilenameTest() throws Exception
     {
         sourceFile = new MockMultipartFile("file", "../quick", sourceMimetype, sourceFileBytes);
@@ -415,7 +414,6 @@ public abstract class AbstractBaseTest
         String directUrl = "file://" + sourceFile.toPath();
 
         transformRequestOptions.put(DIRECT_ACCESS_URL, directUrl);
-//        transformRequest.setTransformRequestOptions(transformRequestOptions);
 
         when(alfrescoSharedFileStoreClient.saveFile(any()))
                 .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
