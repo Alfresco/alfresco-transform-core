@@ -50,9 +50,12 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_RFC822;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
+import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -427,7 +430,7 @@ public class MiscTest extends AbstractBaseTest
     {
         MvcResult result = sendRequest("numbers", null, MIMETYPE_IWORK_NUMBERS,
             "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("pages"));
-        assertTrue(result.getResponse().getContentLengthLong() > 0L,
+        assertTrue(result.getResponse().getContentAsByteArray().length > 0L,
             "Expected image content but content is empty.");
     }
 
@@ -436,7 +439,7 @@ public class MiscTest extends AbstractBaseTest
     {
         MvcResult result = sendRequest("numbers", null, MIMETYPE_IWORK_NUMBERS,
             "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("numbers"));
-        assertTrue(result.getResponse().getContentLengthLong() > 0L,
+        assertTrue(result.getResponse().getContentAsByteArray().length > 0L,
             "Expected image content but content is empty.");
     }
 
@@ -445,17 +448,17 @@ public class MiscTest extends AbstractBaseTest
     {
         MvcResult result = sendRequest("key", null, MIMETYPE_IWORK_KEYNOTE,
             "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("key"));
-        assertTrue(result.getResponse().getContentLengthLong() > 0L,
+        assertTrue(result.getResponse().getContentAsByteArray().length > 0L,
             "Expected image content but content is empty.");
     }
 
-    //    @Test
+//    @Test
 // TODO Doesn't work with java 11, enable when fixed
     public void testOOXML() throws Exception
     {
         MvcResult result = sendRequest("docx", null, MIMETYPE_OPENXML_WORDPROCESSING,
             "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("docx"));
-        assertTrue(result.getResponse().getContentLengthLong() > 0L,
+        assertTrue(result.getResponse().getContentAsByteArray().length > 0L,
             "Expected image content but content is empty.");
     }
 
@@ -474,9 +477,8 @@ public class MiscTest extends AbstractBaseTest
 
         final MockHttpServletRequestBuilder requestBuilder = super
             .mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile)
-            .param("targetExtension", targetExtension)
-            .param("targetMimetype", targetMimetype)
-            .param("sourceMimetype", sourceMimetype);
+            .param(TARGET_MIMETYPE, targetMimetype)
+            .param(SOURCE_MIMETYPE, sourceMimetype);
 
         // SourceEncoding is available in the options but is not used to select the transformer as it is a known
         // like the source mimetype.
@@ -497,15 +499,17 @@ public class MiscTest extends AbstractBaseTest
             requestBuilder.param("extractMapping", extractMapping);
         }
 
-        return mockMvc.perform(requestBuilder)
-                      .andExpect(request().asyncStarted())
-                      .andDo(MvcResult::getAsyncResult)
-                      .andExpect(status().isOk())
-                      .andExpect(header().string("Content-Disposition",
-                          "attachment; filename*=" +
-                          (targetEncoding == null ? "UTF-8" : targetEncoding) +
-                          "''transform." + targetExtension))
-                      .andReturn();
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(request().asyncStarted())
+            .andReturn();
+
+        return mockMvc.perform(asyncDispatch(mvcResult))
+            .andExpect(status().isOk())
+            .andExpect(header().string("Content-Disposition",
+                  "attachment; filename*=" +
+                  (targetEncoding == null ? "UTF-8" : targetEncoding) +
+                  "''transform." + targetExtension))
+              .andReturn();
     }
 
     private String clean(String text)
