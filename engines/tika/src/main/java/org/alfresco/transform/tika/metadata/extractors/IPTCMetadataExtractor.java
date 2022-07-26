@@ -42,7 +42,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
 
 @Component
 public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractorEmbeddor

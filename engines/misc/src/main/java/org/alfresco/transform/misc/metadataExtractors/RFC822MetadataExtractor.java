@@ -28,7 +28,6 @@ package org.alfresco.transform.misc.metadataExtractors;
 
 import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -38,8 +37,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
 import javax.mail.internet.MimeUtility;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -50,7 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
 
 /**
  * Metadata extractor for RFC822 mime emails.
@@ -73,7 +70,7 @@ import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExt
  * @author adavis
  */
 @Component
-public class RFC822MetadataExtractor extends AbstractMetadataExtractor implements CustomTransformer
+public class RFC822MetadataExtractor extends AbstractMetadataExtractorEmbedder implements CustomTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(RFC822MetadataExtractor.class);
 

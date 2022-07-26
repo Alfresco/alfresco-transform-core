@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
 
 /**
  * Metadata extractor for the PDF documents.

@@ -28,7 +28,6 @@ package org.alfresco.transform.misc.metadataExtractors;
 
 import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +36,6 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -47,7 +44,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
 
 /**
  * Metadata extractor for HTML and XHTML.
@@ -66,7 +63,7 @@ import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExt
  * @author Derek Hulley
  * @author adavis
  */
-public class HtmlMetadataExtractor extends AbstractMetadataExtractor implements CustomTransformer
+public class HtmlMetadataExtractor extends AbstractMetadataExtractorEmbedder implements CustomTransformer
 {
     private static final Logger logger = LoggerFactory.getLogger(HtmlMetadataExtractor.class);
 

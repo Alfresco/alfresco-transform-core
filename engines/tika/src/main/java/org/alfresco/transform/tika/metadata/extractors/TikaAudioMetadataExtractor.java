@@ -44,7 +44,7 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Map;
 
-import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
 import static org.alfresco.transform.tika.transformers.Tika.readTikaConfig;
 
 /**

@@ -24,7 +24,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.base.metadataExtractors;
+package org.alfresco.transform.base.metadata;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -50,7 +50,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EMBEDDER;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EMBEDDER;
 
 /**
  * Helper methods for metadata extract and embed.
@@ -94,7 +94,7 @@ import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExt
  * @author Derek Hulley
  * @author adavis
  */
-public abstract class AbstractMetadataExtractor implements CustomTransformer
+public abstract class AbstractMetadataExtractorEmbedder implements CustomTransformer
 {
     private static final String EXTRACT = "extract";
     private static final String EMBED = "embed";
@@ -126,7 +126,7 @@ public abstract class AbstractMetadataExtractor implements CustomTransformer
 
     private final Type type;
 
-    public AbstractMetadataExtractor(Type type, Logger logger)
+    public AbstractMetadataExtractorEmbedder(Type type, Logger logger)
     {
         this.type = type;
         this.logger = logger;
@@ -385,7 +385,7 @@ public abstract class AbstractMetadataExtractor implements CustomTransformer
         Properties properties = null;
         try
         {
-            InputStream inputStream = AbstractMetadataExtractor.class.getClassLoader().getResourceAsStream(filename);
+            InputStream inputStream = AbstractMetadataExtractorEmbedder.class.getClassLoader().getResourceAsStream(filename);
             if (inputStream != null)
             {
                 properties = new Properties();

@@ -46,7 +46,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.StringJoiner;
 
-import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EMBEDDER;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EMBEDDER;
 
 /**
  * Sample POI metadata embedder to demonstrate it is possible to add custom T-Engines that will add

@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 import java.io.Serializable;
 import java.util.Map;
 
-import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.tika.transformers.Tika.readTikaConfig;
 

@@ -27,7 +27,7 @@
 package org.alfresco.transform.tika.metadata;
 
 import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor;
+import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
 import org.apache.tika.embedder.Embedder;
 import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.metadata.DublinCore;
@@ -65,6 +65,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type;
+
 /**
  * The parent of all Metadata Extractors which use Apache Tika under the hood. This handles all the
  * common parts of processing the files, and the common mappings.
@@ -80,7 +82,7 @@ import java.util.stream.Stream;
  * @author Nick Burch
  * @author adavis
  */
-public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMetadataExtractor
+public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMetadataExtractorEmbedder
 {
     protected static final String KEY_AUTHOR = "author";
     protected static final String KEY_TITLE = "title";
