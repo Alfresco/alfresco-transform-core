@@ -28,6 +28,7 @@ package org.alfresco.transform.misc.metadataExtractors;
 
 import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

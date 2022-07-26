@@ -82,7 +82,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  */
 public class LibreOfficeTest extends AbstractBaseTest
 {
-    protected static final String ENGINE_CONFIG_NAME = "libreoffice_engine_config.json";
     protected String targetMimetype = MIMETYPE_PDF;
 
     @Mock

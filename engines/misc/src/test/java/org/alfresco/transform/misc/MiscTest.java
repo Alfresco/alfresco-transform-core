@@ -67,8 +67,6 @@ public class MiscTest extends AbstractBaseTest
     protected final String targetEncoding = "UTF-8";
     protected final String targetMimetype = MIMETYPE_TEXT_PLAIN;
 
-    protected static final String ENGINE_CONFIG_NAME = "misc_engine_config.json";
-
     @BeforeEach
     public void before() throws Exception
     {
