@@ -24,11 +24,11 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.tika.metadataExtractors;
-
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+package org.alfresco.transform.tika.metadata.extractors;
 
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class IPTCMetadataExtractorTest
 {

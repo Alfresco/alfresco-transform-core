@@ -24,8 +24,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.tika.metadataExtractors;
+package org.alfresco.transform.tika.metadata.extractors;
 
+import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
@@ -79,7 +80,7 @@ import static org.apache.tika.metadata.DublinCore.NAMESPACE_URI_DC;
  * @author adavis
  */
 @Component
-public class OpenDocumentMetadataExtractor extends AbstractTikaMetadataExtractor
+public class OpenDocumentMetadataExtractor extends AbstractTikaMetadataExtractorEmbeddor
 {
     private static final Logger logger = LoggerFactory.getLogger(OpenDocumentMetadataExtractor.class);
 

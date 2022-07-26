@@ -24,63 +24,57 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.tika.metadataExtractors;
+package org.alfresco.transform.tika.metadata.extractors;
 
+import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
+import org.alfresco.transform.tika.transformers.Tika;
+import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.Parser;
-import org.apache.tika.parser.dwg.DWGParser;
+import org.apache.tika.parser.pdf.PDFParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
-import java.util.Map;
-
 import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
 
 /**
- * {@code "application/dwg"} and {@code "image/vnd.dwg"} metadata extractor.
+ * Metadata extractor for the PDF documents.
  *
- * Configuration:   (see DWGMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
+ * Configuration:   (see PdfBoxMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
  *
  * <pre>
- *   <b>title:</b>           --      cm:title
- *   <b>description:</b>     --      cm:description
- *   <b>author:</b>          --      cm:author
- *   <b>keywords:</b>
- *   <b>comments:</b>
- *   <b>lastauthor:</b>
+ *   <b>author:</b>                 --      cm:author
+ *   <b>title:</b>                  --      cm:title
+ *   <b>subject:</b>                --      cm:description
+ *   <b>created:</b>                --      cm:created
  * </pre>
  *
- * @author Nick Burch
+ * Uses Apache Tika
+ *
+ * @author Jesper Steen Møller
+ * @author Derek Hulley
  * @author adavis
  */
 @Component
-public class DWGMetadataExtractor extends AbstractTikaMetadataExtractor
+public class PdfBoxMetadataExtractor extends AbstractTikaMetadataExtractorEmbeddor
 {
-    private static final Logger logger = LoggerFactory.getLogger(DWGMetadataExtractor.class);
+    private static final Logger logger = LoggerFactory.getLogger(PdfBoxMetadataExtractor.class);
 
-    private static final String KEY_KEYWORD = "keyword";
-    private static final String KEY_LAST_AUTHOR = "lastAuthor";
-
-    public DWGMetadataExtractor()
+    public PdfBoxMetadataExtractor()
     {
         super(EXTRACTOR, logger);
     }
 
     @Override
-    protected Map<String, Serializable> extractSpecific(Metadata metadata,
-                                                        Map<String, Serializable> properties, Map<String,String> headers)
+    protected DocumentSelector getDocumentSelector(Metadata metadata, String targetMimeType)
     {
-        putRawValue(KEY_KEYWORD, metadata.get(TikaCoreProperties.SUBJECT), properties);
-        putRawValue(KEY_LAST_AUTHOR, metadata.get(TikaCoreProperties.MODIFIED), properties);
-        return properties;
+        return Tika.pdfBoxEmbededDocumentSelector;
     }
 
     @Override
     protected Parser getParser()
     {
-        return new DWGParser();
+        return new PDFParser();
     }
 }

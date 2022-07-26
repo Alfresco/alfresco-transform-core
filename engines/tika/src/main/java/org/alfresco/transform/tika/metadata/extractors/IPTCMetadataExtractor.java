@@ -24,8 +24,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.tika.metadataExtractors;
+package org.alfresco.transform.tika.metadata.extractors;
 
+import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
 import org.alfresco.transform.tika.parsers.ExifToolParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.Metadata;
@@ -44,7 +45,7 @@ import java.util.regex.Pattern;
 import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
 
 @Component
-public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
+public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractorEmbeddor
 {
 
     private static final Logger logger = LoggerFactory.getLogger(IPTCMetadataExtractor.class);
@@ -118,7 +119,7 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
      * @return dateStrings in Iso8601 format
      * @see #iptcToIso8601DateString
      */
-    protected String[] iptcToIso8601DateStrings(String[] dateStrings)
+    public String[] iptcToIso8601DateStrings(String[] dateStrings)
     {
         for (int i = 0; i < dateStrings.length; i++)
         {

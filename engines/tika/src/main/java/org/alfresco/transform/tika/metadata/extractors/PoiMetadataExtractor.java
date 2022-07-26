@@ -24,26 +24,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.tika.metadataExtractors;
+package org.alfresco.transform.tika.metadata.extractors;
 
-import org.apache.poi.ooxml.POIXMLProperties;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.tika.embedder.Embedder;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.mime.MediaType;
-import org.apache.tika.parser.ParseContext;
+import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.microsoft.ooxml.OOXMLParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Collections;
-import java.util.Set;
-import java.util.StringJoiner;
 
 import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
 
@@ -66,7 +54,7 @@ import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExt
  * @author adavis
  */
 @Component
-public class PoiMetadataExtractor extends AbstractTikaMetadataExtractor
+public class PoiMetadataExtractor extends AbstractTikaMetadataExtractorEmbeddor
 {
     private static final Logger logger = LoggerFactory.getLogger(PoiMetadataExtractor.class);
 

@@ -24,8 +24,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.tika.metadataExtractors;
+package org.alfresco.transform.tika.metadata.extractors;
 
+import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.Office;
 import org.apache.tika.metadata.TikaCoreProperties;
@@ -71,7 +72,7 @@ import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExt
  * @author adavis
  */
 @Component
-public class OfficeMetadataExtractor extends AbstractTikaMetadataExtractor
+public class OfficeMetadataExtractor extends AbstractTikaMetadataExtractorEmbeddor
 {
     private static final Logger logger = LoggerFactory.getLogger(OfficeMetadataExtractor.class);
 

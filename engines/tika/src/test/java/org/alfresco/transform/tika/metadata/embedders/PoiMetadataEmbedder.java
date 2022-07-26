@@ -24,8 +24,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.tika.metadataExtractors;
+package org.alfresco.transform.tika.metadata.embedders;
 
+import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
 import org.apache.poi.ooxml.POIXMLProperties;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tika.embedder.Embedder;
@@ -45,50 +46,20 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.StringJoiner;
 
-import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EXTRACTOR;
+import static org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor.Type.EMBEDDER;
 
 /**
  * Sample POI metadata embedder to demonstrate it is possible to add custom T-Engines that will add
  * metadata. This is not production code, so no supported mimetypes exist in the {@code tika_engine_config.json}.
- * Adding the following would make it available:
- *
- * <pre>
- * {
- *   "transformOptions": {
- *     ...
- *     "metadataEmbedOptions": [
- *       {"value": {"name": "metadata", "required": true}}
- *     ]
- *   },
- *   "transformers": [
- *     ...
- *     {
- *       "transformerName": "PoiMetadataEmbedder",
- *       "supportedSourceAndTargetList": [
- *         ...
- *         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "targetMediaType": "alfresco-metadata-embed"}
- *       ],
- *       "transformOptions": [
- *         "metadataEmbedOptions"
- *       ]
- *     }
- *   ]
- * }
- * </pre>
-
- * @author Nick Burch
- * @author Neil McErlean
- * @author Dmitry Velichkevich
- * @author adavis
  */
 @Component
-public class PoiMetadataEmbedder extends AbstractTikaMetadataExtractor
+public class PoiMetadataEmbedder extends AbstractTikaMetadataExtractorEmbeddor
 {
     private static final Logger logger = LoggerFactory.getLogger(PoiMetadataEmbedder.class);
 
     public PoiMetadataEmbedder()
     {
-        super(EXTRACTOR, logger);
+        super(EMBEDDER, logger);
     }
 
     @Override
@@ -127,7 +98,7 @@ public class PoiMetadataEmbedder extends AbstractTikaMetadataExtractor
             for (String name : metadata.names())
             {
                 metadata.isMultiValued("description");
-                String value = null;
+                String value;
                 if (metadata.isMultiValued(name))
                 {
                     String[] values = metadata.getValues(name);

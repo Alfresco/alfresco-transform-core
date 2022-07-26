@@ -24,7 +24,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.tika.metadataExtractors;
+package org.alfresco.transform.tika.metadata;
 
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.metadataExtractors.AbstractMetadataExtractor;
@@ -51,7 +51,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -81,7 +80,7 @@ import java.util.stream.Stream;
  * @author Nick Burch
  * @author adavis
  */
-public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtractor
+public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMetadataExtractor
 {
     protected static final String KEY_AUTHOR = "author";
     protected static final String KEY_TITLE = "title";
@@ -96,7 +95,7 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
     private final DateTimeFormatter tikaUTCDateFormater;
     private final DateTimeFormatter tikaDateFormater;
 
-    public AbstractTikaMetadataExtractor(Type type, Logger logger)
+    public AbstractTikaMetadataExtractorEmbeddor(Type type, Logger logger)
     {
         super(type, logger);
 
@@ -153,11 +152,6 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
         return dateStr;
     }
 
-    /**
-     * Returns the correct Tika Parser to process the document.
-     * If you don't know which you want, use {@link TikaAutoMetadataExtractor}
-     * which makes use of the Tika auto-detection.
-     */
     protected abstract Parser getParser();
 
     /**
@@ -168,7 +162,6 @@ public abstract class AbstractTikaMetadataExtractor extends AbstractMetadataExtr
      */
     protected Embedder getEmbedder()
     {
-        // TODO make this an abstract method once more extracters support embedding
         return null;
     }
 
