@@ -45,7 +45,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
@@ -86,12 +85,10 @@ import static org.alfresco.transform.tika.transformers.Tika.TEXT_MINING;
 import static org.alfresco.transform.tika.transformers.Tika.TIKA_AUTO;
 import static org.alfresco.transform.tika.transformers.Tika.TXT;
 import static org.alfresco.transform.tika.transformers.Tika.XHTML;
-import static org.alfresco.transform.tika.transformers.Tika.XML;
 import static org.alfresco.transform.tika.transformers.Tika.XLSX;
+import static org.alfresco.transform.tika.transformers.Tika.XML;
 import static org.alfresco.transform.tika.transformers.Tika.ZIP;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -104,8 +101,8 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test Tika.
@@ -175,15 +172,11 @@ public class TikaTest extends AbstractBaseTest
             "targetExtension", this.targetExtension)
                                                        : mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile,
             "targetExtension", this.targetExtension, INCLUDE_CONTENTS, includeContents.toString());
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
-                                     .andExpect(request().asyncStarted())
-                                     .andReturn();
-
-        MvcResult result = mockMvc.perform(asyncDispatch(mvcResult))
-                                  .andExpect(MockMvcResultMatchers.status().is(OK.value()))
-                                  .andExpect(MockMvcResultMatchers.header().string("Content-Disposition",
-                                      "attachment; filename*=UTF-8''transform." + this.targetExtension)).
-                                      andReturn();
+        MvcResult result = mockMvc.perform(requestBuilder)
+            .andExpect(status().is(OK.value()))
+            .andExpect(header().string("Content-Disposition",
+             "attachment; filename*=UTF-8''transform." + this.targetExtension))
+            .andReturn();
         String content = result.getResponse().getContentAsString();
         assertTrue(content.contains(expectedContentContains),
             "The content did not include \"" + expectedContentContains);
@@ -256,13 +249,9 @@ public class TikaTest extends AbstractBaseTest
 //            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
 //               .andExpect(MockMvcResultMatchers.status().is(INTERNAL_SERVER_ERROR.value()));
 
-        MvcResult mvcResult = mockMvc.perform(
+        mockMvc.perform(
             mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
-            .andExpect(request().asyncStarted())
-            .andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
-            .andExpect(MockMvcResultMatchers.status().is(INTERNAL_SERVER_ERROR.value()));
+            .andExpect(status().is(INTERNAL_SERVER_ERROR.value()));
     }
 
     // --- Archive ---
@@ -452,13 +441,9 @@ public class TikaTest extends AbstractBaseTest
                         "targetMimetype", MIMETYPE_METADATA_EMBED,
                         "sourceMimetype", MIMETYPE_OPENXML_SPREADSHEET);
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
-                                     .andExpect(request().asyncStarted())
-                                     .andReturn();
-
-        MvcResult result = mockMvc.perform(asyncDispatch(mvcResult))
-                .andExpect(MockMvcResultMatchers.status().is(OK.value()))
-                .andExpect(MockMvcResultMatchers.header().string("Content-Disposition",
+        MvcResult result = mockMvc.perform(requestBuilder)
+                .andExpect(status().is(OK.value()))
+                .andExpect(header().string("Content-Disposition",
                         "attachment; filename*=UTF-8''transform." + targetExtension)).
                         andReturn();
 
@@ -482,8 +467,8 @@ public class TikaTest extends AbstractBaseTest
         mockMvc.perform(
             mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension).param(
                 NOT_EXTRACT_BOOKMARKS_TEXT, "true"))
-               .andExpect(MockMvcResultMatchers.status().is(OK.value()))
-               .andExpect(MockMvcResultMatchers.header().string("Content-Disposition",
+               .andExpect(status().is(OK.value()))
+               .andExpect(header().string("Content-Disposition",
                    "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
@@ -529,7 +514,7 @@ public class TikaTest extends AbstractBaseTest
                 .header(ACCEPT, APPLICATION_JSON_VALUE)
                 .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .content(tr))
-            .andExpect(MockMvcResultMatchers.status().is(CREATED.value()))
+            .andExpect(status().is(CREATED.value()))
             .andReturn().getResponse().getContentAsString();
 
         TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,

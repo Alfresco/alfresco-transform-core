@@ -216,8 +216,6 @@ public class ImageMagickTest extends AbstractBaseTest
                 .param("targetMimetype", targetMimetype)
                 .param("sourceMimetype", sourceMimetype)
                 .param("cropGravity", value))
-            .andExpect(request().asyncStarted())
-            .andDo(MvcResult::getAsyncResult)
             .andExpect(status().isOk())
             .andExpect(content().bytes(expectedTargetFileBytes))
             .andExpect(header().string("Content-Disposition",
@@ -270,8 +268,6 @@ public class ImageMagickTest extends AbstractBaseTest
                 .param("resizePercentage", "true")
                 .param("allowEnlargement", "true")
                 .param("maintainAspectRatio", "false"))
-            .andExpect(request().asyncStarted())
-            .andDo(MvcResult::getAsyncResult)
             .andExpect(status().isOk())
             .andExpect(content().bytes(expectedTargetFileBytes))
             .andExpect(header().string("Content-Disposition",
@@ -310,8 +306,6 @@ public class ImageMagickTest extends AbstractBaseTest
                 .param("resizePercentage", "false")
                 .param("allowEnlargement", "false")
                 .param("maintainAspectRatio", "true"))
-            .andExpect(request().asyncStarted())
-            .andDo(MvcResult::getAsyncResult)
             .andExpect(status().isOk())
             .andExpect(content().bytes(expectedTargetFileBytes))
             .andExpect(header().string("Content-Disposition",
@@ -334,8 +328,6 @@ public class ImageMagickTest extends AbstractBaseTest
                 .param("resizeWidth", "321")
                 .param("resizeHeight", "654")
                 .param("commandOptions", "( horrible command / );"))
-            .andExpect(request().asyncStarted())
-            .andDo(MvcResult::getAsyncResult)
             .andExpect(status().isOk())
             .andExpect(content().bytes(expectedTargetFileBytes))
             .andExpect(header().string("Content-Disposition",

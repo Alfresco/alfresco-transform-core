@@ -30,19 +30,19 @@ import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.common.ExtensionService;
 import org.alfresco.transform.common.TransformException;
 import org.springframework.core.io.Resource;
-import org.springframework.http.ContentDisposition;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import org.springframework.web.util.UriUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 
@@ -52,6 +52,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.util.StringUtils.getFilename;
 
 public class FileManager
 {
@@ -115,6 +116,28 @@ public class FileManager
         catch (IOException e)
         {
             throw new TransformException(INSUFFICIENT_STORAGE, "Failed to store the source file", e);
+        }
+    }
+
+    private static Resource load(File file)
+    {
+        try
+        {
+            Resource resource = new UrlResource(file.toURI());
+            if (resource.exists() || resource.isReadable())
+            {
+                return resource;
+            }
+            else
+            {
+                throw new TransformException(INTERNAL_SERVER_ERROR,
+                    "Could not read the target file: " + file.getPath());
+            }
+        }
+        catch (MalformedURLException e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR,
+                "The target filename was malformed: " + file.getPath(), e);
         }
     }
 
@@ -188,6 +211,14 @@ public class FileManager
         {
             file.delete();
         }
+    }
+
+    public static ResponseEntity<Resource> createAttachment(String targetFilename, File targetFile)
+    {
+        Resource targetResource = load(targetFile);
+        targetFilename = UriUtils.encodePath(getFilename(targetFilename), "UTF-8");
+        return ResponseEntity.ok().header(CONTENT_DISPOSITION,
+            "attachment; filename*=UTF-8''" + targetFilename).body(targetResource);
     }
 
     /**

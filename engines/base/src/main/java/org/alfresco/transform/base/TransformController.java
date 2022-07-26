@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -52,7 +53,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -222,11 +222,11 @@ public class TransformController
 
     // Used by Alfresco Repository's 'Local Transforms'. Uploads the content and downloads the result.
     @PostMapping(value = ENDPOINT_TRANSFORM, consumes = MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<StreamingResponseBody> transform(HttpServletRequest request,
-                                              @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
-                                              @RequestParam(value = SOURCE_MIMETYPE) String sourceMimetype,
-                                              @RequestParam(value = TARGET_MIMETYPE) String targetMimetype,
-                                              @RequestParam Map<String, String> requestParameters)
+    public ResponseEntity<Resource> transform(HttpServletRequest request,
+            @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
+            @RequestParam(value = SOURCE_MIMETYPE) String sourceMimetype,
+            @RequestParam(value = TARGET_MIMETYPE) String targetMimetype,
+            @RequestParam Map<String, String> requestParameters)
     {
         return transformHandler.handleHttpRequest(request, sourceMultipartFile, sourceMimetype,
                 targetMimetype, requestParameters);
@@ -234,7 +234,7 @@ public class TransformController
 
     // Used the t-engine's simple html test UI.
     @PostMapping(value = ENDPOINT_TEST, consumes = MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<StreamingResponseBody> testTransform(HttpServletRequest request,
+    public ResponseEntity<Resource> testTransform(HttpServletRequest request,
             @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
             @RequestParam(value = SOURCE_MIMETYPE, required = false) String sourceMimetype,
             @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,

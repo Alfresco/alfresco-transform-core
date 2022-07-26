@@ -122,9 +122,9 @@ abstract class TransformProcess extends TransformStreamHandler
         LogEntry.setTargetSize(transformManager.getOutputLength());
         LogEntry.setStatusCodeAndMessage(OK, "Success");
     }
+
     protected void sendTransformResponse(TransformManagerImpl transformManager)
     {
-        // Only used in handleMessageRequest(...)
     }
 
     protected void handleTransformException(TransformException e, HttpStatus status)

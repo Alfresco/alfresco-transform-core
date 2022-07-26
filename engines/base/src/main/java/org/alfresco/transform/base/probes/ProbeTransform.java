@@ -256,7 +256,7 @@ public class ProbeTransform
     private File getSourceFile(boolean isLiveProbe)
     {
         incrementTransformerCount();
-        File sourceFile = createTempFile("source_", "_" + sourceFilename);
+        File sourceFile = createTempFile("probe_source_", "_" + sourceFilename);
         try (InputStream inputStream = getClass().getResourceAsStream('/' + sourceFilename))
         {
             Files.copy(inputStream, sourceFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -273,7 +273,7 @@ public class ProbeTransform
 
     private File getTargetFile()
     {
-        File targetFile = createTempFile("target_", "_" + sourceFilename);
+        File targetFile = createTempFile("probe_target_", "_" + sourceFilename);
         LogEntry.setTarget(targetFile.getName());
         return targetFile;
     }

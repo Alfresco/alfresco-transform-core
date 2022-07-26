@@ -205,17 +205,13 @@ public class TransformControllerAllInOneTest
     @Test
     public void testTransformEndpointUsingTransformEngineWithTwoCustomTransformers() throws Exception
     {
-        MvcResult mvcResult = mockMvc.perform(
+        mockMvc.perform(
             MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
                 .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
                     "Start".getBytes(StandardCharsets.UTF_8)))
                 .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
                 .param(TARGET_MIMETYPE, MIMETYPE_PDF)
                 .param(PAGE_REQUEST_PARAM, "1"))
-            .andExpect(request().asyncStarted())
-            .andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
             .andExpect(status().isOk())
             .andExpect(header().string("Content-Disposition",
             "attachment; filename*=UTF-8''transform.pdf"))
@@ -225,19 +221,15 @@ public class TransformControllerAllInOneTest
     @Test
     public void testTransformEndpointUsingTransformEngineWithOneCustomTransformer() throws Exception
     {
-        MvcResult mvcResult = mockMvc.perform(
+        mockMvc.perform(
             MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
                 .file(new MockMultipartFile("file", null, MIMETYPE_PDF,
                     "Start".getBytes(StandardCharsets.UTF_8)))
                 .param(SOURCE_MIMETYPE, MIMETYPE_PDF)
                 .param(TARGET_MIMETYPE, MIMETYPE_IMAGE_JPEG))
-            .andExpect(request().asyncStarted())
-            .andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
-               .andExpect(status().isOk())
-               .andExpect(header().string("Content-Disposition",
-                   "attachment; filename*=UTF-8''transform.jpeg"))
-               .andExpect(content().string("Start -> Pdf2Jpg()"));
+            .andExpect(status().isOk())
+            .andExpect(header().string("Content-Disposition",
+                "attachment; filename*=UTF-8''transform.jpeg"))
+            .andExpect(content().string("Start -> Pdf2Jpg()"));
     }
 }

@@ -31,10 +31,8 @@ import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.messages.TransformStack;
 import org.alfresco.transform.registry.TransformServiceRegistry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -45,7 +43,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -64,7 +61,6 @@ import java.util.UUID;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -73,12 +69,9 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -301,8 +294,6 @@ public abstract class AbstractBaseTest
     {
         mockMvc.perform(
             mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
-               .andExpect(request().asyncStarted())
-               .andDo(MvcResult::getAsyncResult)
                .andExpect(status().isOk())
                .andExpect(content().bytes(expectedTargetFileBytes))
                .andExpect(header().string("Content-Disposition",
@@ -324,8 +315,6 @@ public abstract class AbstractBaseTest
 
         mockMvc.perform(
             mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
-               .andExpect(request().asyncStarted())
-               .andDo(MvcResult::getAsyncResult)
                .andExpect(status().isOk())
                .andExpect(content().bytes(expectedTargetFileBytes))
                .andExpect(header().string("Content-Disposition",
@@ -339,8 +328,6 @@ public abstract class AbstractBaseTest
 
         mockMvc.perform(
             mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
-               .andExpect(request().asyncStarted())
-               .andDo(MvcResult::getAsyncResult)
                .andExpect(status().isOk())
                .andExpect(content().bytes(expectedTargetFileBytes))
                .andExpect(header().string("Content-Disposition",
@@ -445,13 +432,9 @@ public abstract class AbstractBaseTest
         File dauSourceFile = getTestFile("quick." + sourceExtension, true);
         String directUrl = "file://" + dauSourceFile.toPath();
 
-        MvcResult mvcResult = mockMvc.perform(
+        ResultActions resultActions = mockMvc.perform(
              mockMvcRequest(ENDPOINT_TRANSFORM, null)
             .param(DIRECT_ACCESS_URL, directUrl))
-            .andExpect(request().asyncStarted())
-            .andReturn();
-
-        ResultActions resultActions = mockMvc.perform(asyncDispatch(mvcResult))
             .andExpect(status().isOk())
             .andExpect(header().string("Content-Disposition",
                 "attachment; filename*=UTF-8''transform."+targetExtension));

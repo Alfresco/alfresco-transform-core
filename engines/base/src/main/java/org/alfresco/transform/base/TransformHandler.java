@@ -43,8 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -52,7 +50,6 @@ import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.annotation.PostConstruct;
 import javax.jms.Destination;
@@ -66,16 +63,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
+import static org.alfresco.transform.base.fs.FileManager.createAttachment;
 import static org.alfresco.transform.base.fs.FileManager.createTargetFile;
 import static org.alfresco.transform.base.fs.FileManager.getDirectAccessUrlInputStream;
 import static org.alfresco.transform.base.fs.FileManager.getMultipartFileInputStream;
@@ -185,47 +183,50 @@ public class TransformHandler
         return transformerDebug;
     }
 
-    public ResponseEntity<StreamingResponseBody> handleHttpRequest(HttpServletRequest request,
+    public ResponseEntity<Resource> handleHttpRequest(HttpServletRequest request,
             MultipartFile sourceMultipartFile, String sourceMimetype, String targetMimetype,
             Map<String, String> requestParameters)
     {
-        return createResponseEntity(sourceMimetype, targetMimetype, os ->
+        AtomicReference<ResponseEntity<Resource>> responseEntity = new AtomicReference<>();
+
+        new TransformProcess(this, sourceMimetype, targetMimetype, requestParameters,
+            "e" + httpRequestCount.getAndIncrement())
         {
-            new TransformProcess(this, sourceMimetype, targetMimetype, requestParameters,
-                "e" + httpRequestCount.getAndIncrement())
+            @Override
+            protected void init() throws IOException
             {
-                @Override
-                protected void init() throws IOException
-                {
-                    transformManager.setRequest(request);
-                    super.init();
-                }
+                transformManager.setRequest(request);
+                transformManager.setTargetFile(createTargetFile(request, sourceMimetype, targetMimetype));
+                transformManager.keepTargetFile(); // Will be deleted in TransformInterceptor.afterCompletion()
+                super.init();
+            }
 
-                @Override
-                protected InputStream getInputStream()
-                {
-                    return getInputStreamForHandleHttpRequest(requestParameters, sourceMultipartFile);
-                }
+            @Override
+            protected InputStream getInputStream()
+            {
+                return getInputStreamForHandleHttpRequest(requestParameters, sourceMultipartFile);
+            }
 
-                @Override
-                protected long getSourceSize()
-                {
-                    return -1L; // Ignore for http requests as the Alfresco repo will have checked.
-                }
+            @Override
+            protected OutputStream getOutputStream() throws IOException
+            {
+                return getOutputStreamFromFile(transformManager.getTargetFile());
+            }
 
-                @Override
-                protected OutputStream getOutputStream()
-                {
-                    return os;
-                }
+            @Override
+            protected long getSourceSize()
+            {
+                return -1L; // Ignore for http requests as the Alfresco repo will have checked.
+            }
 
-                @Override
-                protected void closeOutputStream() throws IOException
-                {
-                    // Do nothing as the Spring mvc handles this for HttpServletRequest
-                }
-            }.handleTransformRequest();
-        });
+            protected void sendTransformResponse(TransformManagerImpl transformManager)
+            {
+                String extension = ExtensionService.getExtensionForTargetMimetype(targetMimetype, sourceMimetype);
+                responseEntity.set(createAttachment("transform."+extension, transformManager.getTargetFile()));
+            }
+        }.handleTransformRequest();
+
+        return responseEntity.get();
     }
 
     public void handleProbRequest(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
@@ -274,6 +275,7 @@ public class TransformHandler
             {
                 checkTransformRequestValid(request, reply);
                 reference = TransformStack.getReference(reply.getInternalContext());
+                transformManager.setTargetFile(createTargetFile(null, sourceMimetype, targetMimetype));
                 super.init();
             }
 
@@ -292,8 +294,7 @@ public class TransformHandler
             @Override
             protected OutputStream getOutputStream() throws IOException
             {
-                File targetFile = transformManager.setTargetFile(createTargetFile(null, sourceMimetype, targetMimetype));
-                return getOutputStreamFromFile(targetFile);
+                return getOutputStreamFromFile(transformManager.getTargetFile());
             }
 
             protected void sendTransformResponse(TransformManagerImpl transformManager)
@@ -536,17 +537,5 @@ public class TransformHandler
             throw new TransformException(INTERNAL_SERVER_ERROR, "Custom Transformer "+transformName+" not found");
         }
         return customTransformer;
-    }
-
-    private ResponseEntity<StreamingResponseBody> createResponseEntity(String sourceMimetype, String targetMimetype,
-            StreamingResponseBody body)
-    {
-        String extension = ExtensionService.getExtensionForTargetMimetype(targetMimetype, sourceMimetype);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentDisposition(
-                ContentDisposition.attachment()
-                                  .filename("transform."+ extension, StandardCharsets.UTF_8)
-                                  .build());
-        return ResponseEntity.ok().headers(headers).body(body);
     }
 }

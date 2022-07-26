@@ -214,8 +214,6 @@ public class PdfRendererTest extends AbstractBaseTest
                 .param("height", "654")
                 .param("allowPdfEnlargement", "true")
                 .param("maintainPdfAspectRatio", "true"))
-            .andExpect(request().asyncStarted())
-            .andDo(MvcResult::getAsyncResult)
             .andExpect(status().isOk())
             .andExpect(content().bytes(expectedTargetFileBytes))
             .andExpect(header().string("Content-Disposition",
@@ -240,8 +238,6 @@ public class PdfRendererTest extends AbstractBaseTest
                 .param("height", "654")
                 .param("allowPdfEnlargement", "false")
                 .param("maintainPdfAspectRatio", "false"))
-               .andExpect(request().asyncStarted())
-            .andDo(MvcResult::getAsyncResult)
             .andExpect(status().isOk())
             .andExpect(content().bytes(expectedTargetFileBytes))
             .andExpect(header().string("Content-Disposition",

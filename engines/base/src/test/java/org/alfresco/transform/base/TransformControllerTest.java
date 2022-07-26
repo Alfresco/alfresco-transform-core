@@ -58,7 +58,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.File;
@@ -100,10 +99,8 @@ import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -336,17 +333,13 @@ public class TransformControllerTest
     @Test
     public void testTransformEndpointThatUploadsAndDownloadsContent() throws Exception
     {
-        MvcResult mvcResult = mockMvc.perform(
+        mockMvc.perform(
             MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
                 .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
                     "Start".getBytes(StandardCharsets.UTF_8)))
                 .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
                 .param(TARGET_MIMETYPE, MIMETYPE_PDF)
                 .param(PAGE_REQUEST_PARAM, "1"))
-            .andExpect(request().asyncStarted())
-            .andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
             .andExpect(status().isOk())
             .andExpect(header().string("Content-Disposition",
             "attachment; filename*=UTF-8''transform.pdf"))
@@ -362,7 +355,7 @@ public class TransformControllerTest
             TransformHandler spy = spy(orig);
             transformController.transformHandler = spy;
 
-            MvcResult mvcResult = mockMvc.perform(
+            mockMvc.perform(
                 MockMvcRequestBuilders.multipart(ENDPOINT_TEST)
                     .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
                         "Start".getBytes(StandardCharsets.UTF_8)))
@@ -373,12 +366,10 @@ public class TransformControllerTest
                     .param(PAGE_REQUEST_PARAM, "replaced")
                     .param("name1", "hasNoValueSoRemoved").param("value1", "")
                     .param("name2", PAGE_REQUEST_PARAM).param("value2", "1")
-                    .param("name3", SOURCE_ENCODING).param("value3", "UTF-8"))
-                .andExpect(request().asyncStarted())
-                .andReturn();
+                    .param("name3", SOURCE_ENCODING).param("value3", "UTF-8"));
 
             // Do the dispatch, just in case not doing it leaves it in a strange state.
-            mockMvc.perform(asyncDispatch(mvcResult));
+//            mockMvc.perform(asyncDispatch(mvcResult));
 
             verify(spy).handleHttpRequest(any(), any(), eq(MIMETYPE_TEXT_PLAIN), eq(MIMETYPE_PDF),
                 eq(ImmutableMap.of(
@@ -407,17 +398,13 @@ public class TransformControllerTest
     @Test
     public void testInterceptOfTransformException_noTransformers() throws Exception
     {
-        MvcResult mvcResult = mockMvc.perform(
+        mockMvc.perform(
             MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
                .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
                     "Start".getBytes(StandardCharsets.UTF_8)))
                .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
                .param(TARGET_MIMETYPE, MIMETYPE_PDF)
                .param("unknown", "1"))
-               .andExpect(request().asyncStarted())
-               .andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
                .andExpect(status().isBadRequest())
                .andExpect(content().string(containsString("TwoCustomTransformers Error Page")))
                .andExpect(content().string(containsString("No transforms were able to handle the request")));

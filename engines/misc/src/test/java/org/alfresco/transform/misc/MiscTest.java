@@ -55,9 +55,7 @@ import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -499,11 +497,7 @@ public class MiscTest extends AbstractBaseTest
             requestBuilder.param("extractMapping", extractMapping);
         }
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(request().asyncStarted())
-            .andReturn();
-
-        return mockMvc.perform(asyncDispatch(mvcResult))
+        return mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(header().string("Content-Disposition",
                   "attachment; filename*=" +

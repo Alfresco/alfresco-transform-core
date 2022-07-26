@@ -430,10 +430,20 @@ public class TransformStreamHandlerTest
     @Test
     public void testSimulatedHandleHttpRequest() throws Exception
     {
+        File targetFile = tempFile();
+
         try (ByteArrayOutputStream os = new ByteArrayOutputStream())
         {
             new FakeTransformStreamHandler()
             {
+                @Override
+                protected void init() throws IOException
+                {
+                    transformManager.setTargetFile(targetFile);
+                    transformManager.keepTargetFile();
+                    super.init();
+                }
+
                 @Override
                 protected InputStream getInputStream()
                 {
@@ -524,5 +534,32 @@ public class TransformStreamHandlerTest
                 return getOutputStreamToFile(targetFile);
             }
         }.handleTransformRequest();
+    }
+
+    @Test
+    // Tried and failed to create TransformHandler.handleHttpRequest(...) that returned a
+    // ResponseEntity<StreamingResponseBody> (and other async variants) so that we would not need a temporary target
+    // file as a StreamingResponseBody would have allowed us to write directly to the OutputStream. However, I was
+    // unable to find a way to defer setting the httpStatus in the response until we knew there were no Exceptions
+    // thrown in processing. Keeping the following test (it does no harm) to show how much simpler it would have been.
+    public void testSimulatedHandleHttpRequestWithStreamingResponseBody() throws Exception
+    {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream())
+        {
+            new FakeTransformStreamHandler()
+            {
+                @Override
+                protected InputStream getInputStream()
+                {
+                    return getSourceInputStreamFromBytes();
+                }
+
+                @Override
+                protected OutputStream getOutputStream()
+                {
+                    return os;
+                }
+            }.handleTransformRequest();
+        }
     }
 }
