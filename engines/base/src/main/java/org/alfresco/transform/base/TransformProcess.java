@@ -87,13 +87,13 @@ abstract class TransformProcess extends TransformStreamHandler
         }
         catch (TransformException e)
         {
-            transformerDebug.logFailure(reference, e.getMessage());
+            transformerDebug.logFailure(reference, "  Error: "+e.getMessage());
             LogEntry.setStatusCodeAndMessage(e.getStatus(), e.getMessage());
             handleTransformException(e, e.getStatus());
         }
         catch (Exception e)
         {
-            transformerDebug.logFailure(reference, e.getMessage());
+            transformerDebug.logFailure(reference, "  Error: "+e.getMessage());
             LogEntry.setStatusCodeAndMessage(INTERNAL_SERVER_ERROR, e.getMessage());
             handleException(e);
         }
@@ -134,6 +134,6 @@ abstract class TransformProcess extends TransformStreamHandler
 
     protected void handleException(Exception e)
     {
-        throw new RuntimeException(e);
+        throw new TransformException(INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 }

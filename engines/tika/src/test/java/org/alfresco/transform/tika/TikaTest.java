@@ -245,10 +245,6 @@ public class TikaTest extends AbstractBaseTest
     {
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         targetEncoding = "rubbish";
-//        mockMvc.perform(
-//            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
-//               .andExpect(MockMvcResultMatchers.status().is(INTERNAL_SERVER_ERROR.value()));
-
         mockMvc.perform(
             mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
             .andExpect(status().is(INTERNAL_SERVER_ERROR.value()));

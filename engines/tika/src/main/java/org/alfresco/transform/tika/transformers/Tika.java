@@ -236,7 +236,7 @@ public class Tika
         }
         catch (UnsupportedEncodingException e)
         {
-            throw new IllegalStateException("Unsupported encoding "+e.getMessage(), e);
+            throw new IllegalArgumentException("Unsupported encoding "+e.getMessage(), e);
         }
         catch (SAXException | TikaException | IOException e)
         {
