@@ -81,18 +81,6 @@ public class MiscTest extends AbstractBaseTest
     }
 
     @Override
-    protected void mockTransformCommand(String sourceExtension, String targetExtension,
-        String sourceMimetype, boolean readTargetFileBytes)
-    {
-        // Misc transform is not mocked. It is run for real.
-    }
-
-    @Override
-    protected void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest)
-    {
-    }
-
-    @Override
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
         String... params)
     {

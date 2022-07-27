@@ -26,69 +26,11 @@
  */
 package org.alfresco.transform.aio;
 
-import org.alfresco.transform.base.TransformRegistryImpl;
 import org.alfresco.transform.imagemagick.ImageMagickTest;
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test ImageMagick functionality in All-In-One.
  */
 public class AIOImageMagickTest extends ImageMagickTest
 {
-//    @Autowired TransformRegistryImpl transformRegistry;
-
-//    @BeforeEach @Override
-//    public void before() throws IOException
-//    {
-//        ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
-//        ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
-//        //Need to wire in the mocked commandExecutor into the controller...
-//        Map<String, Transformer> transformers = transformRegistry.getTransformerEngineMapping();
-//        transformers.replace("imagemagick", commandExecutor);
-//
-//        mockTransformCommand("jpg", "png", "image/jpeg", true);
-//    }
-
-//    @Test
-//    @Override
-//    public void testGetTransformConfigInfo()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void testGetTransformConfigInfoExcludingCoreVersion()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void testGetInfoFromConfigWithDuplicates()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void testGetInfoFromConfigWithEmptyTransformOptions()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void testGetInfoFromConfigWithNoTransformOptions()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
 }

@@ -27,51 +27,10 @@
 package org.alfresco.transform.aio;
 
 import org.alfresco.transform.pdfrenderer.PdfRendererTest;
-import org.alfresco.transform.registry.AbstractTransformRegistry;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 /**
  * Test PdfRenderer functionality in All-In-One.
  */
 public class AIOPdfRendererTest extends PdfRendererTest
 {
-    @Autowired AbstractTransformRegistry transformRegistry;
-
-//    @Test
-//    @Override
-//    public void testGetTransformConfigInfo()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void testGetTransformConfigInfoExcludingCoreVersion()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void testGetInfoFromConfigWithDuplicates()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void testGetInfoFromConfigWithEmptyTransformOptions()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void testGetInfoFromConfigWithNoTransformOptions()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
 }

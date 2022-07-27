@@ -296,7 +296,7 @@ public class TransformControllerTest
     @Test
     public void testTransformEndpointThatUsesTransformRequests() throws Exception
     {
-        File sourceFile = getTestFile("quick.txt", true, tempDir);
+        File sourceFile = getTestFile("original.txt", true, tempDir);
         String sourceFileRef = fakeSfsClient.saveFile(sourceFile).getEntry().getFileRef();
 
         TransformRequest transformRequest = TransformRequest.builder()

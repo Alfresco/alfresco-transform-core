@@ -107,7 +107,7 @@ public class FakeTransformEngineWithTwoCustomTransformers extends AbstractFakeTr
     @Override
     public ProbeTransform getProbeTransform()
     {
-        return new ProbeTransform("quick.txt", MIMETYPE_TEXT_PLAIN, MIMETYPE_PDF,
+        return new ProbeTransform("original.txt", MIMETYPE_TEXT_PLAIN, MIMETYPE_PDF,
             ImmutableMap.of(SOURCE_ENCODING, "UTF-8"), 46, 0,
             150, 1024, 1, 60 * 2);
     }

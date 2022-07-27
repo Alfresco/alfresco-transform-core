@@ -126,12 +126,13 @@ public class TikaTest extends AbstractBaseTest
     private String targetMimetype = MIMETYPE_TEXT_PLAIN;
 
     @BeforeEach
-    public void before()
+    public void before() throws Exception
     {
         sourceExtension = "pdf";
         targetExtension = "txt";
         sourceMimetype = MIMETYPE_PDF;
         targetMimetype = MIMETYPE_TEXT_PLAIN;
+        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
     }
 
     @Override
@@ -190,34 +191,6 @@ public class TikaTest extends AbstractBaseTest
                     .param("targetMimetype", targetMimetype)
                     .param("sourceMimetype", sourceMimetype);
     }
-
-    @Test
-    @Override
-    public void simpleTransformTest() throws Exception
-    {
-        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
-        super.simpleTransformTest();
-    }
-
-    // --- Super class tests (need modified setup) ---
-
-    @Test
-    @Override
-    public void dotDotSourceFilenameTest() throws Exception
-    {
-        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
-        super.dotDotSourceFilenameTest();
-    }
-
-    @Test
-    @Override
-    public void noExtensionSourceFilenameTest() throws Exception
-    {
-        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
-        super.noExtensionSourceFilenameTest();
-    }
-
-    // --- General Tika tests ---
 
     @Test
     public void badEncodingTest() throws Exception

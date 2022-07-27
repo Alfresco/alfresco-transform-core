@@ -149,11 +149,15 @@ public abstract class AbstractBaseTest
         ReflectionTestUtils.setField(commandExecutor, "checkCommand", origCheckCommand);
     }
 
-    protected abstract void mockTransformCommand(String sourceExtension,
+    protected void mockTransformCommand(String sourceExtension,
         String targetExtension, String sourceMimetype,
-        boolean readTargetFileBytes) throws IOException;
+        boolean readTargetFileBytes) throws IOException
+    {
+    }
 
-    protected abstract void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest);
+    protected void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest)
+    {
+    }
 
     /**
      * This method ends up being the core of the mock.

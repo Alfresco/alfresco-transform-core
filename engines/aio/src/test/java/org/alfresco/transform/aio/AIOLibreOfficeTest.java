@@ -27,58 +27,10 @@
 package org.alfresco.transform.aio;
 
 import org.alfresco.transform.libreoffice.LibreOfficeTest;
-//import org.alfresco.transform.libreoffice.transformers.LibreOfficeTransformer;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 /**
  * Test LibreOffice functionality in All-In-One.
  */
 public class AIOLibreOfficeTest extends LibreOfficeTest
 {
-//    @Autowired AbstractTransformRegistry transformRegistry;
-//
-//    @Override
-//    // Used by the super class to mock the javaExecutor, a different implementation is required here
-//    protected void setJavaExecutor(TransformController controller, LibreOfficeTransformer javaExecutor)
-//    {
-//        //Need to wire in the mocked javaExecutor into the controller...
-//        Map<String,Transformer> transformers = transformRegistry.getTransformerEngineMapping();
-//        transformers.replace("libreoffice", javaExecutor);
-//        // No need to set the transform registry to the controller as it is @Autowired in
-//    }
-
-//    @Test
-//    @Override
-//    public void testGetTransformConfigInfo()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void testGetTransformConfigInfoExcludingCoreVersion()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void testGetInfoFromConfigWithDuplicates()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//    @Test
-//    @Override
-//    public void testGetInfoFromConfigWithEmptyTransformOptions()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//    @Test
-//    @Override
-//    public void testGetInfoFromConfigWithNoTransformOptions()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
 }

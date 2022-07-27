@@ -91,7 +91,7 @@ public class RestTest
         parameters.add(DIRECT_ACCESS_URL, "https://expired/direct/access/url");
         parameters.add(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN);
         parameters.add(TARGET_MIMETYPE, MIMETYPE_PDF);
-        parameters.add("file", new org.springframework.core.io.ClassPathResource("quick.txt"));
+        parameters.add("file", new org.springframework.core.io.ClassPathResource("original.txt"));
 
         ResponseEntity<String> response = restTemplate.exchange(ENDPOINT_TRANSFORM, POST,
             new HttpEntity<>(parameters, HEADERS), String.class, "");
@@ -105,7 +105,7 @@ public class RestTest
         LinkedMultiValueMap<String, Object> parameters = new LinkedMultiValueMap<>();
         parameters.add(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN);
         parameters.add(TARGET_MIMETYPE, MIMETYPE_PDF);
-        parameters.add("file", new org.springframework.core.io.ClassPathResource("quick.txt"));
+        parameters.add("file", new org.springframework.core.io.ClassPathResource("original.txt"));
 
         ResponseEntity<String> response = restTemplate.exchange(ENDPOINT_TRANSFORM, POST,
             new HttpEntity<>(parameters, HEADERS), String.class, "");

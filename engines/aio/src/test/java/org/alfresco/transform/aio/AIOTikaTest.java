@@ -27,53 +27,10 @@
 package org.alfresco.transform.aio;
 
 import org.alfresco.transform.tika.TikaTest;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
 /**
  * Test Tika functionality in All-In-One.
  */
 public class AIOTikaTest extends TikaTest
 {
-//    @Test
-//    @Override
-//    public void testGetTransformConfigInfo()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void testGetTransformConfigInfoExcludingCoreVersion()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void testGetInfoFromConfigWithDuplicates()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void testGetInfoFromConfigWithEmptyTransformOptions()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void testGetInfoFromConfigWithNoTransformOptions()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//    }
-//
-//    @Test
-//    @Override
-//    public void xlsxEmbedTest()
-//    {
-//        // Ignore the test in super class as the way the AIO transformer provides config is fundamentally different.
-//        // It uses the real class path rather than the test one.
-//    }
 }

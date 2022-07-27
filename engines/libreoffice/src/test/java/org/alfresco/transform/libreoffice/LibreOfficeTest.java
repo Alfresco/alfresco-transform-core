@@ -171,13 +171,6 @@ public class LibreOfficeTest extends AbstractBaseTest
         return builder;
     }
 
-    @Override
-    protected void mockTransformCommand(String sourceExtension, String targetExtension,
-        String sourceMimetype, boolean readTargetFileBytes)
-    {
-        throw new IllegalStateException();
-    }
-
     @Test
     public void badExitCodeTest() throws Exception
     {

@@ -27,18 +27,18 @@
 package org.alfresco.transform.aio;
 
 import org.alfresco.transform.base.AbstractBaseTest;
-import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.config.TransformConfig;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import java.io.IOException;
+import java.nio.file.Files;
 
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
 import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_LATEST;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -52,6 +52,20 @@ public class AIOTest extends AbstractBaseTest
     @Autowired
     private String coreVersion;
 
+    @BeforeEach
+    public void before() throws Exception
+    {
+        sourceMimetype = MIMETYPE_HTML;
+        targetMimetype = MIMETYPE_TEXT_PLAIN;
+        sourceExtension = "html";
+        targetExtension = "txt";
+        expectedOptions = null;
+        expectedSourceSuffix = null;
+        sourceFileBytes = readTestFile(sourceExtension);
+        expectedTargetFileBytes = Files.readAllBytes(getTestFile("quick2." + targetExtension, true).toPath());
+        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
+    }
+
     @Override
     // Add extra required parameters to the request.
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
@@ -62,19 +76,8 @@ public class AIOTest extends AbstractBaseTest
                     .param("sourceMimetype", sourceMimetype);
     }
 
-    //@Override
-    protected void mockTransformCommand(String sourceExtension, String targetExtension, String sourceMimetype,
-            boolean readTargetFileBytes) throws IOException
-    {
-    }
-
-    //@Override
-    protected void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest)
-    {
-    }
-
     @Test
-    public void emptyTest()
+    public void coreVersionNotSetInOriginalConfigTest()
     {
         ResponseEntity<TransformConfig> responseEntity = controller.transformConfig(Integer.valueOf(CONFIG_VERSION_DEFAULT));
         responseEntity.getBody().getTransformers().forEach(transformer -> {
@@ -84,7 +87,7 @@ public class AIOTest extends AbstractBaseTest
     }
 
     @Test
-    public void emptyTestWithLatestVersion()
+    public void coreVersionSetInLatestConfigTest()
     {
         ResponseEntity<TransformConfig> responseEntity = controller.transformConfig(CONFIG_VERSION_LATEST);
         responseEntity.getBody().getTransformers().forEach(transformer -> {
