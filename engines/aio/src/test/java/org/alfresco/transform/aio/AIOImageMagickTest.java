@@ -57,25 +57,6 @@ public class AIOImageMagickTest extends ImageMagickTest
 //        mockTransformCommand("jpg", "png", "image/jpeg", true);
     }
 
-    @Override
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
-        String... params)
-    {
-        final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
-            .param("targetMimetype", targetMimetype)
-            .param("sourceMimetype", sourceMimetype);
-
-        return builder;
-    }
-
-//    @Test
-//    @Override
-//    public void noTargetFileTest()
-//    {
-//        // Ignore the test in super class as the AIO transforms will not be selected .
-//        // It is the mock that returns a zero length file for other transformers, when we supply an invalid targetExtension.
-//    }
-//
 //    @Test
 //    @Override
 //    public void testGetTransformConfigInfo()

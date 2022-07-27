@@ -29,6 +29,7 @@ package org.alfresco.transform.libreoffice.transformers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.star.task.ErrorCodeIOException;
 import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.executors.JavaExecutor;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.alfresco.transform.common.TransformException;
 import org.apache.commons.lang3.StringUtils;
@@ -59,7 +60,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
  * transformation logic in the same JVM (check the {@link JodConverter} implementation).
  */
 @Component
-public class LibreOfficeTransformer implements CustomTransformerFileAdaptor
+public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFileAdaptor
 {
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeTransformer.class);
 
@@ -133,6 +134,12 @@ public class LibreOfficeTransformer implements CustomTransformerFileAdaptor
     @Override
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
                           File sourceFile, File targetFile)
+    {
+        call(sourceFile, targetFile);
+    }
+
+    @Override
+    public void call(File sourceFile, File targetFile, String... args)
     {
         try
         {

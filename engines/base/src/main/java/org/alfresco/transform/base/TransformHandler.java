@@ -516,7 +516,7 @@ public class TransformHandler
                 throw new TransformException(BAD_REQUEST, "No transforms were able to handle the request: "+
                         sourceMimetype+" -> "+targetMimetype+transformOptions.entrySet().stream()
                             .map(entry -> entry.getKey()+"="+entry.getValue())
-                            .collect(Collectors.joining(", ", " with ", "")));
+                            .collect(Collectors.joining(", ", " ", "")));
             }
             return transformerName;
         }

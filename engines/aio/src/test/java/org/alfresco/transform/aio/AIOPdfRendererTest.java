@@ -40,27 +40,6 @@ public class AIOPdfRendererTest extends PdfRendererTest
 {
     @Autowired AbstractTransformRegistry transformRegistry;
 
-    @Override
-    protected void setFields()
-    {
-//        ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
-//        ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
-//        //Need to wire in the mocked commandExecutor into the controller...
-//        Map<String,Transformer> transformers = transformRegistry.getTransformerEngineMapping();
-//        transformers.replace("pdfrenderer", commandExecutor);
-    }
-
-    @Override
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
-        String... params)
-    {
-        final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
-            .param("targetMimetype", targetMimetype)
-            .param("sourceMimetype", sourceMimetype);
-
-        return builder;
-    }
-
 //    @Test
 //    @Override
 //    public void testGetTransformConfigInfo()

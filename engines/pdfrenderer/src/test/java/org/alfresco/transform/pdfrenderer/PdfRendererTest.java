@@ -26,6 +26,36 @@
  */
 package org.alfresco.transform.pdfrenderer;
 
+import org.alfresco.transform.base.AbstractBaseTest;
+import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
+import org.alfresco.transform.base.model.FileRefEntity;
+import org.alfresco.transform.base.model.FileRefResponse;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.pdfrenderer.transformers.PdfRendererTransformer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.UUID;
+
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,81 +75,46 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.util.StringUtils.getFilenameExtension;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.annotation.PostConstruct;
-
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.base.AbstractBaseTest;
-import org.alfresco.transform.pdfrenderer.transformers.PdfRendererTransformer;
-import org.alfresco.transform.base.executors.RuntimeExec;
-import org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
-import org.alfresco.transform.base.model.FileRefEntity;
-import org.alfresco.transform.base.model.FileRefResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
 /**
- * Test PdfRenderer.
+ * Test PdfRenderer with mocked external command.
  */
 public class PdfRendererTest extends AbstractBaseTest
 {
-    private static final String ENGINE_CONFIG_NAME = "pdfrenderer_engine_config.json";
-
+    @Autowired
+    private PdfRendererTransformer pdfRendererTransformer;
     @Mock
     private ExecutionResult mockExecutionResult;
-
     @Mock
     protected RuntimeExec mockTransformCommand;
-
     @Mock
     protected RuntimeExec mockCheckCommand;
-
     @Value("${transform.core.pdfrenderer.exe}")
     protected String execPath;
-
-    protected PdfRendererTransformer commandExecutor;
-
-    @PostConstruct
-    private void init()
-    {
-        commandExecutor = new PdfRendererTransformer();
-    }
 
     @BeforeEach
     public void before() throws IOException
     {
-        setFields();
-
+        setMockExternalCommandsOnTransformer(pdfRendererTransformer, mockTransformCommand, mockCheckCommand);
         mockTransformCommand("pdf", "png", APPLICATION_PDF_VALUE, true);
     }
 
-    protected void setFields()
+    @AfterEach
+    public void after()
     {
-        ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
-        ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
-        ReflectionTestUtils.setField(controller, "commandExecutor", commandExecutor);
+        resetExternalCommandsOnTransformer();
+    }
+
+    @Override
+    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
+        String... params)
+    {
+        final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype);
+        return builder;
     }
 
     @Override

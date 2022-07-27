@@ -28,6 +28,8 @@ package org.alfresco.transform.base;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
+import org.alfresco.transform.base.executors.CommandExecutor;
+import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.base.probes.ProbeTransform;
@@ -42,6 +44,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -68,7 +71,6 @@ import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -86,6 +88,8 @@ public abstract class AbstractBaseTest
     @TempDir
     public File tempDir;
 
+    @Autowired
+    protected TransformHandler transformHandler;
     @Autowired
     protected TransformController controller;
 
@@ -125,43 +129,32 @@ public abstract class AbstractBaseTest
     protected byte[] expectedTargetFileBytes;
 
     // Called by sub class
+    private CommandExecutor commandExecutor;
+    private RuntimeExec origTransformCommand;
+    private RuntimeExec origCheckCommand;
+
+    protected void setMockExternalCommandsOnTransformer(CommandExecutor commandExecutor, RuntimeExec mockTransformCommand,
+        RuntimeExec mockCheckCommand)
+    {
+        this.commandExecutor = commandExecutor;
+        origTransformCommand = (RuntimeExec) ReflectionTestUtils.getField(commandExecutor, "transformCommand");
+        origCheckCommand = (RuntimeExec) ReflectionTestUtils.getField(commandExecutor, "transformCommand");
+        ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
+        ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
+    }
+
+    protected void resetExternalCommandsOnTransformer()
+    {
+        ReflectionTestUtils.setField(commandExecutor, "transformCommand", origTransformCommand);
+        ReflectionTestUtils.setField(commandExecutor, "checkCommand", origCheckCommand);
+    }
+
     protected abstract void mockTransformCommand(String sourceExtension,
         String targetExtension, String sourceMimetype,
         boolean readTargetFileBytes) throws IOException;
 
-    protected ProbeTransform getProbeTestTransform()
-    {
-        return controller.probeTransform;
-    }
-
     protected abstract void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest);
 
-//    static void assertConfig(String url, String expectedTransformers, String expectedOptions,
-//        MockMvc mockMvc, ObjectMapper objectMapper) throws Exception
-//    {
-//        TransformConfig config = objectMapper.readValue(
-//            mockMvc.perform(MockMvcRequestBuilders.get(url))
-//                   .andExpect(status().isOk())
-//                   .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-//                   .andReturn()
-//                   .getResponse()
-//                   .getContentAsString(), TransformConfig.class);
-//
-//        // Gets a list of transformerNames,coreVersion,optionNames
-//        assertEquals(expectedTransformers,
-//            config.getTransformers().stream()
-//                  .map(t -> t.getTransformerName()+","
-//                                +t.getCoreVersion()+","
-//                                +t.getTransformOptions().stream().sorted().collect(Collectors.joining(",")))
-//                  .sorted()
-//                  .collect(Collectors.joining("\n")));
-//
-//        assertEquals(expectedOptions,
-//            config.getTransformOptions().keySet().stream()
-//                  .sorted()
-//                  .collect(Collectors.joining(",")));
-//    }
-//
     /**
      * This method ends up being the core of the mock.
      * It copies content from an existing file in the resources folder to the desired location
@@ -301,14 +294,6 @@ public abstract class AbstractBaseTest
     }
 
     @Test
-    public void noTargetFileTest() throws Exception
-    {
-        mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", "xxx"))
-               .andExpect(status().is(INTERNAL_SERVER_ERROR.value()));
-    }
-
-    @Test
-    // Looks dangerous but is okay as we only use the final filename
     public void dotDotSourceFilenameTest() throws Exception
     {
         sourceFile = new MockMultipartFile("file", "../quick." + sourceExtension, sourceMimetype, sourceFileBytes);

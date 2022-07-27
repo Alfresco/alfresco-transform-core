@@ -26,6 +26,38 @@
  */
 package org.alfresco.transform.imagemagick;
 
+import org.alfresco.transform.base.AbstractBaseTest;
+import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
+import org.alfresco.transform.base.model.FileRefEntity;
+import org.alfresco.transform.base.model.FileRefResponse;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.imagemagick.transformers.ImageMagickTransformer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.UUID;
+
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,103 +76,68 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.util.StringUtils.getFilenameExtension;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.annotation.PostConstruct;
-
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.imagemagick.transformers.ImageMagickTransformer;
-import org.alfresco.transform.base.AbstractBaseTest;
-import org.alfresco.transform.base.executors.RuntimeExec;
-import org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
-import org.alfresco.transform.base.model.FileRefEntity;
-import org.alfresco.transform.base.model.FileRefResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
 /**
- * Test ImageMagick.
+ * Test ImageMagick with mocked external command.
  */
 public class ImageMagickTest extends AbstractBaseTest
 {
-    private static final String ENGINE_CONFIG_NAME = "imagemagick_engine_config.json";
+    private static String PREFIX_IMAGE = "image/";
 
-    private String PREFIX_IMAGE = "image/";
+    @Autowired
+    private ImageMagickTransformer imageMagickTransformer;
 
     @Mock
     protected ExecutionResult mockExecutionResult;
-
     @Mock
     protected RuntimeExec mockTransformCommand;
-
     @Mock
     protected RuntimeExec mockCheckCommand;
-
     @Value("${transform.core.imagemagick.exe}")
     protected String EXE;
-
     @Value("${transform.core.imagemagick.dyn}")
     protected String DYN;
-
     @Value("${transform.core.imagemagick.root}")
     protected String ROOT;
-
     @Value("${transform.core.imagemagick.coders}")
     protected String CODERS;
-
     @Value("${transform.core.imagemagick.config}")
     protected String CONFIG;
-
-    protected ImageMagickTransformer commandExecutor;
-
-    @PostConstruct
-    private void init()
-    {
-        commandExecutor = new ImageMagickTransformer();
-    }
 
     @BeforeEach
     public void before() throws IOException
     {
-        ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
-        ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
-        ReflectionTestUtils.setField(controller, "commandExecutor", commandExecutor);
+        setMockExternalCommandsOnTransformer(imageMagickTransformer, mockTransformCommand, mockCheckCommand);
+        mockTransformCommand("jpg", "png", "image/jpeg", true);
+    }
 
-        mockTransformCommand("jpg", "png", "image/jpg", true);
+    @AfterEach
+    public void after()
+    {
+        resetExternalCommandsOnTransformer();
     }
 
     @Override
-    protected void mockTransformCommand(String sourceExtension,
+    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
+        String... params)
+    {
+        final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
+            .param("targetMimetype", targetMimetype)
+            .param("sourceMimetype", sourceMimetype);
+        return builder;
+    }
+
+    @Override
+    public void mockTransformCommand(String sourceExtension,
         String targetExtension, String sourceMimetype,
         boolean readTargetFileBytes) throws IOException
     {
         this.sourceExtension = sourceExtension;
         this.targetExtension = targetExtension;
         this.sourceMimetype = sourceMimetype;
-        this.targetMimetype = PREFIX_IMAGE + targetExtension;
+        this.targetMimetype = PREFIX_IMAGE + ("jpg".equals(targetExtension) ? "jpeg" :  targetExtension);
 
         expectedOptions = null;
         expectedSourceSuffix = null;
@@ -160,7 +157,8 @@ public class ImageMagickTest extends AbstractBaseTest
 
                 assertNotNull(actualSource);
                 assertNotNull(actualTarget);
-                if (expectedSourceSuffix != null) {
+                if (expectedSourceSuffix != null)
+                {
                     assertTrue(actualSource.endsWith(expectedSourceSuffix), 
                         "The source file \"" + actualSource + "\" should have ended in \"" + expectedSourceSuffix + "\"");
                     actualSource = actualSource.substring(0, actualSource.length() - expectedSourceSuffix.length());
@@ -350,8 +348,8 @@ public class ImageMagickTest extends AbstractBaseTest
 
         mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", "xxx"))
                .andExpect(status().is(BAD_REQUEST.value()))
-               .andExpect(
-                   status().reason(containsString("Transformer exit code was not 0: \nSTDERR")));
+               .andExpect(status()
+                              .reason(containsString("Transformer exit code was not 0: \nSTDERR")));
     }
 
     @Test

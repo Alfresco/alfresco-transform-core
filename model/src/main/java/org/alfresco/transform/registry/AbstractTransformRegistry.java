@@ -21,16 +21,16 @@
  */
 package org.alfresco.transform.registry;
 
-import static org.alfresco.transform.registry.TransformRegistryHelper.retrieveTransformListBySize;
-import static org.alfresco.transform.registry.TransformRegistryHelper.lookupTransformOptions;
+import org.alfresco.transform.config.CoreFunction;
+import org.alfresco.transform.config.TransformOption;
+import org.alfresco.transform.config.Transformer;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.alfresco.transform.config.CoreFunction;
-import org.alfresco.transform.config.TransformOption;
-import org.alfresco.transform.config.Transformer;
+import static org.alfresco.transform.registry.TransformRegistryHelper.lookupTransformOptions;
+import static org.alfresco.transform.registry.TransformRegistryHelper.retrieveTransformListBySize;
 
 /**
  * Used to work out if a transformation is supported. Sub classes should implement {@link #getData()} to return an

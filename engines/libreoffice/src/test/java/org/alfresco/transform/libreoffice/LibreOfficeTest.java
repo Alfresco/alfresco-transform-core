@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
@@ -52,10 +53,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.UUID;
 
-import javax.annotation.PostConstruct;
-
+import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.libreoffice.transformers.LibreOfficeTransformer;
@@ -64,9 +65,11 @@ import org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.artofsolving.jodconverter.office.OfficeException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -75,55 +78,46 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
- * Test LibreOffice.
+ * Test LibreOffice with mocked external command.
  */
 public class LibreOfficeTest extends AbstractBaseTest
 {
-    protected String targetMimetype = MIMETYPE_PDF;
+    protected static String targetMimetype = MIMETYPE_PDF;
 
+    @Autowired
+    private LibreOfficeTransformer libreOfficeTransformer;
+
+    @Spy
+    private LibreOfficeTransformer spyLibreOfficeTransformer;
     @Mock
     protected ExecutionResult mockExecutionResult;
 
     @Value("${transform.core.libreoffice.path}")
     private String execPath;
-
     @Value("${transform.core.libreoffice.maxTasksPerProcess}")
     private String maxTasksPerProcess;
-
     @Value("${transform.core.libreoffice.timeout}")
     private String timeout;
-
     @Value("${transform.core.libreoffice.portNumbers}")
     private String portNumbers;
-
     @Value("${transform.core.libreoffice.templateProfileDir}")
     private String templateProfileDir;
-
     @Value("${transform.core.libreoffice.isEnabled}")
     private String isEnabled;
-    
-    @Autowired
-    private LibreOfficeTransformer libreOfficeTransformer;
-
-    protected LibreOfficeTransformer javaExecutor;
-
-    @PostConstruct
-    private void init()
-    {
-//        javaExecutor = Mockito.spy(new LibreOfficeTransformer(execPath, maxTasksPerProcess, timeout, portNumbers, templateProfileDir, isEnabled));
-    }
 
     @BeforeEach
     public void before() throws IOException
     {
+        var customTransformersByName = (Map<String, CustomTransformer>) ReflectionTestUtils.getField(transformHandler, "customTransformersByName");
+        customTransformersByName.put("libreoffice", spyLibreOfficeTransformer);
+
         sourceExtension = "doc";
         targetExtension = "pdf";
         sourceMimetype = "application/msword";
-
-//        setJavaExecutor(controller, javaExecutor);
 
         // The following is based on super.mockTransformCommand(...)
         // This is because LibreOffice used JodConverter rather than a RuntimeExec
@@ -158,14 +152,24 @@ public class LibreOfficeTest extends AbstractBaseTest
             assertTrue(Arrays.equals(sourceFileBytes, actualSourceFileBytes), "Source file is not the same");
 
             return null;
-        }).when(javaExecutor).convert(any(), any());
+        }).when(spyLibreOfficeTransformer).convert(any(), any());
     }
 
-    
-//    protected void setJavaExecutor(TransformerController controller, LibreOfficeTransformer javaExecutor)
-//    {
-//        ReflectionTestUtils.setField(controller, "javaExecutor", javaExecutor);
-//    }
+    @AfterEach
+    public void after() throws IOException
+    {
+        var customTransformersByName = (Map<String, CustomTransformer>) ReflectionTestUtils.getField(transformHandler, "customTransformersByName");
+        customTransformersByName.put("libreoffice", libreOfficeTransformer);
+    }
+
+    @Override
+    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
+    {
+        final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
+            .param("targetMimetype", targetMimetype)
+            .param("sourceMimetype", sourceMimetype);
+        return builder;
+    }
 
     @Override
     protected void mockTransformCommand(String sourceExtension, String targetExtension,
@@ -177,7 +181,7 @@ public class LibreOfficeTest extends AbstractBaseTest
     @Test
     public void badExitCodeTest() throws Exception
     {
-        doThrow(OfficeException.class).when(javaExecutor).convert(any(), any());
+        doThrow(OfficeException.class).when(spyLibreOfficeTransformer).convert(any(), any());
 
         mockMvc
             .perform(MockMvcRequestBuilders
@@ -289,33 +293,34 @@ public class LibreOfficeTest extends AbstractBaseTest
     @Test
     public void testInvalidExecutorMaxTasksPerProcess()
     {
-        testInvalidValue("maxTasksPerProcess", "INVALID", maxTasksPerProcess,
-                "LibreOfficeTransformer MAX_TASKS_PER_PROCESS must have a numeric value");
+        testInvalidValue("maxTasksPerProcess", "INVALID",
+            "LibreOfficeTransformer LIBREOFFICE_MAX_TASKS_PER_PROCESS must have a numeric value");
     }
 
     @Test
     public void testInvalidExecutorTimeout()
     {
-        testInvalidValue("timeout", "INVALID", timeout,
-                "LibreOfficeTransformer TIMEOUT must have a numeric value");
+        testInvalidValue("timeout", "INVALID",
+            "LibreOfficeTransformer LIBREOFFICE_TIMEOUT must have a numeric value");
     }
 
     @Test
     public void testInvalidExecutorPortNumbers()
     {
-        testInvalidValue("portNumbers", null, portNumbers,
-                "LibreOfficeTransformer PORT variable cannot be null or empty");
+        testInvalidValue("portNumbers", null,
+            "LibreOfficeTransformer LIBREOFFICE_PORT_NUMBERS variable cannot be null or empty");
     }
 
     @Test
     public void testInvalidExecutorIsEnabled()
     {
-        testInvalidValue("isEnabled", "INVALID", isEnabled,
-                "LibreOfficeTransformer IS_ENABLED variable must be set to true/false");
+        testInvalidValue("isEnabled", "INVALID",
+            "LibreOfficeTransformer LIBREOFFICE_IS_ENABLED variable must be set to true/false");
     }
 
-    private void testInvalidValue(String fieldName, String invalidValue, String validValue, String expectedErrorMessage)
+    private void testInvalidValue(String fieldName, String invalidValue, String expectedErrorMessage)
     {
+        String validValue = (String)ReflectionTestUtils.getField(libreOfficeTransformer, fieldName);
         String errorMessage = "";
         try
         {

@@ -49,17 +49,6 @@ public class AIOLibreOfficeTest extends LibreOfficeTest
 //        // No need to set the transform registry to the controller as it is @Autowired in
 //    }
 
-    @Override
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
-        String... params)
-    {
-        final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
-            .param("targetMimetype", targetMimetype)
-            .param("sourceMimetype", sourceMimetype);
-
-        return builder;
-    }
-    
 //    @Test
 //    @Override
 //    public void testGetTransformConfigInfo()

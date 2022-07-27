@@ -122,12 +122,8 @@ class TransformRegistryHelper
           throw new TransformException(BAD_REQUEST, "Null value provided for targetMimetype, please provide a value");
         }
 
-        final Map<String, List<SupportedTransform>> targetMap = data.retrieveTransforms(
-            sourceMimetype);
-
-        final List<SupportedTransform> supportedTransformList = targetMap.getOrDefault(
-            targetMimetype, emptyList());
-
+        final Map<String, List<SupportedTransform>> targetMap = data.retrieveTransforms(sourceMimetype);
+        final List<SupportedTransform> supportedTransformList = targetMap.getOrDefault(targetMimetype, emptyList());
         final List<SupportedTransform> transformListBySize = new ArrayList<>();
 
         for (SupportedTransform supportedTransform : supportedTransformList)

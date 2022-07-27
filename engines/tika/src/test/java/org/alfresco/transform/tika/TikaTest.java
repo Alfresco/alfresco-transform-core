@@ -46,7 +46,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -109,7 +108,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 public class TikaTest extends AbstractBaseTest
 {
-    private static final String ENGINE_CONFIG_NAME = "tika_engine_config.json";
     private static final String EXPECTED_XHTML_CONTENT_CONTAINS = "<p>The quick brown fox jumps over the lazy dog</p>";
     private static final String EXPECTED_TEXT_CONTENT_CONTAINS = "The quick brown fox jumps over the lazy dog";
     private static final String EXPECTED_MSG_CONTENT_CONTAINS = "Recipients\n" +
@@ -141,6 +139,8 @@ public class TikaTest extends AbstractBaseTest
         String targetExtension, String sourceMimetype,
         boolean readTargetFileBytes) throws IOException
     {
+        // Tika transform is not mocked. It is run for real.
+
         this.sourceExtension = sourceExtension;
         this.targetExtension = targetExtension;
         this.sourceMimetype = sourceMimetype;
@@ -150,8 +150,6 @@ public class TikaTest extends AbstractBaseTest
         sourceFileBytes = readTestFile(sourceExtension);
         expectedTargetFileBytes = readTargetFileBytes ? readTestFile(targetExtension) : null;
         sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
-
-        // Tika transform is not mocked. It is run for real.
 
         when(mockExecutionResult.getExitValue()).thenReturn(0);
         when(mockExecutionResult.getStdErr()).thenReturn("STDERROR");
@@ -193,23 +191,12 @@ public class TikaTest extends AbstractBaseTest
                     .param("sourceMimetype", sourceMimetype);
     }
 
-    @Mock
-    HttpServletRequest httpServletRequest;
-
     @Test
     @Override
     public void simpleTransformTest() throws Exception
     {
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         super.simpleTransformTest();
-    }
-
-    @Test
-    @Override
-    public void noTargetFileTest()
-    {
-        // Ignore the test in super class as the Tika transforms are real rather than mocked up.
-        // It is the mock that returns a zero length file for other transformers, when we supply an invalid targetExtension.
     }
 
     // --- Super class tests (need modified setup) ---
@@ -228,14 +215,6 @@ public class TikaTest extends AbstractBaseTest
     {
         mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
         super.noExtensionSourceFilenameTest();
-    }
-
-    @Test
-    @Override
-    public void calculateMaxTime() throws Exception
-    {
-        mockTransformCommand(PDF, TXT, MIMETYPE_PDF, true);
-        super.calculateMaxTime();
     }
 
     // --- General Tika tests ---

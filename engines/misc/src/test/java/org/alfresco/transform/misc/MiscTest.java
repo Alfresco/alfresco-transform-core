@@ -59,7 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Test Misc.
+ * Test Misc. Includes calling the 3rd party libraries.
  */
 public class MiscTest extends AbstractBaseTest
 {
@@ -84,6 +84,7 @@ public class MiscTest extends AbstractBaseTest
     protected void mockTransformCommand(String sourceExtension, String targetExtension,
         String sourceMimetype, boolean readTargetFileBytes)
     {
+        // Misc transform is not mocked. It is run for real.
     }
 
     @Override
@@ -107,14 +108,6 @@ public class MiscTest extends AbstractBaseTest
             builder.param("targetEncoding", targetEncoding);
         }
         return builder;
-    }
-
-    @Test
-    @Override
-    public void noTargetFileTest()
-    {
-        // Ignore the test in super class as the Misc transforms are real rather than mocked up.
-        // It is the mock that returns a zero length file for other transformers, when we supply an invalid targetExtension.
     }
 
     /**
