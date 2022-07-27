@@ -34,6 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.io.IOException;
 
@@ -49,6 +51,16 @@ public class AIOTest extends AbstractBaseTest
 {
     @Autowired
     private String coreVersion;
+
+    @Override
+    // Add extra required parameters to the request.
+    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
+        String... params)
+    {
+        return super.mockMvcRequest(url, sourceFile, params)
+                    .param("targetMimetype", targetMimetype)
+                    .param("sourceMimetype", sourceMimetype);
+    }
 
     //@Override
     protected void mockTransformCommand(String sourceExtension, String targetExtension, String sourceMimetype,

@@ -94,7 +94,6 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 public class TransformHandler
 {
     private static final Logger logger = LoggerFactory.getLogger(TransformHandler.class);
-
     private static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
         TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, DIRECT_ACCESS_URL);
 
@@ -113,10 +112,10 @@ public class TransformHandler
     @Autowired
     private TransformerDebug transformerDebug;
 
-    private AtomicInteger httpRequestCount = new AtomicInteger(1);
+    private final AtomicInteger httpRequestCount = new AtomicInteger(1);
     private TransformEngine transformEngine;
     private ProbeTransform probeTransform;
-    private Map<String, CustomTransformer> customTransformersByName = new HashMap<>();
+    private final Map<String, CustomTransformer> customTransformersByName = new HashMap<>();
 
     @PostConstruct
     private void init()
@@ -385,8 +384,8 @@ public class TransformHandler
     public Map<String, String> cleanTransformOptions(Map<String, String> requestParameters)
     {
         Map<String, String> transformOptions = new HashMap<>(requestParameters);
-        transformOptions.keySet().removeAll(NON_TRANSFORM_OPTION_REQUEST_PARAMETERS);
-        transformOptions.values().removeIf(v -> v.isEmpty());
+        NON_TRANSFORM_OPTION_REQUEST_PARAMETERS.forEach(transformOptions.keySet()::remove);
+        transformOptions.values().removeIf(String::isEmpty);
         return transformOptions;
     }
 

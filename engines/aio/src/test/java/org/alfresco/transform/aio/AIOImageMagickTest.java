@@ -43,11 +43,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class AIOImageMagickTest extends ImageMagickTest
 {
-    @Autowired TransformRegistryImpl transformRegistry;
+//    @Autowired TransformRegistryImpl transformRegistry;
 
-    @BeforeEach @Override
-    public void before() throws IOException
-    {       
+//    @BeforeEach @Override
+//    public void before() throws IOException
+//    {
 //        ReflectionTestUtils.setField(commandExecutor, "transformCommand", mockTransformCommand);
 //        ReflectionTestUtils.setField(commandExecutor, "checkCommand", mockCheckCommand);
 //        //Need to wire in the mocked commandExecutor into the controller...
@@ -55,7 +55,7 @@ public class AIOImageMagickTest extends ImageMagickTest
 //        transformers.replace("imagemagick", commandExecutor);
 //
 //        mockTransformCommand("jpg", "png", "image/jpeg", true);
-    }
+//    }
 
 //    @Test
 //    @Override
