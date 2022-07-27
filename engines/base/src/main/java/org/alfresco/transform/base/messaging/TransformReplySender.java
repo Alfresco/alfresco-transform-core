@@ -60,14 +60,17 @@ public class TransformReplySender
     {
         if (destination != null)
         {
-            try {
+            try
+            {
                 //jmsTemplate.setSessionTransacted(true); // do we need this?
                 jmsTemplate.convertAndSend(destination, reply, m -> {
                     m.setJMSCorrelationID(correlationId);
                     return m;
                 });
                 logger.trace("Sent: {} - with correlation ID {}", reply, correlationId);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 logger.error("Failed to send T-Reply " + reply + " - for correlation ID " + correlationId, e);
             }
         }

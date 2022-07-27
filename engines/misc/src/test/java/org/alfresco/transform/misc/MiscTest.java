@@ -81,8 +81,7 @@ public class MiscTest extends AbstractBaseTest
     }
 
     @Override
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
-        String... params)
+    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
     {
         final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
             .param("sourceEncoding", sourceEncoding)

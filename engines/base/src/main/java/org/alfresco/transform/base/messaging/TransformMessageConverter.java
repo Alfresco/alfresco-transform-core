@@ -27,14 +27,11 @@
 
 package org.alfresco.transform.base.messaging;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.google.common.collect.ImmutableMap;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
@@ -42,9 +39,9 @@ import org.springframework.jms.support.converter.MessageType;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.google.common.collect.ImmutableMap;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
 
 /**
  * TODO: Duplicated from the Router
@@ -55,8 +52,6 @@ import com.google.common.collect.ImmutableMap;
 @Service
 public class TransformMessageConverter implements MessageConverter
 {
-    private static final Logger logger = LoggerFactory.getLogger(TransformMessageConverter.class);
-
     private static final MappingJackson2MessageConverter converter;
     private static final JavaType TRANSFORM_REQUEST_TYPE =
         TypeFactory.defaultInstance().constructType(TransformRequest.class);

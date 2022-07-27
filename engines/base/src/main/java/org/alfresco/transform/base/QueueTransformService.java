@@ -139,8 +139,7 @@ public class QueueTransformService
     {
         try
         {
-            TransformRequest request = (TransformRequest) transformMessageConverter
-                .fromMessage(msg);
+            TransformRequest request = (TransformRequest) transformMessageConverter.fromMessage(msg);
             return Optional.ofNullable(request);
         }
         catch (MessageConversionException e)

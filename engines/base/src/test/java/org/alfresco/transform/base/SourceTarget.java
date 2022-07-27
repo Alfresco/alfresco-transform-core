@@ -29,6 +29,8 @@ package org.alfresco.transform.base;
 import java.util.Objects;
 
 /**
+ * Source & Target media type pair
+ *
  * @author Cezar Leahu
  */
 public class SourceTarget
@@ -65,11 +67,6 @@ public class SourceTarget
     }
 
     public static SourceTarget of(final String source, final String target)
-    {
-        return sourceTarget(source, target);
-    }
-
-    public static SourceTarget sourceTarget(final String source, final String target)
     {
         return new SourceTarget(source, target);
     }

@@ -68,8 +68,7 @@ public class AIOTest extends AbstractBaseTest
 
     @Override
     // Add extra required parameters to the request.
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile,
-        String... params)
+    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
     {
         return super.mockMvcRequest(url, sourceFile, params)
                     .param("targetMimetype", targetMimetype)

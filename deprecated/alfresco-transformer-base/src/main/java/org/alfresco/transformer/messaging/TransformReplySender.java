@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -56,22 +56,23 @@ public class TransformReplySender
         send(destination, reply, reply.getRequestId());
     }
 
-    public void send(final Destination destination, final TransformReply reply,
-        final String correlationId)
+    public void send(final Destination destination, final TransformReply reply, final String correlationId)
     {
-        try
+        if (destination != null)
         {
-            //jmsTemplate.setSessionTransacted(true); // do we need this?
-            jmsTemplate.convertAndSend(destination, reply, m -> {
-                m.setJMSCorrelationID(correlationId);
-                return m;
-            });
-            logger.trace("Sent: {} - with correlation ID {}", reply, correlationId);
-        }
-        catch (Exception e)
-        {
-            logger.error(
-                "Failed to send T-Reply " + reply + " - for correlation ID " + correlationId, e);
+            try
+            {
+                //jmsTemplate.setSessionTransacted(true); // do we need this?
+                jmsTemplate.convertAndSend(destination, reply, m -> {
+                    m.setJMSCorrelationID(correlationId);
+                    return m;
+                });
+                logger.trace("Sent: {} - with correlation ID {}", reply, correlationId);
+            }
+            catch (Exception e)
+            {
+                logger.error("Failed to send T-Reply " + reply + " - for correlation ID " + correlationId, e);
+            }
         }
     }
 }
