@@ -2,7 +2,7 @@
 
 # Tika is from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0.
 
-FROM alfresco/alfresco-base-java:jre11-centos7-202207110835
+FROM alfresco/alfresco-base-java:jre11-rockylinux8-202207110835
 
 ARG EXIFTOOL_VERSION=12.25
 ARG EXIFTOOL_FOLDER=Image-ExifTool-${EXIFTOOL_VERSION}
@@ -27,7 +27,9 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
     make && \
     make test && \
     make install) && \
-    yum -y autoremove perl-ExtUtils-MakeMaker make && rm -rf ${EXIFTOOL_FOLDER} ${EXIFTOOL_FOLDER}.tgz && \
+    yum -y autoremove make && \
+    #TODO perl-ExtUtils-MakeMaker removal removes exiftools
+    rm -rf ${EXIFTOOL_FOLDER} ${EXIFTOOL_FOLDER}.tgz #&& \
     yum clean all
 
 ADD target/generated-resources/licenses              /licenses
