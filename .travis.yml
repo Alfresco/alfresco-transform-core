@@ -23,6 +23,7 @@ branches:
     - /^HF\/.+$/
     - /^ATS-.*$/
     - /^ACS-.*$/
+    - feature/ACS-3350_upgrade-to-Java-17
 
 stages:
   - name: Veracode Scan
