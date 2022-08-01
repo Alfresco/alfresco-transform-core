@@ -249,7 +249,7 @@ public abstract class ProbeTestTransform
         {
             throw new TransformException(TOO_MANY_REQUESTS,
                 getMessagePrefix(isLiveProbe) + "Transformer requested to die. A transform took " +
-                "longer than " + (maxTransformTime * 1000) + " seconds");
+                "longer than " + (maxTransformTime / 1000) + " seconds");
         }
 
         if (maxTransformCount > 0 && transformCount.get() > maxTransformCount)

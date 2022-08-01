@@ -129,6 +129,7 @@ public class TransformControllerTest
     public File tempDir;
     @MockBean
     protected AlfrescoSharedFileStoreClient fakeSfsClient;
+
     @BeforeEach
     public void fakeSfsClient()
     {
@@ -229,6 +230,7 @@ public class TransformControllerTest
     @Test
     public void testReadyEndpointReturnsSuccessful() throws Exception
     {
+        transformController.probeTransform.resetForTesting();
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_READY))
                .andExpect(status().isOk())
                .andExpect(content().string(containsString("Success - ")));
@@ -237,6 +239,7 @@ public class TransformControllerTest
     @Test
     public void testLiveEndpointReturnsSuccessful() throws Exception
     {
+        transformController.probeTransform.resetForTesting();
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_LIVE))
                .andExpect(status().isOk())
                .andExpect(content().string(containsString("Success - ")));

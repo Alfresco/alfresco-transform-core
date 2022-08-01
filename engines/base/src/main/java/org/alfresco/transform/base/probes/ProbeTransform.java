@@ -242,7 +242,7 @@ public class ProbeTransform
         {
             throw new TransformException(TOO_MANY_REQUESTS,
                 getMessagePrefix(isLiveProbe) + "Transformer requested to die. A transform took " +
-                "longer than " + (maxTransformTime * 1000) + " seconds");
+                "longer than " + (maxTransformTime / 1000) + " seconds");
         }
 
         if (maxTransformCount > 0 && transformCount.get() > maxTransformCount)
@@ -302,8 +302,7 @@ public class ProbeTransform
                     true)) || transCount > AVERAGE_OVER_TRANSFORMS)
                 {
                     nextTransformTime = System.currentTimeMillis() + livenessTransformPeriod;
-                    logger.trace("{} - {}ms+{}%={}ms", message, normalTime, livenessPercent,
-                        maxTime);
+                    logger.trace("{} - {}ms+{}%={}ms", message, normalTime, livenessPercent, maxTime);
                 }
             }
             else if (!isLiveProbe && !readySent.getAndSet(true))
@@ -355,5 +354,11 @@ public class ProbeTransform
     public long getNormalTime()
     {
         return normalTime;
+    }
+
+    public void resetForTesting()
+    {
+        die.set(false);
+        transformCount.set(0);
     }
 }
