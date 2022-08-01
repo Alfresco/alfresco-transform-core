@@ -31,13 +31,13 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_WORDPROCES
 import java.util.UUID;
 
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.base.AbstractQueueTest;
+import org.alfresco.transform.base.AbstractQueueIT;
 
 /**
  * @author Lucian Tuca
  * created on 15/01/2019
  */
-public class LibreOfficeQueueTest extends AbstractQueueTest
+public class LibreOfficeQueueIT extends AbstractQueueIT
 {
     @Override
     protected TransformRequest buildRequest()

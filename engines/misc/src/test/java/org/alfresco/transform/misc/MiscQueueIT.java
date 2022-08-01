@@ -32,9 +32,9 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import java.util.UUID;
 
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.base.AbstractQueueTest;
+import org.alfresco.transform.base.AbstractQueueIT;
 
-public class MiscQueueTest extends AbstractQueueTest
+public class MiscQueueIT extends AbstractQueueIT
 {
     @Override
     protected TransformRequest buildRequest()

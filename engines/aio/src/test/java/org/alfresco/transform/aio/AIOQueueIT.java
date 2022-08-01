@@ -26,7 +26,7 @@
  */
 package org.alfresco.transform.aio;
 
-import org.alfresco.transform.base.AbstractQueueTest;
+import org.alfresco.transform.base.AbstractQueueIT;
 import org.alfresco.transform.client.model.TransformRequest;
 
 import java.util.UUID;
@@ -38,7 +38,7 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
  * @author David Edwards
  * created on 21/04/2020
  */
-public class AIOQueueTest extends AbstractQueueTest
+public class AIOQueueIT extends AbstractQueueIT
 {
     @Override
     protected TransformRequest buildRequest()

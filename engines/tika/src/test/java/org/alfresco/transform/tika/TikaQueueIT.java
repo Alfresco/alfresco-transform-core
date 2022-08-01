@@ -24,21 +24,21 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.pdfrenderer;
+package org.alfresco.transform.tika;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 
 import java.util.UUID;
 
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.base.AbstractQueueTest;
+import org.alfresco.transform.base.AbstractQueueIT;
 
 /**
  * @author Lucian Tuca
  * created on 15/01/2019
  */
-public class PdfRendererQueueTest extends AbstractQueueTest
+public class TikaQueueIT extends AbstractQueueIT
 {
     @Override
     protected TransformRequest buildRequest()
@@ -47,8 +47,8 @@ public class PdfRendererQueueTest extends AbstractQueueTest
             .builder()
             .withRequestId(UUID.randomUUID().toString())
             .withSourceMediaType(MIMETYPE_OPENXML_WORDPROCESSING)
-            .withTargetMediaType(MIMETYPE_PDF)
-            .withTargetExtension("pdf")
+            .withTargetMediaType(MIMETYPE_TEXT_PLAIN)
+            .withTargetExtension("txt")
             .withSchema(1)
             .withClientData("ACS")
             .withSourceReference(UUID.randomUUID().toString())

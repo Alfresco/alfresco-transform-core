@@ -26,18 +26,12 @@
  */
 package org.alfresco.transform.base;
 
-import static org.alfresco.transform.messages.TransformStack.PIPELINE_FLAG;
-import static org.alfresco.transform.messages.TransformStack.levelBuilder;
-import static org.alfresco.transform.messages.TransformStack.setInitialTransformRequestOptions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import javax.jms.Queue;
 
-import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.common.ExtensionService;
-import org.alfresco.transform.messages.TransformStack;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +49,7 @@ import org.springframework.jms.core.JmsTemplate;
 @SpringBootTest(classes={org.alfresco.transform.base.Application.class},
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {"activemq.url=nio://localhost:61616"})
-public abstract class AbstractQueueTest
+public abstract class AbstractQueueIT
 {
     @Autowired
     private Queue engineRequestQueue;

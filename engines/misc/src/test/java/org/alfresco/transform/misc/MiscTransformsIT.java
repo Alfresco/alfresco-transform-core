@@ -26,9 +26,21 @@
  */
 package org.alfresco.transform.misc;
 
+import org.alfresco.transform.base.FileInfo;
+import org.alfresco.transform.base.SourceTarget;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
+
+import java.util.Map;
+import java.util.stream.Stream;
+
 import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
+import static org.alfresco.transform.base.EngineClient.sendTRequest;
+import static org.alfresco.transform.base.FileInfo.testFile;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_DITA;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_EXCEL;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
@@ -54,30 +66,15 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_MEDIAWIKI;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_XML;
-import static org.alfresco.transform.base.EngineClient.sendTRequest;
-import static org.alfresco.transform.base.FileInfo.testFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;
-
-import java.util.Map;
-import java.util.stream.Stream;
-
-import org.alfresco.transform.base.FileInfo;
-import org.alfresco.transform.base.SourceTarget;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
 
 /**
  * @author Cezar Leahu
  */
 public class MiscTransformsIT
 {
-    private static final Logger logger = LoggerFactory.getLogger(MiscTransformsIT.class);
     private static final String ENGINE_URL = "http://localhost:8090";
 
     private static final Map<String, FileInfo> TEST_FILES = Stream.of(

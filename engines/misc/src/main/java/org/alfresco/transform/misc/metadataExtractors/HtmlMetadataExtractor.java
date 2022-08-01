@@ -31,12 +31,15 @@ import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.swing.text.ChangedCharSetException;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -64,7 +67,8 @@ import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbe
  * @author Derek Hulley
  * @author adavis
  */
-public class HtmlMetadataExtractor extends AbstractMetadataExtractorEmbedder implements CustomTransformer
+@Component
+public class HtmlMetadataExtractor extends AbstractMetadataExtractorEmbedder
 {
     private static final Logger logger = LoggerFactory.getLogger(HtmlMetadataExtractor.class);
 
@@ -97,6 +101,10 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractorEmbedder imp
             TransformManager transformManager) throws Exception
     {
         final Map<String, Serializable> rawProperties = new HashMap<>();
+
+        // This Extractor retries if the encoding needs to be changed, so we need to reread the source,
+        // so cannot use the input stream provided, as it will get closed.
+        final File sourceFile = transformManager.createSourceFile();
 
         HTMLEditorKit.ParserCallback callback = new HTMLEditorKit.ParserCallback()
         {
@@ -181,10 +189,10 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractorEmbedder imp
             rawProperties.clear();
             Reader r = null;
 
-            try
+            try (InputStream cis = new FileInputStream(sourceFile))
             {
                 // TODO: for now, use default charset; we should attempt to map from html meta-data
-                r = new InputStreamReader(inputStream, charsetGuess);
+                r = new InputStreamReader(cis, charsetGuess);
                 HTMLEditorKit.Parser parser = new ParserDelegator();
                 parser.parse(r, callback, tries > 0);
                 break;

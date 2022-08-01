@@ -71,7 +71,7 @@ import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbe
  * @author adavis
  */
 @Component
-public class RFC822MetadataExtractor extends AbstractMetadataExtractorEmbedder implements CustomTransformer
+public class RFC822MetadataExtractor extends AbstractMetadataExtractorEmbedder
 {
     private static final Logger logger = LoggerFactory.getLogger(RFC822MetadataExtractor.class);
 

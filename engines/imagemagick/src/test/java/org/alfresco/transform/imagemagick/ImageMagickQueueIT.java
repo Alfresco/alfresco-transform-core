@@ -24,21 +24,21 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.tika;
+package org.alfresco.transform.imagemagick;
 
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
 
 import java.util.UUID;
 
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.base.AbstractQueueTest;
+import org.alfresco.transform.base.AbstractQueueIT;
 
 /**
  * @author Lucian Tuca
  * created on 15/01/2019
  */
-public class TikaQueueTest extends AbstractQueueTest
+public class ImageMagickQueueIT extends AbstractQueueIT
 {
     @Override
     protected TransformRequest buildRequest()
@@ -46,9 +46,9 @@ public class TikaQueueTest extends AbstractQueueTest
         return TransformRequest
             .builder()
             .withRequestId(UUID.randomUUID().toString())
-            .withSourceMediaType(MIMETYPE_OPENXML_WORDPROCESSING)
-            .withTargetMediaType(MIMETYPE_TEXT_PLAIN)
-            .withTargetExtension("txt")
+            .withSourceMediaType(MIMETYPE_IMAGE_PNG)
+            .withTargetMediaType(MIMETYPE_IMAGE_JPEG)
+            .withTargetExtension("jpeg")
             .withSchema(1)
             .withClientData("ACS")
             .withSourceReference(UUID.randomUUID().toString())
