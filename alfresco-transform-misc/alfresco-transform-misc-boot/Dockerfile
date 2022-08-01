@@ -1,6 +1,6 @@
 # Image provides a container in which to run miscellaneous transformations for Alfresco Content Services.
 
-FROM alfresco/alfresco-base-java:jre17-rockylinux8
+FROM alfresco/alfresco-base-java:jre17-centos7
 
 ENV JAVA_OPTS=""
 
