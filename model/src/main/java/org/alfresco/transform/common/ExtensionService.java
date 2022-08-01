@@ -24,6 +24,7 @@ package org.alfresco.transform.common;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_DITA;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_EXCEL;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_SVG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_XWD;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENDOCUMENT_GRAPHICS;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENDOCUMENT_PRESENTATION;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENDOCUMENT_PRESENTATION_TEMPLATE;
@@ -118,7 +119,8 @@ public class ExtensionService
             Map.entry(MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE,        "xltx"),
             Map.entry(MIMETYPE_IMAGE_SVG,                           "svg"),
             Map.entry(MIMETYPE_TEXT_PLAIN,                          "txt"),
-            Map.entry(MIMETYPE_XHTML,                               "xhtml")
+            Map.entry(MIMETYPE_XHTML,                               "xhtml"),
+            Map.entry(MIMETYPE_IMAGE_XWD,                           "xwd")
     );
 
     public static String getExtensionForTargetMimetype(String targetMimetype, String sourceMimetype)
