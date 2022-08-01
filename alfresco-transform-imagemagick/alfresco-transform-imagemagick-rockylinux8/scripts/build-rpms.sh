@@ -7,7 +7,7 @@ IMAGEMAGICK_VERSION=7.1.0-16
 #Installing SRPM package. For future proof builds the SRPM package is uploaded to Alfresco's nexus repository.
 rpm -i https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/$IMAGEMAGICK_VERSION/imagemagick-distribution-$IMAGEMAGICK_VERSION-src.rpm
 
-#liblqr is not available on Rocky Linux 8 (same as CentOS 7). Removing it from the spec.
+#liblqr is not available on Rocky Linux 8. Removing it from the spec.
 sed -i '/lqr/d' ~/rpmbuild/SPECS/ImageMagick.spec
 
 #We need some libraries from the epel repo.

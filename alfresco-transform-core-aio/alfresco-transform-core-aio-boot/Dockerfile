@@ -31,6 +31,7 @@ ARG USERID=33017
 
 COPY target/alfresco-transform-core-aio-boot-${env.project_version}.jar /usr/bin
 
+#removing perl-ExtUtils-MakeMaker cascades to remove exiftools
 RUN ln /usr/bin/alfresco-transform-core-aio-boot-${env.project_version}.jar /usr/bin/alfresco-transform-core-aio-boot.jar && \
     yum install -y $IMAGEMAGICK_DEP_RPM_URL && \
     yum install -y $IMAGEMAGICK_LIB_RPM_URL $IMAGEMAGICK_RPM_URL && \
@@ -53,7 +54,6 @@ RUN ln /usr/bin/alfresco-transform-core-aio-boot-${env.project_version}.jar /usr
     make test && \
     make install) && \
     yum -y autoremove make &&  \
-    #TODO removing perl-ExtUtils-MakeMaker removes exifTools
     rm -rf ${EXIFTOOL_FOLDER} ${EXIFTOOL_FOLDER}.tgz && \
     yum clean all
 
