@@ -18,6 +18,7 @@ ARG USERID=33004
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 
+#removing perl-ExtUtils-MakeMaker cascades to remove exiftools
 RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     curl -s -S $EXIFTOOL_URL -o ${EXIFTOOL_FOLDER}.tgz && \
     tar xzf ${EXIFTOOL_FOLDER}.tgz && \
@@ -27,7 +28,8 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
     make && \
     make test && \
     make install) && \
-    yum -y autoremove perl-ExtUtils-MakeMaker make && rm -rf ${EXIFTOOL_FOLDER} ${EXIFTOOL_FOLDER}.tgz && \
+    yum -y autoremove make && \
+    rm -rf ${EXIFTOOL_FOLDER} ${EXIFTOOL_FOLDER}.tgz && \
     yum clean all
 
 ADD target/generated-resources/licenses              /licenses
