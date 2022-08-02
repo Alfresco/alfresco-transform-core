@@ -77,7 +77,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Super class for testing.
+ * Super class for unit testing.
  */
 @SpringBootTest(classes={org.alfresco.transform.base.Application.class})
 @AutoConfigureMockMvc
@@ -327,6 +327,7 @@ public abstract class AbstractBaseTest
     public void calculateMaxTime() throws Exception
     {
         ProbeTransform probeTransform = controller.probeTransform;
+        probeTransform.resetForTesting();
         probeTransform.setLivenessPercent(110);
 
         long[][] values = new long[][]{

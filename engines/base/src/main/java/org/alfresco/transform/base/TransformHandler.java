@@ -512,7 +512,7 @@ public class TransformHandler
                     sourceSizeInBytes, targetMimetype, transformOptions, null);
             if (transformerName == null)
             {
-                throw new TransformException(BAD_REQUEST, "No transforms were able to handle the request: "+
+                throw new TransformException(BAD_REQUEST, "No transforms for: "+
                         sourceMimetype+" -> "+targetMimetype+transformOptions.entrySet().stream()
                             .map(entry -> entry.getKey()+"="+entry.getValue())
                             .collect(Collectors.joining(", ", " ", "")));

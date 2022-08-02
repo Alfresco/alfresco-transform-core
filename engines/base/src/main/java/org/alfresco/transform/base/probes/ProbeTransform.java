@@ -358,7 +358,15 @@ public class ProbeTransform
 
     public void resetForTesting()
     {
-        die.set(false);
+        probeCount = 0;
+        transCount = 0;
+        normalTime = 0;
+        maxTime = Long.MAX_VALUE;
+        nextTransformTime = 0;
+
+        initialised.set(false);
+        readySent.set(false);
         transformCount.set(0);
+        die.set(false);
     }
 }

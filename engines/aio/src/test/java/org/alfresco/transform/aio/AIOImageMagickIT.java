@@ -30,5 +30,4 @@ import org.alfresco.transform.imagemagick.ImageMagickTransformationIT;
 
 public class AIOImageMagickIT extends ImageMagickTransformationIT
 {
-    // Tests are in ImageMagickTransformationIT
 }

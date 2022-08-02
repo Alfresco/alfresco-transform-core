@@ -43,7 +43,6 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 @Component
 public class AIOTransformEngine implements TransformEngine
 {
-//    private static String SPLIT_UP_COMMUNITY_LICENCE = Arrays.stream(COMMUNITY_LICENCE.split("\\n"));
     @Autowired(required = false)
     private List<TransformEngine> transformEngines;
 

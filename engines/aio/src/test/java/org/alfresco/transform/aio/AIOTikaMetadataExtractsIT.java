@@ -28,12 +28,6 @@ package org.alfresco.transform.aio;
 
 import org.alfresco.transform.tika.TikaMetadataExtractsIT;
 
-/**
- * Metadata integration tests in the Tika T-Engine, but run from the AIO T-Engine.
- *
- * @author adavis
- * @author dedwards
- */
 public class AIOTikaMetadataExtractsIT extends TikaMetadataExtractsIT
 {
 }

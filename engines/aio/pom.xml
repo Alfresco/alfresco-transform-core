@@ -133,6 +133,50 @@
 
     <build>
         <plugins>
+            <!-- Extract classes and licenses from fat Spring Boot jars. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <includeGroupIds>${project.groupId}</includeGroupIds>
+                    <includeArtifactIds>alfresco-transform-imagemagick,alfresco-transform-libreoffice,alfresco-transform-misc,alfresco-transform-pdf-renderer,alfresco-transform-tika</includeArtifactIds>
+                    <excludeTransitive>true</excludeTransitive>
+                    <excludeClassifiers>tests</excludeClassifiers>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
+                    <outputAbsoluteArtifactFilename>true</outputAbsoluteArtifactFilename>
+                    <overWriteReleases>true</overWriteReleases>
+                    <overWriteSnapshots>true</overWriteSnapshots>
+                    <fileMappers>
+                        <org.codehaus.plexus.components.io.filemappers.RegExpFileMapper>
+                            <pattern>BOOT-INF\/</pattern>
+                            <replacement>./</replacement>
+                        </org.codehaus.plexus.components.io.filemappers.RegExpFileMapper>
+                    </fileMappers>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>unpack-classes</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includes>**/org/alfresco/transform/**/*.class</includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>**/*.class,BOOT-INF/lib/**,META-INF/**,org/**,**/*.idx,docker/**,**/application-default.yaml</excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

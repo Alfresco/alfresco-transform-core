@@ -28,12 +28,6 @@ package org.alfresco.transform.aio;
 
 import org.alfresco.transform.misc.MiscMetadataExtractsIT;
 
-/**
- * Metadata integration tests in the Misc T-Engine, but run from the AIO T-Engine.
- *
- * @author adavis
- * @author dedwards
- */
 public class AIOMiscMetadataExtractsIT extends MiscMetadataExtractsIT
 {
 }

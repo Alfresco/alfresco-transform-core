@@ -542,7 +542,7 @@ public abstract class AbstractTransformerController implements TransformControll
                     sourceSizeInBytes, targetMimetype, transformOptions, null);
             if (transformerName == null)
             {
-                throw new TransformException(BAD_REQUEST, "No transforms were able to handle the request");
+                throw new TransformException(BAD_REQUEST, "No transforms for:");
             }
             return transformerName;
         }
