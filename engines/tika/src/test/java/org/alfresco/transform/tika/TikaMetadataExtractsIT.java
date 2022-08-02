@@ -28,7 +28,7 @@ package org.alfresco.transform.tika;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_APP_DWG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OUTLOOK_MSG;
-import static org.alfresco.transform.base.FileInfo.testFile;
+import static org.alfresco.transform.base.clients.FileInfo.testFile;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_AUDIO_MP4;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_EXCEL;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_BMP;
@@ -75,7 +75,7 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_NEF;
 import java.util.stream.Stream;
 
 import org.alfresco.transform.base.AbstractMetadataExtractsIT;
-import org.alfresco.transform.base.FileInfo;
+import org.alfresco.transform.base.clients.FileInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 

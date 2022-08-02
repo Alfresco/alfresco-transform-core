@@ -5,7 +5,7 @@
  *  pursuant to a written agreement and any use of this program without such an
  *  agreement is prohibited.
  */
-package org.alfresco.transform.base;
+package org.alfresco.transform.base.clients;
 
 import static java.util.Collections.emptyMap;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
@@ -25,7 +25,7 @@ import org.springframework.web.client.RestTemplate;
 /**
  * @author Cezar Leahu
  */
-public class EngineClient
+public class HttpClient
 {
     private static final RestTemplate REST_TEMPLATE = new RestTemplate();
     

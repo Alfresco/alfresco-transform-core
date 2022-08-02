@@ -27,7 +27,7 @@
 package org.alfresco.transform.tika;
 
 import com.google.common.collect.ImmutableMap;
-import org.alfresco.transform.base.EngineClient;
+import org.alfresco.transform.base.clients.HttpClient;
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -77,7 +77,7 @@ public class TikaTransformationIT
             sourceFile, sourceMimetype, targetMimetype, targetExtension);
         try
         {
-            final ResponseEntity<Resource> response = EngineClient.sendTRequest(ENGINE_URL, sourceFile, null,
+            final ResponseEntity<Resource> response = HttpClient.sendTRequest(ENGINE_URL, sourceFile, null,
                 targetMimetype, targetExtension, ImmutableMap.of(
                     "targetEncoding", "UTF-8",
                     "sourceMimetype", sourceMimetype));

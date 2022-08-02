@@ -29,8 +29,8 @@ package org.alfresco.transform.libreoffice;
 import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static org.alfresco.transform.base.EngineClient.sendTRequest;
-import static org.alfresco.transform.base.FileInfo.testFile;
+import static org.alfresco.transform.base.clients.HttpClient.sendTRequest;
+import static org.alfresco.transform.base.clients.FileInfo.testFile;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_EXCEL;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_SVG;
@@ -71,7 +71,7 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.alfresco.transform.base.FileInfo;
+import org.alfresco.transform.base.clients.FileInfo;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;

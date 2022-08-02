@@ -27,7 +27,7 @@
 package org.alfresco.transform.base;
 
 import static java.text.MessageFormat.format;
-import static org.alfresco.transform.base.EngineClient.sendTRequest;
+import static org.alfresco.transform.base.clients.HttpClient.sendTRequest;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_METADATA_EXTRACT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -43,6 +43,7 @@ import java.util.Map;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.alfresco.transform.base.clients.FileInfo;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 

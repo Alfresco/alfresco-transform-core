@@ -27,14 +27,12 @@
 package org.alfresco.transform.misc;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_RFC822;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_XHTML;
-import static org.alfresco.transform.base.FileInfo.testFile;
+import static org.alfresco.transform.base.clients.FileInfo.testFile;
 
 import java.util.stream.Stream;
 
 import org.alfresco.transform.base.AbstractMetadataExtractsIT;
-import org.alfresco.transform.base.FileInfo;
+import org.alfresco.transform.base.clients.FileInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
