@@ -31,7 +31,6 @@ import org.alfresco.transform.common.ExtensionService;
 import org.alfresco.transform.common.TransformException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
@@ -44,7 +43,6 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Arrays;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.alfresco.transform.common.ExtensionService.getExtensionForMimetype;
@@ -58,7 +56,6 @@ public class FileManager
 {
     public static final String SOURCE_FILE = "sourceFile";
     public static final String TARGET_FILE = "targetFile";
-    private static final String FILENAME = "filename=";
 
     public static File createSourceFile(HttpServletRequest request, InputStream inputStream, String sourceMimetype)
     {
@@ -107,18 +104,6 @@ public class FileManager
         }
     }
 
-    public static void save(Resource body, File file)
-    {
-        try
-        {
-            Files.copy(body.getInputStream(), file.toPath(), REPLACE_EXISTING);
-        }
-        catch (IOException e)
-        {
-            throw new TransformException(INSUFFICIENT_STORAGE, "Failed to store the source file", e);
-        }
-    }
-
     private static Resource load(File file)
     {
         try
@@ -139,22 +124,6 @@ public class FileManager
             throw new TransformException(INTERNAL_SERVER_ERROR,
                 "The target filename was malformed: " + file.getPath(), e);
         }
-    }
-
-    public static String getFilenameFromContentDisposition(HttpHeaders headers)
-    {
-        String filename = "";
-        String contentDisposition = headers.getFirst(CONTENT_DISPOSITION);
-        if (contentDisposition != null)
-        {
-            String[] strings = contentDisposition.split("; *");
-            filename = Arrays.stream(strings)
-                             .filter(s -> s.startsWith(FILENAME))
-                             .findFirst()
-                             .map(s -> s.substring(FILENAME.length()))
-                             .orElse("");
-        }
-        return filename;
     }
 
     public static InputStream getMultipartFileInputStream(MultipartFile sourceMultipartFile)

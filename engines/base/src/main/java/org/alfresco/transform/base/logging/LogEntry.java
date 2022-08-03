@@ -49,8 +49,6 @@ import org.springframework.http.HttpStatus;
 public final class LogEntry
 {
     private static final Logger logger = LoggerFactory.getLogger(LogEntry.class);
-    // TODO allow ProbeTransform to find out if there are any transforms running longer than the max time.
-
     private static final AtomicInteger count = new AtomicInteger(0);
     private static final Deque<LogEntry> log = new ConcurrentLinkedDeque<>();
     private static final int MAX_LOG_SIZE = 10;
@@ -69,7 +67,6 @@ public final class LogEntry
     private final int id = count.incrementAndGet();
     private final long start = System.currentTimeMillis();
     private int statusCode;
-
     private long durationStreamIn;
     private long durationTransform = -1;
     private long durationStreamOut = -1;
@@ -149,14 +146,12 @@ public final class LogEntry
         currentLogEntry.get().options = options;
     }
 
-    public static long setStatusCodeAndMessage(HttpStatus status, String message)
+    public static void setStatusCodeAndMessage(HttpStatus status, String message)
     {
         LogEntry logEntry = currentLogEntry.get();
         logEntry.statusCode = status.value();
         logEntry.message = message;
         logEntry.durationTransform = System.currentTimeMillis() - logEntry.start - logEntry.durationStreamIn;
-
-        return logEntry.durationTransform;
     }
 
     public static long getTransformDuration()
@@ -247,10 +242,9 @@ public final class LogEntry
 
     private String size(long size)
     {
-        // TODO fix numeric overflow in TB expression
         return size == -1 ? "" : size(size, "1 byte",
             new String[]{"bytes", " KB", " MB", " GB", " TB"},
-            new long[]{1024, 1024 * 1024, 1024 * 1024 * 1024, 1024 * 1024 * 1024 * 1024, Long.MAX_VALUE});
+            new long[]{1024, 1024 * 1024, 1024 * 1024 * 1024, 1024L * 1024 * 1024 * 1024, Long.MAX_VALUE});
     }
 
     private String size(long size, String singleValue, String[] units, long[] dividers)

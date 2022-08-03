@@ -33,7 +33,6 @@ import static org.alfresco.transform.base.fs.FileManager.deleteFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.transform.base.logging.LogEntry;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
