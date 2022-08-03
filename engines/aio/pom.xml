@@ -182,6 +182,28 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>org.alfresco.transform.base.Application</mainClass>
+                    <excludes> <!-- Don't include source t-engine fat Spring jars. Required files have been extracted -->
+                        <exclude>
+                            <groupId>org.alfresco</groupId>
+                            <artifactId>alfresco-transform-imagemagick</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>org.alfresco</groupId>
+                            <artifactId>alfresco-transform-libreoffice</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>org.alfresco</groupId>
+                            <artifactId>alfresco-transform-misc</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>org.alfresco</groupId>
+                            <artifactId>alfresco-transform-pdf-renderer</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>org.alfresco</groupId>
+                            <artifactId>alfresco-transform-tika</artifactId>
+                        </exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
