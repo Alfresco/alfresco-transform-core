@@ -39,12 +39,9 @@ import java.util.List;
 
 import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionOnSingleStepTransformers;
 
-/**
- * Used by clients to work out if a transformation is supported based on the engine_config.json.
- */
-public class TransformRegistryImpl extends AbstractTransformRegistry
+public class TransformRegistry extends AbstractTransformRegistry
 {
-    private static final Logger log = LoggerFactory.getLogger(TransformRegistryImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(TransformRegistry.class);
 
     @Autowired(required = false)
     private List<TransformEngine> transformEngines;

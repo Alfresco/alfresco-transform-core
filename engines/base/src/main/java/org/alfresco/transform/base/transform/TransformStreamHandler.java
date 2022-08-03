@@ -24,7 +24,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.base;
+package org.alfresco.transform.base.transform;
+
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformManager;
 
 import java.io.IOException;
 import java.io.InputStream;

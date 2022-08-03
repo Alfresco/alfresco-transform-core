@@ -24,7 +24,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.base;
+package org.alfresco.transform.base.metadata;
 
 import static java.text.MessageFormat.format;
 import static org.alfresco.transform.base.clients.HttpClient.sendTRequest;

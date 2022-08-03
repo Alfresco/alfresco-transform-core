@@ -26,7 +26,7 @@
  */
 package org.alfresco.transform.aio;
 
-import org.alfresco.transform.base.AbstractQueueIT;
+import org.alfresco.transform.base.messaging.AbstractQueueIT;
 import org.alfresco.transform.client.model.TransformRequest;
 
 import java.util.UUID;

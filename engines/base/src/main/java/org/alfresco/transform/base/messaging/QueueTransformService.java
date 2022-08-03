@@ -24,10 +24,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.base;
+package org.alfresco.transform.base.messaging;
 
-import org.alfresco.transform.base.messaging.TransformMessageConverter;
-import org.alfresco.transform.base.messaging.TransformReplySender;
+import org.alfresco.transform.base.transform.TransformHandler;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.common.TransformException;
@@ -36,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.stereotype.Component;

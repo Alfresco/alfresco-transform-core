@@ -26,13 +26,12 @@
  */
 package org.alfresco.transform.base.config;
 
-import org.alfresco.transform.base.TransformInterceptor;
-import org.alfresco.transform.base.TransformRegistryImpl;
+import org.alfresco.transform.base.html.TransformInterceptor;
+import org.alfresco.transform.base.TransformRegistry;
 import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.messages.TransformRequestValidator;
 import org.alfresco.transform.registry.TransformServiceRegistry;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -89,7 +88,7 @@ public class WebApplicationConfig implements WebMvcConfigurer
     @Bean
     public TransformServiceRegistry transformRegistry()
     {
-        return new TransformRegistryImpl();
+        return new TransformRegistry();
     }
 
     @Bean

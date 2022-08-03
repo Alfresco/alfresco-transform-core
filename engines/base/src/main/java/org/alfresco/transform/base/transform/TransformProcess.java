@@ -24,8 +24,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.base;
+package org.alfresco.transform.base.transform;
 
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformController;
 import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.common.TransformException;
@@ -36,7 +38,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.jms.Destination;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.io.OutputStream;
 import java.util.Map;
 
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;

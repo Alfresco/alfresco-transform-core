@@ -74,7 +74,7 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_NEF;
 
 import java.util.stream.Stream;
 
-import org.alfresco.transform.base.AbstractMetadataExtractsIT;
+import org.alfresco.transform.base.metadata.AbstractMetadataExtractsIT;
 import org.alfresco.transform.base.clients.FileInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;

@@ -32,7 +32,7 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import java.util.UUID;
 
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.base.AbstractQueueIT;
+import org.alfresco.transform.base.messaging.AbstractQueueIT;
 
 public class MiscQueueIT extends AbstractQueueIT
 {

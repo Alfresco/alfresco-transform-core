@@ -24,8 +24,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.base;
+package org.alfresco.transform.base.transform;
 
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformEngine;
 import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transform.base.messaging.TransformReplySender;
 import org.alfresco.transform.base.model.FileRefResponse;

@@ -26,7 +26,7 @@
  */
 package org.alfresco.transform.base.probes;
 
-import org.alfresco.transform.base.TransformHandler;
+import org.alfresco.transform.base.transform.TransformHandler;
 import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.common.TransformException;
 import org.slf4j.Logger;

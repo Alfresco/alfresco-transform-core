@@ -28,6 +28,7 @@ package org.alfresco.transform.base;
 
 import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.base.transform.TransformHandler;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.common.TransformException;
@@ -98,8 +99,7 @@ public class TransformController
     private List<TransformEngine> transformEngines;
     @Autowired
     private TransformServiceRegistry transformRegistry;
-    @Autowired
-    TransformHandler transformHandler;
+    @Autowired TransformHandler transformHandler;
     @Autowired
     private String coreVersion;
 
@@ -204,7 +204,7 @@ public class TransformController
             @RequestParam(value = CONFIG_VERSION, defaultValue = CONFIG_VERSION_DEFAULT) int configVersion)
     {
         logger.info("GET Transform Config version: " + configVersion);
-        TransformConfig transformConfig = ((TransformRegistryImpl) transformRegistry).getTransformConfig();
+        TransformConfig transformConfig = ((TransformRegistry) transformRegistry).getTransformConfig();
         transformConfig = setOrClearCoreVersion(transformConfig, configVersion);
         return new ResponseEntity<>(transformConfig, OK);
     }

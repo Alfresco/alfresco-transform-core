@@ -39,6 +39,8 @@ import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
 import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
+import org.alfresco.transform.base.transform.TransformHandler;
+import org.alfresco.transform.base.transform.TransformHandlerTest;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.config.TransformConfig;
@@ -104,7 +106,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Tests the endpoints of the TransformController. Testing of transforms is limit as in that is covered by
+ * Tests the endpoints of the TransformController. Testing of transforms is limited as in that is covered by
  * {@link TransformHandlerTest}.
  *
  * Also see {@link TransformControllerAllInOneTest}.

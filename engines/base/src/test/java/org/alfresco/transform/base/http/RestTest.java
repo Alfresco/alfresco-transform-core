@@ -24,11 +24,12 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.base;
+package org.alfresco.transform.base.http;
 
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
 import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
 import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
+import org.alfresco.transform.base.transform.TransformHandlerTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,9 +52,7 @@ import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 /**
- * Very basic requests to the TransformController using http. No longer extended in t-engines as all http interaction
- * is now done by the base. Also see {@link TransformControllerTest} and {@link TransformHandlerTest} for more extensive
- * tests.
+ * Very basic requests to the TransformController using http.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes={org.alfresco.transform.base.Application.class})

@@ -31,7 +31,7 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_WORDPROCES
 import java.util.UUID;
 
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.base.AbstractQueueIT;
+import org.alfresco.transform.base.messaging.AbstractQueueIT;
 
 /**
  * @author Lucian Tuca

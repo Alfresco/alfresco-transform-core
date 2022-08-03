@@ -25,10 +25,9 @@
  * #L%
  */
 
-package org.alfresco.transform.base;
+package org.alfresco.transform.base.messaging;
 
-import org.alfresco.transform.base.messaging.TransformMessageConverter;
-import org.alfresco.transform.base.messaging.TransformReplySender;
+import org.alfresco.transform.base.transform.TransformHandler;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.activemq.command.ActiveMQObjectMessage;
@@ -38,8 +37,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jms.support.converter.MessageConversionException;
 
 import javax.jms.Destination;
@@ -47,13 +44,11 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
