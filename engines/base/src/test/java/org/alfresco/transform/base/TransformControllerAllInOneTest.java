@@ -47,6 +47,7 @@ import java.util.StringJoiner;
 
 import static org.alfresco.transform.base.TransformControllerTest.assertConfig;
 import static org.alfresco.transform.base.TransformControllerTest.getLogMessagesFor;
+import static org.alfresco.transform.base.TransformControllerTest.resetProbeForTesting;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
@@ -64,7 +65,6 @@ import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -100,7 +100,6 @@ public class TransformControllerAllInOneTest
     {
         assertEquals(FakeTransformEngineWithAllInOne.class.getSimpleName(),
                 transformController.transformEngine.getClass().getSimpleName());
-        assertNotNull(transformController.probeTransform);
     }
 
     @Test
@@ -161,7 +160,7 @@ public class TransformControllerAllInOneTest
     @Test
     public void testReadyEndpointReturnsSuccessful() throws Exception
     {
-        transformController.probeTransform.resetForTesting();
+        resetProbeForTesting(transformController);
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_READY))
                .andExpect(status().isOk())
                .andExpect(content().string(containsString("Success - ")));
@@ -170,7 +169,7 @@ public class TransformControllerAllInOneTest
     @Test
     public void testLiveEndpointReturnsSuccessful() throws Exception
     {
-        transformController.probeTransform.resetForTesting();
+        resetProbeForTesting(transformController);
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_LIVE))
                .andExpect(status().isOk())
                .andExpect(content().string(containsString("Success - ")));

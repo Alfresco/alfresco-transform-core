@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Tests {@link TransformStreamHandler} and {@link TransformManagerImpl#createSourceFile()} and
+ * Tests {@link TransformStreamHandler}, {@link TransformManagerImpl#createSourceFile()} and
  * {@link TransformManagerImpl#createTargetFile()} methods.
  */
 public class TransformStreamHandlerTest

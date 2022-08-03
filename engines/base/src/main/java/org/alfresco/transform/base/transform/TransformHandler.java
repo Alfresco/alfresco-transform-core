@@ -65,14 +65,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 import static org.alfresco.transform.base.fs.FileManager.createAttachment;
@@ -80,11 +78,6 @@ import static org.alfresco.transform.base.fs.FileManager.createTargetFile;
 import static org.alfresco.transform.base.fs.FileManager.getDirectAccessUrlInputStream;
 import static org.alfresco.transform.base.fs.FileManager.getMultipartFileInputStream;
 import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_EXTENSION;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
-import static org.alfresco.transform.common.RequestParamMap.TARGET_EXTENSION;
-import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -96,8 +89,6 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 public class TransformHandler
 {
     private static final Logger logger = LoggerFactory.getLogger(TransformHandler.class);
-    private static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
-        TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, DIRECT_ACCESS_URL);
 
     @Autowired(required = false)
     private List<TransformEngine> transformEngines;
@@ -116,14 +107,12 @@ public class TransformHandler
 
     private final AtomicInteger httpRequestCount = new AtomicInteger(1);
     private TransformEngine transformEngine;
-    private ProbeTransform probeTransform;
     private final Map<String, CustomTransformer> customTransformersByName = new HashMap<>();
 
     @PostConstruct
     private void init()
     {
         initTransformEngine();
-        initProbeTestTransform();
         initCustomTransformersByName();
     }
 
@@ -131,27 +120,12 @@ public class TransformHandler
     {
         if (transformEngines != null)
         {
-            // Normally there is just one TransformEngine per t-engine, but we also want to be able to amalgamate the
-            // CustomTransform code from many t-engines into a single t-engine. In this case, there should be a wrapper
-            // TransformEngine (it has no TransformConfig of its own).
-            transformEngine = transformEngines.stream()
-                                              .filter(transformEngine -> transformEngine.getTransformConfig() == null)
-                                              .findFirst()
-                                              .orElse(transformEngines.get(0));
-
+            transformEngine = getTransformEngine();
             logger.info("TransformEngine: " + transformEngine.getTransformEngineName());
             transformEngines.stream()
                             .filter(te -> te != transformEngine)
                             .sorted(Comparator.comparing(TransformEngine::getTransformEngineName))
                             .map(transformEngine -> "  "+transformEngine.getTransformEngineName()).forEach(logger::info);
-        }
-    }
-
-    private void initProbeTestTransform()
-    {
-        if (transformEngine != null)
-        {
-            probeTransform = transformEngine.getProbeTransform();
         }
     }
 
@@ -171,17 +145,18 @@ public class TransformHandler
 
     public TransformEngine getTransformEngine()
     {
-        return transformEngine;
+        // Normally there is just one TransformEngine per t-engine, but we also want to be able to amalgamate the
+        // CustomTransform code from many t-engines into a single t-engine. In this case, there should be a wrapper
+        // TransformEngine (it has no TransformConfig of its own).
+        return transformEngines.stream()
+                               .filter(transformEngine -> transformEngine.getTransformConfig() == null)
+                               .findFirst()
+                               .orElse(transformEngines.get(0));
     }
 
     public ProbeTransform getProbeTransform()
     {
-        return probeTransform;
-    }
-
-    public TransformerDebug getTransformerDebug()
-    {
-        return transformerDebug;
+        return transformEngine.getProbeTransform();
     }
 
     public ResponseEntity<Resource> handleHttpRequest(HttpServletRequest request,
@@ -190,8 +165,9 @@ public class TransformHandler
     {
         AtomicReference<ResponseEntity<Resource>> responseEntity = new AtomicReference<>();
 
-        new TransformProcess(this, sourceMimetype, targetMimetype, requestParameters,
-            "e" + httpRequestCount.getAndIncrement())
+        new TransformProcess(sourceMimetype, targetMimetype, requestParameters,
+            "e" + httpRequestCount.getAndIncrement(), transformRegistry,
+            transformerDebug, getProbeTransform(), customTransformersByName)
         {
             @Override
             protected void init() throws IOException
@@ -233,8 +209,9 @@ public class TransformHandler
     public void handleProbRequest(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
         File sourceFile, File targetFile)
     {
-        new TransformProcess(this, sourceMimetype, targetMimetype, transformOptions,
-            "p" + httpRequestCount.getAndIncrement())
+        new TransformProcess(sourceMimetype, targetMimetype, transformOptions,
+            "p" + httpRequestCount.getAndIncrement(), transformRegistry,
+            transformerDebug, getProbeTransform(), customTransformersByName)
         {
             @Override
             protected void init() throws IOException
@@ -268,8 +245,9 @@ public class TransformHandler
     public TransformReply handleMessageRequest(TransformRequest request, Long timeout, Destination replyToQueue)
     {
         TransformReply reply = createBasicTransformReply(request);
-        new TransformProcess(this, request.getSourceMediaType(), request.getTargetMediaType(),
-            request.getTransformRequestOptions(), "unset")
+        new TransformProcess(request.getSourceMediaType(), request.getTargetMediaType(),
+            request.getTransformRequestOptions(),"unset", transformRegistry,
+            transformerDebug, getProbeTransform(), customTransformersByName)
         {
             @Override
             protected void init() throws IOException
@@ -318,6 +296,11 @@ public class TransformHandler
             }
         }.handleTransformRequest();
         return reply;
+    }
+
+    public String probe(HttpServletRequest request, boolean isLiveProbe)
+    {
+        return getProbeTransform().doTransformOrNothing(request, isLiveProbe, this);
     }
 
     private void sendSuccessfulResponse(Long timeout, TransformReply reply, Destination replyToQueue)
@@ -381,14 +364,6 @@ public class TransformHandler
     {
         // If needed, initialise the context enough to allow logging to take place without NPE checks
         request.setInternalContext(InternalContext.initialise(request.getInternalContext()));
-    }
-
-    public Map<String, String> cleanTransformOptions(Map<String, String> requestParameters)
-    {
-        Map<String, String> transformOptions = new HashMap<>(requestParameters);
-        NON_TRANSFORM_OPTION_REQUEST_PARAMETERS.forEach(transformOptions.keySet()::remove);
-        transformOptions.values().removeIf(String::isEmpty);
-        return transformOptions;
     }
 
     private InputStream getSharedFileStoreInputStream(String sourceReference)
@@ -499,44 +474,5 @@ public class TransformHandler
         }
 
         return sb.toString();
-    }
-
-    public String getTransformerName(final String sourceMimetype, long sourceSizeInBytes, final String targetMimetype,
-        final Map<String, String> transformOptions)
-    {
-        // The transformOptions always contains sourceEncoding when sent to a T-Engine, even though it should not be
-        // used to select a transformer. Similar to source and target mimetypes and extensions, but these are not
-        // passed in transformOptions.
-        String sourceEncoding = transformOptions.remove(SOURCE_ENCODING);
-        try
-        {
-            final String transformerName = transformRegistry.findTransformerName(sourceMimetype,
-                    sourceSizeInBytes, targetMimetype, transformOptions, null);
-            if (transformerName == null)
-            {
-                throw new TransformException(BAD_REQUEST, "No transforms for: "+
-                        sourceMimetype+" -> "+targetMimetype+transformOptions.entrySet().stream()
-                            .map(entry -> entry.getKey()+"="+entry.getValue())
-                            .collect(Collectors.joining(", ", " ", "")));
-            }
-            return transformerName;
-        }
-        finally
-        {
-            if (sourceEncoding != null)
-            {
-                transformOptions.put(SOURCE_ENCODING, sourceEncoding);
-            }
-        }
-    }
-
-    public CustomTransformer getCustomTransformer(String transformName)
-    {
-        CustomTransformer customTransformer = customTransformersByName.get(transformName);
-        if (customTransformer == null)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR, "Custom Transformer "+transformName+" not found");
-        }
-        return customTransformer;
     }
 }

@@ -104,13 +104,11 @@ public class TransformController
     private String coreVersion;
 
     TransformEngine transformEngine;
-    ProbeTransform probeTransform;
 
     @PostConstruct
     private void init()
     {
         transformEngine = transformHandler.getTransformEngine();
-        probeTransform = transformHandler.getProbeTransform();
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -186,7 +184,7 @@ public class TransformController
     @ResponseBody
     public String ready(HttpServletRequest request)
     {
-        return probeTransform.doTransformOrNothing(request, false, transformHandler);
+        return transformHandler.probe(request, false);
     }
 
     /**
@@ -196,7 +194,7 @@ public class TransformController
     @ResponseBody
     public String live(HttpServletRequest request)
     {
-        return probeTransform.doTransformOrNothing(request, true, transformHandler);
+        return transformHandler.probe(request, true);
     }
 
     @GetMapping(value = ENDPOINT_TRANSFORM_CONFIG)
@@ -297,5 +295,10 @@ public class TransformController
         mav.addObject("message", message);
         mav.setViewName("error"); // display error.html
         return mav;
+    }
+
+    void resetForTesting()
+    {
+
     }
 }

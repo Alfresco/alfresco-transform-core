@@ -327,7 +327,7 @@ public abstract class AbstractBaseTest
     @Test
     public void calculateMaxTime() throws Exception
     {
-        ProbeTransform probeTransform = controller.probeTransform;
+        ProbeTransform probeTransform = controller.transformHandler.getProbeTransform();
         probeTransform.resetForTesting();
         probeTransform.setLivenessPercent(110);
 

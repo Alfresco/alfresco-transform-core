@@ -29,17 +29,30 @@ package org.alfresco.transform.base.transform;
 import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.TransformController;
 import org.alfresco.transform.base.logging.LogEntry;
+import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.common.TransformException;
 import org.alfresco.transform.common.TransformerDebug;
+import org.alfresco.transform.registry.TransformServiceRegistry;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.jms.Destination;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_EXTENSION;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
+import static org.alfresco.transform.common.RequestParamMap.TARGET_EXTENSION;
+import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -52,36 +65,53 @@ import static org.springframework.http.HttpStatus.OK;
  */
 abstract class TransformProcess extends TransformStreamHandler
 {
-    private final TransformHandler transformHandler;
-    private final TransformerDebug transformerDebug;
+    private static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
+        TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, DIRECT_ACCESS_URL);
+
     protected final String sourceMimetype;
     protected final String targetMimetype;
     private final Map<String, String> transformOptions;
     protected String reference;
+    private final TransformServiceRegistry transformRegistry;
+    private final TransformerDebug transformerDebug;
+    private final ProbeTransform probeTransform;
+    private final Map<String, CustomTransformer> customTransformersByName;
 
-    TransformProcess(TransformHandler transformHandler, String sourceMimetype, String targetMimetype,
-        Map<String, String> transformOptions, String reference)
+    TransformProcess(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+        String reference, TransformServiceRegistry transformRegistry, TransformerDebug transformerDebug,
+        ProbeTransform probeTransform, Map<String, CustomTransformer> customTransformersByName)
     {
-        LogEntry.start();
-        this.transformHandler = transformHandler;
         this.sourceMimetype = sourceMimetype;
         this.targetMimetype = targetMimetype;
-        this.transformOptions = transformHandler.cleanTransformOptions(transformOptions);
+        this.transformOptions = cleanTransformOptions(transformOptions);
         this.reference = reference;
-        this.transformerDebug = transformHandler.getTransformerDebug();
-        transformHandler.getProbeTransform().incrementTransformerCount();
+
+        this.transformRegistry = transformRegistry;
+        this.transformerDebug = transformerDebug;
+        this.probeTransform = probeTransform;
+        this.customTransformersByName = customTransformersByName;
+    }
+
+    private static Map<String, String> cleanTransformOptions(Map<String, String> requestParameters)
+    {
+        Map<String, String> transformOptions = new HashMap<>(requestParameters);
+        NON_TRANSFORM_OPTION_REQUEST_PARAMETERS.forEach(transformOptions.keySet()::remove);
+        transformOptions.values().removeIf(String::isEmpty);
+        return transformOptions;
     }
 
     public void handleTransformRequest()
     {
+        LogEntry.start();
         transformManager.setSourceMimetype(sourceMimetype);
         transformManager.setTargetMimetype(targetMimetype);
+        probeTransform.incrementTransformerCount();
         try
         {
             init();
             long sourceSizeInBytes = getSourceSize();
-            String transformName = transformHandler.getTransformerName(sourceMimetype, sourceSizeInBytes, targetMimetype, transformOptions);
-            CustomTransformer customTransformer = transformHandler.getCustomTransformer(transformName);
+            String transformName = getTransformerName(sourceMimetype, sourceSizeInBytes, targetMimetype, transformOptions);
+            CustomTransformer customTransformer = getCustomTransformer(transformName);
             transformerDebug.pushTransform(reference, sourceMimetype, targetMimetype, sourceSizeInBytes, transformName);
             transformerDebug.logOptions(reference, transformOptions);
             handleTransform(customTransformer);
@@ -101,7 +131,7 @@ abstract class TransformProcess extends TransformStreamHandler
         finally
         {
             long time = LogEntry.getTransformDuration();
-            transformHandler.getProbeTransform().recordTransformTime(time);
+            probeTransform.recordTransformTime(time);
             transformerDebug.popTransform(reference, time);
             LogEntry.complete();
         }
@@ -136,5 +166,44 @@ abstract class TransformProcess extends TransformStreamHandler
     protected void handleException(Exception e)
     {
         throw new TransformException(INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+
+    private String getTransformerName(final String sourceMimetype, long sourceSizeInBytes, final String targetMimetype,
+        final Map<String, String> transformOptions)
+    {
+        // The transformOptions always contains sourceEncoding when sent to a T-Engine, even though it should not be
+        // used to select a transformer. Similar to source and target mimetypes and extensions, but these are not
+        // passed in transformOptions.
+        String sourceEncoding = transformOptions.remove(SOURCE_ENCODING);
+        try
+        {
+            final String transformerName = transformRegistry.findTransformerName(sourceMimetype,
+                sourceSizeInBytes, targetMimetype, transformOptions, null);
+            if (transformerName == null)
+            {
+                throw new TransformException(BAD_REQUEST, "No transforms for: "+
+                                                              sourceMimetype+" -> "+targetMimetype+transformOptions.entrySet().stream()
+                                                                                                                   .map(entry -> entry.getKey()+"="+entry.getValue())
+                                                                                                                   .collect(Collectors.joining(", ", " ", "")));
+            }
+            return transformerName;
+        }
+        finally
+        {
+            if (sourceEncoding != null)
+            {
+                transformOptions.put(SOURCE_ENCODING, sourceEncoding);
+            }
+        }
+    }
+
+    private CustomTransformer getCustomTransformer(String transformName)
+    {
+        CustomTransformer customTransformer = customTransformersByName.get(transformName);
+        if (customTransformer == null)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR, "Custom Transformer "+transformName+" not found");
+        }
+        return customTransformer;
     }
 }

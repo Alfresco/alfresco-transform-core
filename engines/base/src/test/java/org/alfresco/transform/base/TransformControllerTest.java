@@ -90,7 +90,6 @@ import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
@@ -152,12 +151,17 @@ public class TransformControllerTest
             .body((Resource) new UrlResource(sfsRef2File.get(invocation.getArguments()[0]).toURI())));
     }
 
+
+    static void resetProbeForTesting(TransformController transformController)
+    {
+        transformController.transformHandler.getProbeTransform().resetForTesting();
+    }
+
     @Test
     public void testInitEngine() throws Exception
     {
         assertEquals(FakeTransformEngineWithTwoCustomTransformers.class.getSimpleName(),
                 transformController.transformEngine.getClass().getSimpleName());
-        assertNotNull(transformController.probeTransform);
     }
 
     @Test
@@ -232,7 +236,7 @@ public class TransformControllerTest
     @Test
     public void testReadyEndpointReturnsSuccessful() throws Exception
     {
-        transformController.probeTransform.resetForTesting();
+        resetProbeForTesting(transformController);
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_READY))
                .andExpect(status().isOk())
                .andExpect(content().string(containsString("Success - ")));
@@ -241,7 +245,7 @@ public class TransformControllerTest
     @Test
     public void testLiveEndpointReturnsSuccessful() throws Exception
     {
-        transformController.probeTransform.resetForTesting();
+        resetProbeForTesting(transformController);
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_LIVE))
                .andExpect(status().isOk())
                .andExpect(content().string(containsString("Success - ")));
@@ -372,9 +376,6 @@ public class TransformControllerTest
                     .param("name1", "hasNoValueSoRemoved").param("value1", "")
                     .param("name2", PAGE_REQUEST_PARAM).param("value2", "1")
                     .param("name3", SOURCE_ENCODING).param("value3", "UTF-8"));
-
-            // Do the dispatch, just in case not doing it leaves it in a strange state.
-//            mockMvc.perform(asyncDispatch(mvcResult));
 
             verify(spy).handleHttpRequest(any(), any(), eq(MIMETYPE_TEXT_PLAIN), eq(MIMETYPE_PDF),
                 eq(ImmutableMap.of(
