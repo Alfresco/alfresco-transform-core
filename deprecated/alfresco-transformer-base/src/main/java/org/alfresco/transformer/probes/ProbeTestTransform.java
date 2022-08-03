@@ -51,6 +51,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * Provides the logic performing test transformations by the live and ready probes.
  *
  * <p><b>K8s probes</b>: A readiness probe indicates if the pod should accept request. <b>It does not indicate that a pod is
@@ -72,6 +74,7 @@ import org.slf4j.LoggerFactory;
  * <li>maxTransformSeconds - the maximum time for a transformation, including failed ones.</li>
  * </ul>
  */
+@Deprecated
 public abstract class ProbeTestTransform
 {
     private final Logger logger = LoggerFactory.getLogger(ProbeTestTransform.class);

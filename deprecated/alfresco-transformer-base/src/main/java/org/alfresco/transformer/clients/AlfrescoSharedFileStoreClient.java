@@ -45,8 +45,11 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * Simple Rest client that call Alfresco Shared File Store
  */
+@Deprecated
 public class AlfrescoSharedFileStoreClient
 {
     @Value("${fileStoreUrl}")

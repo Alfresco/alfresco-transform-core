@@ -50,6 +50,8 @@ import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * Queue Transformer service.
  * This service reads all the requests for the particular engine, forwards them to the worker
  * component (at this time the injected controller - to be refactored) and sends back the reply
@@ -58,6 +60,7 @@ import org.springframework.stereotype.Component;
  * @author Lucian Tuca
  * created on 18/12/2018
  */
+@Deprecated
 @Component
 @ConditionalOnProperty(name = "activemq.url")
 public class QueueTransformService

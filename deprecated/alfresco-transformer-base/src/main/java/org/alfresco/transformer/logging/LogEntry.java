@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -40,11 +40,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * Provides setter and getter methods to allow the current Thread to set various log properties and for these
  * values to be retrieved. The {@link #complete()} method should be called at the end of a request to flush the
  * current entry to an internal log Collection of the latest entries. The {@link #getLog()} method is used to obtain
  * access to this collection.
  */
+@Deprecated
 public final class LogEntry
 {
     private static final Logger logger = LoggerFactory.getLogger(LogEntry.class);

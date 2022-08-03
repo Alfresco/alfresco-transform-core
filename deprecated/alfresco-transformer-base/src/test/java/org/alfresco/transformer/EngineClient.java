@@ -23,8 +23,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * @author Cezar Leahu
  */
+@Deprecated
 public class EngineClient
 {
     private static final RestTemplate REST_TEMPLATE = new RestTemplate();

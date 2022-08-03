@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,6 +26,10 @@
  */
 package org.alfresco.transformer.util;
 
+/**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ */
+@Deprecated
 public class Util
 {
     /**

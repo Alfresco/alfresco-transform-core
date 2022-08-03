@@ -36,6 +36,8 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * TODO: Duplicated from the Router
  * TransformReplySender Bean
  * <p/>
@@ -43,6 +45,7 @@ import org.springframework.stereotype.Component;
  *
  * @author Cezar Leahu
  */
+@Deprecated
 @Component
 public class TransformReplySender
 {

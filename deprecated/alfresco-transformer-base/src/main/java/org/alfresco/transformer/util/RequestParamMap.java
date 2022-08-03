@@ -27,9 +27,12 @@
 package org.alfresco.transformer.util;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * Extends the list of transform options with historic request parameters or 'extra' parameters used in testing
  * or communication in the all-in-one transformer.
  */
+@Deprecated
 public interface RequestParamMap extends org.alfresco.transform.common.RequestParamMap
 {
     // This property can be sent by acs repository's legacy transformers to force a transform,

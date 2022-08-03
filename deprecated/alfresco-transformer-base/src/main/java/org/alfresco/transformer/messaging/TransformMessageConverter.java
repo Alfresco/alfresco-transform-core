@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -44,11 +44,14 @@ import javax.jms.Message;
 import javax.jms.Session;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * TODO: Duplicated from the Router
  * Custom wrapper over MappingJackson2MessageConverter for T-Request/T-Reply objects.
  *
  * @author Cezar Leahu
  */
+@Deprecated
 @Service
 public class TransformMessageConverter implements MessageConverter
 {

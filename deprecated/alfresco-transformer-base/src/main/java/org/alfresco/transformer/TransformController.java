@@ -54,11 +54,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * TransformController interface.
  * <br/>
  * It contains much of the common boilerplate code that each of
  * its concrete implementations need as default methods.
  */
+@Deprecated
 public interface TransformController
 {
     Logger logger = LoggerFactory.getLogger(TransformController.class);

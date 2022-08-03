@@ -47,6 +47,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * Super class of metadata integration tests. Sub classes should provide the following:
  * <p>
  * <ul>
@@ -72,6 +74,7 @@ import org.springframework.http.ResponseEntity;
  * @author adavis
  * @author dedwards
  */
+@Deprecated
 public abstract class AbstractMetadataExtractsIT
 {
     private static final String ENGINE_URL = "http://localhost:8090";

@@ -95,8 +95,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * Super class for testing controllers without a server. Includes tests for the AbstractTransformerController itself.
  */
+@Deprecated
 public abstract class AbstractTransformerControllerTest
 {
     @TempDir // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication

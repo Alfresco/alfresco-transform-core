@@ -35,8 +35,6 @@ import java.util.Objects;
 import java.util.StringTokenizer;
 
 /**
- * DUPLICATED FROM *alfresco-core*.
- *
  * This class is used to tokenize strings used as parameters for {@link RuntimeExec} objects.
  * Examples of such strings are as follows (ImageMagick-like parameters):
  * <ul>

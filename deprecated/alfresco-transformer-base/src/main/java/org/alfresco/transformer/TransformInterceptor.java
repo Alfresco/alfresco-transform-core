@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -37,10 +37,13 @@ import org.alfresco.transformer.logging.LogEntry;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * TransformInterceptor
  * <br/>
  * Handles ThreadLocal Log entries for each request.
  */
+@Deprecated
 public class TransformInterceptor extends HandlerInterceptorAdapter
 {
     @Override

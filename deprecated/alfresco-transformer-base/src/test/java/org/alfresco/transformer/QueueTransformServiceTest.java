@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -55,6 +55,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jms.support.converter.MessageConversionException;
 
+/**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ */
+@Deprecated
 public class QueueTransformServiceTest
 {
     @Mock

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2020 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -33,10 +33,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * Basic interface for executing transformations via Shell commands
  *
  * @author Cezar Leahu
  */
+@Deprecated
 public interface CommandExecutor extends Transformer
 {
     void run(Map<String, String> properties, File targetFile, Long timeout);

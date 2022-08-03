@@ -40,6 +40,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 
+/**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ */
+@Deprecated
 @Configuration
 public class WebApplicationConfig implements WebMvcConfigurer
 {

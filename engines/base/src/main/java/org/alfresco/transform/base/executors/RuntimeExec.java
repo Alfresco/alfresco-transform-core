@@ -50,8 +50,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * DUPLICATED FROM *alfresco-core*.
- *
  * This acts as a session similar to the <code>java.lang.Process</code>, but
  * logs the system standard and error streams.
  * <p>

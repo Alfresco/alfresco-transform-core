@@ -50,8 +50,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.ResourceLoader;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * Used by clients to work out if a transformation is supported based on the engine_config.json.
  */
+@Deprecated
 public class TransformRegistryImpl extends AbstractTransformRegistry
 {
     private static final Logger log = LoggerFactory.getLogger(TransformRegistryImpl.class);

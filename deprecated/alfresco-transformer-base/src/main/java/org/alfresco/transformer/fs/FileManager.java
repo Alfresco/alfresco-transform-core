@@ -53,8 +53,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
 /**
- *
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  */
+@Deprecated
 public class FileManager
 {
     public static final String SOURCE_FILE = "sourceFile";

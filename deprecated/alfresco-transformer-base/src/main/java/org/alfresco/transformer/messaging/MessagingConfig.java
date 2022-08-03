@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -46,12 +46,15 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * JMS and messaging configuration for the T-Engines. Contains the basic config in order to have the
  * T-Engine able to read from queues and send a reply back.
  *
  * @author Lucian Tuca
  * created on 18/12/2018
  */
+@Deprecated
 @Configuration
 @ConditionalOnProperty(name = "activemq.url")
 public class MessagingConfig implements JmsListenerConfigurer

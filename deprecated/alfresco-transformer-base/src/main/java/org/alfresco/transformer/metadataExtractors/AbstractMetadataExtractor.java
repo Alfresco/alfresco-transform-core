@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005-2021 Alfresco Software Limited
+ * Copyright (C) 2005-2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -49,6 +49,8 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * Helper methods for metadata extract and embed.
  * <p>
  * <i>Much of the code is based on AbstractMappingMetadataExtracter from the
@@ -91,6 +93,7 @@ import java.util.TreeMap;
  * @author Derek Hulley
  * @author adavis
  */
+@Deprecated
 public abstract class AbstractMetadataExtractor
 {
     private static final String EXTRACT = "extract";

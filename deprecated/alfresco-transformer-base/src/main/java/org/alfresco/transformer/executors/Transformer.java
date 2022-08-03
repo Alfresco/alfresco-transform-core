@@ -39,10 +39,13 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * Basic interface for executing transforms and metadata extract or embed actions.
  *
  * @author adavis
  */
+@Deprecated
 public interface Transformer
 {
     /**

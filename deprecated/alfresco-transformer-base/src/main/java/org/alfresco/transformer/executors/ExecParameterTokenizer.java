@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -35,6 +35,8 @@ import java.util.Objects;
 import java.util.StringTokenizer;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * DUPLICATED FROM *alfresco-core*.
  *
  * This class is used to tokenize strings used as parameters for {@link RuntimeExec} objects.
@@ -61,6 +63,7 @@ import java.util.StringTokenizer;
  * @author Neil Mc Erlean
  * @since 3.4.2
  */
+@Deprecated
 public class ExecParameterTokenizer
 {
     /**

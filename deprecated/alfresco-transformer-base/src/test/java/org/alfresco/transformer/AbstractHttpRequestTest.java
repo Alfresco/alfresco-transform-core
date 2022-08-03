@@ -43,9 +43,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * Super class for testing controllers with a server. Includes tests for the AbstractTransformerController itself.
  * Note: Currently uses json rather than HTML as json is returned by this spring boot test harness.
  */
+@Deprecated
 public abstract class AbstractHttpRequestTest
 {
     @LocalServerPort

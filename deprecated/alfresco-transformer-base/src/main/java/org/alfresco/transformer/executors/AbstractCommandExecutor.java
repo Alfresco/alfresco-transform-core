@@ -36,8 +36,9 @@ import java.util.Map;
 import org.alfresco.transform.common.TransformException;
 
 /**
- *
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  */
+@Deprecated
 public abstract class AbstractCommandExecutor implements CommandExecutor
 {
     protected RuntimeExec transformCommand = createTransformCommand();

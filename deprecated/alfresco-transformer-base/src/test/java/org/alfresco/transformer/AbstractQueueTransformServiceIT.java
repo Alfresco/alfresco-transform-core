@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -39,9 +39,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.core.JmsTemplate;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * @author Lucian Tuca
  * created on 15/01/2019
  */
+@Deprecated
 @SpringBootTest(properties = {"activemq.url=nio://localhost:61616"})
 public abstract class AbstractQueueTransformServiceIT
 {

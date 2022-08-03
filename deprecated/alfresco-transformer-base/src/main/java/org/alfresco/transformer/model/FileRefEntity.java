@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -29,10 +29,13 @@ package org.alfresco.transformer.model;
 import java.util.Objects;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * TODO: Copied from org.alfresco.store.entity (alfresco-shared-file-store). To be discussed
  *
  * POJO that represents content reference ({@link java.util.UUID})
  */
+@Deprecated
 public class FileRefEntity
 {
     private String fileRef;

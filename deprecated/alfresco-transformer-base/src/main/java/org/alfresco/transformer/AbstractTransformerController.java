@@ -99,6 +99,8 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static org.springframework.util.StringUtils.getFilenameExtension;
 
 /**
+ * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
+ *
  * <p>Abstract Controller, provides structure and helper methods to sub-class transformer controllers. Sub classes
  * should implement {@link #transformImpl(String, String, String, Map, File, File)} and unimplemented methods from
  * {@link TransformController}.</p>
@@ -128,6 +130,7 @@ import static org.springframework.util.StringUtils.getFilenameExtension;
  * <p>Provides methods to help super classes perform /transform requests. Also responses to /version, /ready and /live
  * requests.</p>
  */
+@Deprecated
 public abstract class AbstractTransformerController implements TransformController
 {
     private static final Logger logger = LoggerFactory.getLogger(
