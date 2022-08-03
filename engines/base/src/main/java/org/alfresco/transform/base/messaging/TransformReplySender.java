@@ -36,10 +36,8 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * TODO: Duplicated from the Router
- * TransformReplySender Bean
- * <p/>
- * JMS message sender/publisher
+ * Copied from the t-router. We would need to create a common dependency between t-engine base and t-router that
+ * knows about jms to remove this duplication.
  *
  * @author Cezar Leahu
  */

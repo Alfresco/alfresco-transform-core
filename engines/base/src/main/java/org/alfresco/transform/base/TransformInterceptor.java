@@ -36,9 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
- * TransformInterceptor
- * <br/>
- * Handles ThreadLocal Log entries for each request.
+ * Cleans up temporary files in transform requests that upload the content and download the result.
  */
 public class TransformInterceptor extends HandlerInterceptorAdapter
 {

@@ -44,8 +44,8 @@ import javax.jms.Message;
 import javax.jms.Session;
 
 /**
- * TODO: Duplicated from the Router
- * Custom wrapper over MappingJackson2MessageConverter for T-Request/T-Reply objects.
+ * Copied from the t-router. We would need to create a common dependency between t-engine base and t-router that
+ * knows about jms to remove this duplication.
  *
  * @author Cezar Leahu
  */

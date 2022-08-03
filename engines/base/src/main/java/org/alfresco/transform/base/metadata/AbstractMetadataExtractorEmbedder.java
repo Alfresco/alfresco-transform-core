@@ -225,11 +225,6 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
         return Collections.unmodifiableMap(extractMapping.get());
     }
 
-    public Map<String, Set<String>> getEmbedMapping()
-    {
-        return Collections.unmodifiableMap(embedMapping);
-    }
-
     /**
      * Based on AbstractMappingMetadataExtracter#getDefaultMapping.
      *
