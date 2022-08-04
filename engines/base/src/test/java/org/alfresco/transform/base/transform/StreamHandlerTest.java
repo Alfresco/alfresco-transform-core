@@ -48,10 +48,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Tests {@link TransformStreamHandler}, {@link TransformManagerImpl#createSourceFile()} and
+ * Tests {@link StreamHandler}, {@link TransformManagerImpl#createSourceFile()} and
  * {@link TransformManagerImpl#createTargetFile()} methods.
  */
-public class TransformStreamHandlerTest
+public class StreamHandlerTest
 {
     public static final String ORIGINAL = "Original";
     public static final String CHANGE = " plus some change";
@@ -81,7 +81,7 @@ public class TransformStreamHandlerTest
         return File.createTempFile("temp_", null, tempDir);
     }
 
-    private void write(File file, String text) throws IOException
+    private static void write(File file, String text) throws IOException
     {
         try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file)))
         {
@@ -89,13 +89,13 @@ public class TransformStreamHandlerTest
         }
     }
 
-    private void write(OutputStream outputStream, String text) throws IOException
+    private static void write(OutputStream outputStream, String text) throws IOException
     {
         byte[] bytes = text.getBytes(StandardCharsets.ISO_8859_1);
         outputStream.write(bytes, 0, bytes.length);
     }
 
-    private String read(File file) throws IOException
+    public static String read(File file) throws IOException
     {
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file)))
         {
@@ -103,12 +103,12 @@ public class TransformStreamHandlerTest
         }
     }
 
-    private String read(InputStream inputStream) throws IOException
+    private static String read(InputStream inputStream) throws IOException
     {
         return new String(inputStream.readAllBytes(), StandardCharsets.ISO_8859_1);
     }
 
-    private String read(ByteArrayOutputStream outputStream)
+    private static String read(ByteArrayOutputStream outputStream)
     {
         return outputStream.toString(StandardCharsets.ISO_8859_1);
     }
@@ -142,11 +142,12 @@ public class TransformStreamHandlerTest
             transformManager.copyTargetFileToOutputStream();
             transformManager.getOutputStream().close();
             closeInputStreamWithoutException(inputStream);
+            Long outputLength = transformManager.getOutputLength();
             transformManager.deleteSourceFile();
             transformManager.deleteTargetFile();
 
             assertEquals(EXPECTED, read(outputStream));
-            assertEquals(EXPECTED.length(), transformManager.getOutputLength());
+            assertEquals(EXPECTED.length(), outputLength);
         }
     }
 
@@ -166,11 +167,12 @@ public class TransformStreamHandlerTest
             transformManager.copyTargetFileToOutputStream();
             transformManager.getOutputStream().close();
             closeInputStreamWithoutException(inputStream);
+            Long outputLength = transformManager.getOutputLength();
             transformManager.deleteSourceFile();
             transformManager.deleteTargetFile();
 
             assertEquals(EXPECTED, read(outputStream));
-            assertEquals(EXPECTED.length(), transformManager.getOutputLength());
+            assertEquals(EXPECTED.length(), outputLength);
             assertFalse(sourceFileCreatedByTransform.exists());
         }
     }
@@ -193,11 +195,12 @@ public class TransformStreamHandlerTest
             transformManager.copyTargetFileToOutputStream();
             closeInputStreamWithoutException(inputStream);
             transformManager.getOutputStream().close();
+            Long outputLength = transformManager.getOutputLength();
             transformManager.deleteSourceFile();
             transformManager.deleteTargetFile();
 
             assertEquals(EXPECTED, read(outputStream));
-            assertEquals(EXPECTED.length(), transformManager.getOutputLength());
+            assertEquals(EXPECTED.length(), outputLength);
             assertFalse(sourceFile.exists());
         }
     }
@@ -222,11 +225,12 @@ public class TransformStreamHandlerTest
             transformManager.copyTargetFileToOutputStream();
             closeInputStreamWithoutException(inputStream);
             transformManager.getOutputStream().close();
+            Long outputLength = transformManager.getOutputLength();
             transformManager.deleteSourceFile();
             transformManager.deleteTargetFile();
 
             assertEquals(EXPECTED, read(outputStream));
-            assertEquals(EXPECTED.length(), transformManager.getOutputLength());
+            assertEquals(EXPECTED.length(), outputLength);
             assertFalse(sourceFile.exists());
         }
     }
@@ -253,11 +257,12 @@ public class TransformStreamHandlerTest
             transformManager.copyTargetFileToOutputStream();
             transformManager.getOutputStream().close();
             closeInputStreamWithoutException(inputStream);
+            Long outputLength = transformManager.getOutputLength();
             transformManager.deleteSourceFile();
             transformManager.deleteTargetFile();
 
             assertEquals(EXPECTED, read(outputStream));
-            assertEquals(EXPECTED.length(), transformManager.getOutputLength());
+            assertEquals(EXPECTED.length(), outputLength);
             assertFalse(targetFileCreatedByTransform.exists());
         }
     }
@@ -280,11 +285,12 @@ public class TransformStreamHandlerTest
             transformManager.getOutputStream().close();
             closeInputStreamWithoutException(inputStream);
             String actual = read(targetFile);
+            Long outputLength = transformManager.getOutputLength();
             transformManager.deleteSourceFile();
             transformManager.deleteTargetFile();
 
             assertEquals(EXPECTED, actual);
-            assertEquals(EXPECTED.length(), transformManager.getOutputLength());
+            assertEquals(EXPECTED.length(), outputLength);
             assertFalse(targetFile.exists());
         }
     }
@@ -309,11 +315,12 @@ public class TransformStreamHandlerTest
             transformManager.getOutputStream().close();
             closeInputStreamWithoutException(inputStream);
             String actual = read(targetFile);
+            Long outputLength = transformManager.getOutputLength();
             transformManager.deleteSourceFile();
             transformManager.deleteTargetFile();
 
             assertEquals(EXPECTED, actual);
-            assertEquals(EXPECTED.length(), transformManager.getOutputLength());
+            assertEquals(EXPECTED.length(), outputLength);
             assertFalse(targetFile.exists());
         }
     }
@@ -344,11 +351,12 @@ public class TransformStreamHandlerTest
             transformManager.copyTargetFileToOutputStream();
             closeInputStreamWithoutException(inputStream);
             transformManager.getOutputStream().close();
+            Long outputLength = transformManager.getOutputLength();
             transformManager.deleteSourceFile();
             transformManager.deleteTargetFile();
 
             assertEquals(EXPECTED, read(targetFile));
-            assertEquals(EXPECTED.length(), transformManager.getOutputLength());
+            assertEquals(EXPECTED.length(), outputLength);
             assertFalse(sourceFile.exists());
             assertTrue(targetFile.exists());
         }
@@ -375,11 +383,12 @@ public class TransformStreamHandlerTest
             closeInputStreamWithoutException(inputStream);
             transformManager.getOutputStream().close();
             String actual = read(targetFile);
+            Long outputLength = transformManager.getOutputLength();
             transformManager.deleteSourceFile();
             transformManager.deleteTargetFile();
 
             assertEquals(EXPECTED, actual);
-            assertEquals(EXPECTED.length(), transformManager.getOutputLength());
+            assertEquals(EXPECTED.length(), outputLength);
             assertFalse(sourceFile.exists());
             assertFalse(targetFile.exists());
         }
@@ -403,16 +412,17 @@ public class TransformStreamHandlerTest
             closeInputStreamWithoutException(inputStream);
             transformManager.getOutputStream().close();
             String actual = read(targetFile);
+            Long outputLength = transformManager.getOutputLength();
             transformManager.deleteSourceFile();
             transformManager.deleteTargetFile();
 
             assertEquals(EXPECTED, actual);
-            assertEquals(EXPECTED.length(), transformManager.getOutputLength());
+            assertEquals(EXPECTED.length(), outputLength);
             assertFalse(targetFile.exists());
         }
     }
 
-    private abstract class FakeTransformStreamHandler extends TransformStreamHandler
+    private abstract class FakeStreamHandler extends StreamHandler
     {
         @Override
         public void handleTransformRequest() throws Exception
@@ -435,7 +445,7 @@ public class TransformStreamHandlerTest
 
         try (ByteArrayOutputStream os = new ByteArrayOutputStream())
         {
-            new FakeTransformStreamHandler()
+            new FakeStreamHandler()
             {
                 @Override
                 protected void init() throws IOException
@@ -467,7 +477,7 @@ public class TransformStreamHandlerTest
         File sourceFile = tempFile();
         write(sourceFile, ORIGINAL);
 
-        new FakeTransformStreamHandler()
+        new FakeStreamHandler()
         {
             @Override
             protected void init() throws IOException
@@ -499,7 +509,7 @@ public class TransformStreamHandlerTest
         File sourceFile = tempFile();
         write(sourceFile, ORIGINAL);
 
-        new FakeTransformStreamHandler()
+        new FakeStreamHandler()
         {
             @Override
             protected InputStream getInputStream() throws IOException
@@ -520,7 +530,7 @@ public class TransformStreamHandlerTest
     {
         File targetFile = tempFile();
 
-        new FakeTransformStreamHandler()
+        new FakeStreamHandler()
         {
             @Override
             protected InputStream getInputStream()
@@ -547,7 +557,7 @@ public class TransformStreamHandlerTest
     {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream())
         {
-            new FakeTransformStreamHandler()
+            new FakeStreamHandler()
             {
                 @Override
                 protected InputStream getInputStream()

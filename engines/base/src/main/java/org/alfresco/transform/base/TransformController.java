@@ -296,9 +296,4 @@ public class TransformController
         mav.setViewName("error"); // display error.html
         return mav;
     }
-
-    void resetForTesting()
-    {
-
-    }
 }

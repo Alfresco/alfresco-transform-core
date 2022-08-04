@@ -40,7 +40,7 @@ import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.base.transform.TransformHandler;
-import org.alfresco.transform.base.transform.TransformHandlerTest;
+import org.alfresco.transform.base.transform.FragmentTest;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.config.TransformConfig;
@@ -105,8 +105,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Tests the endpoints of the TransformController. Testing of transforms is limited as in that is covered by
- * {@link TransformHandlerTest}.
+ * Tests the endpoints of the TransformController.
  *
  * Also see {@link TransformControllerAllInOneTest}.
  */
@@ -131,8 +130,7 @@ public class TransformControllerTest
     @MockBean
     protected AlfrescoSharedFileStoreClient fakeSfsClient;
 
-    @BeforeEach
-    public void fakeSfsClient()
+    private void fakeSfsClient()
     {
         final Map<String,File> sfsRef2File = new HashMap<>();
         when(fakeSfsClient.saveFile(any())).thenAnswer((Answer) invocation -> {
@@ -150,7 +148,6 @@ public class TransformControllerTest
             ResponseEntity.ok().header(CONTENT_DISPOSITION,"attachment; filename*=UTF-8''transform.tmp")
             .body((Resource) new UrlResource(sfsRef2File.get(invocation.getArguments()[0]).toURI())));
     }
-
 
     static void resetProbeForTesting(TransformController transformController)
     {
@@ -305,6 +302,7 @@ public class TransformControllerTest
     @Test
     public void testTransformEndpointThatUsesTransformRequests() throws Exception
     {
+        fakeSfsClient();
         File sourceFile = getTestFile("original.txt", true, tempDir);
         String sourceFileRef = fakeSfsClient.saveFile(sourceFile).getEntry().getFileRef();
 
@@ -358,11 +356,11 @@ public class TransformControllerTest
     @Test
     public void testTestTransformEndpointWhichConvertsRequestParameters() throws Exception
     {
-        TransformHandler orig = transformController.transformHandler;
+        TransformHandler transformHandlerOrig = transformController.transformHandler;
         try
         {
-            TransformHandler spy = spy(orig);
-            transformController.transformHandler = spy;
+            TransformHandler transformHandlerSpy = spy(transformHandlerOrig);
+            transformController.transformHandler = transformHandlerSpy;
 
             mockMvc.perform(
                 MockMvcRequestBuilders.multipart(ENDPOINT_TEST)
@@ -377,7 +375,7 @@ public class TransformControllerTest
                     .param("name2", PAGE_REQUEST_PARAM).param("value2", "1")
                     .param("name3", SOURCE_ENCODING).param("value3", "UTF-8"));
 
-            verify(spy).handleHttpRequest(any(), any(), eq(MIMETYPE_TEXT_PLAIN), eq(MIMETYPE_PDF),
+            verify(transformHandlerSpy).handleHttpRequest(any(), any(), eq(MIMETYPE_TEXT_PLAIN), eq(MIMETYPE_PDF),
                 eq(ImmutableMap.of(
                     SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN,
                     TARGET_MIMETYPE, MIMETYPE_PDF,
@@ -386,7 +384,7 @@ public class TransformControllerTest
         }
         finally
         {
-            transformController.transformHandler = orig;
+            transformController.transformHandler = transformHandlerOrig;
         }
     }
 

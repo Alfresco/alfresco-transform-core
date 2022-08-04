@@ -26,7 +26,10 @@
  */
 package org.alfresco.transform.base;
 
+import org.alfresco.transform.common.TransformException;
+
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
@@ -50,28 +53,33 @@ public interface TransformManager
      * The file will be deleted once the request is completed. To avoid creating extra files, if a File has already
      * been created by the base t-engine, it is returned.
      * If possible this method should be avoided as it is better not to leave content on disk.
-     * @throws IllegalStateException if this method has already been called. A call to {@link #respondWithFragment(Integer)}
+     * @throws IllegalStateException if this method has already been called. A call to {@link #respondWithFragment(Integer, boolean)}
      *         allows the method to be called again.
      */
     File createTargetFile();
 
     /**
-     * Allows a single transform request to have multiple transform responses. For example images from a video at
+     * Allows a single transform request to have multiple transform responses. For example, images from a video at
      * different time offsets or different pages of a document. Following a call to this method a transform response is
-     * made with output that has already been generated. The {@code CustomTransformer} may then use the returned
-     * {@code outputStream} to generate more output for the next transform response.
-     * {@code CustomTransformer} to throw an {@code Exception} when it finds it has no more output.
-     * @param index returned with the response, so that it may be distinguished from other responses. Renditions
-     *        use the index as an offset into elements. A {@code null} value indicates that there is no more output
-     *        so there should not be another transform reply once the
-     *        {@link CustomTransformer#transform(String, InputStream, String, OutputStream, Map, TransformManager)}
-     *        returns.
-     * @throws IllegalStateException if a synchronous (http) request has been made as this only works with messages
-     *         on queues.
+     * made with the data sent to the current {@code OutputStream}. If this method has been called, there will not be
+     * another response when {@link CustomTransformer#transform(String, InputStream, String, OutputStream, Map,
+     * TransformManager)} returns and any data written to the final {@code OutputStream} will be ignored.
+     * @param index    returned with the response, so that the fragment may be distinguished from other responses.
+     *                 Renditions use the index as an offset into elements. A {@code null} value indicates that there
+     *                 is no more output and any data sent to the current {@code outputStream} will be ignored.
+     * @param finished indicates this is the final fragment. {@code False} indicates that it is expected there will be
+     *                 more fragments. There need not be a call with this parameter set to {@code true}.
+     * @return a new {@code OutputStream} for the next fragment. A {@code null} will be returned if {@code index} was
+     *         {@code null} or {@code finished} was {@code true}.
+     * @throws TransformException if a synchronous (http) request has been made as this only works with requests
+     *                            on queues, or the first call to this method indicated there was no output, or
+     *                            another call is made after it has been indicated that there should be no more
+     *                            fragments.
+     * @throws IOException if there was a problem sending the response.
      */
     // This works because all the state is in the TransformResponse and the t-router will just see each response as
     // something to either return to the client or pass to the next stage in a pipeline. We might be able to enhance
     // the logging to include the index. We may also wish to modify the client data or just make the index available
     // in the message.
-    OutputStream respondWithFragment(Integer index);
+    OutputStream respondWithFragment(Integer index, boolean finished) throws IOException;
 }

@@ -184,6 +184,14 @@ public class TransformerDebug
                 "  " + key + "=\"" + value.replaceAll("\"", "\\\"") + "\"";
     }
 
+    public void logFragment(String reference, int index, long size)
+    {
+        if (logger.isDebugEnabled())
+        {
+            logger.debug(getPaddedReference(reference) + "  fragment["+index+"] "+fileSize(size));
+        }
+    }
+
     public void logFailure(TransformReply reply)
     {
         RepositoryClientData repositoryClientData = new RepositoryClientData(reply.getClientData());

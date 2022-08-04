@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Subclass MUST be named TestTransformer\<something>. Appends the name of the CustomTransformer and any t-options
+ * Subclass MUST be named FakeTransformer\<something>. Appends the name of the CustomTransformer and any t-options
  * to the output. The output is always a String regardless of the stated mimetypes.
  */
 @TestComponent
@@ -51,7 +51,7 @@ public abstract class AbstractFakeTransformer implements CustomTransformer
     public String getTransformerName()
     {
         String simpleClassName = getClass().getSimpleName();
-        return simpleClassName.substring("TestTransformer".length());
+        return simpleClassName.substring("FakeTransformer".length());
     }
 
     @Override

@@ -48,6 +48,7 @@ public class TransformManagerImpl implements TransformManager
     private static final Logger logger = LoggerFactory.getLogger(TransformManagerImpl.class);
 
     private HttpServletRequest request;
+    private ProcessHandler processHandler;
     private InputStream inputStream;
     private OutputStreamLengthRecorder outputStreamLengthRecorder;
     private String sourceMimetype;
@@ -63,6 +64,11 @@ public class TransformManagerImpl implements TransformManager
     public void setRequest(HttpServletRequest request)
     {
         this.request = request;
+    }
+
+    public void setProcessHandler(ProcessHandler processHandler)
+    {
+        this.processHandler = processHandler;
     }
 
     public InputStream setInputStream(InputStream inputStream)
@@ -194,7 +200,10 @@ public class TransformManagerImpl implements TransformManager
         {
             logger.error("Failed to delete temporary source file "+sourceFile.getPath());
         }
+        outputStreamLengthRecorder = null;
         sourceFile = null;
+        createSourceFileCalled = false;
+        startedWithSourceFile = null;
     }
 
     public void deleteTargetFile()
@@ -204,18 +213,18 @@ public class TransformManagerImpl implements TransformManager
             logger.error("Failed to delete temporary target file "+targetFile.getPath());
         }
         targetFile = null;
+        createTargetFileCalled = false;
+        startedWithTargetFile = null;
     }
 
     @Override
-    public OutputStream respondWithFragment(Integer index)
+    public OutputStream respondWithFragment(Integer index, boolean finished) throws IOException
     {
         if (request != null)
         {
-            throw new IllegalStateException(
-                    " Fragments may only be sent with asynchronous requests. This a synchronous http request");
+            throw new IllegalStateException("Fragments may only be sent via message queues. This an http request");
         }
 
-        // TODO send the current output as a TransformResponse and then start a new one.
-        throw new UnsupportedOperationException("Not currently supported");
+        return processHandler.respondWithFragment(index, finished);
     }
 }

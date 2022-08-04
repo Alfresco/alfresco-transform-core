@@ -34,16 +34,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Separation of InputStream, OutputStream, sourceFile and targetFile from the {@link TransformProcess} logic. Allows
+ * Separation of InputStream, OutputStream, sourceFile and targetFile from the {@link ProcessHandler} logic. Allows
  * {@link CustomTransformer} implementations to call {@link TransformManager#createSourceFile()} and
  * {@link TransformManager#createTargetFile()} so that extra Files are not created if there was one already in
  * existence.
  *
  * Subclasses MUST call transformManager.setSourceFile(File) and transformManager.setSourceFile(File) if they start
  * with files rather than streams, before calling the {@link #init()} method which calls
- * transformManager.setInputStream(InputStream) and transformManager.setOutputStream(OutputStream).
+ * transformManager.setOutputStream(InputStream) and transformManager.setOutputStream(OutputStream).
  */
-public abstract class TransformStreamHandler
+public abstract class StreamHandler
 {
     protected TransformManagerImpl transformManager = new TransformManagerImpl();
     protected InputStream inputStream;
@@ -53,7 +53,17 @@ public abstract class TransformStreamHandler
 
     protected void init() throws IOException
     {
+        setInputStream();
+        setOutputStream();
+    }
+
+    private void setInputStream() throws IOException
+    {
         inputStream = transformManager.setInputStream(getInputStream());
+    }
+
+    protected void setOutputStream() throws IOException
+    {
         outputStream = transformManager.setOutputStream(getOutputStream());
     }
 
@@ -66,8 +76,7 @@ public abstract class TransformStreamHandler
         try
         {
             transform(customTransformer);
-            transformManager.copyTargetFileToOutputStream();
-            onSuccessfulTransform();
+            handleSuccessfulTransform();
         }
         finally
         {
@@ -78,6 +87,12 @@ public abstract class TransformStreamHandler
     }
 
     protected abstract void transform(CustomTransformer customTransformer) throws Exception;
+
+    protected void handleSuccessfulTransform() throws IOException
+    {
+        transformManager.copyTargetFileToOutputStream();
+        onSuccessfulTransform();
+    }
 
     protected void onSuccessfulTransform()
     {

@@ -165,7 +165,7 @@ public class TransformHandler
     {
         AtomicReference<ResponseEntity<Resource>> responseEntity = new AtomicReference<>();
 
-        new TransformProcess(sourceMimetype, targetMimetype, requestParameters,
+        new ProcessHandler(sourceMimetype, targetMimetype, requestParameters,
             "e" + httpRequestCount.getAndIncrement(), transformRegistry,
             transformerDebug, getProbeTransform(), customTransformersByName)
         {
@@ -209,7 +209,7 @@ public class TransformHandler
     public void handleProbRequest(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
         File sourceFile, File targetFile)
     {
-        new TransformProcess(sourceMimetype, targetMimetype, transformOptions,
+        new ProcessHandler(sourceMimetype, targetMimetype, transformOptions,
             "p" + httpRequestCount.getAndIncrement(), transformRegistry,
             transformerDebug, getProbeTransform(), customTransformersByName)
         {
@@ -245,7 +245,7 @@ public class TransformHandler
     public TransformReply handleMessageRequest(TransformRequest request, Long timeout, Destination replyToQueue)
     {
         TransformReply reply = createBasicTransformReply(request);
-        new TransformProcess(request.getSourceMediaType(), request.getTargetMediaType(),
+        new ProcessHandler(request.getSourceMediaType(), request.getTargetMediaType(),
             request.getTransformRequestOptions(),"unset", transformRegistry,
             transformerDebug, getProbeTransform(), customTransformersByName)
         {
@@ -254,8 +254,14 @@ public class TransformHandler
             {
                 checkTransformRequestValid(request, reply);
                 reference = TransformStack.getReference(reply.getInternalContext());
-                transformManager.setTargetFile(createTargetFile(null, sourceMimetype, targetMimetype));
+                initTarget();
                 super.init();
+            }
+
+            @Override
+            protected void initTarget()
+            {
+                transformManager.setTargetFile(createTargetFile(null, sourceMimetype, targetMimetype));
             }
 
             @Override
@@ -425,7 +431,7 @@ public class TransformHandler
         }
         catch (HttpClientErrorException e)
         {
-            throw new TransformException(e.getStatusCode(), messageWithCause("Failed to read the source", e));
+            throw new TransformException(e.getStatusCode(), messageWithCause("Failed to read the source from the SFS", e));
         }
     }
 
@@ -461,9 +467,12 @@ public class TransformHandler
     private static String messageWithCause(final String prefix, Throwable e)
     {
         final StringBuilder sb = new StringBuilder();
-        sb.append(prefix).append(" - ")
-          .append(e.getClass().getSimpleName()).append(": ")
-          .append(e.getMessage());
+        sb.append(prefix).append(" - ");
+        if (e.getClass() != TransformException.class)
+        {
+            sb.append(e.getClass().getSimpleName()).append(": ");
+        }
+        sb.append(e.getMessage());
 
         while (e.getCause() != null)
         {

@@ -40,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.jms.Destination;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -57,13 +58,13 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 
 /**
- * Provides the transform logic common to http upload/download, message and probe requests. See
+ * Provides the transform logic common to http (upload/download), message and probe requests. See
  * {@link TransformHandler#handleHttpRequest(HttpServletRequest, MultipartFile, String, String, Map)},
  * {@link TransformHandler#handleMessageRequest(TransformRequest, Long, Destination)} and
  * {@link TransformHandler#handleProbRequest(String, String, Map, File, File)}. Note the handing of transform requests
  * via a message queue is the same as via the {@link TransformController#transform(TransformRequest, Long)}.
  */
-abstract class TransformProcess extends TransformStreamHandler
+abstract class ProcessHandler extends FragmentHandler
 {
     private static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
         TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, DIRECT_ACCESS_URL);
@@ -77,7 +78,7 @@ abstract class TransformProcess extends TransformStreamHandler
     private final ProbeTransform probeTransform;
     private final Map<String, CustomTransformer> customTransformersByName;
 
-    TransformProcess(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+    ProcessHandler(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
         String reference, TransformServiceRegistry transformRegistry, TransformerDebug transformerDebug,
         ProbeTransform probeTransform, Map<String, CustomTransformer> customTransformersByName)
     {
@@ -98,6 +99,13 @@ abstract class TransformProcess extends TransformStreamHandler
         NON_TRANSFORM_OPTION_REQUEST_PARAMETERS.forEach(transformOptions.keySet()::remove);
         transformOptions.values().removeIf(String::isEmpty);
         return transformOptions;
+    }
+
+    @Override
+    protected void init() throws IOException
+    {
+        transformManager.setProcessHandler(this);
+        super.init();
     }
 
     public void handleTransformRequest()
@@ -135,6 +143,11 @@ abstract class TransformProcess extends TransformStreamHandler
             transformerDebug.popTransform(reference, time);
             LogEntry.complete();
         }
+    }
+
+    protected void logFragment(Integer index, Long outputLength)
+    {
+        transformerDebug.logFragment(reference, index, outputLength);
     }
 
     @Override
