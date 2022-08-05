@@ -23,14 +23,14 @@ package org.alfresco.transform.messages;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.UUID;
 
 import org.alfresco.transform.client.model.TransformRequest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 

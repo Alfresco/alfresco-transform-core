@@ -31,9 +31,9 @@ import static java.util.stream.Collectors.toMap;
 import static org.alfresco.transform.registry.TransformRegistryHelper.addToPossibleTransformOptions;
 import static org.alfresco.transform.registry.TransformRegistryHelper.optionsMatch;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,8 +48,8 @@ import org.alfresco.transform.config.TransformOption;
 import org.alfresco.transform.config.TransformOptionGroup;
 import org.alfresco.transform.config.TransformOptionValue;
 import org.alfresco.transform.config.Transformer;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -73,7 +73,7 @@ public class TransformRegistryTest
     protected AbstractTransformRegistry registry;
     protected Map<String, Set<TransformOption>> mapOfTransformOptions;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
         registry = buildTransformServiceRegistryImpl();
@@ -115,17 +115,16 @@ public class TransformRegistryTest
         addToPossibleTransformOptions(possibleTransformOptions, transformOptionGroup, true,
             buildActualOptions(actualOptionNames));
 
-        assertEquals("The expected options don't match", expectedNameSet,
-            possibleTransformOptions.keySet());
+        assertEquals(expectedNameSet, possibleTransformOptions.keySet());
 
         possibleTransformOptions.forEach((name, required) -> {
             if (required)
             {
-                assertTrue(name + " should be REQUIRED", expectedRequiredSet.contains(name));
+                assertTrue(expectedRequiredSet.contains(name));
             }
             else
             {
-                assertFalse(name + " should be OPTIONAL", expectedRequiredSet.contains(name));
+                assertFalse(expectedRequiredSet.contains(name));
             }
         });
     }
@@ -141,12 +140,11 @@ public class TransformRegistryTest
         boolean supported = optionsMatch(transformOptions, buildActualOptions(actualOptionNames));
         if (isBlank(unsupportedMsg))
         {
-            assertTrue("Expected these options to be SUPPORTED", supported);
+            assertTrue(supported);
         }
         else
         {
-            assertFalse("Expected these options NOT to be supported, because " + unsupportedMsg,
-                supported);
+            assertFalse(supported);
         }
     }
 
@@ -189,9 +187,7 @@ public class TransformRegistryTest
         buildAndPopulateRegistry(transformers);
         String transformerName = registry.findTransformerName(sourceMimetype, sourceSizeInBytes,
             targetMimetype, actualOptions, null);
-        assertEquals(
-            sourceMimetype + " to " + targetMimetype + " should have returned " + expectedTransformerName,
-            expectedTransformerName, transformerName);
+        assertEquals(expectedTransformerName, transformerName);
     }
 
     private void assertSupported(final Transformer transformer, final String sourceMimetype,
@@ -229,13 +225,11 @@ public class TransformRegistryTest
             actualOptions, renditionName);
         if (unsupportedMsg == null || unsupportedMsg.isEmpty())
         {
-            assertTrue(sourceMimetype + " to " + targetMimetype + " should be SUPPORTED",
-                supported);
+            assertTrue(supported);
         }
         else
         {
-            assertFalse(sourceMimetype + " to " + targetMimetype + " should NOT be supported",
-                supported);
+            assertFalse(supported);
         }
     }
 

@@ -25,25 +25,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.alfresco.transform.common.TransformConfigResourceReader;
 import org.alfresco.transform.config.SupportedSourceAndTarget;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.config.TransformStep;
 import org.alfresco.transform.config.Transformer;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test the CombinedTransformConfig, extended by both T-Router and ACS repository.
@@ -258,7 +255,7 @@ public class CombinedTransformConfigTest
             assertEquals(numberOfTEngineTransformers, transformConfig.getTransformers().size());
             Transformer actualTransformer = transformConfig.getTransformers().get(numberOfTEngineTransformers - 1);
             assertEquals(expectedTransformer, actualTransformer);
-            assertSame("It should even == the expected transform", expectedTransformer, actualTransformer);
+            assertTrue(expectedTransformer == actualTransformer);
 
             // Check the baseUrl is that of the original t-engine that will do the work, if the overriding transform
             // is a single step transform.
@@ -385,8 +382,8 @@ public class CombinedTransformConfigTest
         config.combineTransformerConfig(registry);
 
         String expected = "Transformer \"1\" references \"unknown\" which do not exist. Read from readFromB";
-        assertEquals(1, registry.errorMessages.size());
-        assertEquals(expected, registry.errorMessages.get(0));
+        assertEquals(1, registry.warnMessages.size());
+        assertEquals(expected, registry.warnMessages.get(0));
     }
 
     @Test

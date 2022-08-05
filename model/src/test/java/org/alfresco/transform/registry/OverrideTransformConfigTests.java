@@ -30,13 +30,13 @@ import org.alfresco.transform.config.RemoveSupported;
 import org.alfresco.transform.config.SupportedSourceAndTarget;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.config.Transformer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests the json elements: {@code removeTransformers}, {@code addSupported}, {@code removeSupported},
@@ -455,6 +455,6 @@ public class OverrideTransformConfigTests
         Set<SupportedSourceAndTarget> supportedSourceAndTargetList = resultConfig.getTransformers().get(0).getSupportedSourceAndTargetList();
         assertTrue(supportedSourceAndTargetList.equals(expectedSupported));
 
-        assertEquals("toString() difference", expectedToString, supportedSourceAndTargetList.toString());
+        assertEquals(expectedToString, supportedSourceAndTargetList.toString());
     }
 }

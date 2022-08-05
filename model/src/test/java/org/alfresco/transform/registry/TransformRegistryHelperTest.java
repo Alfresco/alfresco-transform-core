@@ -27,15 +27,16 @@
 package org.alfresco.transform.registry;
 
 import org.alfresco.transform.common.TransformException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static org.alfresco.transform.registry.TransformRegistryHelper.retrieveTransformListBySize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TransformRegistryHelperTest
 {
@@ -118,10 +119,10 @@ public class TransformRegistryHelperTest
 
     private void assertOrder(List<SupportedTransform> transformsInLoadOrder, List<SupportedTransform> expectedList)
     {
-        TransformRegistryHelper helper = new TransformRegistryHelper();
+        AtomicInteger transformerCount = new AtomicInteger(0);
         TransformCache data = new TransformCache();
         transformsInLoadOrder.forEach(t->data.appendTransform("text/plain", "application/pdf", t,
-                null, null));
+                "transformer"+transformerCount.getAndIncrement(), null));
 
         List<SupportedTransform> supportedTransforms = retrieveTransformListBySize(data,
                 "text/plain", "application/pdf", null, null);
@@ -132,8 +133,8 @@ public class TransformRegistryHelperTest
         String expectedTransformerName = expectedList.get(0).getName();
         long expectedMaxSourceSizeBytes = findMaxSize(expectedList);
         assertEquals(expectedList, supportedTransforms);
-        assertEquals("Transform name", expectedTransformerName, transformerName);
-        assertEquals("MaxSize", expectedMaxSourceSizeBytes, maxSize);
+        assertEquals(expectedTransformerName, transformerName);
+        assertEquals(expectedMaxSourceSizeBytes, maxSize);
 
         // If the above two pass, we don't really need the following one, but if it is wrong it might indicate
         // something is wrong, where the sourceSizeInBytes is not just 1.
@@ -159,23 +160,25 @@ public class TransformRegistryHelperTest
                 supportedTransforms.get(supportedTransforms.size() - 1).getMaxSourceSizeBytes();
     }
 
-    @Test(expected = TransformException.class)
+    @Test
     public void buildTransformListSourceMimeTypeNullErrorTest()
     {
         TransformCache data = new TransformCache();
 
-        retrieveTransformListBySize(data, null, "application/pdf", null, null);
-
-        fail("No exception raised");
+        assertThrows(TransformException.class, () ->
+        {
+            retrieveTransformListBySize(data, null, "application/pdf", null, null);
+        });
     }
 
-    @Test(expected = TransformException.class)
+    @Test
     public void buildTransformListTargetMimeTypeNullErrorTest()
     {
         TransformCache data = new TransformCache();
 
-        retrieveTransformListBySize(data, "text/plain", null, null, null);
-
-        fail("No exception raised");
+        assertThrows(TransformException.class, () ->
+        {
+            retrieveTransformListBySize(data, "text/plain", null, null, null);
+        });
     }
 }
