@@ -26,8 +26,10 @@
  */
 package org.alfresco.transform.tika;
 
+import com.google.common.collect.ImmutableSet;
 import org.alfresco.transform.base.AbstractBaseTest;
 import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.html.OptionLister;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.client.model.TransformReply;
@@ -37,6 +39,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -115,6 +118,8 @@ public class TikaTest extends AbstractBaseTest
                                                                 "\n" +
                                                                 "The quick brown fox jumps over the lazy dogs";
     private static final String EXPECTED_CSV_CONTENT_CONTAINS = "\"The\",\"quick\",\"brown\",\"fox\"";
+
+    @Autowired OptionLister optionLister;
 
     @Mock
     private RuntimeExec.ExecutionResult mockExecutionResult;
@@ -479,5 +484,17 @@ public class TikaTest extends AbstractBaseTest
     {
         expectedTargetFileBytes = readTestFile(targetExtension);
         super.httpTransformRequestUsingDirectAccessUrlTest();
+    }
+
+    @Test
+    public void optionListTest()
+    {
+        assertEquals(ImmutableSet.of(
+                "includeContents",
+                "targetEncoding",
+                "extractMapping",
+                "notExtractBookmarksText",
+                "metadata"),
+            optionLister.getOptionNames(controller.transformConfig(0).getBody().getTransformOptions()));
     }
 }

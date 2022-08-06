@@ -26,12 +26,14 @@
  */
 package org.alfresco.transform.misc;
 
+import com.google.common.collect.ImmutableSet;
 import org.alfresco.transform.base.AbstractBaseTest;
-import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.base.html.OptionLister;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -63,6 +65,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 public class MiscTest extends AbstractBaseTest
 {
+    @Autowired OptionLister optionLister;
+
     protected final String sourceEncoding = "UTF-8";
     protected final String targetEncoding = "UTF-8";
     protected final String targetMimetype = MIMETYPE_TEXT_PLAIN;
@@ -498,5 +502,15 @@ public class MiscTest extends AbstractBaseTest
     {
         super.targetMimetype = this.targetMimetype;
         super.queueTransformRequestUsingDirectAccessUrlTest();
+    }
+
+    @Test
+    public void optionListTest()
+    {
+        assertEquals(ImmutableSet.of(
+                "pageLimit",
+                "targetEncoding",
+                "extractMapping"),
+        optionLister.getOptionNames(controller.transformConfig(0).getBody().getTransformOptions()));
     }
 }

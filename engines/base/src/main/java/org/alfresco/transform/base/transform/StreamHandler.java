@@ -111,9 +111,8 @@ public abstract class StreamHandler
             {
                 inputStream.close();
             }
-            catch (IOException e)
+            catch (IOException ignore)
             {
-                throw new RuntimeException(e);
             }
         }
     }

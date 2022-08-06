@@ -56,27 +56,5 @@ public class Origin<T>
     {
         return readFrom;
     }
-
-    public static <T> Set<T> setOf(Collection<Origin<T>> originCollection)
-    {
-        Set<T> tSet = new HashSet<>(originCollection.size());
-        originCollection.forEach(element -> tSet.add(element.get()));
-        return tSet;
-    }
-
-    @Override
-    public boolean equals(Object o)
-    {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Origin<?> origin = (Origin<?>)o;
-        return t.equals(origin.t);
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return Objects.hash(t);
-    }
 }
 

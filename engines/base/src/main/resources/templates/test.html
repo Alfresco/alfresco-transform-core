@@ -5,7 +5,7 @@
         <form method="POST" enctype="multipart/form-data" action="/test">
             <table>
                 <tr><td><div style="text-align:right">file</div></td><td><input type="file" name="file" /></td></tr>
-                <tr><td><div style="text-align:right">Direct Url</div></td><td><input type="text" name="directAccessUrl"/></td></tr>
+                <tr><td><div style="text-align:right">directAccessUrl</div></td><td><input type="text" name="directAccessUrl"/></td></tr>
                 <tr><td><div style="text-align:right">sourceMimetype</div></td><td><input type="text" name="sourceMimetype" value="" /></td>
                   <td><select name="_sourceMimetype">
                     <option value="" >-- file extension --</option>
@@ -28,166 +28,20 @@
                         <option value="text/html">html</option>
                         <option value="text/plain">txt</option>
                     </select></td></tr>
-                <tr><td><select name="name0">
-                    <option value="sourceEncoding" >sourceEncoding</option>
-                    <option value="targetEncoding">targetEncoding</option>
-                    <option value="page">page</option>
-                    <option value="width">width</option>
-                    <option value="height">height</option>
-                    <option value="allowPdfEnlargement">allowPdfEnlargement</option>
-                    <option value="maintainPdfAspectRatio">maintainPdfAspectRatio</option>
-                    <option value="startPage">startPage</option>
-                    <option value="endPage">endPage</option>
-                    <option value="alphaRemove">alphaRemove</option>
-                    <option value="autoOrient">autoOrient</option>
-                    <option value="cropGravity">cropGravity</option>
-                    <option value="cropWidth">cropWidth</option>
-                    <option value="cropHeight">cropHeight</option>
-                    <option value="cropPercentage">cropPercentage</option>
-                    <option value="cropXOffset">cropXOffset</option>
-                    <option value="cropYOffset">cropYOffset</option>
-                    <option value="thumbnail">thumbnail</option>
-                    <option value="resizeWidth">resizeWidth</option>
-                    <option value="resizeHeight">resizeHeight</option>
-                    <option value="resizePercentage">resizePercentage</option>
-                    <option value="allowEnlargement">allowEnlargement</option>
-                    <option value="maintainAspectRatio">maintainAspectRatio</option>
-                    <option value="commandOptions">commandOptions</option>
-                    <option value="timeout">timeout</option>
-                    <option value="includeContents">includeContents</option>
-                    <option value="notExtractBookmarksText">notExtractBookmarksText</option>
-                    <option value="pageLimit">pageLimit</option>
-                </select></td><td><input type="text" name="value0" /></td></tr>
-                <tr><td><select name="name1">
-                    <option value="sourceEncoding">sourceEncoding</option>
-                    <option value="targetEncoding">targetEncoding</option>
-                    <option value="page">page</option>
-                    <option value="width">width</option>
-                    <option value="height">height</option>
-                    <option value="allowPdfEnlargement">allowPdfEnlargement</option>
-                    <option value="maintainPdfAspectRatio">maintainPdfAspectRatio</option>
-                    <option value="startPage">startPage</option>
-                    <option value="endPage">endPage</option>
-                    <option value="alphaRemove">alphaRemove</option>
-                    <option value="autoOrient">autoOrient</option>
-                    <option value="cropGravity">cropGravity</option>
-                    <option value="cropWidth">cropWidth</option>
-                    <option value="cropHeight">cropHeight</option>
-                    <option value="cropPercentage">cropPercentage</option>
-                    <option value="cropXOffset">cropXOffset</option>
-                    <option value="cropYOffset">cropYOffset</option>
-                    <option value="thumbnail">thumbnail</option>
-                    <option value="resizeWidth" selected="selected">resizeWidth</option>
-                    <option value="resizeHeight">resizeHeight</option>
-                    <option value="resizePercentage">resizePercentage</option>
-                    <option value="allowEnlargement">allowEnlargement</option>
-                    <option value="maintainAspectRatio">maintainAspectRatio</option>
-                    <option value="commandOptions">commandOptions</option>
-                    <option value="timeout">timeout</option>
-                    <option value="includeContents">includeContents</option>
-                    <option value="notExtractBookmarksText">notExtractBookmarksText</option>
-                    <option value="pageLimit">pageLimit</option>
-                </select></td><td><input type="text" name="value1" value="" /></td></tr>
-                <tr><td><select name="name2">
-                    <option value="sourceEncoding">sourceEncoding</option>
-                    <option value="targetEncoding">targetEncoding</option>
-                    <option value="page">page</option>
-                    <option value="width">width</option>
-                    <option value="height">height</option>
-                    <option value="allowPdfEnlargement">allowPdfEnlargement</option>
-                    <option value="maintainPdfAspectRatio">maintainPdfAspectRatio</option>
-                    <option value="startPage">startPage</option>
-                    <option value="endPage">endPage</option>
-                    <option value="alphaRemove">alphaRemove</option>
-                    <option value="autoOrient">autoOrient</option>
-                    <option value="cropGravity">cropGravity</option>
-                    <option value="cropWidth">cropWidth</option>
-                    <option value="cropHeight">cropHeight</option>
-                    <option value="cropPercentage">cropPercentage</option>
-                    <option value="cropXOffset">cropXOffset</option>
-                    <option value="cropYOffset">cropYOffset</option>
-                    <option value="thumbnail">thumbnail</option>
-                    <option value="resizeWidth">resizeWidth</option>
-                    <option value="resizeHeight" selected="selected">resizeHeight</option>
-                    <option value="resizePercentage">resizePercentage</option>
-                    <option value="allowEnlargement">allowEnlargement</option>
-                    <option value="maintainAspectRatio">maintainAspectRatio</option>
-                    <option value="commandOptions">commandOptions</option>
-                    <option value="timeout">timeout</option>
-                    <option value="includeContents">includeContents</option>
-                    <option value="notExtractBookmarksText">notExtractBookmarksText</option>
-                    <option value="pageLimit">pageLimit</option>
-                </select></td><td><input type="text" name="value2" value="" /></td></tr>
-                <tr><td><select name="name3">
-                    <option value="sourceEncoding">sourceEncoding</option>
-                    <option value="targetEncoding">targetEncoding</option>
-                    <option value="page">page</option>
-                    <option value="width">width</option>
-                    <option value="height">height</option>
-                    <option value="allowPdfEnlargement">allowPdfEnlargement</option>
-                    <option value="maintainPdfAspectRatio">maintainPdfAspectRatio</option>
-                    <option value="startPage">startPage</option>
-                    <option value="endPage">endPage</option>
-                    <option value="alphaRemove">alphaRemove</option>
-                    <option value="autoOrient">autoOrient</option>
-                    <option value="cropGravity">cropGravity</option>
-                    <option value="cropWidth">cropWidth</option>
-                    <option value="cropHeight">cropHeight</option>
-                    <option value="cropPercentage">cropPercentage</option>
-                    <option value="cropXOffset">cropXOffset</option>
-                    <option value="cropYOffset">cropYOffset</option>
-                    <option value="thumbnail" selected="selected">thumbnail</option>
-                    <option value="resizeWidth">resizeWidth</option>
-                    <option value="resizeHeight">resizeHeight</option>
-                    <option value="resizePercentage">resizePercentage</option>
-                    <option value="allowEnlargement">allowEnlargement</option>
-                    <option value="maintainAspectRatio">maintainAspectRatio</option>
-                    <option value="commandOptions">commandOptions</option>
-                    <option value="timeout">timeout</option>
-                    <option value="includeContents">includeContents</option>
-                    <option value="notExtractBookmarksText">notExtractBookmarksText</option>
-                    <option value="pageLimit">pageLimit</option>
-                </select></td><td><input type="text" name="value3" value="" /></td></tr>
-                <tr><td><select name="name4">
-                    <option value="sourceEncoding">sourceEncoding</option>
-                    <option value="targetEncoding">targetEncoding</option>
-                    <option value="page">page</option>
-                    <option value="width">width</option>
-                    <option value="height">height</option>
-                    <option value="allowPdfEnlargement">allowPdfEnlargement</option>
-                    <option value="maintainPdfAspectRatio">maintainPdfAspectRatio</option>
-                    <option value="startPage">startPage</option>
-                    <option value="endPage">endPage</option>
-                    <option value="alphaRemove">alphaRemove</option>
-                    <option value="autoOrient">autoOrient</option>
-                    <option value="cropGravity">cropGravity</option>
-                    <option value="cropWidth">cropWidth</option>
-                    <option value="cropHeight">cropHeight</option>
-                    <option value="cropPercentage">cropPercentage</option>
-                    <option value="cropXOffset">cropXOffset</option>
-                    <option value="cropYOffset">cropYOffset</option>
-                    <option value="thumbnail">thumbnail</option>
-                    <option value="resizeWidth">resizeWidth</option>
-                    <option value="resizeHeight">resizeHeight</option>
-                    <option value="resizePercentage">resizePercentage</option>
-                    <option value="allowEnlargement">allowEnlargement</option>
-                    <option value="maintainAspectRatio">maintainAspectRatio</option>
-                    <option value="commandOptions">commandOptions</option>
-                    <option value="timeout">timeout</option>
-                    <option value="includeContents">includeContents</option>
-                    <option value="notExtractBookmarksText">notExtractBookmarksText</option>
-                    <option value="pageLimit">pageLimit</option>
-                </select></td><td><input type="text" name="value4" value="" /></td></tr>
-                <tr><td><input type="text" name="name5" value="" /></td><td><input type="text" name="value5" value="" /></td></tr>
-                <tr><td><input type="text" name="name6" value="" /></td><td><input type="text" name="value6" value="" /></td></tr>
-                <tr><td><input type="text" name="name7" value="" /></td><td><input type="text" name="value7" value="" /></td></tr>
-                <tr><td><input type="text" name="name8" value="" /></td><td><input type="text" name="value8" value="" /></td></tr>
-                <tr><td><input type="text" name="name9" value="" /></td><td><input type="text" name="value9" value="" /></td></tr>
-                <tr><td><input type="text" name="name10" value="" /></td><td><input type="text" name="value10" value="" /></td></tr>
-                <tr><td><input type="text" name="name11" value="" /></td><td><input type="text" name="value11" value="" /></td></tr>
-                <tr><td><input type="text" name="name12" value="" /></td><td><input type="text" name="value12" value="" /></td></tr>
-                <tr><td><input type="text" name="name13" value="" /></td><td><input type="text" name="value13" value="" /></td></tr>
-                <tr><td><input type="text" name="name14" value="" /></td><td><input type="text" name="value14" value="" /></td></tr>
+
+                <th:block th:each="i: ${#numbers.sequence(0, T(java.lang.Math).min(18, transformOptions.size) - 1)}">
+                    <tr><td><select th:name="${'name'+i}">
+                        <option th:each="transformOption, iStat: ${transformOptions}"
+                                th:value="${transformOption}" th:text="${transformOption}"
+                                th:selected="${iStat.index eq i}"/>
+                    </select></td><td><input type="text" th:name="${'value'+i}" /></td></tr>
+                </th:block>
+
+                <th:block th:each="i: ${#numbers.sequence(T(java.lang.Math).min(18, transformOptions.size), T(java.lang.Math).min(18, transformOptions.size) + 2)}">
+                    <tr><td><input type="text" th:name="${'name'+i}" value="" /></td>
+                        <td><input type="text" th:name="${'value'+i}" value="" /></td></tr>
+                </th:block>
+
                 <tr><td><div style="text-align:right">timeout</div></td><td><input type="text" name="timeout" value="" /></td></tr>
 				<tr><td></td><td><input type="submit" value="Transform" /></td></tr>
             </table>

@@ -42,6 +42,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
+import org.alfresco.transform.config.CoreFunction;
 import org.alfresco.transform.config.SupportedSourceAndTarget;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.config.TransformOption;
@@ -130,7 +132,7 @@ public class TransformRegistryTest
     }
 
     // transformOptionNames are upper case if required.
-    private void assertIsSupported(final Set<String> actualOptionNames,
+    private void assertOptionsMatch(final Set<String> actualOptionNames,
         final Set<String> transformOptionNames, final String unsupportedMsg)
     {
         final Map<String, Boolean> transformOptions = transformOptionNames
@@ -384,22 +386,22 @@ public class TransformRegistryTest
     }
 
     @Test
-    public void testRegistryIsSupportedMethod()
+    public void testRegistryOptionsMatchMethod()
     {
-        assertIsSupported(set("a"), set("a", "B", "c"), "required option B is missing");
-        assertIsSupported(emptySet(), set("a", "B", "c"), "required option B is missing");
-        assertIsSupported(set("B"), set("a", "B", "c"), null);
-        assertIsSupported(set("B", "c"), set("a", "B", "c"), null);
-        assertIsSupported(set("B", "a", "c"), set("a", "B", "c"), null);
+        assertOptionsMatch(set("a"), set("a", "B", "c"), "required option B is missing");
+        assertOptionsMatch(emptySet(), set("a", "B", "c"), "required option B is missing");
+        assertOptionsMatch(set("B"), set("a", "B", "c"), null);
+        assertOptionsMatch(set("B", "c"), set("a", "B", "c"), null);
+        assertOptionsMatch(set("B", "a", "c"), set("a", "B", "c"), null);
 
-        assertIsSupported(set("B", "d"), set("a", "B", "c"), "there is an extra option d");
-        assertIsSupported(set("B", "c", "d"), set("a", "B", "c"), "there is an extra option d");
-        assertIsSupported(set("d"), set("a", "B", "c"),
+        assertOptionsMatch(set("B", "d"), set("a", "B", "c"), "there is an extra option d");
+        assertOptionsMatch(set("B", "c", "d"), set("a", "B", "c"), "there is an extra option d");
+        assertOptionsMatch(set("d"), set("a", "B", "c"),
             "required option B is missing and there is an extra option d");
 
-        assertIsSupported(set("a"), set("a", "b", "c"), null);
-        assertIsSupported(emptySet(), set("a", "b", "c"), null);
-        assertIsSupported(set("a", "b", "c"), set("a", "b", "c"), null);
+        assertOptionsMatch(set("a"), set("a", "b", "c"), null);
+        assertOptionsMatch(emptySet(), set("a", "b", "c"), null);
+        assertOptionsMatch(set("a", "b", "c"), set("a", "b", "c"), null);
     }
 
     @Test
@@ -612,5 +614,29 @@ public class TransformRegistryTest
             return emptySet();
         }
         return ImmutableSet.copyOf(elements);
+    }
+
+    @Test
+    public void testIsSupportedCoreFunction() throws Exception
+    {
+        Transformer t1 = newTransformer("transformer1", MSG, GIF, 100, 50);
+        Transformer t2 = newTransformer("transformer2", MSG, GIF, 200, 60);
+        Transformer t3 = newTransformer("transformer3", MSG, GIF, 200, 40);
+        t2.setCoreVersion("1.0");
+        t3.setCoreVersion("2.5.7");
+
+        buildAndPopulateRegistry(new Transformer[] {t1, t2, t3});
+
+        assertTrue(registry.isSupported(CoreFunction.HTTP, "transformer1"));
+        assertTrue(registry.isSupported(CoreFunction.HTTP, "transformer2"));
+        assertTrue(registry.isSupported(CoreFunction.HTTP, "transformer3"));
+
+        assertFalse(registry.isSupported(CoreFunction.ACTIVE_MQ, "transformer1"));
+        assertTrue(registry.isSupported(CoreFunction.ACTIVE_MQ, "transformer2"));
+        assertTrue(registry.isSupported(CoreFunction.ACTIVE_MQ, "transformer3"));
+
+        assertFalse(registry.isSupported(CoreFunction.DIRECT_ACCESS_URL, "transformer1"));
+        assertFalse(registry.isSupported(CoreFunction.DIRECT_ACCESS_URL, "transformer2"));
+        assertTrue(registry.isSupported(CoreFunction.DIRECT_ACCESS_URL, "transformer3"));
     }
 }

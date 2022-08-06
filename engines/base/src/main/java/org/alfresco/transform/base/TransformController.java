@@ -26,8 +26,8 @@
  */
 package org.alfresco.transform.base;
 
+import org.alfresco.transform.base.html.OptionLister;
 import org.alfresco.transform.base.logging.LogEntry;
-import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.base.transform.TransformHandler;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
@@ -102,6 +102,8 @@ public class TransformController
     @Autowired TransformHandler transformHandler;
     @Autowired
     private String coreVersion;
+    @Autowired
+    private OptionLister optionLister;
 
     TransformEngine transformEngine;
 
@@ -149,6 +151,9 @@ public class TransformController
     public String test(Model model)
     {
         model.addAttribute("title", transformEngine.getTransformEngineName() + " Test Page");
+        TransformConfig transformConfig = ((TransformRegistry) transformRegistry).getTransformConfig();
+        transformConfig = setOrClearCoreVersion(transformConfig, 0);
+        model.addAttribute("transformOptions", optionLister.getOptionNames(transformConfig.getTransformOptions()));
         return "test"; // display test.html
     }
 

@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.registry;
 
+import com.google.common.collect.ImmutableMap;
 import org.alfresco.transform.common.TransformException;
 import org.junit.jupiter.api.Test;
 
@@ -34,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
+import static org.alfresco.transform.common.RequestParamMap.TIMEOUT;
 import static org.alfresco.transform.registry.TransformRegistryHelper.retrieveTransformListBySize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -179,6 +181,18 @@ public class TransformRegistryHelperTest
         assertThrows(TransformException.class, () ->
         {
             retrieveTransformListBySize(data, "text/plain", null, null, null);
+        });
+    }
+
+    @Test
+    public void filterTimeoutTest()
+    {
+        // Almost identical to buildTransformListTargetMimeTypeNullErrorTest
+        TransformCache data = new TransformCache();
+
+        assertThrows(TransformException.class, () ->
+        {
+            retrieveTransformListBySize(data, "text/plain", null, ImmutableMap.of(TIMEOUT, "1234"), null);
         });
     }
 }
