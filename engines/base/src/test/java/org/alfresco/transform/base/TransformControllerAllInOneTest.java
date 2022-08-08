@@ -114,12 +114,6 @@ public class TransformControllerAllInOneTest
              + "Startup AllInOne\n"
              + "Line 2 AllInOne\n"
              + "Line 3\n"
-             + "Startup OneCustomTransformer\n"
-             + "Line 2 OneCustomTransformer\n"
-             + "Line 3\n"
-             + "Startup TwoCustomTransformers\n"
-             + "Line 2 TwoCustomTransformers\n"
-             + "Line 3\n"
              + "--------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
              + "Starting application components... Done",
             controllerLogMessages.toString());

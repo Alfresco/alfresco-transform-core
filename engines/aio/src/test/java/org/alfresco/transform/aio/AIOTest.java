@@ -27,6 +27,7 @@
 package org.alfresco.transform.aio;
 
 import org.alfresco.transform.base.AbstractBaseTest;
+import org.alfresco.transform.base.TransformController;
 import org.alfresco.transform.config.TransformConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,11 +37,14 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.nio.file.Files;
+import java.util.StringJoiner;
 
+import static org.alfresco.transform.base.TransformControllerTest.getLogMessagesFor;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
 import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_LATEST;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -93,5 +97,30 @@ public class AIOTest extends AbstractBaseTest
             assertNotNull(transformer.getCoreVersion(), transformer.getTransformerName() +
                     " should have had a coreValue but was null. Should have been " + coreVersion);
         });
+    }
+
+    @Test
+    public void testStartupLogsIncludeEngineMessages()
+    {
+        StringJoiner controllerLogMessages = getLogMessagesFor(TransformController.class);
+
+        controller.startup();
+
+        assertEquals(
+            "--------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
+                + "If the Alfresco software was purchased under a paid Alfresco license, the terms of the paid license agreement \n"
+                + "will prevail. Otherwise, the software is provided under terms of the GNU LGPL v3 license. \n"
+                + "See the license at http://www.gnu.org/licenses/lgpl-3.0.txt. or in /LICENSE.txt \n"
+                + "\n"
+                + "This transformer uses ImageMagick from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt\n"
+                + "This transformer uses LibreOffice from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt\n"
+                + "This transformer uses libraries from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\\\ 2.0.txt\n"
+                + "This transformer uses htmlparser. See the license at http://htmlparser.sourceforge.net/license.html\n"
+                + "This transformer uses alfresco-pdf-renderer which uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt\n"
+                + "This transformer uses Tika from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0. or in /Apache\\ 2.0.txt\n"
+                + "This transformer uses ExifTool by Phil Harvey. See license at https://exiftool.org/#license. or in /Perl-Artistic-License.txt\n"
+                + "--------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
+                + "Starting application components... Done",
+            controllerLogMessages.toString());
     }
 }

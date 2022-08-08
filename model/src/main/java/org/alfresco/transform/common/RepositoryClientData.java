@@ -30,16 +30,17 @@ import java.util.stream.Stream;
  */
 public class RepositoryClientData
 {
-    private static final String CLIENT_DATA_SEPARATOR = "\u23D0";
+    public static final String CLIENT_DATA_SEPARATOR = "\u23D0";
     public static final String DEBUG_SEPARATOR = "\u23D1";
+    static final String REPO_ID = "Repo";
+    public static final String DEBUG = "debug:";
 
-    private static final String REPO_ID = "Repo";
-    private static final String DEBUG = "debug:";
-
+    private final String origClientData;
     private final String[] split;
 
     public RepositoryClientData(String clientData)
     {
+        origClientData = clientData;
         split = clientData == null ? null : clientData.split(CLIENT_DATA_SEPARATOR);
     }
 
@@ -88,7 +89,7 @@ public class RepositoryClientData
     {
         if (split == null)
         {
-            return null;
+            return origClientData;
         }
         StringJoiner sj = new StringJoiner(CLIENT_DATA_SEPARATOR);
         Stream.of(split).forEach(element -> sj.add(element));

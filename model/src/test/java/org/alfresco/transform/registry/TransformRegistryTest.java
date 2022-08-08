@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -498,6 +499,31 @@ public class TransformRegistryTest
                 .retrieveCached("doclib", DOC)
                 .add(cachedSupportedTransform);
         assertEquals(999999L, registry.findMaxSize(DOC, GIF, emptyMap(), "doclib"));
+    }
+
+    @Test
+    public void testTransformCacheGetTransforms() // Used in the Alfresco Repo tests
+    {
+        TransformConfig transformConfig = TransformConfig.builder()
+            .withTransformers(ImmutableList.of(new Transformer("transformer1", emptySet(), set(
+                SupportedSourceAndTarget.builder()
+                    .withSourceMediaType(GIF)
+                    .withTargetMediaType(PDF)
+                    .build(),
+                SupportedSourceAndTarget.builder()
+                    .withSourceMediaType(GIF)
+                    .withTargetMediaType(JPEG)
+                    .build()))))
+                .build();
+
+        assertEquals(0, registry.getData().getTransforms().size());
+        assertEquals("", registry.getData().toString());
+
+        CombinedTransformConfig.combineAndRegister(transformConfig, "readFrom", "baseUrl", registry);
+
+        assertEquals(1, registry.getData().getTransforms().size());
+        assertEquals(2, registry.getData().getTransforms().get(GIF).size());
+        assertEquals("(transformers: 1 transforms: 2)", registry.getData().toString());
     }
 
     @Test

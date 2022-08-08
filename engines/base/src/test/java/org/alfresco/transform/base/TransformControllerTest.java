@@ -40,12 +40,10 @@ import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.base.transform.TransformHandler;
-import org.alfresco.transform.base.transform.FragmentTest;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.config.TransformConfig;
 import org.codehaus.plexus.util.FileUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.stubbing.Answer;
@@ -130,25 +128,6 @@ public class TransformControllerTest
     @MockBean
     protected AlfrescoSharedFileStoreClient fakeSfsClient;
 
-    private void fakeSfsClient()
-    {
-        final Map<String,File> sfsRef2File = new HashMap<>();
-        when(fakeSfsClient.saveFile(any())).thenAnswer((Answer) invocation -> {
-            File originalFile = (File) invocation.getArguments()[0];
-
-            // Make a copy as the original might get deleted
-            File fileCopy = new File(tempDir, originalFile.getName()+"copy");
-            FileUtils.copyFile(originalFile, fileCopy);
-
-            String fileRef = UUID.randomUUID().toString();
-            sfsRef2File.put(fileRef, fileCopy);
-            return new FileRefResponse(new FileRefEntity(fileRef));
-        });
-        when(fakeSfsClient.retrieveFile(any())).thenAnswer((Answer) invocation ->
-            ResponseEntity.ok().header(CONTENT_DISPOSITION,"attachment; filename*=UTF-8''transform.tmp")
-            .body((Resource) new UrlResource(sfsRef2File.get(invocation.getArguments()[0]).toURI())));
-    }
-
     static void resetProbeForTesting(TransformController transformController)
     {
         transformController.transformHandler.getProbeTransform().resetForTesting();
@@ -178,7 +157,7 @@ public class TransformControllerTest
             controllerLogMessages.toString());
     }
 
-    static StringJoiner getLogMessagesFor(Class classBeingLogged)
+    public static StringJoiner getLogMessagesFor(Class classBeingLogged)
     {
         StringJoiner logMessages = new StringJoiner("\n");
         Logger logger = (Logger) LoggerFactory.getLogger(classBeingLogged);
@@ -302,7 +281,23 @@ public class TransformControllerTest
     @Test
     public void testTransformEndpointThatUsesTransformRequests() throws Exception
     {
-        fakeSfsClient();
+        final Map<String,File> sfsRef2File = new HashMap<>();
+        when(fakeSfsClient.saveFile(any())).thenAnswer((Answer) invocation -> {
+            File originalFile = (File) invocation.getArguments()[0];
+
+            // Make a copy as the original might get deleted
+            File fileCopy = new File(tempDir, originalFile.getName()+"copy");
+            FileUtils.copyFile(originalFile, fileCopy);
+
+            String fileRef = UUID.randomUUID().toString();
+            sfsRef2File.put(fileRef, fileCopy);
+            return new FileRefResponse(new FileRefEntity(fileRef));
+        });
+
+        when(fakeSfsClient.retrieveFile(any())).thenAnswer((Answer) invocation ->
+            ResponseEntity.ok().header(CONTENT_DISPOSITION,"attachment; filename*=UTF-8''transform.tmp")
+            .body((Resource) new UrlResource(sfsRef2File.get(invocation.getArguments()[0]).toURI())));
+
         File sourceFile = getTestFile("original.txt", true, tempDir);
         String sourceFileRef = fakeSfsClient.saveFile(sourceFile).getEntry().getFileRef();
 

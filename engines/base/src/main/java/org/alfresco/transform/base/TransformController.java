@@ -120,10 +120,6 @@ public class TransformController
         if (transformEngines != null)
         {
             logSplitMessage(transformEngine.getStartupMessage());
-            transformEngines.stream()
-                            .filter(te -> te != transformEngine)
-                            .sorted(Comparator.comparing(TransformEngine::getTransformEngineName))
-                            .forEach(te -> logSplitMessage(te.getStartupMessage()));
         }
         logger.info("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
         logger.info("Starting application components... Done");
