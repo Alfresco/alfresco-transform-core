@@ -119,7 +119,7 @@ public class TikaTest extends AbstractBaseTest
                                                                 "The quick brown fox jumps over the lazy dogs";
     private static final String EXPECTED_CSV_CONTENT_CONTAINS = "\"The\",\"quick\",\"brown\",\"fox\"";
 
-    @Autowired OptionLister optionLister;
+    protected @Autowired OptionLister optionLister;
 
     @Mock
     private RuntimeExec.ExecutionResult mockExecutionResult;

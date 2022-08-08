@@ -5,10 +5,10 @@
     <name>- Tika</name>
 
     <parent>
-        <artifactId>alfresco-transform-core</artifactId>
         <groupId>org.alfresco</groupId>
-        <version>2.6.1-SNAPSHOT</version>
+        <artifactId>alfresco-transform-core</artifactId>
         <relativePath>../../pom.xml</relativePath>
+        <version>2.6.1-SNAPSHOT</version>
     </parent>
 
     <properties>
