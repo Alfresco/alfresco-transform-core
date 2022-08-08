@@ -147,6 +147,7 @@ public class TransformController
     public String test(Model model)
     {
         model.addAttribute("title", transformEngine.getTransformEngineName() + " Test Page");
+        model.addAttribute("proxyPathPrefix", getPathPrefix(transformEngine.getTransformEngineName()));
         TransformConfig transformConfig = ((TransformRegistry) transformRegistry).getTransformConfig();
         transformConfig = setOrClearCoreVersion(transformConfig, 0);
         model.addAttribute("transformOptions", optionLister.getOptionNames(transformConfig.getTransformOptions()));
@@ -160,6 +161,7 @@ public class TransformController
     public String error(Model model)
     {
         model.addAttribute("title", transformEngine.getTransformEngineName() + " Error Page");
+        model.addAttribute("proxyPathPrefix", getPathPrefix(transformEngine.getTransformEngineName()));
         return "error"; // display error.html
     }
 
@@ -170,12 +172,23 @@ public class TransformController
     String log(Model model)
     {
         model.addAttribute("title", transformEngine.getTransformEngineName() + " Log Entries");
+        model.addAttribute("proxyPathPrefix", getPathPrefix(transformEngine.getTransformEngineName()));
         Collection<LogEntry> log = LogEntry.getLog();
         if (!log.isEmpty())
         {
             model.addAttribute("log", log);
         }
         return "log"; // display log.html
+    }
+
+    private static Object getPathPrefix(String transformEngineName)
+    {
+        int i = transformEngineName.lastIndexOf('-');
+        if (i != -1)
+        {
+            transformEngineName = transformEngineName.substring(i+1);
+        }
+        return "/"+transformEngineName.toLowerCase();
     }
 
     /**

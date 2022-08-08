@@ -2,7 +2,7 @@
 <body>
 	<div>
         <h2 th:text="${title}"></h2>
-        <form method="POST" enctype="multipart/form-data" action="/test">
+        <form method="POST" enctype="multipart/form-data" th:action="${proxyPathPrefix+'/test'}">
             <table>
                 <tr><td><div style="text-align:right">file</div></td><td><input type="file" name="file" /></td></tr>
                 <tr><td><div style="text-align:right">directAccessUrl</div></td><td><input type="text" name="directAccessUrl"/></td></tr>
@@ -49,10 +49,10 @@
     </div>
     <div>
         Test
-        <a href="/log">Log</a>
-        <a href="/ready">Ready</a>
-        <a href="/live">Live</a>
-        <a href="/transform/config?configVersion=9999">Config</a>
+        <a th:href="${proxyPathPrefix+'/log'}">Log</a>
+        <a th:href="${proxyPathPrefix+'/ready'}">Ready</a>
+        <a th:href="${proxyPathPrefix+'/live'}">Live</a>
+        <a th:href="${proxyPathPrefix+'/transform/config?configVersion=9999'}">Config</a>
     </div>
 </body>
 </html>
