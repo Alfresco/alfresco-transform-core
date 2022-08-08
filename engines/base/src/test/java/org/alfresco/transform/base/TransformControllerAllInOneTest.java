@@ -186,7 +186,7 @@ public class TransformControllerAllInOneTest
     public void testConfigLatestEndpointReturnsCoreVersionAndDirectAccessUrlOption() throws Exception
     {
         assertConfig(ENDPOINT_TRANSFORM_CONFIG_LATEST,
-            "Pdf2Jpg,2.6.1,directAccessUrl,imageOptions\n"
+            "Pdf2Jpg,"+coreVersion+",directAccessUrl,imageOptions\n"
                 + "Pdf2Png,"+coreVersion+",directAccessUrl,imageOptions\n"
                 + "TxT2Pdf,"+coreVersion+",directAccessUrl,docOptions\n"
                 + "Txt2JpgViaPdf,"+coreVersion+",directAccessUrl,imageOptions\n"
