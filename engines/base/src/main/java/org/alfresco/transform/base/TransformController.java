@@ -37,6 +37,7 @@ import org.alfresco.transform.registry.TransformServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.Resource;
@@ -104,6 +105,8 @@ public class TransformController
     private String coreVersion;
     @Autowired
     private OptionLister optionLister;
+    @Value("${container.behind-ingres}")
+    private boolean behindIngres;
 
     TransformEngine transformEngine;
 
@@ -181,14 +184,19 @@ public class TransformController
         return "log"; // display log.html
     }
 
-    private static Object getPathPrefix(String transformEngineName)
+    private Object getPathPrefix(String transformEngineName)
     {
-        int i = transformEngineName.lastIndexOf('-');
-        if (i != -1)
+        String pathPrefix = "";
+        if (behindIngres)
         {
-            transformEngineName = transformEngineName.substring(i+1);
+            int i = transformEngineName.lastIndexOf('-');
+            if (i != -1)
+            {
+                transformEngineName = transformEngineName.substring(i + 1);
+            }
+            pathPrefix = "/" + transformEngineName.toLowerCase();
         }
-        return "/"+transformEngineName.toLowerCase();
+        return pathPrefix;
     }
 
     /**

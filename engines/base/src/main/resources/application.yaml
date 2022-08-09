@@ -53,6 +53,7 @@ management:
 
 container:
   name: ${HOSTNAME:t-engine}
+  behind-ingres: true
 
 async-task-executor:
   core-pool-size: 1
