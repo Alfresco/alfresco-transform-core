@@ -78,6 +78,10 @@ public class TransformerDebug
         }
     }
 
+    /**
+     * @deprecated Only called from the deprecated transformer base
+     */
+    @Deprecated
     public void pushTransform(String reference, String sourceMimetype, String targetMimetype, File sourceFile, String transformerName)
     {
         final long sourceSizeInBytes = sourceFile.length();

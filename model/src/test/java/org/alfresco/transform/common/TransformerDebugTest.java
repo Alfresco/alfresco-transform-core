@@ -39,6 +39,10 @@ import java.util.StringJoiner;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
+import static org.alfresco.transform.common.RepositoryClientData.CLIENT_DATA_SEPARATOR;
+import static org.alfresco.transform.common.RepositoryClientData.DEBUG;
+import static org.alfresco.transform.common.RepositoryClientData.DEBUG_SEPARATOR;
+import static org.alfresco.transform.common.RepositoryClientData.REPO_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -59,14 +63,16 @@ class TransformerDebugTest
                 .replaceAll(" [\\d,]+ ms", " -- ms");
     }
 
-    private void twoStepTransform(boolean isTEngine, boolean fail, Level logLevel)
+    private void twoStepTransform(boolean isTEngine, boolean fail, Level logLevel, String renditionName,
+        long sourceSize)
     {
         transformerDebug.setIsTEngine(isTEngine);
         monitorLogs(logLevel);
 
         TransformRequest request = TransformRequest.builder()
-                .withSourceSize(1234L)
+                .withSourceSize(sourceSize)
                 .withInternalContext(InternalContext.initialise(null))
+                .withClientData(clientDataWithDebugRequest(renditionName))
                 .build();
         TransformStack.setInitialSourceReference(request.getInternalContext(), "fileRef");
 
@@ -102,6 +108,22 @@ class TransformerDebugTest
         }
     }
 
+    private String clientDataWithDebugRequest(String renditionName)
+    {
+        return new StringJoiner(CLIENT_DATA_SEPARATOR)
+            .add(REPO_ID + "ACS1234")
+            .add("1")
+            .add(renditionName)
+            .add("3")
+            .add("4")
+            .add("5")
+            .add("54321")
+            .add("7")
+            .add("8")
+            .add(DEBUG)
+            .toString();
+    }
+
     private void monitorLogs(Level logLevel)
     {
         Logger logger = (Logger)LoggerFactory.getLogger(TransformerDebug.class);
@@ -122,7 +144,7 @@ class TransformerDebugTest
     @Test
     void testRouterTwoStepTransform()
     {
-        twoStepTransform(false, false, Level.DEBUG);
+        twoStepTransform(false, false, Level.DEBUG, "", 1234L);
 
         Assertions.assertEquals("" +
                         "1                 txt  pdf   1.2 KB wrapper\n" +
@@ -137,7 +159,7 @@ class TransformerDebugTest
     @Test
     void testRouterTwoStepTransformWithTrace()
     {
-        twoStepTransform(false, false, Level.TRACE);
+        twoStepTransform(false, false, Level.TRACE, "", 1234L);
 
         // With trace there are "Finished" lines for nested transforms, like a T-Engine's debug but still without
         // the size and rendition name
@@ -156,7 +178,7 @@ class TransformerDebugTest
     @Test
     void testEngineTwoStepTransform()
     {
-        twoStepTransform(true, false, Level.DEBUG);
+        twoStepTransform(true, false, Level.DEBUG, "", 1234L);
 
         // Note the first and last lines would only ever be logged on the router, but the expected data includes
         // the extra "Finished" lines, sizes and renditions (if set in client data).
@@ -175,31 +197,110 @@ class TransformerDebugTest
     @Test
     void testRouterTwoStepTransformWithFailure()
     {
-        twoStepTransform(false, true, Level.DEBUG);
+        twoStepTransform(false, true, Level.DEBUG, "", 1234L);
 
         Assertions.assertEquals("" +
-                        "1                 txt  pdf   1.2 KB wrapper\n" +
-                        "1.1               txt  doc   transformer1\n" +
-                        "1.2               doc  pdf   transformer2\n" +
-                        "1.2                 k1=\"v1\"\n" +
-                        "1.2                 k2=\"v2\"\n" +
-                        "1.2               Dummy error",
-                getTransformerDebugOutput());
+                                    "1                 txt  pdf   1.2 KB wrapper\n" +
+                                    "1.1               txt  doc   transformer1\n" +
+                                    "1.2               doc  pdf   transformer2\n" +
+                                    "1.2                 k1=\"v1\"\n" +
+                                    "1.2                 k2=\"v2\"\n" +
+                                    "1.2               Dummy error",
+            getTransformerDebugOutput());
+    }
+
+    @Test
+    void testRenditionName()
+    {
+        twoStepTransform(false, false, Level.DEBUG, "renditionName", 1234L);
+
+        Assertions.assertEquals("" +
+                                    "1                 txt  pdf   1.2 KB -- renditionName -- wrapper\n" +
+                                    "1.1               txt  doc   transformer1\n" +
+                                    "1.2               doc  pdf   transformer2\n" +
+                                    "1.2                 k1=\"v1\"\n" +
+                                    "1.2                 k2=\"v2\"\n" +
+                                    "1                 Finished in -- ms",
+            getTransformerDebugOutput());
+    }
+
+    @Test
+    void testMetadataExtract()
+    {
+        twoStepTransform(false, false, Level.DEBUG, "transform:alfresco-metadata-extract", 1234L);
+
+        Assertions.assertEquals("" +
+                                    "1                 txt  pdf   1.2 KB -- metadataExtract -- wrapper\n" +
+                                    "1.1               txt  doc   transformer1\n" +
+                                    "1.2               doc  pdf   transformer2\n" +
+                                    "1.2                 k1=\"v1\"\n" +
+                                    "1.2                 k2=\"v2\"\n" +
+                                    "1                 Finished in -- ms",
+            getTransformerDebugOutput());
+    }
+
+    @Test
+    void testMetadataEmbed()
+    {
+        twoStepTransform(false, false, Level.DEBUG, "transform:alfresco-metadata-embed", 1234L);
+
+        Assertions.assertEquals("" +
+                                    "1                 txt  pdf   1.2 KB -- metadataEmbed -- wrapper\n" +
+                                    "1.1               txt  doc   transformer1\n" +
+                                    "1.2               doc  pdf   transformer2\n" +
+                                    "1.2                 k1=\"v1\"\n" +
+                                    "1.2                 k2=\"v2\"\n" +
+                                    "1                 Finished in -- ms",
+            getTransformerDebugOutput());
+    }
+
+    @Test
+    void testSourceSize1Byte()
+    {
+        twoStepTransform(false, false, Level.DEBUG, "", 1);
+
+        Assertions.assertEquals("" +
+                                    "1                 txt  pdf   1 byte wrapper\n" +
+                                    "1.1               txt  doc   transformer1\n" +
+                                    "1.2               doc  pdf   transformer2\n" +
+                                    "1.2                 k1=\"v1\"\n" +
+                                    "1.2                 k2=\"v2\"\n" +
+                                    "1                 Finished in -- ms",
+            getTransformerDebugOutput());
+    }
+
+    @Test
+    void testSourceSize23TB()
+    {
+        twoStepTransform(false, false, Level.DEBUG, "", 23L*1024*1024*1024*1024);
+
+        Assertions.assertEquals("" +
+                                    "1                 txt  pdf   23 TB wrapper\n" +
+                                    "1.1               txt  doc   transformer1\n" +
+                                    "1.2               doc  pdf   transformer2\n" +
+                                    "1.2                 k1=\"v1\"\n" +
+                                    "1.2                 k2=\"v2\"\n" +
+                                    "1                 Finished in -- ms",
+            getTransformerDebugOutput());
     }
 
     @Test
     void testLogFailure()
     {
         monitorLogs(Level.TRACE);
-        
+
+        String origClientData = clientDataWithDebugRequest("");
         TransformReply reply = TransformReply.builder()
                 .withInternalContext(InternalContext.initialise(null))
                 .withErrorDetails("T-Request was null - a major error")
+                .withClientData(origClientData)
                 .build();
 
         transformerDebug.logFailure(reply);
 
-        Assertions.assertEquals("                  T-Request was null - a major error", getTransformerDebugOutput());
+        String expectedDebug = "                  T-Request was null - a major error";
+        Assertions.assertEquals(expectedDebug, getTransformerDebugOutput());
+        assertEquals(origClientData+DEBUG_SEPARATOR+expectedDebug, reply.getClientData());
     }
 
     @Test

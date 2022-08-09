@@ -57,6 +57,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -177,6 +178,29 @@ public class TransformControllerTest
         return logMessages;
     }
 
+
+    private void testPageWithOrWithoutIngresPrefix(String url, boolean behindIngres, String... expected) throws Exception
+    {
+        boolean origBehindIngres = (boolean) ReflectionTestUtils.getField(transformController, "behindIngres");
+        try
+        {
+            ReflectionTestUtils.setField(transformController, "behindIngres", behindIngres);
+
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                   .andExpect(status().isOk())
+                   .andExpect(content().string(containsString(expected[0])))
+                   .andExpect(content().string(containsString(expected[1])))
+                   .andExpect(content().string(containsString(expected[2])))
+                   .andExpect(content().string(containsString(expected[3])))
+                   .andExpect(content().string(containsString(expected[4])))
+                   .andExpect(content().string(containsString(expected[5])));
+        }
+        finally
+        {
+            ReflectionTestUtils.setField(transformController, "behindIngres", origBehindIngres);
+        }
+    }
+
     @Test
     public void testVersionEndpointIncludesAvailable() throws Exception
     {
@@ -188,25 +212,72 @@ public class TransformControllerTest
     @Test
     public void testRootEndpointReturnsTestPage() throws Exception
     {
-        mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_ROOT))
-               .andExpect(status().isOk())
-               .andExpect(content().string(containsString("TwoCustomTransformers Test Page")));
+        testPageWithOrWithoutIngresPrefix(ENDPOINT_ROOT, false,
+            "TwoCustomTransformers Test Page",
+            "action=\"/test\"",
+            "<a href=\"/log\">Log</a>",
+            "<a href=\"/ready\">Ready</a>",
+            "<a href=\"/live\">Live</a>",
+            "<a href=\"/transform/config?configVersion=9999\">Config</a>");
+    }
+
+    @Test
+    public void testRootEndpointReturnsTestPageWithIngres() throws Exception
+    {
+        testPageWithOrWithoutIngresPrefix(ENDPOINT_ROOT, true,
+            "TwoCustomTransformers Test Page",
+            "action=\"/twocustomtransformers/test\"",
+            "href=\"/twocustomtransformers/log\"",
+            "<a href=\"/twocustomtransformers/ready\">Ready</a>",
+            "<a href=\"/twocustomtransformers/live\">Live</a>",
+            "<a href=\"/twocustomtransformers/transform/config?configVersion=9999\">Config</a>");
     }
 
     @Test
     public void testErrorEndpointReturnsErrorPage() throws Exception
     {
-        mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_ERROR))
-               .andExpect(status().isOk())
-               .andExpect(content().string(containsString("TwoCustomTransformers Error Page")));
+        testPageWithOrWithoutIngresPrefix(ENDPOINT_ERROR, false,
+            "TwoCustomTransformers Error Page",
+            "<a href=\"/\">Test</a>",
+            "<a href=\"/log\">Log</a>",
+            "<a href=\"/ready\">Ready</a>",
+            "<a href=\"/live\">Live</a>",
+            "<a href=\"/transform/config?configVersion=9999\">Config</a>");    }
+
+    @Test
+    public void testErrorEndpointReturnsErrorPageWithIngres() throws Exception
+    {
+        testPageWithOrWithoutIngresPrefix(ENDPOINT_ERROR, true,
+            "TwoCustomTransformers Error Page",
+            "href=\"/twocustomtransformers/\"",
+            "href=\"/twocustomtransformers/log\"",
+            "<a href=\"/twocustomtransformers/ready\">Ready</a>",
+            "<a href=\"/twocustomtransformers/live\">Live</a>",
+            "<a href=\"/twocustomtransformers/transform/config?configVersion=9999\">Config</a>");
     }
 
     @Test
     public void testLogEndpointReturnsLogPage() throws Exception
     {
-        mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_LOG))
-               .andExpect(status().isOk())
-               .andExpect(content().string(containsString("TwoCustomTransformers Log Entries")));
+        testPageWithOrWithoutIngresPrefix(ENDPOINT_LOG, false,
+            "TwoCustomTransformers Log Entries",
+            "<a href=\"/\">Test</a>",
+            "Log",
+            "<a href=\"/ready\">Ready</a>",
+            "<a href=\"/live\">Live</a>",
+            "<a href=\"/transform/config?configVersion=9999\">Config</a>");
+    }
+
+    @Test
+    public void testLogEndpointReturnsLogPageWithIngres() throws Exception
+    {
+        testPageWithOrWithoutIngresPrefix(ENDPOINT_LOG, true,
+            "TwoCustomTransformers Log Entries",
+            "href=\"/twocustomtransformers/\"",
+            "Log",
+            "<a href=\"/twocustomtransformers/ready\">Ready</a>",
+            "<a href=\"/twocustomtransformers/live\">Live</a>",
+            "<a href=\"/twocustomtransformers/transform/config?configVersion=9999\">Config</a>");
     }
 
     @Test
