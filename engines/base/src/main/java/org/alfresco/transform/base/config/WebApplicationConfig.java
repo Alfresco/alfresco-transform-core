@@ -26,9 +26,10 @@
  */
 package org.alfresco.transform.base.config;
 
-import org.alfresco.transform.base.html.TransformInterceptor;
-import org.alfresco.transform.base.TransformRegistry;
 import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
+import org.alfresco.transform.base.html.TransformInterceptor;
+import org.alfresco.transform.base.registry.TransformConfigSource;
+import org.alfresco.transform.base.registry.TransformRegistry;
 import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.messages.TransformRequestValidator;
 import org.alfresco.transform.registry.TransformServiceRegistry;
@@ -40,6 +41,9 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.alfresco.transform.config.CoreFunction.standardizeCoreVersion;
@@ -101,5 +105,11 @@ public class WebApplicationConfig implements WebMvcConfigurer
     public String coreVersion()
     {
         return standardizeCoreVersion(coreVersionString);
+    }
+
+    @Bean
+    public List<TransformConfigSource> transformConfigSources()
+    {
+        return new ArrayList<>();
     }
 }

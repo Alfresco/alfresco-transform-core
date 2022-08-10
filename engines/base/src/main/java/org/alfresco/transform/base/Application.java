@@ -36,15 +36,27 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class})
+@EnableAsync
+//@EnableScheduling
+//@EnableRetry
 public class Application
 {
-    private static final Logger logger = LoggerFactory.getLogger(Application.class);
-
     @Value("${container.name}")
     private String containerName;
+
+    @Bean
+    public TaskExecutor taskExecutor()
+    {
+        return new SimpleAsyncTaskExecutor();
+    }
 
     @Bean
     MeterRegistryCustomizer<MeterRegistry> metricsCommonTags()

@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.base;
+package org.alfresco.transform.base.registry;
 
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.registry.AbstractTransformRegistry;
@@ -32,8 +32,9 @@ import org.alfresco.transform.registry.TransformCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
-import javax.annotation.PostConstruct;
 import java.util.Comparator;
 import java.util.List;
 
@@ -43,38 +44,36 @@ public class TransformRegistry extends AbstractTransformRegistry
 {
     private static final Logger log = LoggerFactory.getLogger(TransformRegistry.class);
 
-    @Autowired(required = false)
-    private List<TransformEngine> transformEngines;
-
     @Autowired
     private String coreVersion;
+    @Autowired
+    private List<TransformConfigSource> transformConfigSources;
 
     private TransformConfig transformConfigBeforeIncompleteTransformsAreRemoved;
 
-    @PostConstruct
-    public void init()
+    /**
+     * Load the registry on application startup. This allows Components in projects that extend the t-engine base
+     * to use @PostConstruct to add to {@code transformConfigSources}, before the registry is loaded.
+     */
+    @EventListener
+    void init(final ContextRefreshedEvent event)
     {
         CombinedTransformConfig combinedTransformConfig = new CombinedTransformConfig();
-        if (transformEngines != null)
-        {
-            transformEngines.stream()
-                        .sorted(Comparator.comparing(TransformEngine::getTransformEngineName))
-                        .forEach(transformEngine -> {
-                            TransformConfig transformConfig = transformEngine.getTransformConfig();
-                            if (transformConfig != null) // if not a wrapping TransformEngine like all-in-one
-                            {
-                                setCoreVersionOnSingleStepTransformers(transformConfig, coreVersion);
-                                combinedTransformConfig.addTransformConfig(transformConfig,
-                                        transformEngine.getTransformEngineName(), "---", this);
-                            }
-                        });
-        }
+
+        transformConfigSources.stream()
+            .sorted(Comparator.comparing(TransformConfigSource::getReadFrom))
+            .forEach(source -> {
+                TransformConfig transformConfig = source.getTransformConfig();
+                setCoreVersionOnSingleStepTransformers(transformConfig, coreVersion);
+                combinedTransformConfig.addTransformConfig(transformConfig, source.getReadFrom(), source.getBaseUrl(),
+                    this);
+            });
+
         transformConfigBeforeIncompleteTransformsAreRemoved = combinedTransformConfig.buildTransformConfig();
         combinedTransformConfig.combineTransformerConfig(this);
         combinedTransformConfig.registerCombinedTransformers(this);
     }
 
-    // Unlike other subclasses this class does not extend Data or replace it at run time.
     private TransformCache data = new TransformCache();
 
     public TransformConfig getTransformConfig()

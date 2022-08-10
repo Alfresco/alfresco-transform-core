@@ -28,6 +28,7 @@ package org.alfresco.transform.base;
 
 import org.alfresco.transform.base.html.OptionLister;
 import org.alfresco.transform.base.logging.LogEntry;
+import org.alfresco.transform.base.registry.TransformRegistry;
 import org.alfresco.transform.base.transform.TransformHandler;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
@@ -62,7 +63,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
