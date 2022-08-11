@@ -33,6 +33,7 @@ import org.alfresco.transform.base.registry.TransformRegistry;
 import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.messages.TransformRequestValidator;
 import org.alfresco.transform.registry.TransformServiceRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -61,14 +62,8 @@ public class WebApplicationConfig implements WebMvcConfigurer
     public void addInterceptors(InterceptorRegistry registry)
     {
         registry
-                .addInterceptor(transformInterceptor())
+                .addInterceptor(new TransformInterceptor())
                 .addPathPatterns(ENDPOINT_TRANSFORM, "/live", "/ready");
-    }
-
-    @Bean
-    public TransformInterceptor transformInterceptor()
-    {
-        return new TransformInterceptor();
     }
 
     @Bean
@@ -78,21 +73,9 @@ public class WebApplicationConfig implements WebMvcConfigurer
     }
 
     @Bean
-    public AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient()
-    {
-        return new AlfrescoSharedFileStoreClient();
-    }
-
-    @Bean
     public TransformRequestValidator transformRequestValidator()
     {
         return new TransformRequestValidator();
-    }
-
-    @Bean
-    public TransformServiceRegistry transformRegistry()
-    {
-        return new TransformRegistry();
     }
 
     @Bean

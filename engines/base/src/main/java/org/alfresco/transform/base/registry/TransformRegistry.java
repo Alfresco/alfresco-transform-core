@@ -32,6 +32,7 @@ import org.alfresco.transform.registry.TransformCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.retry.annotation.Backoff;
@@ -39,6 +40,7 @@ import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
@@ -48,8 +50,16 @@ import java.util.function.Supplier;
 
 import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionOnSingleStepTransformers;
 
+@Service
 public class TransformRegistry extends AbstractTransformRegistry
 {
+    private static final Logger log = LoggerFactory.getLogger(TransformRegistry.class);
+
+    @Autowired
+    private String coreVersion;
+    @Autowired
+    private List<TransformConfigSource> transformConfigSources;
+
     private static class Data extends TransformCache
     {
         private TransformConfig transformConfigBeforeIncompleteTransformsAreRemoved;
@@ -66,45 +76,30 @@ public class TransformRegistry extends AbstractTransformRegistry
         }
     }
 
-    private static final Logger log = LoggerFactory.getLogger(TransformRegistry.class);
-
-    @Autowired
-    private String coreVersion;
-    @Autowired
-    private List<TransformConfigSource> transformConfigSources;
+    private Data data = new Data();
 
     // Ensures that read operations are blocked while config is being updated
     private ReadWriteLock configRefreshLock = new ReentrantReadWriteLock();
 
-    private Data data = new Data();
+    @EventListener
+    void handleContextRefreshedEvent(final ContextRefreshedEvent event)
+    {
+        final ApplicationContext context = event.getApplicationContext();
+        // the local "initEngineConfigs" method has to be called through the Spring proxy
+        context.getBean(TransformRegistry.class).initRegistryOnAppStartup(null);
+    }
 
     /**
      * Load the registry on application startup. This allows Components in projects that extend the t-engine base
      * to use @PostConstruct to add to {@code transformConfigSources}, before the registry is loaded.
      */
-    @EventListener
-    private void initRegistryOnAppStartup(final ContextRefreshedEvent event)
-    {
-        asyncRegistryInit();
-    }
-
 //    @Async
 //    @Retryable(include = {IllegalStateException.class},
 //        maxAttemptsExpression = "#{${transform.engine.config.retry.attempts}}",
 //        backoff = @Backoff(delayExpression = "#{${transform.engine.config.retry.timeout} * 1000}"))
-    public void asyncRegistryInit()
+    public void initRegistryOnAppStartup(final ContextRefreshedEvent event)
     {
         initRegistry();
-    }
-
-    /**
-     * Recovery method in case all the retries fail. If not specified, the @Retryable method will cause the application
-     * to stop.
-     */
-//    @Recover
-    private void recover(IllegalStateException e)
-    {
-        log.warn(e.getMessage());
     }
 
     /**
@@ -133,6 +128,16 @@ public class TransformRegistry extends AbstractTransformRegistry
         TransformConfig transformConfigBeforeIncompleteTransformsAreRemoved = combinedTransformConfig.buildTransformConfig();
         combinedTransformConfig.combineTransformerConfig(this);
         concurrentUpdate(combinedTransformConfig, transformConfigBeforeIncompleteTransformsAreRemoved);
+    }
+
+    /**
+     * Recovery method in case all the retries fail. If not specified, the @Retryable method will cause the application
+     * to stop.
+     */
+    //    @Recover
+    private void recover(IllegalStateException e)
+    {
+        log.warn(e.getMessage());
     }
 
     public TransformConfig getTransformConfig()

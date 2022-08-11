@@ -40,6 +40,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -47,6 +48,7 @@ import org.springframework.web.client.RestTemplate;
 /**
  * Simple Rest client that call Alfresco Shared File Store
  */
+@Service
 public class AlfrescoSharedFileStoreClient
 {
     @Value("${fileStoreUrl}")
