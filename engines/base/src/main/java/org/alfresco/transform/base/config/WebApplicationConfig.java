@@ -61,8 +61,7 @@ public class WebApplicationConfig implements WebMvcConfigurer
     @Override
     public void addInterceptors(InterceptorRegistry registry)
     {
-        registry
-                .addInterceptor(new TransformInterceptor())
+        registry.addInterceptor(new TransformInterceptor())
                 .addPathPatterns(ENDPOINT_TRANSFORM, "/live", "/ready");
     }
 

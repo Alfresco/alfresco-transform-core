@@ -111,9 +111,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest(classes={org.alfresco.transform.base.Application.class})
 @ContextConfiguration(classes = {
-        FakeTransformEngineWithTwoCustomTransformers.class,
-        FakeTransformerTxT2Pdf.class,
-        FakeTransformerPdf2Png.class})
+    FakeTransformEngineWithTwoCustomTransformers.class,
+    FakeTransformerTxT2Pdf.class,
+    FakeTransformerPdf2Png.class})
 public class TransformControllerTest
 {
     @Autowired

@@ -53,7 +53,7 @@ import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionO
 @Service
 public class TransformRegistry extends AbstractTransformRegistry
 {
-    private static final Logger log = LoggerFactory.getLogger(TransformRegistry.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransformRegistry.class);
 
     @Autowired
     private String coreVersion;
@@ -81,7 +81,7 @@ public class TransformRegistry extends AbstractTransformRegistry
     // Ensures that read operations are blocked while config is being updated
     private ReadWriteLock configRefreshLock = new ReentrantReadWriteLock();
 
-    @EventListener
+    @EventListener(ContextRefreshedEvent.class)
     void handleContextRefreshedEvent(final ContextRefreshedEvent event)
     {
         final ApplicationContext context = event.getApplicationContext();
@@ -93,26 +93,36 @@ public class TransformRegistry extends AbstractTransformRegistry
      * Load the registry on application startup. This allows Components in projects that extend the t-engine base
      * to use @PostConstruct to add to {@code transformConfigSources}, before the registry is loaded.
      */
-//    @Async
-//    @Retryable(include = {IllegalStateException.class},
-//        maxAttemptsExpression = "#{${transform.engine.config.retry.attempts}}",
-//        backoff = @Backoff(delayExpression = "#{${transform.engine.config.retry.timeout} * 1000}"))
-    public void initRegistryOnAppStartup(final ContextRefreshedEvent event)
+    @Async
+    @Retryable(include = {IllegalStateException.class},
+        maxAttemptsExpression = "#{${transform.engine.config.retry.attempts}}",
+        backoff = @Backoff(delayExpression = "#{${transform.engine.config.retry.timeout} * 1000}"))
+    void initRegistryOnAppStartup(final ContextRefreshedEvent event)
     {
-        initRegistry();
+        retrieveConfig();
+    }
+
+    /**
+     * Recovery method in case all the retries fail. If not specified, the @Retryable method will cause the application
+     * to stop.
+     */
+    @Recover
+    void recover(IllegalStateException e)
+    {
+        logger.warn(e.getMessage());
     }
 
     /**
      * Takes the schedule from a spring-boot property
      */
-//    @Scheduled(cron = "${transformer.engine.config.cron}")
+    @Scheduled(cron = "${transform.engine.config.cron}")
     public void retrieveEngineConfigs()
     {
-        log.trace("Refresh TransformRegistry");
-        initRegistry();
+        logger.trace("Refresh TransformRegistry");
+        retrieveConfig();
     }
 
-    void initRegistry()
+    void retrieveConfig()
     {
         CombinedTransformConfig combinedTransformConfig = new CombinedTransformConfig();
 
@@ -128,16 +138,6 @@ public class TransformRegistry extends AbstractTransformRegistry
         TransformConfig transformConfigBeforeIncompleteTransformsAreRemoved = combinedTransformConfig.buildTransformConfig();
         combinedTransformConfig.combineTransformerConfig(this);
         concurrentUpdate(combinedTransformConfig, transformConfigBeforeIncompleteTransformsAreRemoved);
-    }
-
-    /**
-     * Recovery method in case all the retries fail. If not specified, the @Retryable method will cause the application
-     * to stop.
-     */
-    //    @Recover
-    private void recover(IllegalStateException e)
-    {
-        log.warn(e.getMessage());
     }
 
     public TransformConfig getTransformConfig()
@@ -187,12 +187,12 @@ public class TransformRegistry extends AbstractTransformRegistry
     @Override
     protected void logError(String msg)
     {
-        log.error(msg);
+        logger.error(msg);
     }
 
     @Override
     protected void logWarn(String msg)
     {
-        log.warn(msg);
+        logger.warn(msg);
     }
 }

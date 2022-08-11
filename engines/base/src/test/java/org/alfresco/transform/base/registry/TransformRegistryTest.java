@@ -70,7 +70,7 @@ public class TransformRegistryTest
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", Collections.emptyList());
         ReflectionTestUtils.setField(additionalTransformConfigResources, "config", Collections.emptyMap());
         ReflectionTestUtils.setField(additionalTransformConfigResourcesHistoric, "additional", Collections.emptyMap());
-        transformRegistry.initRegistry();
+        transformRegistry.retrieveConfig();
     }
 
     private String getTransformerNames(TransformConfig transformConfig)
@@ -93,7 +93,7 @@ public class TransformRegistryTest
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
             new FakeTransformEngineWithOneCustomTransformer()));
         transformConfigFromTransformEngines.initTransformEngineConfig();
-        transformRegistry.initRegistry();
+        transformRegistry.retrieveConfig();
 
         assertEquals("Pdf2Jpg", getTransformerNames(transformRegistry.getTransformConfig()));
     }
@@ -106,7 +106,7 @@ public class TransformRegistryTest
             new FakeTransformEngineWithOneCustomTransformer(),
             new FakeTransformEngineWithTwoCustomTransformers()));
         transformConfigFromTransformEngines.initTransformEngineConfig();
-        transformRegistry.initRegistry();
+        transformRegistry.retrieveConfig();
 
         assertEquals("Pdf2Jpg, Pdf2Png, TxT2Pdf, Txt2JpgViaPdf, Txt2PngViaPdf",
             getTransformerNames(transformRegistry.getTransformConfig()));
@@ -123,7 +123,7 @@ public class TransformRegistryTest
 
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformConfigFromFiles.initFileConfig();
-        transformRegistry.initRegistry();
+        transformRegistry.retrieveConfig();
 
         assertEquals("A2B, B2C, Pdf2Jpg", getTransformerNames(transformRegistry.getTransformConfig()));
     }
@@ -139,7 +139,7 @@ public class TransformRegistryTest
 
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformConfigFromFiles.initFileConfig();
-        transformRegistry.initRegistry();
+        transformRegistry.retrieveConfig();
 
         assertEquals("A2B, B2C, Pdf2Jpg", getTransformerNames(transformRegistry.getTransformConfig()));
     }
@@ -156,7 +156,7 @@ public class TransformRegistryTest
 
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformConfigFromFiles.initFileConfig();
-        transformRegistry.initRegistry();
+        transformRegistry.retrieveConfig();
 
         assertEquals("A2B, Pdf2Jpg", getTransformerNames(transformRegistry.getTransformConfig()));
     }
@@ -171,7 +171,7 @@ public class TransformRegistryTest
 
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformConfigFromFiles.initFileConfig();
-        transformRegistry.initRegistry();
+        transformRegistry.retrieveConfig();
 
         assertEquals("A2Z", getTransformerNames(transformRegistry.getTransformConfig()));
     }
