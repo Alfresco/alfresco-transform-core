@@ -70,6 +70,6 @@ public class LibreOfficeTransformEngine implements TransformEngine
     public ProbeTransform getProbeTransform()
     {
         return new ProbeTransform("probe.doc", MIMETYPE_WORD, MIMETYPE_PDF, Collections.emptyMap(),
-                11817, 1024, 150, 10240, 60 * 30 + 1, 60 * 15 + 20);
+            9728, 1024, 150, 10240, 60 * 30 + 1, 60 * 15 + 20);
     }
 }

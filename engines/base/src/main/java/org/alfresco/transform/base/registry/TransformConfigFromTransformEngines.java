@@ -34,6 +34,9 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.List;
 
+/**
+ * Makes {@link TransformConfig} from {@link TransformEngine}s available to the {@link TransformRegistry}.
+ */
 @Component
 public class TransformConfigFromTransformEngines
 {
@@ -43,7 +46,7 @@ public class TransformConfigFromTransformEngines
     private List<TransformConfigSource> transformConfigSources;
 
     @PostConstruct
-    private void fromTransformEngineConfig()
+    public void initTransformEngineConfig()
     {
         if (transformEngines != null)
         {
@@ -52,8 +55,9 @@ public class TransformConfigFromTransformEngines
                     TransformConfig transformConfig = transformEngine.getTransformConfig();
                     if (transformConfig != null) // if not a wrapping TransformEngine like all-in-one
                     {
+                        String engineName = transformEngine.getTransformEngineName();
                         transformConfigSources.add(
-                            new AbstractTransformConfigSource(transformEngine.getTransformEngineName(),null)
+                            new AbstractTransformConfigSource(engineName, engineName,null)
                             {
                                  @Override public TransformConfig getTransformConfig()
                                 {

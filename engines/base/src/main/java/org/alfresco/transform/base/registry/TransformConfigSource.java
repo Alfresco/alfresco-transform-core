@@ -4,6 +4,8 @@ import org.alfresco.transform.config.TransformConfig;
 
 public interface TransformConfigSource
 {
+    String getSortOnName();
+
     String getReadFrom();
 
     String getBaseUrl();

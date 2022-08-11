@@ -26,34 +26,24 @@
  */
 package org.alfresco.transform.base.registry;
 
-public abstract class AbstractTransformConfigSource implements TransformConfigSource
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Configuration
+@ConfigurationProperties(prefix = "transform")
+public class AdditionalTransformConfigResources
 {
-    private final String sortOnName;
-    private final String readFrom;
-    private final String baseUrl;
+    // Populated with file paths from Spring Boot properties such as transform.config.<engineName> or
+    // environment variables like TRANSFORM_CONFIG_<engineName>.
+    private final Map<String, String> config = new HashMap<>();
 
-    public AbstractTransformConfigSource(String sortOnName, String readFrom, String baseUrl)
+    public List<Resource> retrieveResources()
     {
-        this.sortOnName = sortOnName;
-        this.readFrom = readFrom;
-        this.baseUrl = baseUrl == null ? "---" : baseUrl;
-    }
-
-    @Override
-    public String getSortOnName()
-    {
-        return sortOnName;
-    }
-
-    @Override
-    public String getReadFrom()
-    {
-        return readFrom;
-    }
-
-    @Override
-    public String getBaseUrl()
-    {
-        return baseUrl;
+        return TransformConfigFromFiles.retrieveResources(config);
     }
 }

@@ -56,14 +56,19 @@ public class TransformConfigResourceReader
     public TransformConfig read(String engineConfigLocation)
     {
         Resource engineConfig = resourceLoader.getResource(engineConfigLocation);
-        try (Reader reader = new InputStreamReader(engineConfig.getInputStream(), UTF_8))
+        return read(engineConfig);
+    }
+
+    public TransformConfig read(Resource resource)
+    {
+        try (Reader reader = new InputStreamReader(resource.getInputStream(), UTF_8))
         {
             TransformConfig transformConfig = jsonObjectMapper.readValue(reader, TransformConfig.class);
             return transformConfig;
         }
         catch (IOException e)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR, "Could not read " + engineConfigLocation, e);
+            throw new TransformException(INTERNAL_SERVER_ERROR, "Could not read " + resource.getFilename(), e);
         }
     }
 }

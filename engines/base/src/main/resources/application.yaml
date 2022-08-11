@@ -25,6 +25,15 @@ server:
 transform:
   core:
     version: @project.version@
+  engine:
+    config:
+      cron: 0 0 * * * *  # once an hour on the hour
+      retry:
+        attempts: 10
+        timeout: 10 # seconds
+
+# Historic values (AVOID) - Exist to help with transition to newer versions
+transformer-routes-path: ${TRANSFORMER_ROUTES_FILE_LOCATION:transformer-pipelines.json}
 
 logging:
   level:

@@ -34,14 +34,38 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Supplier;
 
 import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionOnSingleStepTransformers;
 
 public class TransformRegistry extends AbstractTransformRegistry
 {
+    private static class Data extends TransformCache
+    {
+        private TransformConfig transformConfigBeforeIncompleteTransformsAreRemoved;
+
+        public TransformConfig getTransformConfigBeforeIncompleteTransformsAreRemoved()
+        {
+            return transformConfigBeforeIncompleteTransformsAreRemoved;
+        }
+
+        public void setTransformConfigBeforeIncompleteTransformsAreRemoved(
+            TransformConfig transformConfigBeforeIncompleteTransformsAreRemoved)
+        {
+            this.transformConfigBeforeIncompleteTransformsAreRemoved = transformConfigBeforeIncompleteTransformsAreRemoved;
+        }
+    }
+
     private static final Logger log = LoggerFactory.getLogger(TransformRegistry.class);
 
     @Autowired
@@ -49,19 +73,56 @@ public class TransformRegistry extends AbstractTransformRegistry
     @Autowired
     private List<TransformConfigSource> transformConfigSources;
 
-    private TransformConfig transformConfigBeforeIncompleteTransformsAreRemoved;
+    // Ensures that read operations are blocked while config is being updated
+    private ReadWriteLock configRefreshLock = new ReentrantReadWriteLock();
+
+    private Data data = new Data();
 
     /**
      * Load the registry on application startup. This allows Components in projects that extend the t-engine base
      * to use @PostConstruct to add to {@code transformConfigSources}, before the registry is loaded.
      */
     @EventListener
-    void init(final ContextRefreshedEvent event)
+    private void initRegistryOnAppStartup(final ContextRefreshedEvent event)
+    {
+        asyncRegistryInit();
+    }
+
+//    @Async
+//    @Retryable(include = {IllegalStateException.class},
+//        maxAttemptsExpression = "#{${transform.engine.config.retry.attempts}}",
+//        backoff = @Backoff(delayExpression = "#{${transform.engine.config.retry.timeout} * 1000}"))
+    public void asyncRegistryInit()
+    {
+        initRegistry();
+    }
+
+    /**
+     * Recovery method in case all the retries fail. If not specified, the @Retryable method will cause the application
+     * to stop.
+     */
+//    @Recover
+    private void recover(IllegalStateException e)
+    {
+        log.warn(e.getMessage());
+    }
+
+    /**
+     * Takes the schedule from a spring-boot property
+     */
+//    @Scheduled(cron = "${transformer.engine.config.cron}")
+    public void retrieveEngineConfigs()
+    {
+        log.trace("Refresh TransformRegistry");
+        initRegistry();
+    }
+
+    void initRegistry()
     {
         CombinedTransformConfig combinedTransformConfig = new CombinedTransformConfig();
 
         transformConfigSources.stream()
-            .sorted(Comparator.comparing(TransformConfigSource::getReadFrom))
+            .sorted(Comparator.comparing(TransformConfigSource::getSortOnName))
             .forEach(source -> {
                 TransformConfig transformConfig = source.getTransformConfig();
                 setCoreVersionOnSingleStepTransformers(transformConfig, coreVersion);
@@ -69,22 +130,53 @@ public class TransformRegistry extends AbstractTransformRegistry
                     this);
             });
 
-        transformConfigBeforeIncompleteTransformsAreRemoved = combinedTransformConfig.buildTransformConfig();
+        TransformConfig transformConfigBeforeIncompleteTransformsAreRemoved = combinedTransformConfig.buildTransformConfig();
         combinedTransformConfig.combineTransformerConfig(this);
-        combinedTransformConfig.registerCombinedTransformers(this);
+        concurrentUpdate(combinedTransformConfig, transformConfigBeforeIncompleteTransformsAreRemoved);
     }
-
-    private TransformCache data = new TransformCache();
 
     public TransformConfig getTransformConfig()
     {
-        return transformConfigBeforeIncompleteTransformsAreRemoved;
+        return getData().getTransformConfigBeforeIncompleteTransformsAreRemoved();
     }
 
     @Override
-    public TransformCache getData()
+    public Data getData()
     {
-        return data;
+        return concurrentRead(() -> data );
+    }
+
+    /**
+     * Lock for reads while updating, use {@link #concurrentRead} to access locked fields
+     */
+    private void concurrentUpdate(CombinedTransformConfig combinedTransformConfig,
+        TransformConfig transformConfigBeforeIncompleteTransformsAreRemoved)
+    {
+        configRefreshLock.writeLock().lock();
+        try
+        {
+            data = new Data(); // clear data
+            data.setTransformConfigBeforeIncompleteTransformsAreRemoved(transformConfigBeforeIncompleteTransformsAreRemoved);
+            combinedTransformConfig.registerCombinedTransformers(this);
+        }
+        finally
+        {
+            configRefreshLock.writeLock().unlock();
+        }
+    }
+
+    private <T> T concurrentRead(Supplier<T> s)
+    {
+        configRefreshLock.readLock().lock();
+        try
+        {
+            return s.get();
+
+        }
+        finally
+        {
+            configRefreshLock.readLock().unlock();
+        }
     }
 
     @Override
