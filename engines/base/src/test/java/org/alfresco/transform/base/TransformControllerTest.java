@@ -131,7 +131,7 @@ public class TransformControllerTest
 
     static void resetProbeForTesting(TransformController transformController)
     {
-        transformController.transformHandler.getProbeTransform().resetForTesting();
+        transformController.getProbeTransform().resetForTesting();
     }
 
     @Test
@@ -446,7 +446,7 @@ public class TransformControllerTest
                     SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN,
                     TARGET_MIMETYPE, MIMETYPE_PDF,
                     PAGE_REQUEST_PARAM, "1",
-                    SOURCE_ENCODING, "UTF-8")));
+                    SOURCE_ENCODING, "UTF-8")), any());
         }
         finally
         {

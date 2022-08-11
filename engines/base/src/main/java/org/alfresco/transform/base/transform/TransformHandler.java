@@ -106,29 +106,9 @@ public class TransformHandler
     private TransformerDebug transformerDebug;
 
     private final AtomicInteger httpRequestCount = new AtomicInteger(1);
-    private TransformEngine transformEngine;
     private final Map<String, CustomTransformer> customTransformersByName = new HashMap<>();
 
     @PostConstruct
-    private void init()
-    {
-        initTransformEngine();
-        initCustomTransformersByName();
-    }
-
-    private void initTransformEngine()
-    {
-        if (transformEngines != null)
-        {
-            transformEngine = getTransformEngine();
-            logger.info("TransformEngine: " + transformEngine.getTransformEngineName());
-            transformEngines.stream()
-                            .filter(te -> te != transformEngine)
-                            .sorted(Comparator.comparing(TransformEngine::getTransformEngineName))
-                            .map(transformEngine -> "  "+transformEngine.getTransformEngineName()).forEach(logger::info);
-        }
-    }
-
     private void initCustomTransformersByName()
     {
         if (customTransformers != null)
@@ -143,31 +123,15 @@ public class TransformHandler
         }
     }
 
-    public TransformEngine getTransformEngine()
-    {
-        // Normally there is just one TransformEngine per t-engine, but we also want to be able to amalgamate the
-        // CustomTransform code from many t-engines into a single t-engine. In this case, there should be a wrapper
-        // TransformEngine (it has no TransformConfig of its own).
-        return transformEngines.stream()
-                               .filter(transformEngine -> transformEngine.getTransformConfig() == null)
-                               .findFirst()
-                               .orElse(transformEngines.get(0));
-    }
-
-    public ProbeTransform getProbeTransform()
-    {
-        return transformEngine.getProbeTransform();
-    }
-
     public ResponseEntity<Resource> handleHttpRequest(HttpServletRequest request,
             MultipartFile sourceMultipartFile, String sourceMimetype, String targetMimetype,
-            Map<String, String> requestParameters)
+            Map<String, String> requestParameters, ProbeTransform probeTransform)
     {
         AtomicReference<ResponseEntity<Resource>> responseEntity = new AtomicReference<>();
 
         new ProcessHandler(sourceMimetype, targetMimetype, requestParameters,
             "e" + httpRequestCount.getAndIncrement(), transformRegistry,
-            transformerDebug, getProbeTransform(), customTransformersByName)
+            transformerDebug, probeTransform, customTransformersByName)
         {
             @Override
             protected void init() throws IOException
@@ -207,11 +171,11 @@ public class TransformHandler
     }
 
     public void handleProbRequest(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-        File sourceFile, File targetFile)
+        File sourceFile, File targetFile, ProbeTransform probeTransform)
     {
         new ProcessHandler(sourceMimetype, targetMimetype, transformOptions,
             "p" + httpRequestCount.getAndIncrement(), transformRegistry,
-            transformerDebug, getProbeTransform(), customTransformersByName)
+            transformerDebug, probeTransform, customTransformersByName)
         {
             @Override
             protected void init() throws IOException
@@ -242,12 +206,13 @@ public class TransformHandler
         }.handleTransformRequest();
     }
 
-    public TransformReply handleMessageRequest(TransformRequest request, Long timeout, Destination replyToQueue)
+    public TransformReply handleMessageRequest(TransformRequest request, Long timeout, Destination replyToQueue,
+        ProbeTransform probeTransform)
     {
         TransformReply reply = createBasicTransformReply(request);
         new ProcessHandler(request.getSourceMediaType(), request.getTargetMediaType(),
             request.getTransformRequestOptions(),"unset", transformRegistry,
-            transformerDebug, getProbeTransform(), customTransformersByName)
+            transformerDebug, probeTransform, customTransformersByName)
         {
             @Override
             protected void init() throws IOException
@@ -302,11 +267,6 @@ public class TransformHandler
             }
         }.handleTransformRequest();
         return reply;
-    }
-
-    public String probe(HttpServletRequest request, boolean isLiveProbe)
-    {
-        return getProbeTransform().doTransformOrNothing(request, isLiveProbe, this);
     }
 
     private void sendSuccessfulResponse(Long timeout, TransformReply reply, Destination replyToQueue)

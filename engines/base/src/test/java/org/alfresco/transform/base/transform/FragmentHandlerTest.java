@@ -33,6 +33,7 @@ import org.alfresco.transform.base.fakes.FakeTransformerFragments;
 import org.alfresco.transform.base.messaging.TransformReplySender;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
+import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.commons.lang3.tuple.Pair;
@@ -89,6 +90,8 @@ public class FragmentHandlerTest
     protected AlfrescoSharedFileStoreClient fakeSfsClient;
     @MockBean
     private TransformReplySender transformReplySender;
+    @MockBean
+    private ProbeTransform probeTransform;
 
     private void assertFragments(String sourceText, String expectedError, List<String> expectedLines)
     {
@@ -127,7 +130,7 @@ public class FragmentHandlerTest
             .withSourceSize(32L)
             .withInternalContextForTransformEngineTests()
             .build();
-        transformHandler.handleMessageRequest(request, Long.MAX_VALUE, null);
+        transformHandler.handleMessageRequest(request, Long.MAX_VALUE, null, probeTransform);
 
         TransformReply lastReply = replies.get(replies.size() - 1).getRight();
         String errorDetails = lastReply.getErrorDetails();

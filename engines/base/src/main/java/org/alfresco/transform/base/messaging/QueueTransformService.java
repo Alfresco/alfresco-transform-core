@@ -26,7 +26,7 @@
  */
 package org.alfresco.transform.base.messaging;
 
-import org.alfresco.transform.base.transform.TransformHandler;
+import org.alfresco.transform.base.TransformController;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.common.TransformException;
@@ -63,7 +63,7 @@ public class QueueTransformService
     private static final Logger logger = LoggerFactory.getLogger(QueueTransformService.class);
 
     @Autowired
-    private TransformHandler transformHandler;
+    private TransformController transformController;
     @Autowired
     private TransformMessageConverter transformMessageConverter;
     @Autowired
@@ -123,7 +123,7 @@ public class QueueTransformService
             return;
         }
 
-        transformHandler.handleMessageRequest(transformRequest.get(), null, replyToQueue);
+        transformController.transform(transformRequest.get(), null, replyToQueue);
     }
 
     /**

@@ -59,10 +59,10 @@ import static org.springframework.http.HttpStatus.OK;
 
 /**
  * Provides the transform logic common to http (upload/download), message and probe requests. See
- * {@link TransformHandler#handleHttpRequest(HttpServletRequest, MultipartFile, String, String, Map)},
- * {@link TransformHandler#handleMessageRequest(TransformRequest, Long, Destination)} and
- * {@link TransformHandler#handleProbRequest(String, String, Map, File, File)}. Note the handing of transform requests
- * via a message queue is the same as via the {@link TransformController#transform(TransformRequest, Long)}.
+ * {@link TransformHandler#handleHttpRequest(HttpServletRequest, MultipartFile, String, String, Map, ProbeTransform)},
+ * {@link TransformHandler#handleMessageRequest(TransformRequest, Long, Destination, ProbeTransform)} and
+ * {@link TransformHandler#handleProbRequest(String, String, Map, File, File, ProbeTransform)}. Note the handing of transform requests
+ * via a message queue is the same as via the {@link TransformController#transform(TransformRequest, Long, Destination)}.
  */
 abstract class ProcessHandler extends FragmentHandler
 {

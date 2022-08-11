@@ -212,7 +212,7 @@ public class ProbeTransform
 
         File sourceFile = getSourceFile(isLiveProbe);
         File targetFile = getTargetFile();
-        transformHandler.handleProbRequest(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+        transformHandler.handleProbRequest(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile, this);
         long time = System.currentTimeMillis() - start;
         String message = "Transform " + time + "ms";
         checkTargetFile(targetFile, isLiveProbe, message);

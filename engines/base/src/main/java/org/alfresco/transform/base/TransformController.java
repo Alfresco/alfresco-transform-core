@@ -28,6 +28,7 @@ package org.alfresco.transform.base;
 
 import org.alfresco.transform.base.html.OptionLister;
 import org.alfresco.transform.base.logging.LogEntry;
+import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.base.registry.TransformRegistry;
 import org.alfresco.transform.base.transform.TransformHandler;
 import org.alfresco.transform.client.model.TransformReply;
@@ -58,11 +59,13 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
+import javax.jms.Destination;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -111,9 +114,28 @@ public class TransformController
     TransformEngine transformEngine;
 
     @PostConstruct
-    private void init()
+    private void initTransformEngine()
     {
-        transformEngine = transformHandler.getTransformEngine();
+        if (transformEngines != null)
+        {
+            transformEngine = getTransformEngine();
+            logger.info("TransformEngine: " + transformEngine.getTransformEngineName());
+            transformEngines.stream()
+                            .filter(te -> te != transformEngine)
+                            .sorted(Comparator.comparing(TransformEngine::getTransformEngineName))
+                            .map(transformEngine -> "  "+transformEngine.getTransformEngineName()).forEach(logger::info);
+        }
+    }
+
+    private TransformEngine getTransformEngine()
+    {
+        // Normally there is just one TransformEngine per t-engine, but we also want to be able to amalgamate the
+        // CustomTransform code from many t-engines into a single t-engine. In this case, there should be a wrapper
+        // TransformEngine (it has no TransformConfig of its own).
+        return transformEngines.stream()
+                               .filter(transformEngine -> transformEngine.getTransformConfig() == null)
+                               .findFirst()
+                               .orElse(transformEngines.get(0));
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -206,7 +228,7 @@ public class TransformController
     @ResponseBody
     public String ready(HttpServletRequest request)
     {
-        return transformHandler.probe(request, false);
+        return getProbeTransform().doTransformOrNothing(request, false, transformHandler);
     }
 
     /**
@@ -216,7 +238,12 @@ public class TransformController
     @ResponseBody
     public String live(HttpServletRequest request)
     {
-        return transformHandler.probe(request, true);
+        return getProbeTransform().doTransformOrNothing(request, true, transformHandler);
+    }
+
+    public ProbeTransform getProbeTransform()
+    {
+        return transformEngine.getProbeTransform();
     }
 
     @GetMapping(value = ENDPOINT_TRANSFORM_CONFIG)
@@ -234,9 +261,10 @@ public class TransformController
     @PostMapping(value = ENDPOINT_TRANSFORM, produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<TransformReply> transform(@RequestBody TransformRequest request,
-        @RequestParam(value = "timeout", required = false) Long timeout)
+        @RequestParam(value = "timeout", required = false) Long timeout,
+        @RequestParam(value = "replyToQueue", required = false) Destination replyToQueue)
     {
-        TransformReply reply = transformHandler.handleMessageRequest(request, timeout, null);
+        TransformReply reply = transformHandler.handleMessageRequest(request, timeout, replyToQueue, getProbeTransform());
         return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
     }
 
@@ -249,7 +277,7 @@ public class TransformController
             @RequestParam Map<String, String> requestParameters)
     {
         return transformHandler.handleHttpRequest(request, sourceMultipartFile, sourceMimetype,
-                targetMimetype, requestParameters);
+                targetMimetype, requestParameters, getProbeTransform());
     }
 
     // Used the t-engine's simple html test UI.

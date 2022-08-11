@@ -27,7 +27,7 @@
 
 package org.alfresco.transform.base.messaging;
 
-import org.alfresco.transform.base.transform.TransformHandler;
+import org.alfresco.transform.base.TransformController;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.activemq.command.ActiveMQObjectMessage;
@@ -56,7 +56,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 public class QueueTransformServiceTest
 {
     @Mock
-    private TransformHandler transformHandler;
+    private TransformController transformController;
     @Mock
     private TransformMessageConverter transformMessageConverter;
     @Mock
@@ -76,7 +76,7 @@ public class QueueTransformServiceTest
     {
         queueTransformService.receive(null);
 
-        verifyNoMoreInteractions(transformHandler);
+        verifyNoMoreInteractions(transformController);
         verifyNoMoreInteractions(transformMessageConverter);
         verifyNoMoreInteractions(transformReplySender);
     }
@@ -86,7 +86,7 @@ public class QueueTransformServiceTest
     {
         queueTransformService.receive(new ActiveMQObjectMessage());
 
-        verifyNoMoreInteractions(transformHandler);
+        verifyNoMoreInteractions(transformController);
         verifyNoMoreInteractions(transformMessageConverter);
         verifyNoMoreInteractions(transformReplySender);
     }
@@ -114,7 +114,7 @@ public class QueueTransformServiceTest
         verify(transformMessageConverter).fromMessage(msg);
         verify(transformReplySender).send(destination, reply, msg.getCorrelationId());
 
-        verifyNoMoreInteractions(transformHandler);
+        verifyNoMoreInteractions(transformController);
     }
 
     @Test
@@ -141,7 +141,7 @@ public class QueueTransformServiceTest
         verify(transformMessageConverter).fromMessage(msg);
         verify(transformReplySender).send(destination, reply, msg.getCorrelationId());
 
-        verifyNoMoreInteractions(transformHandler);
+        verifyNoMoreInteractions(transformController);
     }
 
     @Test
@@ -168,7 +168,7 @@ public class QueueTransformServiceTest
         verify(transformMessageConverter).fromMessage(msg);
         verify(transformReplySender).send(destination, reply, msg.getCorrelationId());
 
-        verifyNoMoreInteractions(transformHandler);
+        verifyNoMoreInteractions(transformController);
     }
 
     @Test
@@ -186,12 +186,12 @@ public class QueueTransformServiceTest
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
         doAnswer(invocation -> {transformReplySender.send(destination, reply); return null;})
-            .when(transformHandler).handleMessageRequest(request, null, destination);
+            .when(transformController).transform(request, null, destination);
 
         queueTransformService.receive(msg);
 
         verify(transformMessageConverter).fromMessage(msg);
-        verify(transformHandler).handleMessageRequest(request, null, destination);
+        verify(transformController).transform(request, null, destination);
         verify(transformReplySender).send(destination, reply);
     }
 
@@ -204,7 +204,7 @@ public class QueueTransformServiceTest
 
         queueTransformService.receive(msg);
 
-        verifyNoMoreInteractions(transformHandler);
+        verifyNoMoreInteractions(transformController);
         verifyNoMoreInteractions(transformMessageConverter);
         verifyNoMoreInteractions(transformReplySender);
     }
@@ -227,12 +227,12 @@ public class QueueTransformServiceTest
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
         doAnswer(invocation -> {transformReplySender.send(destination, reply); return null;})
-            .when(transformHandler).handleMessageRequest(request, null, destination);
+            .when(transformController).transform(request, null, destination);
 
         queueTransformService.receive(msg);
 
         verify(transformMessageConverter).fromMessage(msg);
-        verify(transformHandler).handleMessageRequest(request, null, destination);
+        verify(transformController).transform(request, null, destination);
         verify(transformReplySender).send(destination, reply);
     }
 }
