@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.alfresco.transformer.executors.RuntimeExec;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.tika.exception.TikaException;
@@ -75,6 +76,15 @@ public class ExifToolParser extends ExternalParser {
 
     private String separator;
 
+    private RuntimeExec exifRuntimeExec = new RuntimeExec();
+
+    public ExifToolParser(RuntimeExec exifRuntimeExec) {
+        if( exifRuntimeExec!=null )
+        {
+            this.exifRuntimeExec = exifRuntimeExec;
+        }
+    }
+
     public ExifToolParser() {
         super();
         try {
@@ -82,7 +92,14 @@ public class ExifToolParser extends ExternalParser {
             // if ExifTool is not installed then no parsers are returned
             if (eParsers.size() > 0) {
                 ExternalParser eParser = eParsers.get(0);
-                this.setCommand(eParser.getCommand());
+
+                String[] command = exifRuntimeExec.getCommand();
+                if( command==null ) {
+                    command = eParser.getCommand();
+                }
+                logger.debug("Command to be executed: "+command);
+
+                this.setCommand(command);
                 this.setIgnoredLineConsumer(eParser.getIgnoredLineConsumer());
                 this.setMetadataExtractionPatterns(eParser.getMetadataExtractionPatterns());
                 this.setSupportedTypes(eParser.getSupportedTypes());

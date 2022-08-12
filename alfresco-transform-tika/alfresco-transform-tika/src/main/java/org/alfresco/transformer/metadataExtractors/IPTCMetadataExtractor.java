@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.alfresco.transformer.executors.RuntimeExec;
 import org.alfresco.transformer.tika.parsers.ExifToolParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.Metadata;
@@ -50,6 +51,15 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
     private static final Pattern YEAR_IPTC = Pattern.compile("(\\d{4}[:|-]\\d{2}[:|-]\\d{2})");
 
     private ExifToolParser parser;
+    private RuntimeExec exifRuntimeExec = new RuntimeExec();
+
+    public IPTCMetadataExtractor(RuntimeExec exifRuntimeExec) {
+        super(logger);
+        if( exifRuntimeExec!=null )
+        {
+            this.exifRuntimeExec = exifRuntimeExec;
+        }
+    }
 
     public IPTCMetadataExtractor() 
     {
@@ -60,7 +70,7 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
     protected Parser getParser() 
     {
         if (this.parser == null) {
-            this.parser = new ExifToolParser();
+            this.parser = new ExifToolParser(exifRuntimeExec);
         }
         return this.parser;  
     }

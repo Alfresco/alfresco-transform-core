@@ -70,26 +70,27 @@ public class TikaJavaExecutor implements JavaExecutor
         "This transformer uses ExifTool by Phil Harvey. See license at https://exiftool.org/#license. or in /Perl-Artistic-License.txt";
 
     private final Tika tika;
-    private final Map<String, AbstractTikaMetadataExtractor> metadataExtractor = ImmutableMap
-            .<String, AbstractTikaMetadataExtractor>builder()
-            .put("DWGMetadataExtractor", new DWGMetadataExtractor())
-            .put("MailMetadataExtractor", new MailMetadataExtractor())
-            .put("MP3MetadataExtractor", new MP3MetadataExtractor())
-            .put("OfficeMetadataExtractor", new OfficeMetadataExtractor())
-            .put("OpenDocumentMetadataExtractor", new OpenDocumentMetadataExtractor())
-            .put("PdfBoxMetadataExtractor", new PdfBoxMetadataExtractor())
-            .put("PoiMetadataExtractor", new PoiMetadataExtractor())
-            .put("TikaAudioMetadataExtractor", new TikaAudioMetadataExtractor())
-            .put("TikaAutoMetadataExtractor", new TikaAutoMetadataExtractor())
-            .put("IPTCMetadataExtractor", new IPTCMetadataExtractor())
-            .build();
+    private final Map<String, AbstractTikaMetadataExtractor> metadataExtractor;
     private final Map<String, AbstractTikaMetadataExtractor> metadataEmbedder = ImmutableMap
             .<String, AbstractTikaMetadataExtractor>builder()
             .put("SamplePoiMetadataEmbedder", new PoiMetadataExtractor())
             .build();
 
-    public TikaJavaExecutor(boolean notExtractBookmarksTextDefault)
-    {
+    public TikaJavaExecutor(boolean notExtractBookmarksTextDefault, RuntimeExec exifRuntimeExec) {
+        metadataExtractor = ImmutableMap
+                .<String, AbstractTikaMetadataExtractor>builder()
+                .put("DWGMetadataExtractor", new DWGMetadataExtractor())
+                .put("MailMetadataExtractor", new MailMetadataExtractor())
+                .put("MP3MetadataExtractor", new MP3MetadataExtractor())
+                .put("OfficeMetadataExtractor", new OfficeMetadataExtractor())
+                .put("OpenDocumentMetadataExtractor", new OpenDocumentMetadataExtractor()
+                )
+                .put("PdfBoxMetadataExtractor", new PdfBoxMetadataExtractor())
+                .put("PoiMetadataExtractor", new PoiMetadataExtractor())
+                .put("TikaAudioMetadataExtractor", new TikaAudioMetadataExtractor())
+                .put("TikaAutoMetadataExtractor", new TikaAutoMetadataExtractor())
+                .put("IPTCMetadataExtractor", new IPTCMetadataExtractor(exifRuntimeExec))
+                .build();
         this.notExtractBookmarksTextDefault = notExtractBookmarksTextDefault;
         try
         {
@@ -99,6 +100,11 @@ public class TikaJavaExecutor implements JavaExecutor
         {
             throw new RuntimeException("Unable to instantiate Tika:  " + e.getMessage());
         }
+    }
+
+    public TikaJavaExecutor(boolean notExtractBookmarksTextDefault)
+    {
+        this(false, null);
     }
 
     public TikaJavaExecutor() 

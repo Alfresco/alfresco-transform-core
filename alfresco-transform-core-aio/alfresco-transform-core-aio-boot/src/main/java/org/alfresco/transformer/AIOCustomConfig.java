@@ -30,6 +30,7 @@ import org.alfresco.transform.client.registry.TransformServiceRegistry;
 import org.alfresco.transformer.executors.ImageMagickCommandExecutor;
 import org.alfresco.transformer.executors.LibreOfficeJavaExecutor;
 import org.alfresco.transformer.executors.PdfRendererCommandExecutor;
+import org.alfresco.transformer.executors.RuntimeExec;
 import org.alfresco.transformer.executors.TikaJavaExecutor;
 import org.alfresco.transformer.executors.Transformer;
 import org.alfresco.transformer.transformers.SelectingTransformer;
@@ -39,7 +40,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -87,6 +90,24 @@ public class AIOCustomConfig
 
     @Value("${transform.core.version}")
     private String coreVersion;
+
+    @Value("${transform.core.tika.exifTool.windowsOS}")
+    private String[] exifToolCommandOnWindows;
+
+    @Value("${transform.core.tika.exifTool.unixOS}")
+    private String[] exifToolCommandOnUnix;
+
+    @Bean("exifTool")
+    public RuntimeExec exifRuntimeExec() {
+        RuntimeExec runtimeExec = new RuntimeExec();
+        Map<String,String[]> commandPerOS = new HashMap<>();
+        commandPerOS.put("win", exifToolCommandOnWindows);
+        commandPerOS.put("*", exifToolCommandOnUnix);
+        runtimeExec.setCommandsAndArguments(commandPerOS);
+
+        return runtimeExec;
+    }
+
 
     /**
      *
