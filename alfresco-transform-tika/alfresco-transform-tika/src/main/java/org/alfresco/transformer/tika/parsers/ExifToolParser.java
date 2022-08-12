@@ -76,7 +76,7 @@ public class ExifToolParser extends ExternalParser {
 
     private String separator;
 
-    private RuntimeExec exifRuntimeExec = new RuntimeExec();
+    private RuntimeExec exifRuntimeExec = null;
 
     public ExifToolParser(RuntimeExec exifRuntimeExec) {
         if( exifRuntimeExec!=null )
@@ -93,13 +93,19 @@ public class ExifToolParser extends ExternalParser {
             if (eParsers.size() > 0) {
                 ExternalParser eParser = eParsers.get(0);
 
-                String[] command = exifRuntimeExec.getCommand();
-                if( command==null ) {
-                    command = eParser.getCommand();
+                String[] commandToBeExecuted;
+                if( exifRuntimeExec==null ) {
+                    commandToBeExecuted = eParser.getCommand();
+                } else {
+                    commandToBeExecuted = exifRuntimeExec.getCommand();
                 }
-                logger.debug("Command to be executed: "+command);
+                // give some last chance
+                if( commandToBeExecuted==null || commandToBeExecuted.length==0 ) {
+                    commandToBeExecuted = eParser.getCommand();
+                }
+                logger.debug("Command to be executed: "+commandToBeExecuted);
 
-                this.setCommand(command);
+                this.setCommand(commandToBeExecuted);
                 this.setIgnoredLineConsumer(eParser.getIgnoredLineConsumer());
                 this.setMetadataExtractionPatterns(eParser.getMetadataExtractionPatterns());
                 this.setSupportedTypes(eParser.getSupportedTypes());
