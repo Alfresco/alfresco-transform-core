@@ -79,10 +79,7 @@ public class ExifToolParser extends ExternalParser {
     private RuntimeExec exifRuntimeExec = null;
 
     public ExifToolParser(RuntimeExec exifRuntimeExec) {
-        if( exifRuntimeExec!=null )
-        {
-            this.exifRuntimeExec = exifRuntimeExec;
-        }
+        this.exifRuntimeExec = exifRuntimeExec;
     }
 
     public ExifToolParser() {

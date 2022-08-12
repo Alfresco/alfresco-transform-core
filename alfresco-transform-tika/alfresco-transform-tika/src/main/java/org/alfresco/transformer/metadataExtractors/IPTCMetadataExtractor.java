@@ -51,14 +51,11 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractor
     private static final Pattern YEAR_IPTC = Pattern.compile("(\\d{4}[:|-]\\d{2}[:|-]\\d{2})");
 
     private ExifToolParser parser;
-    private RuntimeExec exifRuntimeExec = new RuntimeExec();
+    private RuntimeExec exifRuntimeExec;
 
     public IPTCMetadataExtractor(RuntimeExec exifRuntimeExec) {
         super(logger);
-        if( exifRuntimeExec!=null )
-        {
-            this.exifRuntimeExec = exifRuntimeExec;
-        }
+        this.exifRuntimeExec = exifRuntimeExec;
     }
 
     public IPTCMetadataExtractor() 
