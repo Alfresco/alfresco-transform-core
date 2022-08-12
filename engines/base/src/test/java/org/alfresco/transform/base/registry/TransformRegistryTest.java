@@ -59,17 +59,17 @@ public class TransformRegistryTest
     @Autowired
     private TransformConfigFromFiles transformConfigFromFiles;
     @Autowired
-    private AdditionalTransformConfigResources additionalTransformConfigResources;
+    private TransformConfigFiles transformConfigFiles;
     @Autowired
-    private AdditionalTransformConfigResourcesHistoric additionalTransformConfigResourcesHistoric;
+    private TransformConfigFilesHistoric transformConfigFilesHistoric;
 
     @AfterEach
     private void after()
     {
         transformConfigSources.clear();
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", Collections.emptyList());
-        ReflectionTestUtils.setField(additionalTransformConfigResources, "config", Collections.emptyMap());
-        ReflectionTestUtils.setField(additionalTransformConfigResourcesHistoric, "additional", Collections.emptyMap());
+        ReflectionTestUtils.setField(transformConfigFiles, "config", Collections.emptyMap());
+        ReflectionTestUtils.setField(transformConfigFilesHistoric, "additional", Collections.emptyMap());
         transformRegistry.retrieveConfig();
     }
 
@@ -117,7 +117,7 @@ public class TransformRegistryTest
     {
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
             new FakeTransformEngineWithOneCustomTransformer()));
-        ReflectionTestUtils.setField(additionalTransformConfigResources, "config", ImmutableMap.of(
+        ReflectionTestUtils.setField(transformConfigFiles, "config", ImmutableMap.of(
             "a",   "config/addA2B.json",
             "foo", "config/addB2C.json"));
 
@@ -133,7 +133,7 @@ public class TransformRegistryTest
     {
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
             new FakeTransformEngineWithOneCustomTransformer()));
-        ReflectionTestUtils.setField(additionalTransformConfigResourcesHistoric, "additional", ImmutableMap.of(
+        ReflectionTestUtils.setField(transformConfigFilesHistoric, "additional", ImmutableMap.of(
             "a",   "config/addA2B.json",
             "foo", "config/addB2C.json"));
 
@@ -149,9 +149,9 @@ public class TransformRegistryTest
     {
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
             new FakeTransformEngineWithOneCustomTransformer()));
-        ReflectionTestUtils.setField(additionalTransformConfigResourcesHistoric, "TRANSFORMER_ROUTES_FROM_CLASSPATH",
+        ReflectionTestUtils.setField(transformConfigFilesHistoric, "TRANSFORMER_ROUTES_FROM_CLASSPATH",
             "config/removePdf2JpgAndAddA2Z.json"); // checking it is ignored
-        ReflectionTestUtils.setField(additionalTransformConfigResourcesHistoric, "transformerRoutesExternalFile",
+        ReflectionTestUtils.setField(transformConfigFilesHistoric, "transformerRoutesExternalFile",
             "config/addA2B.json");
 
         transformConfigFromTransformEngines.initTransformEngineConfig();
@@ -166,7 +166,7 @@ public class TransformRegistryTest
     {
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
             new FakeTransformEngineWithOneCustomTransformer()));
-        ReflectionTestUtils.setField(additionalTransformConfigResourcesHistoric, "TRANSFORMER_ROUTES_FROM_CLASSPATH",
+        ReflectionTestUtils.setField(transformConfigFilesHistoric, "TRANSFORMER_ROUTES_FROM_CLASSPATH",
             "config/removePdf2JpgAndAddA2Z.json");
 
         transformConfigFromTransformEngines.initTransformEngineConfig();

@@ -36,10 +36,10 @@ import java.util.Map;
 
 @Configuration
 @ConfigurationProperties(prefix = "transform")
-public class AdditionalTransformConfigResources
+public class TransformConfigFiles
 {
-    // Populated with file paths from Spring Boot properties such as transform.config.<engineName> or
-    // environment variables like TRANSFORM_CONFIG_<engineName>.
+    // Populated from Spring Boot properties or such as transform.config.<engineName> or environment variables like
+    // TRANSFORM_CONFIG_<engineName>.
     private final Map<String, String> config = new HashMap<>();
 
     public List<Resource> retrieveResources()

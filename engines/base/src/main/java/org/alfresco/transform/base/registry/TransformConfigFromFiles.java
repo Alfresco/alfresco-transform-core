@@ -51,9 +51,9 @@ public class TransformConfigFromFiles
     @Autowired
     private List<TransformConfigSource> transformConfigSources;
     @Autowired
-    private AdditionalTransformConfigResources additionalTransformConfigResources;
+    private TransformConfigFiles transformConfigFiles;
     @Autowired
-    private AdditionalTransformConfigResourcesHistoric additionalTransformConfigResourcesHistoric;
+    private TransformConfigFilesHistoric transformConfigFilesHistoric;
     @Autowired
     private TransformConfigResourceReader transformConfigResourceReader;
 
@@ -61,8 +61,8 @@ public class TransformConfigFromFiles
     public void initFileConfig()
     {
         final List<Resource> resources = new ArrayList<>();
-        resources.addAll(additionalTransformConfigResources.retrieveResources());
-        resources.addAll(additionalTransformConfigResourcesHistoric.retrieveResources());
+        resources.addAll(transformConfigFiles.retrieveResources());
+        resources.addAll(transformConfigFilesHistoric.retrieveResources());
         resources.forEach(resource ->
         {
             String filename = resource.getFilename();

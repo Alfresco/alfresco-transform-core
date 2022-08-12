@@ -38,16 +38,16 @@ public class TransformRegistryRefreshTest
     @Autowired
     private TransformConfigFromFiles transformConfigFromFiles;
     @Autowired
-    private AdditionalTransformConfigResources additionalTransformConfigResources;
+    private TransformConfigFiles transformConfigFiles;
 
     @Test
     public void checkRegistryRefreshes() throws InterruptedException
     {
-        verify(transformRegistry, atLeast(1)).retrieveConfig();
         assertEquals(4, transformRegistry.getTransformConfig().getTransformers().size());
+        verify(transformRegistry, atLeast(1)).retrieveConfig();
 
         // As we can't change the content of a classpath resource, lets change what is read.
-        ReflectionTestUtils.setField(additionalTransformConfigResources, "config", ImmutableMap.of(
+        ReflectionTestUtils.setField(transformConfigFiles, "config", ImmutableMap.of(
             "a",   "config/addA2B.json",
             "foo", "config/addB2C.json"));
         transformConfigFromFiles.initFileConfig();

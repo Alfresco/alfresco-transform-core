@@ -40,11 +40,11 @@ import java.util.Map;
 import static org.alfresco.transform.base.registry.TransformConfigFromFiles.retrieveResource;
 
 /**
- * Similar to {@link AdditionalTransformConfigResources} but uses the names historically used by the t-router.
+ * Similar to {@link TransformConfigFiles} but uses the names historically used by the t-router.
  */
 @Configuration
 @ConfigurationProperties(prefix = "transformer.routes")
-public class AdditionalTransformConfigResourcesHistoric
+public class TransformConfigFilesHistoric
 {
     // Populated with file paths from Spring Boot properties such as transformer.routes.additional.<engineName> or
     // environment variables like TRANSFORMER_ROUTES_ADDITIONAL_<engineName>.
