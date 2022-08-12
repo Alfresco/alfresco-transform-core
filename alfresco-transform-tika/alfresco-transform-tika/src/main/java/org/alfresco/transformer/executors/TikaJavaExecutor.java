@@ -104,7 +104,7 @@ public class TikaJavaExecutor implements JavaExecutor
 
     public TikaJavaExecutor(boolean notExtractBookmarksTextDefault)
     {
-        this(false, null);
+        this(notExtractBookmarksTextDefault, null);
     }
 
     public TikaJavaExecutor() 
