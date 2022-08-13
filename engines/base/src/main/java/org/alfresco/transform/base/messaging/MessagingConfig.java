@@ -56,8 +56,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 @ConditionalOnProperty(name = "activemq.url")
 public class MessagingConfig implements JmsListenerConfigurer
 {
-    private static final Logger logger = LoggerFactory.getLogger(MessagingConfig.class);
-
     @Override
     public void configureJmsListeners(@NonNull JmsListenerEndpointRegistrar registrar)
     {
@@ -65,7 +63,6 @@ public class MessagingConfig implements JmsListenerConfigurer
     }
 
     @Bean
-    @ConditionalOnProperty(name = "activemq.url")
     public DefaultMessageHandlerMethodFactory methodFactory()
     {
         DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
@@ -74,21 +71,20 @@ public class MessagingConfig implements JmsListenerConfigurer
     }
 
     @Bean
-    @ConditionalOnProperty(name = "activemq.url")
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(
         final ConnectionFactory connectionFactory,
-        final TransformMessageConverter transformMessageConverter)
+        final TransformMessageConverter transformMessageConverter,
+        final MessagingErrorHandler messagingErrorHandler)
     {
         final DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(transformMessageConverter);
-        factory.setErrorHandler(t -> logger.error("JMS error: " + t.getMessage(), t));
+        factory.setErrorHandler(messagingErrorHandler);
         factory.setTransactionManager(transactionManager(connectionFactory));
         return factory;
     }
 
     @Bean
-    @ConditionalOnProperty(name = "activemq.url")
     public PlatformTransactionManager transactionManager(final ConnectionFactory connectionFactory)
     {
         final JmsTransactionManager transactionManager = new JmsTransactionManager();
@@ -97,7 +93,6 @@ public class MessagingConfig implements JmsListenerConfigurer
     }
 
     @Bean
-    @ConditionalOnProperty(name = "activemq.url")
     public Queue engineRequestQueue(
         @Value("${queue.engineRequestQueue}") String engineRequestQueueValue)
     {

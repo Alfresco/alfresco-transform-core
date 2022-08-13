@@ -22,6 +22,15 @@ server:
   error:
     include-message: ALWAYS
 
+# Historic values (AVOID) - Exist to help with transition to newer versions
+transformer-routes-path: ${TRANSFORMER_ROUTES_FILE_LOCATION:transformer-pipelines.json}
+
+logging:
+  level:
+    org.alfresco.transform.common.TransformerDebug: debug
+
+fileStoreUrl: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
+
 transform:
   core:
     version: @project.version@
@@ -31,17 +40,6 @@ transform:
       retry:
         attempts: 10
         timeout: 10 # seconds
-
-# Historic values (AVOID) - Exist to help with transition to newer versions
-transformer-routes-path: ${TRANSFORMER_ROUTES_FILE_LOCATION:transformer-pipelines.json}
-
-logging:
-  level:
-    # org.alfresco.util.exec.RuntimeExec: debug
-    # org.alfresco.transform.base.metadataExtractors: debug
-    org.alfresco.transform.common.TransformerDebug: debug
-
-fileStoreUrl: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
 
 jms-listener:
   concurrency: ${JMS_LISTENER_CONCURRENCY:1-10}
@@ -62,12 +60,5 @@ management:
 
 container:
   name: ${HOSTNAME:t-engine}
+  isTRouter: false
   behind-ingres: false
-
-async-task-executor:
-  core-pool-size: 1
-  max-pool-size: 2147483647
-  keep-alive-seconds: 60
-  queue-capacity: 2147483647
-  allow-core-thread-time-out: false
-  prestart-all-core-threads: false

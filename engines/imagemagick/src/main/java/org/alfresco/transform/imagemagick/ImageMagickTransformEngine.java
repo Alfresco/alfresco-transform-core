@@ -28,7 +28,7 @@ package org.alfresco.transform.imagemagick;
 
 import org.alfresco.transform.base.TransformEngine;
 import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.common.TransformConfigResourceReader;
+import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,7 +48,7 @@ public class ImageMagickTransformEngine implements TransformEngine
     @Override
     public String getTransformEngineName()
     {
-        return "0030-ImageMagick";
+        return "0030 ImageMagick";
     }
 
     @Override

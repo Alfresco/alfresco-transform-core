@@ -49,7 +49,7 @@ public class AIOTransformEngine implements TransformEngine
     @Override
     public String getTransformEngineName()
     {
-        return "0060-AllInOne";
+        return "0060 AllInOne";
     }
 
     @Override
@@ -77,7 +77,7 @@ public class AIOTransformEngine implements TransformEngine
     @Override
     public ProbeTransform getProbeTransform()
     {
-        return new ProbeTransform("quick.pdf", MIMETYPE_PDF, MIMETYPE_TEXT_PLAIN, Collections.emptyMap(),
+        return new ProbeTransform("probe.pdf", MIMETYPE_PDF, MIMETYPE_TEXT_PLAIN, Collections.emptyMap(),
                 60, 16, 400, 10240, 60 * 30 + 1, 60 * 15 + 20);
     }
 }

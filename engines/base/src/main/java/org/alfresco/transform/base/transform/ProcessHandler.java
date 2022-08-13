@@ -184,31 +184,17 @@ abstract class ProcessHandler extends FragmentHandler
     private String getTransformerName(final String sourceMimetype, long sourceSizeInBytes, final String targetMimetype,
         final Map<String, String> transformOptions)
     {
-        // The transformOptions always contains sourceEncoding when sent to a T-Engine, even though it should not be
-        // used to select a transformer. Similar to source and target mimetypes and extensions, but these are not
-        // passed in transformOptions.
-        String sourceEncoding = transformOptions.remove(SOURCE_ENCODING);
-        try
+        final String transformerName = transformRegistry.findTransformerName(sourceMimetype,
+            sourceSizeInBytes, targetMimetype, transformOptions, null);
+        if (transformerName == null)
         {
-            final String transformerName = transformRegistry.findTransformerName(sourceMimetype,
-                sourceSizeInBytes, targetMimetype, transformOptions, null);
-            if (transformerName == null)
-            {
-                throw new TransformException(BAD_REQUEST, "No transforms for: "+
-                    sourceMimetype+" -> "+targetMimetype+transformOptions.entrySet().stream()
-                    .map(entry -> entry.getKey()+"="+entry.getValue())
-                    .collect(Collectors.joining(", ", " ", "")));
-            }
-            return transformerName;
+            throw new TransformException(BAD_REQUEST, "No transforms for: "+
+                sourceMimetype+" -> "+targetMimetype+transformOptions.entrySet().stream()
+                .map(entry -> entry.getKey()+"="+entry.getValue())
+                .collect(Collectors.joining(", ", " ", "")));
         }
-        finally
-        {
-            if (sourceEncoding != null)
-            {
-                transformOptions.put(SOURCE_ENCODING, sourceEncoding);
-            }
-        }
-    }
+        return transformerName;
+}
 
     private CustomTransformer getCustomTransformer(String transformName)
     {

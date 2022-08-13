@@ -50,7 +50,7 @@ public class TransformerDebug
     private static int MAX_OPTION_END_CHARS = 5;
     private static String MAX_OPTION_DOTS = "...";
 
-    private boolean isTEngine = false;
+    private boolean isTRouter = false;
 
     public void pushTransform(TransformRequest request)
     {
@@ -64,7 +64,7 @@ public class TransformerDebug
             String message = getPaddedReference(reference) +
                     getMimetypeExt(step.getSourceMediaType()) +
                     getTargetMimetypeExt(step.getTargetMediaType(), step.getSourceMediaType()) + ' ' +
-                    (isTopLevel || isTEngine()
+                    (isTopLevel || !isTRouter()
                      ? fileSize(request.getSourceSize()) + ' ' +
                        getRenditionName(new RepositoryClientData(request.getClientData()).getRenditionName())
                      : "") +
@@ -117,7 +117,7 @@ public class TransformerDebug
         if (logger.isDebugEnabled())
         {
             String message = getPaddedReference(reference) + "Finished in " + ms(elapsedTime);
-            if (isTopLevel(reference) || isTEngine())
+            if (isTopLevel(reference) || !isTRouter())
             {
                 logger.debug(message);
             }
@@ -221,9 +221,9 @@ public class TransformerDebug
     }
 
     // T-Engines call this method, as the T-Router will appended the same debug messages
-    public TransformerDebug setIsTEngine(boolean isTEngine)
+    public TransformerDebug setIsTRouter(boolean isTRouter)
     {
-        this.isTEngine = isTEngine;
+        this.isTRouter = isTRouter;
         return this;
     }
 
@@ -234,12 +234,12 @@ public class TransformerDebug
 
     private boolean isDebugToBeReturned(RepositoryClientData repositoryClientData)
     {
-        return !isTEngine() && repositoryClientData.isDebugRequested();
+        return isTRouter() && repositoryClientData.isDebugRequested();
     }
 
-    private boolean isTEngine()
+    private boolean isTRouter()
     {
-        return isTEngine;
+        return isTRouter;
     }
 
     private boolean isTopLevel(String reference)

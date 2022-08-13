@@ -39,6 +39,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.Map.Entry;
 import static java.util.stream.Collectors.toMap;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 class TransformRegistryHelper
@@ -95,17 +96,36 @@ class TransformRegistryHelper
             return cachedTransformList;
         }
 
-        final List<SupportedTransform> builtTransformList = buildTransformList(data,
-            sourceMimetype,
-            targetMimetype,
-            filterTimeout(actualOptions));
-
-        if (renditionName != null)
+        // The transformOptions always contains sourceEncoding and possibly timeout when sent to a T-Engine, even though
+        // they should not be used to select a transformer. Would like to change this, but cannot as we need to support
+        // older ACS repo versions.
+        String sourceEncoding = actualOptions.remove(SOURCE_ENCODING);
+        String timeout = actualOptions.remove(TIMEOUT);
+        try
         {
-            data.cache(renditionName, sourceMimetype, builtTransformList);
-        }
+            final List<SupportedTransform> builtTransformList = buildTransformList(data,
+                sourceMimetype,
+                targetMimetype,
+                actualOptions);
 
-        return builtTransformList;
+            if (renditionName != null)
+            {
+                data.cache(renditionName, sourceMimetype, builtTransformList);
+            }
+
+            return builtTransformList;
+        }
+        finally
+        {
+            if (sourceEncoding != null)
+            {
+                actualOptions.put(SOURCE_ENCODING, sourceEncoding);
+            }
+            if (timeout != null)
+            {
+                actualOptions.put(TIMEOUT, timeout);
+            }
+        }
     }
 
     private static List<SupportedTransform> buildTransformList(
@@ -348,19 +368,5 @@ class TransformRegistryHelper
             .keySet()
             .stream()
             .allMatch(transformOptions::containsKey);
-    }
-
-    private static Map<String, String> filterTimeout(final Map<String, String> options)
-    {
-        // Remove the "timeout" property from the actualOptions as it is not used to select a transformer.
-        if (!options.containsKey(TIMEOUT))
-        {
-            return options;
-        }
-        return options
-            .entrySet()
-            .stream()
-            .filter(e -> !TIMEOUT.equals(e.getKey()))
-            .collect(toMap(Entry::getKey, Entry::getValue));
     }
 }

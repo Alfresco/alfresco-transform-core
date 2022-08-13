@@ -53,7 +53,7 @@ public class TransformOptionGroup extends AbstractTransformOption
 
     public void setTransformOptions(Set<TransformOption> transformOptions)
     {
-        this.transformOptions = transformOptions;
+        this.transformOptions = transformOptions == null ? new HashSet<>() : transformOptions;
     }
 
     @Override

@@ -47,7 +47,7 @@ public class TransformRegistryRefreshTest
         verify(transformRegistry, atLeast(1)).retrieveConfig();
 
         // As we can't change the content of a classpath resource, lets change what is read.
-        ReflectionTestUtils.setField(transformConfigFiles, "config", ImmutableMap.of(
+        ReflectionTestUtils.setField(transformConfigFiles, "files", ImmutableMap.of(
             "a",   "config/addA2B.json",
             "foo", "config/addB2C.json"));
         transformConfigFromFiles.initFileConfig();

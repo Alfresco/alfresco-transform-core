@@ -35,15 +35,20 @@ import java.util.List;
 import java.util.Map;
 
 @Configuration
-@ConfigurationProperties(prefix = "transform")
+@ConfigurationProperties(prefix = "transform.config")
 public class TransformConfigFiles
 {
-    // Populated from Spring Boot properties or such as transform.config.<engineName> or environment variables like
-    // TRANSFORM_CONFIG_<engineName>.
-    private final Map<String, String> config = new HashMap<>();
+    // Populated from Spring Boot properties or such as transform.config.file.<engineName> or environment variables like
+    // TRANSFORM_CONFIG_FILE_<engineName>.
+    private final Map<String, String> files = new HashMap<>();
+
+    public Map<String, String> getFile()
+    {
+        return files;
+    }
 
     public List<Resource> retrieveResources()
     {
-        return TransformConfigFromFiles.retrieveResources(config);
+        return TransformConfigFromFiles.retrieveResources(files);
     }
 }

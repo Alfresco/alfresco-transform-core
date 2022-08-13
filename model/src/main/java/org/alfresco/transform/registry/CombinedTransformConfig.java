@@ -32,6 +32,7 @@ import org.alfresco.transform.config.TransformStep;
 import org.alfresco.transform.config.Transformer;
 import org.alfresco.transform.config.TransformerAndTypes;
 import org.alfresco.transform.config.Types;
+import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -826,5 +827,10 @@ public class CombinedTransformConfig
     protected int transformerCount()
     {
         return combinedTransformers.size();
+    }
+
+    public Map<String,Origin<Transformer>> getTransformerByNameMap()
+    {
+        return combinedTransformers.stream().collect(Collectors.toMap(origin -> origin.get().getTransformerName(), origin -> origin));
     }
 }

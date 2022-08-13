@@ -56,7 +56,32 @@ public class TransformConfig
 
     public void setTransformOptions(Map<String, Set<TransformOption>> transformOptions)
     {
-        this.transformOptions = new HashMap<>(transformOptions);
+        this.transformOptions = transformOptions == null ? new HashMap<>() : new HashMap<>(transformOptions);
+    }
+
+    public void setRemoveTransformers(Set<String> removeTransformers)
+    {
+        this.removeTransformers = removeTransformers == null ? new HashSet<>() : removeTransformers;
+    }
+
+    public void setAddSupported(Set<AddSupported> addSupported)
+    {
+        this.addSupported = addSupported == null ? new HashSet<>() : addSupported;
+    }
+
+    public void setRemoveSupported(Set<RemoveSupported> removeSupported)
+    {
+        this.removeSupported = removeSupported == null ? new HashSet<>() : removeSupported;
+    }
+
+    public void setOverrideSupported(Set<OverrideSupported> overrideSupported)
+    {
+        this.overrideSupported = overrideSupported == null ? new HashSet<>() : overrideSupported;
+    }
+
+    public void setSupportedDefaults(Set<SupportedDefaults> supportedDefaults)
+    {
+        this.supportedDefaults = supportedDefaults == null ? new HashSet<>() : supportedDefaults;
     }
 
     public List<Transformer> getTransformers()
@@ -91,7 +116,7 @@ public class TransformConfig
 
     public void setTransformers(List<Transformer> transformers)
     {
-        this.transformers = transformers;
+        this.transformers = transformers == null ? new ArrayList<>() : transformers;
     }
 
     @Override

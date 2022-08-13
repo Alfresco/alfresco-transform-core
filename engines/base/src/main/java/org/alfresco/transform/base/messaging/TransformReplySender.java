@@ -36,8 +36,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * Copied from the t-router. We would need to create a common dependency between t-engine base and t-router that
- * knows about jms to remove this duplication.
+ * Copied from the t-router.
  *
  * @author Cezar Leahu
  */

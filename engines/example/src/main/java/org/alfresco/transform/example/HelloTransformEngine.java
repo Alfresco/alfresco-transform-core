@@ -29,7 +29,7 @@ package org.alfresco.transform.example;
 import com.google.common.collect.ImmutableMap;
 import org.alfresco.transform.base.TransformEngine;
 import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.common.TransformConfigResourceReader;
+import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,7 +43,7 @@ public class HelloTransformEngine implements TransformEngine
     @Override
     public String getTransformEngineName()
     {
-        return "0200_hello";
+        return "0200 Hello";
     }
 
     @Override

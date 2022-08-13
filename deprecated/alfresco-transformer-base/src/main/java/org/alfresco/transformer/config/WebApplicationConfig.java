@@ -88,6 +88,6 @@ public class WebApplicationConfig implements WebMvcConfigurer
     @Bean
     public TransformerDebug transformerDebug()
     {
-        return new TransformerDebug().setIsTEngine(true);
+        return new TransformerDebug().setIsTRouter(false);
     }
 }

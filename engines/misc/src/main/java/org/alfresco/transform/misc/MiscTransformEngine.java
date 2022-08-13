@@ -29,7 +29,7 @@ package org.alfresco.transform.misc;
 import com.google.common.collect.ImmutableMap;
 import org.alfresco.transform.base.TransformEngine;
 import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.common.TransformConfigResourceReader;
+import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,7 +52,7 @@ public class MiscTransformEngine implements TransformEngine
     @Override
     public String getTransformEngineName()
     {
-        return "0050-Misc";
+        return "0050 Misc";
     }
 
     @Override

@@ -27,7 +27,7 @@
 package org.alfresco.transform.base;
 
 import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.common.TransformConfigResourceReader;
+import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 
 /**

@@ -26,14 +26,10 @@
  */
 package org.alfresco.transform.base.config;
 
-import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transform.base.html.TransformInterceptor;
 import org.alfresco.transform.base.registry.TransformConfigSource;
-import org.alfresco.transform.base.registry.TransformRegistry;
 import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.messages.TransformRequestValidator;
-import org.alfresco.transform.registry.TransformServiceRegistry;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -58,6 +54,9 @@ public class WebApplicationConfig implements WebMvcConfigurer
     @Value("${transform.core.version}")
     private String coreVersionString;
 
+    @Value("${container.isTRouter}")
+    private boolean isTRouter;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry)
     {
@@ -80,7 +79,7 @@ public class WebApplicationConfig implements WebMvcConfigurer
     @Bean
     public TransformerDebug transformerDebug()
     {
-        return new TransformerDebug().setIsTEngine(true);
+        return new TransformerDebug().setIsTRouter(isTRouter);
     }
 
     @Bean

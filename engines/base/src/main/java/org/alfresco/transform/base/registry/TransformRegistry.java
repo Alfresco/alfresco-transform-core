@@ -26,12 +26,18 @@
 package org.alfresco.transform.base.registry;
 
 import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.TransformOption;
+import org.alfresco.transform.config.TransformOptionGroup;
+import org.alfresco.transform.config.TransformOptionValue;
+import org.alfresco.transform.config.Transformer;
 import org.alfresco.transform.registry.AbstractTransformRegistry;
 import org.alfresco.transform.registry.CombinedTransformConfig;
+import org.alfresco.transform.registry.Origin;
 import org.alfresco.transform.registry.TransformCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -44,11 +50,22 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Objects.isNull;
+import static java.util.stream.Collectors.toUnmodifiableMap;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionOnSingleStepTransformers;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
 public class TransformRegistry extends AbstractTransformRegistry
@@ -59,30 +76,53 @@ public class TransformRegistry extends AbstractTransformRegistry
     private String coreVersion;
     @Autowired
     private List<TransformConfigSource> transformConfigSources;
+    @Value("${container.isTRouter}")
+    private boolean isTRouter;
 
     private static class Data extends TransformCache
     {
-        private TransformConfig transformConfigBeforeIncompleteTransformsAreRemoved;
+        private TransformConfig transformConfig;
+        private TransformConfig uncombinedTransformConfig;
+        private Map<String,Origin<Transformer>> transformerByNameMap;
 
-        public TransformConfig getTransformConfigBeforeIncompleteTransformsAreRemoved()
+        public TransformConfig getTransformConfig()
         {
-            return transformConfigBeforeIncompleteTransformsAreRemoved;
+            return transformConfig;
         }
 
-        public void setTransformConfigBeforeIncompleteTransformsAreRemoved(
-            TransformConfig transformConfigBeforeIncompleteTransformsAreRemoved)
+        public void setTransformConfig(TransformConfig transformConfig)
         {
-            this.transformConfigBeforeIncompleteTransformsAreRemoved = transformConfigBeforeIncompleteTransformsAreRemoved;
+            this.transformConfig = transformConfig;
+        }
+
+        public TransformConfig getUncombinedTransformConfig()
+        {
+            return uncombinedTransformConfig;
+        }
+
+        public void setUncombinedTransformConfig(TransformConfig uncombinedTransformConfig)
+        {
+            this.uncombinedTransformConfig = uncombinedTransformConfig;
+        }
+
+        public Map<String, Origin<Transformer>> getTransformerByNameMap()
+        {
+            return transformerByNameMap;
+        }
+
+        public void setTransformerByNameMap(Map<String, Origin<Transformer>> transformerByNameMap)
+        {
+            this.transformerByNameMap = transformerByNameMap;
         }
     }
 
     private Data data = new Data();
 
     // Ensures that read operations are blocked while config is being updated
-    private ReadWriteLock configRefreshLock = new ReentrantReadWriteLock();
+    private final ReadWriteLock configRefreshLock = new ReentrantReadWriteLock();
 
     @EventListener(ContextRefreshedEvent.class)
-    void handleContextRefreshedEvent(final ContextRefreshedEvent event)
+    public void handleContextRefreshedEvent(final ContextRefreshedEvent event)
     {
         final ApplicationContext context = event.getApplicationContext();
         // the local "initEngineConfigs" method has to be called through the Spring proxy
@@ -135,14 +175,27 @@ public class TransformRegistry extends AbstractTransformRegistry
                     this);
             });
 
-        TransformConfig transformConfigBeforeIncompleteTransformsAreRemoved = combinedTransformConfig.buildTransformConfig();
+        TransformConfig uncombinedTransformConfig = combinedTransformConfig.buildTransformConfig();
         combinedTransformConfig.combineTransformerConfig(this);
-        concurrentUpdate(combinedTransformConfig, transformConfigBeforeIncompleteTransformsAreRemoved);
+        TransformConfig transformConfig = combinedTransformConfig.buildTransformConfig();
+        Map<String, Origin<Transformer>> transformerByNameMap = combinedTransformConfig.getTransformerByNameMap();
+        concurrentUpdate(combinedTransformConfig, uncombinedTransformConfig, transformConfig, transformerByNameMap);
     }
 
     public TransformConfig getTransformConfig()
     {
-        return getData().getTransformConfigBeforeIncompleteTransformsAreRemoved();
+        Data data = getData();
+        return isTRouter
+            ? data.getTransformConfig()
+            : data.getUncombinedTransformConfig();
+    }
+
+    /**
+     * @return Returns true if transform information has been loaded.
+     */
+    public boolean isReadyForTransformRequests()
+    {
+        return getData().getTransforms().size() > 0;
     }
 
     @Override
@@ -155,13 +208,16 @@ public class TransformRegistry extends AbstractTransformRegistry
      * Lock for reads while updating, use {@link #concurrentRead} to access locked fields
      */
     private void concurrentUpdate(CombinedTransformConfig combinedTransformConfig,
-        TransformConfig transformConfigBeforeIncompleteTransformsAreRemoved)
+        TransformConfig uncombinedTransformConfig, TransformConfig transformConfig,
+        Map<String, Origin<Transformer>> transformerByNameMap)
     {
         configRefreshLock.writeLock().lock();
         try
         {
             data = new Data(); // clear data
-            data.setTransformConfigBeforeIncompleteTransformsAreRemoved(transformConfigBeforeIncompleteTransformsAreRemoved);
+            data.setTransformConfig(transformConfig);
+            data.setUncombinedTransformConfig(uncombinedTransformConfig);
+            data.setTransformerByNameMap(transformerByNameMap);
             combinedTransformConfig.registerCombinedTransformers(this);
         }
         finally
@@ -194,5 +250,87 @@ public class TransformRegistry extends AbstractTransformRegistry
     protected void logWarn(String msg)
     {
         logger.warn(msg);
+    }
+
+    public Transformer getTransformer(final String sourceMediaType, final Long fileSizeBytes,
+                                      final String targetMediaType, final Map<String, String> transformOptions)
+    {
+        return concurrentRead(() ->
+        {
+            long fileSize = fileSizeBytes == null ? 0 : fileSizeBytes;
+            String transformerName = findTransformerName(sourceMediaType, fileSize, targetMediaType, transformOptions, null);
+            return getTransformer(transformerName);
+        });
+    }
+
+    public Transformer getTransformer(String transformerName)
+    {
+        return getTransformer(getData(), transformerName);
+    }
+
+    private Transformer getTransformer(Data data, String transformerName)
+    {
+        return data.getTransformerByNameMap().get(transformerName).get();
+    }
+
+    public boolean checkSourceSize(String transformerName, String sourceMediaType, Long sourceSize, String targetMediaType)
+    {
+        return Optional.ofNullable(getTransformer(transformerName)).
+                map(transformer -> transformer.getSupportedSourceAndTargetList().stream().
+                        filter(supported -> supported.getSourceMediaType().equals(sourceMediaType) &&
+                                            supported.getTargetMediaType().equals(targetMediaType)).
+                        findFirst().
+                        map(supported -> supported.getMaxSourceSizeBytes() == -1 ||
+                                         supported.getMaxSourceSizeBytes() >= sourceSize).
+                        orElse(false)).
+                orElse(false);
+    }
+
+    public String getEngineName(String transformerName)
+    {
+        return getData().getTransformerByNameMap().get(transformerName).getReadFrom();
+    }
+
+    /**
+     * Filters the transform options for a given transformer. In a pipeline there may be options for different steps.
+     */
+    public Map<String, String> filterOptions(final String transformerName, final Map<String, String> options)
+    {
+        Data data = getData();
+        final Map<String, Set<TransformOption>> configOptions = data.getTransformConfig().getTransformOptions();
+        final Transformer transformer = getTransformer(data, transformerName);
+        if (isNull(transformer) || isEmpty(options) || isEmpty(configOptions))
+        {
+            return emptyMap();
+        }
+
+        final Set<String> knownOptions = transformer.getTransformOptions()
+                .stream()
+                .flatMap(name -> configOptions.get(name).stream())
+                .filter(Objects::nonNull)
+                .flatMap(TransformRegistry::retrieveOptionsStrings)
+                .collect(toUnmodifiableSet());
+        if (isEmpty(knownOptions))
+        {
+            return emptyMap();
+        }
+
+        return options
+                .entrySet()
+                .stream()
+                .filter(e -> knownOptions.contains(e.getKey()))
+                .collect(toUnmodifiableMap(Entry::getKey, Entry::getValue));
+    }
+
+    private static Stream<String> retrieveOptionsStrings(final TransformOption option)
+    {
+        if (option instanceof TransformOptionGroup)
+        {
+            return ((TransformOptionGroup) option)
+                       .getTransformOptions()
+                       .stream()
+                       .flatMap(TransformRegistry::retrieveOptionsStrings);
+        }
+        return Stream.of(((TransformOptionValue) option).getName());
     }
 }

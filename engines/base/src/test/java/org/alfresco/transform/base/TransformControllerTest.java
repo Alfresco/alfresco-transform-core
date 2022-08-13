@@ -206,7 +206,7 @@ public class TransformControllerTest
     {
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_VERSION))
                .andExpect(status().isOk())
-               .andExpect(content().string("TwoCustomTransformers "+coreVersion+" available"));
+               .andExpect(content().string("TwoCustomTransformers "+coreVersion));
     }
 
     @Test

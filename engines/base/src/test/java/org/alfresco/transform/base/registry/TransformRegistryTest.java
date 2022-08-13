@@ -45,6 +45,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @AutoConfigureMockMvc
 @SpringBootTest(classes={org.alfresco.transform.base.Application.class})
@@ -68,8 +70,9 @@ public class TransformRegistryTest
     {
         transformConfigSources.clear();
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", Collections.emptyList());
-        ReflectionTestUtils.setField(transformConfigFiles, "config", Collections.emptyMap());
+        ReflectionTestUtils.setField(transformConfigFiles, "files", Collections.emptyMap());
         ReflectionTestUtils.setField(transformConfigFilesHistoric, "additional", Collections.emptyMap());
+        ReflectionTestUtils.setField(transformRegistry, "isTRouter", false);
         transformRegistry.retrieveConfig();
     }
 
@@ -113,11 +116,45 @@ public class TransformRegistryTest
     }
 
     @Test
+    public void uncombinedConfigFromEngine()
+    {
+        ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
+            new FakeTransformEngineWithAllInOne(),
+            new FakeTransformEngineWithTwoCustomTransformers()));
+        transformConfigFromTransformEngines.initTransformEngineConfig();
+        transformRegistry.retrieveConfig();
+
+        assertEquals("Pdf2Png, TxT2Pdf, Txt2JpgViaPdf, Txt2PngViaPdf",
+            getTransformerNames(transformRegistry.getTransformConfig()));
+
+        ReflectionTestUtils.setField(transformRegistry, "isTRouter", true);
+        transformConfigFromTransformEngines.initTransformEngineConfig();
+        transformRegistry.retrieveConfig();
+
+        assertEquals("Pdf2Png, TxT2Pdf, Txt2PngViaPdf",
+            getTransformerNames(transformRegistry.getTransformConfig()));
+    }
+
+    @Test
+    public void combinedConfigFromRouter()
+    {
+        ReflectionTestUtils.setField(transformRegistry, "isTRouter", true);
+        ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
+            new FakeTransformEngineWithAllInOne(),
+            new FakeTransformEngineWithTwoCustomTransformers()));
+        transformConfigFromTransformEngines.initTransformEngineConfig();
+        transformRegistry.retrieveConfig();
+
+        assertEquals("Pdf2Png, TxT2Pdf, Txt2PngViaPdf",
+            getTransformerNames(transformRegistry.getTransformConfig()));
+    }
+
+    @Test
     public void singleTransformEngineWithAdditionalConfig()
     {
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
             new FakeTransformEngineWithOneCustomTransformer()));
-        ReflectionTestUtils.setField(transformConfigFiles, "config", ImmutableMap.of(
+        ReflectionTestUtils.setField(transformConfigFiles, "files", ImmutableMap.of(
             "a",   "config/addA2B.json",
             "foo", "config/addB2C.json"));
 
@@ -174,5 +211,20 @@ public class TransformRegistryTest
         transformRegistry.retrieveConfig();
 
         assertEquals("A2Z", getTransformerNames(transformRegistry.getTransformConfig()));
+    }
+
+    @Test
+    public void isReadyForTransformRequests()
+    {
+        transformConfigFromTransformEngines.initTransformEngineConfig();
+        transformRegistry.retrieveConfig();
+        assertFalse(transformRegistry.isReadyForTransformRequests());
+
+        ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
+            new FakeTransformEngineWithOneCustomTransformer()));
+        transformConfigFromTransformEngines.initTransformEngineConfig();
+        transformRegistry.retrieveConfig();
+
+        assertTrue(transformRegistry.isReadyForTransformRequests());
     }
 }

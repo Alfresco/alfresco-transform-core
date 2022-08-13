@@ -162,7 +162,7 @@ public class TransformController
     @ResponseBody
     public String version()
     {
-        return transformEngine.getTransformEngineName() + ' ' + coreVersion +  " available";
+        return transformEngine.getTransformEngineName() + ' ' + coreVersion;
     }
 
     /**
@@ -211,7 +211,7 @@ public class TransformController
         String pathPrefix = "";
         if (behindIngres)
         {
-            int i = transformEngineName.lastIndexOf('-');
+            int i = transformEngineName.indexOf(' ');
             if (i != -1)
             {
                 transformEngineName = transformEngineName.substring(i + 1);

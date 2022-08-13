@@ -119,7 +119,7 @@ public class Transformer
 
     public void setTransformerPipeline(List<TransformStep> transformerPipeline)
     {
-        this.transformerPipeline = transformerPipeline;
+        this.transformerPipeline = transformerPipeline == null ? new ArrayList<>() : transformerPipeline;
     }
 
     public List<String> getTransformerFailover()
@@ -129,7 +129,7 @@ public class Transformer
 
     public void setTransformerFailover(List<String> transformerFailover)
     {
-        this.transformerFailover = transformerFailover;
+        this.transformerFailover = transformerFailover == null ? new ArrayList<>() : transformerFailover;
     }
 
     public Set<String> getTransformOptions()
@@ -139,7 +139,7 @@ public class Transformer
 
     public void setTransformOptions(Set<String> transformOptions)
     {
-        this.transformOptions = transformOptions;
+        this.transformOptions = transformOptions == null ? new HashSet<>() : transformOptions;
     }
 
     public Set<SupportedSourceAndTarget> getSupportedSourceAndTargetList()
@@ -150,7 +150,7 @@ public class Transformer
     public void setSupportedSourceAndTargetList(
         Set<SupportedSourceAndTarget> supportedSourceAndTargetList)
     {
-        this.supportedSourceAndTargetList = supportedSourceAndTargetList;
+        this.supportedSourceAndTargetList = supportedSourceAndTargetList == null ? new HashSet<>() : supportedSourceAndTargetList;
     }
 
     @Override

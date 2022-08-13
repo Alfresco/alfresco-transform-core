@@ -124,7 +124,7 @@ public class TransformControllerAllInOneTest
     {
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_VERSION))
                .andExpect(status().isOk())
-               .andExpect(content().string("AllInOne "+coreVersion+" available"));
+               .andExpect(content().string("AllInOne "+coreVersion));
     }
 
     @Test

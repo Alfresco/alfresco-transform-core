@@ -63,10 +63,10 @@ class TransformerDebugTest
                 .replaceAll(" [\\d,]+ ms", " -- ms");
     }
 
-    private void twoStepTransform(boolean isTEngine, boolean fail, Level logLevel, String renditionName,
+    private void twoStepTransform(boolean isTRouter, boolean fail, Level logLevel, String renditionName,
         long sourceSize)
     {
-        transformerDebug.setIsTEngine(isTEngine);
+        transformerDebug.setIsTRouter(isTRouter);
         monitorLogs(logLevel);
 
         TransformRequest request = TransformRequest.builder()
@@ -144,7 +144,7 @@ class TransformerDebugTest
     @Test
     void testRouterTwoStepTransform()
     {
-        twoStepTransform(false, false, Level.DEBUG, "", 1234L);
+        twoStepTransform(true, false, Level.DEBUG, "", 1234L);
 
         Assertions.assertEquals("" +
                         "1                 txt  pdf   1.2 KB wrapper\n" +
@@ -159,7 +159,7 @@ class TransformerDebugTest
     @Test
     void testRouterTwoStepTransformWithTrace()
     {
-        twoStepTransform(false, false, Level.TRACE, "", 1234L);
+        twoStepTransform(true, false, Level.TRACE, "", 1234L);
 
         // With trace there are "Finished" lines for nested transforms, like a T-Engine's debug but still without
         // the size and rendition name
@@ -178,7 +178,7 @@ class TransformerDebugTest
     @Test
     void testEngineTwoStepTransform()
     {
-        twoStepTransform(true, false, Level.DEBUG, "", 1234L);
+        twoStepTransform(false, false, Level.DEBUG, "", 1234L);
 
         // Note the first and last lines would only ever be logged on the router, but the expected data includes
         // the extra "Finished" lines, sizes and renditions (if set in client data).
@@ -197,7 +197,7 @@ class TransformerDebugTest
     @Test
     void testRouterTwoStepTransformWithFailure()
     {
-        twoStepTransform(false, true, Level.DEBUG, "", 1234L);
+        twoStepTransform(true, true, Level.DEBUG, "", 1234L);
 
         Assertions.assertEquals("" +
                                     "1                 txt  pdf   1.2 KB wrapper\n" +
@@ -212,7 +212,7 @@ class TransformerDebugTest
     @Test
     void testRenditionName()
     {
-        twoStepTransform(false, false, Level.DEBUG, "renditionName", 1234L);
+        twoStepTransform(true, false, Level.DEBUG, "renditionName", 1234L);
 
         Assertions.assertEquals("" +
                                     "1                 txt  pdf   1.2 KB -- renditionName -- wrapper\n" +
@@ -227,7 +227,7 @@ class TransformerDebugTest
     @Test
     void testMetadataExtract()
     {
-        twoStepTransform(false, false, Level.DEBUG, "transform:alfresco-metadata-extract", 1234L);
+        twoStepTransform(true, false, Level.DEBUG, "transform:alfresco-metadata-extract", 1234L);
 
         Assertions.assertEquals("" +
                                     "1                 txt  pdf   1.2 KB -- metadataExtract -- wrapper\n" +
@@ -242,7 +242,7 @@ class TransformerDebugTest
     @Test
     void testMetadataEmbed()
     {
-        twoStepTransform(false, false, Level.DEBUG, "transform:alfresco-metadata-embed", 1234L);
+        twoStepTransform(true, false, Level.DEBUG, "transform:alfresco-metadata-embed", 1234L);
 
         Assertions.assertEquals("" +
                                     "1                 txt  pdf   1.2 KB -- metadataEmbed -- wrapper\n" +
@@ -257,7 +257,7 @@ class TransformerDebugTest
     @Test
     void testSourceSize1Byte()
     {
-        twoStepTransform(false, false, Level.DEBUG, "", 1);
+        twoStepTransform(true, false, Level.DEBUG, "", 1);
 
         Assertions.assertEquals("" +
                                     "1                 txt  pdf   1 byte wrapper\n" +
@@ -272,7 +272,7 @@ class TransformerDebugTest
     @Test
     void testSourceSize23TB()
     {
-        twoStepTransform(false, false, Level.DEBUG, "", 23L*1024*1024*1024*1024);
+        twoStepTransform(true, false, Level.DEBUG, "", 23L*1024*1024*1024*1024);
 
         Assertions.assertEquals("" +
                                     "1                 txt  pdf   23 TB wrapper\n" +
@@ -285,7 +285,7 @@ class TransformerDebugTest
     }
 
     @Test
-    void testLogFailure()
+    void testLogFailureOnTEngine()
     {
         monitorLogs(Level.TRACE);
 
@@ -296,11 +296,33 @@ class TransformerDebugTest
                 .withClientData(origClientData)
                 .build();
 
+        transformerDebug.setIsTRouter(false);
         transformerDebug.logFailure(reply);
 
         String expectedDebug = "                  T-Request was null - a major error";
         Assertions.assertEquals(expectedDebug, getTransformerDebugOutput());
-        assertEquals(origClientData+DEBUG_SEPARATOR+expectedDebug, reply.getClientData());
+        assertEquals(origClientData, reply.getClientData());
+    }
+
+    @Test
+    void testLogFailureOnTRouter()
+    {
+        monitorLogs(Level.TRACE);
+
+        String origClientData = clientDataWithDebugRequest("");
+        TransformReply reply = TransformReply.builder()
+                .withInternalContext(InternalContext.initialise(null))
+                .withErrorDetails("T-Request was null - a major error")
+                .withClientData(origClientData)
+                .build();
+
+        transformerDebug.setIsTRouter(true);
+        transformerDebug.logFailure(reply);
+
+        String expectedDebug = "                  T-Request was null - a major error";
+        String expectedClientData = origClientData+DEBUG_SEPARATOR+expectedDebug;
+        Assertions.assertEquals(expectedDebug, getTransformerDebugOutput());
+        assertEquals(expectedClientData, reply.getClientData());
     }
 
     @Test

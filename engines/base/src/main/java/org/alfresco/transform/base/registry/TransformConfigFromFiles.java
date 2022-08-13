@@ -26,7 +26,7 @@
  */
 package org.alfresco.transform.base.registry;
 
-import org.alfresco.transform.common.TransformConfigResourceReader;
+import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;

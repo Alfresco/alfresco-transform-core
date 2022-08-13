@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2022 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -24,9 +24,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.common;
+package org.alfresco.transform.config.reader;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alfresco.transform.common.TransformException;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -41,7 +41,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
- * Reads {@link TransformConfig} from a {@json} file. Typically used by {@code TransformEngine.getTransformConfig()}.
+ * Reads {@link TransformConfig} from json or yaml files. Typically used by {@code TransformEngine.getTransformConfig()}.
  * <pre>
  *     transformConfigResourceReader.read("classpath:pdfrenderer_engine_config.json");
  * </pre>
@@ -51,20 +51,16 @@ public class TransformConfigResourceReader
 {
     @Autowired ResourceLoader resourceLoader;
 
-    private ObjectMapper jsonObjectMapper = new ObjectMapper();
-
-    public TransformConfig read(String engineConfigLocation)
+    public TransformConfig read(String resourcePath)
     {
-        Resource engineConfig = resourceLoader.getResource(engineConfigLocation);
-        return read(engineConfig);
+        return read(resourceLoader.getResource(resourcePath));
     }
 
     public TransformConfig read(Resource resource)
     {
-        try (Reader reader = new InputStreamReader(resource.getInputStream(), UTF_8))
+        try
         {
-            TransformConfig transformConfig = jsonObjectMapper.readValue(reader, TransformConfig.class);
-            return transformConfig;
+            return TransformConfigReaderFactory.create(resource).load();
         }
         catch (IOException e)
         {
