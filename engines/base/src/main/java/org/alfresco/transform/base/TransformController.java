@@ -342,6 +342,7 @@ public class TransformController
 
         ModelAndView mav = new ModelAndView();
         mav.addObject("title", transformEngine.getTransformEngineName() + " Error Page");
+        mav.addObject("proxyPathPrefix", getPathPrefix(transformEngine.getTransformEngineName()));
         mav.addObject("message", message);
         mav.setViewName("error"); // display error.html
         return mav;

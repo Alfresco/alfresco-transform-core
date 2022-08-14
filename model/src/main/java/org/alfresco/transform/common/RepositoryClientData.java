@@ -33,6 +33,7 @@ public class RepositoryClientData {
     public static final String DEBUG_SEPARATOR = "\u23D1";
     public static final String REPO_ID = "Repo";
     public static final String DEBUG = "debug:";
+    private static final String NO_DEBUG = "nodebug:";
 
     private static final int REPO_INDEX = 0;
     private static final int RENDITION_INDEX = 2;
@@ -60,13 +61,9 @@ public class RepositoryClientData {
         return isRepositoryClientData() ? split[REPO_INDEX].substring(REPO_ID.length()) : "";
     }
 
-    public int getRequestId()
+    public String getRequestId()
     {
-        try {
-            return isRepositoryClientData() ? Integer.parseInt(split[REQUEST_ID_INDEX]) : -1;
-        } catch (NumberFormatException e) {
-            return -1;
-        }
+        return isRepositoryClientData() ? split[REQUEST_ID_INDEX] : "";
     }
 
     public String getRenditionName() {
@@ -107,11 +104,13 @@ public class RepositoryClientData {
 
         private static String emptyClientData()
         {
-            StringJoiner sj = new StringJoiner(CLIENT_DATA_SEPARATOR, REPO_ID+"ACS1234"+CLIENT_DATA_SEPARATOR, "");
-            for (int i=1; i<EXPECTED_ELEMENTS; i++)
+            StringJoiner sj = new StringJoiner(CLIENT_DATA_SEPARATOR);
+            sj.add(REPO_ID+"ACS1234");
+            for (int i=0; i<EXPECTED_ELEMENTS-2; i++)
             {
-                sj.add(Integer.toString(i));
+                sj.add("");
             }
+            sj.add(NO_DEBUG);
             return sj.toString();
         }
 
@@ -121,9 +120,9 @@ public class RepositoryClientData {
             return this;
         }
 
-        public Builder withRequestId(final int requestId)
+        public Builder withRequestId(final String requestId)
         {
-            clientData.split[REQUEST_ID_INDEX] = Integer.toString(requestId);
+            clientData.split[REQUEST_ID_INDEX] = requestId;
             return this;
         }
 

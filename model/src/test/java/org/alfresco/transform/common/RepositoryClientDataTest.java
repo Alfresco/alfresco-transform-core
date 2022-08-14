@@ -43,14 +43,14 @@ public class RepositoryClientDataTest
         repositoryClientData = RepositoryClientData.builder()
                                    .withRepoId("ACS1234")
                                    .withRenditionName("renditionName")
-                                   .withRequestId(54321)
+                                   .withRequestId("e123")
                                    .withDebug()
                                    .build();
         String clientData = repositoryClientData.toString();
 
         assertEquals("ACS1234", repositoryClientData.getAcsVersion());
         assertEquals("renditionName", repositoryClientData.getRenditionName());
-        assertEquals(54321, repositoryClientData.getRequestId());
+        assertEquals("e123", repositoryClientData.getRequestId());
         assertTrue(repositoryClientData.isDebugRequested());
         assertEquals(clientData, repositoryClientData.toString());
     }
@@ -74,7 +74,7 @@ public class RepositoryClientDataTest
 
         assertEquals("ACS1234", repositoryClientData.getAcsVersion());
         assertEquals("renditionName", repositoryClientData.getRenditionName());
-        assertEquals(54321, repositoryClientData.getRequestId());
+        assertEquals("54321", repositoryClientData.getRequestId());
         assertFalse(repositoryClientData.isDebugRequested());
         assertEquals(clientData, repositoryClientData.toString());
     }
@@ -98,7 +98,7 @@ public class RepositoryClientDataTest
 
         assertEquals("", repositoryClientData.getAcsVersion());
         assertEquals("", repositoryClientData.getRenditionName());
-        assertEquals(-1, repositoryClientData.getRequestId());
+        assertEquals("", repositoryClientData.getRequestId());
         assertFalse(repositoryClientData.isDebugRequested());
         assertEquals(clientData, repositoryClientData.toString());
     }
@@ -121,7 +121,7 @@ public class RepositoryClientDataTest
 
         assertEquals("", repositoryClientData.getAcsVersion());
         assertEquals("", repositoryClientData.getRenditionName());
-        assertEquals(-1, repositoryClientData.getRequestId());
+        assertEquals("", repositoryClientData.getRequestId());
         assertFalse(repositoryClientData.isDebugRequested());
         assertEquals(clientData, repositoryClientData.toString());
     }
@@ -145,7 +145,7 @@ public class RepositoryClientDataTest
         repositoryClientData = new RepositoryClientData(clientData);
         assertEquals("", repositoryClientData.getAcsVersion());
         assertEquals("", repositoryClientData.getRenditionName());
-        assertEquals(-1, repositoryClientData.getRequestId());
+        assertEquals("", repositoryClientData.getRequestId());
         assertFalse(repositoryClientData.isDebugRequested());
         assertEquals(clientData, repositoryClientData.toString());
     }
@@ -191,26 +191,5 @@ public class RepositoryClientDataTest
         repositoryClientData.appendDebug("Some other debug");
         assertEquals(clientData+DEBUG_SEPARATOR+"Some debug"+DEBUG_SEPARATOR+"Some other debug",
             repositoryClientData.toString());
-    }
-
-    @Test
-    void invalidRequestIdTest()
-    {
-        String clientData = new StringJoiner(CLIENT_DATA_SEPARATOR)
-            .add(REPO_ID + "ACS1234")
-            .add("1")
-            .add("renditionName")
-            .add("3")
-            .add("4")
-            .add("5")
-            .add("abc")
-            .add("7")
-            .add("8")
-            .add(DEBUG)
-            .toString();
-        repositoryClientData = new RepositoryClientData(clientData);
-
-        assertEquals(-1, repositoryClientData.getRequestId());
-        assertEquals(clientData, repositoryClientData.toString());
     }
 }

@@ -231,14 +231,14 @@ public class TransformStack
         levels(internalContext).add(levelBuilder.build());
     }
 
-    public static void setReference(InternalContext internalContext, int requestCountOrClientRequestId)
+    public static void setReference(InternalContext internalContext, String requestCountOrClientRequestId)
     {
         setHeaderField(internalContext, REFERENCE_INDEX, requestCountOrClientRequestId);
     }
 
     public static void incrementReference(InternalContext internalContext)
     {
-        setHeaderField(internalContext, REFERENCE_INDEX, getReferenceCounter(internalContext)+1);
+        setHeaderField(internalContext, REFERENCE_INDEX, Integer.toString(getReferenceCounter(internalContext)+1));
     }
 
     public static void resetAttemptedRetries(InternalContext internalContext)
@@ -258,6 +258,11 @@ public class TransformStack
 
     private static void setHeaderField(InternalContext internalContext, int index, long value)
     {
+        setHeaderField(internalContext, index, Long.toString(value));
+    }
+
+    private static void setHeaderField(InternalContext internalContext, int index, String value)
+    {
         List<String> levels = levels(internalContext);
         int size = levels.size();
         String level = levels.get(size-1);
@@ -272,14 +277,14 @@ public class TransformStack
         List<String> levels = levels(internalContext);
         for (int i=TOP_STACK_LEVEL; i<levels.size(); i++)
         {
-            ref.add(getHeaderField(levels.get(i), REFERENCE_INDEX).toString());
+            ref.add(getHeaderFieldString(levels.get(i), REFERENCE_INDEX));
         }
         return ref.toString();
     }
 
-    public static void setReferenceInADummyTopLevelIfUnset(InternalContext internalContext, int reference)
+    public static void setReferenceInADummyTopLevelIfUnset(InternalContext internalContext, String reference)
     {
-        if (reference != -1 && getReference(internalContext).isBlank() ) // When top transform level not set
+        if (!reference.isBlank() && getReference(internalContext).isBlank() ) // When top transform level not set
         {
             init(internalContext);
             addTransformLevel(internalContext, levelBuilder(PIPELINE_FLAG));
@@ -309,7 +314,12 @@ public class TransformStack
 
     private static Long getHeaderField(String level, int index)
     {
-        return Long.valueOf(level.split(SEPARATOR_REGEX)[index]);
+        return Long.valueOf(getHeaderFieldString(level, index));
+    }
+
+    private static String getHeaderFieldString(String level, int index)
+    {
+        return level.split(SEPARATOR_REGEX)[index];
     }
 
     public static void removeTransformLevel(InternalContext internalContext)
@@ -504,7 +514,7 @@ public class TransformStack
             (split.length-FIELDS_IN_HEADER)%FIELDS_PER_STEP != 0 ||
             (!PIPELINE_FLAG.equals(split[FLAG_INDEX]) &&
              !FAILOVER_FLAG.equals(split[FLAG_INDEX])) ||
-            !aPositiveInt(split[REFERENCE_INDEX]) ||
+            !aValidReference(split[REFERENCE_INDEX]) ||
             !aPositiveLong(split[START_INDEX]) ||
             !aPositiveInt(split[RETRY_INDEX]))
         {
@@ -520,6 +530,12 @@ public class TransformStack
         }
 
         return true;
+    }
+
+    private static boolean aValidReference(String string)
+    {
+        string = string.startsWith("e") ? string.substring(1) : string;
+        return aPositiveInt(string);
     }
 
     private static boolean aPositiveInt(String string)

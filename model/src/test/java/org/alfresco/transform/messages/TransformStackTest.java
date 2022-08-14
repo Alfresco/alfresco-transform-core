@@ -170,7 +170,7 @@ class TransformStackTest
         TransformStack.addTransformLevel(internalContext, TEST_LEVELS.get("top"));
         assertEquals("1", TransformStack.getReference(internalContext));
 
-        TransformStack.setReference(internalContext, 123);
+        TransformStack.setReference(internalContext, "123");
         assertEquals("123", TransformStack.getReference(internalContext));
 
         TransformStack.addTransformLevel(internalContext, TEST_LEVELS.get("pipeline 1-N"));
@@ -198,7 +198,7 @@ class TransformStackTest
         // Undo setup()
         internalContext.getMultiStep().setTransformsToBeDone(new ArrayList<>());
 
-        TransformStack.setReferenceInADummyTopLevelIfUnset(internalContext, 23);
+        TransformStack.setReferenceInADummyTopLevelIfUnset(internalContext, "23");
         assertEquals("23", TransformStack.getReference(internalContext));
     }
 
@@ -499,6 +499,35 @@ class TransformStackTest
             Assertions.assertNull(TransformStack.checkStructure(internalContext, "T-Reply"));
             // call a getter just in case we have missed something
             TransformStack.currentStep(internalContext);
+        };
+    }
+
+    @Test
+    public void testCheckStructureStackLevelsOkWithLeadingE()
+    {
+        TransformStack.addTransformLevel(internalContext, TEST_LEVELS.get("top"));
+
+        for (String value : Arrays.asList(
+                "P" + SEPARATOR + "e20" + SEPARATOR + START + SEPARATOR +  "1" + STEP))
+        {
+            System.out.println("TransformLevel   value: " + value);
+            internalContext.getMultiStep().getTransformsToBeDone().set(TOP_STACK_LEVEL, value);
+            Assertions.assertNull(TransformStack.checkStructure(internalContext, "T-Reply"));
+        };
+    }
+
+    @Test
+    public void testCheckStructureStackLevelsFailWithLeadingX()
+    {
+        TransformStack.addTransformLevel(internalContext, TEST_LEVELS.get("top"));
+
+        for (String value : Arrays.asList(
+                "P" + SEPARATOR + "x20" + SEPARATOR + START + SEPARATOR +  "1" + STEP))
+        {
+            System.out.println("TransformLevel   value: " + value);
+            internalContext.getMultiStep().getTransformsToBeDone().set(TOP_STACK_LEVEL, value);
+            assertEquals("T-Reply InternalContext did not have levels set correctly",
+                TransformStack.checkStructure(internalContext, "T-Reply"));
         };
     }
 
