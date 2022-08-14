@@ -40,6 +40,11 @@ import java.util.Map;
 public interface TransformManager
 {
     /**
+     * @return the id of the request.
+     */
+    String getRequestId();
+
+    /**
      * Allows a {@link CustomTransformer} to use a local source {@code File} rather than the supplied {@code InputStream}.
      * The file will be deleted once the request is completed. To avoid creating extra files, if a File has already
      * been created by the base t-engine, it is returned.

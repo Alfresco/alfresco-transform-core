@@ -47,9 +47,9 @@ public interface CustomTransformerFileAdaptor extends CustomTransformer
     {
         File sourceFile = transformManager.createSourceFile();
         File targetFile = transformManager.createTargetFile();
-        transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
+        transform(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile, transformManager);
     }
 
     void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-            File sourceFile, File targetFile) throws Exception;
+            File sourceFile, File targetFile, TransformManager transformManager) throws Exception;
 }

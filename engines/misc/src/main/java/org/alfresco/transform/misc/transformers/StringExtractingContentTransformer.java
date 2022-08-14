@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +81,7 @@ public class StringExtractingContentTransformer implements CustomTransformerFile
      */
     @Override
     public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> transformOptions,
-                          final File sourceFile, final File targetFile) throws Exception
+                          final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
     {
         String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
         String targetEncoding = transformOptions.get(TARGET_ENCODING);

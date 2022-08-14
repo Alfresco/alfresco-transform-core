@@ -71,6 +71,11 @@ public class TransformManagerImpl implements TransformManager
         this.processHandler = processHandler;
     }
 
+    @Override public String getRequestId()
+    {
+        return processHandler.getReference();
+    }
+
     public InputStream setInputStream(InputStream inputStream)
     {
         this.inputStream = inputStream;
@@ -130,14 +135,13 @@ public class TransformManagerImpl implements TransformManager
         return targetFile;
     }
 
-    File setTargetFile(File targetFile)
+    public void setTargetFile(File targetFile)
     {
         this.targetFile = targetFile;
         if (startedWithTargetFile == null)
         {
             startedWithTargetFile = true;
         }
-        return targetFile;
     }
 
     public void keepTargetFile()
@@ -179,7 +183,7 @@ public class TransformManagerImpl implements TransformManager
     {
         if (targetFile != null)
         {
-            if (startedWithTargetFile == false)
+            if (!startedWithTargetFile)
             {
                 FileManager.copyFileToOutputStream(targetFile, outputStreamLengthRecorder);
             }

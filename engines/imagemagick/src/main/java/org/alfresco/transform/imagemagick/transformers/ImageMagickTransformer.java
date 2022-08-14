@@ -37,8 +37,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -152,7 +150,7 @@ public class ImageMagickTransformer extends AbstractCommandExecutor implements C
 
     @Override
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                          File sourceFile, File targetFile) throws TransformException
+                          File sourceFile, File targetFile, TransformManager transformManager) throws TransformException
     {
         final String options = ImageMagickOptionsBuilder
                 .builder()

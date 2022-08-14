@@ -47,8 +47,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -133,7 +131,7 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
 
     @Override
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                          File sourceFile, File targetFile)
+                          File sourceFile, File targetFile, TransformManager transformManager)
     {
         call(sourceFile, targetFile);
     }

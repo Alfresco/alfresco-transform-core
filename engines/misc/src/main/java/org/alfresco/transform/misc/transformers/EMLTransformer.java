@@ -46,7 +46,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Map;
@@ -84,7 +83,7 @@ public class EMLTransformer implements CustomTransformerFileAdaptor
 
     @Override
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                          File sourceFile, File targetFile) throws Exception
+                          File sourceFile, File targetFile, TransformManager transformManager) throws Exception
     {
         logger.debug("Performing RFC822 to text transform.");
         // Use try with resource

@@ -39,8 +39,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -86,7 +84,7 @@ public class AppleIWorksContentTransformer implements CustomTransformerFileAdapt
 
     @Override
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                          File sourceFile, File targetFile)
+                          File sourceFile, File targetFile, TransformManager transformManager)
     {
         logger.debug("Performing IWorks to jpeg transform with sourceMimetype={} targetMimetype={}",
             sourceMimetype, targetMimetype);

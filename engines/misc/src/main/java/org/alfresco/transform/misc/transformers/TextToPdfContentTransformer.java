@@ -116,7 +116,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
     @Override
     public void transform(final String sourceMimetype, final String targetMimetype, final Map<String,
                           String> transformOptions,
-                          final File sourceFile, final File targetFile) throws Exception
+                          final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
     {
         String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
         String stringPageLimit = transformOptions.get(PAGE_LIMIT);

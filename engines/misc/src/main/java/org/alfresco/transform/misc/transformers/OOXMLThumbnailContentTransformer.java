@@ -40,7 +40,6 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
@@ -70,7 +69,7 @@ public class OOXMLThumbnailContentTransformer implements CustomTransformerFileAd
 
     @Override
     public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
-                          final File sourceFile, final File targetFile) throws Exception
+                          final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
     {
         if (logger.isDebugEnabled())
         {

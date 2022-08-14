@@ -28,14 +28,20 @@ import java.util.stream.Stream;
  * The client data supplied and echoed back to content repository (the client). May be modified to include
  * TransformerDebug.
  */
-public class RepositoryClientData
-{
+public class RepositoryClientData {
     public static final String CLIENT_DATA_SEPARATOR = "\u23D0";
     public static final String DEBUG_SEPARATOR = "\u23D1";
-    static final String REPO_ID = "Repo";
+    public static final String REPO_ID = "Repo";
     public static final String DEBUG = "debug:";
 
+    private static final int REPO_INDEX = 0;
+    private static final int RENDITION_INDEX = 2;
+    private static final int REQUEST_ID_INDEX = 6;
+    private static final int DEBUG_INDEX = 9;
+    private static final int EXPECTED_ELEMENTS = 10;
+
     private final String origClientData;
+
     private final String[] split;
 
     public RepositoryClientData(String clientData)
@@ -46,53 +52,102 @@ public class RepositoryClientData
 
     private boolean isRepositoryClientData()
     {
-        return split != null && split.length == 10 && split[0].startsWith(REPO_ID);
+        return split != null && split.length == EXPECTED_ELEMENTS && split[REPO_INDEX].startsWith(REPO_ID);
     }
 
     public String getAcsVersion()
     {
-        return isRepositoryClientData() ? split[0].substring(REPO_ID.length()) : "";
+        return isRepositoryClientData() ? split[REPO_INDEX].substring(REPO_ID.length()) : "";
     }
 
     public int getRequestId()
     {
-        try
-        {
-            return isRepositoryClientData() ? Integer.parseInt(split[6]) : -1;
-        }
-        catch (NumberFormatException e)
-        {
+        try {
+            return isRepositoryClientData() ? Integer.parseInt(split[REQUEST_ID_INDEX]) : -1;
+        } catch (NumberFormatException e) {
             return -1;
         }
     }
 
-    public String getRenditionName()
-    {
-        return isRepositoryClientData() ? split[2] : "";
+    public String getRenditionName() {
+        return isRepositoryClientData() ? split[RENDITION_INDEX] : "";
     }
 
-    public void appendDebug(String message)
-    {
+    public void appendDebug(String message) {
         if (isDebugRequested())
         {
-            split[9] += DEBUG_SEPARATOR+ message;
+            split[DEBUG_INDEX] += DEBUG_SEPARATOR + message;
         }
     }
 
-    public boolean isDebugRequested()
-    {
+    public boolean isDebugRequested() {
         return isRepositoryClientData() && split[9].startsWith(DEBUG);
     }
 
-    @Override
-    public String toString()
-    {
-        if (split == null)
-        {
+    @Override public String toString() {
+        if (split == null) {
             return origClientData;
         }
         StringJoiner sj = new StringJoiner(CLIENT_DATA_SEPARATOR);
-        Stream.of(split).forEach(element -> sj.add(element));
+        Stream.of(split).forEach(sj::add);
         return sj.toString();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder
+    {
+        private final RepositoryClientData clientData = new RepositoryClientData(emptyClientData());
+
+        private Builder()
+        {
+        }
+
+        private static String emptyClientData()
+        {
+            StringJoiner sj = new StringJoiner(CLIENT_DATA_SEPARATOR, REPO_ID+"ACS1234"+CLIENT_DATA_SEPARATOR, "");
+            for (int i=1; i<EXPECTED_ELEMENTS; i++)
+            {
+                sj.add(Integer.toString(i));
+            }
+            return sj.toString();
+        }
+
+        public Builder withRepoId(final String version)
+        {
+            clientData.split[REPO_INDEX] = REPO_ID+version;
+            return this;
+        }
+
+        public Builder withRequestId(final int requestId)
+        {
+            clientData.split[REQUEST_ID_INDEX] = Integer.toString(requestId);
+            return this;
+        }
+
+        public Builder withRenditionName(final String renditionName)
+        {
+            clientData.split[RENDITION_INDEX] = renditionName;
+            return this;
+        }
+
+        public Builder withDebug()
+        {
+            clientData.split[DEBUG_INDEX]=DEBUG;
+            return this;
+        }
+
+        public Builder withDebugMessage(final String message)
+        {
+            clientData.split[DEBUG_INDEX]=DEBUG+DEBUG_SEPARATOR+message;
+            return this;
+        }
+
+        public RepositoryClientData build()
+        {
+            return clientData;
+        }
     }
 }

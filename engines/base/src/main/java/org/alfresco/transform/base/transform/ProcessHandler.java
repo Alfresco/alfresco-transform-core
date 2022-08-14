@@ -108,6 +108,12 @@ abstract class ProcessHandler extends FragmentHandler
         super.init();
     }
 
+
+    public String getReference()
+    {
+        return reference;
+    }
+
     public void handleTransformRequest()
     {
         LogEntry.start();

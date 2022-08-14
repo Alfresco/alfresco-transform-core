@@ -39,11 +39,8 @@ import java.util.StringJoiner;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
-import static org.alfresco.transform.common.RepositoryClientData.CLIENT_DATA_SEPARATOR;
-import static org.alfresco.transform.common.RepositoryClientData.DEBUG;
 import static org.alfresco.transform.common.RepositoryClientData.DEBUG_SEPARATOR;
-import static org.alfresco.transform.common.RepositoryClientData.REPO_ID;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests TransformerDebug. AbstractRouterTest in the t-router contains more complete end to end tests. The tests in this
@@ -72,7 +69,7 @@ class TransformerDebugTest
         TransformRequest request = TransformRequest.builder()
                 .withSourceSize(sourceSize)
                 .withInternalContext(InternalContext.initialise(null))
-                .withClientData(clientDataWithDebugRequest(renditionName))
+                .withClientData(RepositoryClientData.builder().withRenditionName(renditionName).build().toString())
                 .build();
         TransformStack.setInitialSourceReference(request.getInternalContext(), "fileRef");
 
@@ -106,22 +103,6 @@ class TransformerDebugTest
             TransformStack.removeSuccessfulStep(reply, transformerDebug);
             TransformStack.removeTransformLevel(reply.getInternalContext());
         }
-    }
-
-    private String clientDataWithDebugRequest(String renditionName)
-    {
-        return new StringJoiner(CLIENT_DATA_SEPARATOR)
-            .add(REPO_ID + "ACS1234")
-            .add("1")
-            .add(renditionName)
-            .add("3")
-            .add("4")
-            .add("5")
-            .add("54321")
-            .add("7")
-            .add("8")
-            .add(DEBUG)
-            .toString();
     }
 
     private void monitorLogs(Level logLevel)
@@ -289,7 +270,7 @@ class TransformerDebugTest
     {
         monitorLogs(Level.TRACE);
 
-        String origClientData = clientDataWithDebugRequest("");
+        String origClientData = RepositoryClientData.builder().build().toString();
         TransformReply reply = TransformReply.builder()
                 .withInternalContext(InternalContext.initialise(null))
                 .withErrorDetails("T-Request was null - a major error")
@@ -309,7 +290,7 @@ class TransformerDebugTest
     {
         monitorLogs(Level.TRACE);
 
-        String origClientData = clientDataWithDebugRequest("");
+        String origClientData = RepositoryClientData.builder().withDebug().build().toString();
         TransformReply reply = TransformReply.builder()
                 .withInternalContext(InternalContext.initialise(null))
                 .withErrorDetails("T-Request was null - a major error")

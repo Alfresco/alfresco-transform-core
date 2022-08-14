@@ -26,13 +26,8 @@
  */
 package org.alfresco.transform.base.messaging;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Queue;
-
 import org.alfresco.transform.messages.TransformRequestValidator;
 import org.apache.activemq.command.ActiveMQQueue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -44,6 +39,9 @@ import org.springframework.jms.connection.JmsTransactionManager;
 import org.springframework.lang.NonNull;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import javax.jms.ConnectionFactory;
+import javax.jms.Queue;
 
 /**
  * JMS and messaging configuration for the T-Engines. Contains the basic config in order to have the

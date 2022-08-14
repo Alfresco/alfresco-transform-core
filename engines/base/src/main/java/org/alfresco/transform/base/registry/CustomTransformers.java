@@ -37,6 +37,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class CustomTransformers
@@ -47,8 +48,6 @@ public class CustomTransformers
     private List<CustomTransformer> customTransformers;
 
     private final Map<String, CustomTransformer> customTransformersByName = new HashMap<>();
-
-    private CustomTransformer defaultCustomTransformer;
 
     @PostConstruct
     private void initCustomTransformersByName()
@@ -61,19 +60,17 @@ public class CustomTransformers
             logger.info("Transformers:");
             customTransformers.stream()
                   .sorted(Comparator.comparing(CustomTransformer::getTransformerName))
-                  .map(customTransformer -> "  "+customTransformer.getTransformerName()).forEach(logger::info);
+                  .map(customTransformer -> customTransformer.getTransformerName())
+                  .filter(Objects::nonNull)
+                  .map(name -> "  "+name)
+                  .forEach(logger::info);
         }
-    }
-
-    public void setDefaultCustomTransformer(CustomTransformer defaultCustomTransformer)
-    {
-        this.defaultCustomTransformer = defaultCustomTransformer;
     }
 
     public CustomTransformer get(String name)
     {
         CustomTransformer customTransformer = customTransformersByName.get(name);
-        return customTransformer == null ? defaultCustomTransformer : customTransformer;
+        return customTransformer == null ? customTransformersByName.get(null) : customTransformer;
     }
 
     public void put(String name, CustomTransformer  customTransformer)

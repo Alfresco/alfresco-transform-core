@@ -40,19 +40,13 @@ public class RepositoryClientDataTest
     @Test
     void AcsClientDataWithDebugTest()
     {
-        String clientData = new StringJoiner(CLIENT_DATA_SEPARATOR)
-            .add(REPO_ID + "ACS1234")
-            .add("1")
-            .add("renditionName")
-            .add("3")
-            .add("4")
-            .add("5")
-            .add("54321")
-            .add("7")
-            .add("8")
-            .add(DEBUG)
-            .toString();
-        repositoryClientData = new RepositoryClientData(clientData);
+        repositoryClientData = RepositoryClientData.builder()
+                                   .withRepoId("ACS1234")
+                                   .withRenditionName("renditionName")
+                                   .withRequestId(54321)
+                                   .withDebug()
+                                   .build();
+        String clientData = repositoryClientData.toString();
 
         assertEquals("ACS1234", repositoryClientData.getAcsVersion());
         assertEquals("renditionName", repositoryClientData.getRenditionName());

@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.htmlparser.Parser;
 import org.htmlparser.beans.StringBean;
@@ -88,7 +89,7 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
     @Override
     public void transform(final String sourceMimetype, final String targetMimetype,
                           final Map<String, String> transformOptions,
-                          final File sourceFile, final File targetFile) throws Exception
+                          final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
     {
         String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
         checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
