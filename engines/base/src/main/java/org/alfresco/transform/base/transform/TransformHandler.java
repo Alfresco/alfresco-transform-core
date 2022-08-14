@@ -26,12 +26,12 @@
  */
 package org.alfresco.transform.base.transform;
 
-import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.TransformEngine;
 import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
 import org.alfresco.transform.base.messaging.TransformReplySender;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.base.registry.CustomTransformers;
 import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
@@ -53,7 +53,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import javax.jms.Destination;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedInputStream;
@@ -65,8 +64,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -93,7 +90,7 @@ public class TransformHandler
     @Autowired(required = false)
     private List<TransformEngine> transformEngines;
     @Autowired(required = false)
-    private List<CustomTransformer> customTransformers;
+    private CustomTransformers customTransformers;
     @Autowired
     private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
     @Autowired
@@ -106,22 +103,6 @@ public class TransformHandler
     private TransformerDebug transformerDebug;
 
     private final AtomicInteger httpRequestCount = new AtomicInteger(1);
-    private final Map<String, CustomTransformer> customTransformersByName = new HashMap<>();
-
-    @PostConstruct
-    private void initCustomTransformersByName()
-    {
-        if (customTransformers != null)
-        {
-            customTransformers.forEach(customTransformer ->
-                    customTransformersByName.put(customTransformer.getTransformerName(), customTransformer));
-
-            logger.info("Transformers:");
-            customTransformers.stream()
-                              .sorted(Comparator.comparing(CustomTransformer::getTransformerName))
-                              .map(customTransformer -> "  "+customTransformer.getTransformerName()).forEach(logger::info);
-        }
-    }
 
     public ResponseEntity<Resource> handleHttpRequest(HttpServletRequest request,
             MultipartFile sourceMultipartFile, String sourceMimetype, String targetMimetype,
@@ -131,7 +112,7 @@ public class TransformHandler
 
         new ProcessHandler(sourceMimetype, targetMimetype, requestParameters,
             "e" + httpRequestCount.getAndIncrement(), transformRegistry,
-            transformerDebug, probeTransform, customTransformersByName)
+            transformerDebug, probeTransform, customTransformers)
         {
             @Override
             protected void init() throws IOException
@@ -175,7 +156,7 @@ public class TransformHandler
     {
         new ProcessHandler(sourceMimetype, targetMimetype, transformOptions,
             "p" + httpRequestCount.getAndIncrement(), transformRegistry,
-            transformerDebug, probeTransform, customTransformersByName)
+            transformerDebug, probeTransform, customTransformers)
         {
             @Override
             protected void init() throws IOException
@@ -212,7 +193,7 @@ public class TransformHandler
         TransformReply reply = createBasicTransformReply(request);
         new ProcessHandler(request.getSourceMediaType(), request.getTargetMediaType(),
             request.getTransformRequestOptions(),"unset", transformRegistry,
-            transformerDebug, probeTransform, customTransformersByName)
+            transformerDebug, probeTransform, customTransformers)
         {
             @Override
             protected void init() throws IOException

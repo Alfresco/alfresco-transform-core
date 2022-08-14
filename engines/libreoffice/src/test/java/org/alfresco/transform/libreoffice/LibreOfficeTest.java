@@ -56,6 +56,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.registry.CustomTransformers;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.libreoffice.transformers.LibreOfficeTransformer;
@@ -89,6 +90,8 @@ public class LibreOfficeTest extends AbstractBaseTest
 
     @Autowired
     private LibreOfficeTransformer libreOfficeTransformer;
+    @Autowired
+    private CustomTransformers customTransformers;
 
     @Spy
     private LibreOfficeTransformer spyLibreOfficeTransformer;
@@ -111,8 +114,7 @@ public class LibreOfficeTest extends AbstractBaseTest
     @BeforeEach
     public void before() throws IOException
     {
-        var customTransformersByName = (Map<String, CustomTransformer>) ReflectionTestUtils.getField(transformHandler, "customTransformersByName");
-        customTransformersByName.put("libreoffice", spyLibreOfficeTransformer);
+        customTransformers.put("libreoffice", spyLibreOfficeTransformer);
 
         sourceExtension = "doc";
         targetExtension = "pdf";
@@ -157,8 +159,7 @@ public class LibreOfficeTest extends AbstractBaseTest
     @AfterEach
     public void after() throws IOException
     {
-        var customTransformersByName = (Map<String, CustomTransformer>) ReflectionTestUtils.getField(transformHandler, "customTransformersByName");
-        customTransformersByName.put("libreoffice", libreOfficeTransformer);
+        customTransformers.put("libreoffice", libreOfficeTransformer);
     }
 
     @Override

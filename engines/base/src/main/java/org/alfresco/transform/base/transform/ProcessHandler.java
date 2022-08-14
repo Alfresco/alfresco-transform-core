@@ -30,6 +30,7 @@ import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.TransformController;
 import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.base.registry.CustomTransformers;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.common.TransformException;
 import org.alfresco.transform.common.TransformerDebug;
@@ -48,7 +49,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_EXTENSION;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_EXTENSION;
@@ -76,11 +76,11 @@ abstract class ProcessHandler extends FragmentHandler
     private final TransformServiceRegistry transformRegistry;
     private final TransformerDebug transformerDebug;
     private final ProbeTransform probeTransform;
-    private final Map<String, CustomTransformer> customTransformersByName;
+    private final CustomTransformers customTransformers;
 
     ProcessHandler(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
         String reference, TransformServiceRegistry transformRegistry, TransformerDebug transformerDebug,
-        ProbeTransform probeTransform, Map<String, CustomTransformer> customTransformersByName)
+        ProbeTransform probeTransform, CustomTransformers customTransformers)
     {
         this.sourceMimetype = sourceMimetype;
         this.targetMimetype = targetMimetype;
@@ -90,7 +90,7 @@ abstract class ProcessHandler extends FragmentHandler
         this.transformRegistry = transformRegistry;
         this.transformerDebug = transformerDebug;
         this.probeTransform = probeTransform;
-        this.customTransformersByName = customTransformersByName;
+        this.customTransformers = customTransformers;
     }
 
     private static Map<String, String> cleanTransformOptions(Map<String, String> requestParameters)
@@ -198,7 +198,7 @@ abstract class ProcessHandler extends FragmentHandler
 
     private CustomTransformer getCustomTransformer(String transformName)
     {
-        CustomTransformer customTransformer = customTransformersByName.get(transformName);
+        CustomTransformer customTransformer = customTransformers.get(transformName);
         if (customTransformer == null)
         {
             throw new TransformException(INTERNAL_SERVER_ERROR, "Custom Transformer "+transformName+" not found");
