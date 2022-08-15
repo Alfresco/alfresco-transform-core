@@ -67,7 +67,7 @@ public class TransformConfigFromFiles
         {
             String filename = resource.getFilename();
             transformConfigSources.add(
-                new AbstractTransformConfigSource(filename, "Additional config "+filename,null)
+                new AbstractTransformConfigSource(filename, filename,null)
                 {
                     @Override public TransformConfig getTransformConfig()
                     {

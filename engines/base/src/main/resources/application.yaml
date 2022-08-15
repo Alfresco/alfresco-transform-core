@@ -29,7 +29,7 @@ logging:
   level:
     org.alfresco.transform.common.TransformerDebug: debug
 
-fileStoreUrl: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
+filestore-url: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
 
 transform:
   core:

@@ -62,7 +62,7 @@ public class SharedFileStoreClient
 {
     private static final Logger logger = LoggerFactory.getLogger(SharedFileStoreClient.class);
 
-    @Value("${fileStoreUrl}")
+    @Value("${filestore-url}")
     private String url;
 
     @Autowired
