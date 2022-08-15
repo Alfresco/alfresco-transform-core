@@ -43,6 +43,7 @@ public class TransformRegistryRefreshTest
     @Test
     public void checkRegistryRefreshes() throws InterruptedException
     {
+        waitForRegistryReady(1000);
         assertEquals(4, transformRegistry.getTransformConfig().getTransformers().size());
         verify(transformRegistry, atLeast(1)).retrieveConfig();
 
@@ -55,5 +56,19 @@ public class TransformRegistryRefreshTest
         Thread.sleep(3000); // to give it a chance to refresh a few (at least 2 more) times
         verify(transformRegistry, atLeast(1+2)).retrieveConfig();
         assertEquals(6, transformRegistry.getTransformConfig().getTransformers().size());
+    }
+
+    private void waitForRegistryReady(int timeout) throws InterruptedException
+    {
+        long start = System.currentTimeMillis();
+        while (!transformRegistry.isReadyForTransformRequests())
+        {
+            if (System.currentTimeMillis()-start > timeout)
+            {
+                throw new IllegalStateException("Registry is still not ready after "+timeout+" ms");
+            }
+            Thread.sleep(100);
+        }
+        System.out.println("Registry ready after "+(System.currentTimeMillis()-start)+" ms");
     }
 }
