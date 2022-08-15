@@ -39,7 +39,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -62,7 +61,7 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author adavis
  */
-public class TransformRegistryTest
+public class TransformRegistryModelTest
 {
     protected static final String GIF = "image/gif";
     protected static final String JPEG = "image/jpeg";
