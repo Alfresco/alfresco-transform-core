@@ -35,7 +35,7 @@ before_install: bash _ci/init.sh
 jobs:
   include:
     - stage: Veracode Scan
-      name: "Veracode - Source Clear Scan (SCA)" 
+      name: "Veracode - Source Clear Scan (SCA)"
       install: skip
       script: travis_wait 30 bash _ci/source_clear.sh
 
