@@ -138,7 +138,7 @@ public class TransformHandler
             @Override
             protected long getSourceSize()
             {
-                return sourceMultipartFile.getSize();
+                return sourceMultipartFile == null ? -1 : sourceMultipartFile.getSize();
             }
 
             protected void sendTransformResponse(TransformManagerImpl transformManager)
