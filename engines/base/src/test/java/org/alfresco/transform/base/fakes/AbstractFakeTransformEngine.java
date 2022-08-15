@@ -38,7 +38,7 @@ public abstract class AbstractFakeTransformEngine implements TransformEngine
     @Override public String getTransformEngineName()
     {
         String simpleClassName = getClass().getSimpleName();
-        return simpleClassName.substring("FakeTransformEngineWith".length());
+        return "0000 "+simpleClassName.substring("FakeTransformEngineWith".length());
     }
 
     @Override public String getStartupMessage()

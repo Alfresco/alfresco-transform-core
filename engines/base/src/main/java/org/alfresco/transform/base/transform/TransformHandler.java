@@ -138,7 +138,7 @@ public class TransformHandler
             @Override
             protected long getSourceSize()
             {
-                return -1L; // Ignore for http requests as the Alfresco repo will have checked.
+                return sourceMultipartFile.getSize();
             }
 
             protected void sendTransformResponse(TransformManagerImpl transformManager)

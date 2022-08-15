@@ -46,9 +46,9 @@ public class TransformerDebug
     private static final String TIMEOUT =  "timeout";
 
     // For truncating long option values
-    private static int MAX_OPTION_VALUE = 60;
-    private static int MAX_OPTION_END_CHARS = 5;
-    private static String MAX_OPTION_DOTS = "...";
+    private static final int MAX_OPTION_VALUE = 60;
+    private static final int MAX_OPTION_END_CHARS = 5;
+    private static final String MAX_OPTION_DOTS = "...";
 
     private boolean isTRouter = false;
 
@@ -90,7 +90,7 @@ public class TransformerDebug
 
     public void pushTransform(String reference, String sourceMimetype, String targetMimetype, long sourceSizeInBytes, String transformerName)
     {
-        if (logger.isDebugEnabled())
+        if (logger.isDebugEnabled() && !isTRouter)
         {
             String message = getPaddedReference(reference) +
                     getMimetypeExt(sourceMimetype) +
@@ -108,25 +108,30 @@ public class TransformerDebug
             InternalContext internalContext = reply.getInternalContext();
             String reference = TransformStack.getReference(internalContext);
             long elapsedTime = TransformStack.getElapsedTime(internalContext);
-            popTransform(reference, elapsedTime);
+            popTransformWithDebugForEnginesOrAtTopForRouter(reference, elapsedTime);
         }
     }
 
     public void popTransform(String reference, long elapsedTime)
     {
-        if (logger.isDebugEnabled())
+        if (logger.isDebugEnabled() && !isTRouter)
         {
-            String message = getPaddedReference(reference) + "Finished in " + ms(elapsedTime);
-            if (isTopLevel(reference) || !isTRouter())
-            {
-                logger.debug(message);
-            }
-            else
-            {
-                logger.trace(message);
-            }
-            // We don't append the Finished message to ClientData as that would be too much
+            popTransformWithDebugForEnginesOrAtTopForRouter(reference, elapsedTime);
         }
+    }
+
+    private void popTransformWithDebugForEnginesOrAtTopForRouter(String reference, long elapsedTime)
+    {
+        String message = getPaddedReference(reference) + "Finished in " + ms(elapsedTime);
+        if (isTopLevel(reference) || !isTRouter())
+        {
+            logger.debug(message);
+        }
+        else
+        {
+            logger.trace(message);
+        }
+        // We don't append the Finished message to ClientData as that would be too much
     }
 
     public void logOptions(TransformRequest request)
@@ -160,7 +165,7 @@ public class TransformerDebug
 
     public void logOptions(String reference, Map<String, String> options)
     {
-        if (logger.isDebugEnabled() && options != null && !options.isEmpty())
+        if (logger.isDebugEnabled() && !isTRouter && options != null && !options.isEmpty())
         {
             for (Map.Entry<String, String> option : options.entrySet())
             {

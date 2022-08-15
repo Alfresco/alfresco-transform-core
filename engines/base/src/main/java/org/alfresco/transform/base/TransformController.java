@@ -162,7 +162,7 @@ public class TransformController
     @ResponseBody
     public String version()
     {
-        return transformEngine.getTransformEngineName() + ' ' + coreVersion;
+        return getSimpleTransformEngineName() + ' ' + coreVersion;
     }
 
     /**
@@ -171,8 +171,8 @@ public class TransformController
     @GetMapping(ENDPOINT_ROOT)
     public String test(Model model)
     {
-        model.addAttribute("title", transformEngine.getTransformEngineName() + " Test Page");
-        model.addAttribute("proxyPathPrefix", getPathPrefix(transformEngine.getTransformEngineName()));
+        model.addAttribute("title", getSimpleTransformEngineName() + " Test Page");
+        model.addAttribute("proxyPathPrefix", getPathPrefix());
         TransformConfig transformConfig = ((TransformRegistry) transformRegistry).getTransformConfig();
         transformConfig = setOrClearCoreVersion(transformConfig, 0);
         model.addAttribute("transformOptions", optionLister.getOptionNames(transformConfig.getTransformOptions()));
@@ -185,8 +185,8 @@ public class TransformController
     @GetMapping(ENDPOINT_ERROR)
     public String error(Model model)
     {
-        model.addAttribute("title", transformEngine.getTransformEngineName() + " Error Page");
-        model.addAttribute("proxyPathPrefix", getPathPrefix(transformEngine.getTransformEngineName()));
+        model.addAttribute("title", getSimpleTransformEngineName() + " Error Page");
+        model.addAttribute("proxyPathPrefix", getPathPrefix());
         return "error"; // display error.html
     }
 
@@ -196,8 +196,8 @@ public class TransformController
     @GetMapping(ENDPOINT_LOG)
     String log(Model model)
     {
-        model.addAttribute("title", transformEngine.getTransformEngineName() + " Log Entries");
-        model.addAttribute("proxyPathPrefix", getPathPrefix(transformEngine.getTransformEngineName()));
+        model.addAttribute("title", getSimpleTransformEngineName() + " Log Entries");
+        model.addAttribute("proxyPathPrefix", getPathPrefix());
         Collection<LogEntry> log = LogEntry.getLog();
         if (!log.isEmpty())
         {
@@ -206,19 +206,19 @@ public class TransformController
         return "log"; // display log.html
     }
 
-    private Object getPathPrefix(String transformEngineName)
+    private Object getPathPrefix()
     {
         String pathPrefix = "";
         if (behindIngres)
         {
-            int i = transformEngineName.indexOf(' ');
-            if (i != -1)
-            {
-                transformEngineName = transformEngineName.substring(i + 1);
-            }
-            pathPrefix = "/" + transformEngineName.toLowerCase();
+            pathPrefix = "/" + getSimpleTransformEngineName().toLowerCase();
         }
         return pathPrefix;
+    }
+
+    private String getSimpleTransformEngineName()
+    {
+        return transformEngine.getTransformEngineName().replaceFirst("^\\d+ ", "");
     }
 
     /**
@@ -228,6 +228,7 @@ public class TransformController
     @ResponseBody
     public String ready(HttpServletRequest request)
     {
+        // An alternative without transforms might be: ((TransformRegistry)transformRegistry).isReadyForTransformRequests();
         return getProbeTransform().doTransformOrNothing(request, false, transformHandler);
     }
 
@@ -341,8 +342,8 @@ public class TransformController
         response.sendError(e.getStatus().value(), message);
 
         ModelAndView mav = new ModelAndView();
-        mav.addObject("title", transformEngine.getTransformEngineName() + " Error Page");
-        mav.addObject("proxyPathPrefix", getPathPrefix(transformEngine.getTransformEngineName()));
+        mav.addObject("title", getSimpleTransformEngineName() + " Error Page");
+        mav.addObject("proxyPathPrefix", getPathPrefix());
         mav.addObject("message", message);
         mav.setViewName("error"); // display error.html
         return mav;

@@ -150,8 +150,8 @@ public class TransformControllerTest
 
         assertEquals(
             "--------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
-             + "Startup TwoCustomTransformers\n"
-             + "Line 2 TwoCustomTransformers\n"
+             + "Startup 0000 TwoCustomTransformers\n"
+             + "Line 2 0000 TwoCustomTransformers\n"
              + "Line 3\n"
              + "--------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
              + "Starting application components... Done",
