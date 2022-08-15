@@ -450,8 +450,8 @@ public class TikaTest extends AbstractBaseTest
         ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
             sourceFile), headers, OK);
 
-        when(alfrescoSharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
-        when(alfrescoSharedFileStoreClient.saveFile(any()))
+        when(sharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
+        when(sharedFileStoreClient.saveFile(any()))
             .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
         when(mockExecutionResult.getExitValue()).thenReturn(0);
 

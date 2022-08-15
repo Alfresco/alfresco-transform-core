@@ -52,10 +52,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.UUID;
 
-import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.registry.CustomTransformers;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
@@ -213,8 +211,8 @@ public class LibreOfficeTest extends AbstractBaseTest
         ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
             sourceFile), headers, OK);
 
-        when(alfrescoSharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
-        when(alfrescoSharedFileStoreClient.saveFile(any()))
+        when(sharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
+        when(sharedFileStoreClient.saveFile(any()))
             .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
         when(mockExecutionResult.getExitValue()).thenReturn(0);
 

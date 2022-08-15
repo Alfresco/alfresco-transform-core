@@ -33,7 +33,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
+import org.alfresco.transform.base.sfs.SharedFileStoreClient;
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
 import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
 import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
@@ -127,7 +127,7 @@ public class TransformControllerTest
     @TempDir
     public File tempDir;
     @MockBean
-    protected AlfrescoSharedFileStoreClient fakeSfsClient;
+    protected SharedFileStoreClient fakeSfsClient;
 
     static void resetProbeForTesting(TransformController transformController)
     {

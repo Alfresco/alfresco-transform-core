@@ -27,7 +27,7 @@
 package org.alfresco.transform.base;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
+import org.alfresco.transform.base.sfs.SharedFileStoreClient;
 import org.alfresco.transform.base.executors.CommandExecutor;
 import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.base.model.FileRefEntity;
@@ -101,7 +101,7 @@ public abstract class AbstractBaseTest
     protected ObjectMapper objectMapper;
 
     @MockBean
-    protected AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
+    protected SharedFileStoreClient sharedFileStoreClient;
 
     @SpyBean
     protected TransformServiceRegistry transformRegistry;
@@ -393,7 +393,7 @@ public abstract class AbstractBaseTest
 
         transformRequestOptions.put(DIRECT_ACCESS_URL, directUrl);
 
-        when(alfrescoSharedFileStoreClient.saveFile(any()))
+        when(sharedFileStoreClient.saveFile(any()))
                 .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
 
         // Update the Transformation Request with any specific params before sending it

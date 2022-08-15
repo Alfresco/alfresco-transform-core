@@ -24,15 +24,20 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.transform.base.clients;
+package org.alfresco.transform.base.sfs;
 
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import java.io.File;
 
 import org.alfresco.transform.common.TransformException;
 import org.alfresco.transform.base.model.FileRefResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -40,22 +45,39 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Simple Rest client that call Alfresco Shared File Store
  */
 @Service
-public class AlfrescoSharedFileStoreClient
+public class SharedFileStoreClient
 {
+    private static final Logger logger = LoggerFactory.getLogger(SharedFileStoreClient.class);
+
     @Value("${fileStoreUrl}")
-    private String fileStoreUrl;
+    private String url;
 
     @Autowired
     private RestTemplate restTemplate;
+
+    private WebClient client;
+
+    @PostConstruct
+    public void init()
+    {
+        client = WebClient.builder().baseUrl(url.endsWith("/") ? url : url + "/")
+                          .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                          .defaultHeader(ACCEPT, APPLICATION_JSON_VALUE)
+                          .build();
+    }
 
     /**
      * Retrieves a file from Shared File Store using given file reference
@@ -67,7 +89,7 @@ public class AlfrescoSharedFileStoreClient
     {
         try
         {
-            return restTemplate.getForEntity(fileStoreUrl + "/" + fileRef,
+            return restTemplate.getForEntity(url + "/" + fileRef,
                 org.springframework.core.io.Resource.class);
         }
         catch (HttpClientErrorException e)
@@ -94,12 +116,28 @@ public class AlfrescoSharedFileStoreClient
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map,
                 headers);
             ResponseEntity<FileRefResponse> responseEntity = restTemplate
-                .exchange(fileStoreUrl, POST, requestEntity, FileRefResponse.class);
+                .exchange(url, POST, requestEntity, FileRefResponse.class);
             return responseEntity.getBody();
         }
         catch (HttpClientErrorException e)
         {
             throw new TransformException(e.getStatusCode(), e.getMessage(), e);
+        }
+    }
+
+    @Async
+    public void asyncDelete(final String fileReference)
+    {
+        try
+        {
+            logger.debug("                  Deleting intermediate file {}", fileReference);
+
+            client.delete().uri(fileReference)
+                  .exchange().block();
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to delete intermediate file {}: {}", fileReference, e.getMessage());
         }
     }
 }

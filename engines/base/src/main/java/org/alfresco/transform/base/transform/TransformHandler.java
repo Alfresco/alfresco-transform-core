@@ -27,7 +27,7 @@
 package org.alfresco.transform.base.transform;
 
 import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
+import org.alfresco.transform.base.sfs.SharedFileStoreClient;
 import org.alfresco.transform.base.messaging.TransformReplySender;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.base.probes.ProbeTransform;
@@ -92,7 +92,7 @@ public class TransformHandler
     @Autowired(required = false)
     private CustomTransformers customTransformers;
     @Autowired
-    private AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
+    private SharedFileStoreClient alfrescoSharedFileStoreClient;
     @Autowired
     private TransformRequestValidator transformRequestValidator;
     @Autowired

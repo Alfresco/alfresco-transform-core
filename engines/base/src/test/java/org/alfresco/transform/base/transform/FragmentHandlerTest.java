@@ -27,7 +27,7 @@
 package org.alfresco.transform.base.transform;
 
 import com.google.common.collect.ImmutableList;
-import org.alfresco.transform.base.clients.AlfrescoSharedFileStoreClient;
+import org.alfresco.transform.base.sfs.SharedFileStoreClient;
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithFragments;
 import org.alfresco.transform.base.fakes.FakeTransformerFragments;
 import org.alfresco.transform.base.messaging.TransformReplySender;
@@ -87,7 +87,7 @@ public class FragmentHandlerTest
     private MockMvc mockMvc;
 
     @MockBean
-    protected AlfrescoSharedFileStoreClient fakeSfsClient;
+    protected SharedFileStoreClient fakeSfsClient;
     @MockBean
     private TransformReplySender transformReplySender;
     @MockBean
