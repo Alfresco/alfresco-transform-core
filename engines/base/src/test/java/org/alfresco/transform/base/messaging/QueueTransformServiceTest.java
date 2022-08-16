@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.support.converter.MessageConversionException;
 
 import javax.jms.Destination;
@@ -53,6 +54,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
+@SpringBootTest(classes={org.alfresco.transform.base.Application.class})
 public class QueueTransformServiceTest
 {
     @Mock
@@ -64,12 +66,6 @@ public class QueueTransformServiceTest
 
     @InjectMocks
     private QueueTransformService queueTransformService;
-
-    @BeforeEach
-    public void setup()
-    {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void testWhenReceiveNullMessageThenStopFlow()
