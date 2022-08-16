@@ -33,11 +33,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 public class CustomTransformers
@@ -57,13 +57,20 @@ public class CustomTransformers
             customTransformers.forEach(customTransformer ->
                    customTransformersByName.put(customTransformer.getTransformerName(), customTransformer));
 
-            logger.info("Transformers:");
-            customTransformers.stream()
-                  .sorted(Comparator.comparing(CustomTransformer::getTransformerName))
-                  .map(customTransformer -> customTransformer.getTransformerName())
-                  .filter(Objects::nonNull)
-                  .map(name -> "  "+name)
-                  .forEach(logger::info);
+            List<String> nonNullTransformerNames = customTransformers.stream()
+                 .map(CustomTransformer::getTransformerName)
+                 .filter(Objects::nonNull)
+                 .collect(Collectors.toList());
+
+            if (!nonNullTransformerNames.isEmpty())
+            {
+                logger.info("Custom Transformers:");
+                nonNullTransformerNames
+                    .stream()
+                    .sorted()
+                    .map(name -> "  "+name)
+                    .forEach(logger::debug);
+            }
         }
     }
 
@@ -76,5 +83,10 @@ public class CustomTransformers
     public void put(String name, CustomTransformer  customTransformer)
     {
         customTransformersByName.put(name, customTransformer);
+    }
+
+    public List<CustomTransformer> toList()
+    {
+        return customTransformers;
     }
 }

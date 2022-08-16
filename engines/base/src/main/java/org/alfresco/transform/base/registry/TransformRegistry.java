@@ -25,6 +25,7 @@
  */
 package org.alfresco.transform.base.registry;
 
+import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.config.TransformOption;
 import org.alfresco.transform.config.TransformOptionGroup;
@@ -34,6 +35,7 @@ import org.alfresco.transform.registry.AbstractTransformRegistry;
 import org.alfresco.transform.registry.CombinedTransformConfig;
 import org.alfresco.transform.registry.Origin;
 import org.alfresco.transform.registry.TransformCache;
+import org.alfresco.transform.registry.TransformerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +50,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -58,6 +62,7 @@ import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
@@ -65,6 +70,8 @@ import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toUnmodifiableMap;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionOnSingleStepTransformers;
+import static org.alfresco.transform.registry.TransformerType.FAILOVER_TRANSFORMER;
+import static org.alfresco.transform.registry.TransformerType.PIPELINE_TRANSFORMER;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
@@ -78,6 +85,9 @@ public class TransformRegistry extends AbstractTransformRegistry
     private List<TransformConfigSource> transformConfigSources;
     @Value("${container.isTRouter}")
     private boolean isTRouter;
+
+    // Not autowired - avoids a circular reference in the router - initialised on startup event
+    private List<CustomTransformer> customTransformers;
 
     private static class Data extends TransformCache
     {
@@ -126,7 +136,7 @@ public class TransformRegistry extends AbstractTransformRegistry
     {
         final ApplicationContext context = event.getApplicationContext();
         // the local "initEngineConfigs" method has to be called through the Spring proxy
-        context.getBean(TransformRegistry.class).initRegistryOnAppStartup(null);
+        context.getBean(TransformRegistry.class).initRegistryOnAppStartup(event);
     }
 
     /**
@@ -139,12 +149,14 @@ public class TransformRegistry extends AbstractTransformRegistry
         backoff = @Backoff(delayExpression = "#{${transform.engine.config.retry.timeout} * 1000}"))
     void initRegistryOnAppStartup(final ContextRefreshedEvent event)
     {
+        customTransformers = event.getApplicationContext().getBean(CustomTransformers.class).toList();
         retrieveConfig();
     }
 
     /**
      * Recovery method in case all the retries fail. If not specified, the @Retryable method will cause the application
-     * to stop.
+     * to stop, which we don't want as the t-engine issue may have been sorted out in an hour when the next scheduled
+     * try is made.
      */
     @Recover
     void recover(IllegalStateException e)
@@ -180,6 +192,60 @@ public class TransformRegistry extends AbstractTransformRegistry
         TransformConfig transformConfig = combinedTransformConfig.buildTransformConfig();
         Map<String, Origin<Transformer>> transformerByNameMap = combinedTransformConfig.getTransformerByNameMap();
         concurrentUpdate(combinedTransformConfig, uncombinedTransformConfig, transformConfig, transformerByNameMap);
+
+        logTransformers(uncombinedTransformConfig, combinedTransformConfig, transformerByNameMap);
+    }
+
+    private void logTransformers(TransformConfig uncombinedTransformConfig, CombinedTransformConfig combinedTransformConfig,
+        Map<String, Origin<Transformer>> transformerByNameMap)
+    {
+        if (logger.isInfoEnabled())
+        {
+            Set<String> customTransformerNames = new HashSet(customTransformers == null
+                ? Collections.emptySet()
+                : customTransformers.stream().map(CustomTransformer::getTransformerName).collect(Collectors.toSet()));
+            List<String>  nonNullTransformerNames = uncombinedTransformConfig.getTransformers().stream()
+                .map(Transformer::getTransformerName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+            if (!nonNullTransformerNames.isEmpty())
+            {
+                logger.info("Transformers (" + nonNullTransformerNames.size() + "):");
+                nonNullTransformerNames
+                    .stream()
+                    .sorted()
+                    .map(name -> {
+                        Origin<Transformer> transformerOrigin = transformerByNameMap.get(name);
+                        String message = "  " + name + (transformerOrigin == null
+                            ? " -- unavailable: missing transform steps"
+                            : isTRouter
+                            ? ""
+                            : TransformerType.valueOf(transformerOrigin.get()) == PIPELINE_TRANSFORMER
+                            ? " -- unavailable: pipeline only available via t-router"
+                            : TransformerType.valueOf(transformerOrigin.get()) == FAILOVER_TRANSFORMER
+                            ? " -- unavailable: failover only available via t-router"
+                            : !customTransformerNames.contains(name)
+                            ? " -- missing: CustomTransformer"
+                            : "");
+                        customTransformerNames.remove(name);
+                        return message;
+                    })
+                    .forEach(logger::info);
+
+                List<String> unusedCustomTransformNames = customTransformerNames.stream()
+                    .filter(Objects::nonNull)
+                    .sorted()
+                    .collect(Collectors.toList());
+                if (!unusedCustomTransformNames.isEmpty())
+                {
+                    logger.info("Unused CustomTransformers (" + unusedCustomTransformNames.size() + " - name is not in the transform config):");
+                    unusedCustomTransformNames
+                        .stream()
+                        .map(name -> "  " + name)
+                        .forEach(logger::info);
+                }
+            }
+        }
     }
 
     public TransformConfig getTransformConfig()
