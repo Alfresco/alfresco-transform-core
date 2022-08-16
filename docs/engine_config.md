@@ -116,7 +116,7 @@ The config can be found under `alfresco-transform-core/engines/<t-engine-name>/s
     priority** is.
    
 ## Transformer selection strategy
-The ACS repository will use the T-Engine configuration to choose which T-Engine will perform a transform.
+The T-Engine configuration is used to choose which T-Engine will perform a transform.
 A transformer definition contains a supported list of source and target Media Types. This is used for the
 most basic selection. This is further refined by checking that the definition also supports transform options
 (parameters) that have been supplied in a transform request or a Rendition Definition used in a rendition request.

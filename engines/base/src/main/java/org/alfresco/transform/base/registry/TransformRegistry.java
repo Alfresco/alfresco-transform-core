@@ -298,7 +298,6 @@ public class TransformRegistry extends AbstractTransformRegistry
         try
         {
             return s.get();
-
         }
         finally
         {
@@ -336,7 +335,8 @@ public class TransformRegistry extends AbstractTransformRegistry
 
     private Transformer getTransformer(Data data, String transformerName)
     {
-        return data.getTransformerByNameMap().get(transformerName).get();
+        Origin<Transformer> transformerOrigin = data.getTransformerByNameMap().get(transformerName);
+        return transformerOrigin == null ? null : transformerOrigin.get();
     }
 
     public boolean checkSourceSize(String transformerName, String sourceMediaType, Long sourceSize, String targetMediaType)

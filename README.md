@@ -64,7 +64,7 @@ The core T-Engine images are available on Docker Hub.
 Either as a single Core AIO (All-In-One) T-Engine:
 * [alfresco/alfresco-transform-core-aio](https://hub.docker.com/r/alfresco/alfresco-transform-core-aio)
 
-Or as set of individual T-Engines:
+Or as a set of individual T-Engines:
 * [alfresco/alfresco-imagemagick](https://hub.docker.com/r/alfresco/alfresco-imagemagick)
 * [alfresco/alfresco-pdf-renderer](https://hub.docker.com/r/alfresco/alfresco-pdf-renderer)
 * [alfresco/alfresco-libreoffice](https://hub.docker.com/r/alfresco/alfresco-libreoffice)
