@@ -32,7 +32,6 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.alfresco.transformer.EngineClient.sendTRequest;
 import static org.alfresco.transformer.TestFileInfo.testFile;
-import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_APPLICATION_EPS;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_BMP;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_CGM;
 import static org.alfresco.transformer.util.MimetypeMap.MIMETYPE_IMAGE_GIF;
@@ -97,7 +96,6 @@ public class ImageMagickTransformationIT {
             .add(Pair.of("cgm", MIMETYPE_IMAGE_CGM))
             .add(Pair.of("cr2", MIMETYPE_IMAGE_RAW_CR2))
             .add(Pair.of("dng", MIMETYPE_IMAGE_RAW_DNG))
-            .add(Pair.of("eps", MIMETYPE_APPLICATION_EPS))
             .add(Pair.of("gif", MIMETYPE_IMAGE_GIF))
             .add(Pair.of("ief", MIMETYPE_IMAGE_IEF))
             .add(Pair.of("jp2", MIMETYPE_IMAGE_JP2))
@@ -154,7 +152,6 @@ public class ImageMagickTransformationIT {
 
     private static final List<Pair<String, String>> targetExtensionsForTiffFirstPage = new ImmutableList.Builder<Pair<String, String>>()
             .add(Pair.of("bmp", MIMETYPE_IMAGE_BMP))
-            .add(Pair.of("eps", MIMETYPE_APPLICATION_EPS))
             .add(Pair.of("jp2", MIMETYPE_IMAGE_JP2))
             .add(Pair.of("jpg", MIMETYPE_IMAGE_JPEG))
             .add(Pair.of("png", MIMETYPE_IMAGE_PNG))
@@ -165,7 +162,6 @@ public class ImageMagickTransformationIT {
 
     private static final Map<String, TestFileInfo> TEST_FILES = Stream.of(
             testFile(MIMETYPE_IMAGE_BMP, "bmp", "quick.bmp"), 
-            testFile(MIMETYPE_APPLICATION_EPS, "eps", "quick.eps"),
             testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"), 
             testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quick.jpg"),
             testFile(MIMETYPE_IMAGE_PBM, "pbm", "quick.pbm"), 
@@ -184,7 +180,6 @@ public class ImageMagickTransformationIT {
         return Stream
             .of(
                 allTargets("quick.bmp", targetExtensions), 
-                allTargets("quick.eps", targetExtensions),
                 allTargets("quick.gif", targetExtensions), 
                 allTargets("quick.jpg", targetExtensions),
                 allTargets("quick.pbm", targetExtensions), 
