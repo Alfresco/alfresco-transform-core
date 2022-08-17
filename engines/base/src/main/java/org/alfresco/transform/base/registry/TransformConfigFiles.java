@@ -38,8 +38,8 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "transform.config")
 public class TransformConfigFiles
 {
-    // Populated from Spring Boot properties or such as transform.config.file.<engineName> or environment variables like
-    // TRANSFORM_CONFIG_FILE_<engineName>.
+    // Populated from Spring Boot properties or such as transform.config.file.<filename> or environment variables like
+    // TRANSFORM_CONFIG_FILE_<filename>.
     private final Map<String, String> files = new HashMap<>();
 
     public Map<String, String> getFile()
