@@ -23,7 +23,8 @@ COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     yum install -y $IMAGEMAGICK_DEP_RPM_URL && \
     yum install -y $IMAGEMAGICK_LIB_RPM_URL $IMAGEMAGICK_RPM_URL && \
-    yum clean all
+    yum clean all && \
+    rpm -e --nodeps libgs
 
 ADD target/generated-resources/licenses              /licenses
 ADD target/generated-resources/licenses.xml          /licenses/

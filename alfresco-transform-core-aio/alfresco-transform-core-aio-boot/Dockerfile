@@ -35,6 +35,7 @@ COPY target/alfresco-transform-core-aio-boot-${env.project_version}.jar /usr/bin
 RUN ln /usr/bin/alfresco-transform-core-aio-boot-${env.project_version}.jar /usr/bin/alfresco-transform-core-aio-boot.jar && \
     yum install -y $IMAGEMAGICK_DEP_RPM_URL && \
     yum install -y $IMAGEMAGICK_LIB_RPM_URL $IMAGEMAGICK_RPM_URL && \
+    rpm -e --nodeps libgs && \
     yum install -y cairo cups-libs libSM libGLU && \
     test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
     ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
