@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>2.7.0-A1-SNAPSHOT</version>
+    <version>2.7.0-A1</version>
     <packaging>pom</packaging>
 
     <parent>
@@ -125,7 +125,7 @@
         <connection>scm:git:https://github.com/Alfresco/alfresco-transform-core.git</connection>
         <developerConnection>scm:git:https://github.com/Alfresco/alfresco-transform-core.git</developerConnection>
         <url>https://github.com/Alfresco/alfresco-transform-core</url>
-        <tag>HEAD</tag>
+        <tag>2.7.0-A1</tag>
     </scm>
 
     <dependencyManagement>
