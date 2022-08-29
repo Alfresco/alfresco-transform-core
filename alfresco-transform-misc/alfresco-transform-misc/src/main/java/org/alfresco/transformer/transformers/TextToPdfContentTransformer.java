@@ -182,6 +182,59 @@ public class TextToPdfContentTransformer implements SelectableTransformer
     }
 
     /**
+     * Skips the BOM for UTF-8 encoding
+     */
+    private InputStream handleUTF8BOM(InputStream is)
+    {
+        return new PushbackInputStream(is, UTF8_READ_AHEAD_BYTES)
+        {
+            boolean bomRead;
+
+            @Override
+            public int read(byte[] bytes, int off, int len) throws IOException
+            {
+                int i = 0;
+                int b = 0;
+                for (; i < len; i++)
+                {
+                    b = read();
+                    if (b == -1)
+                    {
+                        break;
+                    }
+                    bytes[off + i] = (byte) b;
+                }
+                return i == 0 && b == -1 ? -1 : i;
+            }
+
+            @Override
+            public int read() throws IOException
+            {
+                if (!bomRead)
+                {
+                    bomRead = true;
+                    byte[] bytes = new byte[UTF8_READ_AHEAD_BYTES];
+                    int end = in.read(bytes, 0, UTF8_READ_AHEAD_BYTES);
+
+                    if (bytes[0] == EF && bytes[1] == BB && bytes[2] == BF)
+                    {
+                        logger.warn("UTF-8 BOM detected, it will be skipped");
+                    }
+                    else
+                    {
+                        for (int i = end - 1; i >= 0; i--)
+                        {
+                            unread(bytes[i]);
+                        }
+                    }
+                }
+
+                return super.read();
+            }
+        };
+    }
+
+    /**
      * Handles the situation where there is a BOM even though the encoding indicates that normally there should not be
      * one for UTF-16BE and UTF-16LE. For extra flexibility includes UTF-16 too which optionally has the BOM. Rather
      * than look at the BOM we look at the number of zero bytes in the first few character. XML files even when not in
@@ -298,59 +351,6 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                     }
                 }
                 return count;
-            }
-        };
-    }
-
-    /**
-     * Skips the BOM for UTF-8 encoding
-     */
-    private InputStream handleUTF8BOM(InputStream is)
-    {
-        return new PushbackInputStream(is, UTF8_READ_AHEAD_BYTES)
-        {
-            boolean bomRead;
-
-            @Override
-            public int read(byte[] bytes, int off, int len) throws IOException
-            {
-                int i = 0;
-                int b = 0;
-                for (; i < len; i++)
-                {
-                    b = read();
-                    if (b == -1)
-                    {
-                        break;
-                    }
-                    bytes[off + i] = (byte) b;
-                }
-                return i == 0 && b == -1 ? -1 : i;
-            }
-
-            @Override
-            public int read() throws IOException
-            {
-                if (!bomRead)
-                {
-                    bomRead = true;
-                    byte[] bytes = new byte[UTF8_READ_AHEAD_BYTES];
-                    int end = in.read(bytes, 0, UTF8_READ_AHEAD_BYTES);
-
-                    if (bytes[0] == EF && bytes[1] == BB && bytes[2] == BF)
-                    {
-                        logger.warn("UTF-8 BOM detected");
-                    }
-                    else
-                    {
-                        for (int i = end - 1; i >= 0; i--)
-                        {
-                            unread(bytes[i]);
-                        }
-                    }
-                }
-
-                return super.read();
             }
         };
     }
