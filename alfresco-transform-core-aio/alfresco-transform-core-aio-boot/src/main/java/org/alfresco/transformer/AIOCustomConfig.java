@@ -92,17 +92,17 @@ public class AIOCustomConfig
     private String coreVersion;
 
     @Value("${transform.core.tika.exifTool.windowsOS}")
-    private String[] exifToolCommandOnWindows;
+    private String exifToolCommandOnWindows;
 
     @Value("${transform.core.tika.exifTool.unixOS}")
-    private String[] exifToolCommandOnUnix;
+    private String exifToolCommandOnUnix;
 
     @Bean("exifTool")
     public RuntimeExec exifRuntimeExec() {
         RuntimeExec runtimeExec = new RuntimeExec();
         Map<String,String[]> commandPerOS = new HashMap<>();
-        commandPerOS.put("win", exifToolCommandOnWindows);
-        commandPerOS.put("*", exifToolCommandOnUnix);
+        commandPerOS.put("win", exifToolCommandOnWindows.split(" "));
+        commandPerOS.put("*", exifToolCommandOnUnix.split(" "));
         runtimeExec.setCommandsAndArguments(commandPerOS);
 
         return runtimeExec;
@@ -134,7 +134,7 @@ public class AIOCustomConfig
     List<Transformer> getTEnginesSortedByName()
     {
         return Stream.of(new SelectingTransformer(),
-                new TikaJavaExecutor(notExtractBookmarksTextDefault),
+                new TikaJavaExecutor(notExtractBookmarksTextDefault, exifRuntimeExec()),
                 new ImageMagickCommandExecutor(imageMagickExePath, imageMagickDynPath, imageMagickRootPath, imageMagickCodersPath, imageMagickConfigPath),
                 new LibreOfficeJavaExecutor(libreofficePath, libreofficeMaxTasksPerProcess, libreofficeTimeout, libreofficePortNumbers, libreofficeTemplateProfileDir, libreofficeIsEnabled),
                 new PdfRendererCommandExecutor(pdfRendererPath))
