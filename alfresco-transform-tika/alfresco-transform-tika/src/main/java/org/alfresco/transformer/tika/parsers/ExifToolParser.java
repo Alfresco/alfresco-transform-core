@@ -76,13 +76,11 @@ public class ExifToolParser extends ExternalParser {
 
     private String separator;
 
-    private RuntimeExec exifRuntimeExec = null;
-
-    public ExifToolParser(RuntimeExec exifRuntimeExec) {
-        this.exifRuntimeExec = exifRuntimeExec;
+    public ExifToolParser() {
+        this(null);
     }
 
-    public ExifToolParser() {
+    public ExifToolParser(RuntimeExec exifRuntimeExec) {
         super();
         try {
             List<ExternalParser> eParsers = ExternalParsersFactory.create(getExternalParserConfigURL());
