@@ -134,6 +134,18 @@ public class TextToPdfContentTransformerTest
         transformTextAndCheck("UTF-16", true, false, "ff fe 00 31 00 20 00 49");
     }
 
+    @Test
+    public void testUTF8WithBOM() throws Exception
+    {
+        transformTextAndCheck("UTF-8", null, true, "ef bb bf 31 20 49 20 6d");
+    }
+
+    @Test
+    public void testUTF8WithoutBOM() throws Exception
+    {
+        transformTextAndCheck("UTF-8", null, false, "31 20 49 20 6d 75 73 74");
+    }
+
     /**
      * @param encoding to be used to read the source file
      * @param bigEndian indicates that the file should contain big endian characters, so typically the first byte of
@@ -143,7 +155,7 @@ public class TextToPdfContentTransformerTest
      * @param expectedByteOrder The first few bytes of the source file so we can check the test data has been
      *                 correctly created.
      */
-    protected void transformTextAndCheck(String encoding, boolean bigEndian, Boolean validBom,
+    protected void transformTextAndCheck(String encoding, Boolean bigEndian, Boolean validBom,
                                          String expectedByteOrder) throws Exception
     {
         transformTextAndCheckImpl(-1, encoding, bigEndian, validBom, expectedByteOrder);
@@ -244,6 +256,12 @@ public class TextToPdfContentTransformerTest
         // Use a writer to use the required encoding
         try (OutputStreamWriter ow = new OutputStreamWriter(new FileOutputStream(file), encoding))
         {
+            // Add BOM to UTF-8 file
+            if (bigEndian == null && encoding != null && "UTF-8".equals(encoding.toUpperCase()) && validBom != null && validBom)
+            {
+                ow.append("\ufeff");
+            }
+
             ow.append(content);
         }
 

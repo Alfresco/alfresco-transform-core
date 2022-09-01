@@ -70,6 +70,11 @@ public class TextToPdfContentTransformer implements SelectableTransformer
     private static final byte FE = (byte) 0xFE;
     private static final byte FF = (byte) 0xFF;
 
+    private static final int UTF8_READ_AHEAD_BYTES = 3;
+    private static final byte EF = (byte) 0xEF;
+    private static final byte BB = (byte) 0xBB;
+    private static final byte BF = (byte) 0xBF;
+
     public static final String PAGE_LIMIT = RequestParamMap.PAGE_LIMIT;
 
     private final PagedTextToPDF transformer;
@@ -165,115 +170,13 @@ public class TextToPdfContentTransformer implements SelectableTransformer
                 {
                     logger.debug("Handle big and little endian UTF-16 text. Using UTF-16 rather than encoding " + name);
                     charset = Charset.forName("UTF-16");
-                    is = new PushbackInputStream(is, UTF16_READ_AHEAD_BYTES)
-                    {
-                        boolean bomRead;
-                        boolean switchByteOrder;
-                        boolean evenByte = true;
-
-                        @Override
-                        public int read(byte[] bytes, int off, int len) throws IOException
-                        {
-                            int i = 0;
-                            int b = 0;
-                            for (; i<len; i++)
-                            {
-                                b = read();
-                                if (b == -1)
-                                {
-                                    break;
-                                }
-                                bytes[off+i] = (byte)b;
-                            }
-                            return i == 0 && b == -1 ? -1 : i;
-                        }
-
-                        @Override
-                        public int read() throws IOException
-                        {
-                            if (!bomRead)
-                            {
-                                bomRead = true;
-                                boolean switchBom = false;
-                                byte[] bytes = new byte[UTF16_READ_AHEAD_BYTES];
-                                int end = in.read(bytes, 0, UTF16_READ_AHEAD_BYTES);
-                                int evenZeros = countZeros(bytes, 0);
-                                int oddZeros = countZeros(bytes, 1);
-                                if (evenZeros > oddZeros)
-                                {
-                                    if (bytes[0] == FF && bytes[1] == FE)
-                                    {
-                                        switchByteOrder = true;
-                                        switchBom = true;
-                                        logger.warn("Little-endian BOM FFFE read, but characters are big-endian");
-                                    }
-                                    else
-                                    {
-                                        logger.debug("More even zero bytes, so normal read for big-endian");
-                                    }
-                                }
-                                else
-                                {
-                                    if (bytes[0] == FE && bytes[1] == FF)
-                                    {
-                                        switchBom = true;
-                                        logger.debug("Big-endian BOM FEFF read, but characters are little-endian");
-                                    }
-                                    else
-                                    {
-                                        switchByteOrder = true;
-                                        logger.debug("More odd zero bytes, so switch bytes from little-endian");
-                                    }
-                                }
-
-                                if (switchBom)
-                                {
-                                    byte b = bytes[0];
-                                    bytes[0] = bytes[1];
-                                    bytes[1] = b;
-                                }
-
-                                for (int i = end-1; i>=0; i--)
-                                {
-                                    unread(bytes[i]);
-                                }
-                            }
-
-                            if (switchByteOrder)
-                            {
-                                if (evenByte)
-                                {
-                                    int b1 = super.read();
-                                    int b2 = super.read();
-                                    if (b1 != -1)
-                                    {
-                                        unread(b1);
-                                    }
-                                    if (b2 != -1)
-                                    {
-                                        unread(b2);
-                                    }
-                                }
-                                evenByte = !evenByte;
-                            }
-
-                            return super.read();
-                        }
-
-                        // Counts the number of even or odd 00 bytes
-                        private int countZeros(byte[] b, int offset)
-                        {
-                            int count = 0;
-                            for (int i=offset; i<UTF16_READ_AHEAD_BYTES; i+=2)
-                            {
-                                if (b[i] == 0)
-                                {
-                                    count++;
-                                }
-                            }
-                            return count;
-                        }
-                    };
+                    is = handleUTF16BOM(is);
+                }
+                else if ("UTF-8".equals(name))
+                {
+                    logger.debug("Using UTF-8");
+                    charset = Charset.forName("UTF-8");
+                    is = handleUTF8BOM(is);
                 }
                 logger.debug("Processing plain text in encoding " + name);
                 return new InputStreamReader(is, charset);
@@ -444,5 +347,179 @@ public class TextToPdfContentTransformer implements SelectableTransformer
         {
             throw new IllegalArgumentException(paramName + " parameter must be an integer.");
         }
+    }
+
+    /**
+     * Skips the BOM character for UTF-8 encoding
+     */
+    private InputStream handleUTF8BOM(InputStream is)
+    {
+        return new PushbackInputStream(is, UTF8_READ_AHEAD_BYTES)
+        {
+            boolean bomRead;
+
+            @Override
+            public int read(byte[] bytes, int off, int len) throws IOException
+            {
+                int i = 0;
+                int b = 0;
+                for (; i < len; i++)
+                {
+                    b = read();
+                    if (b == -1)
+                    {
+                        break;
+                    }
+                    bytes[off + i] = (byte) b;
+                }
+                return i == 0 && b == -1 ? -1 : i;
+            }
+
+            @Override
+            public int read() throws IOException
+            {
+                if (!bomRead)
+                {
+                    bomRead = true;
+                    byte[] bytes = new byte[UTF8_READ_AHEAD_BYTES];
+                    int end = in.read(bytes, 0, UTF8_READ_AHEAD_BYTES);
+
+                    if (bytes[0] == EF && bytes[1] == BB && bytes[2] == BF)
+                    {
+                        logger.warn("UTF-8 BOM detected, it will be skipped");
+                    }
+                    else
+                    {
+                        for (int i = end - 1; i >= 0; i--)
+                        {
+                            unread(bytes[i]);
+                        }
+                    }
+                }
+
+                return super.read();
+            }
+        };
+    }
+
+    /**
+     * Handles the situation where there is a BOM even though the encoding indicates that normally there should not be
+     * one for UTF-16BE and UTF-16LE. For extra flexibility includes UTF-16 too which optionally has the BOM. Rather
+     * than look at the BOM we look at the number of zero bytes in the first few character. XML files even when not in
+     * European languages tend to have more even zero bytes when big-endian encoded and more odd zero bytes when
+     * little-endian. Think of: <?xml version="1.0"?> The normal Java decoder does not have this flexibility but other
+     * transformers do.
+     */
+    private InputStream handleUTF16BOM(InputStream is)
+    {
+        return new PushbackInputStream(is, UTF16_READ_AHEAD_BYTES)
+        {
+            boolean bomRead;
+            boolean switchByteOrder;
+            boolean evenByte = true;
+
+            @Override
+            public int read(byte[] bytes, int off, int len) throws IOException
+            {
+                int i = 0;
+                int b = 0;
+                for (; i < len; i++)
+                {
+                    b = read();
+                    if (b == -1)
+                    {
+                        break;
+                    }
+                    bytes[off + i] = (byte) b;
+                }
+                return i == 0 && b == -1 ? -1 : i;
+            }
+
+            @Override
+            public int read() throws IOException
+            {
+                if (!bomRead)
+                {
+                    bomRead = true;
+                    boolean switchBom = false;
+                    byte[] bytes = new byte[UTF16_READ_AHEAD_BYTES];
+                    int end = in.read(bytes, 0, UTF16_READ_AHEAD_BYTES);
+                    int evenZeros = countZeros(bytes, 0);
+                    int oddZeros = countZeros(bytes, 1);
+                    if (evenZeros > oddZeros)
+                    {
+                        if (bytes[0] == FF && bytes[1] == FE)
+                        {
+                            switchByteOrder = true;
+                            switchBom = true;
+                            logger.warn("Little-endian BOM FFFE read, but characters are big-endian");
+                        }
+                        else
+                        {
+                            logger.debug("More even zero bytes, so normal read for big-endian");
+                        }
+                    }
+                    else
+                    {
+                        if (bytes[0] == FE && bytes[1] == FF)
+                        {
+                            switchBom = true;
+                            logger.debug("Big-endian BOM FEFF read, but characters are little-endian");
+                        }
+                        else
+                        {
+                            switchByteOrder = true;
+                            logger.debug("More odd zero bytes, so switch bytes from little-endian");
+                        }
+                    }
+
+                    if (switchBom)
+                    {
+                        byte b = bytes[0];
+                        bytes[0] = bytes[1];
+                        bytes[1] = b;
+                    }
+
+                    for (int i = end - 1; i >= 0; i--)
+                    {
+                        unread(bytes[i]);
+                    }
+                }
+
+                if (switchByteOrder)
+                {
+                    if (evenByte)
+                    {
+                        int b1 = super.read();
+                        int b2 = super.read();
+                        if (b1 != -1)
+                        {
+                            unread(b1);
+                        }
+                        if (b2 != -1)
+                        {
+                            unread(b2);
+                        }
+                    }
+                    evenByte = !evenByte;
+                }
+
+                return super.read();
+            }
+
+            // Counts the number of even or odd 00 bytes
+            private int countZeros(byte[] b, int offset)
+            {
+                int count = 0;
+                for (int i = offset; i < UTF16_READ_AHEAD_BYTES; i += 2)
+                {
+                    if (b[i] == 0)
+                    {
+                        count++;
+                    }
+                }
+                return count;
+            }
+        };
     }
 }
