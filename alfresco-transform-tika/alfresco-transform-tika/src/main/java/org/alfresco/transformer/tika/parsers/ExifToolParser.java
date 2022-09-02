@@ -333,6 +333,7 @@ public class ExifToolParser extends ExternalParser {
                 try {
                     IOUtils.copy(stream, stdin);
                 } catch (IOException e) {
+                    logger.error( e.getMessage());
                 }
             }
         };
@@ -340,6 +341,7 @@ public class ExifToolParser extends ExternalParser {
         try {
             t.join();
         } catch (InterruptedException ignore) {
+            logger.error(ignore.getMessage());
         }
     }
 
