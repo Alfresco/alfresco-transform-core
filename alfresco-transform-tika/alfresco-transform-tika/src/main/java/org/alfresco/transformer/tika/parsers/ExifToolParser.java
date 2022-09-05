@@ -100,11 +100,11 @@ public class ExifToolParser extends ExternalParser {
                 if( commandToBeExecuted==null || commandToBeExecuted.length==0 ) {
                     commandToBeExecuted = eParser.getCommand();
                 }
-                if( logger.isDebugEnabled() ) {
-                    logger.debug("Command to be executed: " + String.join( " ", commandToBeExecuted) );
-                }
 
-                this.setCommand(commandToBeExecuted);
+                String commandToBeExecutedAsString = String.join( " ", commandToBeExecuted);
+                logger.debug("Command to be executed: " + commandToBeExecutedAsString );
+
+                this.setCommand(commandToBeExecutedAsString);
                 this.setIgnoredLineConsumer(eParser.getIgnoredLineConsumer());
                 this.setMetadataExtractionPatterns(eParser.getMetadataExtractionPatterns());
                 this.setSupportedTypes(eParser.getSupportedTypes());
