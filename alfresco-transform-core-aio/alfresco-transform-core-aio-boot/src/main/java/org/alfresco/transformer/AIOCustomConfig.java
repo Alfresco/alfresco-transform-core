@@ -101,7 +101,7 @@ public class AIOCustomConfig
     public RuntimeExec exifRuntimeExec() {
         RuntimeExec runtimeExec = new RuntimeExec();
         Map<String,String[]> commandPerOS = new HashMap<>();
-        commandPerOS.put("win", exifToolCommandOnWindows.split(" "));
+        commandPerOS.put("[wW]in.*", exifToolCommandOnWindows.split(" "));
         commandPerOS.put("*", exifToolCommandOnUnix.split(" "));
         runtimeExec.setCommandsAndArguments(commandPerOS);
 
