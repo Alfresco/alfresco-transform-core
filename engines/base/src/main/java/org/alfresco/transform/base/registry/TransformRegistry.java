@@ -50,6 +50,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -88,6 +89,8 @@ public class TransformRegistry extends AbstractTransformRegistry
 
     // Not autowired - avoids a circular reference in the router - initialised on startup event
     private List<CustomTransformer> customTransformers;
+
+    private int previousLogMessageHashCode;
 
     private static class Data extends TransformCache
     {
@@ -208,9 +211,10 @@ public class TransformRegistry extends AbstractTransformRegistry
                 .map(Transformer::getTransformerName)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+            ArrayList<String> logMessages = new ArrayList<>();
             if (!nonNullTransformerNames.isEmpty())
             {
-                logger.info("Transformers (" + nonNullTransformerNames.size() + "):");
+                logMessages.add("Transformers (" + nonNullTransformerNames.size() + "):");
                 nonNullTransformerNames
                     .stream()
                     .sorted()
@@ -230,7 +234,7 @@ public class TransformRegistry extends AbstractTransformRegistry
                         customTransformerNames.remove(name);
                         return message;
                     })
-                    .forEach(logger::info);
+                    .forEach(logMessages::add);
 
                 List<String> unusedCustomTransformNames = customTransformerNames.stream()
                     .filter(Objects::nonNull)
@@ -238,11 +242,22 @@ public class TransformRegistry extends AbstractTransformRegistry
                     .collect(Collectors.toList());
                 if (!unusedCustomTransformNames.isEmpty())
                 {
-                    logger.info("Unused CustomTransformers (" + unusedCustomTransformNames.size() + " - name is not in the transform config):");
+                    logMessages.add("Unused CustomTransformers (" + unusedCustomTransformNames.size() + " - name is not in the transform config):");
                     unusedCustomTransformNames
                         .stream()
                         .map(name -> "  " + name)
-                        .forEach(logger::info);
+                        .forEach(logMessages::add);
+                }
+
+                int logMessageHashCode = logMessages.hashCode();
+                if (previousLogMessageHashCode != logMessageHashCode)
+                {
+                    previousLogMessageHashCode = logMessageHashCode;
+                    logMessages.stream().forEach(logger::info);
+                }
+                else
+                {
+                    logger.debug("Config unchanged");
                 }
             }
         }

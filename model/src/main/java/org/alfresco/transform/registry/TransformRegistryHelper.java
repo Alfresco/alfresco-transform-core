@@ -38,14 +38,12 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.Map.Entry;
-import static java.util.stream.Collectors.toMap;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+import static org.alfresco.transform.common.RequestParamMap.TIMEOUT;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 class TransformRegistryHelper
 {
-    private static final String TIMEOUT = "timeout";
-
     static Set<TransformOption> lookupTransformOptions(final Set<String> transformOptionNames,
         final Map<String, Set<TransformOption>> transformOptions, final String readFrom,
         final Consumer<String> logError)
@@ -96,36 +94,26 @@ class TransformRegistryHelper
             return cachedTransformList;
         }
 
-        // The transformOptions always contains sourceEncoding and possibly timeout when sent to a T-Engine, even though
-        // they should not be used to select a transformer. Would like to change this, but cannot as we need to support
-        // older ACS repo versions.
-        String sourceEncoding = actualOptions.remove(SOURCE_ENCODING);
-        String timeout = actualOptions.remove(TIMEOUT);
-        try
+        // The transformOptions sometimes contains sourceEncoding and timeout, even though they should not be used
+        // to select a transformer. Would like to change this, but cannot as we need to support all ACS repo versions.
+        if (actualOptions.containsKey(SOURCE_ENCODING) || actualOptions.containsKey(TIMEOUT))
         {
-            final List<SupportedTransform> builtTransformList = buildTransformList(data,
-                sourceMimetype,
-                targetMimetype,
-                actualOptions);
-
-            if (renditionName != null)
-            {
-                data.cache(renditionName, sourceMimetype, builtTransformList);
-            }
-
-            return builtTransformList;
+            actualOptions = new HashMap<>(actualOptions);
+            actualOptions.remove(SOURCE_ENCODING);
+            actualOptions.remove(TIMEOUT);
         }
-        finally
+
+        final List<SupportedTransform> builtTransformList = buildTransformList(data,
+            sourceMimetype,
+            targetMimetype,
+            actualOptions);
+
+        if (renditionName != null)
         {
-            if (sourceEncoding != null)
-            {
-                actualOptions.put(SOURCE_ENCODING, sourceEncoding);
-            }
-            if (timeout != null)
-            {
-                actualOptions.put(TIMEOUT, timeout);
-            }
+            data.cache(renditionName, sourceMimetype, builtTransformList);
         }
+
+        return builtTransformList;
     }
 
     private static List<SupportedTransform> buildTransformList(
