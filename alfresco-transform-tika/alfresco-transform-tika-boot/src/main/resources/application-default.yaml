@@ -9,5 +9,5 @@ transform:
       pdfBox:
         notExtractBookmarksTextDefault: ${PDFBOX_NOTEXTRACTBOOKMARKS_DEFAULT:false}
       exifTool:
-        windowsOS: exiftool -args -G1 -sep \"|||\" \#{'$'}{INPUT}
+        windowsOS: 'exiftool -args -G1 -sep "|||" #{"$"}{INPUT}'
         unixOS: 'env FOO=#{"$"}{OUTPUT} exiftool -args -G1 -sep "|||" #{"$"}{INPUT}'
