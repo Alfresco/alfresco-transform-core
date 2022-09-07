@@ -53,7 +53,7 @@ src/main/java/org/alfresco/transformer/Application.java
 ~~~
 
 * *TransformerName*Controller.java - A [Spring Boot](https://projects.spring.io/spring-boot/) Controller that
-  extends TransformController to handel requests. It implements a few methods including *transformImpl*
+  extends TransformController to handle requests. It implements a few methods including *transformImpl*
   which is intended to perform the actual transform. Generally the transform is done in a sub class of
   *JavaExecutor*, when a Java library is being used or *AbstractCommandExecutor*, when an external process is used.
   Both are sub interfaces of *Transformer*.

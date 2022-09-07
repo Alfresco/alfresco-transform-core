@@ -1,10 +1,10 @@
-## TransformerDebug
+# TransformerDebug
 
 In addition to any normal logging, the t-engines, t-router and t-client also
 use the `TransformerDebug` class to provide request based logging. The
 following is an example from Alfresco after the upload of a `docx` file.
 
-~~~
+~~~text
 163               docx json AGM 2016 - Masters report.docx 14.8 KB -- metadataExtract --  TransformService
 163               workspace://SpacesStore/0db3a665-328d-4437-85ed-56b753cf19c8 1563306426
 163               docx json  14.8 KB -- metadataExtract -- PoiMetadataExtractor

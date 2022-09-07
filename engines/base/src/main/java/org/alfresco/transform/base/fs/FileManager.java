@@ -221,7 +221,7 @@ public class FileManager
 
             final File systemTempDir = new File(systemTempDirPath);
             final File tempDir = new File(systemTempDir, dirName);
-            if (!tempDir.exists() && !tempDir.mkdirs() && !tempDir.exists())
+            if (!tempDir.exists() && !tempDir.mkdirs())
             {
                 throw new RuntimeException("Failed to create temp directory: " + tempDir);
             }

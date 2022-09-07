@@ -1,4 +1,4 @@
-## Transform specific code
+# Transform specific code
 
 To create a new t-engine an author uses a base t-engine (a Spring Boot
 application) and implements the following interfaces. An implementation of
@@ -11,7 +11,7 @@ one format to another without really worrying about all the plumbing.
 Typically, the transform specific code uses a 3rd party library or an
 external executable which needs to be added to the Docker image.
 
-~~~
+~~~java
 package org.alfresco.transform;
 
 import org.alfresco.transform.config.TransformConfig;
@@ -49,7 +49,7 @@ public interface TransformEngine
 
 implementations of the following interface provide the actual transform code.
 
-~~~
+~~~java
 package org.alfresco.transform;
 
 import java.io.InputStream;
@@ -81,7 +81,7 @@ The implementation of the following interface is provided by the t-base,
 allows the `CustomTransformer` to interact with the base t-engine. The
 creation of Files is discouraged as it is better not to leave files on disk.
 
-~~~
+~~~java
 package org.alfresco.transform.base;
 
 import java.io.File;

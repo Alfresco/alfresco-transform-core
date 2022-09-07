@@ -1,4 +1,4 @@
-## T-Engines
+# T-Engines
 
 The t-engines provide the basic transform operations. The Transform Service
 provides a common base for the communication with other components. It is
@@ -13,7 +13,7 @@ A t-engine groups together one of more Transformers. Each Transformer
 transformations from one MIME Type to another with a common set of
 t-options.
 
-~~~
+~~~yaml
 0010 my-t-engine
   Transformer 1
     mimetype A -> mimetype B
@@ -32,7 +32,7 @@ t-options.
   ...
 ~~~
 
-### Endpoints
+## Endpoints
 
 * `POST /transform` to perform a transform. There are two forms:
   * For asynchronous transforms: Perform a transform using a

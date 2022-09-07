@@ -97,13 +97,19 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 @Controller
 public class TransformController
 {
+
     private static final Logger logger = LoggerFactory.getLogger(TransformController.class);
+
+    private static final String MODEL_TITLE = "title";
+    private static final String MODEL_PROXY_PATH_PREFIX = "proxyPathPrefix";
+    private static final String MODEL_MESSAGE = "message";
 
     @Autowired(required = false)
     private List<TransformEngine> transformEngines;
     @Autowired
     private TransformServiceRegistry transformRegistry;
-    @Autowired TransformHandler transformHandler;
+    @Autowired
+    TransformHandler transformHandler;
     @Autowired
     private String coreVersion;
     @Autowired
@@ -119,11 +125,11 @@ public class TransformController
         if (transformEngines != null)
         {
             transformEngine = getTransformEngine();
-            logger.info("TransformEngine: " + transformEngine.getTransformEngineName());
+            logger.info("TransformEngine: {}", transformEngine.getTransformEngineName());
             transformEngines.stream()
-                            .filter(te -> te != transformEngine)
+                            .filter(transformEngineFromStream -> transformEngineFromStream != transformEngine)
                             .sorted(Comparator.comparing(TransformEngine::getTransformEngineName))
-                            .map(transformEngine -> "  "+transformEngine.getTransformEngineName()).forEach(logger::info);
+                            .map(sortedTransformEngine -> "  "+sortedTransformEngine.getTransformEngineName()).forEach(logger::info);
         }
     }
 
@@ -133,7 +139,7 @@ public class TransformController
         // CustomTransform code from many t-engines into a single t-engine. In this case, there should be a wrapper
         // TransformEngine (it has no TransformConfig of its own).
         return transformEngines.stream()
-                               .filter(transformEngine -> transformEngine.getTransformConfig() == null)
+                               .filter(transformEngineFromStream -> transformEngineFromStream.getTransformConfig() == null)
                                .findFirst()
                                .orElse(transformEngines.get(0));
     }
@@ -171,8 +177,8 @@ public class TransformController
     @GetMapping(ENDPOINT_ROOT)
     public String test(Model model)
     {
-        model.addAttribute("title", getSimpleTransformEngineName() + " Test Page");
-        model.addAttribute("proxyPathPrefix", getPathPrefix());
+        model.addAttribute(MODEL_TITLE, getSimpleTransformEngineName() + " Test Page");
+        model.addAttribute(MODEL_PROXY_PATH_PREFIX, getPathPrefix());
         TransformConfig transformConfig = ((TransformRegistry) transformRegistry).getTransformConfig();
         transformConfig = setOrClearCoreVersion(transformConfig, 0);
         model.addAttribute("transformOptions", optionLister.getOptionNames(transformConfig.getTransformOptions()));
@@ -185,8 +191,8 @@ public class TransformController
     @GetMapping(ENDPOINT_ERROR)
     public String error(Model model)
     {
-        model.addAttribute("title", getSimpleTransformEngineName() + " Error Page");
-        model.addAttribute("proxyPathPrefix", getPathPrefix());
+        model.addAttribute(MODEL_TITLE, getSimpleTransformEngineName() + " Error Page");
+        model.addAttribute(MODEL_PROXY_PATH_PREFIX, getPathPrefix());
         return "error"; // display error.html
     }
 
@@ -196,8 +202,8 @@ public class TransformController
     @GetMapping(ENDPOINT_LOG)
     String log(Model model)
     {
-        model.addAttribute("title", getSimpleTransformEngineName() + " Log Entries");
-        model.addAttribute("proxyPathPrefix", getPathPrefix());
+        model.addAttribute(MODEL_TITLE, getSimpleTransformEngineName() + " Log Entries");
+        model.addAttribute(MODEL_PROXY_PATH_PREFIX, getPathPrefix());
         Collection<LogEntry> log = LogEntry.getLog();
         if (!log.isEmpty())
         {
@@ -342,9 +348,9 @@ public class TransformController
         response.sendError(e.getStatus().value(), message);
 
         ModelAndView mav = new ModelAndView();
-        mav.addObject("title", getSimpleTransformEngineName() + " Error Page");
-        mav.addObject("proxyPathPrefix", getPathPrefix());
-        mav.addObject("message", message);
+        mav.addObject(MODEL_TITLE, getSimpleTransformEngineName() + " Error Page");
+        mav.addObject(MODEL_PROXY_PATH_PREFIX, getPathPrefix());
+        mav.addObject(MODEL_MESSAGE, message);
         mav.setViewName("error"); // display error.html
         return mav;
     }

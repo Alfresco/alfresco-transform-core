@@ -35,7 +35,8 @@ implementations.
 
 The `TransformEngineName` is important if the config from multiple T-Engines is being
 combined as they are sorted by name.
-```
+
+```java
 package org.alfresco.transform.example;
 
 import com.google.common.collect.ImmutableMap;
@@ -81,7 +82,8 @@ public class HelloTransformEngine implements TransformEngine
 ```
 
 **Example CustomTransformer**
-```
+
+```java
 package org.alfresco.transform.example;
 
 import org.alfresco.transform.base.CustomTransformer;
@@ -120,6 +122,7 @@ public class HelloTransformer implements CustomTransformer
 ```
 
 **Example T-Config** `resources/hello_engine_config.json`
+
 ```json
 {
   "transformOptions": {
@@ -145,12 +148,14 @@ public class HelloTransformer implements CustomTransformer
 **Example properties** `resources/application-default.yaml`
 
 As can be seen the following defines a default which can be overridden by an environment variable.
+
 ```yaml
 queue:
   engineRequestQueue: ${TRANSFORM_ENGINE_REQUEST_QUEUE:org.alfresco.transform.engine.libreoffice.acs}
 ```
 
 **Example ProbeTransform test file** `resources/probe.txt`
-```json
+
+```text
 Jane
 ```

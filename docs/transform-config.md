@@ -1,4 +1,4 @@
-## T-Engine configuration
+# T-Engine configuration
 
 Each t-engine provides an endpoint that returns t-config that defines what
 it supports. The t-router and t-engines may also have external t-config files.
@@ -22,7 +22,7 @@ files) are specified in Spring Boot properties or such as
 The following is a simple t-config file from an example Hello World
 t-engine.
 
-~~~
+~~~json
 {
   "transformOptions":
   {
@@ -69,7 +69,7 @@ t-engine.
   from text to HTML and we have limited the source file size, to avoid
   transforming files that clearly don't contain names.
 
-### Transform pipelines
+## Transform pipelines
 
 Transforms may be combined in a pipeline to form a new transformer, where
 the output from one becomes the input to the next and so on. The t-config
@@ -86,7 +86,7 @@ message in the body. This is then transformed back into a text file. This
 example contains just one pipeline transformer, but many may be defined 
 in the same file.
 
-~~~
+~~~json
 {
   "transformers": [
     {
@@ -127,14 +127,14 @@ in the same file.
 * **transformOptions** A list of references to options required by the
   pipeline transformer.
 
-### Failover transforms
+## Failover transforms
 
 A failover transform, simply provides a list of transforms to be attempted
 one after another until one succeeds. For example, you may have a fast
 transform that is able to handle a limited set of transforms and another
 that is slower but handles all cases.
 
-~~~
+~~~json
 {
   "transformers": [
     {
@@ -163,14 +163,15 @@ that is slower but handles all cases.
 * **transformOptions** A list of references to options required by the 
   pipeline transformer.
 
-### Overriding transforms
+## Overriding transforms
 
 It is possible to override a previously defined transform definition. The
 following example removes most of the supported source to target media
 types from the standard `"libreoffice"` transform. It also changes the
 max size and priority of others. This is not something you would normally
 want to do.
-~~~
+
+~~~json
 {
   "transformers": [
     {
@@ -188,7 +189,7 @@ want to do.
 }
 ~~~
 
-### Removing a transformer
+## Removing a transformer
 
 To discard a previous transformer definition include its name in the
 optional `"removeTransformers"` list. You might want to do this if you
@@ -197,7 +198,7 @@ contains no alternatives), or you wish to temporarily remove it. The
 following example removes two transformers before processing any other
 configuration in the same T-Engine or pipeline file.
 
-~~~
+~~~json
 {
   "removeTransformers" : [
     "libreoffice",
@@ -207,7 +208,7 @@ configuration in the same T-Engine or pipeline file.
 }
 ~~~
 
-### Overriding the supportedSourceAndTargetList
+## Overriding the supportedSourceAndTargetList
 
 Rather than totally override an existing transform definition, it is
 generally simpler to modify the `"supportedSourceAndTargetList"` by adding
@@ -219,7 +220,8 @@ in the original, the same change is not needed in a second place. The
 following example adds one transform, removes two others and changes
 the `"priority"` and `"maxSourceSizeBytes"` of another. This is done before
 processing any other configuration in the same T-Engine or pipeline file.
-~~~
+
+~~~json
 {
   "addSupported": [
     {
@@ -255,7 +257,7 @@ processing any other configuration in the same T-Engine or pipeline file.
 }
 ~~~
 
-### Default maxSourceSizeBytes and priority values
+## Default maxSourceSizeBytes and priority values
 
 When defining `"supportedSourceAndTargetList"` elements the `"priority"`
 and `"maxSourceSizeBytes"` are optional and normally have the default
@@ -283,7 +285,7 @@ be used in preference.
 
 Defaults values are only applied after all t-config has been read.
 
-~~~
+~~~json
 {
   "supportedDefaults": [
     {

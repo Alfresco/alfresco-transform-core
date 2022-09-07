@@ -46,8 +46,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableRetry
 public class Application
 {
-    private static final Logger logger = LoggerFactory.getLogger(Application.class);
-
     @Value("${container.name}")
     private String containerName;
 
