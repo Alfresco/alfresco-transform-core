@@ -217,7 +217,7 @@ public class TransformRegistry extends AbstractTransformRegistry
                 logMessages.add("Transformers (" + nonNullTransformerNames.size() + "):");
                 nonNullTransformerNames
                     .stream()
-                    .sorted()
+                    .sorted(String.CASE_INSENSITIVE_ORDER)
                     .map(name -> {
                         Origin<Transformer> transformerOrigin = transformerByNameMap.get(name);
                         String message = "  " + name + (transformerOrigin == null
@@ -242,7 +242,7 @@ public class TransformRegistry extends AbstractTransformRegistry
                     .collect(Collectors.toList());
                 if (!unusedCustomTransformNames.isEmpty())
                 {
-                    logMessages.add("Unused CustomTransformers (" + unusedCustomTransformNames.size() + " - name is not in the transform config):");
+                    logMessages.add("Unused CustomTransformers (" + unusedCustomTransformNames.size() + ") - name is not in the transform config:");
                     unusedCustomTransformNames
                         .stream()
                         .map(name -> "  " + name)
