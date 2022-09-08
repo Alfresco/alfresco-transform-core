@@ -40,6 +40,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -255,7 +256,7 @@ public class CombinedTransformConfigTest
             assertEquals(numberOfTEngineTransformers, transformConfig.getTransformers().size());
             Transformer actualTransformer = transformConfig.getTransformers().get(numberOfTEngineTransformers - 1);
             assertEquals(expectedTransformer, actualTransformer);
-            assertTrue(expectedTransformer == actualTransformer);
+            assertSame(expectedTransformer, actualTransformer);
 
             // Check the baseUrl is that of the original t-engine that will do the work, if the overriding transform
             // is a single step transform.

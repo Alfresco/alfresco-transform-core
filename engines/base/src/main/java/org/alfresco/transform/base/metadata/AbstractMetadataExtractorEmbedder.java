@@ -33,7 +33,6 @@ import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.TransformManager;
 import org.slf4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -127,7 +126,7 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
 
     private final Type type;
 
-    public AbstractMetadataExtractorEmbedder(Type type, Logger logger)
+    protected AbstractMetadataExtractorEmbedder(Type type, Logger logger)
     {
         this.type = type;
         this.logger = logger;
@@ -507,7 +506,7 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
         }
         finally
         {
-            extractMapping.set(null);
+            extractMapping.remove();
         }
     }
 

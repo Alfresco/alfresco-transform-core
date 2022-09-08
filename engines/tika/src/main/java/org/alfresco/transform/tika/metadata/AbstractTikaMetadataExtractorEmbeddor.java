@@ -65,8 +65,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type;
-
 /**
  * The parent of all Metadata Extractors which use Apache Tika under the hood. This handles all the
  * common parts of processing the files, and the common mappings.
@@ -97,7 +95,7 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
     private final DateTimeFormatter tikaUTCDateFormater;
     private final DateTimeFormatter tikaDateFormater;
 
-    public AbstractTikaMetadataExtractorEmbeddor(Type type, Logger logger)
+    protected AbstractTikaMetadataExtractorEmbeddor(Type type, Logger logger)
     {
         super(type, logger);
 

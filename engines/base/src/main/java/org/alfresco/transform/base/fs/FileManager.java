@@ -57,6 +57,10 @@ public class FileManager
     public static final String SOURCE_FILE = "sourceFile";
     public static final String TARGET_FILE = "targetFile";
 
+    private FileManager()
+    {
+    }
+
     public static File createSourceFile(HttpServletRequest request, InputStream inputStream, String sourceMimetype)
     {
         try
@@ -185,6 +189,7 @@ public class FileManager
     public static ResponseEntity<Resource> createAttachment(String targetFilename, File targetFile)
     {
         Resource targetResource = load(targetFile);
+        // targetFilename should never be null (will be "transform."+<something>), so we should not worry about encodePath(null)
         targetFilename = UriUtils.encodePath(getFilename(targetFilename), "UTF-8");
         return ResponseEntity.ok().header(CONTENT_DISPOSITION,
             "attachment; filename*=UTF-8''" + targetFilename).body(targetResource);
@@ -195,6 +200,10 @@ public class FileManager
      */
     public static class TempFileProvider
     {
+        private TempFileProvider()
+        {
+        }
+
         public static File createTempFile(final String prefix, final String suffix)
         {
             final File directory = getTempDir();

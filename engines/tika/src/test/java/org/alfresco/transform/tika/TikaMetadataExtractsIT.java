@@ -26,15 +26,26 @@
  */
 package org.alfresco.transform.tika;
 
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_APP_DWG;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_OUTLOOK_MSG;
+import org.alfresco.transform.base.clients.FileInfo;
+import org.alfresco.transform.base.metadata.AbstractMetadataExtractsIT;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
+
 import static org.alfresco.transform.base.clients.FileInfo.testFile;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_APP_DWG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_AUDIO_MP4;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_EXCEL;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_BMP;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_GIF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_ARW;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_CR2;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_NEF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_RAF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_RW2;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_TIFF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_KEYNOTE;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_NUMBERS;
@@ -53,6 +64,7 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENOFFICE1_WRITER
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_PRESENTATION;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_SPREADSHEET;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_OUTLOOK_MSG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PPT;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
@@ -66,18 +78,6 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_VORBIS;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_XML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_ZIP;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_RAF;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_ARW;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_CR2;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_RW2;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAW_NEF;
-
-import java.util.stream.Stream;
-
-import org.alfresco.transform.base.metadata.AbstractMetadataExtractsIT;
-import org.alfresco.transform.base.clients.FileInfo;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Metadata integration tests in the Tika T-Engine.
@@ -106,40 +106,40 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
 
         return Stream.of(
                 //IPTCMetadataExtractor
-                FileInfo.testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quick.jpg"),
-                FileInfo.testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quickIPTC-EXT.jpg"),
-                FileInfo.testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quickIPTC-multi-creator.jpg"),
-                FileInfo.testFile(MIMETYPE_IMAGE_JPEG, "jpg", "testJPEG_IPTC_EXT.jpg"),
-                FileInfo.testFile(MIMETYPE_IMAGE_GIF, "gif", "quickIPTC.gif"),
-                FileInfo.testFile(MIMETYPE_IMAGE_PNG, "png", "quickIPTC.png"),
-                FileInfo.testFile(MIMETYPE_IMAGE_RAW_ARW, "arw", "20140614_163822_Photogrpahy_Class.ARW"),
-                FileInfo.testFile(MIMETYPE_IMAGE_RAW_CR2, "cr2", "20141227_134519_Palace.CR2"),
-                FileInfo.testFile(MIMETYPE_IMAGE_RAW_RW2, "rw2", "20140629_145035_Flower.RW2"),
-                FileInfo.testFile(MIMETYPE_IMAGE_RAW_NEF, "nef", "20150408_074941_Bush.NEF"),
-                FileInfo.testFile(MIMETYPE_IMAGE_RAW_RAF, "raf", "20160502_190928_London_Underground.RAF"),
+                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quick.jpg"),
+                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quickIPTC-EXT.jpg"),
+                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quickIPTC-multi-creator.jpg"),
+                testFile(MIMETYPE_IMAGE_JPEG, "jpg", "testJPEG_IPTC_EXT.jpg"),
+                testFile(MIMETYPE_IMAGE_GIF, "gif", "quickIPTC.gif"),
+                testFile(MIMETYPE_IMAGE_PNG, "png", "quickIPTC.png"),
+                testFile(MIMETYPE_IMAGE_RAW_ARW, "arw", "20140614_163822_Photogrpahy_Class.ARW"),
+                testFile(MIMETYPE_IMAGE_RAW_CR2, "cr2", "20141227_134519_Palace.CR2"),
+                testFile(MIMETYPE_IMAGE_RAW_RW2, "rw2", "20140629_145035_Flower.RW2"),
+                testFile(MIMETYPE_IMAGE_RAW_NEF, "nef", "20150408_074941_Bush.NEF"),
+                testFile(MIMETYPE_IMAGE_RAW_RAF, "raf", "20160502_190928_London_Underground.RAF"),
                 
                 // DWGMetadataExtractor
-                FileInfo.testFile(MIMETYPE_APP_DWG, "dwg", "quick2010CustomProps.dwg"),
+                testFile(MIMETYPE_APP_DWG, "dwg", "quick2010CustomProps.dwg"),
 
                 // MailMetadataExtractor
-                FileInfo.testFile(MIMETYPE_OUTLOOK_MSG, "msg", "quick.msg"),
+                testFile(MIMETYPE_OUTLOOK_MSG, "msg", "quick.msg"),
 
                 // MP3MetadataExtractor
-                FileInfo.testFile(MIMETYPE_MP3, "mp3", "quick.mp3"),
+                testFile(MIMETYPE_MP3, "mp3", "quick.mp3"),
 
                 // OfficeMetadataExtractor
-                FileInfo.testFile(MIMETYPE_WORD, "doc", "quick.doc"),
+                testFile(MIMETYPE_WORD, "doc", "quick.doc"),
                 //testFile("application/x-tika-msoffice-embedded; format=ole10_native", "", ""),
-                FileInfo.testFile(MIMETYPE_VISIO, "vsd", "quick.vsd"),
+                testFile(MIMETYPE_VISIO, "vsd", "quick.vsd"),
                 //testFile("application/vnd.ms-project", "mpp", ""),
                 //testFile("application/x-tika-msworks-spreadsheet", "", ""),
                 //testFile("application/x-mspublisher", "", ""),
-                FileInfo.testFile(MIMETYPE_PPT, "ppt", "quick.ppt"),
+                testFile(MIMETYPE_PPT, "ppt", "quick.ppt"),
                 //testFile("application/x-tika-msoffice", "", ""),
                 //testFile(MIMETYPE_VISIO_2013, "vsdx", ""),
                 //testFile("application/sldworks", "", ""),
                 //testFile(MIMETYPE_ENCRYPTED_OFFICE, "", ""),
-                FileInfo.testFile(MIMETYPE_EXCEL, "xls", "quick.xls"),
+                testFile(MIMETYPE_EXCEL, "xls", "quick.xls"),
 
                 // OpenDocumentMetadataExtractor
                 //testFile("application/x-vnd.oasis.opendocument.presentation", "", ""),
@@ -147,14 +147,14 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile(MIMETYPE_OPENDOCUMENT_IMAGE_TEMPLATE, "", ""),
                 //testFile("application/x-vnd.oasis.opendocument.text-web", "", ""),
                 //testFile("application/x-vnd.oasis.opendocument.image", "", ""),
-                FileInfo.testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS_TEMPLATE, "otg", "quick.otg"),
+                testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS_TEMPLATE, "otg", "quick.otg"),
                 //testFile(MIMETYPE_OPENDOCUMENT_TEXT_WEB, "oth", ""),
                 //testFile("application/x-vnd.oasis.opendocument.spreadsheet-template", "", ""),
-                FileInfo.testFile(MIMETYPE_OPENDOCUMENT_SPREADSHEET_TEMPLATE, "ots", "quick.ots"),
-                FileInfo.testFile(MIMETYPE_OPENOFFICE1_WRITER, "sxw", "quick.sxw"),
+                testFile(MIMETYPE_OPENDOCUMENT_SPREADSHEET_TEMPLATE, "ots", "quick.ots"),
+                testFile(MIMETYPE_OPENOFFICE1_WRITER, "sxw", "quick.sxw"),
                 //testFile("application/x-vnd.oasis.opendocument.graphics-template", "", ""),
-                FileInfo.testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS, "odg", "quick.odg"),
-                FileInfo.testFile(MIMETYPE_OPENDOCUMENT_SPREADSHEET, "ods", "quick.ods"),
+                testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS, "odg", "quick.odg"),
+                testFile(MIMETYPE_OPENDOCUMENT_SPREADSHEET, "ods", "quick.ods"),
                 //testFile("application/x-vnd.oasis.opendocument.chart", "", ""),
                 //testFile("application/x-vnd.oasis.opendocument.spreadsheet", "", ""),
                 //testFile(MIMETYPE_OPENDOCUMENT_IMAGE, "odi", ""),
@@ -165,23 +165,23 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("application/vnd.oasis.opendocument.image-template", "", ""),
                 //testFile("application/x-vnd.oasis.opendocument.image-template", "", ""),
                 //testFile("application/x-vnd.oasis.opendocument.presentation-template", "", ""),
-                FileInfo.testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION_TEMPLATE, "otp", "quick.otp"),
-                FileInfo.testFile(MIMETYPE_OPENDOCUMENT_TEXT, "odt", "quick.odt"),
+                testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION_TEMPLATE, "otp", "quick.otp"),
+                testFile(MIMETYPE_OPENDOCUMENT_TEXT, "odt", "quick.odt"),
                 //testFile(MIMETYPE_OPENDOCUMENT_FORMULA_TEMPLATE, "", ""),
-                FileInfo.testFile(MIMETYPE_OPENDOCUMENT_TEXT_TEMPLATE, "ott", "quick.ott"),
+                testFile(MIMETYPE_OPENDOCUMENT_TEXT_TEMPLATE, "ott", "quick.ott"),
                 //testFile("application/vnd.oasis.opendocument.chart-template", "", ""),
                 //testFile("application/x-vnd.oasis.opendocument.chart-template", "", ""),
                 //testFile("application/x-vnd.oasis.opendocument.formula-template", "", ""),
                 //testFile(MIMETYPE_OPENDOCUMENT_DATABASE, "odb", ""),
                 //testFile("application/x-vnd.oasis.opendocument.text-master", "", ""),
-                FileInfo.testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION, "odp", "quick.odp"),
+                testFile(MIMETYPE_OPENDOCUMENT_PRESENTATION, "odp", "quick.odp"),
                 //testFile(MIMETYPE_OPENDOCUMENT_CHART_TEMPLATE, "", ""),
                 //testFile("application/x-vnd.oasis.opendocument.graphics", "", ""),
-                FileInfo.testFile(MIMETYPE_OPENDOCUMENT_FORMULA, "odf", "quick.odf"),
+                testFile(MIMETYPE_OPENDOCUMENT_FORMULA, "odf", "quick.odf"),
                 //testFile(MIMETYPE_OPENDOCUMENT_TEXT_MASTER, "odm", ""),
 
                 // PdfBoxMetadataExtractor
-                FileInfo.testFile(MIMETYPE_PDF, "pdf", "quick.pdf"),
+                testFile(MIMETYPE_PDF, "pdf", "quick.pdf"),
                 //testFile(MIMETYPE_APPLICATION_ILLUSTRATOR, "ai", ""),
 
                 // PoiMetadataExtractor
@@ -189,7 +189,7 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile(MIMETYPE_OPENXML_SPREADSHEET_ADDIN_MACRO, "xlam", ""),
                 //testFile(MIMETYPE_OPENXML_WORD_TEMPLATE, "dotx", ""),
                 //testFile(MIMETYPE_OPENXML_SPREADSHEET_BINARY_MACRO, "xlsb", ""),
-                FileInfo.testFile(MIMETYPE_OPENXML_WORDPROCESSING, "docx", "quick.docx"),
+                testFile(MIMETYPE_OPENXML_WORDPROCESSING, "docx", "quick.docx"),
                 //testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDE_MACRO, "sldm", ""),
                 //testFile("application/vnd.ms-visio.drawing", "", ""),
                 //testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW_MACRO, "ppsm", ""),
@@ -205,8 +205,8 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("application/vnd.ms-visio.template.macroenabled.12", "", ""),
                 //testFile("model/vnd.dwfx+xps", "", ""),
                 //testFile(MIMETYPE_OPENXML_PRESENTATION_TEMPLATE, "potx", ""),
-                FileInfo.testFile(MIMETYPE_OPENXML_PRESENTATION, "pptx", "quick.pptx"),
-                FileInfo.testFile(MIMETYPE_OPENXML_SPREADSHEET, "xlsx", "quick.xlsx"),
+                testFile(MIMETYPE_OPENXML_PRESENTATION, "pptx", "quick.pptx"),
+                testFile(MIMETYPE_OPENXML_SPREADSHEET, "xlsx", "quick.xlsx"),
                 //testFile("application/vnd.ms-visio.stencil", "", ""),
                 //testFile("application/vnd.ms-visio.template", "", ""),
                 //testFile(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW, "ppsx", ""),
@@ -214,16 +214,16 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile(MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO, "xltm", ""),
 
                 // TikaAudioMetadataExtractor
-                FileInfo.testFile("video/x-m4v", "m4v", "quick.m4v"),
+                testFile("video/x-m4v", "m4v", "quick.m4v"),
                 //testFile("audio/x-oggflac", "", ""),
                 //testFile("application/mp4", "", ""),
-                FileInfo.testFile(MIMETYPE_VORBIS, "ogg", "quick.ogg"),
-                FileInfo.testFile(MIMETYPE_VIDEO_3GP, "3gp", "quick.3gp"),
+                testFile(MIMETYPE_VORBIS, "ogg", "quick.ogg"),
+                testFile(MIMETYPE_VIDEO_3GP, "3gp", "quick.3gp"),
                 //testFile(MIMETYPE_FLAC, "flac", ""),
-                FileInfo.testFile(MIMETYPE_VIDEO_3GP2, "3g2", "quick.3g2"),
-                FileInfo.testFile(MIMETYPE_VIDEO_QUICKTIME, "mov", "quick.mov"),
-                FileInfo.testFile(MIMETYPE_AUDIO_MP4, "m4a", "quick.m4a"),
-                FileInfo.testFile(MIMETYPE_VIDEO_MP4, "mp4", "quick.mp4"),
+                testFile(MIMETYPE_VIDEO_3GP2, "3g2", "quick.3g2"),
+                testFile(MIMETYPE_VIDEO_QUICKTIME, "mov", "quick.mov"),
+                testFile(MIMETYPE_AUDIO_MP4, "m4a", "quick.m4a"),
+                testFile(MIMETYPE_VIDEO_MP4, "mp4", "quick.mp4"),
 
                 // TikaAutoMetadataExtractor
 
@@ -243,12 +243,12 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("audio/midi", "", ""),
                 //testFile("application/aaigrid", "", ""),
                 //testFile("application/x-bag", "", ""),
-                FileInfo.testFile(MIMETYPE_IWORK_KEYNOTE, "key", "quick.key"),
+                testFile(MIMETYPE_IWORK_KEYNOTE, "key", "quick.key"),
                 //testFile("application/x-quattro-pro; version=9", "", ""),
                 //testFile("application/x-ibooks+zip", "", ""),
                 //testFile("audio/wave", "", ""),
                 //testFile("application/x-midi", "", ""),
-                FileInfo.testFile(MIMETYPE_XML, "xml", "quick.xml"),
+                testFile(MIMETYPE_XML, "xml", "quick.xml"),
                 //testFile(MIMETYPE_RSS, "rss", ""),
                 //testFile("application/x-netcdf", "cdf", ""),
                 //testFile("video/x-daala", "", ""),
@@ -276,7 +276,7 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("application/x-rar", "", ""),
                 //testFile("image/sar-ceos", "", ""),
                 //testFile("application/acad", "", ""),
-                FileInfo.testFile(MIMETYPE_ZIP, "zip", "quick.zip"),
+                testFile(MIMETYPE_ZIP, "zip", "quick.zip"),
                 //testFile(MIMETYPE_IMAGE_PSD, "psd", ""),
                 //testFile("application/x-sharedlib", "", ""),
                 //testFile("audio/x-m4a", "", ""),
@@ -302,12 +302,12 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("application/x-coredump", "", ""),
                 //testFile("application/x-msaccess", "", ""),
                 //testFile("application/x-dods", "", ""),
-                FileInfo.testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"),
+                testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"),
                 //testFile("application/vnd.ms-outlook-pst", "", ""),
                 //testFile("image/bsb", "", ""),
                 //testFile("application/x-cpio", "cpio", ""),
                 //testFile("audio/ogg", "oga", ""),
-                FileInfo.testFile("application/x-tar", "tar", "quick.tar"),
+                testFile("application/x-tar", "tar", "quick.tar"),
                 //testFile("application/x-dbf", "", ""),
                 //testFile("video/x-ogm", "", ""),
                 //testFile("application/x-los-las", "", ""),
@@ -327,7 +327,7 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("application/x-hdf", "hdf", ""),
                 //testFile("image/x-mff", "", ""),
                 //testFile("image/x-srp", "", ""),
-                FileInfo.testFile(MIMETYPE_IMAGE_BMP, "bmp", "quick.bmp"),
+                testFile(MIMETYPE_IMAGE_BMP, "bmp", "quick.bmp"),
                 //testFile("video/x-ogguvs", "", ""),
                 //testFile("drawing/dwg", "", ""),
                 //testFile("application/x-doq2", "", ""),
@@ -340,7 +340,7 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("application/x-wcs", "", ""),
                 //testFile("text/x-c++src", "", ""),
                 //testFile("application/timestamped-data", "", ""),
-                FileInfo.testFile(MIMETYPE_IMAGE_TIFF, "tiff", "quick.tiff"),
+                testFile(MIMETYPE_IMAGE_TIFF, "tiff", "quick.tiff"),
                 //testFile("application/msexcel", "", ""),
                 //testFile("application/x-asp", "", ""),
                 //testFile("application/x-rar-compressed", "rar", ""),
@@ -396,7 +396,7 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("image/vnd.microsoft.icon", "", ""),
                 //testFile("application/x-envi", "", ""),
                 //testFile("application/x-dwg", "", ""),
-                FileInfo.testFile(MIMETYPE_IWORK_NUMBERS, "numbers", "quick.numbers"),
+                testFile(MIMETYPE_IWORK_NUMBERS, "numbers", "quick.numbers"),
                 //testFile("application/vnd.ms-word2006ml", "", ""),
                 //testFile("application/x-bt", "", ""),
                 //testFile("application/x-font-adobe-metric", "", ""),
@@ -419,7 +419,7 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("audio/ogg; codecs=opus", "", ""),
                 //testFile("application/fits", "", ""),
                 //testFile("application/x-r", "", ""),
-                FileInfo.testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"),
+                testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"),
                 //testFile("application/java-vm", "", ""),
                 //testFile("application/mspowerpoint", "", ""),
                 //testFile("application/x-http", "", ""),
@@ -454,13 +454,13 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("application/x-executable", "", ""),
                 //testFile("application/x-isatab", "", ""),
                 //testFile("application/grass-ascii-grid", "", ""),
-                FileInfo.testFile(MIMETYPE_TEXT_PLAIN, "txt", "quick.txt"),
+                testFile(MIMETYPE_TEXT_PLAIN, "txt", "quick.txt"),
                 //testFile("application/gzipped", "", ""),
                 //testFile("application/x-gxf", "", ""),
                 //testFile("application/x-cpg", "", ""),
                 //testFile("application/x-lan", "", ""),
                 //testFile("application/x-xyz", "", ""),
-                FileInfo.testFile(MIMETYPE_IWORK_PAGES, "pages", "quick.pages"),
+                testFile(MIMETYPE_IWORK_PAGES, "pages", "quick.pages"),
                 //testFile("image/x-jbig2", "", ""),
                 //testFile("image/nitf", "", ""),
                 //testFile("application/mbox", "", ""),
@@ -519,7 +519,7 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
                 //testFile("application/x-emf", "", ""),
                 //testFile("application/x-geo-pdf", "", ""),
                 //testFile("video/x-ogg-uvs", "", ""),
-                FileInfo.testFile(MIMETYPE_VIDEO_FLV, "flv", "quick.flv"),
+                testFile(MIMETYPE_VIDEO_FLV, "flv", "quick.flv"),
                 //testFile("application/x-zip-compressed", "", ""),
                 //testFile("application/gzip", "", ""),
                 //testFile("application/x-tika-unix-dump", "", ""),
@@ -546,7 +546,7 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
 
                 // Test MNT-15219 Excel (.xlsx) containing xmls (shapes/drawings) with multi byte characters may
                 // cause OutOfMemory in Tika Note - doesn't use extractFromMimetype
-                FileInfo.testFile(MIMETYPE_OPENXML_SPREADSHEET, "xlsx", "dmsu1332-reproduced.xlsx")
+                testFile(MIMETYPE_OPENXML_SPREADSHEET, "xlsx", "dmsu1332-reproduced.xlsx")
 
         );
     }
@@ -565,13 +565,13 @@ public class TikaMetadataExtractsIT extends AbstractMetadataExtractsIT
         // - the replacement TikaCoreProperties.SUBJECT raw metadata changed into a multi value
         // The following test files were the ones that failed.
         return Stream.of(
-                FileInfo.testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS_TEMPLATE, "otg", "quick.otg"),
-                FileInfo.testFile(MIMETYPE_OPENOFFICE1_WRITER, "sxw", "quick.sxw"),
-                FileInfo.testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS, "odg", "quick.odg"),
-                FileInfo.testFile(MIMETYPE_OPENDOCUMENT_TEXT, "odt", "quick.odt"),
-                FileInfo.testFile(MIMETYPE_OPENDOCUMENT_TEXT_TEMPLATE, "ott", "quick.ott"),
-                FileInfo.testFile(MIMETYPE_OPENDOCUMENT_FORMULA, "odf", "quick.odf"),
-                FileInfo.testFile(MIMETYPE_PDF, "pdf", "quick.pdf")
+                testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS_TEMPLATE, "otg", "quick.otg"),
+                testFile(MIMETYPE_OPENOFFICE1_WRITER, "sxw", "quick.sxw"),
+                testFile(MIMETYPE_OPENDOCUMENT_GRAPHICS, "odg", "quick.odg"),
+                testFile(MIMETYPE_OPENDOCUMENT_TEXT, "odt", "quick.odt"),
+                testFile(MIMETYPE_OPENDOCUMENT_TEXT_TEMPLATE, "ott", "quick.ott"),
+                testFile(MIMETYPE_OPENDOCUMENT_FORMULA, "odf", "quick.odf"),
+                testFile(MIMETYPE_PDF, "pdf", "quick.pdf")
         );
     }
 }

@@ -85,7 +85,10 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @Component
 public class TransformHandler
 {
+
     private static final Logger logger = LoggerFactory.getLogger(TransformHandler.class);
+
+    private static final String FAILED_WRITING_TO_SFS = "Failed writing to SFS";
 
     @Autowired(required = false)
     private List<TransformEngine> transformEngines;
@@ -141,6 +144,7 @@ public class TransformHandler
                 return sourceMultipartFile == null ? -1 : sourceMultipartFile.getSize();
             }
 
+            @Override
             protected void sendTransformResponse(TransformManagerImpl transformManager)
             {
                 String extension = ExtensionService.getExtensionForTargetMimetype(targetMimetype, sourceMimetype);
@@ -151,7 +155,7 @@ public class TransformHandler
         return responseEntity.get();
     }
 
-    public void handleProbRequest(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+    public void handleProbeRequest(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
         File sourceFile, File targetFile, ProbeTransform probeTransform)
     {
         new ProcessHandler(sourceMimetype, targetMimetype, transformOptions,
@@ -170,7 +174,7 @@ public class TransformHandler
             @Override
             protected InputStream getInputStream()
             {
-                return getInputStreamForHandleProbRequest(sourceFile);
+                return getInputStreamForHandleProbeRequest(sourceFile);
             }
 
             @Override
@@ -228,6 +232,7 @@ public class TransformHandler
                 return getOutputStreamFromFile(transformManager.getTargetFile());
             }
 
+            @Override
             protected void sendTransformResponse(TransformManagerImpl transformManager)
             {
                 reply.getInternalContext().setCurrentSourceSize(transformManager.getOutputLength());
@@ -345,7 +350,7 @@ public class TransformHandler
             : getDirectAccessUrlInputStream(directUrl));
     }
 
-    private InputStream getInputStreamForHandleProbRequest(File sourceFile)
+    private InputStream getInputStreamForHandleProbeRequest(File sourceFile)
     {
         try
         {
@@ -390,15 +395,15 @@ public class TransformHandler
         }
         catch (TransformException e)
         {
-            throw new TransformException(e.getStatus(), messageWithCause("Failed writing to SFS", e));
+            throw new TransformException(e.getStatus(), messageWithCause(FAILED_WRITING_TO_SFS, e));
         }
         catch (HttpClientErrorException e)
         {
-            throw new TransformException(e.getStatusCode(), messageWithCause("Failed writing to SFS", e));
+            throw new TransformException(e.getStatusCode(), messageWithCause(FAILED_WRITING_TO_SFS, e));
         }
         catch (Exception e)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR, messageWithCause("Failed writing to SFS", e));
+            throw new TransformException(INTERNAL_SERVER_ERROR, messageWithCause(FAILED_WRITING_TO_SFS, e));
         }
 
         reply.setTargetReference(targetRef.getEntry().getFileRef());

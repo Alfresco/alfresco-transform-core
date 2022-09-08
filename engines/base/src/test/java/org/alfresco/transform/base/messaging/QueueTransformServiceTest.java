@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2022 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -32,11 +32,9 @@ import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.activemq.command.ActiveMQObjectMessage;
 import org.apache.activemq.command.ActiveMQQueue;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.support.converter.MessageConversionException;
 
@@ -49,7 +47,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -72,9 +70,9 @@ public class QueueTransformServiceTest
     {
         queueTransformService.receive(null);
 
-        verifyNoMoreInteractions(transformController);
-        verifyNoMoreInteractions(transformMessageConverter);
-        verifyNoMoreInteractions(transformReplySender);
+        verifyNoInteractions(transformController);
+        verifyNoInteractions(transformMessageConverter);
+        verifyNoInteractions(transformReplySender);
     }
 
     @Test
@@ -82,9 +80,9 @@ public class QueueTransformServiceTest
     {
         queueTransformService.receive(new ActiveMQObjectMessage());
 
-        verifyNoMoreInteractions(transformController);
-        verifyNoMoreInteractions(transformMessageConverter);
-        verifyNoMoreInteractions(transformReplySender);
+        verifyNoInteractions(transformController);
+        verifyNoInteractions(transformMessageConverter);
+        verifyNoInteractions(transformReplySender);
     }
 
     @Test
@@ -110,7 +108,7 @@ public class QueueTransformServiceTest
         verify(transformMessageConverter).fromMessage(msg);
         verify(transformReplySender).send(destination, reply, msg.getCorrelationId());
 
-        verifyNoMoreInteractions(transformController);
+        verifyNoInteractions(transformController);
     }
 
     @Test
@@ -137,7 +135,7 @@ public class QueueTransformServiceTest
         verify(transformMessageConverter).fromMessage(msg);
         verify(transformReplySender).send(destination, reply, msg.getCorrelationId());
 
-        verifyNoMoreInteractions(transformController);
+        verifyNoInteractions(transformController);
     }
 
     @Test
@@ -164,7 +162,7 @@ public class QueueTransformServiceTest
         verify(transformMessageConverter).fromMessage(msg);
         verify(transformReplySender).send(destination, reply, msg.getCorrelationId());
 
-        verifyNoMoreInteractions(transformController);
+        verifyNoInteractions(transformController);
     }
 
     @Test
@@ -200,9 +198,9 @@ public class QueueTransformServiceTest
 
         queueTransformService.receive(msg);
 
-        verifyNoMoreInteractions(transformController);
-        verifyNoMoreInteractions(transformMessageConverter);
-        verifyNoMoreInteractions(transformReplySender);
+        verifyNoInteractions(transformController);
+        verifyNoInteractions(transformMessageConverter);
+        verifyNoInteractions(transformReplySender);
     }
 
     @Test

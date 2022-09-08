@@ -29,7 +29,6 @@ package org.alfresco.transform.tika;
 import com.google.common.collect.ImmutableSet;
 import org.alfresco.transform.base.AbstractBaseTest;
 import org.alfresco.transform.base.executors.RuntimeExec;
-import org.alfresco.transform.base.html.OptionLister;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.client.model.TransformReply;
@@ -39,7 +38,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -54,6 +52,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
+import static org.alfresco.transform.base.html.OptionsHelper.getOptionNames;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_METADATA_EMBED;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_PRESENTATION;
@@ -118,8 +117,6 @@ public class TikaTest extends AbstractBaseTest
                                                                 "\n" +
                                                                 "The quick brown fox jumps over the lazy dogs";
     private static final String EXPECTED_CSV_CONTENT_CONTAINS = "\"The\",\"quick\",\"brown\",\"fox\"";
-
-    protected @Autowired OptionLister optionLister;
 
     @Mock
     private RuntimeExec.ExecutionResult mockExecutionResult;
@@ -495,6 +492,6 @@ public class TikaTest extends AbstractBaseTest
                 "extractMapping",
                 "notExtractBookmarksText",
                 "metadata"),
-            optionLister.getOptionNames(controller.transformConfig(0).getBody().getTransformOptions()));
+            getOptionNames(controller.transformConfig(0).getBody().getTransformOptions()));
     }
 }

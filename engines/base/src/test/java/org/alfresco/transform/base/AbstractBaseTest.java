@@ -106,9 +106,6 @@ public abstract class AbstractBaseTest
     @SpyBean
     protected TransformServiceRegistry transformRegistry;
 
-    @Autowired
-    private String coreVersion;
-
     protected String sourceExtension;
     protected String targetExtension;
     protected String sourceMimetype;

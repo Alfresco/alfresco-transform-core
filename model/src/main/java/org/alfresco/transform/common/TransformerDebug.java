@@ -197,7 +197,7 @@ public class TransformerDebug
     {
         if (logger.isDebugEnabled())
         {
-            logger.debug(getPaddedReference(reference) + "  fragment["+index+"] "+fileSize(size));
+            logger.debug("%s  fragment[%d]%s", getPaddedReference(reference), index, fileSize(size));
         }
     }
 

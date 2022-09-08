@@ -27,6 +27,10 @@ import org.springframework.core.io.Resource;
 
 public class TransformConfigReaderFactory
 {
+    private TransformConfigReaderFactory()
+    {
+    }
+
     public static TransformConfigReader create(final Resource resource)
     {
         final String fileName = resource.getFilename();

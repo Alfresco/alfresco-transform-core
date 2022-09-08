@@ -34,10 +34,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**

@@ -22,9 +22,9 @@
 package org.alfresco.transform.registry;
 
 import org.alfresco.transform.config.AddSupported;
-import org.alfresco.transform.config.SupportedDefaults;
 import org.alfresco.transform.config.OverrideSupported;
 import org.alfresco.transform.config.RemoveSupported;
+import org.alfresco.transform.config.SupportedDefaults;
 import org.alfresco.transform.config.SupportedSourceAndTarget;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.config.TransformOption;
@@ -32,7 +32,6 @@ import org.alfresco.transform.config.TransformStep;
 import org.alfresco.transform.config.Transformer;
 import org.alfresco.transform.config.TransformerAndTypes;
 import org.alfresco.transform.config.Types;
-import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.ArrayList;
 import java.util.HashMap;

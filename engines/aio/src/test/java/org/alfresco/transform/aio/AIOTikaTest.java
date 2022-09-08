@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
 import org.alfresco.transform.tika.TikaTest;
 import org.junit.jupiter.api.Test;
 
+import static org.alfresco.transform.base.html.OptionsHelper.getOptionNames;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -69,6 +70,6 @@ public class AIOTikaTest extends TikaTest
                 "targetEncoding",
                 "thumbnail",
                 "width"),
-            optionLister.getOptionNames(controller.transformConfig(0).getBody().getTransformOptions()));
+            getOptionNames(controller.transformConfig(0).getBody().getTransformOptions()));
     }
 }

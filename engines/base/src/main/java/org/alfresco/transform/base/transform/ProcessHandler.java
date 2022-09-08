@@ -61,7 +61,7 @@ import static org.springframework.http.HttpStatus.OK;
  * Provides the transform logic common to http (upload/download), message and probe requests. See
  * {@link TransformHandler#handleHttpRequest(HttpServletRequest, MultipartFile, String, String, Map, ProbeTransform)},
  * {@link TransformHandler#handleMessageRequest(TransformRequest, Long, Destination, ProbeTransform)} and
- * {@link TransformHandler#handleProbRequest(String, String, Map, File, File, ProbeTransform)}. Note the handing of transform requests
+ * {@link TransformHandler#handleProbeRequest(String, String, Map, File, File, ProbeTransform)}. Note the handing of transform requests
  * via a message queue is the same as via the {@link TransformController#transform(TransformRequest, Long, Destination)}.
  */
 abstract class ProcessHandler extends FragmentHandler
@@ -151,6 +151,7 @@ abstract class ProcessHandler extends FragmentHandler
         }
     }
 
+    @Override
     protected void logFragment(Integer index, Long outputLength)
     {
         transformerDebug.logFragment(reference, index, outputLength);
@@ -200,7 +201,7 @@ abstract class ProcessHandler extends FragmentHandler
                 .collect(Collectors.joining(", ", " ", "")));
         }
         return transformerName;
-}
+    }
 
     private CustomTransformer getCustomTransformer(String transformName)
     {

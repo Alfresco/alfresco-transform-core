@@ -35,6 +35,6 @@ public class OOXMLTransformer extends AbstractTikaTransformer
     @Override
     protected Parser getParser()
     {
-        return tika.ooXmlParser;
+        return Tika.ooXmlParser;
     }
 }

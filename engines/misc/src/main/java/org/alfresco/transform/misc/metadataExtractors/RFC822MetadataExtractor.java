@@ -26,7 +26,6 @@
  */
 package org.alfresco.transform.misc.metadataExtractors;
 
-import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
 import org.slf4j.Logger;
@@ -179,11 +178,10 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractorEmbedder
              * Extract values from all header fields, including extension fields "X-"
              */
             Set<String> keys = getExtractMapping().keySet();
-            @SuppressWarnings("unchecked")
             Enumeration<Header> headers = mimeMessage.getAllHeaders();
             while (headers.hasMoreElements())
             {
-                Header header = (Header) headers.nextElement();
+                Header header = headers.nextElement();
                 if (keys.contains(header.getName()))
                 {
                     tmp = header.getValue();

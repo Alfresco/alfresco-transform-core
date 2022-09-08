@@ -26,14 +26,18 @@
  */
 package org.alfresco.transform.base.logging;
 
-public interface StandardMessages
+public final class StandardMessages
 {
-    String COMMUNITY_LICENCE =
+    private StandardMessages()
+    {
+    }
+
+    public static String COMMUNITY_LICENCE =
         "If the Alfresco software was purchased under a paid Alfresco license, the terms of the paid license agreement \n" +
         "will prevail. Otherwise, the software is provided under terms of the GNU LGPL v3 license. \n" +
         "See the license at http://www.gnu.org/licenses/lgpl-3.0.txt. or in /LICENSE.txt \n\n";
 
-    String ENTERPRISE_LICENCE =
+    public static String ENTERPRISE_LICENCE =
         "This image is only intended to be used with the Alfresco Enterprise Content Repository which is covered by\n" +
         "https://www.alfresco.com/legal/agreements and https://www.alfresco.com/terms-use\n" +
         "\n" +

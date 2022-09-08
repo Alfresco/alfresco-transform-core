@@ -26,8 +26,10 @@
  */
 package org.alfresco.transform.base.logging;
 
-import static java.lang.Math.max;
-import static org.springframework.http.HttpStatus.OK;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -36,9 +38,8 @@ import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
+import static java.lang.Math.max;
+import static org.springframework.http.HttpStatus.OK;
 
 /**
  * Provides setter and getter methods to allow the current Thread to set various log properties and for these
@@ -96,7 +97,7 @@ public final class LogEntry
 
     private void append(StringBuilder sb, String value)
     {
-        if (value != null && !value.isEmpty() && !"0bytes".equals(value))
+        if (StringUtils.isNotBlank(value) && !"0bytes".equals(value))
         {
             sb.append(value);
             sb.append(' ');

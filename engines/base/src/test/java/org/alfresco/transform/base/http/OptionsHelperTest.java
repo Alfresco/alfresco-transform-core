@@ -29,7 +29,6 @@ package org.alfresco.transform.base.http;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.alfresco.transform.base.html.OptionLister;
 import org.alfresco.transform.config.TransformOption;
 import org.alfresco.transform.config.TransformOptionGroup;
 import org.alfresco.transform.config.TransformOptionValue;
@@ -40,21 +39,17 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import static org.alfresco.transform.base.html.OptionsHelper.getOptionNames;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * Used in the html test page.
- */
-public class OptionListerTest
+public class OptionsHelperTest
 {
-    OptionLister optionLister = new OptionLister();
-
     @Test
-    public void emptyListTest()
+    public void emptyTest()
     {
         Map<String, Set<TransformOption>> transformOptionsByName = Collections.emptyMap();
 
-        assertEquals(Collections.emptySet(), optionLister.getOptionNames(transformOptionsByName));
+        assertEquals(Collections.emptySet(), getOptionNames(transformOptionsByName));
     }
 
     @Test
@@ -63,7 +58,7 @@ public class OptionListerTest
         Map<String, Set<TransformOption>> transformOptionsByName = ImmutableMap.of("Dummy", ImmutableSet.of(
             new TransformOptionValue(true, "startPage")));
 
-        assertEquals(ImmutableSet.of("startPage"), optionLister.getOptionNames(transformOptionsByName));
+        assertEquals(ImmutableSet.of("startPage"), getOptionNames(transformOptionsByName));
     }
 
     @Test
@@ -72,7 +67,7 @@ public class OptionListerTest
         Map<String, Set<TransformOption>> transformOptionsByName = ImmutableMap.of("DummyOptions", ImmutableSet.of(
             new TransformOptionValue(true, "startPage")));
 
-        assertEquals(ImmutableSet.of("startPage"), optionLister.getOptionNames(transformOptionsByName));
+        assertEquals(ImmutableSet.of("startPage"), getOptionNames(transformOptionsByName));
     }
 
     @Test
@@ -81,7 +76,7 @@ public class OptionListerTest
         Map<String, Set<TransformOption>> transformOptionsByName = ImmutableMap.of("DummyOptions", ImmutableSet.of(
             new TransformOptionValue(true, "startPage")));
 
-        assertEquals(ImmutableSet.of("startPage"), optionLister.getOptionNames(transformOptionsByName));
+        assertEquals(ImmutableSet.of("startPage"), getOptionNames(transformOptionsByName));
     }
 
     @Test
@@ -91,7 +86,7 @@ public class OptionListerTest
             new TransformOptionValue(false, "startPage"),
             new TransformOptionValue(true, "endPage")));
 
-        assertEquals(ImmutableSet.of("startPage", "endPage"), optionLister.getOptionNames(transformOptionsByName));
+        assertEquals(ImmutableSet.of("startPage", "endPage"), getOptionNames(transformOptionsByName));
     }
 
     @Test
@@ -104,7 +99,7 @@ public class OptionListerTest
             new TransformOptionValue(false, "f"),
             new TransformOptionValue(true, "z")));
 
-        assertEquals(ImmutableList.of("a", "f", "k", "n", "z"), new ArrayList<>(optionLister.getOptionNames(transformOptionsByName)));
+        assertEquals(ImmutableList.of("a", "f", "k", "n", "z"), new ArrayList<>(getOptionNames(transformOptionsByName)));
     }
 
     @Test
@@ -128,7 +123,7 @@ public class OptionListerTest
                 "x",
                 "y",
                 "ratio"),
-            optionLister.getOptionNames(transformOptionsByName));
+            getOptionNames(transformOptionsByName));
     }
 
     @Test
@@ -151,7 +146,7 @@ public class OptionListerTest
                 "scale",
                 "x",
                 "y"),
-            optionLister.getOptionNames(transformOptionsByName));
+            getOptionNames(transformOptionsByName));
     }
 
     @Test
@@ -184,6 +179,6 @@ public class OptionListerTest
                 "4.2.2.1",
                 "4.2.3",
                 "4.3"),
-            optionLister.getOptionNames(transformOptionsByName));
+            getOptionNames(transformOptionsByName));
     }
 }

@@ -35,6 +35,6 @@ public class PoiTransformer extends AbstractTikaTransformer
     @Override
     protected Parser getParser()
     {
-        return tika.tikaOfficeDetectParser;
+        return Tika.tikaOfficeDetectParser;
     }
 }

@@ -26,7 +26,6 @@
  */
 package org.alfresco.transform.base;
 
-import org.alfresco.transform.base.html.OptionLister;
 import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.base.registry.TransformRegistry;
@@ -71,6 +70,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.text.MessageFormat.format;
+import static org.alfresco.transform.base.html.OptionsHelper.getOptionNames;
 import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION;
 import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_ERROR;
@@ -112,8 +112,6 @@ public class TransformController
     TransformHandler transformHandler;
     @Autowired
     private String coreVersion;
-    @Autowired
-    private OptionLister optionLister;
     @Value("${container.behind-ingres}")
     private boolean behindIngres;
 
@@ -181,7 +179,7 @@ public class TransformController
         model.addAttribute(MODEL_PROXY_PATH_PREFIX, getPathPrefix());
         TransformConfig transformConfig = ((TransformRegistry) transformRegistry).getTransformConfig();
         transformConfig = setOrClearCoreVersion(transformConfig, 0);
-        model.addAttribute("transformOptions", optionLister.getOptionNames(transformConfig.getTransformOptions()));
+        model.addAttribute("transformOptions", getOptionNames(transformConfig.getTransformOptions()));
         return "test"; // display test.html
     }
 

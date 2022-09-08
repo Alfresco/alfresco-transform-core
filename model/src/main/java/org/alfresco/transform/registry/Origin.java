@@ -21,11 +21,6 @@
  */
 package org.alfresco.transform.registry;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
 /**
  * Wraps an object so that we know where it was read from. The equals() and hashcode() are that of the wrapped object
  * so it is still possible do set operations.

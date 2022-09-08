@@ -59,7 +59,6 @@ public class TransformReplySender
         {
             try
             {
-                //jmsTemplate.setSessionTransacted(true); // do we need this?
                 jmsTemplate.convertAndSend(destination, reply, m -> {
                     m.setJMSCorrelationID(correlationId);
                     return m;

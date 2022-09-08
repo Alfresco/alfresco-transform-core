@@ -33,12 +33,13 @@ import static org.alfresco.transform.base.fs.FileManager.deleteFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
  * Cleans up temporary files in transform requests that upload the content and download the result.
  */
-public class TransformInterceptor extends HandlerInterceptorAdapter
+public class TransformInterceptor implements AsyncHandlerInterceptor
 {
     @Override
     public void afterCompletion(HttpServletRequest request,

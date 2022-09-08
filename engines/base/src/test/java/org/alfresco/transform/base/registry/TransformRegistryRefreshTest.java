@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableMap;
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
 import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
 import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,6 +20,9 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.atLeast;
@@ -43,7 +47,7 @@ public class TransformRegistryRefreshTest
     @Test
     public void checkRegistryRefreshes() throws InterruptedException
     {
-        waitForRegistryReady(1000);
+        waitForRegistryReady();
         assertEquals(4, transformRegistry.getTransformConfig().getTransformers().size());
         verify(transformRegistry, atLeast(1)).retrieveConfig();
 
@@ -53,22 +57,18 @@ public class TransformRegistryRefreshTest
             "foo", "config/addB2C.json"));
         transformConfigFromFiles.initFileConfig();
 
-        Thread.sleep(3000); // to give it a chance to refresh a few (at least 2 more) times
-        verify(transformRegistry, atLeast(1+2)).retrieveConfig();
-        assertEquals(6, transformRegistry.getTransformConfig().getTransformers().size());
+        Awaitility.await().pollDelay(3, TimeUnit.SECONDS).until( () -> { // i.e. Thread.sleep(3_000) - but keeps sona happy
+            verify(transformRegistry, atLeast(1+2)).retrieveConfig();
+            assertEquals(6, transformRegistry.getTransformConfig().getTransformers().size());
+            return true;
+        });
     }
 
-    private void waitForRegistryReady(int timeout) throws InterruptedException
+    private void waitForRegistryReady() throws InterruptedException
     {
-        long start = System.currentTimeMillis();
-        while (!transformRegistry.isReadyForTransformRequests())
-        {
-            if (System.currentTimeMillis()-start > timeout)
-            {
-                throw new IllegalStateException("Registry is still not ready after "+timeout+" ms");
-            }
-            Thread.sleep(100);
-        }
-        System.out.println("Registry ready after "+(System.currentTimeMillis()-start)+" ms");
+        Awaitility.await().atMost(1, TimeUnit.SECONDS)
+                  .pollInterval(100, TimeUnit.MILLISECONDS)
+                  .pollDelay(Duration.ZERO)
+                  .until(() -> transformRegistry.isReadyForTransformRequests());
     }
 }

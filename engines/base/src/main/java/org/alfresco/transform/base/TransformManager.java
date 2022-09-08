@@ -51,7 +51,7 @@ public interface TransformManager
      * If possible this method should be avoided as it is better not to leave content on disk.
      * @throws IllegalStateException if this method has already been called.
      */
-    File createSourceFile();
+    File createSourceFile() throws IllegalStateException;
 
     /**
      * Allows a {@link CustomTransformer} to use a local target {@code File} rather than the supplied {@code OutputStream}.
@@ -61,7 +61,7 @@ public interface TransformManager
      * @throws IllegalStateException if this method has already been called. A call to {@link #respondWithFragment(Integer, boolean)}
      *         allows the method to be called again.
      */
-    File createTargetFile();
+    File createTargetFile() throws IllegalStateException;
 
     /**
      * Allows a single transform request to have multiple transform responses. For example, images from a video at

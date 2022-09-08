@@ -35,6 +35,6 @@ public class ArchiveTransformer extends AbstractTikaTransformer
     @Override
     protected Parser getParser()
     {
-        return tika.packageParser;
+        return Tika.packageParser;
     }
 }

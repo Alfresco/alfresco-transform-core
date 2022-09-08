@@ -26,11 +26,12 @@
  */
 package org.alfresco.transform.base.util;
 
-import java.io.File;
-import java.io.InputStream;
-
 public class Util
 {
+    private Util()
+    {
+    }
+
     /**
      * Safely converts a {@link String} to an {@link Integer}
      *

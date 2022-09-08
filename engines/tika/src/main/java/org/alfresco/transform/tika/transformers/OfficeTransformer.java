@@ -35,6 +35,6 @@ public class OfficeTransformer extends AbstractTikaTransformer
     @Override
     protected Parser getParser()
     {
-        return tika.officeParser;
+        return Tika.officeParser;
     }
 }

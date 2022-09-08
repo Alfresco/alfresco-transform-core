@@ -238,7 +238,9 @@ public class StreamHandlerTest
     @Test
     public void testStartWithOutputStream()
     {
-        // Do nothing. Same as testUsingInputStream() which just uses the outputStream
+        // This method exists so that we have a test for each input or output type. However, it contains no code
+        // because it would be identical to the testStartWithInputStream method. Testing without both and input
+        // and output would be far more complicated.
     }
 
     @Test
@@ -328,7 +330,8 @@ public class StreamHandlerTest
     @Test
     public void testHandleHttpRequestApproachUsingSourceAndTargetStreams()
     {
-        // Do nothing. Same as testUsingInputStream() which uses inputStream and outputStream
+        // This method exists so that we have a test for each request approach. However, it contains no code
+        // because it would be identical to the testStartWithInputStream method.
     }
 
     @Test

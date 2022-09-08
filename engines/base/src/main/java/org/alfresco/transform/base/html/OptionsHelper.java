@@ -35,36 +35,42 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+/**
+ * Used in the html test page, which provides a list of known transform option names.
+ */
 @Component
-public class OptionLister
+public class OptionsHelper
 {
-    public Set<String> getOptionNames(Map<String, Set<TransformOption>> transformOptionsByName)
+    private OptionsHelper()
+    {
+    }
+
+    public static Set<String> getOptionNames(Map<String, Set<TransformOption>> transformOptionsByName)
     {
         Set<String> set = new TreeSet<>();
-        transformOptionsByName.forEach(((optionName, optionSet) -> {
-            optionSet.stream().forEach(option -> addToList(set, option));
-        }));
+        transformOptionsByName.forEach(((optionName, optionSet) ->
+            optionSet.stream().forEach(option -> addOption(set, option))));
         return set;
     }
 
-    private void addToList(Set<String> set, TransformOption option)
+    private static void addOption(Set<String> set, TransformOption option)
     {
         if (option instanceof TransformOptionGroup)
         {
-            addGroupToList(set, (TransformOptionGroup)option);
+            addGroup(set, (TransformOptionGroup)option);
         }
         else
         {
-            addValueToList(set, (TransformOptionValue)option);
+            addValue(set, (TransformOptionValue)option);
         }
     }
 
-    private void addGroupToList(Set<String> set, TransformOptionGroup group)
+    private static void addGroup(Set<String> set, TransformOptionGroup group)
     {
-        group.getTransformOptions().stream().forEach(option -> addToList(set, option));
+        group.getTransformOptions().stream().forEach(option -> addOption(set, option));
     }
 
-    private void addValueToList(Set<String> set, TransformOptionValue value)
+    private static void addValue(Set<String> set, TransformOptionValue value)
     {
         set.add(value.getName());
     }

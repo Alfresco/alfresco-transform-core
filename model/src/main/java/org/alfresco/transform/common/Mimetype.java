@@ -21,15 +21,6 @@
  */
 package org.alfresco.transform.common;
 
-import static java.util.Arrays.stream;
-import static java.util.Collections.unmodifiableSet;
-import static java.util.stream.Collectors.toSet;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.Objects;
-import java.util.Set;
-
 /**
  * Mimetype
  * <p>

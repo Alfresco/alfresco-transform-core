@@ -44,6 +44,10 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 class TransformRegistryHelper
 {
+    private TransformRegistryHelper()
+    {
+    }
+
     static Set<TransformOption> lookupTransformOptions(final Set<String> transformOptionNames,
         final Map<String, Set<TransformOption>> transformOptions, final String readFrom,
         final Consumer<String> logError)

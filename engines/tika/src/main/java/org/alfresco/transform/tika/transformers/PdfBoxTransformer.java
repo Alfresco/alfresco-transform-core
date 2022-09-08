@@ -36,12 +36,12 @@ public class PdfBoxTransformer extends AbstractTikaTransformer
     @Override
     protected Parser getParser()
     {
-        return tika.pdfParser;
+        return Tika.pdfParser;
     }
 
     @Override
     protected DocumentSelector getDocumentSelector()
     {
-        return tika.pdfBoxEmbededDocumentSelector;
+        return Tika.pdfBoxEmbededDocumentSelector;
     }
 }

@@ -32,7 +32,7 @@ public abstract class AbstractTransformConfigSource implements TransformConfigSo
     private final String readFrom;
     private final String baseUrl;
 
-    public AbstractTransformConfigSource(String sortOnName, String readFrom, String baseUrl)
+    protected AbstractTransformConfigSource(String sortOnName, String readFrom, String baseUrl)
     {
         this.sortOnName = sortOnName;
         this.readFrom = readFrom;

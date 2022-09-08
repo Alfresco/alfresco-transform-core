@@ -50,19 +50,6 @@ public class JmsClient
         return queue;
     }
 
-    private static void deleteQueues(final ConnectionFactory factory,
-        final ActiveMQQueue... queues) throws Exception
-    {
-        try (final Connection connection = factory.createConnection())
-        {
-            for (ActiveMQQueue q : queues)
-            {
-                // will fail if there are active subscribers
-                ((ActiveMQConnection) connection).destroyDestination(q);
-            }
-        }
-    }
-
     public void sendBytesMessage(final TransformRequest request)
         throws Exception
     {
