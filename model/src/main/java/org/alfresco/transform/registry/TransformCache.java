@@ -104,4 +104,3 @@ public class TransformCache
         return coreVersion.isBlank() ? null : coreVersion;
     }
 }
-
