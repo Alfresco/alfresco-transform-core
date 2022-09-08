@@ -134,7 +134,7 @@ abstract class ProcessHandler extends FragmentHandler
         {
             transformerDebug.logFailure(reference, "  Error: "+e.getMessage());
             LogEntry.setStatusCodeAndMessage(e.getStatus(), e.getMessage());
-            handleTransformException(e, e.getStatus());
+            handleTransformException(e);
         }
         catch (Exception e)
         {
@@ -178,7 +178,7 @@ abstract class ProcessHandler extends FragmentHandler
     {
     }
 
-    protected void handleTransformException(TransformException e, HttpStatus status)
+    protected void handleTransformException(TransformException e)
     {
         throw e;
     }

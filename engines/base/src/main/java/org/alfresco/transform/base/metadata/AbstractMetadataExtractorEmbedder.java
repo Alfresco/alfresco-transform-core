@@ -116,7 +116,7 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
 
     protected final Logger logger;
     private Map<String, Set<String>> defaultExtractMapping;
-    private ThreadLocal<Map<String, Set<String>>> extractMapping = new ThreadLocal<>();
+    private final ThreadLocal<Map<String, Set<String>>> extractMapping = new ThreadLocal<>();
     private Map<String, Set<String>> embedMapping;
 
     public enum Type
@@ -180,8 +180,7 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
         {
             TypeReference<HashMap<String, Serializable>> typeRef = new TypeReference<>() {};
             HashMap<String, Serializable> systemProperties = jsonObjectMapper.readValue(metadataAsJson, typeRef);
-            Map<String, Serializable> rawProperties = mapSystemToRaw(systemProperties);
-            return rawProperties;
+            return mapSystemToRaw(systemProperties);
         }
         catch (JsonProcessingException e)
         {
@@ -213,8 +212,8 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
         {
             logger.debug(
                     "Converted system model values to metadata values: \n" +
-                            "   System Properties:    " + systemMetadata + "\n" +
-                            "   Metadata Properties: " + metadataProperties);
+                            "   System Properties:   {}\n" +
+                            "   Metadata Properties: {}", systemMetadata, metadataProperties);
         }
         return metadataProperties;
     }
@@ -238,7 +237,7 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
         Properties properties = readProperties(filename);
         if (properties == null)
         {
-            logger.error("Failed to read "+filename);
+            logger.error("Failed to read {}", filename);
         }
 
         Map<String, String> namespacesByPrefix = getNamespaces(properties);
@@ -270,7 +269,7 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
             }
             if (logger.isTraceEnabled())
             {
-                logger.trace("Added mapping from " + documentProperty + " to " + qnames);
+                logger.trace("Added mapping from {} to {}", documentProperty, qnames);
             }
         }
         return convertedMapping;
@@ -293,21 +292,21 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
         String filename = getPropertiesFilename(EMBED);
         Properties properties = readProperties(filename);
 
-        Map<String, Set<String>> embedMapping;
+        Map<String, Set<String>> mapping;
         if (properties != null)
         {
             Map<String, String> namespacesByPrefix = getNamespaces(properties);
-            embedMapping = buildEmbedMapping(properties, namespacesByPrefix);
+            mapping = buildEmbedMapping(properties, namespacesByPrefix);
         }
         else
         {
             if (logger.isDebugEnabled())
             {
-                logger.debug("No " + filename + ", assuming reverse of extract mapping");
+                logger.debug("No {}, assuming reverse of extract mapping", filename);
             }
-            embedMapping = buildEmbedMappingByReversingExtract();
+            mapping = buildEmbedMappingByReversingExtract();
         }
-        return embedMapping;
+        return mapping;
     }
 
     private Map<String, Set<String>> buildEmbedMapping(Properties properties, Map<String, String> namespacesByPrefix)
@@ -325,7 +324,8 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
             modelProperty = getQNameString(namespacesByPrefix, entry, modelProperty, EMBED);
             String[] metadataKeysArray = metadataKeysString.split(",");
             Set<String> metadataKeys = new HashSet<String>(metadataKeysArray.length);
-            for (String metadataKey : metadataKeysArray) {
+            for (String metadataKey : metadataKeysArray)
+            {
                 metadataKeys.add(metadataKey.trim());
             }
             // Create the entry
@@ -340,28 +340,28 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
 
     private Map<String, Set<String>> buildEmbedMappingByReversingExtract()
     {
-        Map<String, Set<String>> extractMapping = buildExtractMapping();
-        Map<String, Set<String>> embedMapping;
-        embedMapping = new HashMap<>(extractMapping.size());
-        for (String metadataKey : extractMapping.keySet())
+        Map<String, Set<String>> extract = buildExtractMapping();
+        Map<String, Set<String>> mapping;
+        mapping = new HashMap<>(extract.size());
+        for (String metadataKey : extract.keySet())
         {
-            if (extractMapping.get(metadataKey) != null && extractMapping.get(metadataKey).size() > 0)
+            if (extract.get(metadataKey) != null && extract.get(metadataKey).size() > 0)
             {
-                String modelProperty = extractMapping.get(metadataKey).iterator().next();
-                Set<String> metadataKeys = embedMapping.get(modelProperty);
+                String modelProperty = extract.get(metadataKey).iterator().next();
+                Set<String> metadataKeys = mapping.get(modelProperty);
                 if (metadataKeys == null)
                 {
-                    metadataKeys = new HashSet<String>(1);
-                    embedMapping.put(modelProperty, metadataKeys);
+                    metadataKeys = new HashSet<>(1);
+                    mapping.put(modelProperty, metadataKeys);
                 }
                 metadataKeys.add(metadataKey);
                 if (logger.isTraceEnabled())
                 {
-                    logger.trace("Added mapping from " + modelProperty + " to " + metadataKeys.toString());
+                    logger.trace("Added mapping from {} to {}", modelProperty, metadataKeys);
                 }
             }
         }
-        return embedMapping;
+        return mapping;
     }
 
     private String getPropertiesFilename(String suffix)
@@ -395,7 +395,7 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
 
     private Map<String, String> getNamespaces(Properties properties)
     {
-        Map<String, String> namespacesByPrefix = new HashMap<String, String>(5);
+        Map<String, String> namespacesByPrefix = new HashMap<>(5);
         for (Map.Entry<Object, Object> entry : properties.entrySet())
         {
             String propertyName = (String) entry.getKey();
@@ -463,7 +463,7 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
             }
             else
             {
-                if (valueStr.indexOf("\u0000") != -1)
+                if (valueStr.contains("\u0000"))
                 {
                     valueStr = valueStr.replaceAll("\u0000", "");
                 }
@@ -539,7 +539,7 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
         if (logger.isDebugEnabled())
         {
             logger.debug("Raw metadata:");
-            metadata.forEach((k,v) -> logger.debug("  "+k+"="+v));
+            metadata.forEach((k,v) -> logger.debug("  {}={}", k, v));
         }
 
         metadata = mapRawToSystem(metadata, extractMapping);
@@ -561,7 +561,7 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
         {
             logger.debug("Returned metadata:");
         }
-        Map<String, Serializable> systemProperties = new HashMap<String, Serializable>(rawMetadata.size() * 2 + 1);
+        Map<String, Serializable> systemProperties = new HashMap<>(rawMetadata.size() * 2 + 1);
         for (Map.Entry<String, Serializable> entry : rawMetadata.entrySet())
         {
             String documentKey = entry.getKey();
@@ -571,7 +571,7 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
                 systemProperties.put(documentKey, documentValue);
                 if (debugEnabled)
                 {
-                    logger.debug("  " + documentKey + "=" + documentValue);
+                    logger.debug("  {}={}", documentKey, documentValue);
                 }
                 continue;
             }
@@ -582,17 +582,17 @@ public abstract class AbstractMetadataExtractorEmbedder implements CustomTransfo
                 continue;
             }
 
-           Set<String> systemQNames = extractMapping.get(documentKey);
+            Set<String> systemQNames = extractMapping.get(documentKey);
             for (String systemQName : systemQNames)
             {
                 if (debugEnabled)
                 {
-                    logger.debug("  "+systemQName+"="+documentValue+" ("+documentKey+")");
+                    logger.debug("  {}={} ({})", systemQName, documentValue, documentKey);
                 }
                 systemProperties.put(systemQName, documentValue);
             }
         }
-        return new TreeMap<String, Serializable>(systemProperties);
+        return new TreeMap<>(systemProperties);
     }
 
     private void writeMetadata(OutputStream outputStream, Map<String, Serializable> results)

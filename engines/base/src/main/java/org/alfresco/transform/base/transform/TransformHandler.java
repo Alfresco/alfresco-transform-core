@@ -241,9 +241,9 @@ public class TransformHandler
             }
 
             @Override
-            protected void handleTransformException(TransformException e, HttpStatus status)
+            protected void handleTransformException(TransformException e)
             {
-                sendFailedResponse(reply, e, status, replyToQueue);
+                sendFailedResponse(reply, e, e.getStatus(), replyToQueue);
             }
 
             @Override

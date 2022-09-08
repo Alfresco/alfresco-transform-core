@@ -255,7 +255,6 @@ public class Tika
             }
             else
             {
-                javax.xml.transform.TransformerFactory.newInstance();
                 SAXTransformerFactory factory = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
                 TransformerHandler transformerHandler;
                 transformerHandler = factory.newTransformerHandler();
