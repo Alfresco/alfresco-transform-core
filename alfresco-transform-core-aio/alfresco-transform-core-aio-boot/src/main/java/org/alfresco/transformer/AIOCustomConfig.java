@@ -97,7 +97,6 @@ public class AIOCustomConfig
     @Value("${transform.core.tika.exifTool.unixOS}")
     private String exifToolCommandOnUnix;
 
-    @Bean("exifTool")
     public RuntimeExec exifRuntimeExec() {
         RuntimeExec runtimeExec = new RuntimeExec();
         Map<String,String[]> commandPerOS = new HashMap<>();
