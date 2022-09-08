@@ -131,7 +131,7 @@ public class TransformControllerTest
 
     static void resetProbeForTesting(TransformController transformController)
     {
-        transformController.getProbeTransform().resetForTesting();
+        AbstractBaseTest.resetProbeForTesting(transformController.getProbeTransform());
     }
 
     @Test

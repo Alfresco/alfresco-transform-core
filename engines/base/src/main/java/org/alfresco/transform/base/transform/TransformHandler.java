@@ -85,13 +85,10 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @Component
 public class TransformHandler
 {
-
     private static final Logger logger = LoggerFactory.getLogger(TransformHandler.class);
 
     private static final String FAILED_WRITING_TO_SFS = "Failed writing to SFS";
 
-    @Autowired(required = false)
-    private List<TransformEngine> transformEngines;
     @Autowired(required = false)
     private CustomTransformers customTransformers;
     @Autowired
@@ -267,7 +264,7 @@ public class TransformHandler
         reply.setErrorDetails(messageWithCause("Transform failed", e));
 
         transformerDebug.logFailure(reply);
-        logger.trace("Transform failed. Sending " + reply, e);
+        logger.trace("Transform failed. Sending {}", reply, e);
         transformReplySender.send(replyToQueue, reply);
     }
 

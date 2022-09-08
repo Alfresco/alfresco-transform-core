@@ -88,7 +88,7 @@ public class TransformRegistry extends AbstractTransformRegistry
     private boolean isTRouter;
 
     // Not autowired - avoids a circular reference in the router - initialised on startup event
-    private List<CustomTransformer> customTransformers;
+    private List<CustomTransformer> customTransformerList;
 
     private int previousLogMessageHashCode;
 
@@ -127,6 +127,11 @@ public class TransformRegistry extends AbstractTransformRegistry
         {
             this.transformerByNameMap = transformerByNameMap;
         }
+
+        public int getTransformCount()
+        {
+            return transformCount;
+        }
     }
 
     private Data data = new Data();
@@ -152,7 +157,7 @@ public class TransformRegistry extends AbstractTransformRegistry
         backoff = @Backoff(delayExpression = "#{${transform.engine.config.retry.timeout} * 1000}"))
     void initRegistryOnAppStartup(final ContextRefreshedEvent event)
     {
-        customTransformers = event.getApplicationContext().getBean(CustomTransformers.class).toList();
+        customTransformerList = event.getApplicationContext().getBean(CustomTransformers.class).toList();
         retrieveConfig();
     }
 
@@ -196,17 +201,16 @@ public class TransformRegistry extends AbstractTransformRegistry
         Map<String, Origin<Transformer>> transformerByNameMap = combinedTransformConfig.getTransformerByNameMap();
         concurrentUpdate(combinedTransformConfig, uncombinedTransformConfig, transformConfig, transformerByNameMap);
 
-        logTransformers(uncombinedTransformConfig, combinedTransformConfig, transformerByNameMap);
+        logTransformers(uncombinedTransformConfig, transformerByNameMap);
     }
 
-    private void logTransformers(TransformConfig uncombinedTransformConfig, CombinedTransformConfig combinedTransformConfig,
-        Map<String, Origin<Transformer>> transformerByNameMap)
+    private void logTransformers(TransformConfig uncombinedTransformConfig, Map<String, Origin<Transformer>> transformerByNameMap)
     {
         if (logger.isInfoEnabled())
         {
-            Set<String> customTransformerNames = new HashSet(customTransformers == null
+            Set<String> customTransformerNames = new HashSet<>(customTransformerList == null
                 ? Collections.emptySet()
-                : customTransformers.stream().map(CustomTransformer::getTransformerName).collect(Collectors.toSet()));
+                : customTransformerList.stream().map(CustomTransformer::getTransformerName).collect(Collectors.toSet()));
             List<String>  nonNullTransformerNames = uncombinedTransformConfig.getTransformers().stream()
                 .map(Transformer::getTransformerName)
                 .filter(Objects::nonNull)
@@ -214,7 +218,7 @@ public class TransformRegistry extends AbstractTransformRegistry
             ArrayList<String> logMessages = new ArrayList<>();
             if (!nonNullTransformerNames.isEmpty())
             {
-                logMessages.add("Transformers (" + nonNullTransformerNames.size() + "):");
+                logMessages.add("Transformers (" + nonNullTransformerNames.size() + ") Transforms (" + getData().getTransformCount()+ "):");
                 nonNullTransformerNames
                     .stream()
                     .sorted(String.CASE_INSENSITIVE_ORDER)

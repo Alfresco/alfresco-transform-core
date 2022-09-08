@@ -233,7 +233,7 @@ public class TransformController
     public String ready(HttpServletRequest request)
     {
         // An alternative without transforms might be: ((TransformRegistry)transformRegistry).isReadyForTransformRequests();
-        return getProbeTransform().doTransformOrNothing(request, false, transformHandler);
+        return getProbeTransform().doTransformOrNothing(false, transformHandler);
     }
 
     /**
@@ -243,7 +243,7 @@ public class TransformController
     @ResponseBody
     public String live(HttpServletRequest request)
     {
-        return getProbeTransform().doTransformOrNothing(request, true, transformHandler);
+        return getProbeTransform().doTransformOrNothing(true, transformHandler);
     }
 
     public ProbeTransform getProbeTransform()

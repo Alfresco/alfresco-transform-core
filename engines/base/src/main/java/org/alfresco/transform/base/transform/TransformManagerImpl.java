@@ -202,7 +202,7 @@ public class TransformManagerImpl implements TransformManager
     {
         if (sourceFile != null && !sourceFile.delete())
         {
-            logger.error("Failed to delete temporary source file "+sourceFile.getPath());
+            logger.error("Failed to delete temporary source file {}", sourceFile.getPath());
         }
         outputStreamLengthRecorder = null;
         sourceFile = null;
@@ -214,7 +214,7 @@ public class TransformManagerImpl implements TransformManager
     {
         if (!keepTargetFile && targetFile != null && !targetFile.delete())
         {
-            logger.error("Failed to delete temporary target file "+targetFile.getPath());
+            logger.error("Failed to delete temporary target file {}", targetFile.getPath());
         }
         targetFile = null;
         createTargetFileCalled = false;

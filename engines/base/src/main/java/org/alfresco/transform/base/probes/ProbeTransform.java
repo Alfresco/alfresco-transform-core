@@ -32,7 +32,6 @@ import org.alfresco.transform.common.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -121,7 +120,7 @@ public class ProbeTransform
         this.sourceFilename = sourceFilename;
         this.sourceMimetype = sourceMimetype;
         this.targetMimetype = targetMimetype;
-        this.transformOptions = new HashMap(transformOptions);
+        this.transformOptions = new HashMap<>(transformOptions);
         minExpectedLength = Math.max(0, expectedLength - plusOrMinus);
         maxExpectedLength = expectedLength + plusOrMinus;
 
@@ -168,7 +167,7 @@ public class ProbeTransform
     }
 
     // We don't want to be doing test transforms every few seconds, but do want frequent live probes.
-    public String doTransformOrNothing(HttpServletRequest request, boolean isLiveProbe, TransformHandler transformHandler)
+    public String doTransformOrNothing(boolean isLiveProbe, TransformHandler transformHandler)
     {
         // If not initialised OR it is a live probe and we are scheduled to to do a test transform.
         probeCount++;
@@ -215,7 +214,7 @@ public class ProbeTransform
         transformHandler.handleProbeRequest(sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile, this);
         long time = System.currentTimeMillis() - start;
         String message = "Transform " + time + "ms";
-        checkTargetFile(targetFile, isLiveProbe, message);
+        checkTargetFile(targetFile, isLiveProbe);
 
         recordTransformTime(time);
         calculateMaxTime(time, isLiveProbe);
@@ -312,7 +311,7 @@ public class ProbeTransform
         }
     }
 
-    private void checkTargetFile(File targetFile, boolean isLiveProbe, String message)
+    private void checkTargetFile(File targetFile, boolean isLiveProbe)
     {
         String probeMessage = getProbeMessage(isLiveProbe);
         if (!targetFile.exists() || !targetFile.isFile())

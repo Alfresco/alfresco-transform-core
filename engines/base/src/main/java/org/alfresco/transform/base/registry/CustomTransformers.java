@@ -45,22 +45,22 @@ public class CustomTransformers
     private static final Logger logger = LoggerFactory.getLogger(CustomTransformers.class);
 
     @Autowired(required = false)
-    private List<CustomTransformer> customTransformers;
+    private List<CustomTransformer> customTransformerList;
 
     private final Map<String, CustomTransformer> customTransformersByName = new HashMap<>();
 
     @PostConstruct
     private void initCustomTransformersByName()
     {
-        if (customTransformers != null)
+        if (customTransformerList != null)
         {
-            customTransformers.forEach(customTransformer ->
+            customTransformerList.forEach(customTransformer ->
                    customTransformersByName.put(customTransformer.getTransformerName(), customTransformer));
 
-            List<String> nonNullTransformerNames = customTransformers.stream()
-                 .map(CustomTransformer::getTransformerName)
-                 .filter(Objects::nonNull)
-                 .collect(Collectors.toList());
+            List<String> nonNullTransformerNames = customTransformerList.stream()
+                .map(CustomTransformer::getTransformerName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
             if (!nonNullTransformerNames.isEmpty())
             {
@@ -87,6 +87,6 @@ public class CustomTransformers
 
     public List<CustomTransformer> toList()
     {
-        return customTransformers;
+        return customTransformerList;
     }
 }

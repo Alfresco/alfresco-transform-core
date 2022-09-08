@@ -61,6 +61,8 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
@@ -284,6 +286,20 @@ public abstract class AbstractBaseTest
         .build();
     }
 
+    public static void resetProbeForTesting(ProbeTransform probe)
+    {
+        ReflectionTestUtils.setField(probe, "probeCount", 0);
+        ReflectionTestUtils.setField(probe, "transCount", 0);
+        ReflectionTestUtils.setField(probe, "normalTime", 0);
+        ReflectionTestUtils.setField(probe, "maxTime", Long.MAX_VALUE);
+        ReflectionTestUtils.setField(probe, "nextTransformTime", 0);
+
+        ((AtomicBoolean)ReflectionTestUtils.getField(probe, "initialised")).set(false);
+        ((AtomicBoolean)ReflectionTestUtils.getField(probe, "readySent")).set(false);
+        ((AtomicLong)ReflectionTestUtils.getField(probe, "transformCount")).set(0);
+        ((AtomicBoolean)ReflectionTestUtils.getField(probe, "die")).set(false);
+    }
+
     @Test
     public void simpleTransformTest() throws Exception
     {
@@ -325,7 +341,7 @@ public abstract class AbstractBaseTest
     public void calculateMaxTime() throws Exception
     {
         ProbeTransform probeTransform = controller.getProbeTransform();
-        probeTransform.resetForTesting();
+        resetProbeForTesting(probeTransform);
         probeTransform.setLivenessPercent(110);
 
         long[][] values = new long[][]{
