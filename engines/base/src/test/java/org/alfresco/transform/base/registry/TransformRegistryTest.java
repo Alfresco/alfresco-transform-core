@@ -28,9 +28,12 @@ package org.alfresco.transform.base.registry;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import org.alfresco.transform.base.fakes.AbstractFakeTransformEngine;
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithAllInOne;
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithOneCustomTransformer;
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
+import org.alfresco.transform.config.SupportedSourceAndTarget;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.config.Transformer;
 import org.junit.jupiter.api.AfterEach;
@@ -44,9 +47,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_EXCEL;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 
 @AutoConfigureMockMvc
 @SpringBootTest(classes={org.alfresco.transform.base.Application.class})
@@ -226,5 +233,43 @@ public class TransformRegistryTest
         transformRegistry.retrieveConfig();
 
         assertTrue(transformRegistry.isReadyForTransformRequests());
+    }
+
+    @Test
+    public void testCheckSourceSize()
+    {
+        ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
+            new AbstractFakeTransformEngine()
+            {
+                @Override public TransformConfig getTransformConfig()
+                {
+                    return TransformConfig.builder()
+                        .withTransformers(ImmutableList.of(
+                            Transformer.builder()
+                                .withTransformerName("transformerName")
+                                .withSupportedSourceAndTargetList(ImmutableSet.of(
+                                    SupportedSourceAndTarget.builder()
+                                        .withSourceMediaType(MIMETYPE_WORD)
+                                        .withTargetMediaType(MIMETYPE_PDF)
+                                        .build(),
+                                    SupportedSourceAndTarget.builder()
+                                        .withSourceMediaType(MIMETYPE_EXCEL)
+                                        .withTargetMediaType(MIMETYPE_PDF)
+                                        .withMaxSourceSizeBytes(12345L)
+                                        .build()))
+                                .build()))
+                    .build();
+                }
+            }));
+        transformConfigFromTransformEngines.initTransformEngineConfig();
+        transformRegistry.retrieveConfig();
+
+        assertTrue( transformRegistry.checkSourceSize("transformerName", MIMETYPE_WORD, Long.MAX_VALUE, MIMETYPE_PDF));
+        assertTrue( transformRegistry.checkSourceSize("transformerName", MIMETYPE_EXCEL, 12345L, MIMETYPE_PDF));
+//TODO issue mentioned in ACS-3476,
+//commenting out changes to code due to issues with libreoffice blocking a release
+//        assertFalse(transformRegistry.checkSourceSize("transformerName", MIMETYPE_EXCEL, 12346L, MIMETYPE_PDF));
+//        assertFalse(transformRegistry.checkSourceSize("transformerName", "doesNotExist", 12345L, MIMETYPE_PDF));
+//        assertFalse(transformRegistry.checkSourceSize("doesNotExist", MIMETYPE_WORD, 12345L, MIMETYPE_PDF));
     }
 }

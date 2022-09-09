@@ -360,15 +360,19 @@ public class TransformRegistry extends AbstractTransformRegistry
 
     public boolean checkSourceSize(String transformerName, String sourceMediaType, Long sourceSize, String targetMediaType)
     {
-        return Optional.ofNullable(getTransformer(transformerName)).
-                map(transformer -> transformer.getSupportedSourceAndTargetList().stream().
-                        filter(supported -> supported.getSourceMediaType().equals(sourceMediaType) &&
-                                            supported.getTargetMediaType().equals(targetMediaType)).
-                        findFirst().
-                        map(supported -> supported.getMaxSourceSizeBytes() == -1 ||
-                                         supported.getMaxSourceSizeBytes() >= sourceSize).
-                        orElse(false)).
-                orElse(false);
+        //TODO issue mentioned in ACS-3476,
+        //commenting out changes to code due to issues with libreoffice blocking a release
+        return true;
+
+//        return Optional.ofNullable(getTransformer(transformerName)).
+//                map(transformer -> transformer.getSupportedSourceAndTargetList().stream().
+//                        filter(supported -> supported.getSourceMediaType().equals(sourceMediaType) &&
+//                                            supported.getTargetMediaType().equals(targetMediaType)).
+//                        findFirst().
+//                        map(supported -> supported.getMaxSourceSizeBytes() == -1 ||
+//                                         supported.getMaxSourceSizeBytes() >= sourceSize).
+//                        orElse(false)).
+//                orElse(false);
     }
 
     public String getEngineName(String transformerName)
