@@ -266,10 +266,8 @@ public class TransformRegistryTest
 
         assertTrue( transformRegistry.checkSourceSize("transformerName", MIMETYPE_WORD, Long.MAX_VALUE, MIMETYPE_PDF));
         assertTrue( transformRegistry.checkSourceSize("transformerName", MIMETYPE_EXCEL, 12345L, MIMETYPE_PDF));
-//TODO issue mentioned in ACS-3476,
-//commenting out changes to code due to issues with libreoffice blocking a release
-//        assertFalse(transformRegistry.checkSourceSize("transformerName", MIMETYPE_EXCEL, 12346L, MIMETYPE_PDF));
-//        assertFalse(transformRegistry.checkSourceSize("transformerName", "doesNotExist", 12345L, MIMETYPE_PDF));
-//        assertFalse(transformRegistry.checkSourceSize("doesNotExist", MIMETYPE_WORD, 12345L, MIMETYPE_PDF));
+        assertFalse(transformRegistry.checkSourceSize("transformerName", MIMETYPE_EXCEL, 12346L, MIMETYPE_PDF));
+        assertFalse(transformRegistry.checkSourceSize("transformerName", "doesNotExist", 12345L, MIMETYPE_PDF));
+        assertFalse(transformRegistry.checkSourceSize("doesNotExist", MIMETYPE_WORD, 12345L, MIMETYPE_PDF));
     }
 }

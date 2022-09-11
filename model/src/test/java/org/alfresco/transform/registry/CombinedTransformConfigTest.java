@@ -41,7 +41,6 @@ import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test the CombinedTransformConfig, extended by both T-Router and ACS repository.
@@ -87,14 +86,14 @@ public class CombinedTransformConfigTest
             .build();
 
     // Not static as pipelines gets modified.
-    private static final Transformer PIPELINE1_2C3 = Transformer.builder().withTransformerName("1")
+    private final Transformer PIPELINE1_2C3 = Transformer.builder().withTransformerName("1")
             .withTransformerPipeline(List.of(
                     new TransformStep("2", "mimetype/c"),
                     new TransformStep("3", null)))
             .build();
 
     // Not static as pipelines gets modified.
-    private static final Transformer PIPELINE1_2C3_COPY = Transformer.builder().withTransformerName("1")
+    private final Transformer PIPELINE1_2C3_COPY = Transformer.builder().withTransformerName("1")
             .withTransformerPipeline(List.of(
                     new TransformStep("2", "mimetype/c"),
                     new TransformStep("3", null)))
@@ -349,7 +348,7 @@ public class CombinedTransformConfigTest
         config.addTransformConfig(transformConfig, READ_FROM_B, BASE_URL_B, registry);
         config.combineTransformerConfig(registry);
 
-        String expected = "Transformer \"2\" cannot have pipeline and failover sections. Read from readFromB";
+        String expected = "Transformer \"2\" cannot have both pipeline and failover sections. Read from readFromB";
         assertEquals(1, registry.errorMessages.size());
         assertEquals(expected, registry.errorMessages.get(0));
     }
@@ -566,7 +565,7 @@ public class CombinedTransformConfigTest
     @Test
     public void testInvalidIndexToRemoveBeforeCurrent()
     {
-        // indexToRemove is is before the current i value, so we are removing an overridden transform
+        // indexToRemove is before the current i value, so we are removing an overridden transform
         // Code throws an IllegalArgumentException and i is simply decremented to ignore the current value
         final TransformConfig tEngineTransformConfig = TransformConfig.builder()
                 .withTransformers(ImmutableList.of(
@@ -681,10 +680,11 @@ public class CombinedTransformConfigTest
         config.addTransformConfig(transformConfig, READ_FROM_B, BASE_URL_B, registry);
         config.combineTransformerConfig(registry);
 
-        String expected = "No supported source and target mimetypes could be added to the transformer \"5\" as " +
-                "the final step should not have a target mimetype. Read from readFromB";
-        assertEquals(1, registry.errorMessages.size());
-        assertEquals(expected, registry.errorMessages.get(0));
+        assertEquals(2, registry.errorMessages.size());
+        assertEquals("No supported source and target mimetypes could be added to the transformer \"5\" as " +
+            "the final step should not have a target mimetype. Read from readFromB", registry.errorMessages.get(0));
+        assertEquals("Transformer \"5\" has no supported source and target mimetypes, "
+            + "so will be ignored. Read from readFromB", registry.errorMessages.get(1));
     }
 
     @Test
@@ -735,6 +735,173 @@ public class CombinedTransformConfigTest
         String expected = "Transformer \"1\" ignored as step transforms (\"4\", \"5\", \"6\") do not exist. Read from readFromB";
         assertEquals(1, registry.warnMessages.size());
         assertEquals(expected, registry.warnMessages.get(0));
+    }
+
+    @Test
+    public void testPipelineWithValidSupportedSourceAndTarget()
+    {
+        // Tests the case where a pipeline's declared SupportedSourceAndTarget are supported by the step
+        // transformers.
+        final Transformer pipeline = Transformer.builder().withTransformerName("1")
+                .withTransformerPipeline(List.of(
+                        new TransformStep("2", "mimetype/c"),
+                        new TransformStep("3", null)))
+                        .withSupportedSourceAndTargetList(Set.of(
+                                SupportedSourceAndTarget.builder()
+                                        .withSourceMediaType("mimetype/a")
+                                        .withTargetMediaType("mimetype/d")
+                                .build()))
+                .build();
+        final TransformConfig transformConfig = TransformConfig.builder()
+                .withTransformers(ImmutableList.of(
+                        TRANSFORMER2_A2C,
+                        TRANSFORMER3_C2D,
+                        pipeline))
+                .build();
+
+        config.addTransformConfig(transformConfig, READ_FROM_B, BASE_URL_B, registry);
+        config.combineTransformerConfig(registry);
+        config.registerCombinedTransformers(registry);
+
+        assertEquals(0, registry.errorMessages.size());
+        assertEquals(3, config.buildTransformConfig().getTransformers().size());
+        assertEquals("1", registry.findTransformerName("mimetype/a", -1,
+            "mimetype/d", emptyMap(), null));
+        assertEquals("2", registry.findTransformerName("mimetype/a", -1,
+            "mimetype/c", emptyMap(), null));
+        assertEquals("3", registry.findTransformerName("mimetype/c", -1,
+            "mimetype/d", emptyMap(), null));
+    }
+
+    @Test
+    public void testPipelineWithValidWildcardSupportedSourceAndTarget()
+    {
+        // Tests the case where a pipeline's declared SupportedSourceAndTarget are NOT supplied so should
+        // be the cartesian product of the step transformers a->d
+        final Transformer pipeline = Transformer.builder().withTransformerName("1")
+                .withTransformerPipeline(List.of(
+                        new TransformStep("2", "mimetype/c"),
+                        new TransformStep("3", null)))
+                .build();
+        final TransformConfig transformConfig = TransformConfig.builder()
+                .withTransformers(ImmutableList.of(
+                        TRANSFORMER2_A2C,
+                        TRANSFORMER3_C2D,
+                        pipeline))
+                .build();
+
+        config.addTransformConfig(transformConfig, READ_FROM_B, BASE_URL_B, registry);
+        config.combineTransformerConfig(registry);
+        config.registerCombinedTransformers(registry);
+
+        assertEquals(0, registry.errorMessages.size());
+        assertEquals(3, config.buildTransformConfig().getTransformers().size());
+        assertEquals("1", registry.findTransformerName("mimetype/a", -1,
+            "mimetype/d", emptyMap(), null));
+    }
+
+    @Test
+    public void testIgnorePipelineWithInvalidSupportedSourceAndTarget()
+    {
+        // Tests the case where a pipeline's declared SupportedSourceAndTargets are NOT supported by the step
+        // transformers.
+        final Transformer pipeline = Transformer.builder().withTransformerName("1")
+                .withTransformerPipeline(List.of(
+                        new TransformStep("2", "mimetype/c"),
+                        new TransformStep("2", null)))
+                        .withSupportedSourceAndTargetList(Set.of(
+                                SupportedSourceAndTarget.builder()
+                                        .withSourceMediaType("mimetype/a")
+                                        .withTargetMediaType("mimetype/d")
+                                .build()
+                            ))
+                .build();
+        final TransformConfig transformConfig = TransformConfig.builder()
+                .withTransformers(ImmutableList.of(
+                        TRANSFORMER2_B2C,   // Does NOT support a->c so steps are invalid for a->d
+                        TRANSFORMER3_C2D,
+                        pipeline))
+                .build();
+
+        config.addTransformConfig(transformConfig, READ_FROM_B, BASE_URL_B, registry);
+        config.combineTransformerConfig(registry);
+        config.registerCombinedTransformers(registry);
+
+        String expected = "Pipeline transformer \"1\" steps do not support (mimetype/a->mimetype/d) so will be ignored";
+        assertEquals(1, registry.errorMessages.size());
+        assertEquals(expected, registry.errorMessages.get(0));
+        assertEquals(2, config.buildTransformConfig().getTransformers().size());
+        assertEquals("2", registry.findTransformerName("mimetype/b", -1,
+            "mimetype/c", emptyMap(), null));
+        assertEquals("3", registry.findTransformerName("mimetype/c", -1,
+            "mimetype/d", emptyMap(), null));
+    }
+
+    @Test
+    public void testIgnorePipelineWithMultipleInvalidSupportedSourceAndTarget()
+    {
+        // Same as testIgnorePipelineWithInvalidSupportedSourceAndTarget, but with multiple invalid declared
+        // SupportedSourceAndTargets
+        final Transformer pipeline = Transformer.builder().withTransformerName("1")
+                .withTransformerPipeline(List.of(
+                        new TransformStep("2", "mimetype/c"),
+                        new TransformStep("2", null)))
+                        .withSupportedSourceAndTargetList(Set.of(
+                                SupportedSourceAndTarget.builder()
+                                        .withSourceMediaType("mimetype/a")
+                                        .withTargetMediaType("mimetype/d")
+                                .build(),
+                                SupportedSourceAndTarget.builder() // Always going to be invalid with these steps
+                                        .withSourceMediaType("mimetype/x")
+                                        .withTargetMediaType("mimetype/y")
+                                .build()
+                            ))
+                .build();
+        final TransformConfig transformConfig = TransformConfig.builder()
+                .withTransformers(ImmutableList.of(
+                        TRANSFORMER2_B2C,   // Does NOT support a->c so steps are invalid for a->d
+                        TRANSFORMER3_C2D,
+                        pipeline))
+                .build();
+
+        config.addTransformConfig(transformConfig, READ_FROM_B, BASE_URL_B, registry);
+        config.combineTransformerConfig(registry);
+        config.registerCombinedTransformers(registry);
+
+        String expected = "Pipeline transformer \"1\" steps do not support (mimetype/a->mimetype/d, mimetype/x->mimetype/y) so will be ignored";
+        assertEquals(1, registry.errorMessages.size());
+        assertEquals(expected, registry.errorMessages.get(0));
+    }
+
+    @Test
+    public void testIgnorePipelineWithInvalidWildcardSupportedSourceAndTarget()
+    {
+        // Tests the case where a pipeline's declared SupportedSourceAndTarget are NOT supplied so should
+        // be the cartesian product of the step transformers BUT AND THERE ARE NONE.
+        final Transformer pipeline = Transformer.builder().withTransformerName("1")
+                .withTransformerPipeline(List.of(
+                        new TransformStep("2", "mimetype/c"),
+                        new TransformStep("2", null)))
+                .build();
+        final TransformConfig transformConfig = TransformConfig.builder()
+                .withTransformers(ImmutableList.of(
+                        TRANSFORMER2_B2X,   // Does NOT support <anything>->c so steps are invalid
+                        TRANSFORMER3_C2D,
+                        pipeline))
+                .build();
+
+        config.addTransformConfig(transformConfig, READ_FROM_B, BASE_URL_B, registry);
+        config.combineTransformerConfig(registry);
+        config.registerCombinedTransformers(registry);
+
+        assertEquals(2, registry.errorMessages.size());
+        assertEquals("No supported source and target mimetypes could be added to the transformer \"1\" as "
+                         + "the first step transformer \"2\" does not support to \"mimetype/c\". Read from readFromB",
+            registry.errorMessages.get(0));
+        assertEquals("Transformer \"1\" has no supported source and target mimetypes, so will be ignored. "
+                         + "Read from readFromB",
+            registry.errorMessages.get(1));
+        assertEquals(2, config.buildTransformConfig().getTransformers().size());
     }
 
     @Test
@@ -858,12 +1025,14 @@ public class CombinedTransformConfigTest
         config.addTransformConfig(transformConfig, READ_FROM_B, BASE_URL_B, registry);
         config.combineTransformerConfig(registry);
 
-        String expected = expectedWildcardError("the step transformer \"2\" does not support \"mimetype/b\" to \"mimetype/c\"");
-        assertEquals(1, registry.errorMessages.size());
-        assertEquals(expected, registry.errorMessages.get(0));
+        assertEquals(2, registry.errorMessages.size());
+        assertEquals(expectedWildcardError("the step transformer \"2\" does not support \"mimetype/b\" "
+            + "to \"mimetype/c\""), registry.errorMessages.get(0));
+        assertEquals("Transformer \"4\" has no supported source and target mimetypes, so will be ignored. "
+            + "Read from readFromB", registry.errorMessages.get(1));
 
-        // 4: the pipeline is not removed, but will not be used as it has no supported transforms.
-        assertEquals(4, config.buildTransformConfig().getTransformers().size());
+        // The pipeline is removed, so 3 are expected
+        assertEquals(3, config.buildTransformConfig().getTransformers().size());
     }
 
     @Test

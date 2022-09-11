@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
@@ -264,6 +266,7 @@ public class CombinedTransformConfig
         sortTransformers(registry);
         applyDefaults();
         addWildcardSupportedSourceAndTarget(registry);
+        removePipelinesWithUnsupportedTransforms(registry);
         setCoreVersionOnCombinedMultiStepTransformers();
     }
 
@@ -312,7 +315,7 @@ public class CombinedTransformConfig
                 if (isPipeline && isFailover)
                 {
                     throw new IllegalArgumentException("Transformer " + transformerName(name) +
-                            " cannot have pipeline and failover sections. Read from " + readFrom);
+                            " cannot have both pipeline and failover sections. Read from " + readFrom);
                 }
 
                 // Remove transforms as they may override each other or be invalid
@@ -814,6 +817,78 @@ public class CombinedTransformConfig
         Set<TransformOption> transformOptions = new HashSet<>();
         transformOptionNames.forEach(name->transformOptions.addAll(combinedTransformOptions.get(name)));
         return transformOptions;
+    }
+
+    /**
+     * Removes pipeline transformers if the step transformers cannot be chained together via the intermediary types
+     * to produce the set of claimed source and target mimetypes.
+     * @param registry used to log messages
+     */
+    private void removePipelinesWithUnsupportedTransforms(AbstractTransformRegistry registry)
+    {
+        Map<String, Transformer> transformersByName = combinedTransformers.stream()
+            .map(Origin::get)
+            .collect(Collectors.toMap(Transformer::getTransformerName, Function.identity()));
+
+        for (int i=0; i<combinedTransformers.size(); i++)
+        {
+            try
+            {
+                Origin<Transformer> transformAndItsOrigin = combinedTransformers.get(i);
+                Transformer transformer = transformAndItsOrigin.get();
+                String readFrom = transformAndItsOrigin.getReadFrom();
+                String name = transformer.getTransformerName();
+                List<TransformStep> pipeline = transformer.getTransformerPipeline();
+                boolean isPipeline = pipeline != null && !pipeline.isEmpty();
+
+                if (isPipeline)
+                {
+                    if (transformer.getSupportedSourceAndTargetList().isEmpty())
+                    {
+                        throw new IllegalStateException("Transformer " + transformerName(name) +
+                                " has no supported source and target mimetypes, so will be ignored. Read from " + readFrom);
+                    }
+
+                    List<String> unsupported = new ArrayList<>();
+                    transformer.getSupportedSourceAndTargetList()
+                        .forEach(supportedSourceAndTarget -> {
+                            String nextSource = supportedSourceAndTarget.getSourceMediaType();
+                            for (TransformStep step : pipeline)
+                            {
+                                String source = nextSource;
+                                String target = step.getTargetMediaType() == null
+                                    ? supportedSourceAndTarget.getTargetMediaType()
+                                    : step.getTargetMediaType();
+
+                                if (transformersByName.get(step.getTransformerName()).getSupportedSourceAndTargetList().stream()
+                                    .noneMatch(stepsSupportedSourceAndTarget -> source.equals(stepsSupportedSourceAndTarget.getSourceMediaType())
+                                                                             && target.equals(stepsSupportedSourceAndTarget.getTargetMediaType())))
+                                {
+                                    unsupported.add(supportedSourceAndTarget.getSourceMediaType()+"->"+supportedSourceAndTarget.getTargetMediaType());
+                                    break;
+                                }
+                                nextSource = target;
+                            }
+                        });
+
+                    if (!unsupported.isEmpty())
+                    {
+                        throw new IllegalStateException("Pipeline transformer " + transformerName(name) +
+                                " steps do not support ("+
+                                unsupported.stream()
+                                    .sorted()
+                                    .collect(Collectors.joining(", "))+
+                                ") so will be ignored");
+                    }
+                }
+            }
+            catch (IllegalStateException e)
+            {
+                String msg = e.getMessage();
+                registry.logError(msg);
+                combinedTransformers.remove(i--);
+            }
+        }
     }
 
     private void setCoreVersionOnCombinedMultiStepTransformers()
