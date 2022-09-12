@@ -19,18 +19,12 @@
  * <http://www.gnu.org/licenses/lgpl-3.0.html>.
  * #L%
  */
-package org.alfresco.transform.router;
+package org.alfresco.transform.client.model;
 
 /**
- * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
- *
- * This class previously existed in the alfresco-transform-model. It now exists in the deprecated
- * alfresco-transform-base and extends the new class. This should to make it easier to use the deprecated module
- * by custom transformers that have not been converted to the new base.
+ * @deprecated will be removed in a future release when the deprecated alfresco-transform-model is removed.
  */
-public class ExtensionService extends org.alfresco.transform.common.ExtensionService
+@Deprecated
+public interface Mimetype extends org.alfresco.transform.common.Mimetype
 {
-    private ExtensionService()
-    {
-    }
 }

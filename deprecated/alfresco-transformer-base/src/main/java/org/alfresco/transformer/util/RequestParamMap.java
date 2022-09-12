@@ -33,7 +33,7 @@ package org.alfresco.transformer.util;
  * or communication in the all-in-one transformer.
  */
 @Deprecated
-public interface RequestParamMap extends org.alfresco.transform.common.RequestParamMap
+public interface RequestParamMap extends org.alfresco.transform.client.util.RequestParamMap
 {
     // This property can be sent by acs repository's legacy transformers to force a transform,
     // instead of letting this T-Engine determine it based on the request parameters.

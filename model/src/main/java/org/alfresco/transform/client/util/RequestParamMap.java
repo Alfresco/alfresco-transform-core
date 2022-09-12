@@ -19,15 +19,12 @@
  * <http://www.gnu.org/licenses/lgpl-3.0.html>.
  * #L%
  */
-package org.alfresco.transform.client.model;
+package org.alfresco.transform.client.util;
 
 /**
- * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
- *
- * This interface previously existed in the alfresco-transform-model. It now exists in the deprecated
- * alfresco-transform-base and extends the new class. This should to make it easier to use the deprecated module
- * by custom transformers that have not been converted to the new base.
+ * @deprecated will be removed in a future release when the deprecated alfresco-transform-model is removed.
  */
-public interface Mimetype extends org.alfresco.transform.common.Mimetype
+@Deprecated
+public interface RequestParamMap extends  org.alfresco.transform.common.RequestParamMap
 {
 }

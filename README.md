@@ -8,14 +8,14 @@ Contains the common transformer (T-Engine) code, plus a few implementations.
 * `model` - library packaged as a jar file which contains the data model of json
  configuration files and messages sent between clients, T-Engines and T-Router. Also contains code to
  to combine and then work out which transform to use for a combination of source and target mimetypes
- and transform options.
+ and transform options. **See the deprecated [README](https://github.com/Alfresco/alfresco-transform-core/blob/master/deprecated/alfresco-base-t-engine/README.md)
+  as some `model` classes have moved package.**
 * `engines/base` - contains code common to t-engines, packaged as a jar.
   [README](https://github.com/Alfresco/alfresco-transform-core/blob/master/engines/base/README.md)
 * `engines/<name>` - multiple T-Engines, which extend the `engines/base`; each one builds a SpringBoot jar
   and a [Docker image](https://github.com/Alfresco/alfresco-transform-core#docker)
 * `deprecated/alfresco-base-t-engine` - The original t-engine base, which may still be used, 
-  but has been replaced by the simpler `engines/base` 
-  [README](https://github.com/Alfresco/alfresco-transform-core/blob/master/deprecated/alfresco-base-t-engine/README.md)
+  but has been replaced by the simpler `engines/base`.
 
 ### Documentation
 
