@@ -21,3 +21,9 @@ transform:
     tika:
         pdfBox:
           notExtractBookmarksTextDefault: ${PDFBOX_NOTEXTRACTBOOKMARKS_DEFAULT:false}
+          
+logging:
+  level:
+    # TODO janv - hack'athon ;-)
+    org.alfresco.transform.base.messaging: debug
+    org.springframework.kafka: info
