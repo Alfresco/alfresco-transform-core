@@ -26,7 +26,7 @@
  */
 package org.alfresco.transform.base.transform;
 
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 
 import java.io.IOException;
 import java.io.OutputStream;

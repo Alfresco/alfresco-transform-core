@@ -30,7 +30,7 @@ import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.executors.AbstractCommandExecutor;
 import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.imagemagick.ImageMagickOptionsBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

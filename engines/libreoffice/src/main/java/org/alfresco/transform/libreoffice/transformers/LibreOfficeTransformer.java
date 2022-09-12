@@ -31,7 +31,7 @@ import com.sun.star.task.ErrorCodeIOException;
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.executors.JavaExecutor;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;

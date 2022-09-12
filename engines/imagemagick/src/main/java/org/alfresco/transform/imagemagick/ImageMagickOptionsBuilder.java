@@ -27,7 +27,7 @@
 package org.alfresco.transform.imagemagick;
 
 import com.google.common.collect.ImmutableList;
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 
 import java.util.List;
 import java.util.StringJoiner;

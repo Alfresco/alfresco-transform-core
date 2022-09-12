@@ -32,10 +32,9 @@ import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.base.registry.CustomTransformers;
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.registry.TransformServiceRegistry;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.jms.Destination;

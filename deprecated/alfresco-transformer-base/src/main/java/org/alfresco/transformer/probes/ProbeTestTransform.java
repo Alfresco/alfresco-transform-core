@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.AbstractTransformerController;
 import org.alfresco.transformer.logging.LogEntry;
 import org.slf4j.Logger;

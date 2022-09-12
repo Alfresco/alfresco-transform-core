@@ -31,7 +31,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import java.io.File;
 
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.model.FileRefResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

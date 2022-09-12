@@ -34,7 +34,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import java.io.File;
 
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -27,7 +27,7 @@
 package org.alfresco.transform.registry;
 
 import com.google.common.collect.ImmutableMap;
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;

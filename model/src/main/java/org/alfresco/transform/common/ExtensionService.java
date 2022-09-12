@@ -123,6 +123,10 @@ public class ExtensionService
             Map.entry(MIMETYPE_IMAGE_XWD,                           "xwd")
     );
 
+    protected ExtensionService()
+    {
+    }
+
     public static String getExtensionForTargetMimetype(String targetMimetype, String sourceMimetype)
     {
         if (targetMimetype == null)

@@ -33,7 +33,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import java.io.File;
 import java.util.Map;
 
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.

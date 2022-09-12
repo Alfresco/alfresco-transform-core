@@ -37,7 +37,7 @@ import javax.jms.Message;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.messaging.TransformMessageConverter;
 import org.alfresco.transformer.messaging.TransformReplySender;
 import org.slf4j.Logger;

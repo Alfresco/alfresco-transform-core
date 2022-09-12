@@ -39,7 +39,7 @@ import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.registry.AbstractTransformRegistry;
 import org.alfresco.transform.registry.CombinedTransformConfig;
 import org.alfresco.transform.registry.TransformCache;
-import org.alfresco.transform.common.TransformException;
+import org.alfresco.transform.exceptions.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

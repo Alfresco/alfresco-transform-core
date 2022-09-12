@@ -654,10 +654,11 @@ public class CombinedTransformConfigTest
         config.addTransformConfig(transformConfig, READ_FROM_B, BASE_URL_B, registry);
         config.combineTransformerConfig(registry);
 
-        String expected = "No supported source and target mimetypes could be added to the transformer \"5\" as " +
-                "intermediate steps should have a target mimetype. Read from readFromB";
-        assertEquals(1, registry.errorMessages.size());
-        assertEquals(expected, registry.errorMessages.get(0));
+        assertEquals(2, registry.errorMessages.size());
+        assertEquals("No supported source and target mimetypes could be added to the transformer \"5\" as " +
+                "intermediate steps should have a target mimetype. Read from readFromB", registry.errorMessages.get(0));
+        assertEquals("Transformer \"5\" has no supported source and target mimetypes, so will be ignored. "
+                         + "Read from readFromB", registry.errorMessages.get(1));
     }
 
     @Test
