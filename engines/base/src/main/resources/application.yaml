@@ -13,9 +13,14 @@ spring:
       max-connections: 20
   jackson:
     default-property-inclusion: non_empty
+    
+# TODO janv - hack'athon ;-)
+  kafka:
+    bootstrap-servers: localhost:9092
 
 activemq:
   url: ${ACTIVEMQ_URL:false}
+
 
 server:
   port: ${SERVER_PORT:8090}
@@ -28,6 +33,9 @@ transformer-routes-path: ${TRANSFORMER_ROUTES_FILE_LOCATION:transformer-pipeline
 logging:
   level:
     org.alfresco.transform.common.TransformerDebug: debug
+# TODO janv - hack'athon ;-)
+    org.alfresco.transform.base.messaging: debug
+    org.springframework.kafka: info
 
 filestore-url: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
 
