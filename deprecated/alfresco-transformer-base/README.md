@@ -7,7 +7,6 @@ simpler way to do it.
 > When upgrading to 3.0.0, you will find that a number of classes in the alfresco-transform-model
 have moved. See the [alfresco-transform-model README](https://github.com/Alfresco/alfresco-transform-core/blob/master/model/README.md)
 
-
 This project provides a base Spring Boot process (optionally within their own Docker containers).
 It performs common actions such as logging, throttling requests and handling the streaming of content to and from the container.
 
