@@ -117,7 +117,7 @@ public abstract class AbstractTransformerControllerTest
     @SpyBean
     protected TransformServiceRegistry transformRegistry;
 
-    @Autowired
+    @Value("${transform.core.version}")
     private String coreVersion;
 
     protected String sourceExtension;
