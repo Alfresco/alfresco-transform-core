@@ -29,6 +29,7 @@ package org.alfresco.transform.base.registry;
 import org.alfresco.transform.base.TransformEngine;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -44,6 +45,8 @@ public class TransformConfigFromTransformEngines
     private List<TransformEngine> transformEngines;
     @Autowired
     private List<TransformConfigSource> transformConfigSources;
+    @Value("${container.isTRouter}")
+    private boolean isTRouter;
 
     @PostConstruct
     public void initTransformEngineConfig()
@@ -57,7 +60,7 @@ public class TransformConfigFromTransformEngines
                     {
                         String engineName = transformEngine.getTransformEngineName();
                         transformConfigSources.add(
-                            new AbstractTransformConfigSource(engineName, engineName,null)
+                            new AbstractTransformConfigSource(engineName, engineName, isTRouter ? null : "---")
                             {
                                  @Override public TransformConfig getTransformConfig()
                                 {

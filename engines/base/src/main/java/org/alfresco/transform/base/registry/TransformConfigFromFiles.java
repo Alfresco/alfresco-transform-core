@@ -70,7 +70,7 @@ public class TransformConfigFromFiles
         {
             String filename = resource.getFilename();
             transformConfigSources.add(
-                new AbstractTransformConfigSource(filename, filename,(isTRouter ? "---" : null))
+                new AbstractTransformConfigSource(filename, filename, isTRouter ? null : "---")
                 {
                     @Override public TransformConfig getTransformConfig()
                     {
