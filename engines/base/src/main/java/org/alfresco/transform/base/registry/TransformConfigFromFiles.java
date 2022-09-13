@@ -29,6 +29,7 @@ package org.alfresco.transform.base.registry;
 import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -56,6 +57,8 @@ public class TransformConfigFromFiles
     private TransformConfigFilesHistoric transformConfigFilesHistoric;
     @Autowired
     private TransformConfigResourceReader transformConfigResourceReader;
+    @Value("${container.isTRouter}")
+    private boolean isTRouter;
 
     @PostConstruct
     public void initFileConfig()
@@ -67,7 +70,7 @@ public class TransformConfigFromFiles
         {
             String filename = resource.getFilename();
             transformConfigSources.add(
-                new AbstractTransformConfigSource(filename, filename,null)
+                new AbstractTransformConfigSource(filename, filename,(isTRouter ? "---" : null))
                 {
                     @Override public TransformConfig getTransformConfig()
                     {
