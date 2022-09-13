@@ -97,7 +97,6 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 @Controller
 public class TransformController
 {
-
     private static final Logger logger = LoggerFactory.getLogger(TransformController.class);
 
     private static final String MODEL_TITLE = "title";

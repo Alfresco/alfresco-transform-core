@@ -225,7 +225,7 @@ public class TransformRegistry extends AbstractTransformRegistry
                     .map(name -> {
                         Origin<Transformer> transformerOrigin = transformerByNameMap.get(name);
                         String message = "  " + name + (transformerOrigin == null
-                            ? " -- unavailable: missing transform steps"
+                            ? " -- unavailable: see previous messages"
                             : isTRouter
                             ? ""
                             : TransformerType.valueOf(transformerOrigin.get()) == PIPELINE_TRANSFORMER

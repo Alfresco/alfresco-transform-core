@@ -36,7 +36,7 @@ public abstract class AbstractTransformConfigSource implements TransformConfigSo
     {
         this.sortOnName = sortOnName;
         this.readFrom = readFrom;
-        this.baseUrl = baseUrl == null ? "---" : baseUrl;
+        this.baseUrl = baseUrl;
     }
 
     @Override
