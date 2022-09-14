@@ -23,6 +23,7 @@ branches:
     - /^HF\/.+$/
     - /^ATS-.*$/
     - /^ACS-.*$/
+    - /^MNT-.*$/
 
 stages:
   - name: Veracode Scan
