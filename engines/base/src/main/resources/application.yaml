@@ -1,0 +1,64 @@
+---
+spring:
+  servlet:
+    multipart:
+      max-file-size: 8192MB
+      max-request-size: 8192MB
+  activemq:
+    broker-url: ${ACTIVEMQ_URL:nio://localhost:61616}?jms.watchTopicAdvisories=false
+    user: ${ACTIVEMQ_USER:admin}
+    password: ${ACTIVEMQ_PASSWORD:admin}
+    pool:
+      enabled: true
+      max-connections: 20
+  jackson:
+    default-property-inclusion: non_empty
+
+activemq:
+  url: ${ACTIVEMQ_URL:false}
+
+server:
+  port: ${SERVER_PORT:8090}
+  error:
+    include-message: ALWAYS
+
+# Historic values (AVOID) - Exist to help with transition to newer versions
+transformer-routes-path: ${TRANSFORMER_ROUTES_FILE_LOCATION:transformer-pipelines.json}
+
+logging:
+  level:
+    org.alfresco.transform.common.TransformerDebug: debug
+
+filestore-url: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
+
+transform:
+  core:
+    version: @project.version@
+  engine:
+    config:
+      cron: 0 0 * * * *  # once an hour on the hour
+      retry:
+        attempts: 10
+        timeout: 10 # seconds
+
+jms-listener:
+  concurrency: ${JMS_LISTENER_CONCURRENCY:1-10}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - metrics
+          - prometheus
+          - health
+  metrics:
+    enable[http]: false
+    enable[logback]: false
+    enable[tomcat]: false
+    enable[jvm.classes]: false
+
+container:
+  name: ${HOSTNAME:t-engine}
+  isTRouter: false
+  behind-ingres: false

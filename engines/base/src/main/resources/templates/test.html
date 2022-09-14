@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xml:lang="en">
+<head>
+    <title th:text="${title}"/>
+</head>
+
+<body>
+	<div>
+        <h2 th:text="${title}"></h2>
+        <form method="POST" enctype="multipart/form-data" th:action="${proxyPathPrefix+'/test'}">
+            <table>
+                <tr><td><div style="text-align:right">file</div></td><td><input type="file" name="file" /></td></tr>
+                <tr><td><div style="text-align:right">directAccessUrl</div></td><td><input type="text" name="directAccessUrl"/></td></tr>
+                <tr><td><div style="text-align:right">sourceMimetype</div></td><td><input type="text" name="sourceMimetype" value="" /></td>
+                  <td><select name="_sourceMimetype">
+                    <option value="" >-- by file extension --</option>
+                    <option value="image/jpeg" >jpg</option>
+                    <option value="image/png">png</option>
+                    <option value="application/pdf">pdf</option>
+                    <option value="application/vnd.openxmlformats-officedocument.wordprocessingml.document">docx</option>
+                    <option value="application/vnd.openxmlformats-officedocument.presentationml.slideshow">ppsx</option>
+                    <option value="text/html">html</option>
+                    <option value="text/plain">txt</option>
+                  </select></td></tr>
+                <tr><td><div style="text-align:right">targetMimetype</div></td><td><input type="text" name="targetMimetype" value="" /></td>
+                    <td><select name="_targetMimetype">
+                        <option value="" >-- by file extension --</option>
+                        <option value="image/jpeg" >jpg</option>
+                        <option value="image/png">png</option>
+                        <option value="application/pdf">pdf</option>
+                        <option value="application/vnd.openxmlformats-officedocument.wordprocessingml.document">docx</option>
+                        <option value="application/vnd.openxmlformats-officedocument.presentationml.slideshow">ppsx</option>
+                        <option value="text/html">html</option>
+                        <option value="text/plain">txt</option>
+                    </select></td></tr>
+
+                <th:block th:each="i: ${#numbers.sequence(0, T(java.lang.Math).min(18, transformOptions.size) - 1)}">
+                    <tr><td><select th:name="${'name'+i}">
+                        <option th:each="transformOption, iStat: ${transformOptions}"
+                                th:value="${transformOption}" th:text="${transformOption}"
+                                th:selected="${iStat.index eq i}"/>
+                    </select></td><td><input type="text" th:name="${'value'+i}" /></td></tr>
+                </th:block>
+
+                <th:block th:each="i: ${#numbers.sequence(T(java.lang.Math).min(18, transformOptions.size), T(java.lang.Math).min(18, transformOptions.size) + 2)}">
+                    <tr><td><input type="text" th:name="${'name'+i}" value="" /></td>
+                        <td><input type="text" th:name="${'value'+i}" value="" /></td></tr>
+                </th:block>
+
+                <tr><td><div style="text-align:right">timeout</div></td><td><input type="text" name="timeout" value="" /></td></tr>
+				<tr><td></td><td><input type="submit" value="Transform" /></td></tr>
+            </table>
+        </form>
+    </div>
+    <div>
+        Test
+        <a th:href="${proxyPathPrefix+'/log'}">Log</a>
+        <a th:href="${proxyPathPrefix+'/ready'}">Ready</a>
+        <a th:href="${proxyPathPrefix+'/live'}">Live</a>
+        <a th:href="${proxyPathPrefix+'/transform/config?configVersion=9999'}">Config</a>
+    </div>
+</body>
+</html>

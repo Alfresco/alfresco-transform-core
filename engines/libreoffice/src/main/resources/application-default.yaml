@@ -1,0 +1,11 @@
+queue:
+  engineRequestQueue: ${TRANSFORM_ENGINE_REQUEST_QUEUE:org.alfresco.transform.engine.libreoffice.acs}
+transform:
+  core:
+    libreoffice:
+      path: ${LIBREOFFICE_HOME:/opt/libreoffice7.2}
+      maxTasksPerProcess: ${LIBREOFFICE_MAX_TASKS_PER_PROCESS:200}
+      timeout: ${LIBREOFFICE_TIMEOUT:1200000}
+      portNumbers: ${LIBREOFFICE_PORT_NUMBERS:8100}
+      templateProfileDir: ${LIBREOFFICE_TEMPLATE_PROFILE_DIR:}
+      isEnabled: ${LIBREOFFICE_IS_ENABLED:true}

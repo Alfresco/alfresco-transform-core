@@ -1,0 +1,130 @@
+---
+transformOptions:
+  imageMagickOptions:
+    - value:
+        name: alphaRemove
+    - value:
+        name: autoOrient
+    - value:
+        name: startPage
+    - value:
+        name: endPage
+    - group:
+        transformOptions:
+          - value:
+              name: cropGravity
+          - value:
+              name: cropWidth
+          - value:
+              name: cropHeight
+          - value:
+              name: cropPercentage
+          - value:
+              name: cropXOffset
+          - value:
+              name: cropYOffset
+    - group:
+        transformOptions:
+          - value:
+              name: thumbnail
+          - value:
+              name: resizeHeight
+          - value:
+              name: resizeWidth
+          - value:
+              name: resizePercentage
+          - value:
+              name: allowEnlargement
+          - value:
+              name: maintainAspectRatio
+transformers:
+  - transformerName: CORE_AIO
+    supportedSourceAndTargetList:
+      - sourceMediaType: image/gif
+        targetMediaType: image/gif
+    transformOptions:
+    - imageMagickOptions
+
+
+  - transformerName: IMAGEMAGICK
+    supportedSourceAndTargetList:
+      - sourceMediaType: image/gif
+        targetMediaType: image/gif
+    transformOptions: 
+    - imageMagickOptions
+
+  - transformerName: PDF_RENDERER
+    supportedSourceAndTargetList:
+      - sourceMediaType: application/vnd.ms-powerpoint
+        targetMediaType: application/pdf
+        priority: 55
+        maxSourceSizeBytes: 50331648
+    transformOptions: []
+  - transformerName: CORE_AIO
+    supportedSourceAndTargetList:
+      - sourceMediaType: application/msword
+        targetMediaType: application/pdf
+        maxSourceSizeBytes: 18874368
+ 
+  - transformerName: CORE_AIO
+    supportedSourceAndTargetList:
+      - sourceMediaType: text/plain
+        targetMediaType: text/plain
+      - sourceMediaType: text/mediawiki
+        targetMediaType: text/plain 
+      - sourceMediaType: text/css
+        targetMediaType: text/plain
+      - sourceMediaType: text/csv
+        targetMediaType: text/plain
+      - sourceMediaType: text/xml
+        targetMediaType: text/plain
+      - sourceMediaType: text/html
+        targetMediaType: text/plain
+      - sourceMediaType: application/x-javascript
+        targetMediaType: text/plain
+      - sourceMediaType: application/dita+xml
+        targetMediaType: text/plain     
+    transformOptions: 
+    - stringOptions
+
+  - transformerName: officeToImageViaPdf
+    transformerPipeline:
+    - transformerName: libreoffice
+      targetMediaType: application/pdf
+    - transformerName: pdfToImageViaPng
+    transformOptions:
+    - pdfRendererOptions
+    - imageMagickOptions
+  - transformerName: textToImageViaPdf
+    transformerPipeline:
+    - transformerName: libreoffice
+      targetMediaType: application/pdf
+    - transformerName: pdfToImageViaPng
+    supportedSourceAndTargetList:
+    - sourceMediaType: text/plain
+      targetMediaType: image/gif
+    - sourceMediaType: text/plain
+      targetMediaType: image/jpeg
+    - sourceMediaType: text/plain
+      targetMediaType: image/tiff
+    - sourceMediaType: text/plain
+      targetMediaType: image/png
+    - sourceMediaType: text/csv
+      targetMediaType: image/gif
+    - sourceMediaType: text/csv
+      targetMediaType: image/jpeg
+    - sourceMediaType: text/csv
+      targetMediaType: image/tiff
+    - sourceMediaType: text/csv
+      targetMediaType: image/png
+    - sourceMediaType: text/xml
+      targetMediaType: image/gif
+    - sourceMediaType: text/xml
+      targetMediaType: image/jpeg
+    - sourceMediaType: text/xml
+      targetMediaType: image/tiff
+    - sourceMediaType: text/xml
+      targetMediaType: image/png
+    transformOptions:
+    - pdfRendererOptions
+    - imageMagickOptions    

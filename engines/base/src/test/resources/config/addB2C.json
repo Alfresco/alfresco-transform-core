@@ -1,0 +1,11 @@
+{
+  "transformers": [
+    {
+      "transformerName": "B2C",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "B", "targetMediaType": "C"}
+      ],
+      "transformOptions": []
+    }
+  ]
+}

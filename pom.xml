@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>2.7.0-A2-SNAPSHOT</version>
+    <version>3.0.0-HXP-A10-SNAPSHOT</version>
+    <name>Alfresco Transform Core</name>
     <packaging>pom</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.7.3</version>
-        <relativePath />
     </parent>
 
     <properties>
@@ -25,7 +25,6 @@
         <dependency.activemq.version>5.17.1</dependency.activemq.version>
         <dependency.jackson.version>2.13.3</dependency.jackson.version>
         <dependency.jackson-databind.version>2.13.3</dependency.jackson-databind.version>
-        <dependency.junit.version>4.13.2</dependency.junit.version>
         <dependency.cxf.version>3.5.3</dependency.cxf.version>
         <dependency.tika.version>2.4.1</dependency.tika.version>
         <dependency.poi.version>5.2.2</dependency.poi.version>
@@ -41,82 +40,82 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick</module>
-                <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot</module>
-                <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice</module>
-                <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice-boot</module>
-                <module>alfresco-transform-misc/alfresco-transform-misc</module>
-                <module>alfresco-transform-misc/alfresco-transform-misc-boot</module>
-                <module>alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer</module>
-                <module>alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer-boot</module>
-                <module>alfresco-transform-tika/alfresco-transform-tika</module>
-                <module>alfresco-transform-tika/alfresco-transform-tika-boot</module>
-                <module>alfresco-transform-core-aio/alfresco-transform-core-aio</module>
-                <module>alfresco-transform-core-aio/alfresco-transform-core-aio-boot</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/imagemagick</module>
+                <module>engines/libreoffice</module>
+                <module>engines/misc</module>
+                <module>engines/pdfrenderer</module>
+                <module>engines/tika</module>
+                <module>engines/aio</module>
+                <module>engines/example</module>
+                <module>deprecated/alfresco-transformer-base</module>
             </modules>
         </profile>
         <profile>
             <id>base</id>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/example</module>
+                <module>deprecated/alfresco-transformer-base</module>
             </modules>
         </profile>
         <profile>
             <id>imagemagick</id>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick</module>
-                <module>alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/imagemagick</module>
             </modules>
         </profile>
         <profile>
             <id>libreoffice</id>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice</module>
-                <module>alfresco-transform-libreoffice/alfresco-transform-libreoffice-boot</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/libreoffice</module>
             </modules>
         </profile>
         <profile>
             <id>misc</id>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>alfresco-transform-misc/alfresco-transform-misc</module>
-                <module>alfresco-transform-misc/alfresco-transform-misc-boot</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/misc</module>
             </modules>
         </profile>
         <profile>
             <id>pdf-renderer</id>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer</module>
-                <module>alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer-boot</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/pdfrenderer</module>
             </modules>
         </profile>
         <profile>
             <id>tika</id>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>alfresco-transform-tika/alfresco-transform-tika</module>
-                <module>alfresco-transform-tika/alfresco-transform-tika-boot</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/tika</module>
             </modules>
         </profile>
         <profile>
             <!-- Should only be run after all other snapshot images have been build  -->
             <id>aio-test</id>
             <modules>
-                <module>alfresco-transform-model</module>
-                <module>alfresco-transformer-base</module>
-                <module>alfresco-transform-core-aio/alfresco-transform-core-aio</module>
-                <module>alfresco-transform-core-aio/alfresco-transform-core-aio-boot</module>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/aio</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>example</id>
+            <modules>
+                <module>model</module>
+                <module>engines/base</module>
+                <module>engines/example</module>
             </modules>
         </profile>
     </profiles>
@@ -242,11 +241,15 @@
                 <artifactId>commons-codec</artifactId>
                 <version>1.15</version>
             </dependency>
-            <!-- Junit -->
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${dependency.junit.version}</version>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>4.5.13</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpmime</artifactId>
+                <version>4.5.13</version>
             </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>
