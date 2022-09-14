@@ -16,42 +16,42 @@ updates:
   registries:
   - maven-alfresco-internal
 - package-ecosystem: docker
-  directory: "/alfresco-transform-core-aio/alfresco-transform-core-aio-boot"
+  directory: "/engines/aio"
   schedule:
     interval: daily
     time: "22:00"
     timezone: Europe/London
   open-pull-requests-limit: 99
 - package-ecosystem: docker
-  directory: "/alfresco-transform-libreoffice/alfresco-transform-libreoffice-boot"
+  directory: "/engines/libreoffice"
   schedule:
     interval: daily
     time: "22:00"
     timezone: Europe/London
   open-pull-requests-limit: 99
 - package-ecosystem: docker
-  directory: "/alfresco-transform-imagemagick/alfresco-transform-imagemagick-boot"
+  directory: "/engines/imagemagick"
   schedule:
     interval: daily
     time: "22:00"
     timezone: Europe/London
   open-pull-requests-limit: 99
 - package-ecosystem: docker
-  directory: "/alfresco-transform-misc/alfresco-transform-misc-boot"
+  directory: "/engines/misc"
   schedule:
     interval: daily
     time: "22:00"
     timezone: Europe/London
   open-pull-requests-limit: 99
 - package-ecosystem: docker
-  directory: "/alfresco-transform-tika/alfresco-transform-tika-boot"
+  directory: "/engines/tika"
   schedule:
     interval: daily
     time: "22:00"
     timezone: Europe/London
   open-pull-requests-limit: 99
 - package-ecosystem: docker
-  directory: "/alfresco-transform-pdf-renderer/alfresco-transform-pdf-renderer-boot"
+  directory: "/engines/pdfrenderer"
   schedule:
     interval: daily
     time: "22:00"

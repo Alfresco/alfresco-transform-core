@@ -1,0 +1,14 @@
+{
+  "removeTransformers" : [
+    "Pdf2Jpg"
+  ],
+  "transformers": [
+    {
+      "transformerName": "A2Z",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "A", "targetMediaType": "Z"}
+      ],
+      "transformOptions": []
+    }
+  ]
+}

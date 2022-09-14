@@ -1,0 +1,57 @@
+---
+spring:
+  servlet:
+    multipart:
+      max-file-size: 8192MB
+      max-request-size: 8192MB
+  activemq:
+    broker-url: ${ACTIVEMQ_URL:nio://localhost:61616}?jms.watchTopicAdvisories=false
+    user: ${ACTIVEMQ_USER:admin}
+    password: ${ACTIVEMQ_PASSWORD:admin}
+    pool:
+      enabled: true
+      max-connections: 20
+  jackson:
+    default-property-inclusion: non_empty
+
+activemq:
+  url: ${ACTIVEMQ_URL:false}
+
+server:
+  port: ${SERVER_PORT:8090}
+  error:
+    include-message: ALWAYS
+
+logging:
+  level:
+    # org.alfresco.util.exec.RuntimeExec: debug
+    org.alfresco.transformer.LibreOfficeController: debug
+    org.alfresco.transformer.JodConverterSharedInstance: debug
+    org.alfresco.transformer.AlfrescoPdfRendererController: debug
+    org.alfresco.transformer.ImageMagickController: debug
+    org.alfresco.transformer.TikaController: debug
+    org.alfresco.transformer.MiscellaneousTransformersController: debug
+    org.alfresco.transform.common.TransformerDebug: debug
+
+fileStoreUrl: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
+
+jms-listener:
+  concurrency: ${JMS_LISTENER_CONCURRENCY:1-10}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - metrics
+          - prometheus
+          - health
+  metrics:
+    enable[http]: false
+    enable[logback]: false
+    enable[tomcat]: false
+    enable[jvm.classes]: false
+
+container:
+  name: ${HOSTNAME:t-engine}
+

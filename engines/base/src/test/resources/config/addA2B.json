@@ -1,0 +1,11 @@
+{
+  "transformers": [
+    {
+      "transformerName": "A2B",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "A", "targetMediaType": "B"}
+      ],
+      "transformOptions": []
+    }
+  ]
+}
