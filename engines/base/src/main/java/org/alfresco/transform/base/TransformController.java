@@ -35,6 +35,7 @@ import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.registry.TransformServiceRegistry;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.jms.Destination;
+import javax.jms.JMSException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -268,8 +270,22 @@ public class TransformController
         @RequestParam(value = "timeout", required = false) Long timeout,
         @RequestParam(value = "replyToQueue", required = false) Destination replyToQueue)
     {
-        TransformReply reply = transformHandler.handleMessageRequest(request, timeout, replyToQueue, getProbeTransform());
-        return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+        try {
+            // TODO janv - hack'athon ;-) - check conversion
+            String replyTo = ((ActiveMQQueue)replyToQueue).getQueueName();
+            
+            TransformReply reply = transform(request, timeout, replyTo);
+            return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
+        } 
+        catch (JMSException e) {
+            logger.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public TransformReply transform(TransformRequest request, Long timeout, String replyToDestination)
+    {
+        return transformHandler.handleMessageRequest(request, timeout, replyToDestination, getProbeTransform());
     }
 
     // Used by Alfresco Repository's 'Local Transforms'. Uploads the content and downloads the result.

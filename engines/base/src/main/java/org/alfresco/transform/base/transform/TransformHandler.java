@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.base.transform;
 
+import org.alfresco.transform.base.messaging.KafkaTransformReplySender;
 import org.alfresco.transform.base.sfs.SharedFileStoreClient;
 import org.alfresco.transform.base.messaging.TransformReplySender;
 import org.alfresco.transform.base.model.FileRefResponse;
@@ -40,6 +41,7 @@ import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.messages.TransformRequestValidator;
 import org.alfresco.transform.messages.TransformStack;
 import org.alfresco.transform.registry.TransformServiceRegistry;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +54,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.jms.Destination;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -95,8 +96,10 @@ public class TransformHandler
     private TransformRequestValidator transformRequestValidator;
     @Autowired
     private TransformServiceRegistry transformRegistry;
-    @Autowired
-    private TransformReplySender transformReplySender;
+    @Autowired(required = false) // jms
+    private TransformReplySender jmsTransformReplySender;
+    @Autowired(required = false) // kafka
+    private KafkaTransformReplySender kafkaTransformReplySender;
     @Autowired
     private TransformerDebug transformerDebug;
 
@@ -186,8 +189,8 @@ public class TransformHandler
         }.handleTransformRequest();
     }
 
-    public TransformReply handleMessageRequest(TransformRequest request, Long timeout, Destination replyToQueue,
-        ProbeTransform probeTransform)
+    public TransformReply handleMessageRequest(TransformRequest request, Long timeout, String replyToQueue,
+                                               ProbeTransform probeTransform)
     {
         TransformReply reply = createBasicTransformReply(request);
         new ProcessHandler(request.getSourceMediaType(), request.getTargetMediaType(),
@@ -250,20 +253,34 @@ public class TransformHandler
         return reply;
     }
 
-    private void sendSuccessfulResponse(Long timeout, TransformReply reply, Destination replyToQueue)
+    private void sendSuccessfulResponse(Long timeout, TransformReply reply, String replyToQueue)
     {
         logger.trace("Sending successful {}, timeout {} ms", reply, timeout);
-        transformReplySender.send(replyToQueue, reply);
+
+        // TODO janv - hack'athon ;-) - ugh !
+        if (jmsTransformReplySender != null) {
+            jmsTransformReplySender.send(new ActiveMQQueue(replyToQueue), reply);
+        }
+        else if (kafkaTransformReplySender != null) {
+            kafkaTransformReplySender.send(replyToQueue, reply);
+        }
     }
 
-    private void sendFailedResponse(TransformReply reply, Exception e, HttpStatus status, Destination replyToQueue)
+    private void sendFailedResponse(TransformReply reply, Exception e, HttpStatus status, String replyToQueue)
     {
         reply.setStatus(status.value());
         reply.setErrorDetails(messageWithCause("Transform failed", e));
 
         transformerDebug.logFailure(reply);
         logger.trace("Transform failed. Sending {}", reply, e);
-        transformReplySender.send(replyToQueue, reply);
+
+        // TODO janv - hack'athon ;-) - ugh !
+        if (jmsTransformReplySender != null) {
+            jmsTransformReplySender.send(new ActiveMQQueue(replyToQueue), reply);
+        }
+        else if (kafkaTransformReplySender != null) {
+            kafkaTransformReplySender.send(replyToQueue, reply);
+        }
     }
 
     private void checkTransformRequestValid(TransformRequest request, TransformReply reply)

@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.ImmutableMap;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
@@ -50,6 +51,7 @@ import javax.jms.Session;
  * @author Cezar Leahu
  */
 @Service
+@ConditionalOnProperty(name = "activemq.url")
 public class TransformMessageConverter implements MessageConverter
 {
     private static final MappingJackson2MessageConverter converter;

@@ -34,34 +34,50 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Prints JMS status information at application startup.
+ * Prints Messaging status information at application startup.
  *
  * @author Cezar Leahu
  */
 @Configuration
-public class MessagingInfo
-{
+public class MessagingInfo {
     private static final Logger logger = LoggerFactory.getLogger(MessagingInfo.class);
 
     @Value("${activemq.url:}")
     private String activemqUrl;
 
+    @Value("${spring.kafka.bootstrap-servers:}")
+    private String bootstrapServers;
+
     @PostConstruct
-    public void init()
-    {
+    public void init() {
         // For backwards-compatibility, we continue to rely on setting ACTIVEMQ_URL environment variable (see application.yaml)
         // The MessagingConfig class uses on ConditionalOnProperty (ie. activemq.url is set and not false)
 
         // Note: as per application.yaml the broker url is appended with "?jms.watchTopicAdvisories=false". If this needs to be fully
         // overridden then it would require explicitly setting both "spring.activemq.broker-url" *and* "activemq.url" (latter to non-false value).
 
-        if ((activemqUrl != null) && (! activemqUrl.equals("false")))
-        {
+        boolean jmsEnabled = false;
+        if ((activemqUrl != null) && (! activemqUrl.equals("false"))) {
             logger.info("JMS client is ENABLED - ACTIVEMQ_URL ='{}'", activemqUrl);
+            jmsEnabled = true;
         }
-        else
-        {
+        else {
             logger.info("JMS client is DISABLED - ACTIVEMQ_URL is not set");
+        }
+
+        // TODO janv - hack'athon ;-)
+        
+        boolean kafkaEnabled = false;
+        if ((bootstrapServers != null) && (! bootstrapServers.isEmpty()))
+        {
+            logger.info("Kafka client is ENABLED - SPRING_KAFKA_BOOTSTRAP-SEVERS ='{}'", bootstrapServers);
+            kafkaEnabled = true;
+        }
+
+        if (jmsEnabled && kafkaEnabled) {
+            String errorMessage = "Cannot enable both ActiveMQ and Kafka at the same time";
+            logger.error(errorMessage);
+            throw new UnsupportedOperationException(errorMessage);
         }
     }
 }
