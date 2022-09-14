@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.tika.metadata.extractors;
 
+import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
 import org.alfresco.transform.tika.parsers.ExifToolParser;
 import org.apache.commons.lang3.StringUtils;

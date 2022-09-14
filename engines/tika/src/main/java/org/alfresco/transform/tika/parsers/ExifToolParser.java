@@ -46,7 +46,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.alfresco.transformer.executors.RuntimeExec;
+import org.alfresco.transform.base.executors.RuntimeExec;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.tika.exception.TikaException;
