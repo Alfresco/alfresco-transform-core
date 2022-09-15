@@ -33,6 +33,29 @@ mvn clean install -Plocal,docker-it-setup
 ```
 > The `local` Maven profile builds local Docker images for each T-Engine.
 
+## Run in Docker
+
+Execute the following commands to run a t-engine in detached mode on port 8090 and to show the logs:
+
+```bash
+docker run -d -p 8090:8090 --name <t-engine-project-name> <t-engine-project-name>:latest
+docker logs -f <t-engine-project-name>
+```
+
+## Run the Spring Boot Application
+
+Since a T-Engine is a Spring Boot application, it might be helpful to run it as such during development by executing
+one of the following:
+* `mvn spring-boot:run`
+* `java -jar target/helloworld-t-engine-{version}.jar` in the project directory.
+* Run or debug the application `org.alfresco.transform.base.Application` from within an IDE.
+
+
+## Test page
+
+The application will be accessible on port 8090 and the test page is: `http://localhost:8090/`.
+The config is available on `http://localhost:8090/transform/config`.
+
 ### Artifacts
 
 #### Maven
