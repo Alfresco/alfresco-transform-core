@@ -195,9 +195,12 @@ abstract class ProcessHandler extends FragmentHandler
         if (transformerName == null)
         {
             throw new TransformException(BAD_REQUEST, "No transforms for: "+
-                sourceMimetype+" -> "+targetMimetype+transformOptions.entrySet().stream()
-                .map(entry -> entry.getKey()+"="+entry.getValue())
-                .collect(Collectors.joining(", ", " ", "")));
+                sourceMimetype+
+                (sourceSizeInBytes >= 0 ? " ("+TransformerDebug.fileSize(sourceSizeInBytes)+")" : "")+
+                 " -> "+targetMimetype+
+                transformOptions.entrySet().stream()
+                    .map(entry -> entry.getKey()+"="+entry.getValue())
+                    .collect(Collectors.joining(", ", " ", "")));
         }
         return transformerName;
     }

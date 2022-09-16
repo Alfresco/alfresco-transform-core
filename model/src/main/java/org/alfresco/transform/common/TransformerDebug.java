@@ -322,7 +322,7 @@ public class TransformerDebug
         return String.format("%,d ms", time);
     }
 
-    private String fileSize(long size)
+    public static String fileSize(long size)
     {
         if (size < 0)
         {
@@ -346,7 +346,7 @@ public class TransformerDebug
         return fileSizeFormat(size, divider, units[units.length-1]);
     }
 
-    private String fileSizeFormat(long size, long divider, String unit)
+    private static String fileSizeFormat(long size, long divider, String unit)
     {
         size = size * 10 / divider;
         int decimalPoint = (int) size % 10;

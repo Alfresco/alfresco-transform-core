@@ -477,6 +477,6 @@ public class TransformControllerTest
                .param("unknown", "1"))
                .andExpect(status().isBadRequest())
                .andExpect(content().string(containsString("TwoCustomTransformers Error Page")))
-               .andExpect(content().string(containsString("No transforms for:")));
+               .andExpect(content().string(containsString("No transforms for: text/plain (5 bytes) -&gt; application/pdf unknown=1")));
     }
 }
