@@ -50,6 +50,11 @@ public class TransformConfigFilesHistoric
     // environment variables like TRANSFORMER_ROUTES_ADDITIONAL_<engineName>.
     private final Map<String, String> additional = new HashMap<>();
 
+    //Used by ConfigurationProperties annotation
+    public Map<String, String> getAdditional() {
+        return additional;
+    }
+
     private String TRANSFORMER_ROUTES_FROM_CLASSPATH = "transformer-pipelines.json";
 
     @Value("${transformer-routes-path}")
