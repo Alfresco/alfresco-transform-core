@@ -31,8 +31,6 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_TIFF;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -176,18 +174,12 @@ public class ExifToolParser extends ExternalParser {
         MediaType mediaType = MediaType.parse(metadata.get(Metadata.CONTENT_TYPE));
         TemporaryResources tmp = new TemporaryResources();
         try {
-            // create copy of inputstream
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            stream.transferTo(baos);
-
-            TikaInputStream tis;
+            TikaInputStream tis = TikaInputStream.get(stream, tmp);
 
             if (this.getSupportedTypes().contains(mediaType)) {
-                tis = TikaInputStream.get(cloneInputStream(baos), tmp);
                 parse(tis, xhtml, metadata, tmp);
             }
 
-            tis = TikaInputStream.get(cloneInputStream(baos), tmp);
             switch (mediaType.getType()+"/"+mediaType.getSubtype()) {
                 case MIMETYPE_IMAGE_JPEG: 
                     parseAdditional(new JpegParser(), tis, handler, metadata, context, mediaType);
@@ -201,10 +193,6 @@ public class ExifToolParser extends ExternalParser {
         } finally {
             tmp.dispose();
         }
-    }
-
-    private InputStream cloneInputStream( ByteArrayOutputStream transferedStream ) {
-        return new ByteArrayInputStream(transferedStream.toByteArray());
     }
 
     private void parseAdditional(Parser parser, TikaInputStream tis, ContentHandler handler, Metadata metadata, ParseContext context,
