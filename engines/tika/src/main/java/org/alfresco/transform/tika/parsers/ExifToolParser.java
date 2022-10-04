@@ -89,15 +89,14 @@ public class ExifToolParser extends ExternalParser {
                 ExternalParser eParser = eParsers.get(0);
 
                 String[] commandToBeExecuted;
-                if( exifRuntimeExec==null ) {
+                if (exifRuntimeExec==null) {
                     logger.debug("Command to be executed determined from Tika ExternalParser");
                     commandToBeExecuted = eParser.getCommand();
                 } else {
                     logger.debug("Command to be executed determined from RuntimeExec");
                     commandToBeExecuted = exifRuntimeExec.getCommand();
                 }
-                // give some last chance
-                if( commandToBeExecuted==null || commandToBeExecuted.length==0 ) {
+                if (commandToBeExecuted==null || commandToBeExecuted.length==0) {
                     commandToBeExecuted = eParser.getCommand();
                 }
 
