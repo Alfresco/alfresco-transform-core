@@ -59,13 +59,8 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractorEmbeddor
     private RuntimeExec exifRuntimeExec;
 
     public IPTCMetadataExtractor(RuntimeExec exifRuntimeExec) {
-        this();
-        this.exifRuntimeExec = exifRuntimeExec;
-    }
-
-    public IPTCMetadataExtractor() 
-    {
         super(EXTRACTOR, logger);
+        this.exifRuntimeExec = exifRuntimeExec;
     }
 
     @Override
