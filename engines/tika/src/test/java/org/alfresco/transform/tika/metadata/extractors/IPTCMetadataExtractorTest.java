@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class IPTCMetadataExtractorTest
 {
-    IPTCMetadataExtractor extractor = new IPTCMetadataExtractor();
+    IPTCMetadataExtractor extractor = new IPTCMetadataExtractor(null);
 
     @Test
     public void testIptcToIso8601DateStrings() {

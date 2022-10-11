@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.alfresco.transform.base.executors.RuntimeExec;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.tika.exception.TikaException;
@@ -76,13 +77,33 @@ public class ExifToolParser extends ExternalParser {
     private String separator;
 
     public ExifToolParser() {
+        this(null);
+    }
+
+    public ExifToolParser(RuntimeExec exifRuntimeExec) {
         super();
         try {
             List<ExternalParser> eParsers = ExternalParsersFactory.create(getExternalParserConfigURL());
             // if ExifTool is not installed then no parsers are returned
             if (eParsers.size() > 0) {
                 ExternalParser eParser = eParsers.get(0);
-                this.setCommand(eParser.getCommand());
+
+                String[] commandToBeExecuted;
+                if (exifRuntimeExec==null) {
+                    logger.debug("Command to be executed determined from Tika ExternalParser");
+                    commandToBeExecuted = eParser.getCommand();
+                } else {
+                    logger.debug("Command to be executed determined from RuntimeExec");
+                    commandToBeExecuted = exifRuntimeExec.getCommand();
+                }
+                if (commandToBeExecuted==null || commandToBeExecuted.length==0) {
+                    commandToBeExecuted = eParser.getCommand();
+                }
+
+                String commandToBeExecutedAsString = String.join( " ", commandToBeExecuted);
+                logger.debug("Command to be executed: " + commandToBeExecutedAsString );
+
+                this.setCommand(commandToBeExecutedAsString);
                 this.setIgnoredLineConsumer(eParser.getIgnoredLineConsumer());
                 this.setMetadataExtractionPatterns(eParser.getMetadataExtractionPatterns());
                 this.setSupportedTypes(eParser.getSupportedTypes());
@@ -153,9 +174,11 @@ public class ExifToolParser extends ExternalParser {
         TemporaryResources tmp = new TemporaryResources();
         try {
             TikaInputStream tis = TikaInputStream.get(stream, tmp);
+
             if (this.getSupportedTypes().contains(mediaType)) {
                 parse(tis, xhtml, metadata, tmp);
-            }       
+            }
+
             switch (mediaType.getType()+"/"+mediaType.getSubtype()) {
                 case MIMETYPE_IMAGE_JPEG: 
                     parseAdditional(new JpegParser(), tis, handler, metadata, context, mediaType);
@@ -299,6 +322,7 @@ public class ExifToolParser extends ExternalParser {
                 try {
                     IOUtils.copy(stream, stdin);
                 } catch (IOException e) {
+                    logger.error( e.getMessage());
                 }
             }
         };
@@ -306,6 +330,7 @@ public class ExifToolParser extends ExternalParser {
         try {
             t.join();
         } catch (InterruptedException ignore) {
+            logger.error(ignore.getMessage());
         }
     }
 

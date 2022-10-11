@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.tika.metadata.extractors;
 
+import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
 import org.alfresco.transform.tika.parsers.ExifToolParser;
 import org.apache.commons.lang3.StringUtils;
@@ -55,17 +56,18 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractorEmbeddor
     private static final Pattern YEAR_IPTC = Pattern.compile("(\\d{4}[:|-]\\d{2}[:|-]\\d{2})");
 
     private ExifToolParser parser;
+    private RuntimeExec exifRuntimeExec;
 
-    public IPTCMetadataExtractor() 
-    {
+    public IPTCMetadataExtractor(RuntimeExec exifRuntimeExec) {
         super(EXTRACTOR, logger);
+        this.exifRuntimeExec = exifRuntimeExec;
     }
 
     @Override
     protected Parser getParser() 
     {
         if (this.parser == null) {
-            this.parser = new ExifToolParser();
+            this.parser = new ExifToolParser(exifRuntimeExec);
         }
         return this.parser;  
     }

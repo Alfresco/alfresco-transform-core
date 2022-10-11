@@ -28,6 +28,7 @@ package org.alfresco.transform.tika.transformers;
 
 import org.alfresco.transform.base.CustomTransformer;
 import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.common.RequestParamMap;
 import org.apache.tika.extractor.DocumentSelector;
@@ -36,10 +37,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -52,10 +55,26 @@ public abstract class AbstractTikaTransformer implements CustomTransformer
 
     @Value("${transform.core.tika.pdfBox.notExtractBookmarksTextDefault:false}")
     boolean notExtractBookmarksTextDefault;
+    @Value("${transform.core.tika.exifTool.windowsOS}")
+    private String exifToolCommandOnWindows;
+    @Value("${transform.core.tika.exifTool.unixOS}")
+    private String exifToolCommandOnUnix;
     @Autowired
     protected Tika tika;
 
     protected abstract Parser getParser();
+
+    @Bean("exifTool")
+    public RuntimeExec exifRuntimeExec()
+    {
+        RuntimeExec runtimeExec = new RuntimeExec();
+        Map<String, String[]> commandPerOS = new HashMap<>();
+        commandPerOS.put("[wW]in.*", exifToolCommandOnWindows.split(" "));
+        commandPerOS.put("*", exifToolCommandOnUnix.split(" "));
+        runtimeExec.setCommandsAndArguments(commandPerOS);
+
+        return runtimeExec;
+    }
 
     protected DocumentSelector getDocumentSelector()
     {
