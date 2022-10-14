@@ -28,7 +28,7 @@
         <dependency.cxf.version>3.5.3</dependency.cxf.version>
         <dependency.tika.version>2.4.1</dependency.tika.version>
         <dependency.poi.version>5.2.2</dependency.poi.version>
-        <dependency.ooxml-schemas.version>1.4</dependency.ooxml-schemas.version>
+        <dependency.poi-ooxml-lite.version>5.2.3</dependency.poi-ooxml-lite.version>
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
     </properties>
