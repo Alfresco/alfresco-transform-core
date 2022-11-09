@@ -26,8 +26,46 @@
  */
 package org.alfresco.transform.aio;
 
+import static java.text.MessageFormat.format;
+
+import static org.alfresco.transform.base.clients.HttpClient.sendTRequest;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_TIFF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.http.HttpStatus.OK;
+
+import java.io.IOException;
+import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
+
 import org.alfresco.transform.imagemagick.ImageMagickTransformationIT;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.junit.jupiter.api.Test;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 
 public class AIOImageMagickIT extends ImageMagickTransformationIT
 {
+
+    @Test
+    void testTransformTiffToPdf() throws IOException
+    {
+        final String sourceFile = "quick.tiff";
+        final String targetExtension = "pdf";
+        final String sourceMimetype = MIMETYPE_IMAGE_TIFF;
+        final String targetMimetype = MIMETYPE_PDF;
+        final Map<String, String> tOptions = ImmutableMap.of("startPage", "0", "endPage", "0");
+
+        // when
+        final ResponseEntity<Resource> response = sendTRequest("http://localhost:8090", sourceFile, sourceMimetype,
+            targetMimetype, targetExtension, tOptions);
+
+        final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
+            sourceFile, sourceMimetype, targetMimetype, targetExtension);
+        assertEquals(OK, response.getStatusCode(), descriptor);
+        final PDDocument pdfFile = PDDocument.load(response.getBody().getInputStream());
+        assertNotNull(pdfFile);
+    }
 }
