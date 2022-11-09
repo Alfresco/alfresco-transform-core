@@ -62,9 +62,7 @@ public class AIOImageMagickIT extends ImageMagickTransformationIT
         final ResponseEntity<Resource> response = sendTRequest("http://localhost:8090", sourceFile, sourceMimetype,
             targetMimetype, targetExtension, tOptions);
 
-        final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
-            sourceFile, sourceMimetype, targetMimetype, targetExtension);
-        assertEquals(OK, response.getStatusCode(), descriptor);
+        assertEquals(OK, response.getStatusCode());
         final PDDocument pdfFile = PDDocument.load(response.getBody().getInputStream());
         assertNotNull(pdfFile);
     }
