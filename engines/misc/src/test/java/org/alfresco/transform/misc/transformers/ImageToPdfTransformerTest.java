@@ -100,7 +100,7 @@ class ImageToPdfTransformerTest
     static Stream<TransformOptions> tiffTransformOptions()
     {
         return Stream.of(
-            TransformOptions.of(0, 0),
+            TransformOptions.of(0, 0), // (startPage, endPage)
             TransformOptions.of(0, 1),
             TransformOptions.of(1, 1),
             TransformOptions.of(null, 0), // expected 1 page in target file
