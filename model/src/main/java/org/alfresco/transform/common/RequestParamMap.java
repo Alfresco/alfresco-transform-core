@@ -64,6 +64,7 @@ public interface RequestParamMap
     String INCLUDE_CONTENTS        = "includeContents";
     String NOT_EXTRACT_BOOKMARKS_TEXT = "notExtractBookmarksText";
     String PAGE_LIMIT              = "pageLimit";
+    String PDF_FORMAT              = "pdfFormat";
 
     // Parameters interpreted by the TransformController
     String DIRECT_ACCESS_URL       = "directAccessUrl";
