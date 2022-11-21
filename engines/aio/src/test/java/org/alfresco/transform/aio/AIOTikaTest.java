@@ -63,13 +63,15 @@ public class AIOTikaTest extends TikaTest
                 "notExtractBookmarksText",
                 "page",
                 "pageLimit",
+                "pdfFormat",
                 "resizeHeight",
                 "resizePercentage",
                 "resizeWidth",
                 "startPage",
                 "targetEncoding",
                 "thumbnail",
-                "width"),
+                "width"
+            ),
             getOptionNames(controller.transformConfig(0).getBody().getTransformOptions()));
     }
 }
