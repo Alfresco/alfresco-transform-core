@@ -34,7 +34,9 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.RequestParamMap.END_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.PDF_FORMAT;
 import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.then;
 
 import java.io.File;
@@ -105,9 +107,9 @@ class ImageToPdfTransformerTest
             TransformOptions.of(1, 1),
             TransformOptions.of(null, 0), // expected 1 page in target file
             TransformOptions.of(null, 1), // expected 2 pages in target file
-            TransformOptions.of(0, null), // expected all (2) pages in target file
+            TransformOptions.of(0, null), // expected all pages in target file
             TransformOptions.of(1, null), // expected 1 page in target file
-            TransformOptions.none() // expected all (2) pages in target file
+            TransformOptions.none() // expected all pages in target file
         );
     }
 
@@ -115,7 +117,7 @@ class ImageToPdfTransformerTest
     {
         return Stream.of(
             ArgumentsCartesianProduct.of(imageFiles(), defaultTransformOptions()),
-            ArgumentsCartesianProduct.of(ImageFile.of("quick.tiff", MIMETYPE_IMAGE_TIFF, 2), tiffTransformOptions())
+            ArgumentsCartesianProduct.of(ImageFile.of("quick.tiff", MIMETYPE_IMAGE_TIFF, 6), tiffTransformOptions())
         ).flatMap(Function.identity());
     }
 
