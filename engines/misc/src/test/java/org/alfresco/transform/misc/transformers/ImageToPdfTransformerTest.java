@@ -63,7 +63,7 @@ import org.mockito.MockitoAnnotations;
 
 class ImageToPdfTransformerTest
 {
-    private static final File sourceFile = loadFile("quick.gif");
+    private static final File sourceFile = loadFile("sample.gif");
 
     @Mock
     private TransformManager transformManager;
@@ -84,9 +84,9 @@ class ImageToPdfTransformerTest
     static Stream<ImageFile> imageFiles()
     {
         return Stream.of(
-            ImageFile.of("quick.jpg", MIMETYPE_IMAGE_JPEG),
-            ImageFile.of("quick.gif", MIMETYPE_IMAGE_GIF),
-            ImageFile.of("quick.png", MIMETYPE_IMAGE_PNG)
+            ImageFile.of("sample.jpg", MIMETYPE_IMAGE_JPEG),
+            ImageFile.of("sample.gif", MIMETYPE_IMAGE_GIF),
+            ImageFile.of("sample.png", MIMETYPE_IMAGE_PNG)
         );
     }
 
@@ -117,7 +117,7 @@ class ImageToPdfTransformerTest
     {
         return Stream.of(
             ArgumentsCartesianProduct.of(imageFiles(), defaultTransformOptions()),
-            ArgumentsCartesianProduct.of(ImageFile.of("quick.tiff", MIMETYPE_IMAGE_TIFF, 6), tiffTransformOptions())
+            ArgumentsCartesianProduct.of(ImageFile.of("sample.tiff", MIMETYPE_IMAGE_TIFF, 6), tiffTransformOptions())
         ).flatMap(Function.identity());
     }
 

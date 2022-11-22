@@ -82,10 +82,10 @@ public class MiscTransformsIT
     private static final String ENGINE_URL = "http://localhost:8090";
 
     private static final Map<String, FileInfo> TEST_FILES = Stream.of(
-        testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"),
-        testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quick.jpg"),
-        testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"),
-        testFile(MIMETYPE_IMAGE_TIFF, "tiff", "quick.tiff"),
+        testFile(MIMETYPE_IMAGE_GIF, "gif", "sample.gif"),
+        testFile(MIMETYPE_IMAGE_JPEG, "jpg", "sample.jpg"),
+        testFile(MIMETYPE_IMAGE_PNG, "png", "sample.png"),
+        testFile(MIMETYPE_IMAGE_TIFF, "tiff", "sample.tiff"),
         testFile(MIMETYPE_WORD, "doc", "quick.doc"),
         testFile(MIMETYPE_OPENXML_WORDPROCESSING, "docx", "quick.docx"),
         testFile(MIMETYPE_EXCEL, "xls", "quick.xls"),
