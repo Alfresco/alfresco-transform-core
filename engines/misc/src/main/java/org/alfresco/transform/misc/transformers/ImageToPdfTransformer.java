@@ -136,9 +136,9 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         try (PDPageContentStream pdfPageContent = new PDPageContentStream(pdfDocument, pdfPage))
         {
             final PDRectangle pageSize = pdfPage.getMediaBox();
-            final float withRatio = pageSize.getWidth() / image.getWidth();
-            final float heightRatio = pageSize.getHeight() / image.getHeight();
-            final float ratio = Stream.of(withRatio, heightRatio, 1f).min(Comparator.naturalOrder()).get();
+            final float widthRatio = image.getWidth() > 0 ? pageSize.getWidth() / image.getWidth() : 0;
+            final float heightRatio = image.getHeight() > 0 ? pageSize.getHeight() / image.getHeight() : 0;
+            final float ratio = Stream.of(widthRatio, heightRatio, 1f).min(Comparator.naturalOrder()).get();
             // find image bottom
             final float y = pageSize.getHeight() - image.getHeight() * ratio;
             // drawing starts from bottom left corner
