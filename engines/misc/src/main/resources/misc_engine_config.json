@@ -8,6 +8,11 @@
     ],
     "metadataOptions": [
       {"value": {"name": "extractMapping"}}
+    ],
+    "imageToPdfOptions": [
+      {"value": {"name": "startPage"}},
+      {"value": {"name": "endPage"}},
+      {"value": {"name": "pdfFormat"}}
     ]
   },
   "transformers": [
@@ -90,6 +95,15 @@
       ],
       "transformOptions": [
         "metadataOptions"
+      ]
+    },
+    {
+      "transformerName": "imageToPdf",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "image/tiff",                                    "targetMediaType": "application/pdf"}
+      ],
+      "transformOptions": [
+        "imageToPdfOptions"
       ]
     }
   ]

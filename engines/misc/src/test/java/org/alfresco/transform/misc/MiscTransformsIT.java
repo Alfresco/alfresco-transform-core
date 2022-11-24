@@ -26,21 +26,12 @@
  */
 package org.alfresco.transform.misc;
 
-import org.alfresco.transform.base.clients.FileInfo;
-import org.alfresco.transform.base.clients.SourceTarget;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
-
-import java.util.Map;
-import java.util.stream.Stream;
-
 import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static org.alfresco.transform.base.clients.HttpClient.sendTRequest;
+
 import static org.alfresco.transform.base.clients.FileInfo.testFile;
+import static org.alfresco.transform.base.clients.HttpClient.sendTRequest;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_DITA;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_EXCEL;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
@@ -67,8 +58,21 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_XML;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
+
+import org.alfresco.transform.base.clients.FileInfo;
+import org.alfresco.transform.base.clients.SourceTarget;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 
 /**
  * @author Cezar Leahu
@@ -78,10 +82,10 @@ public class MiscTransformsIT
     private static final String ENGINE_URL = "http://localhost:8090";
 
     private static final Map<String, FileInfo> TEST_FILES = Stream.of(
-        testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"),
-        testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quick.jpg"),
-        testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"),
-        testFile(MIMETYPE_IMAGE_TIFF, "tiff", "quick.tiff"),
+        testFile(MIMETYPE_IMAGE_GIF, "gif", "sample.gif"),
+        testFile(MIMETYPE_IMAGE_JPEG, "jpg", "sample.jpg"),
+        testFile(MIMETYPE_IMAGE_PNG, "png", "sample.png"),
+        testFile(MIMETYPE_IMAGE_TIFF, "tiff", "sample.tiff"),
         testFile(MIMETYPE_WORD, "doc", "quick.doc"),
         testFile(MIMETYPE_OPENXML_WORDPROCESSING, "docx", "quick.docx"),
         testFile(MIMETYPE_EXCEL, "xls", "quick.xls"),
@@ -146,6 +150,8 @@ public class MiscTransformsIT
             SourceTarget.of("application/dita+xml", "application/pdf"),
             SourceTarget.of("text/xml", "application/pdf"),
 
+            SourceTarget.of(MIMETYPE_IMAGE_TIFF, MIMETYPE_PDF),
+
             SourceTarget.of("message/rfc822", "text/plain")
         );
     }
@@ -164,9 +170,17 @@ public class MiscTransformsIT
 
         try
         {
+            // when
             final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile,
                 sourceMimetype, targetMimetype, targetExtension);
+
             assertEquals(OK, response.getStatusCode(), descriptor);
+            if (MIMETYPE_PDF.equals(targetMimetype))
+            {
+                // verify if PDF isn't corrupted
+                final PDDocument pdfFile = PDDocument.load(Objects.requireNonNull(response.getBody()).getInputStream());
+                assertNotNull(pdfFile);
+            }
         }
         catch (Exception e)
         {

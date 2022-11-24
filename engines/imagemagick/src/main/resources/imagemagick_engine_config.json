@@ -932,7 +932,7 @@
         {"sourceMediaType": "image/tiff",                               "targetMediaType": "image/x-raw-minolta" },
         {"sourceMediaType": "image/tiff",                               "targetMediaType": "image/x-raw-nikon" },
         {"sourceMediaType": "image/tiff",                               "targetMediaType": "image/x-raw-olympus" },
-        {"sourceMediaType": "image/tiff",                              "targetMediaType": "image/x-portable-bitmap" },
+        {"sourceMediaType": "image/tiff",                               "targetMediaType": "image/x-portable-bitmap" },
         {"sourceMediaType": "image/tiff",                               "targetMediaType": "image/x-raw-pentax" },
         {"sourceMediaType": "image/tiff",                               "targetMediaType": "image/x-portable-graymap" },
         {"sourceMediaType": "image/tiff",                               "targetMediaType": "image/x-portable-anymap" },
@@ -950,7 +950,6 @@
         {"sourceMediaType": "image/tiff",                               "targetMediaType": "image/x-xbitmap" },
         {"sourceMediaType": "image/tiff",                               "targetMediaType": "image/x-xpixmap" },
         {"sourceMediaType": "image/tiff",                               "targetMediaType": "image/x-xwindowdump" },
-        {"sourceMediaType": "image/tiff",                               "targetMediaType": "application/pdf" },
 
         {"sourceMediaType": "image/x-raw-sigma",                        "targetMediaType": "image/x-raw-hasselblad" },
         {"sourceMediaType": "image/x-raw-sigma",                        "targetMediaType": "image/x-raw-sony" },
