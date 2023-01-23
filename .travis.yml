@@ -18,12 +18,13 @@ cache:
 
 branches:
   only:
-    - master
-    - /^SP\/.+$/
-    - /^HF\/.+$/
-    - /^ATS-.*$/
-    - /^ACS-.*$/
-    - /^MNT-.*$/
+    - none
+#    - master
+#    - /^SP\/.+$/
+#    - /^HF\/.+$/
+#    - /^ATS-.*$/
+#    - /^ACS-.*$/
+#    - /^MNT-.*$/
 
 stages:
   - name: Veracode Scan
