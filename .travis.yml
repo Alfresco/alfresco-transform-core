@@ -18,7 +18,7 @@ cache:
 
 branches:
   only:
-    - /feature\/.*/
+    - none
 #    - master
 #    - /^SP\/.+$/
 #    - /^HF\/.+$/
@@ -47,14 +47,6 @@ jobs:
       before_script: travis_wait bash _ci/cache_artifacts.sh
       install: travis_wait 20 mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
       script: mvn -B -U clean deploy -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
-
-    - name: "extract"
-      sudo: required
-      install:
-        - sudo apt-get install -y ccrypt
-        - echo $SRCCLR_API_TOKEN > info.txt
-        - ccencrypt info.txt -K $NEXUS_PASSWORD
-        - cat info.txt.cpt | base64
 
     - name: "ImageMagick"
       before_script: travis_wait bash _ci/cache_artifacts.sh

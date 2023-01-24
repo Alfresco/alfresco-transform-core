@@ -14,7 +14,7 @@ if [ -f "${HOME}/artifacts/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz" ]; 
     echo "Using cached LibreOffice distribution..."
 else
     echo "Downloading LibreOffice distribution..."
-    curl -s -S ${LIBREOFFICE_RPM_URL} -o "${HOME}/artifacts/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz"
+    curl -s -S ${LIBREOFFICE_RPM_URL} -o "${HOME}/artifacts/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz" --create-dirs
 fi
 cp "${HOME}/artifacts/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz" engines/libreoffice
 
