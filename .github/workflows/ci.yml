@@ -32,8 +32,6 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v1.30.0
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
-      - name: "Clean Maven cache"
-        run: bash _ci/cleanup_cache.sh
 
   build_and_test:
     name: "Core & Base Snapshot deployment"
