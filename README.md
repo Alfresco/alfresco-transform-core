@@ -1,5 +1,5 @@
 ## Alfresco Transform Core
-[![Build Status](https://travis-ci.com/Alfresco/alfresco-transform-core.svg?branch=master)](https://travis-ci.com/Alfresco/alfresco-transform-core)
+[![Build Status](https://github.com/Alfresco/alfresco-transform-core/actions/workflows/master_release.yml/badge.svg?branch=master)](https://github.com/Alfresco/alfresco-transform-core/actions/workflows/master_release.yml)
 
 Contains the common transformer (T-Engine) code, plus a few implementations.
 

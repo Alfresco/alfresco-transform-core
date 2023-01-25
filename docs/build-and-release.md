@@ -1,6 +1,6 @@
 # Build
-The `alfresco-transform-core` project uses _Travis CI_. \
-The `.travis.yml` config file can be found in the root of the repository.
+The `alfresco-transform-core` project uses _GitHub Actions CI_. \
+The `ci.yml` and `master_release.yml` config files can be found in the .github/workflows directory of the project.
 
 
 ## Stages and Jobs
@@ -9,7 +9,7 @@ The `.travis.yml` config file can be found in the root of the repository.
 
 
 ## Branches
-Travis CI builds differ by branch:
+GitHub Actions CI builds differ by branch:
 * `master` / `SP/*` / `HF/*` branches:
   - regular builds which include the _Build_ stage;
     > On the `master` branch only the _Build_ stage updates the `latest` T-Engines images on 

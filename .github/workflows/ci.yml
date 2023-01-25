@@ -4,6 +4,20 @@ on:
   push:
     branches:
       - feature/**
+      - SP/**
+      - HF/**
+      - ATS-**
+      - ACS-**
+      - MNT-**
+  pull_request:
+    branches:
+      - master
+      - feature/**
+      - SP/**
+      - HF/**
+      - ATS-**
+      - ACS-**
+      - MNT-**
   workflow_call:
   workflow_dispatch:
 
@@ -21,26 +35,28 @@ jobs:
   veracode:
     name: "Veracode - Source Clear Scan (SCA)"
     runs-on: ubuntu-latest
-    if: always()
+    if: >
+      github.ref_name == 'master' || github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.30.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.30.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
       - name: "Before install"
         run: |
           bash _ci/init.sh
-      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v1.30.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v1.32.0
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
 
   build_and_test:
     name: "Core & Base Snapshot deployment"
     runs-on: ubuntu-latest
-    if: always()
+    if: >
+      github.ref_name == 'master' && github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.30.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.30.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
       - name: "Before install"
         run: |
           bash _ci/init.sh
@@ -75,8 +91,8 @@ jobs:
             testPackage: tika
     steps:
       - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.30.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.30.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
       - name: "Before install"
         run: |
           bash _ci/init.sh
@@ -97,8 +113,8 @@ jobs:
     if: always()
     steps:
       - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.30.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.30.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
       - name: "Before install"
         run: |
           bash _ci/init.sh
