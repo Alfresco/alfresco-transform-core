@@ -26,7 +26,6 @@ on:
 env:
   DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  GITHUB_ACTIONS_DEPLOY_TIMEOUT: 60
   NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
   NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
   QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
@@ -34,6 +33,7 @@ env:
   GIT_USERNAME: ${{ secrets.BOT_GITHUB_USERNAME }}
   GIT_EMAIL: ${{ secrets.BOT_GITHUB_EMAIL }}
   GIT_PASSWORD: ${{ secrets.BOT_GITHUB_TOKEN }}
+  GITHUB_ACTIONS_DEPLOY_TIMEOUT: 60
 
 jobs:
   veracode:
@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
-      - name: "Before install"
+      - name: "Init"
         run: bash _ci/init.sh
       - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v1.32.0
         with:
@@ -62,12 +62,12 @@ jobs:
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
-      - name: "Before install"
+      - name: "Init"
         run: bash _ci/init.sh
       - name: "Install"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         run: mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
-      - name: "Before script"
+      - name: "Cache LibreOffice"
         run: bash _ci/cache_artifacts.sh
       - name: "Run tests"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
@@ -76,7 +76,6 @@ jobs:
   all_tests_matrix:
     name: ${{ matrix.testName }}
     runs-on: ubuntu-latest
-    if: always()
     strategy:
       fail-fast: false
       matrix:
@@ -103,12 +102,12 @@ jobs:
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
-      - name: "Before install"
+      - name: "Init"
         run: bash _ci/init.sh
       - name: "Install"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         run: bash _ci/build.sh ${{ matrix.buildProfile }}
-      - name: "Before script"
+      - name: "Cache LibreOffice"
         run: bash _ci/cache_artifacts.sh
       - name: "Run tests"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
@@ -134,7 +133,7 @@ jobs:
           username: ${{ env.GIT_USERNAME }}
           email: ${{ env.GIT_EMAIL }}
           global: true
-      - name: "Before script"
+      - name: "Cache LibreOffice"
         run: bash _ci/cache_artifacts.sh
       - name: "Release"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
