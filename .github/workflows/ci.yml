@@ -5,8 +5,6 @@ on:
     branches:
       - feature/**
       - fix/**
-      - SP/**
-      - HF/**
       - ATS-**
       - ACS-**
       - MNT-**
@@ -27,7 +25,6 @@ env:
   DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   GITHUB_ACTIONS_DEPLOY_TIMEOUT: 60
-  JAVA_VERSION: "17"
   NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
   NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
   QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
@@ -44,8 +41,7 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
       - name: "Before install"
-        run: |
-          bash _ci/init.sh
+        run: bash _ci/init.sh
       - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v1.32.0
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
@@ -60,18 +56,15 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
       - name: "Before install"
-        run: |
-          bash _ci/init.sh
+        run: bash _ci/init.sh
       - name: "Install"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: |
-          mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
+        run: mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
       - name: "Before script"
         run: bash _ci/cache_artifacts.sh
       - name: "Run tests"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: |
-          mvn -B -U clean deploy -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
+        run: mvn -B -U clean deploy -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
 
   all_tests_matrix:
     name: ${{ matrix.testName }}
@@ -91,23 +84,21 @@ jobs:
             testPackage: pdf-renderer
           - testName: Tika
             testPackage: tika
+          - testName:
     steps:
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
       - name: "Before install"
-        run: |
-          bash _ci/init.sh
+        run: bash _ci/init.sh
       - name: "Install"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: |
-          bash _ci/build.sh ${{ matrix.testPackage }}
+        run: bash _ci/build.sh ${{ matrix.testPackage }}
       - name: "Before script"
         run: bash _ci/cache_artifacts.sh
       - name: "Run tests"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: |
-          bash _ci/test.sh ${{ matrix.testPackage }}
+        run: bash _ci/test.sh ${{ matrix.testPackage }}
 
   all_in_one_transformer:
     name: "All in One Transformer"
@@ -118,15 +109,12 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
       - name: "Before install"
-        run: |
-          bash _ci/init.sh
+        run: bash _ci/init.sh
       - name: "Install"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: |
-          bash _ci/build.sh full-build
+        run: bash _ci/build.sh full-build
       - name: "Before script"
         run: bash _ci/cache_artifacts.sh
       - name: "Run tests"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: |
-          bash _ci/test.sh aio-test
+        run: bash _ci/test.sh aio-test

@@ -49,5 +49,4 @@ jobs:
         run: bash _ci/cache_artifacts.sh
       - name: "Release"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: |
-          bash _ci/release.sh
+        run: bash _ci/release.sh
