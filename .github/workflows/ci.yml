@@ -18,6 +18,8 @@ on:
       - ATS-**
       - ACS-**
       - MNT-**
+  schedule:
+    - cron: '0 5 * * 1'
   workflow_call:
   workflow_dispatch:
 
@@ -29,13 +31,17 @@ env:
   NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
   QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
   QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+  GIT_USERNAME: ${{ secrets.BOT_GITHUB_USERNAME }}
+  GIT_EMAIL: ${{ secrets.BOT_GITHUB_EMAIL }}
+  GIT_PASSWORD: ${{ secrets.BOT_GITHUB_TOKEN }}
 
 jobs:
   veracode:
     name: "Veracode - Source Clear Scan (SCA)"
     runs-on: ubuntu-latest
     if: >
-      github.ref_name == 'master' || github.event_name == 'pull_request'
+      github.ref_name == 'master' || 
+      github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
@@ -50,7 +56,8 @@ jobs:
     name: "Core & Base Snapshot deployment"
     runs-on: ubuntu-latest
     if: >
-      github.ref_name == 'master' && github.event_name != 'pull_request'
+      github.ref_name == 'master' && 
+      github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
@@ -75,16 +82,23 @@ jobs:
       matrix:
         include:
           - testName: ImageMagick
-            testPackage: imagemagick
+            buildProfile: imagemagick
+            testProfile: imagemagick
           - testName: LibreOffice
-            testPackage: libreoffice
+            buildProfile: libreoffice
+            testProfile: libreoffice
           - testName: Transform Misc
-            testPackage: misc
+            buildProfile: misc
+            testProfile: misc
           - testName: PDF Renderer
-            testPackage: pdf-renderer
+            buildProfile: pdf-renderer
+            testProfile: pdf-renderer
           - testName: Tika
-            testPackage: tika
-          - testName:
+            buildProfile: tika
+            testProfile: tika
+          - testName: All in One Transformer
+            buildProfile: full-build
+            testProfile: aio-test
     steps:
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
@@ -93,28 +107,35 @@ jobs:
         run: bash _ci/init.sh
       - name: "Install"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: bash _ci/build.sh ${{ matrix.testPackage }}
+        run: bash _ci/build.sh ${{ matrix.buildProfile }}
       - name: "Before script"
         run: bash _ci/cache_artifacts.sh
       - name: "Run tests"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: bash _ci/test.sh ${{ matrix.testPackage }}
+        run: bash _ci/test.sh ${{ matrix.testProfile }}
 
-  all_in_one_transformer:
-    name: "All in One Transformer"
+  release:
+    name: "Release"
     runs-on: ubuntu-latest
-    if: always()
+    needs: [veracode, build_and_test, all_tests_matrix]
+    if: >
+      !failure() &&
+      contains(github.event.head_commit.message, '[release]') &&
+      github.event_name != 'pull_request' &&
+      (github.ref_name == 'master' || github.ref_name == 'SP/' || github.ref_name == 'HF/')
     steps:
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
-      - name: "Before install"
-        run: bash _ci/init.sh
-      - name: "Install"
-        timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: bash _ci/build.sh full-build
+      - name: "Init"
+        run: bash ./scripts/ci/init.sh
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v1.32.0
+        with:
+          username: ${{ env.GIT_USERNAME }}
+          email: ${{ env.GIT_EMAIL }}
+          global: true
       - name: "Before script"
         run: bash _ci/cache_artifacts.sh
-      - name: "Run tests"
+      - name: "Release"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: bash _ci/test.sh aio-test
+        run: bash _ci/release.sh

@@ -1,6 +1,6 @@
 # Build
 The `alfresco-transform-core` project uses _GitHub Actions CI_. \
-The `ci.yml` and `master_release.yml` config files can be found in the `.github/workflows` directory of the project.
+The `ci.yml` config file can be found in the `.github/workflows` directory of the project.
 
 
 ## Stages and Jobs
