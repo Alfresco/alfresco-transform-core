@@ -11,8 +11,6 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 # GitHub Actions CI runner work on DETACHED HEAD, so we need to checkout the release branch
 git checkout -B "${BRANCH_NAME}"
 
-git config user.email "build@alfresco.com"
-
 # Run the release plugin - with "[skip ci]" in the release commit message
 mvn -B -Dmaven.wagon.http.pool=false \
     ${DRY_RUN} \
