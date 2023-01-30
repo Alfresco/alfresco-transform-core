@@ -8,9 +8,6 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 mkdir -p ${HOME}/.m2 && cp -f _ci/settings.xml ${HOME}/.m2/
 find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
 
-echo "${QUAY_PASSWORD}" | docker login -u="${QUAY_USERNAME}" --password-stdin quay.io
-echo "${DOCKERHUB_PASSWORD}" | docker login -u=${DOCKERHUB_USERNAME} --password-stdin docker.io
-
 
 # Enable experimental docker features (e.g. squash options)
 echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
