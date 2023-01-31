@@ -89,7 +89,7 @@ jobs:
         run: |
           echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
           sudo service docker restart
-      - name: "Install"
+      - name: "Build local docker image"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         run: mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
       - name: "Cache LibreOffice"
@@ -142,7 +142,7 @@ jobs:
         run: |
           echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
           sudo service docker restart
-      - name: "Install"
+      - name: "Build local docker image"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         run: bash _ci/build.sh ${{ matrix.buildProfile }}
       - name: "Cache LibreOffice"
