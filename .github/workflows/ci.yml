@@ -43,8 +43,8 @@ jobs:
       github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.33.0
       - name: "Init"
         run: bash _ci/init.sh
       - name: "Login to Docker Hub"
@@ -58,7 +58,7 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v1.32.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v1.33.0
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
 
@@ -70,8 +70,8 @@ jobs:
       github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.33.0
       - name: "Init"
         run: bash _ci/init.sh
       - name: "Login to Docker Hub"
@@ -121,8 +121,8 @@ jobs:
             testProfile: aio-test
     steps:
       - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.33.0
       - name: "Init"
         run: bash _ci/init.sh
       - name: "Login to Docker Hub"
@@ -156,8 +156,8 @@ jobs:
       (github.ref_name == 'master' || contains(github.ref_name, 'SP/') || contains(github.ref_name, 'HF/'))
     steps:
       - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.32.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.33.0
       - name: "Init"
         run: bash ./scripts/ci/init.sh
       - name: "Login to Docker Hub"
@@ -171,7 +171,7 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v1.32.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v1.33.0
         with:
           username: ${{ env.GIT_USERNAME }}
           email: ${{ env.GIT_EMAIL }}
