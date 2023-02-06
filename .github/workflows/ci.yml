@@ -61,8 +61,7 @@ jobs:
           echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
-        run: |
-          find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
+        run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
       - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v1.33.0
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
@@ -93,8 +92,7 @@ jobs:
           echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
-        run: |
-          find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
+        run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
       - name: "Build local docker image"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         run: mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
@@ -149,8 +147,7 @@ jobs:
           echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
-        run: |
-          find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
+        run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
       - name: "Build local docker image"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         run: bash _ci/build.sh ${{ matrix.buildProfile }}
@@ -189,8 +186,7 @@ jobs:
           echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
-        run: |
-          find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
+        run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
       - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v1.33.0
         with:
           username: ${{ env.GIT_USERNAME }}
