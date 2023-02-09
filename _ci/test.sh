@@ -6,10 +6,10 @@ set -vex
 pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 
 # Always build the image, but only publish from the "master" branch
-[ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ] && PROFILE="internal" || PROFILE="local"
+[ "${PULL_REQUEST}" = "false" ] && [ "${BRANCH_NAME}" = "master" ] && PROFILE="internal" || PROFILE="local"
 
 # If the branch is "master" and the commit is not a Pull Request then deploy the JAR SNAPSHOT artifacts
-[ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ] && DEPLOY="deploy" || DEPLOY="verify"
+[ "${PULL_REQUEST}" = "false" ] && [ "${BRANCH_NAME}" = "master" ] && DEPLOY="deploy" || DEPLOY="verify"
 
 # Do not deploy snapshots for alfresco-transform-core, alfresco-transformer-base and alfresco-base-t-engine
 mvn -B -U -Dmaven.wagon.http.pool=false \
