@@ -26,10 +26,7 @@
  */
 package org.alfresco.transform.base.sfs;
 
-import static org.springframework.http.HttpHeaders.ACCEPT;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import java.io.File;
@@ -52,8 +49,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import javax.annotation.PostConstruct;
-
 /**
  * Simple Rest client that call Alfresco Shared File Store
  */
@@ -68,16 +63,8 @@ public class SharedFileStoreClient
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
     private WebClient client;
-
-    @PostConstruct
-    public void init()
-    {
-        client = WebClient.builder().baseUrl(url.endsWith("/") ? url : url + "/")
-                          .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                          .defaultHeader(ACCEPT, APPLICATION_JSON_VALUE)
-                          .build();
-    }
 
     /**
      * Retrieves a file from Shared File Store using given file reference
