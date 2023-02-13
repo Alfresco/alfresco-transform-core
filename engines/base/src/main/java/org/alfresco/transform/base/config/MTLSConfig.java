@@ -65,54 +65,53 @@ public class MTLSConfig {
     @Value("${filestore-url}")
     private String url;
 
-    @Value("${server.ssl.enabled}")
+    @Value("${server.ssl.enabled:false}")
     boolean sslEnabled;
 
-    @Value("${server.ssl.key.store}")
+    @Value("${server.ssl.key.store:}")
     private Resource keyStoreResource;
 
-    //TODO: use some hashing algorithm
-    @Value("${server.ssl.key.password}")
+    @Value("${server.ssl.key.password:}")
     private char[] keyPassword;
 
-    //TODO: use some hashing algorithm
-    @Value("${server.ssl.key.store.password}")
+    @Value("${server.ssl.key.store.password:}")
     private char[] keyStorePassword;
 
-    @Value("${server.ssl.key.store.type}")
+    @Value("${server.ssl.key.store.type:}")
     private String keyStoreType;
 
-    @Value("${server.ssl.trust.store}")
+    @Value("${server.ssl.trust.store:}")
     private Resource trustStoreResource;
 
-    //TODO: use some hashing algorithm
-    @Value("${server.ssl.trust.store.password}")
+    @Value("${server.ssl.trust.store.password:}")
     private char[] trustStorePassword;
 
-    @Value("${server.ssl.trust.store.type}")
+    @Value("${server.ssl.trust.store.type:}")
     private String trustStoreType;
 
     @Bean
-    public WebClient client() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException
+    public WebClient client(WebClient.Builder clientBuilder)
+    {
+            return clientBuilder.baseUrl(url.endsWith("/") ? url : url + "/")
+                    .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                    .defaultHeader(ACCEPT, APPLICATION_JSON_VALUE)
+                    .build();
+    }
+
+    @Bean
+    public WebClient.Builder clientBuilder() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException
     {
         if(sslEnabled)
         {
             HttpClient httpClient = getHttpClientWithMTLS();
-
-            return WebClient.builder().baseUrl(url.endsWith("/") ? url : url + "/")
-                    .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                    .defaultHeader(ACCEPT, APPLICATION_JSON_VALUE)
-                    .clientConnector(new ReactorClientHttpConnector(httpClient))
-                    .build();
+            return WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient));
         } else {
-            return WebClient.builder().baseUrl(url.endsWith("/") ? url : url + "/")
-                    .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                    .defaultHeader(ACCEPT, APPLICATION_JSON_VALUE)
-                    .build();
+            return WebClient.builder();
         }
     }
 
-    private HttpClient getHttpClientWithMTLS() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
+    private HttpClient getHttpClientWithMTLS() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException
+    {
         KeyManagerFactory keyManagerFactory = initKeyManagerFactory();
         TrustManagerFactory trustManagerFactory = initTrustManagerFactory();
 
@@ -121,34 +120,38 @@ public class MTLSConfig {
                 .keyManager(keyManagerFactory)
                 .build();
 
-        HttpClient httpClient = HttpClient.create().secure(p -> p.sslContext(sslContext));
-        return httpClient;
+        return HttpClient.create().secure(p -> p.sslContext(sslContext));
     }
 
-    private TrustManagerFactory initTrustManagerFactory() throws NoSuchAlgorithmException, KeyStoreException, IOException, CertificateException {
+    private TrustManagerFactory initTrustManagerFactory() throws NoSuchAlgorithmException, KeyStoreException, IOException, CertificateException
+    {
         TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         KeyStore trustStore = getKeyStore(trustStoreType, trustStoreResource, trustStorePassword);
         trustManagerFactory.init(trustStore);
         return trustManagerFactory;
     }
 
-    private KeyManagerFactory initKeyManagerFactory() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
+    private KeyManagerFactory initKeyManagerFactory() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException
+    {
         KeyStore clientKeyStore = getKeyStore(keyStoreType, keyStoreResource, keyStorePassword);
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(keyStoreType);
         keyManagerFactory.init(clientKeyStore, keyPassword);
         return keyManagerFactory;
     }
 
-    private KeyStore getKeyStore(String keyStoreType, Resource keyStoreResource, char[] keyStorePassword) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+    private KeyStore getKeyStore(String keyStoreType, Resource keyStoreResource, char[] keyStorePassword) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException
+    {
         KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-        try (InputStream keyStoreInputStream = keyStoreResource.getInputStream()) {
+        try (InputStream keyStoreInputStream = keyStoreResource.getInputStream())
+        {
             keyStore.load(keyStoreInputStream, keyStorePassword);
         }
         return keyStore;
     }
 
     @Bean
-    public RestTemplate restTemplate() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, UnrecoverableKeyException {
+    public RestTemplate restTemplate() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, UnrecoverableKeyException
+    {
         if(sslEnabled)
         {
             return getRestTemplateWithMTLS();
@@ -157,7 +160,8 @@ public class MTLSConfig {
         }
     }
 
-    private RestTemplate getRestTemplateWithMTLS() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, KeyManagementException, UnrecoverableKeyException {
+    private RestTemplate getRestTemplateWithMTLS() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, KeyManagementException, UnrecoverableKeyException
+    {
         KeyStore keyStore = getKeyStore(keyStoreType, keyStoreResource, keyStorePassword);
         SSLContext sslContext = new SSLContextBuilder()
                 .loadKeyMaterial(keyStore, keyPassword)
