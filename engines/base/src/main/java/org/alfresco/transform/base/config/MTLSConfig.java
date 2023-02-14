@@ -99,8 +99,7 @@ public class MTLSConfig {
     }
 
     @Bean
-    public WebClient.Builder clientBuilder() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException
-    {
+    public WebClient.Builder clientBuilder() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
         if(sslEnabled)
         {
             HttpClient httpClient = getHttpClientWithMTLS();
@@ -110,8 +109,7 @@ public class MTLSConfig {
         }
     }
 
-    private HttpClient getHttpClientWithMTLS() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException
-    {
+    private HttpClient getHttpClientWithMTLS() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
         KeyManagerFactory keyManagerFactory = initKeyManagerFactory();
         TrustManagerFactory trustManagerFactory = initTrustManagerFactory();
 
@@ -125,16 +123,15 @@ public class MTLSConfig {
 
     private TrustManagerFactory initTrustManagerFactory() throws NoSuchAlgorithmException, KeyStoreException, IOException, CertificateException
     {
-        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         KeyStore trustStore = getKeyStore(trustStoreType, trustStoreResource, trustStorePassword);
+        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         trustManagerFactory.init(trustStore);
         return trustManagerFactory;
     }
 
-    private KeyManagerFactory initKeyManagerFactory() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException
-    {
+    private KeyManagerFactory initKeyManagerFactory() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
         KeyStore clientKeyStore = getKeyStore(keyStoreType, keyStoreResource, keyStorePassword);
-        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(keyStoreType);
+        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         keyManagerFactory.init(clientKeyStore, keyPassword);
         return keyManagerFactory;
     }
