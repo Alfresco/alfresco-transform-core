@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2023 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,7 +26,10 @@
  */
 package org.alfresco.transform.base.sfs;
 
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import java.io.File;
@@ -49,6 +52,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import javax.annotation.PostConstruct;
+
 /**
  * Simple Rest client that call Alfresco Shared File Store
  */
@@ -64,7 +69,18 @@ public class SharedFileStoreClient
     private RestTemplate restTemplate;
 
     @Autowired
+    private WebClient.Builder clientBuilder;
+
     private WebClient client;
+
+    @PostConstruct
+    public void init()
+    {
+        client = clientBuilder.baseUrl(url.endsWith("/") ? url : url + "/")
+                          .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                          .defaultHeader(ACCEPT, APPLICATION_JSON_VALUE)
+                          .build();
+    }
 
     /**
      * Retrieves a file from Shared File Store using given file reference

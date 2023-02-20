@@ -55,15 +55,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
-import static org.springframework.http.HttpHeaders.ACCEPT;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
 @Configuration
 public class MTLSConfig {
-
-    @Value("${filestore-url}")
-    private String url;
 
     @Value("${server.ssl.enabled:false}")
     boolean sslEnabled;
@@ -88,15 +81,6 @@ public class MTLSConfig {
 
     @Value("${server.ssl.trust.store.type:}")
     private String trustStoreType;
-
-    @Bean
-    public WebClient client(WebClient.Builder clientBuilder)
-    {
-            return clientBuilder.baseUrl(url.endsWith("/") ? url : url + "/")
-                    .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                    .defaultHeader(ACCEPT, APPLICATION_JSON_VALUE)
-                    .build();
-    }
 
     @Bean
     public WebClient.Builder clientBuilder() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
