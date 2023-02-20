@@ -231,7 +231,7 @@ and the Alfresco Maven repository:
 </repository>
 ~~~
 
-The build plan is available in [TravisCI](https://travis-ci.com/Alfresco/alfresco-transform-core).
+The build plan is available in [GitHub Actions CI](https://github.com/Alfresco/alfresco-transform-core/actions).
 
 ## Contributing guide
 
