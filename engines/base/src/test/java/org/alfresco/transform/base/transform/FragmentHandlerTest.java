@@ -149,7 +149,7 @@ public class FragmentHandlerTest
     public void testErrorIfHttp() {
         String expectedError = "Fragments may only be sent via message queues. This an http request";
         await()
-            .atMost(1, TimeUnit.MINUTES)
+            .atMost(10, TimeUnit.SECONDS)
             .untilAsserted(() -> mockMvc.perform(
                     MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
                         .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
