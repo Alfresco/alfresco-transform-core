@@ -149,15 +149,15 @@ public class FragmentHandlerTest
     public void testErrorIfHttp() {
         String expectedError = "Fragments may only be sent via message queues. This an http request";
         await()
-        .atMost(1, TimeUnit.MINUTES)
-        .untilAsserted(() -> mockMvc.perform(
-                MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
-                    .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
-                        "Start".getBytes(StandardCharsets.UTF_8)))
-                    .param(SOURCE_MIMETYPE, MIMETYPE_PDF)
-                    .param(TARGET_MIMETYPE, MIMETYPE_IMAGE_JPEG))
-            .andExpect(status().isInternalServerError())
-            .andExpect(status().reason(containsString(expectedError))));
+            .atMost(1, TimeUnit.MINUTES)
+            .untilAsserted(() -> mockMvc.perform(
+                    MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
+                        .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
+                            "Start".getBytes(StandardCharsets.UTF_8)))
+                        .param(SOURCE_MIMETYPE, MIMETYPE_PDF)
+                        .param(TARGET_MIMETYPE, MIMETYPE_IMAGE_JPEG))
+                .andExpect(status().isInternalServerError())
+                .andExpect(status().reason(containsString(expectedError))));
     }
 
     @Test
