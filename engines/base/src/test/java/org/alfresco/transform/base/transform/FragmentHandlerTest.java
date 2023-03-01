@@ -61,9 +61,7 @@ import static org.alfresco.transform.base.transform.StreamHandlerTest.read;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
-import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
+import static org.alfresco.transform.common.RequestParamMap.*;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -156,7 +154,8 @@ public class FragmentHandlerTest
                 .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
                  "Start".getBytes(StandardCharsets.UTF_8)))
                 .param(SOURCE_MIMETYPE, MIMETYPE_PDF)
-                .param(TARGET_MIMETYPE, MIMETYPE_IMAGE_JPEG))
+                .param(TARGET_MIMETYPE, MIMETYPE_IMAGE_JPEG)
+                .param(TIMEOUT, "60000"))
                .andExpect(status().isInternalServerError())
                .andExpect(status().reason(containsString(expectedError)));
     }
