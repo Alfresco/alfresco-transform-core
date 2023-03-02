@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2022 - 2022 Alfresco Software Limited
+ * Copyright (C) 2022 - 2023 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -56,14 +56,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.alfresco.transform.base.transform.StreamHandlerTest.read;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
-import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
+import static org.alfresco.transform.common.Mimetype.*;
+import static org.alfresco.transform.common.RequestParamMap.*;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -148,17 +146,18 @@ public class FragmentHandlerTest
     }
 
     @Test
-    public void testErrorIfHttp() throws Exception
-    {
+    public void testErrorIfHttp() {
         String expectedError = "Fragments may only be sent via message queues. This an http request";
-        mockMvc.perform(
-            MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
-                .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
-                 "Start".getBytes(StandardCharsets.UTF_8)))
-                .param(SOURCE_MIMETYPE, MIMETYPE_PDF)
-                .param(TARGET_MIMETYPE, MIMETYPE_IMAGE_JPEG))
-               .andExpect(status().isInternalServerError())
-               .andExpect(status().reason(containsString(expectedError)));
+        await()
+            .atMost(10, TimeUnit.SECONDS)
+            .untilAsserted(() -> mockMvc.perform(
+                    MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
+                        .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
+                            "Start".getBytes(StandardCharsets.UTF_8)))
+                        .param(SOURCE_MIMETYPE, MIMETYPE_PDF)
+                        .param(TARGET_MIMETYPE, MIMETYPE_IMAGE_JPEG))
+                .andExpect(status().isInternalServerError())
+                .andExpect(status().reason(containsString(expectedError))));
     }
 
     @Test

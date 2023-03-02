@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2023 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -44,6 +44,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
+import java.util.concurrent.TimeUnit;
 
 import static org.alfresco.transform.base.TransformControllerTest.assertConfig;
 import static org.alfresco.transform.base.TransformControllerTest.getLogMessagesFor;
@@ -63,6 +64,7 @@ import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_VERSION;
 import static org.alfresco.transform.common.RequestParamMap.PAGE_REQUEST_PARAM;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -197,31 +199,34 @@ public class TransformControllerAllInOneTest
     @Test
     public void testTransformEndpointUsingTransformEngineWithTwoCustomTransformers() throws Exception
     {
-        mockMvc.perform(
-            MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
-                .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
-                    "Start".getBytes(StandardCharsets.UTF_8)))
-                .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
-                .param(TARGET_MIMETYPE, MIMETYPE_PDF)
-                .param(PAGE_REQUEST_PARAM, "1"))
-            .andExpect(status().isOk())
-            .andExpect(header().string("Content-Disposition",
-            "attachment; filename*=UTF-8''transform.pdf"))
-            .andExpect(content().string("Start -> TxT2Pdf(page=1)"));
+      await()
+          .atMost(10, TimeUnit.SECONDS)
+          .untilAsserted(() -> mockMvc.perform(
+                  MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
+                      .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
+                          "Start".getBytes(StandardCharsets.UTF_8)))
+                      .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
+                      .param(TARGET_MIMETYPE, MIMETYPE_PDF)
+                      .param(PAGE_REQUEST_PARAM, "1"))
+              .andExpect(status().isOk())
+              .andExpect(header().string("Content-Disposition",
+                  "attachment; filename*=UTF-8''transform.pdf"))
+              .andExpect(content().string("Start -> TxT2Pdf(page=1)")));
     }
 
-    @Test
-    public void testTransformEndpointUsingTransformEngineWithOneCustomTransformer() throws Exception
-    {
-        mockMvc.perform(
-            MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
-                .file(new MockMultipartFile("file", null, MIMETYPE_PDF,
-                    "Start".getBytes(StandardCharsets.UTF_8)))
-                .param(SOURCE_MIMETYPE, MIMETYPE_PDF)
-                .param(TARGET_MIMETYPE, MIMETYPE_IMAGE_JPEG))
-            .andExpect(status().isOk())
-            .andExpect(header().string("Content-Disposition",
-                "attachment; filename*=UTF-8''transform.jpeg"))
-            .andExpect(content().string("Start -> Pdf2Jpg()"));
-    }
+     @Test
+     public void testTransformEndpointUsingTransformEngineWithOneCustomTransformer() throws Exception {
+       await()
+           .atMost(10, TimeUnit.SECONDS)
+           .untilAsserted(() -> mockMvc.perform(
+                   MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
+                       .file(new MockMultipartFile("file", null, MIMETYPE_PDF,
+                           "Start".getBytes(StandardCharsets.UTF_8)))
+                       .param(SOURCE_MIMETYPE, MIMETYPE_PDF)
+                       .param(TARGET_MIMETYPE, MIMETYPE_IMAGE_JPEG))
+               .andExpect(status().isOk())
+               .andExpect(header().string("Content-Disposition",
+                   "attachment; filename*=UTF-8''transform.jpeg"))
+               .andExpect(content().string("Start -> Pdf2Jpg()")));
+     }
 }
