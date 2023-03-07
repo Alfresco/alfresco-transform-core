@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+import org.alfresco.transform.base.MtlsTestUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -56,7 +57,7 @@ public class SfsClient
         ((Logger) LoggerFactory.getLogger("org.apache.http.wire")).setAdditive(false);
     }
 
-    private static final String SFS_BASE_URL = "http://localhost:8099";
+    private static final String SFS_BASE_URL = MtlsTestUtils.isMtlsEnabled() ? "https://localhost:8099" : "http://localhost:8099";
 
     public static String uploadFile(final String fileToUploadName) throws Exception
     {
@@ -75,7 +76,7 @@ public class SfsClient
             .addPart("file", new FileBody(file, ContentType.DEFAULT_BINARY))
             .build());
 
-        try (CloseableHttpClient client = HttpClients.createDefault())
+        try (CloseableHttpClient client = MtlsTestUtils.isMtlsEnabled() ? MtlsTestUtils.httpClientWithMtls() : HttpClients.createDefault())
         {
             final HttpResponse response = client.execute(post);
             int status = response.getStatusLine().getStatusCode();
@@ -134,7 +135,8 @@ public class SfsClient
             sfsBaseUrl+"/alfresco/api/-default-/private/sfs/versions/1/file/{0}",
             uuid));
 
-        try (CloseableHttpClient client = HttpClients.createDefault())
+        try (CloseableHttpClient client = MtlsTestUtils.isMtlsEnabled() ?
+                MtlsTestUtils.httpClientWithMtls() : HttpClients.createDefault())
         {
             final HttpResponse response = client.execute(head);
             final int status = response.getStatusLine().getStatusCode();
