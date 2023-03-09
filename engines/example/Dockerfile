@@ -1,4 +1,4 @@
-FROM alfresco/alfresco-base-java:jre17-rockylinux8-202207110835
+FROM alfresco/alfresco-base-java:jre17-rockylinux8-202302221525
 
 ARG EXIFTOOL_VERSION=12.25
 ARG EXIFTOOL_FOLDER=Image-ExifTool-${EXIFTOOL_VERSION}
