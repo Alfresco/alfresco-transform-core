@@ -28,7 +28,7 @@ import org.springframework.web.client.RestTemplate;
  */
 public class HttpClient
 {
-    private static final RestTemplate REST_TEMPLATE = MtlsTestUtils.isMtlsEnabled() ? MtlsTestUtils.restTemplateWithMtls() : new RestTemplate();
+    private static final RestTemplate REST_TEMPLATE = MtlsTestUtils.getRestTemplate();
 
     public static ResponseEntity<Resource> sendTRequest(
         final String engineUrl, final String sourceFile,

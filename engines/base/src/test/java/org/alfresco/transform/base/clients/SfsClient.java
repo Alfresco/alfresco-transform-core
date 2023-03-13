@@ -32,7 +32,6 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +75,7 @@ public class SfsClient
             .addPart("file", new FileBody(file, ContentType.DEFAULT_BINARY))
             .build());
 
-        try (CloseableHttpClient client = MtlsTestUtils.isMtlsEnabled() ? MtlsTestUtils.httpClientWithMtls() : HttpClients.createDefault())
+        try (CloseableHttpClient client = MtlsTestUtils.getHttpClient())
         {
             final HttpResponse response = client.execute(post);
             int status = response.getStatusLine().getStatusCode();
@@ -135,8 +134,7 @@ public class SfsClient
             sfsBaseUrl+"/alfresco/api/-default-/private/sfs/versions/1/file/{0}",
             uuid));
 
-        try (CloseableHttpClient client = MtlsTestUtils.isMtlsEnabled() ?
-                MtlsTestUtils.httpClientWithMtls() : HttpClients.createDefault())
+        try (CloseableHttpClient client = MtlsTestUtils.getHttpClient())
         {
             final HttpResponse response = client.execute(head);
             final int status = response.getStatusLine().getStatusCode();
@@ -155,7 +153,7 @@ public class SfsClient
             sfsBaseUrl+"/alfresco/api/-default-/private/sfs/versions/1/file/{0}",
             uuid));
 
-        try (CloseableHttpClient client = HttpClients.createDefault())
+        try (CloseableHttpClient client = MtlsTestUtils.getHttpClient())
         {
             final HttpResponse response = client.execute(get);
             final int status = response.getStatusLine().getStatusCode();

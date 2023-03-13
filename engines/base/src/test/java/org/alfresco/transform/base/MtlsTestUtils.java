@@ -62,4 +62,13 @@ public class MtlsTestUtils {
         }
         return new RestTemplate(requestFactory);
     }
+
+    public static RestTemplate getRestTemplate()
+    {
+        return MtlsTestUtils.isMtlsEnabled() ? MtlsTestUtils.restTemplateWithMtls() : new RestTemplate();
+    }
+
+    public static CloseableHttpClient getHttpClient() throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, KeyManagementException {
+        return MtlsTestUtils.isMtlsEnabled() ? MtlsTestUtils.httpClientWithMtls() : HttpClients.createDefault();
+    }
 }
