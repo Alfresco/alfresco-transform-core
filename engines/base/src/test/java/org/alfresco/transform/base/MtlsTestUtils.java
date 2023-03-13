@@ -1,7 +1,6 @@
 package org.alfresco.transform.base;
 
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
@@ -10,6 +9,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,8 +27,8 @@ public class MtlsTestUtils {
         return Boolean.parseBoolean(System.getProperty("mtls-enabled"));
     }
 
-    public static CloseableHttpClient httpClientWithMtls() throws NoSuchAlgorithmException, KeyManagementException, UnrecoverableKeyException, KeyStoreException, IOException, CertificateException {
-
+    public static CloseableHttpClient httpClientWithMtls() throws NoSuchAlgorithmException, KeyManagementException, UnrecoverableKeyException, KeyStoreException, IOException, CertificateException
+    {
         String keyStoreFile = System.getProperty("mtls-keystore-file");
         String keyStoreType = System.getProperty("mtls-keystore-type");
         char[] keyStorePassword = System.getProperty("mtls-keystore-password").toCharArray();
@@ -44,12 +44,8 @@ public class MtlsTestUtils {
             sslContextBuilder.loadKeyMaterial(keyStore, keyStorePassword);
         }
 
-        KeyStore trustStore = KeyStore.getInstance(trustStoreType);
-        try (InputStream trustStoreInputStream = new FileInputStream(trustStoreFile))
-        {
-            trustStore.load(trustStoreInputStream, trustStorePassword);
-            sslContextBuilder.loadTrustMaterial(trustStore, TrustAllStrategy.INSTANCE);
-        }
+        File trustStore = new File(trustStoreFile);
+        sslContextBuilder.loadTrustMaterial(trustStore, trustStorePassword);
 
         SSLContext sslContext = sslContextBuilder.build();
         SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
