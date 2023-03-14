@@ -77,7 +77,7 @@ public class MTLSConfig {
     @Value("${client.ssl.trust-store-type:}")
     private String trustStoreType;
 
-    @Bean()
+    @Bean
     @Scope("prototype")
     public WebClient.Builder clientBuilder(SslContextBuilder nettySslContextBuilder) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException
     {
