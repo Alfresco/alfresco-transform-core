@@ -79,25 +79,59 @@ public class MTLSConfig {
 
     @Bean()
     @Scope("prototype")
-    public WebClient.Builder clientBuilder() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException
+    public WebClient.Builder clientBuilder(SslContextBuilder nettySslContextBuilder) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException
     {
         if(isTlsOrMtlsConfigured())
         {
-            return createWebClientBuilderWithSslContext();
+            return createWebClientBuilderWithSslContext(nettySslContextBuilder);
         } else {
             return WebClient.builder();
         }
     }
 
     @Bean
-    public RestTemplate restTemplate() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, UnrecoverableKeyException
+    public RestTemplate restTemplate(SSLContextBuilder apacheSSLContextBuilder) throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, UnrecoverableKeyException
     {
         if(isTlsOrMtlsConfigured())
         {
-            return createRestTemplateWithSslContext();
+            return createRestTemplateWithSslContext(apacheSSLContextBuilder);
         } else {
             return new RestTemplate();
         }
+    }
+
+    @Bean
+    public SSLContextBuilder apacheSSLContextBuilder() throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableKeyException {
+        SSLContextBuilder sslContextBuilder = new SSLContextBuilder();
+        if(isKeystoreConfigured())
+        {
+            KeyStore keyStore = getKeyStore(keyStoreType, keyStoreResource, keyStorePassword);
+            sslContextBuilder.loadKeyMaterial(keyStore, keyStorePassword);
+        }
+        if(isTruststoreConfigured())
+        {
+            sslContextBuilder.loadTrustMaterial(trustStoreResource.getURL(), trustStorePassword);
+        }
+
+        return sslContextBuilder;
+    }
+
+    @Bean
+    public SslContextBuilder nettySslContextBuilder() throws UnrecoverableKeyException, CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException {
+        SslContextBuilder sslContextBuilder = SslContextBuilder.forClient();
+        if(isKeystoreConfigured())
+        {
+            KeyManagerFactory keyManagerFactory = initKeyManagerFactory();
+            sslContextBuilder.keyManager(keyManagerFactory);
+        }
+
+        if(isTruststoreConfigured())
+        {
+            TrustManagerFactory trustManagerFactory = initTrustManagerFactory();
+            sslContextBuilder.trustManager(trustManagerFactory);
+        }
+
+        return sslContextBuilder;
     }
 
     private boolean isTlsOrMtlsConfigured()
@@ -115,25 +149,30 @@ public class MTLSConfig {
         return keyStoreResource != null;
     }
 
-    private WebClient.Builder createWebClientBuilderWithSslContext() throws UnrecoverableKeyException, CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException
+    private WebClient.Builder createWebClientBuilderWithSslContext(SslContextBuilder sslContextBuilder) throws UnrecoverableKeyException, CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException
     {
-        SslContextBuilder sslContextBuilder = SslContextBuilder.forClient();
-
-        if(isKeystoreConfigured())
-        {
-            KeyManagerFactory keyManagerFactory = initKeyManagerFactory();
-            sslContextBuilder.keyManager(keyManagerFactory);
-        }
-
-        if(isTruststoreConfigured())
-        {
-            TrustManagerFactory trustManagerFactory = initTrustManagerFactory();
-            sslContextBuilder.trustManager(trustManagerFactory);
-        }
-
         SslContext sslContext = sslContextBuilder.build();
         HttpClient httpClient = HttpClient.create().secure(p -> p.sslContext(sslContext));
         return WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient));
+    }
+
+    private RestTemplate createRestTemplateWithSslContext(SSLContextBuilder sslContextBuilder) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, KeyManagementException, UnrecoverableKeyException
+    {
+        SSLContext sslContext = sslContextBuilder.build();
+        SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
+        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslContextFactory).build();
+        ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        return new RestTemplate(requestFactory);
+    }
+
+    private KeyStore getKeyStore(String keyStoreType, Resource keyStoreResource, char[] keyStorePassword) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException
+    {
+        KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+        try (InputStream keyStoreInputStream = keyStoreResource.getInputStream())
+        {
+            keyStore.load(keyStoreInputStream, keyStorePassword);
+        }
+        return keyStore;
     }
 
     private TrustManagerFactory initTrustManagerFactory() throws NoSuchAlgorithmException, KeyStoreException, IOException, CertificateException
@@ -150,37 +189,5 @@ public class MTLSConfig {
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         keyManagerFactory.init(clientKeyStore, keyStorePassword);
         return keyManagerFactory;
-    }
-
-    private KeyStore getKeyStore(String keyStoreType, Resource keyStoreResource, char[] keyStorePassword) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException
-    {
-        KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-        try (InputStream keyStoreInputStream = keyStoreResource.getInputStream())
-        {
-            keyStore.load(keyStoreInputStream, keyStorePassword);
-        }
-        return keyStore;
-    }
-
-    private RestTemplate createRestTemplateWithSslContext() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, KeyManagementException, UnrecoverableKeyException
-    {
-        SSLContextBuilder sslContextBuilder = new SSLContextBuilder();
-
-        if(isKeystoreConfigured())
-        {
-            KeyStore keyStore = getKeyStore(keyStoreType, keyStoreResource, keyStorePassword);
-            sslContextBuilder.loadKeyMaterial(keyStore, keyStorePassword);
-        }
-
-        if(isTruststoreConfigured())
-        {
-            sslContextBuilder.loadTrustMaterial(trustStoreResource.getURL(), trustStorePassword);
-        }
-
-        SSLContext sslContext = sslContextBuilder.build();
-        SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
-        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslContextFactory).build();
-        ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-        return new RestTemplate(requestFactory);
     }
 }

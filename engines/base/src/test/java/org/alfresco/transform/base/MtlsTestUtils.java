@@ -22,19 +22,21 @@ import java.security.cert.CertificateException;
 
 public class MtlsTestUtils {
 
+    private static final boolean MTLS_ENABLED = Boolean.parseBoolean(System.getProperty("test-mtls-enabled"));
+
     public static boolean isMtlsEnabled()
     {
-        return Boolean.parseBoolean(System.getProperty("mtls-enabled"));
+        return MTLS_ENABLED;
     }
 
     public static CloseableHttpClient httpClientWithMtls() throws NoSuchAlgorithmException, KeyManagementException, UnrecoverableKeyException, KeyStoreException, IOException, CertificateException
     {
-        String keyStoreFile = System.getProperty("mtls-keystore-file");
-        String keyStoreType = System.getProperty("mtls-keystore-type");
-        char[] keyStorePassword = System.getProperty("mtls-keystore-password").toCharArray();
-        String trustStoreFile = System.getProperty("mtls-truststore-file");
-        String trustStoreType = System.getProperty("mtls-truststore-type");
-        char[] trustStorePassword = System.getProperty("mtls-truststore-password").toCharArray();
+        String keyStoreFile = System.getProperty("test-client-keystore-file");
+        String keyStoreType = System.getProperty("test-client-keystore-type");
+        char[] keyStorePassword = System.getProperty("test-client-keystore-password").toCharArray();
+        String trustStoreFile = System.getProperty("test-client-truststore-file");
+        String trustStoreType = System.getProperty("test-client-truststore-type");
+        char[] trustStorePassword = System.getProperty("test-client-truststore-password").toCharArray();
 
         SSLContextBuilder sslContextBuilder = new SSLContextBuilder();
         KeyStore keyStore = KeyStore.getInstance(keyStoreType);
