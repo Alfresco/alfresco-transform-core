@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+import org.alfresco.transform.base.MtlsTestUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -31,7 +32,6 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +56,7 @@ public class SfsClient
         ((Logger) LoggerFactory.getLogger("org.apache.http.wire")).setAdditive(false);
     }
 
-    private static final String SFS_BASE_URL = "http://localhost:8099";
+    private static final String SFS_BASE_URL = MtlsTestUtils.isMtlsEnabled() ? "https://localhost:8099" : "http://localhost:8099";
 
     public static String uploadFile(final String fileToUploadName) throws Exception
     {
@@ -75,7 +75,7 @@ public class SfsClient
             .addPart("file", new FileBody(file, ContentType.DEFAULT_BINARY))
             .build());
 
-        try (CloseableHttpClient client = HttpClients.createDefault())
+        try (CloseableHttpClient client = MtlsTestUtils.getHttpClient())
         {
             final HttpResponse response = client.execute(post);
             int status = response.getStatusLine().getStatusCode();
@@ -134,7 +134,7 @@ public class SfsClient
             sfsBaseUrl+"/alfresco/api/-default-/private/sfs/versions/1/file/{0}",
             uuid));
 
-        try (CloseableHttpClient client = HttpClients.createDefault())
+        try (CloseableHttpClient client = MtlsTestUtils.getHttpClient())
         {
             final HttpResponse response = client.execute(head);
             final int status = response.getStatusLine().getStatusCode();
@@ -153,7 +153,7 @@ public class SfsClient
             sfsBaseUrl+"/alfresco/api/-default-/private/sfs/versions/1/file/{0}",
             uuid));
 
-        try (CloseableHttpClient client = HttpClients.createDefault())
+        try (CloseableHttpClient client = MtlsTestUtils.getHttpClient())
         {
             final HttpResponse response = client.execute(get);
             final int status = response.getStatusLine().getStatusCode();

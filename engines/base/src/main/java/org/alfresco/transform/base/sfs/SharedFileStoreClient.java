@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2023 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -34,6 +34,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import java.io.File;
 
+import org.alfresco.transform.base.WebClientBuilderAdjuster;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.slf4j.Logger;
@@ -53,6 +54,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.annotation.PostConstruct;
+import javax.net.ssl.SSLException;
 
 /**
  * Simple Rest client that call Alfresco Shared File Store
@@ -68,12 +70,16 @@ public class SharedFileStoreClient
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private WebClientBuilderAdjuster adjuster;
+
     private WebClient client;
 
     @PostConstruct
-    public void init()
-    {
-        client = WebClient.builder().baseUrl(url.endsWith("/") ? url : url + "/")
+    public void init() throws SSLException {
+        final WebClient.Builder clientBuilder = WebClient.builder();
+        adjuster.adjust(clientBuilder);
+        client = clientBuilder.baseUrl(url.endsWith("/") ? url : url + "/")
                           .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                           .defaultHeader(ACCEPT, APPLICATION_JSON_VALUE)
                           .build();

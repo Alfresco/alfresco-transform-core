@@ -13,6 +13,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import java.util.Map;
 
+import org.alfresco.transform.base.MtlsTestUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -27,8 +28,8 @@ import org.springframework.web.client.RestTemplate;
  */
 public class HttpClient
 {
-    private static final RestTemplate REST_TEMPLATE = new RestTemplate();
-    
+    private static final RestTemplate REST_TEMPLATE = MtlsTestUtils.getRestTemplate();
+
     public static ResponseEntity<Resource> sendTRequest(
         final String engineUrl, final String sourceFile,
         final String sourceMimetype, final String targetMimetype, final String targetExtension)
