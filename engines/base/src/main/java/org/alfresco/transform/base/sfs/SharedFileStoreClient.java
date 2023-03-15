@@ -34,6 +34,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import java.io.File;
 
+import org.alfresco.transform.base.WebClientBuilderAdjuster;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.slf4j.Logger;
@@ -53,6 +54,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.annotation.PostConstruct;
+import javax.net.ssl.SSLException;
 
 /**
  * Simple Rest client that call Alfresco Shared File Store
@@ -69,13 +71,14 @@ public class SharedFileStoreClient
     private RestTemplate restTemplate;
 
     @Autowired
-    private WebClient.Builder clientBuilder;
+    private WebClientBuilderAdjuster adjuster;
 
     private WebClient client;
 
     @PostConstruct
-    public void init()
-    {
+    public void init() throws SSLException {
+        final WebClient.Builder clientBuilder = WebClient.builder();
+        adjuster.adjust(clientBuilder);
         client = clientBuilder.baseUrl(url.endsWith("/") ? url : url + "/")
                           .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                           .defaultHeader(ACCEPT, APPLICATION_JSON_VALUE)
