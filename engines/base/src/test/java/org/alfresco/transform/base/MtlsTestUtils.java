@@ -47,7 +47,9 @@ public class MtlsTestUtils {
         }
 
         File trustStore = new File(trustStoreFile);
-        sslContextBuilder.loadTrustMaterial(trustStore, trustStorePassword);
+        sslContextBuilder
+                .setKeyStoreType(trustStoreType)
+                .loadTrustMaterial(trustStore, trustStorePassword);
 
         SSLContext sslContext = sslContextBuilder.build();
         SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
