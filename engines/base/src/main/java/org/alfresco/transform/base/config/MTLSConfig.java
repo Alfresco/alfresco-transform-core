@@ -116,7 +116,9 @@ public class MTLSConfig {
         }
         if(isTruststoreConfigured())
         {
-            sslContextBuilder.loadTrustMaterial(trustStoreResource.getURL(), trustStorePassword);
+            sslContextBuilder
+                    .setKeyStoreType(trustStoreType)
+                    .loadTrustMaterial(trustStoreResource.getURL(), trustStorePassword);
         }
 
         return sslContextBuilder;
