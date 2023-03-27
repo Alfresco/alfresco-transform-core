@@ -34,7 +34,6 @@ import org.alfresco.transformer.TransformRegistryImpl;
 import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -59,12 +58,6 @@ public class WebApplicationConfig implements WebMvcConfigurer
     public TransformInterceptor transformInterceptor()
     {
         return new TransformInterceptor();
-    }
-
-    @Bean
-    public RestTemplate restTemplate()
-    {
-        return new RestTemplate();
     }
 
     @Bean
