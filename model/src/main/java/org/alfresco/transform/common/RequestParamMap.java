@@ -65,6 +65,7 @@ public interface RequestParamMap
     String NOT_EXTRACT_BOOKMARKS_TEXT = "notExtractBookmarksText";
     String PAGE_LIMIT              = "pageLimit";
     String PDF_FORMAT              = "pdfFormat";
+    String PDF_ORIENTATION         = "pdfOrientation";
 
     // Parameters interpreted by the TransformController
     String DIRECT_ACCESS_URL       = "directAccessUrl";

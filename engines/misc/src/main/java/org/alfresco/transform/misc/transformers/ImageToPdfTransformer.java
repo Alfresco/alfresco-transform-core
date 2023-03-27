@@ -28,6 +28,7 @@ package org.alfresco.transform.misc.transformers;
 
 import static org.alfresco.transform.common.RequestParamMap.END_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.PDF_FORMAT;
+import static org.alfresco.transform.common.RequestParamMap.PDF_ORIENTATION;
 import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
 
 import javax.imageio.ImageIO;
@@ -58,10 +59,11 @@ import org.springframework.stereotype.Component;
  * Converts image files into PDF files. Transformer uses PDF Box to perform conversions.
  * During conversion image might be scaled down (keeping proportions) to match width or height of the PDF document.
  * If the image is smaller than PDF page size, the image will be placed in the top left-hand side of the PDF document page.
- * Transformer takes 3 optional transform options:
- * - startPage - page number of image (for multipage images) from which transformer should start conversion. Default: first page of the image.
- * - endPage - page number of image (for multipage images) up to which transformation should be performed. Default: last page of the image.
- * - pdfFormat - output PDF file format. Available formats: A0, A1, A2, A3, A4, A5, A6, LETTER, LEGAL. Default: A4.
+ * Transformer accepts bellow optional transform parameters:
+ * - startPage - page number of image (for multi-page images) from which transformer should start conversion. Default: first page of the image.
+ * - endPage - page number of image (for multi-page images) up to which transformation should be performed. Default: last page of the image.
+ * - pdfFormat - output PDF file format. Available formats: DEFAULT, A0, A1, A2, A3, A4, A5, A6, LETTER, LEGAL. Default: original image size.
+ * - pdfOrientation - output PDF file orientation. Available options: DEFAULT, PORTRAIT, LANDSCAPE. Default: original image orientation.
  */
 @Component
 public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
@@ -73,8 +75,8 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
     private static final String START_PAGE_GREATER_THAN_END_PAGE_ERROR_MESSAGE = "Start page number cannot be greater than end page.";
     private static final String INVALID_OPTION_ERROR_MESSAGE = "Parameter '%s' is invalid: \"%s\" - it must be an integer.";
     private static final String INVALID_IMAGE_ERROR_MESSAGE = "Image file (%s) format (%s) not supported by ImageIO.";
-    private static final String DEFAULT_PDF_FORMAT_STRING = "A4";
-    private static final PDRectangle DEFAULT_PDF_FORMAT = PDRectangle.A4;
+    private static final String DEFAULT_PDF_FORMAT_STRING = "DEFAULT";
+    private static final String DEFAULT_PDF_ORIENTATION_STRING = "DEFAULT";
 
     @Override
     public String getTransformerName()
@@ -94,6 +96,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
             final Integer startPage = parseOptionIfPresent(transformOptions, START_PAGE, Integer.class).orElse(null);
             final Integer endPage = parseOptionIfPresent(transformOptions, END_PAGE, Integer.class).orElse(null);
             final String pdfFormat = parseOptionIfPresent(transformOptions, PDF_FORMAT, String.class).orElse(DEFAULT_PDF_FORMAT_STRING);
+            final String pdfOrientation = parseOptionIfPresent(transformOptions, PDF_ORIENTATION, String.class).orElse(DEFAULT_PDF_ORIENTATION_STRING);
             verifyOptions(startPage, endPage);
 
             final ImageReader imageReader = findImageReader(imageInputStream, imageFile.getName(), sourceMimetype);
@@ -108,7 +111,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
                     break;
                 }
 
-                scaleAndDrawImage(pdfDocument, imageReader.read(i), pdfFormat);
+                scaleAndDrawImage(pdfDocument, imageReader.read(i), pdfFormat, pdfOrientation);
             }
 
             pdfDocument.save(pdfFile);
@@ -128,11 +131,12 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         return imageReader;
     }
 
-    private void scaleAndDrawImage(final PDDocument pdfDocument, final BufferedImage bufferedImage, final String pdfFormat) throws IOException
+    private void scaleAndDrawImage(final PDDocument pdfDocument, final BufferedImage bufferedImage, final String pdfFormat, final String pdfOrientation)
+        throws IOException
     {
-        final PDPage pdfPage = new PDPage(resolvePdfFormat(pdfFormat));
-        pdfDocument.addPage(pdfPage);
         final PDImageXObject image = LosslessFactory.createFromImage(pdfDocument, bufferedImage);
+        final PDPage pdfPage = new PDPage(resolvePdfFormat(pdfFormat, pdfOrientation, image.getWidth(), image.getHeight()));
+        pdfDocument.addPage(pdfPage);
         try (PDPageContentStream pdfPageContent = new PDPageContentStream(pdfDocument, pdfPage))
         {
             final PDRectangle pageSize = pdfPage.getMediaBox();
@@ -146,31 +150,67 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         }
     }
 
-    private PDRectangle resolvePdfFormat(final String pdfFormat)
+    private PDRectangle resolvePdfFormat(final String pdfFormat, final String pdfOrientation, final int actualWidth, final int actualHeight)
     {
+        PDRectangle pdRectangle;
         switch (pdfFormat.toUpperCase()) {
+        case "DEFAULT":
+            pdRectangle = new PDRectangle(actualWidth, actualHeight);
+            break;
         case "A4":
-            return DEFAULT_PDF_FORMAT;
+            pdRectangle = PDRectangle.A4;
+            break;
         case "LETTER":
-            return PDRectangle.LETTER;
+            pdRectangle = PDRectangle.LETTER;
+            break;
         case "A0":
-            return PDRectangle.A0;
+            pdRectangle = PDRectangle.A0;
+            break;
         case "A1":
-            return PDRectangle.A1;
+            pdRectangle = PDRectangle.A1;
+            break;
         case "A2":
-            return PDRectangle.A2;
+            pdRectangle = PDRectangle.A2;
+            break;
         case "A3":
-            return PDRectangle.A3;
+            pdRectangle = PDRectangle.A3;
+            break;
         case "A5":
-            return PDRectangle.A5;
+            pdRectangle = PDRectangle.A5;
+            break;
         case "A6":
-            return PDRectangle.A6;
+            pdRectangle = PDRectangle.A6;
+            break;
         case "LEGAL":
-            return PDRectangle.LEGAL;
+            pdRectangle = PDRectangle.LEGAL;
+            break;
         default:
-            log.info("PDF format: '{}' not supported. Using default: '{}'", pdfFormat, DEFAULT_PDF_FORMAT_STRING);
-            return DEFAULT_PDF_FORMAT;
+            log.warn("PDF format: '{}' not supported. Maintaining the default one.", pdfFormat);
+            pdRectangle = new PDRectangle(actualWidth, actualHeight);
+            break;
         }
+
+        switch (pdfOrientation.toUpperCase()) {
+        case "DEFAULT":
+            break;
+        case "PORTRAIT":
+            if (pdRectangle.getWidth() > pdRectangle.getHeight())
+            {
+                pdRectangle = new PDRectangle(pdRectangle.getHeight(), pdRectangle.getWidth());
+            }
+            break;
+        case "LANDSCAPE":
+            if (pdRectangle.getHeight() > pdRectangle.getWidth())
+            {
+                pdRectangle = new PDRectangle(pdRectangle.getHeight(), pdRectangle.getWidth());
+            }
+            break;
+        default:
+            log.warn("PDF orientation: '{}' not supported. Maintaining the default one.", pdfOrientation);
+            break;
+        }
+
+        return pdRectangle;
     }
 
     private static <T> Optional<T> parseOptionIfPresent(final Map<String, String> transformOptions, final String parameter, final Class<T> targetType)
