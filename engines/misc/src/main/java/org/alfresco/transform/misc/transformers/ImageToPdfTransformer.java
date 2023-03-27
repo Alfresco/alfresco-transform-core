@@ -150,12 +150,13 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         }
     }
 
-    private PDRectangle resolvePdfFormat(final String pdfFormat, final String pdfOrientation, final int actualWidth, final int actualHeight)
+    private PDRectangle resolvePdfFormat(final String pdfFormat, final String pdfOrientation, final int defaultWidth, final int defaultHeight)
     {
         PDRectangle pdRectangle;
-        switch (pdfFormat.toUpperCase()) {
+        switch (pdfFormat.toUpperCase())
+        {
         case "DEFAULT":
-            pdRectangle = new PDRectangle(actualWidth, actualHeight);
+            pdRectangle = new PDRectangle(defaultWidth, defaultHeight);
             break;
         case "A4":
             pdRectangle = PDRectangle.A4;
@@ -186,11 +187,12 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
             break;
         default:
             log.warn("PDF format: '{}' not supported. Maintaining the default one.", pdfFormat);
-            pdRectangle = new PDRectangle(actualWidth, actualHeight);
+            pdRectangle = new PDRectangle(defaultWidth, defaultHeight);
             break;
         }
 
-        switch (pdfOrientation.toUpperCase()) {
+        switch (pdfOrientation.toUpperCase())
+        {
         case "DEFAULT":
             break;
         case "PORTRAIT":

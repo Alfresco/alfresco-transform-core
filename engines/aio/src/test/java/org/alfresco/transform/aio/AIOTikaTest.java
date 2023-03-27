@@ -64,6 +64,7 @@ public class AIOTikaTest extends TikaTest
                 "page",
                 "pageLimit",
                 "pdfFormat",
+                "pdfOrientation",
                 "resizeHeight",
                 "resizePercentage",
                 "resizeWidth",
