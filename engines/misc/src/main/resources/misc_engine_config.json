@@ -12,7 +12,8 @@
     "imageToPdfOptions": [
       {"value": {"name": "startPage"}},
       {"value": {"name": "endPage"}},
-      {"value": {"name": "pdfFormat"}}
+      {"value": {"name": "pdfFormat"}},
+      {"value": {"name": "pdfOrientation"}}
     ]
   },
   "transformers": [

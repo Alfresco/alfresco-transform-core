@@ -27,6 +27,7 @@
 package org.alfresco.transform.misc.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +43,7 @@ import org.junit.jupiter.params.provider.Arguments;
 public class ArgumentsCartesianProduct
 {
     /**
-     * Creates cartesian product of fixed argument and a stream of arguments.
+     * Creates arguments cartesian product of fixed object and a stream of objects.
      * Example: a ✕ {x,y,z} = {a,x}, {a,y}, {a,z}
      */
     public static Stream<Arguments> of(final Object fixedFirstArgument, final Stream<?> secondArguments)
@@ -51,7 +52,7 @@ public class ArgumentsCartesianProduct
     }
 
     /**
-     * Creates cartesian product of a stream of arguments and fixed arguments.
+     * Creates arguments cartesian product of a stream of objects and fixed object.
      * Example: {a,b,c} ✕ y ✕ z = {a,y,z}, {b,y,z}, {c,y,z}
      */
     public static Stream<Arguments> of(final Stream<?> firstArguments, final Object... otherFixedArguments)
@@ -60,7 +61,7 @@ public class ArgumentsCartesianProduct
     }
 
     /**
-     * Creates cartesian product of two streams of arguments.
+     * Creates arguments cartesian product of two streams of objects.
      * Example: {a,b} ✕ {y,z} = {a,y}, {a,z}, {b,y}, {b,z}
      */
     public static Stream<Arguments> of(final Stream<?> firstArguments, final Stream<?> secondArguments)
@@ -69,12 +70,27 @@ public class ArgumentsCartesianProduct
     }
 
     /**
-     * Creates cartesian product of multiple streams of arguments.
+     * Creates arguments cartesian product of multiple streams of objects.
      * Example: {a,b} ✕ {k,l,m} ✕ ... ✕ {y,z} = {a,k,...,y}, {a,k,...,z}, {a,l,...,y}, ..., {b,m,...,z}
      */
     public static Stream<Arguments> of(final Stream<?>... argumentsStreams)
     {
         return cartesianProductOf(argumentsStreams).map(arguments -> Arguments.of(arguments.toArray()));
+    }
+
+    /**
+     * Creates arguments cartesian product of multiple streams of arguments.
+     * Example: {a,b} ✕ {k,l,m} ✕ ... ✕ {y,z} = {a,k,...,y}, {a,k,...,z}, {a,l,...,y}, ..., {b,m,...,z}
+     */
+    @SafeVarargs
+    @SuppressWarnings("unchecked")
+    public static Stream<Arguments> ofArguments(final Stream<Arguments>... argumentsStreams)
+    {
+        return cartesianProductOf(argumentsStreams)
+            .map(argumentsStream -> (Stream<Arguments>) argumentsStream)
+            .map(argumentsStream -> Arguments.of(argumentsStream
+                    .flatMap(arguments -> Arrays.stream(arguments.get()))
+                    .toArray()));
     }
 
     private static Stream<Stream<?>> cartesianProductOf(final Stream<?>... streams)
