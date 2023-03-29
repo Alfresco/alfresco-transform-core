@@ -124,7 +124,10 @@ public class MTLSConfig {
         SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
 
         HttpClientBuilder httpClientBuilder = HttpClients.custom().setSSLSocketFactory(sslContextFactory);
-        if(hostNameVerificationDisabled) httpClientBuilder.setSSLHostnameVerifier(new NoopHostnameVerifier());
+        if(hostNameVerificationDisabled)
+        {
+            httpClientBuilder.setSSLHostnameVerifier(new NoopHostnameVerifier());
+        }
         CloseableHttpClient httpClient = httpClientBuilder.build();
         ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
         return new RestTemplate(requestFactory);

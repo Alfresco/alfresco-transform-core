@@ -28,7 +28,6 @@ package org.alfresco.transform.base.config;
 
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.alfresco.transform.base.WebClientBuilderAdjuster;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -140,10 +139,7 @@ public class MTLSConfig {
             sslContextBuilder.keyManager(keyManagerFactory);
         }
 
-        if(hostNameVerificationDisabled)
-        {
-            sslContextBuilder.trustManager(InsecureTrustManagerFactory.INSTANCE);
-        } else if(isTruststoreConfigured())
+        if(isTruststoreConfigured())
         {
             TrustManagerFactory trustManagerFactory = initTrustManagerFactory();
             sslContextBuilder.trustManager(trustManagerFactory);
@@ -172,7 +168,12 @@ public class MTLSConfig {
         return HttpClient.create().secure(p -> p.sslContext(sslContext).handlerConfigurator(handler -> {
             SSLEngine sslEngine = handler.engine();
             SSLParameters sslParameters = sslEngine.getSSLParameters();
-            sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
+            if(hostNameVerificationDisabled)
+            {
+                sslParameters.setEndpointIdentificationAlgorithm(null);
+            } else {
+                sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
+            }
             sslEngine.setSSLParameters(sslParameters);
         }));
     }
@@ -182,7 +183,10 @@ public class MTLSConfig {
         SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
 
         HttpClientBuilder httpClientBuilder = HttpClients.custom().setSSLSocketFactory(sslContextFactory);
-        if(hostNameVerificationDisabled) httpClientBuilder.setSSLHostnameVerifier(new NoopHostnameVerifier());
+        if(hostNameVerificationDisabled)
+        {
+            httpClientBuilder.setSSLHostnameVerifier(new NoopHostnameVerifier());
+        }
         CloseableHttpClient httpClient = httpClientBuilder.build();
         ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
         return new RestTemplate(requestFactory);
