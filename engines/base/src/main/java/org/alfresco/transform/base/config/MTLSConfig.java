@@ -48,7 +48,9 @@ import reactor.netty.http.client.HttpClient;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.IOException;
 import java.io.InputStream;
@@ -167,7 +169,12 @@ public class MTLSConfig {
 
     private HttpClient createHttpClientWithSslContext(SslContextBuilder sslContextBuilder) throws SSLException {
         SslContext sslContext = sslContextBuilder.build();
-        return HttpClient.create().secure(p -> p.sslContext(sslContext));
+        return HttpClient.create().secure(p -> p.sslContext(sslContext).handlerConfigurator(handler -> {
+            SSLEngine sslEngine = handler.engine();
+            SSLParameters sslParameters = sslEngine.getSSLParameters();
+            sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
+            sslEngine.setSSLParameters(sslParameters);
+        }));
     }
 
     private RestTemplate createRestTemplateWithSslContext(SSLContextBuilder sslContextBuilder) throws NoSuchAlgorithmException, KeyManagementException {
