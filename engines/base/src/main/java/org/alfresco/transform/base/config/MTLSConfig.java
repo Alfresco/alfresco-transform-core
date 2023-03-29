@@ -29,8 +29,10 @@ package org.alfresco.transform.base.config;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import org.alfresco.transform.base.WebClientBuilderAdjuster;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +47,9 @@ import reactor.netty.http.client.HttpClient;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,6 +80,9 @@ public class MTLSConfig {
 
     @Value("${client.ssl.trust-store-type:}")
     private String trustStoreType;
+
+    @Value("${client.ssl.hostname-verification-disabled:false}")
+    private boolean hostNameVerificationDisabled;
 
     @Bean
     public WebClientBuilderAdjuster webClientBuilderAdjuster(SslContextBuilder nettySslContextBuilder)
@@ -158,13 +165,29 @@ public class MTLSConfig {
 
     private HttpClient createHttpClientWithSslContext(SslContextBuilder sslContextBuilder) throws SSLException {
         SslContext sslContext = sslContextBuilder.build();
-        return HttpClient.create().secure(p -> p.sslContext(sslContext));
+        return HttpClient.create().secure(p -> p.sslContext(sslContext).handlerConfigurator(handler -> {
+            SSLEngine sslEngine = handler.engine();
+            SSLParameters sslParameters = sslEngine.getSSLParameters();
+            if(hostNameVerificationDisabled)
+            {
+                sslParameters.setEndpointIdentificationAlgorithm(null);
+            } else {
+                sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
+            }
+            sslEngine.setSSLParameters(sslParameters);
+        }));
     }
 
     private RestTemplate createRestTemplateWithSslContext(SSLContextBuilder sslContextBuilder) throws NoSuchAlgorithmException, KeyManagementException {
         SSLContext sslContext = sslContextBuilder.build();
         SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
-        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslContextFactory).build();
+
+        HttpClientBuilder httpClientBuilder = HttpClients.custom().setSSLSocketFactory(sslContextFactory);
+        if(hostNameVerificationDisabled)
+        {
+            httpClientBuilder.setSSLHostnameVerifier(new NoopHostnameVerifier());
+        }
+        CloseableHttpClient httpClient = httpClientBuilder.build();
         ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
         return new RestTemplate(requestFactory);
     }

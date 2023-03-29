@@ -26,8 +26,10 @@
  */
 package org.alfresco.transformer.config;
 
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,6 +71,9 @@ public class MTLSConfig {
 
     @Value("${client.ssl.trust-store-type:}")
     private String trustStoreType;
+
+    @Value("${client.ssl.hostname-verification-disabled:false}")
+    private boolean hostNameVerificationDisabled;
 
     @Bean
     public RestTemplate restTemplate(SSLContextBuilder apacheSSLContextBuilder) throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, UnrecoverableKeyException
@@ -117,7 +122,13 @@ public class MTLSConfig {
     private RestTemplate createRestTemplateWithSslContext(SSLContextBuilder sslContextBuilder) throws NoSuchAlgorithmException, KeyManagementException {
         SSLContext sslContext = sslContextBuilder.build();
         SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
-        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslContextFactory).build();
+
+        HttpClientBuilder httpClientBuilder = HttpClients.custom().setSSLSocketFactory(sslContextFactory);
+        if(hostNameVerificationDisabled)
+        {
+            httpClientBuilder.setSSLHostnameVerifier(new NoopHostnameVerifier());
+        }
+        CloseableHttpClient httpClient = httpClientBuilder.build();
         ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
         return new RestTemplate(requestFactory);
     }
