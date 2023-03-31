@@ -29,6 +29,7 @@
         <dependency.tika.version>2.4.1</dependency.tika.version>
         <dependency.poi.version>5.2.2</dependency.poi.version>
         <dependency.poi-ooxml-lite.version>5.2.3</dependency.poi-ooxml-lite.version>
+        <dependency.snakeyaml.version>1.33</dependency.snakeyaml.version>
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
     </properties>
@@ -254,7 +255,7 @@
             <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
-                <version>1.32</version>
+                <version>${dependency.snakeyaml.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
