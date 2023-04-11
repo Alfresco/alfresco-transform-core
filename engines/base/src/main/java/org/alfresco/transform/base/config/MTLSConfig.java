@@ -170,7 +170,7 @@ public class MTLSConfig {
             SSLParameters sslParameters = sslEngine.getSSLParameters();
             if(hostNameVerificationDisabled)
             {
-                sslParameters.setEndpointIdentificationAlgorithm(null);
+                sslParameters.setEndpointIdentificationAlgorithm("");
             } else {
                 sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
             }
