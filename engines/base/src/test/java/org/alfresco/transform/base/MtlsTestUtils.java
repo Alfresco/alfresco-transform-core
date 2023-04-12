@@ -3,7 +3,6 @@ package org.alfresco.transform.base;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -60,14 +59,10 @@ public class MtlsTestUtils {
                 .loadTrustMaterial(trustStore, trustStorePassword);
 
         SSLContext sslContext = sslContextBuilder.build();
-        SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
+        SSLConnectionSocketFactory sslContextFactory = HOSTNAME_VERIFICATION_DISABLED ? new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE)
+                : new SSLConnectionSocketFactory(sslContext);
 
-        HttpClientBuilder httpClientBuilder = HttpClients.custom().setSSLSocketFactory(sslContextFactory);
-        if(HOSTNAME_VERIFICATION_DISABLED)
-        {
-            httpClientBuilder.setSSLHostnameVerifier(new NoopHostnameVerifier());
-        }
-        return httpClientBuilder.build();
+        return HttpClients.custom().setSSLSocketFactory(sslContextFactory).build();
     }
 
     public static RestTemplate restTemplateWithMtls()
