@@ -1,7 +1,9 @@
 package org.alfresco.transform.base;
 
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -23,10 +25,16 @@ import java.security.cert.CertificateException;
 public class MtlsTestUtils {
 
     private static final boolean MTLS_ENABLED = Boolean.parseBoolean(System.getProperty("test-mtls-enabled"));
+    private static final boolean HOSTNAME_VERIFICATION_DISABLED = Boolean.parseBoolean(System.getProperty("test-client-disable-hostname-verification"));
 
     public static boolean isMtlsEnabled()
     {
         return MTLS_ENABLED;
+    }
+
+    public static boolean isHostnameVerificationDisabled()
+    {
+        return HOSTNAME_VERIFICATION_DISABLED;
     }
 
     public static CloseableHttpClient httpClientWithMtls() throws NoSuchAlgorithmException, KeyManagementException, UnrecoverableKeyException, KeyStoreException, IOException, CertificateException
@@ -53,7 +61,13 @@ public class MtlsTestUtils {
 
         SSLContext sslContext = sslContextBuilder.build();
         SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
-        return HttpClients.custom().setSSLSocketFactory(sslContextFactory).build();
+
+        HttpClientBuilder httpClientBuilder = HttpClients.custom().setSSLSocketFactory(sslContextFactory);
+        if(HOSTNAME_VERIFICATION_DISABLED)
+        {
+            httpClientBuilder.setSSLHostnameVerifier(new NoopHostnameVerifier());
+        }
+        return httpClientBuilder.build();
     }
 
     public static RestTemplate restTemplateWithMtls()
