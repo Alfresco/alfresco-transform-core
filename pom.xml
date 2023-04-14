@@ -23,13 +23,13 @@
         <dependency.alfresco-jodconverter-core.version>3.0.1.14</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
         <dependency.activemq.version>5.17.1</dependency.activemq.version>
-        <dependency.jackson.version>2.14.0-rc1</dependency.jackson.version>
-        <dependency.jackson-databind.version>2.14.0-rc1</dependency.jackson-databind.version>
+        <dependency.jackson.version>2.15.0-rc2</dependency.jackson.version>
+        <dependency.jackson-databind.version>${dependency.jackson.version}</dependency.jackson-databind.version>
         <dependency.cxf.version>3.5.3</dependency.cxf.version>
         <dependency.tika.version>2.4.1</dependency.tika.version>
         <dependency.poi.version>5.2.2</dependency.poi.version>
         <dependency.poi-ooxml-lite.version>5.2.3</dependency.poi-ooxml-lite.version>
-        <dependency.snakeyaml.version>1.33</dependency.snakeyaml.version>
+        <dependency.snakeyaml.version>2.0</dependency.snakeyaml.version>
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
     </properties>
@@ -205,6 +205,11 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.module</groupId>
                 <artifactId>jackson-module-parameter-names</artifactId>
+                <version>${dependency.jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
                 <version>${dependency.jackson.version}</version>
             </dependency>
             <!-- Active MQ client -->
