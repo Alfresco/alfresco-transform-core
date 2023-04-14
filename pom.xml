@@ -207,6 +207,11 @@
                 <artifactId>jackson-module-parameter-names</artifactId>
                 <version>${dependency.jackson.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${dependency.jackson.version}</version>
+            </dependency>
             <!-- Active MQ client -->
             <dependency>
                 <groupId>org.apache.activemq</groupId>
