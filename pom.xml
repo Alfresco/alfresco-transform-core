@@ -23,7 +23,7 @@
         <dependency.alfresco-jodconverter-core.version>3.0.1.14</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
         <dependency.activemq.version>5.17.1</dependency.activemq.version>
-        <dependency.jackson.version>2.15.0-rc2</dependency.jackson.version>
+        <dependency.jackson.version>2.15.0-rc3</dependency.jackson.version>
         <dependency.cxf.version>3.5.3</dependency.cxf.version>
         <dependency.tika.version>2.4.1</dependency.tika.version>
         <dependency.poi.version>5.2.2</dependency.poi.version>
