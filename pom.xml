@@ -24,7 +24,6 @@
         <env.project_version>${project.version}</env.project_version>
         <dependency.activemq.version>5.17.1</dependency.activemq.version>
         <dependency.jackson.version>2.15.0-rc2</dependency.jackson.version>
-        <dependency.jackson-databind.version>${dependency.jackson.version}</dependency.jackson-databind.version>
         <dependency.cxf.version>3.5.3</dependency.cxf.version>
         <dependency.tika.version>2.4.1</dependency.tika.version>
         <dependency.poi.version>5.2.2</dependency.poi.version>
@@ -178,39 +177,11 @@
             </dependency>
             <!-- Jackson -->
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
                 <version>${dependency.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${dependency.jackson-databind.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${dependency.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jdk8</artifactId>
-                <version>${dependency.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jsr310</artifactId>
-                <version>${dependency.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-parameter-names</artifactId>
-                <version>${dependency.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-yaml</artifactId>
-                <version>${dependency.jackson.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
             <!-- Active MQ client -->
             <dependency>
