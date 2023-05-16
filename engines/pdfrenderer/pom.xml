@@ -111,7 +111,7 @@
                                                     <port>61616:61616</port>
                                                 </ports>
                                                 <wait>
-                                                    <log>Apache ActiveMQ 5.17.4 .* started</log>
+                                                    <log>Apache ActiveMQ 5.* started</log>
                                                     <time>20000</time>
                                                     <kill>500</kill>
                                                     <shutdown>100</shutdown>
