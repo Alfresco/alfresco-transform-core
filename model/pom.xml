@@ -112,21 +112,8 @@
                     <version>2.0.1.alfresco-2</version>
                     <executions>
                         <execution>
-                            <id>third-party-licenses</id>
-                            <goals>
-                                <goal>add-third-party</goal>
-                                <goal>download-licenses</goal>
-                            </goals>
-                            <phase>generate-resources</phase>
-                            <configuration>
-                                <failOnMissing>true</failOnMissing>
-                                <excludedScopes>provided,test</excludedScopes>
-                                <excludedGroups>org.alfresco</excludedGroups>
-                                <failIfWarning>true</failIfWarning>
-                                <includedLicenses>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/includedLicenses.txt</includedLicenses>
-                                <licenseMergesUrl>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/licenseMerges.txt</licenseMergesUrl>
-                                <overrideUrl>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/override-THIRD-PARTY.properties</overrideUrl>
-                            </configuration>
+                            <id>project-license</id>
+                            <phase>none</phase>
                         </execution>
                     </executions>
                 </plugin>
