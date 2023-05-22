@@ -170,7 +170,7 @@ public class MTLSConfig {
             SSLParameters sslParameters = sslEngine.getSSLParameters();
             if(hostNameVerificationDisabled)
             {
-                sslParameters.setEndpointIdentificationAlgorithm(null);
+                sslParameters.setEndpointIdentificationAlgorithm("");
             } else {
                 sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
             }
@@ -180,13 +180,10 @@ public class MTLSConfig {
 
     private RestTemplate createRestTemplateWithSslContext(SSLContextBuilder sslContextBuilder) throws NoSuchAlgorithmException, KeyManagementException {
         SSLContext sslContext = sslContextBuilder.build();
-        SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
+        SSLConnectionSocketFactory sslContextFactory = hostNameVerificationDisabled ? new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE)
+                : new SSLConnectionSocketFactory(sslContext);
 
         HttpClientBuilder httpClientBuilder = HttpClients.custom().setSSLSocketFactory(sslContextFactory);
-        if(hostNameVerificationDisabled)
-        {
-            httpClientBuilder.setSSLHostnameVerifier(new NoopHostnameVerifier());
-        }
         CloseableHttpClient httpClient = httpClientBuilder.build();
         ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
         return new RestTemplate(requestFactory);

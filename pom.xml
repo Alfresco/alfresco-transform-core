@@ -3,33 +3,32 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>3.1.0-A6-SNAPSHOT</version>
+    <version>3.2.0-A2-SNAPSHOT</version>
     <name>Alfresco Transform Core</name>
     <packaging>pom</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.10</version>
+        <version>2.7.11</version>
     </parent>
 
     <properties>
-        <java.version>11</java.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
 
         <image.tag>latest</image.tag>
         <dependency.pdfbox.version>2.0.26</dependency.pdfbox.version>
-        <dependency.alfresco-jodconverter-core.version>3.0.1.14</dependency.alfresco-jodconverter-core.version>
+        <dependency.alfresco-jodconverter-core.version>3.0.1.16</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
-        <dependency.activemq.version>5.17.1</dependency.activemq.version>
-        <dependency.jackson.version>2.14.0-rc1</dependency.jackson.version>
-        <dependency.jackson-databind.version>2.14.0-rc1</dependency.jackson-databind.version>
-        <dependency.cxf.version>3.5.3</dependency.cxf.version>
+        <dependency.activemq.version>5.17.4</dependency.activemq.version>
+        <dependency.jackson.version>2.15.1</dependency.jackson.version>
+        <dependency.cxf.version>4.0.1</dependency.cxf.version>
         <dependency.tika.version>2.4.1</dependency.tika.version>
         <dependency.poi.version>5.2.2</dependency.poi.version>
         <dependency.poi-ooxml-lite.version>5.2.3</dependency.poi-ooxml-lite.version>
-        <dependency.snakeyaml.version>1.33</dependency.snakeyaml.version>
+        <dependency.snakeyaml.version>2.0</dependency.snakeyaml.version>
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
     </properties>
@@ -125,7 +124,7 @@
         <connection>scm:git:https://github.com/Alfresco/alfresco-transform-core.git</connection>
         <developerConnection>scm:git:https://github.com/Alfresco/alfresco-transform-core.git</developerConnection>
         <url>https://github.com/Alfresco/alfresco-transform-core</url>
-        <tag>3.1.0-A2-SNAPSHOT</tag>
+        <tag>3.2.0-A1-SNAPSHOT</tag>
     </scm>
 
     <dependencyManagement>
@@ -178,34 +177,11 @@
             </dependency>
             <!-- Jackson -->
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
                 <version>${dependency.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${dependency.jackson-databind.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${dependency.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jdk8</artifactId>
-                <version>${dependency.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jsr310</artifactId>
-                <version>${dependency.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-parameter-names</artifactId>
-                <version>${dependency.jackson.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
             <!-- Active MQ client -->
             <dependency>
@@ -223,18 +199,18 @@
             <dependency>
                 <groupId>com.github.junrar</groupId>
                 <artifactId>junrar</artifactId>
-                <version>7.5.3</version>
+                <version>7.5.4</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
-                <version>1.21</version>
+                <version>1.23.0</version>
             </dependency>
             <!-- Jsoup -->
             <dependency>
                 <groupId>org.jsoup</groupId>
                 <artifactId>jsoup</artifactId>
-                <version>1.15.3</version>
+                <version>1.16.1</version>
             </dependency>
 
             <dependency>
@@ -245,12 +221,12 @@
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
-                <version>4.5.13</version>
+                <version>4.5.14</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpmime</artifactId>
-                <version>4.5.13</version>
+                <version>4.5.14</version>
             </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>
@@ -311,7 +287,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>2.0.1.alfresco-2</version>
+                    <version>2.0.1</version>
                     <configuration>
                         <inceptionYear>2005</inceptionYear>
                         <organizationName>Alfresco Software Limited</organizationName>
@@ -394,7 +370,7 @@
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
-                    <version>0.40.2</version>
+                    <version>0.42.1</version>
                  </plugin>
             </plugins>
         </pluginManagement>

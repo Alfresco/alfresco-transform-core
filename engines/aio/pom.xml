@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-transform-core</artifactId>
-        <version>3.1.0-A6-SNAPSHOT</version>
+        <version>3.2.0-A2-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -141,7 +141,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.5.0</version>
                 <configuration>
                     <includeGroupIds>${project.groupId}</includeGroupIds>
                     <includeArtifactIds>alfresco-transform-imagemagick,alfresco-transform-libreoffice,alfresco-transform-misc,alfresco-transform-pdf-renderer,alfresco-transform-tika</includeArtifactIds>
@@ -240,7 +240,7 @@
                                 <configuration>
                                     <images>
                                         <image>
-                                            <name>alfresco/alfresco-activemq:5.17.1-jre11-rockylinux8</name>
+                                            <name>alfresco/alfresco-activemq:5.17.4-jre17-rockylinux8</name>
                                             <run>
                                                 <hostname>activemq</hostname>
                                                 <ports>
