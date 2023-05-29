@@ -256,6 +256,12 @@
                                     <name>${image.name}:${image.tag}</name>
                                     <registry>${image.registry}</registry>
                                     <build>
+                                        <buildx>
+                                            <platforms>
+                                                <platform>linux/amd64</platform>
+                                                <platform>linux/arm64</platform>
+                                            </platforms>
+                                        </buildx>
                                         <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
                                             <squash>true</squash>
@@ -266,6 +272,12 @@
                                 <image>
                                     <name>${image.name}:${image.tag}</name>
                                     <build>
+                                        <buildx>
+                                            <platforms>
+                                                <platform>linux/amd64</platform>
+                                                <platform>linux/arm64</platform>
+                                            </platforms>
+                                        </buildx>
                                         <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
                                             <squash>true</squash>
@@ -309,6 +321,12 @@
                                     <name>${image.name}:${project.version}</name>
                                     <registry>${image.registry}</registry>
                                     <build>
+                                        <buildx>
+                                            <platforms>
+                                                <platform>linux/amd64</platform>
+                                                <platform>linux/arm64</platform>
+                                            </platforms>
+                                        </buildx>
                                         <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
                                             <squash>true</squash>
@@ -319,6 +337,12 @@
                                 <image>
                                     <name>${image.name}:${project.version}</name>
                                     <build>
+                                        <buildx>
+                                            <platforms>
+                                                <platform>linux/amd64</platform>
+                                                <platform>linux/arm64</platform>
+                                            </platforms>
+                                        </buildx>
                                         <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
                                             <squash>true</squash>
