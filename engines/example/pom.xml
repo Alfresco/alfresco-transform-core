@@ -14,8 +14,6 @@
     <properties>
         <image.name>alfresco/alfresco-transform-example</image.name>
         <env.project_artifactId>${project.artifactId}</env.project_artifactId>
-        <base.image>alfresco/alfresco-base-java:jre17-rockylinux8-202302221525</base.image>
-        <scripts.directory>alfresco-transform-core/scripts</scripts.directory>
     </properties>
 
     <dependencies>
