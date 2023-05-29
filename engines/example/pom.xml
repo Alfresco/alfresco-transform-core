@@ -12,14 +12,10 @@
     </parent>
 
     <properties>
-        <!--
         <image.name>alfresco/alfresco-transform-example</image.name>
-        -->
-        <image.name>alfresco-transform-example</image.name>
-        <image.registry>quay.io</image.registry>
         <env.project_artifactId>${project.artifactId}</env.project_artifactId>
-        <builder.name>entitled-builder</builder.name>
-        <local.registry>127.0.0.1:5000</local.registry>
+        <base.image>alfresco/alfresco-base-java:jre17-rockylinux8-202302221525</base.image>
+        <scripts.directory>alfresco-transform-core/scripts</scripts.directory>
     </properties>
 
     <dependencies>
@@ -205,40 +201,40 @@
         </profile>
 
         <profile>
-            <id>build-multiarch-docker-images</id>
+            <id>push-docker-images</id>
+            <!-- publishes "image:latest" on Quay -->
             <build>
                 <plugins>
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
+                        <configuration>
+                            <verbose>true</verbose>
+                            <images>
+                                <!-- Quay image -->
+                                <image>
+                                    <name>${image.name}:${image.tag}</name>
+                                    <registry>${image.registry}</registry>
+                                    <build>
+                                        <buildx>
+                                            <platforms>
+                                                <platform>linux/amd64</platform>
+                                                <platform>linux/arm64</platform>
+                                            </platforms>
+                                        </buildx>
+                                        <contextDir>${project.basedir}</contextDir>
+                                    </build>
+                                </image>
+                            </images>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>build-push-image</id>
-                                <phase>package</phase>
+                                <phase>install</phase>
                                 <goals>
                                     <goal>build</goal>
                                     <goal>push</goal>
                                 </goals>
-                                <configuration>
-                                    <images>
-                                        <image>
-                                            <name>alfresco/dev:${image.name}</name>
-                                            <build>
-                                                <buildx>
-                                                    <platforms>
-                                                        <platform>linux/amd64</platform>
-                                                        <platform>linux/arm64</platform>
-                                                    </platforms>
-                                                    <builderName>${builder.name}</builderName>
-                                                </buildx>
-                                                <contextDir>${project.basedir}</contextDir>
-                                                <buildOptions>
-                                                    <squash>true</squash>
-                                                </buildOptions>
-                                            </build>
-                                        </image>
-                                    </images>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
