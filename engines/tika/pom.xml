@@ -13,7 +13,6 @@
 
     <properties>
         <image.name>alfresco/alfresco-tika</image.name>
-        <image.registry>quay.io</image.registry>
         <env.project_artifactId>${project.artifactId}</env.project_artifactId>
     </properties>
 
@@ -297,6 +296,12 @@
                                     <name>${image.name}:${image.tag}</name>
                                     <registry>${image.registry}</registry>
                                     <build>
+                                        <buildx>
+                                            <platforms>
+                                                <platform>linux/amd64</platform>
+                                                <platform>linux/arm64</platform>
+                                            </platforms>
+                                        </buildx>
                                         <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
                                             <squash>true</squash>
@@ -307,6 +312,12 @@
                                 <image>
                                     <name>${image.name}:${image.tag}</name>
                                     <build>
+                                        <buildx>
+                                            <platforms>
+                                                <platform>linux/amd64</platform>
+                                                <platform>linux/arm64</platform>
+                                            </platforms>
+                                        </buildx>
                                         <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
                                             <squash>true</squash>
@@ -350,6 +361,12 @@
                                     <name>${image.name}:${project.version}</name>
                                     <registry>${image.registry}</registry>
                                     <build>
+                                        <buildx>
+                                            <platforms>
+                                                <platform>linux/amd64</platform>
+                                                <platform>linux/arm64</platform>
+                                            </platforms>
+                                        </buildx>
                                         <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
                                             <squash>true</squash>
@@ -360,6 +377,12 @@
                                 <image>
                                     <name>${image.name}:${project.version}</name>
                                     <build>
+                                        <buildx>
+                                            <platforms>
+                                                <platform>linux/amd64</platform>
+                                                <platform>linux/arm64</platform>
+                                            </platforms>
+                                        </buildx>
                                         <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
                                             <squash>true</squash>
