@@ -20,8 +20,6 @@
 
         <image.tag>latest</image.tag>
         <image.registry>quay.io</image.registry>
-        <builder.name>entitled-builder</builder.name>
-        <local.registry>127.0.0.1:5000</local.registry>
         <dependency.pdfbox.version>2.0.26</dependency.pdfbox.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.16</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
