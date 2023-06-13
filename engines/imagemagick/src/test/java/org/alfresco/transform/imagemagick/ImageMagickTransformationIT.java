@@ -151,16 +151,6 @@ public class ImageMagickTransformationIT {
             .add(Pair.of("3fr", MIMETYPE_IMAGE_RAW_3FR))
             .build();
 
-    private static final List<Pair<String, String>> targetExtensionsForTiffFirstPage = new ImmutableList.Builder<Pair<String, String>>()
-            .add(Pair.of("bmp", MIMETYPE_IMAGE_BMP))
-            .add(Pair.of("jp2", MIMETYPE_IMAGE_JP2))
-            .add(Pair.of("jpg", MIMETYPE_IMAGE_JPEG))
-            .add(Pair.of("png", MIMETYPE_IMAGE_PNG))
-            .add(Pair.of("xbm", MIMETYPE_IMAGE_XBM))
-            .add(Pair.of("xpm", MIMETYPE_IMAGE_XPM))
-            .add(Pair.of("xwd", MIMETYPE_IMAGE_XWD))
-            .build();
-
     private static final Map<String, FileInfo> TEST_FILES = Stream.of(
             testFile(MIMETYPE_IMAGE_BMP, "bmp", "quick.bmp"), 
             testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"),
@@ -209,16 +199,8 @@ public class ImageMagickTransformationIT {
             sourceFile, sourceMimetype, targetMimetype, targetExtension);
         try
         {
-            // note: some image/tiff->image/* will return multiple page results (hence error) unless options specified for single page
-            Map<String, String> tOptions = emptyMap();
-            Pair<String,String> targetPair = Pair.of(targetExtension, targetMimetype);
-            if (MIMETYPE_IMAGE_TIFF.equals(sourceMimetype) && targetExtensionsForTiffFirstPage.contains(targetPair))
-            {
-                tOptions = ImmutableMap.of("startPage", "0", "endPage", "0");
-            }
-
             final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, sourceMimetype,
-                targetMimetype, targetExtension, tOptions);
+                targetMimetype, targetExtension, emptyMap());
             assertEquals(OK, response.getStatusCode(), descriptor);
         }
         catch (Exception e)
@@ -233,6 +215,4 @@ public class ImageMagickTransformationIT {
             .stream()
             .map(k -> Pair.of(TEST_FILES.get(sourceFile), k));
     }
-
-    
 }

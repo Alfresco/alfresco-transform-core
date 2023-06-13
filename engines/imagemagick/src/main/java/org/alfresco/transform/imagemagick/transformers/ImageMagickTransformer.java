@@ -26,22 +26,13 @@
  */
 package org.alfresco.transform.imagemagick.transformers;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.executors.AbstractCommandExecutor;
-import org.alfresco.transform.base.executors.RuntimeExec;
-import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transform.imagemagick.ImageMagickOptionsBuilder;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.alfresco.transform.base.util.Util.stringToInteger;
 import static org.alfresco.transform.base.util.Util.stringToLong;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_BMP;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JP2;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_XWD;
 import static org.alfresco.transform.common.RequestParamMap.ALLOW_ENLARGEMENT;
 import static org.alfresco.transform.common.RequestParamMap.ALPHA_REMOVE;
 import static org.alfresco.transform.common.RequestParamMap.AUTO_ORIENT;
@@ -61,9 +52,31 @@ import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.THUMBNAIL;
 import static org.alfresco.transform.common.RequestParamMap.TIMEOUT;
 
+import javax.annotation.PostConstruct;
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.executors.AbstractCommandExecutor;
+import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
+import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.imagemagick.ImageMagickOptionsBuilder;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+/**
+ * Converts image files into different types of images. Transformer supports multi-page images and allows to specify via parameters `startPage` and `endPage` range of pages that should be converted.
+ * In case of a one-page target image type (like `jpeg` or `png`) parameters `startPage` and `endPage` will be set to 0 by default - this means that only first page will be converted.
+ */
 @Component
 public class ImageMagickTransformer extends AbstractCommandExecutor implements CustomTransformerFileAdaptor
 {
+    private final List<String> singlePageFormats = List.of(MIMETYPE_IMAGE_BMP, MIMETYPE_IMAGE_JP2, MIMETYPE_IMAGE_JPEG, MIMETYPE_IMAGE_PNG, MIMETYPE_IMAGE_XWD);
+
     @Value("${transform.core.imagemagick.exe}")
     private String exe;
     @Value("${transform.core.imagemagick.dyn}")
@@ -152,10 +165,24 @@ public class ImageMagickTransformer extends AbstractCommandExecutor implements C
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
                           File sourceFile, File targetFile, TransformManager transformManager) throws TransformException
     {
+        String startPageString = transformOptions.get(START_PAGE);
+        String endPageString = transformOptions.get(END_PAGE);
+        if (!singlePageFormats.contains(sourceMimetype) && singlePageFormats.contains(targetMimetype))
+        {
+            if (StringUtils.isEmpty(startPageString))
+            {
+                startPageString = "0";
+            }
+            if (StringUtils.isEmpty(endPageString))
+            {
+                endPageString = startPageString;
+            }
+        }
+
         final String options = ImageMagickOptionsBuilder
                 .builder()
-                .withStartPage(transformOptions.get(START_PAGE))
-                .withEndPage(transformOptions.get(END_PAGE))
+                .withStartPage(startPageString)
+                .withEndPage(endPageString)
                 .withAlphaRemove(transformOptions.get(ALPHA_REMOVE))
                 .withAutoOrient(transformOptions.get(AUTO_ORIENT))
                 .withCropGravity(transformOptions.get(CROP_GRAVITY))
@@ -174,8 +201,8 @@ public class ImageMagickTransformer extends AbstractCommandExecutor implements C
                 .build();
 
         String pageRange = calculatePageRange(
-                stringToInteger(transformOptions.get(START_PAGE)),
-                stringToInteger(transformOptions.get(END_PAGE))
+                stringToInteger(startPageString),
+                stringToInteger(endPageString)
         );
 
         Long timeout = stringToLong(transformOptions.get(TIMEOUT));
