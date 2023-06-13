@@ -167,7 +167,7 @@ public class ImageMagickTransformer extends AbstractCommandExecutor implements C
     {
         String startPageString = transformOptions.get(START_PAGE);
         String endPageString = transformOptions.get(END_PAGE);
-        if (singlePageFormats.contains(targetMimetype))
+        if (!singlePageFormats.contains(sourceMimetype) && singlePageFormats.contains(targetMimetype))
         {
             if (StringUtils.isEmpty(startPageString))
             {
