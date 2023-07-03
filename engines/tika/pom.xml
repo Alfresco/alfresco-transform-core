@@ -301,6 +301,9 @@
                                                 <platform>linux/amd64</platform>
                                                 <platform>linux/arm64</platform>
                                             </platforms>
+                                            <attestations>
+                                                <provenance>false</provenance>
+                                            </attestations>
                                         </buildx>
                                         <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
@@ -317,6 +320,9 @@
                                                 <platform>linux/amd64</platform>
                                                 <platform>linux/arm64</platform>
                                             </platforms>
+                                            <attestations>
+                                                <provenance>false</provenance>
+                                            </attestations>
                                         </buildx>
                                         <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
@@ -366,6 +372,9 @@
                                                 <platform>linux/amd64</platform>
                                                 <platform>linux/arm64</platform>
                                             </platforms>
+                                            <attestations>
+                                                <provenance>false</provenance>
+                                            </attestations>
                                         </buildx>
                                         <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
@@ -382,6 +391,9 @@
                                                 <platform>linux/amd64</platform>
                                                 <platform>linux/arm64</platform>
                                             </platforms>
+                                            <attestations>
+                                                <provenance>false</provenance>
+                                            </attestations>
                                         </buildx>
                                         <contextDir>${project.basedir}</contextDir>
                                         <buildOptions>
