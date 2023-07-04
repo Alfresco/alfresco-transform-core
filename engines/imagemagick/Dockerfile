@@ -24,6 +24,8 @@ ARG USERID=33002
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 
+RUN echo "Architecture: $(uname -m)"
+
 RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     yum install -y $IMAGEMAGICK_DEP_RPM_URL && \
     if [ "$(uname -m)" = "x86_64" ]; then \
