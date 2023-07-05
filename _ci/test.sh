@@ -12,11 +12,9 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 #[ "${PULL_REQUEST}" = "false" ] && [ "${BRANCH_NAME}" = "master" ] && DEPLOY="deploy" || DEPLOY="verify"
 
 # Do not deploy snapshots for alfresco-transform-core, alfresco-transformer-base and alfresco-base-t-engine
-mvn -B -U -Dmaven.wagon.http.pool=false \
-    clean ${DEPLOY} \
-    -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true \
-    -Dparent.core.deploy.skip=true -Dtransformer.base.deploy.skip=true \
-    "-Pinternal"
+
+
+mvn -B -U clean install -DskipTests -Pinternal -Ddocker.verbose=true
 
 docker ps -a -q | xargs -r -l docker stop ; docker ps -a -q | xargs -r -l docker rm
 
