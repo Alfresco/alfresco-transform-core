@@ -12,7 +12,8 @@
     </parent>
 
     <properties>
-        <image.name>alfresco/alfresco-imagemagick</image.name>
+        <image.name>alfresco/dev</image.name>
+        <!--<image.name>alfresco/alfresco-imagemagick</image.name>-->
         <image.registry>quay.io</image.registry>
         <env.project_artifactId>${project.artifactId}</env.project_artifactId>
     </properties>
@@ -202,7 +203,7 @@
                             <images>
                                 <!-- QuayIO image -->
                                 <image>
-                                    <name>${image.name}:${image.tag}</name>
+                                    <name>${image.name}:alfresco-imagemagick-CI</name>
                                     <registry>${image.registry}</registry>
                                     <build>
                                         <buildx>
@@ -221,6 +222,7 @@
                                     </build>
                                 </image>
                                 <!-- DockerHub image -->
+                                <!--
                                 <image>
                                     <name>${image.name}:${image.tag}</name>
                                     <build>
@@ -239,6 +241,7 @@
                                         </buildOptions>
                                     </build>
                                 </image>
+                                -->
                             </images>
                         </configuration>
                         <executions>
@@ -272,6 +275,7 @@
                         <configuration>
                             <images>
                                 <!-- QuayIO image -->
+                                <!--
                                 <image>
                                     <name>${image.name}:${project.version}</name>
                                     <registry>${image.registry}</registry>
@@ -291,7 +295,9 @@
                                         </buildOptions>
                                     </build>
                                 </image>
+                                -->
                                 <!-- DockerHub image -->
+                                <!--
                                 <image>
                                     <name>${image.name}:${project.version}</name>
                                     <build>
@@ -310,6 +316,7 @@
                                         </buildOptions>
                                     </build>
                                 </image>
+                                -->
                             </images>
                         </configuration>
                         <executions>
