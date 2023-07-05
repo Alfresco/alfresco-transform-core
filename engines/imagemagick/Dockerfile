@@ -10,8 +10,8 @@ ARG IMAGEMAGICK_VERSION=7.1.0-16
 ENV IMAGEMAGICK_RPM_URL_AMD64=https://github.com/Alfresco/imagemagick-build/releases/download/v${IMAGEMAGICK_VERSION}/ImageMagick-${IMAGEMAGICK_VERSION}.x86_64.rpm
 ENV IMAGEMAGICK_LIB_RPM_URL_AMD64=https://github.com/Alfresco/imagemagick-build/releases/download/v${IMAGEMAGICK_VERSION}/ImageMagick-libs-${IMAGEMAGICK_VERSION}.x86_64.rpm
 
-ENV IMAGEMAGICK_RPM_URL_ARM64=https://github.com/Alfresco/imagemagick-build/releases/download/v${IMAGEMAGICK_VERSION}/ImageMagick-${IMAGEMAGICK_VERSION}.arm64.rpm
-ENV IMAGEMAGICK_LIB_RPM_URL_ARM64=https://github.com/Alfresco/imagemagick-build/releases/download/v${IMAGEMAGICK_VERSION}/ImageMagick-libs-${IMAGEMAGICK_VERSION}.arm64.rpm
+ENV IMAGEMAGICK_RPM_URL_ARM64=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/7.1.0-16-ci-3/imagemagick-distribution-7.1.0-16-ci-3-arm64.rpm
+ENV IMAGEMAGICK_LIB_RPM_URL_ARM64=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/7.1.0-16-ci-3/imagemagick-distribution-7.1.0-16-ci-3-arm64-libs.rpm
 
 ENV IMAGEMAGICK_DEP_RPM_URL=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
