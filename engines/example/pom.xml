@@ -12,8 +12,7 @@
     </parent>
 
     <properties>
-        <image.name>alfresco/dev</image.name>
-        <!--<image.name>alfresco/alfresco-transform-example</image.name>-->
+        <image.name>alfresco/alfresco-transform-example</image.name>
         <env.project_artifactId>${project.artifactId}</env.project_artifactId>
     </properties>
 
@@ -211,7 +210,6 @@
                             <verbose>true</verbose>
                             <images>
                                 <!-- Quay image -->
-                                <!--
                                 <image>
                                     <name>${image.name}:${image.tag}</name>
                                     <registry>${image.registry}</registry>
@@ -228,7 +226,6 @@
                                         <contextDir>${project.basedir}</contextDir>
                                     </build>
                                 </image>
-                                -->
                             </images>
                         </configuration>
                         <executions>
@@ -257,7 +254,7 @@
                             <images>
                                 <!-- QuayIO image -->
                                 <image>
-                                    <name>${image.name}:alfresco-transform-example-CI</name>
+                                    <name>${image.name}:${image.tag}</name>
                                     <registry>${image.registry}</registry>
                                     <build>
                                         <buildx>
@@ -276,7 +273,6 @@
                                     </build>
                                 </image>
                                 <!-- DockerHub image -->
-                                <!--
                                 <image>
                                     <name>${image.name}:${image.tag}</name>
                                     <build>
@@ -295,7 +291,6 @@
                                         </buildOptions>
                                     </build>
                                 </image>
-                                -->
                             </images>
                         </configuration>
                         <executions>
@@ -329,7 +324,6 @@
                         <configuration>
                             <images>
                                 <!-- QuayIO image -->
-                                <!--
                                 <image>
                                     <name>${image.name}:${project.version}</name>
                                     <registry>${image.registry}</registry>
@@ -349,9 +343,7 @@
                                         </buildOptions>
                                     </build>
                                 </image>
-                                -->
                                 <!-- DockerHub image -->
-                                <!--
                                 <image>
                                     <name>${image.name}:${project.version}</name>
                                     <build>
@@ -370,7 +362,6 @@
                                         </buildOptions>
                                     </build>
                                 </image>
-                                -->
                             </images>
                         </configuration>
                         <executions>
