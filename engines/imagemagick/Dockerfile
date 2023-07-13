@@ -7,8 +7,7 @@ FROM alfresco/alfresco-base-java:jre17-rockylinux8-202306121108
 # For other ImageMagick versions please look at https://github.com/Alfresco/imagemagick-build tags
 ARG IMAGEMAGICK_VERSION=7.1.0-16
 
-ENV IMAGEMAGICK_RPM_URL=https://github.com/Alfresco/imagemagick-build/releases/download/v${IMAGEMAGICK_VERSION}/ImageMagick-${IMAGEMAGICK_VERSION}.x86_64.rpm
-ENV IMAGEMAGICK_LIB_RPM_URL=https://github.com/Alfresco/imagemagick-build/releases/download/v${IMAGEMAGICK_VERSION}/ImageMagick-libs-${IMAGEMAGICK_VERSION}.x86_64.rpm
+ENV IMAGEMAGICK_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}-ci-3/imagemagick-distribution-${IMAGEMAGICK_VERSION}-ci-3
 ENV IMAGEMAGICK_DEP_RPM_URL=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 ENV JAVA_OPTS=""
 
@@ -22,9 +21,12 @@ COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 
 RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     yum install -y $IMAGEMAGICK_DEP_RPM_URL && \
-    yum install -y $IMAGEMAGICK_LIB_RPM_URL $IMAGEMAGICK_RPM_URL && \
-    yum clean all && \
-    rpm -e --nodeps libgs
+    if [ "$(uname -m)" = "x86_64" ]; then \
+            yum install -y ${IMAGEMAGICK_RPM_URL}-el8.rpm ${IMAGEMAGICK_RPM_URL}-el8-libs.rpm; \
+        else \
+            yum install -y ${IMAGEMAGICK_RPM_URL}-arm64.rpm ${IMAGEMAGICK_RPM_URL}-arm64-libs.rpm; \
+        fi && \
+    yum clean all
 
 ADD target/generated-resources/licenses              /licenses
 ADD target/generated-resources/licenses.xml          /licenses/
