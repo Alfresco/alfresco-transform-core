@@ -68,14 +68,25 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
             </plugin>
-            <plugin>
+             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>jar-for-tests</id>
                         <goals>
                             <goal>test-jar</goal>
                         </goals>
+                    </execution>
+                    <execution>
+                        <id>jar-for-creating-extensions</id>
+                        <goals>
+		                    <goal>jar</goal>
+		                </goals>
+		                <phase>package</phase>
+		                <configuration>
+		                    <classifier>extensions</classifier>
+		                </configuration>
                     </execution>
                 </executions>
             </plugin>
