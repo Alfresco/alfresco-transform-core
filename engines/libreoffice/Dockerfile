@@ -7,7 +7,7 @@ FROM alfresco/alfresco-base-java:jre17-rockylinux8-202306121108
 ARG LIBREOFFICE_VERSION=7.2.5
 
 ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz
-ENV LIBREOFFICE_ARM64_RPM_URL=https://dl.rockylinux.org/pub/rocky/8.8/devel/aarch64/os/Packages/l/libreoffice-core-6.4.7.2-13.el8.aarch64.rpm
+ENV LIBREOFFICE_ARM64_RPM_URL=https://dl.rockylinux.org/pub/rocky/8/Devel/aarch64/os/Packages/l/libreoffice-6.4.7.2-13.el8.aarch64.rpm
 ENV JAVA_OPTS=""
 
 # Set default user information
@@ -28,7 +28,7 @@ RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.proj
         yum localinstall -y LibreOffice*/RPMS/*.rpm && \
         rm -rf libreoffice-dist-*linux.gz LibreOffice_*_Linux_x86-64_rpm; \
     else \
-      yum install -y $LIBREOFFICE_ARM64_RPM_URL && \
+      dnf --enablerepo=devel install -y $LIBREOFFICE_ARM64_RPM_URL && \
       update-alternatives --set java java-17-openjdk.aarch64; \
     fi && \
       yum clean all
@@ -46,4 +46,4 @@ EXPOSE 8090
 
 USER ${LIBREUSERNAME}
 
-ENTRYPOINT java $JAVA_OPTS -jar /usr/bin/${env.project_artifactId}.jar
+ENTRYPOINT ["/bin/sh", "-c", "if [[ \"$(uname -m)\" != \"x86_64\" ]]; then export LIBREOFFICE_HOME=${LIBREOFFICE_HOME:=/usr/lib64/libreoffice}; fi && java $JAVA_OPTS -jar /usr/bin/${env.project_artifactId}.jar"]
