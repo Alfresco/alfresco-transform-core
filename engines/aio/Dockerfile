@@ -79,4 +79,6 @@ EXPOSE 8090
 
 USER ${AIOUSERNAME}
 
-ENTRYPOINT ["/bin/sh", "-c", "if [[ \"$(uname -m)\" != \"x86_64\" ]]; then export LIBREOFFICE_HOME=${LIBREOFFICE_HOME:=/usr/lib64/libreoffice}; fi && java $JAVA_OPTS -jar /usr/bin/${env.project_artifactId}.jar"]
+# Copy the script to set LIBREOFFICE_HOME
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+ENTRYPOINT ["/docker-entrypoint.sh", "${env.project_artifactId}"]
