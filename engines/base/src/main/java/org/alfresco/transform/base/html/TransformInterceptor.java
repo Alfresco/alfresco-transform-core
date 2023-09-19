@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2023 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -30,11 +30,10 @@ import static org.alfresco.transform.base.fs.FileManager.SOURCE_FILE;
 import static org.alfresco.transform.base.fs.FileManager.TARGET_FILE;
 import static org.alfresco.transform.base.fs.FileManager.deleteFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
  * Cleans up temporary files in transform requests that upload the content and download the result.

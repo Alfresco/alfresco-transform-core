@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2023 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -28,7 +28,7 @@ package org.alfresco.transform.base.messaging;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import javax.jms.Queue;
+import jakarta.jms.Queue;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;

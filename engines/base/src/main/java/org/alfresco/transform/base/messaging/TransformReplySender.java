@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2023 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,7 +26,7 @@
  */
 package org.alfresco.transform.base.messaging;
 
-import javax.jms.Destination;
+import jakarta.jms.Destination;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.slf4j.Logger;

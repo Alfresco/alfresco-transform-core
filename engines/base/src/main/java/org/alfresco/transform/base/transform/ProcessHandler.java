@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2022 - 2022 Alfresco Software Limited
+ * Copyright (C) 2022 - 2023 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -37,8 +37,8 @@ import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.registry.TransformServiceRegistry;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.jms.Destination;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.jms.Destination;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;

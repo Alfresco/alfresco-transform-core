@@ -45,6 +45,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.net.ssl.SSLException;
 
 /**
@@ -100,7 +101,7 @@ public class SharedFileStoreClient
         }
         catch (HttpClientErrorException e)
         {
-            throw new TransformException(e.getStatusCode(), e.getMessage(), e);
+            throw new TransformException(HttpStatus.resolve(e.getStatusCode().value()), e.getMessage(), e);
         }
     }
 
@@ -127,7 +128,7 @@ public class SharedFileStoreClient
         }
         catch (HttpClientErrorException e)
         {
-            throw new TransformException(e.getStatusCode(), e.getMessage(), e);
+            throw new TransformException(HttpStatus.resolve(e.getStatusCode().value()), e.getMessage(), e);
         }
     }
 

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2023 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -52,8 +52,8 @@ import org.springframework.validation.Errors;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.jms.Destination;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.jms.Destination;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -372,7 +372,7 @@ public class TransformHandler
         }
         catch (HttpClientErrorException e)
         {
-            throw new TransformException(e.getStatusCode(), messageWithCause("Failed to read the source from the SFS", e));
+            throw new TransformException(HttpStatus.resolve(e.getStatusCode().value()), messageWithCause("Failed to read the source from the SFS", e));
         }
     }
 
@@ -394,7 +394,7 @@ public class TransformHandler
         }
         catch (HttpClientErrorException e)
         {
-            throw new TransformException(e.getStatusCode(), messageWithCause(FAILED_WRITING_TO_SFS, e));
+            throw new TransformException(HttpStatus.resolve(e.getStatusCode().value()), messageWithCause(FAILED_WRITING_TO_SFS, e));
         }
         catch (Exception e)
         {

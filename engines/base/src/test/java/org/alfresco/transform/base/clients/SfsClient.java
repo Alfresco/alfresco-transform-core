@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2022 Alfresco Software, Ltd.  All rights reserved.
+ * Copyright 2015-2023 Alfresco Software, Ltd.  All rights reserved.
  *
  * License rights for this program may be obtained from Alfresco Software, Ltd.
  * pursuant to a written agreement and any use of this program without such an
@@ -22,17 +22,18 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 import org.alfresco.transform.base.MtlsTestUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.mime.FileBody;
+import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpEntityContainer;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
@@ -71,17 +72,17 @@ public class SfsClient
             sfsBaseUrl+"/alfresco/api/-default-/private/sfs/versions/1/file");
         post.setEntity(MultipartEntityBuilder
             .create()
-            .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+            .setMode(HttpMultipartMode.LEGACY)
             .addPart("file", new FileBody(file, ContentType.DEFAULT_BINARY))
             .build());
 
         try (CloseableHttpClient client = MtlsTestUtils.getHttpClient())
         {
             final HttpResponse response = client.execute(post);
-            int status = response.getStatusLine().getStatusCode();
+            int status = response.getCode();
             if (status >= 200 && status < 300)
             {
-                return JacksonSerializer.readStringValue(EntityUtils.toString(response.getEntity()),
+                return JacksonSerializer.readStringValue(EntityUtils.toString(((HttpEntityContainer) response).getEntity()),
                     "entry.fileRef");
             }
             else
@@ -137,7 +138,7 @@ public class SfsClient
         try (CloseableHttpClient client = MtlsTestUtils.getHttpClient())
         {
             final HttpResponse response = client.execute(head);
-            final int status = response.getStatusLine().getStatusCode();
+            final int status = response.getCode();
             return status >= 200 && status < 300;
         }
     }
@@ -156,12 +157,12 @@ public class SfsClient
         try (CloseableHttpClient client = MtlsTestUtils.getHttpClient())
         {
             final HttpResponse response = client.execute(get);
-            final int status = response.getStatusLine().getStatusCode();
+            final int status = response.getCode();
             if (status < 200 || status >= 300)
             {
                 throw new Exception("File with UUID " + uuid + " was not found on SFS");
             }
-            final HttpEntity entity = response.getEntity();
+            final HttpEntity entity = ((HttpEntityContainer) response).getEntity();
             if (entity == null)
             {
                 throw new Exception("Failed to read HTTP reply entity for file with UUID " + uuid);

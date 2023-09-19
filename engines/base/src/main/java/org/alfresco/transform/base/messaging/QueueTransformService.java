@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2023 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -39,9 +39,9 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
