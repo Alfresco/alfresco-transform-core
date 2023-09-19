@@ -34,7 +34,7 @@
                         <option value="text/plain">txt</option>
                     </select></td></tr>
 
-                <th:block th:each="i: ${#numbers.sequence(0, T(java.lang.Math).min(18, transformOptions.size) - 1)}">
+                <th:block th:each="i: ${#numbers.sequence(0, T(java.lang.Math).min(18, transformOptions.size()) - 1)}">
                     <tr><td><select th:name="${'name'+i}">
                         <option th:each="transformOption, iStat: ${transformOptions}"
                                 th:value="${transformOption}" th:text="${transformOption}"
@@ -42,7 +42,7 @@
                     </select></td><td><input type="text" th:name="${'value'+i}" /></td></tr>
                 </th:block>
 
-                <th:block th:each="i: ${#numbers.sequence(T(java.lang.Math).min(18, transformOptions.size), T(java.lang.Math).min(18, transformOptions.size) + 2)}">
+                <th:block th:each="i: ${#numbers.sequence(T(java.lang.Math).min(18, transformOptions.size()), T(java.lang.Math).min(18, transformOptions.size()) + 2)}">
                     <tr><td><input type="text" th:name="${'name'+i}" value="" /></td>
                         <td><input type="text" th:name="${'value'+i}" value="" /></td></tr>
                 </th:block>
