@@ -28,7 +28,7 @@ package org.alfresco.transform.base.messaging;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import javax.jms.Queue;
+import jakarta.jms.Queue;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;

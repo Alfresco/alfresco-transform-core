@@ -26,8 +26,8 @@
  */
 package org.alfresco.transformer.messaging;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Queue;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Queue;
 
 import org.alfresco.transform.messages.TransformRequestValidator;
 import org.apache.activemq.command.ActiveMQQueue;

@@ -31,9 +31,9 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.util.Optional;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;

@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.registry.AbstractTransformRegistry;

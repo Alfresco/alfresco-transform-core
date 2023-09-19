@@ -26,7 +26,7 @@
  */
 package org.alfresco.transform.base.messaging;
 
-import javax.jms.Destination;
+import jakarta.jms.Destination;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.slf4j.Logger;

@@ -52,7 +52,7 @@ import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.THUMBNAIL;
 import static org.alfresco.transform.common.RequestParamMap.TIMEOUT;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;

@@ -30,11 +30,11 @@ import static org.alfresco.transformer.fs.FileManager.SOURCE_FILE;
 import static org.alfresco.transformer.fs.FileManager.TARGET_FILE;
 import static org.alfresco.transformer.fs.FileManager.deleteFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.alfresco.transformer.logging.LogEntry;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
@@ -44,7 +44,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  * Handles ThreadLocal Log entries for each request.
  */
 @Deprecated
-public class TransformInterceptor extends HandlerInterceptorAdapter
+public class TransformInterceptor implements AsyncHandlerInterceptor
 {
     @Override
     public boolean preHandle(HttpServletRequest request,

@@ -39,9 +39,9 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;

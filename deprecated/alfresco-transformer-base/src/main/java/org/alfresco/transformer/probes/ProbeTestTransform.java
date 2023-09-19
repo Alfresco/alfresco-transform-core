@@ -42,7 +42,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.AbstractTransformerController;

@@ -1,10 +1,17 @@
 package org.alfresco.transform.base;
 
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.http.config.Registry;
+import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.apache.hc.core5.http.ssl.TLS;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
@@ -59,10 +66,26 @@ public class MtlsTestUtils {
                 .loadTrustMaterial(trustStore, trustStorePassword);
 
         SSLContext sslContext = sslContextBuilder.build();
-        SSLConnectionSocketFactory sslContextFactory = HOSTNAME_VERIFICATION_DISABLED ? new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE)
-                : new SSLConnectionSocketFactory(sslContext);
 
-        return HttpClients.custom().setSSLSocketFactory(sslContextFactory).build();
+        return HttpClients.custom().setConnectionManager(buildSslConnectionManager(sslContext)).build();
+    }
+
+    private static HttpClientConnectionManager buildSslConnectionManager(SSLContext sslContext) {
+        final SSLConnectionSocketFactoryBuilder sslConnectionSocketFactoryBuilder =
+                SSLConnectionSocketFactoryBuilder.create()
+                        .setSslContext(sslContext)
+                        .setTlsVersions(TLS.V_1_2, TLS.V_1_3);
+        if (HOSTNAME_VERIFICATION_DISABLED) {
+            sslConnectionSocketFactoryBuilder.setHostnameVerifier(NoopHostnameVerifier.INSTANCE);
+        }
+        final SSLConnectionSocketFactory sslConnectionSocketFactory = sslConnectionSocketFactoryBuilder.build();
+
+        final Registry<ConnectionSocketFactory> sslSocketFactoryRegistry =
+                RegistryBuilder.<ConnectionSocketFactory> create()
+                        .register("https", sslConnectionSocketFactory)
+                        .build();
+
+        return new BasicHttpClientConnectionManager(sslSocketFactoryRegistry);
     }
 
     public static RestTemplate restTemplateWithMtls()

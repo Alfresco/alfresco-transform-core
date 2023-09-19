@@ -39,6 +39,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
@@ -73,7 +74,7 @@ public class AlfrescoSharedFileStoreClient
         }
         catch (HttpClientErrorException e)
         {
-            throw new TransformException(e.getStatusCode(), e.getMessage(), e);
+            throw new TransformException(HttpStatus.resolve(e.getStatusCode().value()), e.getMessage(), e);
         }
     }
 
@@ -100,7 +101,7 @@ public class AlfrescoSharedFileStoreClient
         }
         catch (HttpClientErrorException e)
         {
-            throw new TransformException(e.getStatusCode(), e.getMessage(), e);
+            throw new TransformException(HttpStatus.resolve(e.getStatusCode().value()), e.getMessage(), e);
         }
     }
 }

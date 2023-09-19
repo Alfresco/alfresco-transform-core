@@ -39,9 +39,9 @@ import org.springframework.jms.support.converter.MessageType;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Session;
 
 /**
  * Copied from the t-router. We would need to create a common dependency between t-engine base and t-router that

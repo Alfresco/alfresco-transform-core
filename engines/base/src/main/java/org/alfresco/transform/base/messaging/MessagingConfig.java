@@ -40,8 +40,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Queue;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Queue;
 
 /**
  * JMS and messaging configuration for the T-Engines. Contains the basic config in order to have the
