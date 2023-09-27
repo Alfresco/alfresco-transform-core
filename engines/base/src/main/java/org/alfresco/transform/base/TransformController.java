@@ -68,6 +68,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.text.MessageFormat.format;
 import static org.alfresco.transform.base.html.OptionsHelper.getOptionNames;
@@ -115,6 +116,7 @@ public class TransformController
     private boolean behindIngres;
 
     TransformEngine transformEngine;
+    private final AtomicReference<ProbeTransform> probeTransform = new AtomicReference<>();
 
     @PostConstruct
     private void initTransformEngine()
@@ -247,7 +249,17 @@ public class TransformController
 
     public ProbeTransform getProbeTransform()
     {
-        return transformEngine.getProbeTransform();
+        ProbeTransform probe = probeTransform.get();
+        if (probe != null)
+        {
+            return probe;
+        }
+        probe = transformEngine.getProbeTransform();
+        if (probeTransform.compareAndSet(null, probe))
+        {
+            return probe;
+        }
+        return probeTransform.get();
     }
 
     @GetMapping(value = ENDPOINT_TRANSFORM_CONFIG)

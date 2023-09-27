@@ -176,11 +176,15 @@ public class ProbeTransform
         {
             return doNothing(true);
         }
-        return (isLiveProbe && livenessTransformPeriod > 0 &&
+
+        String result = (isLiveProbe && livenessTransformPeriod > 0 &&
                 (transCount <= AVERAGE_OVER_TRANSFORMS || nextTransformTime < System.currentTimeMillis()))
                || !initialised.get()
                ? doTransform(isLiveProbe, transformHandler)
                : doNothing(isLiveProbe);
+        
+        checkMaxTransformTimeAndCount(isLiveProbe);
+        return result;
     }
 
     private String doNothing(boolean isLiveProbe)
@@ -196,8 +200,6 @@ public class ProbeTransform
 
     private String doTransform(boolean isLiveProbe, TransformHandler transformHandler)
     {
-        checkMaxTransformTimeAndCount(isLiveProbe);
-
         long start = System.currentTimeMillis();
 
         if (nextTransformTime != 0)
@@ -230,8 +232,6 @@ public class ProbeTransform
         // We don't care if the ready or live probe works out if we are 'ready' to take requests.
         initialised.set(true);
 
-        checkMaxTransformTimeAndCount(isLiveProbe);
-
         return getProbeMessage(isLiveProbe) + "Success - "+message;
     }
 
@@ -254,7 +254,6 @@ public class ProbeTransform
 
     private File getSourceFile(boolean isLiveProbe)
     {
-        incrementTransformerCount();
         File sourceFile = createTempFile("probe_source_", "_" + sourceFilename);
         try (InputStream inputStream = getClass().getResourceAsStream('/' + sourceFilename))
         {
