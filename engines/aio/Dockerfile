@@ -19,7 +19,9 @@ ARG LIBREOFFICE_VERSION=7.2.5
 ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz
 ENV LIBREOFFICE_ARM64_RPM_URL=https://dl.rockylinux.org/pub/rocky/8/Devel/aarch64/os/Packages/l/libreoffice-6.4.7.2-13.el8.aarch64.rpm
 
-ENV ALFRESCO_PDF_RENDERER_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-pdf-renderer/1.1/alfresco-pdf-renderer-1.1-linux.tgz
+ARG PDF_RENDERER_VERSION=1.2
+ENV ALFRESCO_PDF_RENDERER_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-pdf-renderer/${PDF_RENDERER_VERSION}/alfresco-pdf-renderer-${PDF_RENDERER_VERSION}-linux.tgz
+ENV ALFRESCO_PDF_RENDERER_ARM64_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-pdf-renderer/${PDF_RENDERER_VERSION}/alfresco-pdf-renderer-${PDF_RENDERER_VERSION}-linux-arm.tgz
 
 ENV JAVA_OPTS=""
 
@@ -35,10 +37,10 @@ COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     yum install -y $IMAGEMAGICK_DEP_RPM_URL && \
     if [ "$(uname -m)" = "x86_64" ]; then \
-                yum install -y ${IMAGEMAGICK_RPM_URL}-el8.rpm ${IMAGEMAGICK_RPM_URL}-el8-libs.rpm; \
-            else \
-                yum install -y ${IMAGEMAGICK_RPM_URL}-arm64.rpm ${IMAGEMAGICK_RPM_URL}-arm64-libs.rpm; \
-            fi && \
+      yum install -y ${IMAGEMAGICK_RPM_URL}-el8.rpm ${IMAGEMAGICK_RPM_URL}-el8-libs.rpm; \
+    else \
+      yum install -y ${IMAGEMAGICK_RPM_URL}-arm64.rpm ${IMAGEMAGICK_RPM_URL}-arm64-libs.rpm; \
+    fi && \
     yum install -y cairo cups-libs libSM libGLU && \
     if [ "$(uname -m)" = "x86_64" ]; then \
       test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
@@ -51,9 +53,13 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
       dnf --enablerepo=devel install -y $LIBREOFFICE_ARM64_RPM_URL && \
       update-alternatives --set java java-17-openjdk.aarch64; \
     fi && \
-    curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz && \
+    if [ "$(uname -m)" = "x86_64" ]; then \
+      curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz; \
+    else \
+      curl -s -S $ALFRESCO_PDF_RENDERER_ARM64_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz; \
+    fi && \
     tar xf alfresco-pdf-renderer-linux.tgz -C /usr/bin && \
-	rm -f alfresco-pdf-renderer-linux.tgz && \
+    rm -f alfresco-pdf-renderer-linux.tgz && \
     curl -s -S $EXIFTOOL_URL -o ${EXIFTOOL_FOLDER}.tgz && \
     tar xzf ${EXIFTOOL_FOLDER}.tgz && \
     yum -y install perl perl-ExtUtils-MakeMaker make && \

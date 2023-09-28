@@ -4,7 +4,9 @@
 
 FROM alfresco/alfresco-base-java:jre17-rockylinux8-202306121108
 
-ENV ALFRESCO_PDF_RENDERER_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-pdf-renderer/1.1/alfresco-pdf-renderer-1.1-linux.tgz
+ARG PDF_RENDERER_VERSION=1.2
+ENV ALFRESCO_PDF_RENDERER_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-pdf-renderer/${PDF_RENDERER_VERSION}/alfresco-pdf-renderer-${PDF_RENDERER_VERSION}-linux.tgz
+ENV ALFRESCO_PDF_RENDERER_ARM64_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-pdf-renderer/${PDF_RENDERER_VERSION}/alfresco-pdf-renderer-${PDF_RENDERER_VERSION}-linux-arm.tgz
 ENV JAVA_OPTS=""
 
 # Set default user information
@@ -16,7 +18,11 @@ ARG USERID=33001
 COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 
 RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
-    curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz && \
+    if [ "$(uname -m)" = "x86_64" ]; then \
+      curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz; \
+    else \
+      curl -s -S $ALFRESCO_PDF_RENDERER_ARM64_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz; \
+    fi && \
     tar xf alfresco-pdf-renderer-linux.tgz -C /usr/bin && \
 	rm -f alfresco-pdf-renderer-linux.tgz && \
     yum clean all
