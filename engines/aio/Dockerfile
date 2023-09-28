@@ -37,10 +37,10 @@ COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     yum install -y $IMAGEMAGICK_DEP_RPM_URL && \
     if [ "$(uname -m)" = "x86_64" ]; then \
-                yum install -y ${IMAGEMAGICK_RPM_URL}-el8.rpm ${IMAGEMAGICK_RPM_URL}-el8-libs.rpm; \
-            else \
-                yum install -y ${IMAGEMAGICK_RPM_URL}-arm64.rpm ${IMAGEMAGICK_RPM_URL}-arm64-libs.rpm; \
-            fi && \
+      yum install -y ${IMAGEMAGICK_RPM_URL}-el8.rpm ${IMAGEMAGICK_RPM_URL}-el8-libs.rpm; \
+    else \
+      yum install -y ${IMAGEMAGICK_RPM_URL}-arm64.rpm ${IMAGEMAGICK_RPM_URL}-arm64-libs.rpm; \
+    fi && \
     yum install -y cairo cups-libs libSM libGLU && \
     if [ "$(uname -m)" = "x86_64" ]; then \
       test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
@@ -54,14 +54,12 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
       update-alternatives --set java java-17-openjdk.aarch64; \
     fi && \
     if [ "$(uname -m)" = "x86_64" ]; then \
-      curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz && \
-      tar xf alfresco-pdf-renderer-linux.tgz -C /usr/bin && \
-      rm -f alfresco-pdf-renderer-linux.tgz; \
+      curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz; \
     else \
-      curl -s -S $ALFRESCO_PDF_RENDERER_ARM64_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz && \
-      tar xf alfresco-pdf-renderer-linux.tgz -C /usr/bin && \
-      rm -f alfresco-pdf-renderer-linux.tgz; \
+      curl -s -S $ALFRESCO_PDF_RENDERER_ARM64_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz; \
     fi && \
+    tar xf alfresco-pdf-renderer-linux.tgz -C /usr/bin && \
+    rm -f alfresco-pdf-renderer-linux.tgz && \
     curl -s -S $EXIFTOOL_URL -o ${EXIFTOOL_FOLDER}.tgz && \
     tar xzf ${EXIFTOOL_FOLDER}.tgz && \
     yum -y install perl perl-ExtUtils-MakeMaker make && \
