@@ -26,7 +26,7 @@
         <dependency.jackson.version>2.15.2</dependency.jackson.version>
         <dependency.tika.version>2.4.1</dependency.tika.version>
         <dependency.poi.version>5.2.2</dependency.poi.version>
-        <dependency.poi-ooxml-lite.version>5.2.3</dependency.poi-ooxml-lite.version>
+        <dependency.poi-ooxml-lite.version>5.2.4</dependency.poi-ooxml-lite.version>
         <dependency.snakeyaml.version>2.2</dependency.snakeyaml.version>
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
