@@ -66,7 +66,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_READY;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -84,6 +86,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest(classes={org.alfresco.transform.base.Application.class})
 @AutoConfigureMockMvc
+
 public abstract class AbstractBaseTest
 {
     // Added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test
@@ -309,6 +312,28 @@ public abstract class AbstractBaseTest
                .andExpect(content().bytes(expectedTargetFileBytes))
                .andExpect(header().string("Content-Disposition",
                    "attachment; filename*=UTF-8''transform." + targetExtension));
+    }
+
+    @Test
+    public void readinessShouldReturnAnErrorAfterReachingMaxTransforms() throws Exception
+    {
+        controller.getProbeTransform().setLivenessTransformEnabled(true);
+        controller.getProbeTransform().setMaxTransformCount(10);
+
+        int max_transforms = 11;
+        for (int i = 0; i<max_transforms; i++) {
+            mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
+                            .andExpect(status().isOk())
+                            .andExpect(content().bytes(expectedTargetFileBytes))
+                            .andExpect(header().string("Content-Disposition",
+                            "attachment; filename*=UTF-8''transform." + targetExtension));
+        }
+
+        mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_READY))
+                        .andExpect(status().isTooManyRequests())
+                        .andExpect(content().string(containsString("10 transformations")));
+
+        controller.getProbeTransform().setLivenessTransformEnabled(false);
     }
 
     @Test

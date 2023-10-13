@@ -93,9 +93,9 @@ public class ProbeTransform
     private long maxTime = Long.MAX_VALUE;
     private long nextTransformTime;
 
-    private final boolean livenessTransformEnabled;
+    private boolean livenessTransformEnabled;
     private final long livenessTransformPeriod;
-    private final long maxTransformCount;
+    private long maxTransformCount;
     private long maxTransformTime;
 
     private final AtomicBoolean initialised = new AtomicBoolean(false);
@@ -164,6 +164,16 @@ public class ProbeTransform
         }
         logger.trace("Probe: {}={}", name, l);
         return l;
+    }
+
+    public void setLivenessTransformEnabled(boolean enabled)
+    {
+        livenessTransformEnabled = enabled;
+    }
+
+    public void setMaxTransformCount(long transforms)
+    {
+        maxTransformCount = transforms;
     }
 
     // We don't want to be doing test transforms every few seconds, but do want frequent live probes.
