@@ -271,16 +271,12 @@ public class FileManager
 
             final File systemTempDir = new File(systemTempDirPath);
             final File tempDir = new File(systemTempDir, dirName);
-
-            int retrieveTempDirAttemptLimit = 5;
-            for (int i = 0; i < retrieveTempDirAttemptLimit; i++) {
-                if (tempDir.exists() || tempDir.mkdirs())
-                {
-                    return tempDir;
-                }
+            if (!tempDir.exists() && !tempDir.mkdirs() && !tempDir.exists())
+            {
+                throw new RuntimeException("Failed to create temp directory: " + tempDir);
             }
 
-            throw new RuntimeException("Failed to create temp directory: " + tempDir);
+            return tempDir;
         }
     }
 }
