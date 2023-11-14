@@ -201,7 +201,7 @@
                                 <configuration>
                                     <images>
                                         <image>
-                                            <name>alfresco/alfresco-activemq:5.17.6-jre17-rockylinux8</name>
+                                            <name>alfresco/alfresco-activemq:5.18.3-jre17-rockylinux8</name>
                                             <run>
                                                 <hostname>activemq</hostname>
                                                 <ports>
