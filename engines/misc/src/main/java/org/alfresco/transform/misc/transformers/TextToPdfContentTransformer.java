@@ -31,6 +31,8 @@ import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.tools.TextToPDF;
 import org.slf4j.Logger;
@@ -48,12 +50,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.Reader;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.alfresco.transform.common.RequestParamMap.PAGE_LIMIT;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+import static org.alfresco.transform.common.RequestParamMap.PDF_FONT;
+import static org.alfresco.transform.common.RequestParamMap.PDF_FONT_SIZE;
 
 /**
  * <p>
@@ -81,6 +86,11 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
 
     private final PagedTextToPDF transformer;
 
+    protected static final String NOTOSANS_REGULAR = "NotoSans-Regular";
+    protected static final String NOTOSANS_BOLD = "NotoSans-Bold";
+    protected static final String NOTOSANS_ITALIC = "NotoSans-Italic";
+    protected static final String NOTOSANS_BOLD_ITALIC = "NotoSans-BoldItalic";
+
     public TextToPdfContentTransformer()
     {
         transformer = new PagedTextToPDF();
@@ -90,7 +100,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
     {
         try
         {
-            transformer.setFont(PagedTextToPDF.getStandardFont(fontName));
+            transformer.setFont(fontName);
         }
         catch (Throwable e)
         {
@@ -130,6 +140,20 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         {
             pageLimit = parseInt(stringPageLimit, PAGE_LIMIT);
         }
+        String pdfFont = transformOptions.get(PDF_FONT);
+        String pdfFontSize = transformOptions.get(PDF_FONT_SIZE);
+        Integer fontSize = null;
+        if (pdfFontSize != null)
+        {
+            try
+            {
+                fontSize = parseInt(pdfFontSize, PDF_FONT_SIZE);
+            }
+            catch (Exception e)
+            {
+                fontSize = 10;
+            }
+        }
 
         PDDocument pdf = null;
         try (InputStream is = new FileInputStream(sourceFile);
@@ -138,7 +162,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         {
             //TransformationOptionLimits limits = getLimits(reader, writer, options);
             //TransformationOptionPair pageLimits = limits.getPagesPair();
-            pdf = transformer.createPDFFromText(ir, pageLimit);
+            pdf = transformer.createPDFFromText(ir, pageLimit, pdfFont, fontSize);
             pdf.save(os);
         }
         finally
@@ -231,22 +255,32 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         }
         //duplicating until here
 
+        private String fontName = null;
+        private boolean fontChanged = false;
+
         // The following code is based on the code in TextToPDF with the addition of
         // checks for page limits.
         // The calling code must close the PDDocument once finished with it.
-        public PDDocument createPDFFromText(Reader text, int pageLimit)
+        public PDDocument createPDFFromText(Reader text, int pageLimit, String pdfFontName, Integer pdfFontSize)
             throws IOException
         {
             PDDocument doc = null;
             int pageCount = 0;
             try
             {
+                doc = new PDDocument();
+
+                final PDFont font = getFont(doc, pdfFontName);
+                final int fontSize = pdfFontSize != null ? pdfFontSize : getFontSize();
+
+                logger.debug("Going to use font " + font.getName() + " with size " + fontSize);
+
                 final int margin = 40;
-                float height = getFont().getFontDescriptor().getFontBoundingBox().getHeight() / 1000;
+                float height = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000;
 
                 //calculate font height and increase by 5 percent.
-                height = height * getFontSize() * 1.05f;
-                doc = new PDDocument();
+                height = height * fontSize * 1.05f;
+
                 BufferedReader data = (text instanceof BufferedReader) ? (BufferedReader) text : new BufferedReader(text);
                 String nextLine;
                 PDPage page = new PDPage();
@@ -280,8 +314,8 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                             {
                                 String lineWithNextWord = nextLineToDraw.toString() + lineWords[lineIndex];
                                 lengthIfUsingNextWord =
-                                    (getFont().getStringWidth(
-                                        lineWithNextWord) / 1000) * getFontSize();
+                                    (font.getStringWidth(
+                                        lineWithNextWord) / 1000) * fontSize;
                             }
                         }
                         while (lineIndex < lineWords.length &&
@@ -304,7 +338,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                                 contentStream.close();
                             }
                             contentStream = new PDPageContentStream(doc, page);
-                            contentStream.setFont(getFont(), getFontSize());
+                            contentStream.setFont(font, fontSize);
                             contentStream.beginText();
                             y = page.getMediaBox().getHeight() - margin + height;
                             contentStream.moveTextPositionByAmount(margin, y);
@@ -343,6 +377,74 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                 throw io;
             }
             return doc;
+        }
+
+        public void setFont(String aFontName)
+        {
+            PDType1Font font = PagedTextToPDF.getStandardFont(aFontName);
+
+            if (font != null)
+            {
+                super.setFont(font);
+                this.fontChanged = true;
+            }
+            else
+            {
+                this.fontChanged = false;
+            }
+
+            this.fontName = aFontName;
+        }
+
+        private PDFont getFont(PDDocument doc, String name)
+        {
+            PDFont font = null;
+
+            if (name == null && !fontChanged)
+            {
+                name = fontName != null ? fontName : NOTOSANS_REGULAR;
+            }
+
+            try
+            {
+                if (name != null)
+                {
+                    String location = "fonts" + System.getProperty("file.separator") + name + ".ttf";
+                    ClassLoader loader = TextToPdfContentTransformer.class.getClassLoader();
+                    File fontFile = null;
+
+                    if (null != loader)
+                    {
+                        URL resource = loader.getResource(location);
+                        if (resource != null)
+                        {
+                            String file = resource.getFile();
+                            if (file != null && !file.isEmpty())
+                            {
+                                fontFile = new File(file);
+                            }
+                        }
+                    }
+
+                    if (null != fontFile)
+                    {
+                        PDDocument documentMock = new PDDocument();
+                        font = PDType0Font.load(documentMock, fontFile);
+                    }
+                }
+            }
+            catch (IOException e)
+            {
+                String msg = "Error loading font " + name + " :" + e.getMessage();
+                logger.error(msg, e);
+            }
+
+            if (font == null)
+            {
+                font = getFont();
+            }
+
+            return font;
         }
     }
 

@@ -45,11 +45,18 @@ import java.util.Map;
 
 import static org.alfresco.transform.common.RequestParamMap.PAGE_LIMIT;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+import static org.alfresco.transform.common.RequestParamMap.PDF_FONT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.alfresco.transform.misc.transformers.TextToPdfContentTransformer.NOTOSANS_REGULAR;
+import static org.alfresco.transform.misc.transformers.TextToPdfContentTransformer.NOTOSANS_BOLD;
+import static org.alfresco.transform.misc.transformers.TextToPdfContentTransformer.NOTOSANS_ITALIC;
+import static org.alfresco.transform.misc.transformers.TextToPdfContentTransformer.NOTOSANS_BOLD_ITALIC;;
 
 public class TextToPdfContentTransformerTest
 {
     TextToPdfContentTransformer transformer = new TextToPdfContentTransformer();
+
+    private static final String TEXT_WITH_ABREVE = "Gămbardella, Matthew, Corets, Evă";
 
     @BeforeEach
     public void setUp()
@@ -146,6 +153,63 @@ public class TextToPdfContentTransformerTest
         transformTextAndCheck("UTF-8", null, false, "31 20 49 20 6d 75 73 74");
     }
 
+    @Test
+    public void testMNT23960_NotoSansRegular() throws Exception
+    {
+        transformer.setStandardFont(NOTOSANS_REGULAR);
+
+        File sourceFile = File.createTempFile("TMP_NotoSans-Regular", ".txt");
+        String encoding = "UTF-8";
+
+        writeToFile(sourceFile, TEXT_WITH_ABREVE, encoding, null, null);
+
+        transformTextAndCheck(sourceFile, encoding, TEXT_WITH_ABREVE, String.valueOf(-1));
+
+        transformer.setStandardFont("Times-Roman");
+    }
+
+    @Test
+    public void testMNT23960_NotoSansBold() throws Exception
+    {
+        File sourceFile = File.createTempFile("TMP_NotoSans-Bold", ".txt");
+        String encoding = "UTF-8";
+
+        writeToFile(sourceFile, TEXT_WITH_ABREVE, encoding, null, null);
+
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put(PDF_FONT, NOTOSANS_BOLD);
+
+        transformTextAndCheck(sourceFile, encoding, TEXT_WITH_ABREVE, String.valueOf(-1), true, parameters);
+    }
+
+    @Test
+    public void testMNT23960_NotoSansItalic() throws Exception
+    {
+        File sourceFile = File.createTempFile("TMP_NotoSans-Italic", ".txt");
+        String encoding = "UTF-8";
+
+        writeToFile(sourceFile, TEXT_WITH_ABREVE, encoding, null, null);
+
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put(PDF_FONT, NOTOSANS_ITALIC);
+
+        transformTextAndCheck(sourceFile, encoding, TEXT_WITH_ABREVE, String.valueOf(-1), true, parameters);
+    }
+
+    @Test
+    public void testMNT23960_NotoSansBoldItalic() throws Exception
+    {
+        File sourceFile = File.createTempFile("TMP_NotoSans-BoldItalic", ".txt");
+        String encoding = "UTF-8";
+
+        writeToFile(sourceFile, TEXT_WITH_ABREVE, encoding, null, null);
+
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put(PDF_FONT, NOTOSANS_BOLD_ITALIC);
+
+        transformTextAndCheck(sourceFile, encoding, TEXT_WITH_ABREVE, String.valueOf(-1), true, parameters);
+    }
+
     /**
      * @param encoding to be used to read the source file
      * @param bigEndian indicates that the file should contain big endian characters, so typically the first byte of
@@ -206,6 +270,12 @@ public class TextToPdfContentTransformerTest
     private void transformTextAndCheck(File sourceFile, String encoding, String checkText,
         String pageLimit) throws Exception
     {
+        transformTextAndCheck(sourceFile, encoding, checkText, pageLimit, true, null);
+    }
+
+    private void transformTextAndCheck(File sourceFile, String encoding, String checkText,
+        String pageLimit, boolean clean, Map<String, String> extraParameters) throws Exception
+    {
         // And a temp writer
         File targetFile = File.createTempFile("AlfrescoTestTarget_", ".pdf");
 
@@ -213,6 +283,10 @@ public class TextToPdfContentTransformerTest
         Map<String, String> parameters = new HashMap<>();
         parameters.put(PAGE_LIMIT, pageLimit);
         parameters.put(SOURCE_ENCODING, encoding);
+        if (extraParameters != null)
+        {
+            parameters.putAll(extraParameters);
+        }
         transformer.transform("text/plain", "application/pdf", parameters, sourceFile, targetFile, null);
 
         // Read back in the PDF and check it
