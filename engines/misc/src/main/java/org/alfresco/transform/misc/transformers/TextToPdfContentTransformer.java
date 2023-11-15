@@ -50,7 +50,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.Reader;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -90,6 +89,9 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
     protected static final String NOTOSANS_BOLD = "NotoSans-Bold";
     protected static final String NOTOSANS_ITALIC = "NotoSans-Italic";
     protected static final String NOTOSANS_BOLD_ITALIC = "NotoSans-BoldItalic";
+
+    protected static final String DEFAULT_FONT = NOTOSANS_REGULAR;
+    protected static final int DEFAULT_FONT_SIZE = 10;
 
     public TextToPdfContentTransformer()
     {
@@ -151,7 +153,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
             }
             catch (Exception e)
             {
-                fontSize = 10;
+                fontSize = DEFAULT_FONT_SIZE;
             }
         }
 
@@ -403,7 +405,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
 
             if (name == null && !fontChanged)
             {
-                name = fontName != null ? fontName : NOTOSANS_REGULAR;
+                name = fontName != null ? fontName : DEFAULT_FONT;
             }
 
             try
