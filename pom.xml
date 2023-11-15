@@ -189,6 +189,16 @@
                 <artifactId>activemq-client</artifactId>
                 <version>${dependency.activemq.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>activemq-broker</artifactId>
+                <version>${dependency.activemq.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>activemq-openwire-legacy</artifactId>
+                <version>${dependency.activemq.version}</version>
+            </dependency>
             <!-- Google Guava -->
             <dependency>
                 <groupId>com.google.guava</groupId>
