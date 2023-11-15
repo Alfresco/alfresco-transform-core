@@ -399,6 +399,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         private PDFont getFont(PDDocument doc, String name)
         {
             PDFont font = null;
+            InputStream fontIS = null;
 
             if (name == null && !fontChanged)
             {
@@ -410,33 +411,38 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                 if (name != null)
                 {
                     String location = "fonts" + System.getProperty("file.separator") + name + ".ttf";
-                    ClassLoader loader = TextToPdfContentTransformer.class.getClassLoader();
-                    File fontFile = null;
+                    ClassLoader loader = PagedTextToPDF.class.getClassLoader();
 
                     if (null != loader)
                     {
-                        URL resource = loader.getResource(location);
-                        if (resource != null)
-                        {
-                            String file = resource.getFile();
-                            if (file != null && !file.isEmpty())
-                            {
-                                fontFile = new File(file);
-                            }
-                        }
+                        fontIS = loader.getResourceAsStream(location);
                     }
 
-                    if (null != fontFile)
+                    if (null != fontIS)
                     {
                         PDDocument documentMock = new PDDocument();
-                        font = PDType0Font.load(documentMock, fontFile);
+                        font = PDType0Font.load(documentMock, fontIS);
                     }
                 }
             }
-            catch (IOException e)
+            catch (IOException ioe)
             {
-                String msg = "Error loading font " + name + " :" + e.getMessage();
-                logger.error(msg, e);
+                String msg = "Error loading font " + name + " :" + ioe.getMessage();
+                logger.error(msg, ioe);
+            }
+            finally
+            {
+                if (fontIS != null)
+                {
+                    try
+                    {
+                        fontIS.close();
+                    }
+                    catch (Exception e)
+                    {
+                        logger.error("Error closing font inputstream: " + e.getMessage());
+                    }
+                }
             }
 
             if (font == null)
