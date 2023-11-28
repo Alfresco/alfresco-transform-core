@@ -33,6 +33,6 @@ import org.alfresco.transform.base.LivenessReadinessProbeTest;
 public class TikaLivenessReadinessProbeTest extends LivenessReadinessProbeTest {
     @Override
     protected ImagesForTests getImageForTest() {
-        return new ImagesForTests("tika", "alfresco-tika", "text/plain", "text/plain", "original.txt");
+        return new ImagesForTests("alfresco-tika", "text/plain", "text/plain", "original.txt");
     }
 }

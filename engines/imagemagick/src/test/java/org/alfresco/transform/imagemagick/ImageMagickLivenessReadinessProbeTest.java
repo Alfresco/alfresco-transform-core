@@ -32,6 +32,6 @@ import org.alfresco.transform.base.LivenessReadinessProbeTest;
 public class ImageMagickLivenessReadinessProbeTest extends LivenessReadinessProbeTest {
     @Override
     protected ImagesForTests getImageForTest() {
-        return new ImagesForTests("imagemagick", "alfresco-imagemagick", "image/jpeg", "image/png", "test.jpeg");
+        return new ImagesForTests("alfresco-imagemagick", "image/jpeg", "image/png", "test.jpeg");
     }
 }

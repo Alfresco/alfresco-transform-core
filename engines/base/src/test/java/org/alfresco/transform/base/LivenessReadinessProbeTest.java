@@ -23,7 +23,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 public abstract class LivenessReadinessProbeTest
 {
     @Test
-    public void readinessShouldReturnAn429ErrorAfterReachingMaxTransforms() throws URISyntaxException {
+    public void readinessShouldReturnAn429ErrorAfterReachingMaxTransforms() throws URISyntaxException
+    {
         final ImagesForTests testData = getImageForTest();
 
         try (final var env = createEnv(testData.image))
@@ -59,16 +60,13 @@ public abstract class LivenessReadinessProbeTest
 
     protected static class ImagesForTests
     {
-        private final String name;
         private final String image;
-
         private final String sourceMimetype;
         private final String targetMimetype;
         private final String filename;
 
-        public ImagesForTests(String name, String image, String sourceMimetype, String targetMimetype, String filename)
+        public ImagesForTests(String image, String sourceMimetype, String targetMimetype, String filename)
         {
-            this.name = Objects.requireNonNull(name);
             this.image = Objects.requireNonNull(image);
             this.sourceMimetype = Objects.requireNonNull(sourceMimetype);
             this.targetMimetype = Objects.requireNonNull(targetMimetype);
@@ -76,7 +74,8 @@ public abstract class LivenessReadinessProbeTest
         }
     }
 
-    private void sendTransformRequest(String url, String sourceMimetype, String targetMimetype, String filename) {
+    private void sendTransformRequest(String url, String sourceMimetype, String targetMimetype, String filename)
+    {
         var builder = createRequestBuilder(sourceMimetype, targetMimetype, filename);
         WebClient client = WebClient.create();
         WebClient.ResponseSpec responseSpec = client.post()
@@ -88,7 +87,8 @@ public abstract class LivenessReadinessProbeTest
         assertEquals(OK, responseSpec.toBodilessEntity().block().getStatusCode());
     }
 
-    private MultipartBodyBuilder createRequestBuilder(String sourceMimetype, String targetMimetype, String filename) {
+    private MultipartBodyBuilder createRequestBuilder(String sourceMimetype, String targetMimetype, String filename)
+    {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("_sourceMimetype", sourceMimetype);
         builder.part("_targetMimetype", targetMimetype);
@@ -97,7 +97,8 @@ public abstract class LivenessReadinessProbeTest
         return builder;
     }
 
-    private static void assertProbeDied(String url) {
+    private static void assertProbeDied(String url)
+    {
         WebTestClient client = WebTestClient.bindToServer().baseUrl(url+"/ready").build();
         client.get()
                 .exchange()

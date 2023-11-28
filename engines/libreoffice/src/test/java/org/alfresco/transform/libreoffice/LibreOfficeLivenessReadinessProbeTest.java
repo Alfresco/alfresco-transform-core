@@ -32,6 +32,6 @@ import org.alfresco.transform.base.LivenessReadinessProbeTest;
 public class LibreOfficeLivenessReadinessProbeTest extends LivenessReadinessProbeTest {
     @Override
     protected ImagesForTests getImageForTest() {
-        return new ImagesForTests("libreoffice", "alfresco-libreoffice", "text/plain", "application/pdf", "original.txt");
+        return new ImagesForTests("alfresco-libreoffice", "text/plain", "application/pdf", "original.txt");
     }
 }
