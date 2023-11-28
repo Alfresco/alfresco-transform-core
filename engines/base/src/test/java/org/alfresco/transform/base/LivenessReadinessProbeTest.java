@@ -1,7 +1,6 @@
 package org.alfresco.transform.base;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 
@@ -12,7 +11,6 @@ import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.net.URISyntaxException;
 
-import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,17 +20,16 @@ import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
 import org.springframework.web.reactive.function.client.WebClient;
 
-public class LivenessReadinessProbeTest
+public abstract class LivenessReadinessProbeTest
 {
-    protected String url;
+    @Test
+    public void readinessShouldReturnAn429ErrorAfterReachingMaxTransforms() throws URISyntaxException {
+        final ImagesForTests testData = getImageForTest();
 
-    @ParameterizedTest
-    @MethodSource ("containers")
-    public void readinessShouldReturnAn429ErrorAfterReachingMaxTransforms(final ImagesForTests testData) throws URISyntaxException {
         try (final var env = createEnv(testData.image))
         {
             env.start();
-            url = "http://localhost:" + env.getFirstMappedPort();
+            var url = "http://localhost:" + env.getFirstMappedPort();
 
             int max_transforms = 11;
             for (int i = 0; i<max_transforms; i++) {
@@ -46,6 +43,8 @@ public class LivenessReadinessProbeTest
         }
     }
 
+    protected abstract ImagesForTests getImageForTest();
+
     private GenericContainer<?> createEnv(String image) throws URISyntaxException
     {
         System.out.println(image);
@@ -58,19 +57,7 @@ public class LivenessReadinessProbeTest
             .waitingFor(Wait.forListeningPort());
     }
 
-    private static List<ImagesForTests> containers()
-    {
-        final var allContainers = List.of(
-                new ImagesForTests("imagemagick", "alfresco-imagemagick", "image/jpeg", "image/png", "test.jpeg"),
-                new ImagesForTests("ats-aio", "alfresco-transform-core-aio", "text/plain", "text/plain", "original.txt"),
-                new ImagesForTests("libreoffice", "alfresco-libreoffice", "text/plain", "application/pdf", "original.txt"),
-                new ImagesForTests("misc", "alfresco-transform-misc", "text/plain", "text/plain", "original.txt"),
-                new ImagesForTests("pdf-renderer", "alfresco-pdf-renderer", "application/pdf", "image/png", "test.pdf"),
-                new ImagesForTests("tika", "alfresco-tika", "text/plain", "text/plain", "original.txt"));
-
-        return allContainers;
-    }
-    private static class ImagesForTests
+    protected static class ImagesForTests
     {
         private final String name;
         private final String image;
@@ -79,7 +66,7 @@ public class LivenessReadinessProbeTest
         private final String targetMimetype;
         private final String filename;
 
-        private ImagesForTests(String name, String image, String sourceMimetype, String targetMimetype, String filename)
+        public ImagesForTests(String name, String image, String sourceMimetype, String targetMimetype, String filename)
         {
             this.name = Objects.requireNonNull(name);
             this.image = Objects.requireNonNull(image);
