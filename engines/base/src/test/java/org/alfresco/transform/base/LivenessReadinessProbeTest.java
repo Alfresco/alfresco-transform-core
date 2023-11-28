@@ -1,86 +1,34 @@
 package org.alfresco.transform.base;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.alfresco.transform.base.model.FileRefEntity;
-import org.alfresco.transform.base.model.FileRefResponse;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.codehaus.plexus.util.FileUtils;
-import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.ClassPathResource;
+
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
-import static org.alfresco.transform.base.AbstractBaseTest.getTestFile;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.assertj.core.api.FactoryBasedNavigableListAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.ACCEPT;
-import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import org.springframework.web.reactive.function.client.WebClient;
-import org.alfresco.transform.base.sfs.SharedFileStoreClient;
-
-//@SpringBootTest(classes={org.alfresco.transform.base.Application.class})
 
 public class LivenessReadinessProbeTest
 {
-    @Autowired
-    private ObjectMapper mapper = new ObjectMapper();
-    @TempDir
-    public File tempDir;
-
-    protected SharedFileStoreClient sfsClient;
-
-    protected String sourceExtension;
-    protected String targetExtension;
-    protected String sourceMimetype;
-    protected String targetMimetype;
-
-    protected String sourceMediaType;
-    protected String targetMediaType;
-
-
-    protected HashMap<String, String> options = new HashMap<>();
-
     protected String url;
-    protected String readyUrl = "/ready";
-
 
     @ParameterizedTest
     @MethodSource ("containers")
-    public void readinessShouldReturnAn429ErrorAfterReachingMaxTransforms(final ImagesForTests testData) throws URISyntaxException, InterruptedException, IOException {
+    public void readinessShouldReturnAn429ErrorAfterReachingMaxTransforms(final ImagesForTests testData) throws URISyntaxException {
         try (final var env = createEnv(testData.image))
         {
             env.start();
@@ -88,10 +36,10 @@ public class LivenessReadinessProbeTest
 
             int max_transforms = 11;
             for (int i = 0; i<max_transforms; i++) {
-                sendTransformRequest(url);
+                sendTransformRequest(url, testData.sourceMimetype, testData.targetMimetype, testData.filename);
             }
 
-            checkReadiness(url+"/ready", TOO_MANY_REQUESTS);
+            assertProbeDied(url);
 
             final String logs = env.getLogs();
             System.out.println(logs);
@@ -112,16 +60,13 @@ public class LivenessReadinessProbeTest
 
     private static List<ImagesForTests> containers()
     {
-//        final var allContainers = List.of(
-//                new ImagesForTests("imagemagick", "alfresco-imagemagick"),
-//                new ImagesForTests("ats-aio", "alfresco-transform-core-aio"),
-//                new ImagesForTests("libreoffice", "alfresco-libreoffice"),
-//                new ImagesForTests("misc", "alfresco-transform-misc"),
-//                new ImagesForTests("pdf-renderer", "alfresco-pdf-renderer"),
-//                new ImagesForTests("tika", "alfresco-tika"));
-
         final var allContainers = List.of(
-                new ImagesForTests("libreoffice", "alfresco-libreoffice"));
+                new ImagesForTests("imagemagick", "alfresco-imagemagick", "image/jpeg", "image/png", "test.jpeg"),
+                new ImagesForTests("ats-aio", "alfresco-transform-core-aio", "text/plain", "text/plain", "original.txt"),
+                new ImagesForTests("libreoffice", "alfresco-libreoffice", "text/plain", "application/pdf", "original.txt"),
+                new ImagesForTests("misc", "alfresco-transform-misc", "text/plain", "text/plain", "original.txt"),
+                new ImagesForTests("pdf-renderer", "alfresco-pdf-renderer", "application/pdf", "image/png", "test.pdf"),
+                new ImagesForTests("tika", "alfresco-tika", "text/plain", "text/plain", "original.txt"));
 
         return allContainers;
     }
@@ -130,18 +75,22 @@ public class LivenessReadinessProbeTest
         private final String name;
         private final String image;
 
-        private ImagesForTests(String name, String image)
+        private final String sourceMimetype;
+        private final String targetMimetype;
+        private final String filename;
+
+        private ImagesForTests(String name, String image, String sourceMimetype, String targetMimetype, String filename)
         {
             this.name = Objects.requireNonNull(name);
             this.image = Objects.requireNonNull(image);
+            this.sourceMimetype = Objects.requireNonNull(sourceMimetype);
+            this.targetMimetype = Objects.requireNonNull(targetMimetype);
+            this.filename = Objects.requireNonNull(filename);
         }
     }
-    private void sendTransformRequest(String url) {
-        MultipartBodyBuilder builder = new MultipartBodyBuilder();
-        builder.part("_sourceMimetype", "text/plain");
-        builder.part("_targetMimetype", "application/pdf");
-        builder.part("file", new ByteArrayResource("a new file for tests".getBytes(StandardCharsets.UTF_8))).filename("testfile.txt");
 
+    private void sendTransformRequest(String url, String sourceMimetype, String targetMimetype, String filename) {
+        var builder = createRequestBuilder(sourceMimetype, targetMimetype, filename);
         WebClient client = WebClient.create();
         WebClient.ResponseSpec responseSpec = client.post()
                 .uri(url + "/test")
@@ -152,20 +101,19 @@ public class LivenessReadinessProbeTest
         assertEquals(OK, responseSpec.toBodilessEntity().block().getStatusCode());
     }
 
-//    private static HttpStatusCode getResponse(String url) {
-//        WebClient client = WebClient.create();
-//        WebClient.ResponseSpec response = client.get()
-//                .uri(url)
-//                .retrieve();
-//
-////        System.out.println(response.toBodilessEntity().block().getStatusCode());
-//        return response.toBodilessEntity().block().getStatusCode();
-//    }
+    private MultipartBodyBuilder createRequestBuilder(String sourceMimetype, String targetMimetype, String filename) {
+        MultipartBodyBuilder builder = new MultipartBodyBuilder();
+        builder.part("_sourceMimetype", sourceMimetype);
+        builder.part("_targetMimetype", targetMimetype);
+        builder.part("file", new ClassPathResource(filename));
 
-    private static void checkReadiness(String url, HttpStatusCode status) {
-        WebTestClient client = WebTestClient.bindToServer().baseUrl(url).build();
+        return builder;
+    }
+
+    private static void assertProbeDied(String url) {
+        WebTestClient client = WebTestClient.bindToServer().baseUrl(url+"/ready").build();
         client.get()
                 .exchange()
-                .expectStatus().isEqualTo(status);
+                .expectStatus().isEqualTo(TOO_MANY_REQUESTS);
     }
 }
