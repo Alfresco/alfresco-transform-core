@@ -75,15 +75,13 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - name: "Build"
         run: mvn -B -U install -DskipTests
-      - name: "Create zip"
-        run: find engines/*/target model/target/alfresco-transform-model-*.jar  -name '*.jar' -exec zip -y -r to-scan.zip {} +
       - name: "Run SAST Scan"
         id: scan
         uses: veracode/Veracode-pipeline-scan-action@v1.0.10
         with:
           vid: '${{ secrets.VERACODE_API_ID }}'
           vkey: '${{ secrets.VERACODE_API_KEY }}'
-          file: "to-scan.zip"
+          file: "engines/aio/target/alfresco-transform-core-aio-*.jar"
           fail_build: true
           project_name: alfresco-transform-core
           issue_details: true
