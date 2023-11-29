@@ -184,6 +184,11 @@
                 <artifactId>snakeyaml</artifactId>
                 <version>${dependency.snakeyaml.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers</artifactId>
+                <version>1.19.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
