@@ -25,13 +25,13 @@
  * #L%
  */
 
-package org.alfresco.transform.imagemagick;
+package org.alfresco.transform.libreoffice;
 
 import org.alfresco.transform.base.LivenessReadinessProbeTest;
 
-public class ImageMagickLivenessReadinessProbeTest extends LivenessReadinessProbeTest {
+public class LibreOfficeLivenessReadinessProbeIT extends LivenessReadinessProbeTest {
     @Override
     protected ImagesForTests getImageForTest() {
-        return new ImagesForTests("alfresco-imagemagick", "image/jpeg", "image/png", "quick.jpg");
+        return new ImagesForTests("alfresco-libreoffice", "text/plain", "application/pdf", "original.txt");
     }
 }

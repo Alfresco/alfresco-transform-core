@@ -25,13 +25,13 @@
  * #L%
  */
 
-package org.alfresco.transform.misc;
+package org.alfresco.transform.pdfrenderer;
 
 import org.alfresco.transform.base.LivenessReadinessProbeTest;
 
-public class MiscLivenessReadinessProbeTest extends LivenessReadinessProbeTest {
+public class PdfRendererLivenessReadinessProbeIT extends LivenessReadinessProbeTest {
     @Override
     protected ImagesForTests getImageForTest() {
-        return new ImagesForTests("alfresco-transform-misc", "text/plain", "text/plain", "original.txt");
+        return new ImagesForTests("alfresco-pdf-renderer", "application/pdf", "image/png", "quick.pdf");
     }
 }

@@ -25,13 +25,14 @@
  * #L%
  */
 
-package org.alfresco.transform.pdfrenderer;
+package org.alfresco.transform.tika;
 
 import org.alfresco.transform.base.LivenessReadinessProbeTest;
 
-public class PdfRendererLivenessReadinessProbeTest extends LivenessReadinessProbeTest {
+
+public class TikaLivenessReadinessProbeIT extends LivenessReadinessProbeTest {
     @Override
     protected ImagesForTests getImageForTest() {
-        return new ImagesForTests("alfresco-pdf-renderer", "application/pdf", "image/png", "quick.pdf");
+        return new ImagesForTests("alfresco-tika", "text/plain", "text/plain", "original.txt");
     }
 }

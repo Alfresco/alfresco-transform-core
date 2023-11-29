@@ -25,14 +25,13 @@
  * #L%
  */
 
-package org.alfresco.transform.tika;
+package org.alfresco.transform.imagemagick;
 
 import org.alfresco.transform.base.LivenessReadinessProbeTest;
 
-
-public class TikaLivenessReadinessProbeTest extends LivenessReadinessProbeTest {
+public class ImageMagickLivenessReadinessProbeIT extends LivenessReadinessProbeTest {
     @Override
     protected ImagesForTests getImageForTest() {
-        return new ImagesForTests("alfresco-tika", "text/plain", "text/plain", "original.txt");
+        return new ImagesForTests("alfresco-imagemagick", "image/jpeg", "image/png", "quick.jpg");
     }
 }
