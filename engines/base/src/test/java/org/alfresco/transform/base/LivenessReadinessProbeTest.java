@@ -22,6 +22,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 public abstract class LivenessReadinessProbeTest
 {
+    protected final Integer MAX_TRANSFORMS = 10;
+
     @Test
     public void readinessShouldReturnAn429ErrorAfterReachingMaxTransforms() throws URISyntaxException
     {
@@ -32,8 +34,13 @@ public abstract class LivenessReadinessProbeTest
             env.start();
             var url = "http://localhost:" + env.getFirstMappedPort();
 
-            int max_transforms = 11;
-            for (int i = 0; i<max_transforms; i++) {
+            /*
+                Asserts that /ready probe hasn't died before sending a transformation request.
+                Each /ready request creates a valid transformation and increases the counter of
+                used transformations, hence the need to divide MAX_TRANSFORMS
+            */
+            for (int i = 0; i<MAX_TRANSFORMS/2; i++) {
+                assertProbeIsOk(url);
                 sendTransformRequest(url, testData.sourceMimetype, testData.targetMimetype, testData.filename);
             }
 
@@ -52,7 +59,7 @@ public abstract class LivenessReadinessProbeTest
         final GenericContainer<?> transformCore = new GenericContainer<>("alfresco/"+image+":latest");
 
         return transformCore.withEnv("livenessTransformEnabled", "true")
-            .withEnv("maxTransforms", "10")
+            .withEnv("maxTransforms", MAX_TRANSFORMS.toString())
             .withNetworkAliases(image)
             .withExposedPorts(8090)
             .waitingFor(Wait.forListeningPort());
@@ -103,5 +110,13 @@ public abstract class LivenessReadinessProbeTest
         client.get()
                 .exchange()
                 .expectStatus().isEqualTo(TOO_MANY_REQUESTS);
+    }
+
+    private static void assertProbeIsOk(String url)
+    {
+        WebTestClient client = WebTestClient.bindToServer().baseUrl(url+"/ready").build();
+        client.get()
+                .exchange()
+                .expectStatus().isEqualTo(OK);
     }
 }

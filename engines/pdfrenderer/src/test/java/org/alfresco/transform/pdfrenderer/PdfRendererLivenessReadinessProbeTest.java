@@ -32,6 +32,6 @@ import org.alfresco.transform.base.LivenessReadinessProbeTest;
 public class PdfRendererLivenessReadinessProbeTest extends LivenessReadinessProbeTest {
     @Override
     protected ImagesForTests getImageForTest() {
-        return new ImagesForTests("alfresco-pdf-renderer", "application/pdf", "image/png", "test.pdf");
+        return new ImagesForTests("alfresco-pdf-renderer", "application/pdf", "image/png", "quick.pdf");
     }
 }
