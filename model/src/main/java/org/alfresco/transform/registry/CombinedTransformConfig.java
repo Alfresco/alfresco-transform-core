@@ -40,12 +40,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
-import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionOnMultiStepTransformers;
+import static org.alfresco.transform.registry.TransformRegistryHelper.TRANSFORM_OPTIONS_KEY_PATTERN;
 
 /**
  * This class combines one or more T-Engine config and local files and registers them as if they were all in one file.
@@ -104,7 +104,8 @@ public class CombinedTransformConfig
         overrideSupported(transformConfig.getOverrideSupported(), readFrom, registry);
 
         // Add transform options and transformers from the new transformConfig
-        transformConfig.getTransformOptions().forEach(combinedTransformOptions::put);
+        transformConfig.getTransformOptions().forEach(
+            (optionsName, options) -> combinedTransformOptions.put(String.format(TRANSFORM_OPTIONS_KEY_PATTERN, readFrom, optionsName), options));
         transformConfig.getTransformers().forEach(t -> combinedTransformers.add(new Origin<>(t, baseUrl, readFrom)));
     }
 
@@ -411,7 +412,7 @@ public class CombinedTransformConfig
 
         for (String transformOptionsLabel : transformer.getTransformOptions())
         {
-            if (!combinedTransformOptions.containsKey(transformOptionsLabel))
+            if (!combinedTransformOptions.containsKey(String.format(TRANSFORM_OPTIONS_KEY_PATTERN, readFrom, transformOptionsLabel)))
             {
                 throw new IllegalStateException("Transformer " + transformerName(name) +
                         " references \"" + transformOptionsLabel +
