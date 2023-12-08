@@ -57,8 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     if: >
       (github.ref_name == 'master' || startsWith(github.ref_name, 'SP/') || startsWith(github.ref_name, 'HF/') || github.event_name == 'pull_request') &&
-      !contains(github.event.head_commit.message, '[skip tests]') &&
-      !contains(github.event.head_commit.message, '[force')
+      !contains(github.event.head_commit.message, '[skip tests]')
     steps:
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v1.34.0
