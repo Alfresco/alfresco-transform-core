@@ -84,11 +84,10 @@ jobs:
       - name: "Create zip"
         run: zip -r to-scan.zip engines/aio/target/alfresco-transform-core-aio-*.jar engines/base/target/alfresco-base-t-engine-*.jar model/target/alfresco-transform-model-*.jar
       - name: "Run SAST Scan"
-        id: scan
         uses: veracode/Veracode-pipeline-scan-action@v1.0.10
         with:
-          vid: '${{ secrets.VERACODE_API_ID }}'
-          vkey: '${{ secrets.VERACODE_API_KEY }}'
+          vid: ${{ secrets.VERACODE_API_ID }}
+          vkey: ${{ secrets.VERACODE_API_KEY }}
           file: "to-scan.zip"
           fail_build: true
           project_name: alfresco-transform-core
