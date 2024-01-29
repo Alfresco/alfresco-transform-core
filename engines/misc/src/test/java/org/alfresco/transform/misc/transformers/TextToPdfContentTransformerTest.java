@@ -26,10 +26,14 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.alfresco.transform.common.RequestParamMap.PAGE_LIMIT;
+import static org.alfresco.transform.common.RequestParamMap.PDF_FONT;
+import static org.alfresco.transform.common.RequestParamMap.PDF_FONT_SIZE;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -43,20 +47,18 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.alfresco.transform.common.RequestParamMap.PAGE_LIMIT;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
-import static org.alfresco.transform.common.RequestParamMap.PDF_FONT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.alfresco.transform.misc.transformers.TextToPdfContentTransformer.NOTOSANS_REGULAR;
-import static org.alfresco.transform.misc.transformers.TextToPdfContentTransformer.NOTOSANS_BOLD;
-import static org.alfresco.transform.misc.transformers.TextToPdfContentTransformer.NOTOSANS_ITALIC;
-import static org.alfresco.transform.misc.transformers.TextToPdfContentTransformer.NOTOSANS_BOLD_ITALIC;;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;;
 
 public class TextToPdfContentTransformerTest
 {
     TextToPdfContentTransformer transformer = new TextToPdfContentTransformer();
 
     private static final String TEXT_WITH_ABREVE = "Gămbardella, Matthew, Corets, Evă";
+    private static final String TEXT_WITHOUT_ABREVE = "Gambardella, Matthew, Corets, Eva";
 
     @BeforeEach
     public void setUp()
@@ -153,61 +155,76 @@ public class TextToPdfContentTransformerTest
         transformTextAndCheck("UTF-8", null, false, "31 20 49 20 6d 75 73 74");
     }
 
+    /**
+     * Test if a different font can be chosen to perform the transformation
+     *
+     * @throws Exception
+     */
     @Test
-    public void testMNT23960_NotoSansRegular() throws Exception
+    public void testMNT23960_TimesBold_WithoutAbreve() throws Exception
     {
-        transformer.setStandardFont(NOTOSANS_REGULAR);
-
-        File sourceFile = File.createTempFile("TMP_NotoSans-Regular", ".txt");
+        File sourceFile = File.createTempFile("TMP_Times-Bold", ".txt");
         String encoding = "UTF-8";
 
-        writeToFile(sourceFile, TEXT_WITH_ABREVE, encoding, null, null);
+        writeToFile(sourceFile, TEXT_WITHOUT_ABREVE, encoding, null, null);
 
-        transformTextAndCheck(sourceFile, encoding, TEXT_WITH_ABREVE, String.valueOf(-1));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put(PDF_FONT, PDType1Font.TIMES_BOLD.getName());
+        parameters.put(PDF_FONT_SIZE, "30");
 
-        transformer.setStandardFont("Times-Roman");
+        TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITHOUT_ABREVE, String.valueOf(-1), true,
+                parameters, false);
+
+        assertEquals(result.getUsedFont(), PDType1Font.TIMES_BOLD.getName());
+        assertNull(result.getErrorMessage());
     }
 
+    /**
+     * Test if the default font is used when the chosen one is not found
+     *
+     * @throws Exception
+     */
     @Test
-    public void testMNT23960_NotoSansBold() throws Exception
+    public void testMNT23960_InexistentFont_WithoutAbreve() throws Exception
     {
-        File sourceFile = File.createTempFile("TMP_NotoSans-Bold", ".txt");
+        File sourceFile = File.createTempFile("TMP_MyDummyFont", ".txt");
+        String encoding = "UTF-8";
+
+        writeToFile(sourceFile, TEXT_WITHOUT_ABREVE, encoding, null, null);
+
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put(PDF_FONT, "MyDummyFont");
+
+        TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITHOUT_ABREVE, String.valueOf(-1), true,
+                parameters, false);
+
+        assertEquals(result.getUsedFont(), PDType1Font.TIMES_ROMAN.getName());
+        assertNull(result.getErrorMessage());
+    }
+
+    /**
+     * Test if a different font can be chosen to perform the transformation with abreve character. This test
+     * transformation should fail as Times-Bold font doesn't handle the abreve character
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testMNT23960_TimesBold_WithAbreve() throws Exception
+    {
+        File sourceFile = File.createTempFile("TMP_Times-Bold", ".txt");
         String encoding = "UTF-8";
 
         writeToFile(sourceFile, TEXT_WITH_ABREVE, encoding, null, null);
 
         Map<String, String> parameters = new HashMap<>();
-        parameters.put(PDF_FONT, NOTOSANS_BOLD);
+        parameters.put(PDF_FONT, PDType1Font.TIMES_BOLD.getName());
 
-        transformTextAndCheck(sourceFile, encoding, TEXT_WITH_ABREVE, String.valueOf(-1), true, parameters);
-    }
+        TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITH_ABREVE, String.valueOf(-1), true,
+                parameters, true);
 
-    @Test
-    public void testMNT23960_NotoSansItalic() throws Exception
-    {
-        File sourceFile = File.createTempFile("TMP_NotoSans-Italic", ".txt");
-        String encoding = "UTF-8";
-
-        writeToFile(sourceFile, TEXT_WITH_ABREVE, encoding, null, null);
-
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put(PDF_FONT, NOTOSANS_ITALIC);
-
-        transformTextAndCheck(sourceFile, encoding, TEXT_WITH_ABREVE, String.valueOf(-1), true, parameters);
-    }
-
-    @Test
-    public void testMNT23960_NotoSansBoldItalic() throws Exception
-    {
-        File sourceFile = File.createTempFile("TMP_NotoSans-BoldItalic", ".txt");
-        String encoding = "UTF-8";
-
-        writeToFile(sourceFile, TEXT_WITH_ABREVE, encoding, null, null);
-
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put(PDF_FONT, NOTOSANS_BOLD_ITALIC);
-
-        transformTextAndCheck(sourceFile, encoding, TEXT_WITH_ABREVE, String.valueOf(-1), true, parameters);
+        assertEquals(result.getUsedFont(), PDType1Font.TIMES_BOLD.getName());
+        assertNotNull(result.getErrorMessage());
+        assertTrue(result.getErrorMessage().contains(PDType1Font.TIMES_BOLD.getName()));
     }
 
     /**
@@ -270,12 +287,14 @@ public class TextToPdfContentTransformerTest
     private void transformTextAndCheck(File sourceFile, String encoding, String checkText,
         String pageLimit) throws Exception
     {
-        transformTextAndCheck(sourceFile, encoding, checkText, pageLimit, true, null);
+        transformTextAndCheck(sourceFile, encoding, checkText, pageLimit, true, null, false);
     }
 
-    private void transformTextAndCheck(File sourceFile, String encoding, String checkText,
-        String pageLimit, boolean clean, Map<String, String> extraParameters) throws Exception
+    private TransformCheckResult transformTextAndCheck(File sourceFile, String encoding, String checkText,
+        String pageLimit, boolean clean, Map<String, String> extraParameters, boolean shouldFail) throws Exception
     {
+        TransformCheckResult result = new TransformCheckResult();
+
         // And a temp writer
         File targetFile = File.createTempFile("AlfrescoTestTarget_", ".pdf");
 
@@ -287,24 +306,43 @@ public class TextToPdfContentTransformerTest
         {
             parameters.putAll(extraParameters);
         }
-        transformer.transform("text/plain", "application/pdf", parameters, sourceFile, targetFile, null);
 
-        // Read back in the PDF and check it
-        PDDocument doc = PDDocument.load(targetFile);
-        PDFTextStripper textStripper = new PDFTextStripper();
-        StringWriter textWriter = new StringWriter();
-        textStripper.writeText(doc, textWriter);
-        doc.close();
+        boolean failed = false;
 
-        String roundTrip = clean(textWriter.toString());
+        try
+        {
+            transformer.transform("text/plain", "application/pdf", parameters, sourceFile, targetFile, null);
+        }
+        catch (Exception e)
+        {
+            failed = true;
+            result.setErrorMessage(e.getMessage());
+        }
 
-        assertEquals(
-            checkText, roundTrip,
-            "Incorrect text in PDF when starting from text in " + encoding
-        );
+        result.setUsedFont(transformer.getUsedFont());
+
+        if (!failed)
+        {
+            // Read back in the PDF and check it
+            PDDocument doc = PDDocument.load(targetFile);
+            PDFTextStripper textStripper = new PDFTextStripper();
+            StringWriter textWriter = new StringWriter();
+            textStripper.writeText(doc, textWriter);
+            doc.close();
+
+            String roundTrip = clean(textWriter.toString());
+
+            assertEquals(checkText, roundTrip, "Incorrect text in PDF when starting from text in " + encoding);
+        }
+        else
+        {
+            assertTrue(shouldFail && failed);
+        }
 
         sourceFile.delete();
         targetFile.delete();
+
+        return result;
     }
 
     private String clean(String text)
@@ -440,5 +478,31 @@ public class TextToPdfContentTransformerTest
             sb.append(Character.forDigit((bytes[i] & 0xF), 16));
         }
         return sb.toString();
+    }
+
+    private static class TransformCheckResult
+    {
+        private String usedFont;
+        private String errorMessage;
+
+        public String getUsedFont()
+        {
+            return usedFont;
+        }
+
+        public void setUsedFont(String usedFont)
+        {
+            this.usedFont = usedFont;
+        }
+
+        public String getErrorMessage()
+        {
+            return errorMessage;
+        }
+
+        public void setErrorMessage(String errorMessage)
+        {
+            this.errorMessage = errorMessage;
+        }
     }
 }

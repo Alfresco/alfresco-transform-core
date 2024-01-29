@@ -26,18 +26,10 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType0Font;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.tools.TextToPDF;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import static org.alfresco.transform.common.RequestParamMap.PAGE_LIMIT;
+import static org.alfresco.transform.common.RequestParamMap.PDF_FONT;
+import static org.alfresco.transform.common.RequestParamMap.PDF_FONT_SIZE;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -50,14 +42,28 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.Reader;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import static org.alfresco.transform.common.RequestParamMap.PAGE_LIMIT;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
-import static org.alfresco.transform.common.RequestParamMap.PDF_FONT;
-import static org.alfresco.transform.common.RequestParamMap.PDF_FONT_SIZE;
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
+import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.fontbox.util.autodetect.FontFileFinder;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.FontMappers;
+import org.apache.pdfbox.pdmodel.font.FontMapping;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.tools.TextToPDF;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * <p>
@@ -85,12 +91,6 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
 
     private final PagedTextToPDF transformer;
 
-    protected static final String NOTOSANS_REGULAR = "NotoSans-Regular";
-    protected static final String NOTOSANS_BOLD = "NotoSans-Bold";
-    protected static final String NOTOSANS_ITALIC = "NotoSans-Italic";
-    protected static final String NOTOSANS_BOLD_ITALIC = "NotoSans-BoldItalic";
-
-    protected static final String DEFAULT_FONT = NOTOSANS_REGULAR;
     protected static final int DEFAULT_FONT_SIZE = 10;
 
     public TextToPdfContentTransformer()
@@ -122,6 +122,11 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
             throw new RuntimeException(
                 "Unable to set Font Size for PDF generation: " + fontSize);
         }
+    }
+
+    public String getUsedFont()
+    {
+        return transformer.getUsedFont();
     }
 
     @Override
@@ -258,6 +263,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         //duplicating until here
 
         private String fontName = null;
+        private String usedFont = null;
         private boolean fontChanged = false;
 
         // The following code is based on the code in TextToPDF with the addition of
@@ -275,7 +281,9 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                 final PDFont font = getFont(doc, pdfFontName);
                 final int fontSize = pdfFontSize != null ? pdfFontSize : getFontSize();
 
-                logger.debug("Going to use font " + font.getName() + " with size " + fontSize);
+                this.usedFont = font.getName();
+
+                logger.debug("Going to use font " + this.usedFont + " with size " + fontSize);
 
                 final int margin = 40;
                 float height = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000;
@@ -401,48 +409,76 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         private PDFont getFont(PDDocument doc, String name)
         {
             PDFont font = null;
-            InputStream fontIS = null;
 
             if (name == null && !fontChanged)
             {
-                name = fontName != null ? fontName : DEFAULT_FONT;
+                name = fontName != null ? fontName : PDType1Font.HELVETICA.getName();
             }
 
-            try
-            {
-                if (name != null)
-                {
-                    String location = "fonts" + System.getProperty("file.separator") + name + ".ttf";
-                    ClassLoader loader = PagedTextToPDF.class.getClassLoader();
+            PDType1Font pdType1Font = PagedTextToPDF.getStandardFont(name);
 
-                    if (null != loader)
-                    {
-                        fontIS = loader.getResourceAsStream(location);
-                    }
+            if (pdType1Font != null)
+            {
+                font = pdType1Font;
+            }
+            else
+            {
+                FontMapping<TrueTypeFont> mapping = FontMappers.instance().getTrueTypeFont(name, null);
 
-                    if (null != fontIS)
-                    {
-                        PDDocument documentMock = new PDDocument();
-                        font = PDType0Font.load(documentMock, fontIS);
-                    }
-                }
-            }
-            catch (IOException ioe)
-            {
-                String msg = "Error loading font " + name + " :" + ioe.getMessage();
-                logger.error(msg, ioe);
-            }
-            finally
-            {
-                if (fontIS != null)
+                if (mapping != null && mapping.getFont() != null && !mapping.isFallback())
                 {
                     try
                     {
-                        fontIS.close();
+                        font = PDType0Font.load(doc, mapping.getFont().getOriginalData());
                     }
                     catch (Exception e)
                     {
-                        logger.error("Error closing font inputstream: " + e.getMessage());
+                        logger.error("Error loading mapping font: " + e.getMessage());
+                    }
+                }
+                else
+                {
+                    String nameWithExtension = name + ".ttf";
+
+                    FontFileFinder fontFileFinder = new FontFileFinder();
+                    List<URI> uris = fontFileFinder.find();
+
+                    for (URI uri : uris)
+                    {
+
+                        if (uri.getPath().contains(nameWithExtension))
+                        {
+                            InputStream fontIS = null;
+                            try
+                            {
+                                fontIS = new FileInputStream(new File(uri));
+                                if (null != fontIS)
+                                {
+                                    PDDocument documentMock = new PDDocument();
+                                    font = PDType0Font.load(documentMock, fontIS);
+                                    break;
+                                }
+                            }
+                            catch (IOException ioe)
+                            {
+                                String msg = "Error loading font " + name + " : " + ioe.getMessage();
+                                logger.error(msg, ioe);
+                            }
+                            finally
+                            {
+                                if (fontIS != null)
+                                {
+                                    try
+                                    {
+                                        fontIS.close();
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        logger.error("Error closing font inputstream: " + e.getMessage());
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -453,6 +489,10 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
             }
 
             return font;
+        }
+
+        public String getUsedFont() {
+            return this.usedFont;
         }
     }
 
