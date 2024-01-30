@@ -17,7 +17,6 @@ ENV IMAGEMAGICK_DEP_RPM_URL=https://dl.fedoraproject.org/pub/epel/epel-release-l
 
 ARG LIBREOFFICE_VERSION=7.2.5
 ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz
-ENV LIBREOFFICE_ARM64_RPM_URL=$(wget -qO- https://dl.rockylinux.org/pub/rocky/8/Devel/aarch64/os/Packages/l/ | grep -oP 'href="libreoffice-\K[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -1)
 ARG PDF_RENDERER_VERSION=1.2
 ENV ALFRESCO_PDF_RENDERER_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-pdf-renderer/${PDF_RENDERER_VERSION}/alfresco-pdf-renderer-${PDF_RENDERER_VERSION}-linux.tgz
 ENV ALFRESCO_PDF_RENDERER_ARM64_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-pdf-renderer/${PDF_RENDERER_VERSION}/alfresco-pdf-renderer-${PDF_RENDERER_VERSION}-linux-arm.tgz
@@ -49,6 +48,7 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
       yum localinstall -y LibreOffice*/RPMS/*.rpm && \
       rm -rf libreoffice-dist-*linux.gz LibreOffice_*_Linux_x86-64_rpm; \
     else \
+      LIBREOFFICE_ARM64_RPM_URL=$(wget -O- https://dl.rockylinux.org/pub/rocky/8/Devel/aarch64/os/Packages/l/ | grep -oP 'href="libreoffice-\K[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -1) \
       dnf --enablerepo=devel install -y $LIBREOFFICE_ARM64_RPM_URL && \
       update-alternatives --set java java-17-openjdk.aarch64; \
     fi && \
