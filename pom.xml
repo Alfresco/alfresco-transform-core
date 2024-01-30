@@ -186,7 +186,7 @@
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers</artifactId>
-                <version>1.19.1</version>
+                <version>1.19.4</version>
             </dependency>
 <!--        PRODSEC-7375 / CVE-2023-46604-->
 <!--        Both dependencies can be removed once spring-boot-starter-activemq has secure versions of those dependencies-->
