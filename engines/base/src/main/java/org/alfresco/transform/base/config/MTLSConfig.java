@@ -26,8 +26,6 @@
  */
 package org.alfresco.transform.base.config;
 
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
 import org.alfresco.transform.base.WebClientBuilderAdjuster;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
@@ -41,21 +39,19 @@ import org.apache.hc.core5.http.config.Registry;
 import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.dynamic.HttpClientTransportDynamic;
+import org.eclipse.jetty.io.ClientConnector;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.web.client.RestTemplate;
-import reactor.netty.http.client.HttpClient;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.TrustManagerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyManagementException;
@@ -90,35 +86,33 @@ public class MTLSConfig {
     private boolean hostNameVerificationDisabled;
 
     @Bean
-    public WebClientBuilderAdjuster webClientBuilderAdjuster(SslContextBuilder nettySslContextBuilder)
+    public WebClientBuilderAdjuster webClientBuilderAdjuster(SslContextFactory.Client sslContextFactory)
     {
         return builder -> {
             if(isTlsOrMtlsConfigured())
             {
-                HttpClient httpClientWithSslContext = null;
-                try {
-                    httpClientWithSslContext = createHttpClientWithSslContext(nettySslContextBuilder);
-                } catch (SSLException e) {
-                    throw new RuntimeException(e);
-                }
-                builder.clientConnector(new ReactorClientHttpConnector(httpClientWithSslContext));
+                ClientConnector clientConnector = new ClientConnector();
+                clientConnector.setSslContextFactory(sslContextFactory);
+                HttpClient httpClientWithSslContext = new HttpClient(new HttpClientTransportDynamic(clientConnector));
+
+                builder.clientConnector(new JettyClientHttpConnector(httpClientWithSslContext));
             }
         };
     }
 
     @Bean
-    public RestTemplate restTemplate(SSLContextBuilder apacheSSLContextBuilder) throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, UnrecoverableKeyException
+    public RestTemplate restTemplate(SSLContextBuilder sslContextBuilder) throws NoSuchAlgorithmException, KeyManagementException
     {
         if(isTlsOrMtlsConfigured())
         {
-            return createRestTemplateWithSslContext(apacheSSLContextBuilder);
+            return createRestTemplateWithSslContext(sslContextBuilder);
         } else {
             return new RestTemplate();
         }
     }
 
     @Bean
-    public SSLContextBuilder apacheSSLContextBuilder() throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableKeyException {
+    public SSLContextBuilder sslContextBuilder() throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableKeyException {
         SSLContextBuilder sslContextBuilder = new SSLContextBuilder();
         if(isKeystoreConfigured())
         {
@@ -136,21 +130,15 @@ public class MTLSConfig {
     }
 
     @Bean
-    public SslContextBuilder nettySslContextBuilder() throws UnrecoverableKeyException, CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException {
-        SslContextBuilder sslContextBuilder = SslContextBuilder.forClient();
-        if(isKeystoreConfigured())
-        {
-            KeyManagerFactory keyManagerFactory = initKeyManagerFactory();
-            sslContextBuilder.keyManager(keyManagerFactory);
-        }
+    public SslContextFactory.Client sslContextFactory(SSLContextBuilder sslContextBuilder) throws NoSuchAlgorithmException, KeyManagementException
+    {
+        SslContextFactory.Client sslContextFactory = new SslContextFactory.Client();
+        sslContextFactory.setSslContext(sslContextBuilder.build());
+        sslContextFactory.setTrustAll(false);
+        sslContextFactory.setEndpointIdentificationAlgorithm(hostNameVerificationDisabled ? "" : "HTTPS");
+        sslContextFactory.setIncludeProtocols(TLS.V_1_2.getId(), TLS.V_1_3.getId());
 
-        if(isTruststoreConfigured())
-        {
-            TrustManagerFactory trustManagerFactory = initTrustManagerFactory();
-            sslContextBuilder.trustManager(trustManagerFactory);
-        }
-
-        return sslContextBuilder;
+        return sslContextFactory;
     }
 
     private boolean isTlsOrMtlsConfigured()
@@ -166,21 +154,6 @@ public class MTLSConfig {
     private boolean isKeystoreConfigured()
     {
         return keyStoreResource != null;
-    }
-
-    private HttpClient createHttpClientWithSslContext(SslContextBuilder sslContextBuilder) throws SSLException {
-        SslContext sslContext = sslContextBuilder.build();
-        return HttpClient.create().secure(p -> p.sslContext(sslContext).handlerConfigurator(handler -> {
-            SSLEngine sslEngine = handler.engine();
-            SSLParameters sslParameters = sslEngine.getSSLParameters();
-            if(hostNameVerificationDisabled)
-            {
-                sslParameters.setEndpointIdentificationAlgorithm("");
-            } else {
-                sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
-            }
-            sslEngine.setSSLParameters(sslParameters);
-        }));
     }
 
     private RestTemplate createRestTemplateWithSslContext(SSLContextBuilder sslContextBuilder) throws NoSuchAlgorithmException, KeyManagementException {
@@ -214,21 +187,5 @@ public class MTLSConfig {
             keyStore.load(keyStoreInputStream, keyStorePassword);
         }
         return keyStore;
-    }
-
-    private TrustManagerFactory initTrustManagerFactory() throws NoSuchAlgorithmException, KeyStoreException, IOException, CertificateException
-    {
-        KeyStore trustStore = getKeyStore(trustStoreType, trustStoreResource, trustStorePassword);
-        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        trustManagerFactory.init(trustStore);
-        return trustManagerFactory;
-    }
-
-    private KeyManagerFactory initKeyManagerFactory() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException
-    {
-        KeyStore clientKeyStore = getKeyStore(keyStoreType, keyStoreResource, keyStorePassword);
-        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        keyManagerFactory.init(clientKeyStore, keyStorePassword);
-        return keyManagerFactory;
     }
 }
