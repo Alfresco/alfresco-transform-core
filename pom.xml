@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>5.0.2-A2-SNAPSHOT</version>
+    <version>5.0.2-A3-SNAPSHOT</version>
     <name>Alfresco Transform Core</name>
     <packaging>pom</packaging>
 
@@ -20,13 +20,12 @@
 
         <image.tag>latest</image.tag>
         <image.registry>quay.io</image.registry>
-        <dependency.pdfbox.version>2.0.26</dependency.pdfbox.version>
+        <dependency.pdfbox.version>2.0.30</dependency.pdfbox.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.18</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
         <dependency.jackson.version>2.16.1</dependency.jackson.version>
-        <dependency.tika.version>2.4.1</dependency.tika.version>
-        <dependency.poi.version>5.2.2</dependency.poi.version>
-        <dependency.poi-ooxml-lite.version>5.2.4</dependency.poi-ooxml-lite.version>
+        <dependency.tika.version>2.9.1</dependency.tika.version>
+        <dependency.poi.version>5.2.5</dependency.poi.version>
         <dependency.snakeyaml.version>2.2</dependency.snakeyaml.version>
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
@@ -171,7 +170,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
-                <version>1.24.0</version>
+                <version>1.25.0</version>
             </dependency>
 
             <dependency>
@@ -187,7 +186,7 @@
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers</artifactId>
-                <version>1.19.1</version>
+                <version>1.19.4</version>
             </dependency>
 <!--        PRODSEC-7375 / CVE-2023-46604-->
 <!--        Both dependencies can be removed once spring-boot-starter-activemq has secure versions of those dependencies-->
@@ -338,7 +337,7 @@
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
-                    <version>0.43.0</version>
+                    <version>0.43.4</version>
                  </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
