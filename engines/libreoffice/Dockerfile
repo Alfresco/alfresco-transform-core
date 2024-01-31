@@ -28,8 +28,8 @@ RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.proj
         yum localinstall -y LibreOffice*/RPMS/*.rpm && \
         rm -rf libreoffice-dist-*linux.gz LibreOffice_*_Linux_x86-64_rpm; \
     else \
-      $LIBREOFFICE_ARM64_RPM_URL+=$(wget -O- https://dl.rockylinux.org/pub/rocky/8/Devel/aarch64/os/Packages/l/ | perl -nle 'print $& if m{href="libreoffice-\K[6-7]+\.[0-9]+(\.[0-9]+)?(\.[0-9]+)?-[0-9]{0,2}\.el8\.aarch64\.rpm}' | sort -V | tail -1) && \
-      dnf --enablerepo=devel install -y $LIBREOFFICE_ARM64_RPM_URL && \
+      LIBREOFFICE_ARM64_RPM_VERSION=$(wget -O- https://dl.rockylinux.org/pub/rocky/8/Devel/aarch64/os/Packages/l/ | perl -nle 'print $& if m{href="libreoffice-\K[6-7]+\.[0-9]+(\.[0-9]+)?(\.[0-9]+)?-[0-9]{0,2}\.el8\.aarch64\.rpm}' | sort -V | tail -1) && \
+      dnf --enablerepo=devel install -y $LIBREOFFICE_ARM64_RPM_URL$LIBREOFFICE_ARM64_RPM_VERSION && \
       update-alternatives --set java java-17-openjdk.aarch64; \
     fi && \
       yum clean all
