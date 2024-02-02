@@ -63,7 +63,10 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.tools.TextToPDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * <p>
@@ -88,6 +91,8 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
     private static final byte BB = (byte) 0xBB;
     private static final byte BF = (byte) 0xBF;
 
+    @Value("${transform.core.misc.pdfBox.defaultFont}")
+    String pdfBoxDefaultFont;
 
     private final PagedTextToPDF transformer;
 
@@ -96,6 +101,12 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
     public TextToPdfContentTransformer()
     {
         transformer = new PagedTextToPDF();
+    }
+
+    @PostConstruct
+    public void init()
+    {
+        transformer.setDefaultFont(pdfBoxDefaultFont);
     }
 
     public void setStandardFont(String fontName)
@@ -126,7 +137,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
 
     public String getUsedFont()
     {
-        return transformer.getUsedFont();
+        return transformer.getFontName();
     }
 
     @Override
@@ -148,6 +159,10 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
             pageLimit = parseInt(stringPageLimit, PAGE_LIMIT);
         }
         String pdfFont = transformOptions.get(PDF_FONT);
+        if (pdfFont == null || pdfFont.isBlank())
+        {
+            pdfFont = pdfBoxDefaultFont;
+        }
         String pdfFontSize = transformOptions.get(PDF_FONT_SIZE);
         Integer fontSize = null;
         if (pdfFontSize != null)
@@ -263,8 +278,8 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         //duplicating until here
 
         private String fontName = null;
-        private String usedFont = null;
         private boolean fontChanged = false;
+        private String defaultFont = null;
 
         // The following code is based on the code in TextToPDF with the addition of
         // checks for page limits.
@@ -281,9 +296,9 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                 final PDFont font = getFont(doc, pdfFontName);
                 final int fontSize = pdfFontSize != null ? pdfFontSize : getFontSize();
 
-                this.usedFont = font.getName();
+                fontName = font.getName();
 
-                logger.debug("Going to use font " + this.usedFont + " with size " + fontSize);
+                logger.debug("Going to use font " + fontName + " with size " + fontSize);
 
                 final int margin = 40;
                 float height = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000;
@@ -412,7 +427,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
 
             if (name == null && !fontChanged)
             {
-                name = fontName != null ? fontName : PDType1Font.HELVETICA.getName();
+                name = fontName != null ? fontName : getDefaultFont();
             }
 
             PDType1Font pdType1Font = PagedTextToPDF.getStandardFont(name);
@@ -485,14 +500,44 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
 
             if (font == null)
             {
-                font = getFont();
+                if (!name.equals(defaultFont))
+                {
+                    font = getFont(doc, defaultFont);
+                }
+                else
+                {
+                    font = getFont();
+                }
             }
 
             return font;
         }
 
-        public String getUsedFont() {
-            return this.usedFont;
+        public String getFontName()
+        {
+            return this.fontName;
+        }
+
+        public String getDefaultFont()
+        {
+            if (defaultFont == null || defaultFont.isBlank())
+            {
+                return PDType1Font.HELVETICA.getName();
+            }
+
+            return defaultFont;
+        }
+
+        public void setDefaultFont(String name)
+        {
+            if (name == null || name.isBlank())
+            {
+                defaultFont = PDType1Font.HELVETICA.getName();
+            }
+            else
+            {
+                this.defaultFont = name;
+            }
         }
     }
 
