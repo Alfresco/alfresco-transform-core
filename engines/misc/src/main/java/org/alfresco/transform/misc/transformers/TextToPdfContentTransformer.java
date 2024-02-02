@@ -411,11 +411,6 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
             if (font != null)
             {
                 super.setFont(font);
-                this.fontChanged = true;
-            }
-            else
-            {
-                this.fontChanged = false;
             }
 
             this.fontName = aFontName;
@@ -425,7 +420,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         {
             PDFont font = null;
 
-            if (name == null && !fontChanged)
+            if (name == null)
             {
                 name = fontName != null ? fontName : getDefaultFont();
             }
