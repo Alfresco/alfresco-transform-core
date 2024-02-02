@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-transform-core</artifactId>
-        <version>5.0.1-A2-SNAPSHOT</version>
+        <version>5.0.2-A5-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -132,6 +132,11 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
      </dependencies>
 
     <build>
@@ -140,7 +145,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.1</version>
                 <configuration>
                     <includeGroupIds>${project.groupId}</includeGroupIds>
                     <includeArtifactIds>alfresco-transform-imagemagick,alfresco-transform-libreoffice,alfresco-transform-misc,alfresco-transform-pdf-renderer,alfresco-transform-tika</includeArtifactIds>

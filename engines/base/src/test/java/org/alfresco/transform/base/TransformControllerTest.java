@@ -26,48 +26,22 @@
  */
 package org.alfresco.transform.base;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.AppenderBase;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
-import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
-import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
-import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
-import org.alfresco.transform.base.model.FileRefEntity;
-import org.alfresco.transform.base.model.FileRefResponse;
-import org.alfresco.transform.base.sfs.SharedFileStoreClient;
-import org.alfresco.transform.base.transform.TransformHandler;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.config.TransformConfig;
-import org.codehaus.plexus.util.FileUtils;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.mockito.stubbing.Answer;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringJoiner;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import static org.alfresco.transform.base.AbstractBaseTest.getTestFile;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_BMP;
@@ -87,21 +61,52 @@ import static org.alfresco.transform.common.RequestParamMap.PAGE_REQUEST_PARAM;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.ACCEPT;
-import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringJoiner;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
+import org.codehaus.plexus.util.FileUtils;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.stubbing.Answer;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
+import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
+import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
+import org.alfresco.transform.base.model.FileRefEntity;
+import org.alfresco.transform.base.model.FileRefResponse;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.base.sfs.SharedFileStoreClient;
+import org.alfresco.transform.base.transform.TransformHandler;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.config.TransformConfig;
 
 /**
  * Tests the endpoints of the TransformController.
@@ -294,8 +299,19 @@ public class TransformControllerTest
     {
         resetProbeForTesting(transformController);
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_LIVE))
-               .andExpect(status().isOk())
-               .andExpect(content().string(containsString("Success - ")));
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Success - ")));
+    }
+
+    @Test
+    public void testLiveEndpointReturnsErrorAfterTooManyTransforms() throws Exception
+    {
+        resetProbeForTesting(transformController);
+        ProbeTransform probeTransform = transformController.getProbeTransform();
+        IntStream.range(0, 1024 + 1).forEach(i -> probeTransform.incrementTransformerCount());
+        mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_LIVE))
+                .andExpect(status().is(TOO_MANY_REQUESTS.value()))
+                .andExpect(content().string(containsString("Transformer requested to die. It has performed more than 1024 transformations")));
     }
 
     @Test

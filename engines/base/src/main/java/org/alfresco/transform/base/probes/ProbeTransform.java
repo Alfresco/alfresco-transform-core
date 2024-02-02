@@ -169,6 +169,9 @@ public class ProbeTransform
     // We don't want to be doing test transforms every few seconds, but do want frequent live probes.
     public String doTransformOrNothing(boolean isLiveProbe, TransformHandler transformHandler)
     {
+        // If we already decided to die then don't bother with any other checks.
+        checkMaxTransformTimeAndCount(isLiveProbe);
+
         // If not initialised OR it is a live probe and we are scheduled to to do a test transform.
         probeCount++;
         // TODO: update/fix/refactor liveness probes as part of ATS-138
@@ -182,7 +185,8 @@ public class ProbeTransform
                || !initialised.get()
                ? doTransform(isLiveProbe, transformHandler)
                : doNothing(isLiveProbe);
-        
+
+        // Check if the test transformation was too slow.
         checkMaxTransformTimeAndCount(isLiveProbe);
         return result;
     }
