@@ -76,7 +76,7 @@ ADD target/generated-resources/licenses              /licenses
 ADD target/generated-resources/licenses.xml          /licenses/
 ADD target/generated-sources/license/THIRD-PARTY.txt /licenses/
 COPY target/classes/licenses/3rd-party/ /
-COPY target/classes/fonts/NotoSans /usr/share/fonts/NotoSans
+COPY target/classes/fonts/NotoSans /usr/local/share/fonts/NotoSans
 
 RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
     useradd -u ${USERID} -G ${GROUPNAME} ${AIOUSERNAME} && \
