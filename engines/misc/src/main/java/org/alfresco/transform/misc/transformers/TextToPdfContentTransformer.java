@@ -278,7 +278,6 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         //duplicating until here
 
         private String fontName = null;
-        private boolean fontChanged = false;
         private String defaultFont = null;
 
         // The following code is based on the code in TextToPDF with the addition of
