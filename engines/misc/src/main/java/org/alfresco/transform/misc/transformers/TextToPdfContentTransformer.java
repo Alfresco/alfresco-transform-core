@@ -90,13 +90,12 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
     private static final byte EF = (byte) 0xEF;
     private static final byte BB = (byte) 0xBB;
     private static final byte BF = (byte) 0xBF;
-
-    @Value("${transform.core.misc.pdfBox.defaultFont:NotoSans-Regular}")
-    private String pdfBoxDefaultFont;
+    private static final int DEFAULT_FONT_SIZE = 10;
 
     private final PagedTextToPDF transformer;
 
-    protected static final int DEFAULT_FONT_SIZE = 10;
+    @Value("${transform.core.misc.pdfBox.defaultFont:NotoSans-Regular}")
+    private String pdfBoxDefaultFont;
 
     public TextToPdfContentTransformer()
     {
