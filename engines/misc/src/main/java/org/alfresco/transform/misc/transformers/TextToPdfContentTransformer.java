@@ -417,21 +417,13 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
 
         /**
          * Gets the font that will be used in document transformation using the following approaches:
-         * <p>
-         * 1. Standard font map
-         * </p>
-         * <p>
-         * 2. Font Mappers
-         * </p>
-         * <p>
-         * 3. File system fonts
-         * </p>
-         * <p>
-         * 4. Transformer default font
-         * </p>
-         * <p>
-         * 5. PdfBox default font
-         * </p>
+         * <ol>
+         *     <li>Standard font map
+         *     <li>Font Mappers
+         *     <li>File system fonts
+         *     <li>Transformer default font
+         *     <li>PdfBox default font
+         * </ol>
          *
          * @param doc
          *            the document that will be transformed
