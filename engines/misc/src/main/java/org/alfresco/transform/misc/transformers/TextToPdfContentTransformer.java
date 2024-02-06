@@ -172,6 +172,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
             }
             catch (Exception e)
             {
+                logger.error("Error parsing font size {}, going to set it as {} : {}", fontSize, DEFAULT_FONT_SIZE, e.getMessage());
                 fontSize = DEFAULT_FONT_SIZE;
             }
         }
@@ -296,7 +297,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
 
                 fontName = font.getName();
 
-                logger.debug("Going to use font " + fontName + " with size " + fontSize);
+                logger.debug("Going to use font {} with size {}", fontName, fontSize);
 
                 final int margin = 40;
                 float height = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000;
@@ -441,7 +442,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                     }
                     catch (Exception e)
                     {
-                        logger.error("Error loading mapping font: " + e.getMessage());
+                        logger.error("Error loading mapping font {} : {}", name, e.getMessage());
                     }
                 }
                 else
