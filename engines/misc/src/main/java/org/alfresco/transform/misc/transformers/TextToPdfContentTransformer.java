@@ -416,92 +416,162 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
             this.fontName = aFontName;
         }
 
-        private PDFont getFont(PDDocument doc, String name)
+        /**
+         * Gets the font that will be used in document transformation using the following approaches:
+         * <p>
+         * 1. Standard font map
+         * </p>
+         * <p>
+         * 2. Font Mappers
+         * </p>
+         * <p>
+         * 3. File system fonts
+         * </p>
+         * <p>
+         * 4. Transformer default font
+         * </p>
+         * <p>
+         * 5. PdfBox default font
+         * </p>
+         *
+         * @param doc
+         *            the document that will be transformed
+         * @param fontName
+         *            the font name that will be used in transformation
+         *
+         * @return the font that was found
+         */
+        private PDFont getFont(PDDocument doc, String fontName)
         {
-            PDFont font = null;
-
-            if (name == null)
+            if (fontName == null)
             {
-                name = fontName != null ? fontName : getDefaultFont();
+                fontName = fontName != null ? fontName : getDefaultFont();
             }
 
-            PDType1Font pdType1Font = PagedTextToPDF.getStandardFont(name);
+            // First, it tries to get the font from PdfBox STANDARD_14 map
+            PDFont font = getFromStandardFonts(fontName);
 
-            if (pdType1Font != null)
-            {
-                font = pdType1Font;
-            }
-            else
-            {
-                FontMapping<TrueTypeFont> mapping = FontMappers.instance().getTrueTypeFont(name, null);
-
-                if (mapping != null && mapping.getFont() != null && !mapping.isFallback())
-                {
-                    try
-                    {
-                        font = PDType0Font.load(doc, mapping.getFont().getOriginalData());
-                    }
-                    catch (Exception e)
-                    {
-                        logger.error("Error loading mapping font {} : {}", name, e.getMessage());
-                    }
-                }
-                else
-                {
-                    String nameWithExtension = name + ".ttf";
-
-                    FontFileFinder fontFileFinder = new FontFileFinder();
-                    List<URI> uris = fontFileFinder.find();
-
-                    for (URI uri : uris)
-                    {
-
-                        if (uri.getPath().contains(nameWithExtension))
-                        {
-                            InputStream fontIS = null;
-                            try
-                            {
-                                fontIS = new FileInputStream(new File(uri));
-                                if (null != fontIS)
-                                {
-                                    PDDocument documentMock = new PDDocument();
-                                    font = PDType0Font.load(documentMock, fontIS);
-                                    break;
-                                }
-                            }
-                            catch (IOException ioe)
-                            {
-                                String msg = "Error loading font " + name + " : " + ioe.getMessage();
-                                logger.error(msg, ioe);
-                            }
-                            finally
-                            {
-                                if (fontIS != null)
-                                {
-                                    try
-                                    {
-                                        fontIS.close();
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        logger.error("Error closing font inputstream: " + e.getMessage());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
+            // If not found, tries to get the font from FontMappers
             if (font == null)
             {
-                if (!name.equals(defaultFont))
+                font = getFromFontMapper(fontName, doc);
+            }
+
+            // If still not found, tries to get the font from file system
+            if (font == null)
+            {
+                font = getFromFileSystem(fontName);
+            }
+
+            // If font is still null:
+            // - If different from the configured default font, it will recursively get the transformer default font
+            // - Otherwise, it will use the PdfBox default font (Helvetica)
+            if (font == null)
+            {
+                if (!fontName.equals(defaultFont))
                 {
                     font = getFont(doc, defaultFont);
                 }
                 else
                 {
                     font = getFont();
+                }
+            }
+
+            return font;
+        }
+
+        /**
+         * Gets the font from PdfBox standard fonts map
+         *
+         * @param fontName
+         *            the font name to obtain
+         *
+         * @return the font object that has been found, otherwise null
+         */
+        private PDFont getFromStandardFonts(String fontName)
+        {
+            return PagedTextToPDF.getStandardFont(fontName);
+        }
+
+        /**
+         * Gets the font from {@link FontMappers} instance
+         *
+         * @param fontName
+         *            the font name to obtain
+         * @param doc
+         *            the PDF document
+         *
+         * @return the font object that has been found, otherwise null
+         */
+        private PDFont getFromFontMapper(String fontName, PDDocument doc)
+        {
+            PDFont font = null;
+            FontMapping<TrueTypeFont> mapping = FontMappers.instance().getTrueTypeFont(fontName, null);
+
+            if (mapping != null && mapping.getFont() != null && !mapping.isFallback())
+            {
+                try
+                {
+                    font = PDType0Font.load(doc, mapping.getFont().getOriginalData());
+                }
+                catch (Exception e)
+                {
+                    logger.error("Error loading font mapping {} : {}", fontName, e.getMessage());
+                }
+            }
+
+            return font;
+        }
+
+        /**
+         * Gets the font from existing file system fonts
+         *
+         * @param fontName
+         *            the font name to obtain
+         * @return the font object that has been found, otherwise null
+         */
+        private PDFont getFromFileSystem(String fontName)
+        {
+            PDFont font = null;
+            String nameWithExtension = fontName + ".ttf";
+
+            FontFileFinder fontFileFinder = new FontFileFinder();
+            List<URI> uris = fontFileFinder.find();
+
+            for (URI uri : uris)
+            {
+                if (uri.getPath().contains(nameWithExtension))
+                {
+                    InputStream fontIS = null;
+                    try
+                    {
+                        fontIS = new FileInputStream(new File(uri));
+                        if (null != fontIS)
+                        {
+                            PDDocument documentMock = new PDDocument();
+                            font = PDType0Font.load(documentMock, fontIS);
+                            break;
+                        }
+                    }
+                    catch (IOException ioe)
+                    {
+                        logger.error("Error loading font {} from filesystem: {}", fontName, ioe.getMessage());
+                    }
+                    finally
+                    {
+                        if (fontIS != null)
+                        {
+                            try
+                            {
+                                fontIS.close();
+                            }
+                            catch (Exception e)
+                            {
+                                logger.error("Error closing font inputstream: " + e.getMessage());
+                            }
+                        }
+                    }
                 }
             }
 
