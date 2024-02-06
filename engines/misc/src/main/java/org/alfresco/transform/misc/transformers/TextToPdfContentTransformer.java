@@ -165,7 +165,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         }
         String pdfFontSize = transformOptions.get(PDF_FONT_SIZE);
         Integer fontSize = null;
-        if (pdfFontSize != null)
+        if (pdfFontSize != null && !pdfFontSize.isBlank())
         {
             try
             {
@@ -173,8 +173,8 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
             }
             catch (Exception e)
             {
-                logger.error("Error parsing font size {}, going to set it as {} : {}", fontSize, DEFAULT_FONT_SIZE, e.getMessage());
                 fontSize = DEFAULT_FONT_SIZE;
+                logger.error("Error parsing font size {}, going to set it as {} : {}", pdfFontSize, fontSize, e.getMessage());
             }
         }
 
