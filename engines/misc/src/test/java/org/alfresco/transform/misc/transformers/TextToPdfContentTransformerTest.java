@@ -161,7 +161,7 @@ public class TextToPdfContentTransformerTest
      * @throws Exception
      */
     @Test
-    public void testMNT23960_TimesBold_WithoutAbreve() throws Exception
+    public void testMNT23960_TimesBold_WithoutBreve() throws Exception
     {
         File sourceFile = File.createTempFile("TMP_Times-Bold", ".txt");
         String encoding = "UTF-8";
@@ -185,7 +185,7 @@ public class TextToPdfContentTransformerTest
      * @throws Exception
      */
     @Test
-    public void testMNT23960_InexistentFont_WithoutAbreve() throws Exception
+    public void testMNT23960_InexistentFont_WithoutBreve() throws Exception
     {
         File sourceFile = File.createTempFile("TMP_MyDummyFont", ".txt");
         String encoding = "UTF-8";
@@ -203,13 +203,13 @@ public class TextToPdfContentTransformerTest
     }
 
     /**
-     * Test if a different font can be chosen to perform the transformation with abreve character. This test
-     * transformation should fail as Times-Bold font doesn't handle the abreve character
+     * Test if a different font can be chosen to perform the transformation with breve character. This test
+     * transformation should fail as Times-Bold font doesn't handle the breve character
      *
      * @throws Exception
      */
     @Test
-    public void testMNT23960_TimesBold_WithAbreve() throws Exception
+    public void testMNT23960_TimesBold_WithBreve() throws Exception
     {
         File sourceFile = File.createTempFile("TMP_Times-Bold", ".txt");
         String encoding = "UTF-8";
