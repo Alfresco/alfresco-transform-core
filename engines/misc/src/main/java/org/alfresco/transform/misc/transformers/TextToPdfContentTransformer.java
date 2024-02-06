@@ -26,16 +26,10 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.tools.TextToPDF;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import static org.alfresco.transform.common.RequestParamMap.PAGE_LIMIT;
+import static org.alfresco.transform.common.RequestParamMap.PDF_FONT;
+import static org.alfresco.transform.common.RequestParamMap.PDF_FONT_SIZE;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -48,12 +42,31 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.Reader;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import static org.alfresco.transform.common.RequestParamMap.PAGE_LIMIT;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
+import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.fontbox.util.autodetect.FontFileFinder;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.FontMappers;
+import org.apache.pdfbox.pdmodel.font.FontMapping;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.tools.TextToPDF;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * <p>
@@ -77,20 +90,30 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
     private static final byte EF = (byte) 0xEF;
     private static final byte BB = (byte) 0xBB;
     private static final byte BF = (byte) 0xBF;
-
+    private static final String DEFAULT_FONT = "NotoSans-Regular";
+    private static final int DEFAULT_FONT_SIZE = 10;
 
     private final PagedTextToPDF transformer;
+
+    @Value("${transform.core.misc.pdfBox.defaultFont:NotoSans-Regular}")
+    private String pdfBoxDefaultFont;
 
     public TextToPdfContentTransformer()
     {
         transformer = new PagedTextToPDF();
     }
 
+    @PostConstruct
+    public void init()
+    {
+        transformer.setDefaultFont(pdfBoxDefaultFont);
+    }
+
     public void setStandardFont(String fontName)
     {
         try
         {
-            transformer.setFont(PagedTextToPDF.getStandardFont(fontName));
+            transformer.setFont(fontName);
         }
         catch (Throwable e)
         {
@@ -112,6 +135,11 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         }
     }
 
+    public String getUsedFont()
+    {
+        return transformer.getFontName();
+    }
+
     @Override
     public String getTransformerName()
     {
@@ -130,6 +158,25 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         {
             pageLimit = parseInt(stringPageLimit, PAGE_LIMIT);
         }
+        String pdfFont = transformOptions.get(PDF_FONT);
+        if (pdfFont == null || pdfFont.isBlank())
+        {
+            pdfFont = pdfBoxDefaultFont;
+        }
+        String pdfFontSize = transformOptions.get(PDF_FONT_SIZE);
+        Integer fontSize = null;
+        if (pdfFontSize != null && !pdfFontSize.isBlank())
+        {
+            try
+            {
+                fontSize = parseInt(pdfFontSize, PDF_FONT_SIZE);
+            }
+            catch (Exception e)
+            {
+                fontSize = DEFAULT_FONT_SIZE;
+                logger.error("Error parsing font size {}, going to set it as {}", pdfFontSize, fontSize, e);
+            }
+        }
 
         PDDocument pdf = null;
         try (InputStream is = new FileInputStream(sourceFile);
@@ -138,7 +185,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         {
             //TransformationOptionLimits limits = getLimits(reader, writer, options);
             //TransformationOptionPair pageLimits = limits.getPagesPair();
-            pdf = transformer.createPDFFromText(ir, pageLimit);
+            pdf = transformer.createPDFFromText(ir, pageLimit, pdfFont, fontSize);
             pdf.save(os);
         }
         finally
@@ -231,22 +278,34 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         }
         //duplicating until here
 
+        private String fontName = null;
+        private String defaultFont = null;
+
         // The following code is based on the code in TextToPDF with the addition of
         // checks for page limits.
         // The calling code must close the PDDocument once finished with it.
-        public PDDocument createPDFFromText(Reader text, int pageLimit)
+        public PDDocument createPDFFromText(Reader text, int pageLimit, String pdfFontName, Integer pdfFontSize)
             throws IOException
         {
             PDDocument doc = null;
             int pageCount = 0;
             try
             {
+                doc = new PDDocument();
+
+                final PDFont font = getFont(doc, pdfFontName);
+                final int fontSize = pdfFontSize != null ? pdfFontSize : getFontSize();
+
+                fontName = font.getName();
+
+                logger.debug("Going to use font {} with size {}", fontName, fontSize);
+
                 final int margin = 40;
-                float height = getFont().getFontDescriptor().getFontBoundingBox().getHeight() / 1000;
+                float height = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000;
 
                 //calculate font height and increase by 5 percent.
-                height = height * getFontSize() * 1.05f;
-                doc = new PDDocument();
+                height = height * fontSize * 1.05f;
+
                 BufferedReader data = (text instanceof BufferedReader) ? (BufferedReader) text : new BufferedReader(text);
                 String nextLine;
                 PDPage page = new PDPage();
@@ -280,8 +339,8 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                             {
                                 String lineWithNextWord = nextLineToDraw.toString() + lineWords[lineIndex];
                                 lengthIfUsingNextWord =
-                                    (getFont().getStringWidth(
-                                        lineWithNextWord) / 1000) * getFontSize();
+                                    (font.getStringWidth(
+                                        lineWithNextWord) / 1000) * fontSize;
                             }
                         }
                         while (lineIndex < lineWords.length &&
@@ -304,7 +363,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                                 contentStream.close();
                             }
                             contentStream = new PDPageContentStream(doc, page);
-                            contentStream.setFont(getFont(), getFontSize());
+                            contentStream.setFont(font, fontSize);
                             contentStream.beginText();
                             y = page.getMediaBox().getHeight() - margin + height;
                             contentStream.moveTextPositionByAmount(margin, y);
@@ -343,6 +402,199 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                 throw io;
             }
             return doc;
+        }
+
+        public void setFont(String aFontName)
+        {
+            PDType1Font font = PagedTextToPDF.getStandardFont(aFontName);
+
+            if (font != null)
+            {
+                super.setFont(font);
+                this.fontName = aFontName;
+            }
+        }
+
+        /**
+         * Gets the font that will be used in document transformation using the following approaches:
+         * <ol>
+         *     <li>Standard font map
+         *     <li>Font Mappers
+         *     <li>File system fonts
+         *     <li>Transformer default font
+         *     <li>PdfBox default font
+         * </ol>
+         *
+         * @param doc
+         *            the document that will be transformed
+         * @param fontName
+         *            the font name that will be used in transformation
+         *
+         * @return the font that was found
+         */
+        private PDFont getFont(PDDocument doc, String fontName)
+        {
+            if (fontName == null)
+            {
+                fontName = fontName != null ? fontName : getDefaultFont();
+            }
+
+            // First, it tries to get the font from PdfBox STANDARD_14 map
+            PDFont font = getFromStandardFonts(fontName);
+
+            // If not found, tries to get the font from FontMappers
+            if (font == null)
+            {
+                font = getFromFontMapper(fontName, doc);
+
+                // If still not found, tries to get the font from file system
+                if (font == null)
+                {
+                    font = getFromFileSystem(fontName);
+
+                    // If font is still null:
+                    // - it will recursively get the transformer default font
+                    // - Otherwise, it will use the PdfBox default font (Helvetica)
+                    if (font == null)
+                    {
+                        if (defaultFont != null && !fontName.equals(defaultFont))
+                        {
+                            font = getFont(doc, defaultFont);
+                        }
+                        else
+                        {
+                            font = getFont();
+                        }
+                    }
+                }
+
+            }
+
+            return font;
+        }
+
+        /**
+         * Gets the font from PdfBox standard fonts map
+         *
+         * @param fontName
+         *            the font name to obtain
+         *
+         * @return the font object that has been found, otherwise null
+         */
+        private PDFont getFromStandardFonts(String fontName)
+        {
+            return PagedTextToPDF.getStandardFont(fontName);
+        }
+
+        /**
+         * Gets the font from {@link FontMappers} instance
+         *
+         * @param fontName
+         *            the font name to obtain
+         * @param doc
+         *            the PDF document
+         *
+         * @return the font object that has been found, otherwise null
+         */
+        private PDFont getFromFontMapper(String fontName, PDDocument doc)
+        {
+            PDFont font = null;
+            FontMapping<TrueTypeFont> mapping = FontMappers.instance().getTrueTypeFont(fontName, null);
+
+            if (mapping != null && mapping.getFont() != null && !mapping.isFallback())
+            {
+                try
+                {
+                    font = PDType0Font.load(doc, mapping.getFont().getOriginalData());
+                }
+                catch (Exception e)
+                {
+                    logger.error("Error loading font mapping {}", fontName, e);
+                }
+            }
+
+            return font;
+        }
+
+        /**
+         * Gets the font from existing file system fonts
+         *
+         * @param fontName
+         *            the font name to obtain
+         * @return the font object that has been found, otherwise null
+         */
+        private PDFont getFromFileSystem(String fontName)
+        {
+            PDFont font = null;
+            String nameWithExtension = fontName + ".ttf";
+
+            FontFileFinder fontFileFinder = new FontFileFinder();
+            List<URI> uris = fontFileFinder.find();
+
+            for (URI uri : uris)
+            {
+                if (uri.getPath().contains(nameWithExtension))
+                {
+                    InputStream fontIS = null;
+                    try
+                    {
+                        fontIS = new FileInputStream(new File(uri));
+                        if (null != fontIS)
+                        {
+                            PDDocument documentMock = new PDDocument();
+                            font = PDType0Font.load(documentMock, fontIS);
+                            break;
+                        }
+                    }
+                    catch (IOException ioe)
+                    {
+                        logger.error("Error loading font {} from filesystem", fontName, ioe);
+                    }
+                    finally
+                    {
+                        if (fontIS != null)
+                        {
+                            try
+                            {
+                                fontIS.close();
+                            }
+                            catch (Exception e)
+                            {
+                                logger.error("Error closing font inputstream", e);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return font;
+        }
+
+        public String getFontName()
+        {
+            return this.fontName;
+        }
+
+        public String getDefaultFont()
+        {
+            if (defaultFont == null || defaultFont.isBlank())
+            {
+                return TextToPdfContentTransformer.DEFAULT_FONT;
+            }
+
+            return defaultFont;
+        }
+
+        public void setDefaultFont(String name)
+        {
+            if (name == null || name.isBlank())
+            {
+                defaultFont = TextToPdfContentTransformer.DEFAULT_FONT;
+            }
+            else
+            {
+                this.defaultFont = name;
+            }
         }
     }
 
