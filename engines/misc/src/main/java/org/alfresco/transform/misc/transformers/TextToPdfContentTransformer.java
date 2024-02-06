@@ -90,6 +90,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
     private static final byte EF = (byte) 0xEF;
     private static final byte BB = (byte) 0xBB;
     private static final byte BF = (byte) 0xBF;
+    private static final String DEFAULT_FONT = "NotoSans-Regular";
     private static final int DEFAULT_FONT_SIZE = 10;
 
     private final PagedTextToPDF transformer;
@@ -516,7 +517,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         {
             if (defaultFont == null || defaultFont.isBlank())
             {
-                return PDType1Font.HELVETICA.getName();
+                return TextToPdfContentTransformer.DEFAULT_FONT;
             }
 
             return defaultFont;
@@ -526,7 +527,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         {
             if (name == null || name.isBlank())
             {
-                defaultFont = PDType1Font.HELVETICA.getName();
+                defaultFont = TextToPdfContentTransformer.DEFAULT_FONT;
             }
             else
             {
