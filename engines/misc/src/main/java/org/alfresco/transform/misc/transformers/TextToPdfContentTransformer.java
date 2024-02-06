@@ -411,9 +411,8 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
             if (font != null)
             {
                 super.setFont(font);
+                this.fontName = aFontName;
             }
-
-            this.fontName = aFontName;
         }
 
         /**
@@ -466,7 +465,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                     // - Otherwise, it will use the PdfBox default font (Helvetica)
                     if (font == null)
                     {
-                        if (!fontName.equals(defaultFont))
+                        if (defaultFont != null && !fontName.equals(defaultFont))
                         {
                             font = getFont(doc, defaultFont);
                         }
