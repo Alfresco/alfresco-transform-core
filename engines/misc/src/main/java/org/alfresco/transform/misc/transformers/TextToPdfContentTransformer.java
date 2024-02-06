@@ -455,27 +455,28 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
             if (font == null)
             {
                 font = getFromFontMapper(fontName, doc);
-            }
 
-            // If still not found, tries to get the font from file system
-            if (font == null)
-            {
-                font = getFromFileSystem(fontName);
-            }
+                // If still not found, tries to get the font from file system
+                if (font == null)
+                {
+                    font = getFromFileSystem(fontName);
 
-            // If font is still null:
-            // - If different from the configured default font, it will recursively get the transformer default font
-            // - Otherwise, it will use the PdfBox default font (Helvetica)
-            if (font == null)
-            {
-                if (!fontName.equals(defaultFont))
-                {
-                    font = getFont(doc, defaultFont);
+                    // If font is still null:
+                    // - it will recursively get the transformer default font
+                    // - Otherwise, it will use the PdfBox default font (Helvetica)
+                    if (font == null)
+                    {
+                        if (!fontName.equals(defaultFont))
+                        {
+                            font = getFont(doc, defaultFont);
+                        }
+                        else
+                        {
+                            font = getFont();
+                        }
+                    }
                 }
-                else
-                {
-                    font = getFont();
-                }
+
             }
 
             return font;
