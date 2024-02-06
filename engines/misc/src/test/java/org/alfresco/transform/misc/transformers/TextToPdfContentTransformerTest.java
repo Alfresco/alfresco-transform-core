@@ -146,7 +146,8 @@ public class TextToPdfContentTransformerTest
     @Test
     public void testUTF8WithBOM() throws Exception
     {
-        transformTextAndCheck("UTF-8", null, true, "ef bb bf 31 20 49 20 6d");
+        TransformCheckResult result = transformTextAndCheck("UTF-8", null, true, "ef bb bf 31 20 49 20 6d");
+        assertEquals(result.getUsedFont(), "Times-Roman");
     }
 
     @Test
@@ -236,18 +237,18 @@ public class TextToPdfContentTransformerTest
      * @param expectedByteOrder The first few bytes of the source file so we can check the test data has been
      *                 correctly created.
      */
-    protected void transformTextAndCheck(String encoding, Boolean bigEndian, Boolean validBom,
+    protected TransformCheckResult transformTextAndCheck(String encoding, Boolean bigEndian, Boolean validBom,
                                          String expectedByteOrder) throws Exception
     {
-        transformTextAndCheckImpl(-1, encoding, bigEndian, validBom, expectedByteOrder);
+        return transformTextAndCheckImpl(-1, encoding, bigEndian, validBom, expectedByteOrder);
     }
 
-    protected void transformTextAndCheckPageLength(int pageLimit) throws Exception
+    protected TransformCheckResult transformTextAndCheckPageLength(int pageLimit) throws Exception
     {
-        transformTextAndCheckImpl(pageLimit, "UTF-8", null, null, null);
+        return transformTextAndCheckImpl(pageLimit, "UTF-8", null, null, null);
     }
 
-    private void transformTextAndCheckImpl(int pageLimit, String encoding, Boolean bigEndian, Boolean validBom,
+    private TransformCheckResult transformTextAndCheckImpl(int pageLimit, String encoding, Boolean bigEndian, Boolean validBom,
                                            String expectedByteOrder) throws Exception
     {
         StringBuilder sb = new StringBuilder();
@@ -258,7 +259,7 @@ public class TextToPdfContentTransformerTest
         writeToFile(sourceFile, text, encoding, bigEndian, validBom);
         checkFileBytes(sourceFile, expectedByteOrder);
 
-        transformTextAndCheck(sourceFile, encoding, checkText, String.valueOf(pageLimit));
+        return transformTextAndCheck(sourceFile, encoding, checkText, String.valueOf(pageLimit));
     }
 
     private String createTestText(int pageLimit, StringBuilder sb)
@@ -284,10 +285,10 @@ public class TextToPdfContentTransformerTest
         return checkText;
     }
 
-    private void transformTextAndCheck(File sourceFile, String encoding, String checkText,
+    private TransformCheckResult transformTextAndCheck(File sourceFile, String encoding, String checkText,
         String pageLimit) throws Exception
     {
-        transformTextAndCheck(sourceFile, encoding, checkText, pageLimit, true, null, false);
+        return transformTextAndCheck(sourceFile, encoding, checkText, pageLimit, true, null, false);
     }
 
     private TransformCheckResult transformTextAndCheck(File sourceFile, String encoding, String checkText,
