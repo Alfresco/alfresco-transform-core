@@ -57,8 +57,8 @@ public class TextToPdfContentTransformerTest
 {
     TextToPdfContentTransformer transformer = new TextToPdfContentTransformer();
 
-    private static final String TEXT_WITH_ABREVE = "Gămbardella, Matthew, Corets, Evă";
-    private static final String TEXT_WITHOUT_ABREVE = "Gambardella, Matthew, Corets, Eva";
+    private static final String TEXT_WITH_A_BREVE = "Gămbardella, Matthew, Corets, Evă";
+    private static final String TEXT_WITHOUT_A_BREVE = "Gambardella, Matthew, Corets, Eva";
 
     @BeforeEach
     public void setUp()
@@ -166,13 +166,13 @@ public class TextToPdfContentTransformerTest
         File sourceFile = File.createTempFile("TMP_Times-Bold", ".txt");
         String encoding = "UTF-8";
 
-        writeToFile(sourceFile, TEXT_WITHOUT_ABREVE, encoding, null, null);
+        writeToFile(sourceFile, TEXT_WITHOUT_A_BREVE, encoding, null, null);
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put(PDF_FONT, PDType1Font.TIMES_BOLD.getName());
         parameters.put(PDF_FONT_SIZE, "30");
 
-        TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITHOUT_ABREVE, String.valueOf(-1), true,
+        TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITHOUT_A_BREVE, String.valueOf(-1), true,
                 parameters, false);
 
         assertEquals(result.getUsedFont(), PDType1Font.TIMES_BOLD.getName());
@@ -190,12 +190,12 @@ public class TextToPdfContentTransformerTest
         File sourceFile = File.createTempFile("TMP_MyDummyFont", ".txt");
         String encoding = "UTF-8";
 
-        writeToFile(sourceFile, TEXT_WITHOUT_ABREVE, encoding, null, null);
+        writeToFile(sourceFile, TEXT_WITHOUT_A_BREVE, encoding, null, null);
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put(PDF_FONT, "MyDummyFont");
 
-        TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITHOUT_ABREVE, String.valueOf(-1), true,
+        TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITHOUT_A_BREVE, String.valueOf(-1), true,
                 parameters, false);
 
         assertEquals(result.getUsedFont(), PDType1Font.TIMES_ROMAN.getName());
@@ -214,12 +214,12 @@ public class TextToPdfContentTransformerTest
         File sourceFile = File.createTempFile("TMP_Times-Bold", ".txt");
         String encoding = "UTF-8";
 
-        writeToFile(sourceFile, TEXT_WITH_ABREVE, encoding, null, null);
+        writeToFile(sourceFile, TEXT_WITH_A_BREVE, encoding, null, null);
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put(PDF_FONT, PDType1Font.TIMES_BOLD.getName());
 
-        TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITH_ABREVE, String.valueOf(-1), true,
+        TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITH_A_BREVE, String.valueOf(-1), true,
                 parameters, true);
 
         assertEquals(result.getUsedFont(), PDType1Font.TIMES_BOLD.getName());
