@@ -174,7 +174,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
             catch (Exception e)
             {
                 fontSize = DEFAULT_FONT_SIZE;
-                logger.error("Error parsing font size {}, going to set it as {} : {}", pdfFontSize, fontSize, e.getMessage());
+                logger.error("Error parsing font size {}, going to set it as {} : {}", pdfFontSize, fontSize, e);
             }
         }
 
@@ -517,7 +517,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                 }
                 catch (Exception e)
                 {
-                    logger.error("Error loading font mapping {} : {}", fontName, e.getMessage());
+                    logger.error("Error loading font mapping {} : {}", fontName, e);
                 }
             }
 
@@ -556,7 +556,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                     }
                     catch (IOException ioe)
                     {
-                        logger.error("Error loading font {} from filesystem: {}", fontName, ioe.getMessage());
+                        logger.error("Error loading font {} from filesystem: {}", fontName, ioe);
                     }
                     finally
                     {
