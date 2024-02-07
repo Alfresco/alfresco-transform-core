@@ -188,18 +188,6 @@
                 <artifactId>testcontainers</artifactId>
                 <version>1.19.4</version>
             </dependency>
-<!--        PRODSEC-7375 / CVE-2023-46604-->
-<!--        Both dependencies can be removed once spring-boot-starter-activemq has secure versions of those dependencies-->
-            <dependency>
-                <groupId>org.apache.activemq</groupId>
-                <artifactId>activemq-client</artifactId>
-                <version>5.18.3</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.activemq</groupId>
-                <artifactId>activemq-client-jakarta</artifactId>
-                <version>5.18.3</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
