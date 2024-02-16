@@ -71,7 +71,9 @@ public class AIOTikaTest extends TikaTest
                 "startPage",
                 "targetEncoding",
                 "thumbnail",
-                "width"
+                "width",
+                "pdfFont",
+                "pdfFontSize"
             ),
             getOptionNames(controller.transformConfig(0).getBody().getTransformOptions()));
     }

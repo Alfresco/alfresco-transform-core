@@ -24,3 +24,6 @@ transform:
         exifTool:
           windowsOS: 'exiftool -args -G1 -sep "|||" #{"$"}{INPUT}'
           unixOS: 'env FOO=#{"$"}{OUTPUT} exiftool -args -G1 -sep "|||" #{"$"}{INPUT}'
+    misc:
+        pdfBox:
+          defaultFont: ${MISC_PDFBOX_DEFAULT_FONT:NotoSans-Regular}

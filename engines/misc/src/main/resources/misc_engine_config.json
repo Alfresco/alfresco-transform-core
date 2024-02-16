@@ -1,7 +1,9 @@
 {
   "transformOptions": {
     "textToPdfOptions": [
-      {"value": {"name": "pageLimit"}}
+      {"value": {"name": "pageLimit"}},
+      {"value": {"name": "pdfFont"}},
+      {"value": {"name": "pdfFontSize"}}
     ],
     "stringOptions": [
        {"value": {"name": "targetEncoding"}}
