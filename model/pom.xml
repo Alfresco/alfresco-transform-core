@@ -12,9 +12,9 @@
     </parent>
 
     <properties>
-        <maven.compiler.source>${acs-7.4-compatible.java.version}</maven.compiler.source>
-        <maven.compiler.target>${acs-7.4-compatible.java.version}</maven.compiler.target>
-        <maven.compiler.release>${acs-7.4-compatible.java.version}</maven.compiler.release>
+        <maven.compiler.source>${acs-compatible.java.version}</maven.compiler.source>
+        <maven.compiler.target>${acs-compatible.java.version}</maven.compiler.target>
+        <maven.compiler.release>${acs-compatible.java.version}</maven.compiler.release>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
