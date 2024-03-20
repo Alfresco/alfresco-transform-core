@@ -18,6 +18,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
 
+        <acs-7.4-compatible.java.version>11</acs-7.4-compatible.java.version>
         <image.tag>latest</image.tag>
         <image.registry>quay.io</image.registry>
         <dependency.pdfbox.version>2.0.30</dependency.pdfbox.version>
