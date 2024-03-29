@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.2</version>
+        <version>3.2.4</version>
     </parent>
 
     <properties>
@@ -26,6 +26,7 @@
         <env.project_version>${project.version}</env.project_version>
         <dependency.jackson.version>2.16.1</dependency.jackson.version>
         <dependency.tika.version>2.9.1</dependency.tika.version>
+        <dependency.mime4j.version>0.8.11</dependency.mime4j.version>
         <dependency.poi.version>5.2.5</dependency.poi.version>
         <dependency.snakeyaml.version>2.2</dependency.snakeyaml.version>
 
@@ -172,6 +173,17 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>1.26.0</version>
+            </dependency>
+            <!-- Apache James - Mime4j -->
+            <dependency>
+                <groupId>org.apache.james</groupId>
+                <artifactId>apache-mime4j-core</artifactId>
+                <version>${dependency.mime4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.james</groupId>
+                <artifactId>apache-mime4j-dom</artifactId>
+                <version>${dependency.mime4j.version}</version>
             </dependency>
 
             <dependency>
