@@ -505,7 +505,7 @@ public class TransformControllerTest
         when(transformRegistry.getTransformConfig()).thenReturn(null);
 
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
-            .andExpect(status().isInternalServerError())
+            .andExpect(status().isServiceUnavailable())
             .andExpect(content().string(containsString("Transform Config unavailable.")));
     }
 }
