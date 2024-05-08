@@ -78,6 +78,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import org.alfresco.transform.base.registry.TransformRegistry;
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -87,6 +88,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
@@ -133,6 +135,8 @@ public class TransformControllerTest
     public File tempDir;
     @MockBean
     protected SharedFileStoreClient fakeSfsClient;
+    @SpyBean
+    private TransformRegistry transformRegistry;
 
     static void resetProbeForTesting(TransformController transformController)
     {
@@ -494,5 +498,14 @@ public class TransformControllerTest
                .andExpect(status().isBadRequest())
                .andExpect(content().string(containsString("TwoCustomTransformers Error Page")))
                .andExpect(content().string(containsString("No transforms for: text/plain (5 bytes) -&gt; application/pdf unknown=1")));
+    }
+
+    @Test
+    public void testUnavailableTransformConfig() throws Exception {
+        when(transformRegistry.getTransformConfig()).thenReturn(null);
+
+        mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Transform Config unavailable.")));
     }
 }

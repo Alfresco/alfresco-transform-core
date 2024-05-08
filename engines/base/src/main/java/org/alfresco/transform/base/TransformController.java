@@ -68,6 +68,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.text.MessageFormat.format;
@@ -88,6 +89,7 @@ import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 import static org.alfresco.transform.config.CoreVersionDecorator.setOrClearCoreVersion;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
@@ -268,6 +270,9 @@ public class TransformController
     {
         logger.info("GET Transform Config version: " + configVersion);
         TransformConfig transformConfig = ((TransformRegistry) transformRegistry).getTransformConfig();
+        if(Objects.isNull(transformConfig)) {
+            throw new TransformException(INTERNAL_SERVER_ERROR, "Transform Config unavailable.");
+        }
         transformConfig = setOrClearCoreVersion(transformConfig, configVersion);
         return new ResponseEntity<>(transformConfig, OK);
     }
