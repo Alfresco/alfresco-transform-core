@@ -28,6 +28,8 @@
         <dependency.tika.version>2.9.2</dependency.tika.version>
         <dependency.poi.version>5.2.5</dependency.poi.version>
         <dependency.snakeyaml.version>2.2</dependency.snakeyaml.version>
+        <!--The override can be removed when transitive (from tika) bouncycastle dependency is free of vulnerabilities-->
+        <dependency.bouncycastle.version.override>1.78.1</dependency.bouncycastle.version.override>
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
     </properties>
@@ -128,6 +130,16 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcmail-jdk18on</artifactId>
+                <version>${dependency.bouncycastle.version.override}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${dependency.bouncycastle.version.override}</version>
+            </dependency>
             <dependency>
                 <groupId>org.dom4j</groupId>
                 <artifactId>dom4j</artifactId>
