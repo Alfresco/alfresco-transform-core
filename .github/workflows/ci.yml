@@ -83,7 +83,7 @@ jobs:
       - name: "Build"
         run: mvn -B -U install -DskipTests
       - name: "Create zip"
-        run: zip -r to-scan.zip engines/aio/target/alfresco-transform-core-aio-*.jar engines/base/target/alfresco-base-t-engine-*.jar model/target/alfresco-transform-model-*.jar
+        run: zip -r to-scan.zip engines/aio/target/alfresco-transform-core-aio-*.jar engines/base/target/alfresco-base-t-engine-*.jar model/target/alfresco-transform-model-*.jar -x *javadoc.jar *sources.jar
       - name: "Run SAST Scan"
         uses: veracode/Veracode-pipeline-scan-action@v1.0.10
         with:
@@ -98,6 +98,7 @@ jobs:
           summary_output_file: results.json
           summary_display: true
           baseline_file: baseline.json
+          include: "*alfresco*"
       - name: Upload scan result
         if: success() || failure()
         run: zip readable_output.zip results.json
