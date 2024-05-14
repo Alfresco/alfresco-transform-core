@@ -107,7 +107,7 @@ jobs:
           summary_output_file: results.json
           summary_display: true
           baseline_file: baseline.json
-          include: "engines/aio/*"
+          include: "to-scan/alfresco-transform*"
       - name: Upload scan result
         if: success() || failure()
         run: zip readable_output.zip results.json
