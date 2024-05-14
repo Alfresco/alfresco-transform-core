@@ -84,10 +84,15 @@ jobs:
         run: mvn -B -U install -DskipTests
       - name: "Create zip"
         run:  |
-          zip -d engines/aio/target/alfresco-transform-core-aio-*.jar 'BOOT-INF/lib/bcmail-jdk18on-*.jar' 'BOOT-INF/lib/bcprov-jdk18on-*.jar'
-          zip -d engines/base/target/alfresco-base-t-engine-*.jar 'BOOT-INF/lib/bcmail-jdk18on-*.jar' 'BOOT-INF/lib/bcprov-jdk18on-*.jar'
-          zip -d model/target/alfresco-transform-model-*.jar 'BOOT-INF/lib/bcmail-jdk18on-*.jar' 'BOOT-INF/lib/bcprov-jdk18on-*.jar'
-          zip -r to-scan.zip engines/aio/target/alfresco-transform-core-aio-*.jar engines/base/target/alfresco-base-t-engine-*.jar model/target/alfresco-transform-model-*.jar -x *javadoc.jar *sources.jar
+          mkdir -p to-scan
+          for file in engines/aio/target/alfresco-transform-core-aio-*.jar engines/base/target/alfresco-base-t-engine-*.jar model/target/alfresco-transform-model-*.jar
+          do
+            if [[ $file != *javadoc.jar ]] && [[ $file != *sources.jar ]] && [[ $file != *tests.jar ]]; then
+              mv "$file" to-scan/
+            fi
+          done
+          zip -d to-scan/alfresco-transform*.jar "BOOT-INF/lib/bcmail-jdk18on-*.jar" "BOOT-INF/lib/bcprov-jdk18on-*.jar"
+          zip -r to-scan.zip to-scan
       - name: "Run SAST Scan"
         uses: veracode/Veracode-pipeline-scan-action@v1.0.10
         with:
