@@ -84,9 +84,9 @@ jobs:
         run: mvn -B -U install -DskipTests
       - name: "Create zip"
         run:  |
-          zip -d engines/aio/target/alfresco-transform-core-aio-*.jar 'bcmail-jdk18on' 'bcprov-jdk18on'
-          zip -d engines/base/target/alfresco-base-t-engine-*.jar 'bcmail-jdk18on' 'bcprov-jdk18on'
-          zip -d model/target/alfresco-transform-model-*.jar 'bcmail-jdk18on' 'bcprov-jdk18on'
+          zip -d engines/aio/target/alfresco-transform-core-aio-*.jar 'BOOT-INF/lib/bcmail-jdk18on-*.jar' 'BOOT-INF/lib/bcprov-jdk18on-*.jar'
+          zip -d engines/base/target/alfresco-base-t-engine-*.jar 'BOOT-INF/lib/bcmail-jdk18on-*.jar' 'BOOT-INF/lib/bcprov-jdk18on-*.jar'
+          zip -d model/target/alfresco-transform-model-*.jar 'BOOT-INF/lib/bcmail-jdk18on-*.jar' 'BOOT-INF/lib/bcprov-jdk18on-*.jar'
           zip -r to-scan.zip engines/aio/target/alfresco-transform-core-aio-*.jar engines/base/target/alfresco-base-t-engine-*.jar model/target/alfresco-transform-model-*.jar -x *javadoc.jar *sources.jar
       - name: "Run SAST Scan"
         uses: veracode/Veracode-pipeline-scan-action@v1.0.10
