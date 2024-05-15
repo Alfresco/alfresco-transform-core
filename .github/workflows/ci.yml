@@ -83,7 +83,7 @@ jobs:
       - name: "Build"
         run: mvn -B -U install -DskipTests
       - name: "Create zip"
-        run:  |
+        run: |
           mkdir -p to-scan
           for file in engines/aio/target/alfresco-transform-core-aio-*.jar engines/base/target/alfresco-base-t-engine-*.jar model/target/alfresco-transform-model-*.jar
           do
