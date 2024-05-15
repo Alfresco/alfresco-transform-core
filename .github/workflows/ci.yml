@@ -92,6 +92,7 @@ jobs:
             fi
           done
           zip -d to-scan/alfresco-transform*.jar "BOOT-INF/lib/bcmail-jdk18on-*.jar" "BOOT-INF/lib/bcprov-jdk18on-*.jar" "BOOT-INF/lib/asm*.jar"
+          zip -d to-scan/alfresco-base*.jar "BOOT-INF/lib/asm*.jar"
           zip -r to-scan.zip to-scan
       - name: "Run SAST Scan"
         uses: veracode/Veracode-pipeline-scan-action@v1.0.10
