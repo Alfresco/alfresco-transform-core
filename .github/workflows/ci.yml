@@ -83,6 +83,7 @@ jobs:
       - name: "Build"
         run: mvn -B -U install -DskipTests
       - name: "Create zip"
+        # Removing the aspectjweaver and bouncycastle jars from the scan, since Veracode detects them as 1st party code and fails the scan. TO BE REVERTED ONCE VERACODE FIXES THE ISSUE
         run:  |
           mkdir -p to-scan
           for file in engines/aio/target/alfresco-transform-core-aio-*.jar engines/base/target/alfresco-base-t-engine-*.jar model/target/alfresco-transform-model-*.jar
@@ -91,7 +92,6 @@ jobs:
               mv "$file" to-scan/
             fi
           done
-# Removing the aspectjweaver and bouncycastle jars from the scan, since Veracode detects them as 1st party code and fails the scan. TO BE REMOVED ONCE VERACODE FIXES THE ISSUE
           zip -d to-scan/alfresco-transform*.jar "BOOT-INF/lib/bcmail-jdk18on-*.jar" "BOOT-INF/lib/bcprov-jdk18on-*.jar" "BOOT-INF/lib/aspectjweaver*.jar"
           zip -r to-scan.zip to-scan
       - name: "Run SAST Scan"
