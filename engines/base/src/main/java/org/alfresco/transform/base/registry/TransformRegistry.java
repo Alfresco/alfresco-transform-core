@@ -161,7 +161,8 @@ public class TransformRegistry extends AbstractTransformRegistry
     /**
      * Recovery mode method, executes only when there was failure during initial config retrieval process.
      */
-    @Scheduled(initialDelay = 1000, fixedDelayString = "#{${transform.engine.config.retry.timeout} * 1000}")
+    @Scheduled(initialDelayString = "#{${transform.engine.config.retry.timeout} * 1000}",
+            fixedDelayString = "#{${transform.engine.config.retry.timeout} * 1000}")
     public void retrieveEngineConfigsAfterFailure()
     {
         if(isRecoveryModeOn.get())
