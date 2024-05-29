@@ -80,7 +80,7 @@ public class TransformRegistry extends AbstractTransformRegistry
     @Value("${container.isTRouter}")
     private boolean isTRouter;
 
-    private AtomicBoolean isRecoveryModeOn = new AtomicBoolean(true);
+    private final AtomicBoolean isRecoveryModeOn = new AtomicBoolean(true);
 
     // Not autowired - avoids a circular reference in the router - initialised on startup event
     private List<CustomTransformer> customTransformerList;
@@ -311,6 +311,11 @@ public class TransformRegistry extends AbstractTransformRegistry
     public boolean isReadyForTransformRequests()
     {
         return getData().getTransforms().size() > 0;
+    }
+
+    public boolean isRecoveryModeOn()
+    {
+        return isRecoveryModeOn.getAcquire();
     }
 
     @Override

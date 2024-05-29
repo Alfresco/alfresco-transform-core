@@ -88,7 +88,6 @@ import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 import static org.alfresco.transform.config.CoreVersionDecorator.setOrClearCoreVersion;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -103,11 +102,12 @@ public class TransformController
     private static final String MODEL_TITLE = "title";
     private static final String MODEL_PROXY_PATH_PREFIX = "proxyPathPrefix";
     private static final String MODEL_MESSAGE = "message";
+    public static final String X_ALFRESCO_RETRY_NEEDED_HEADER = "X-Alfresco-Retry-Needed";
 
     @Autowired(required = false)
     private List<TransformEngine> transformEngines;
     @Autowired
-    private TransformServiceRegistry transformRegistry;
+    private TransformRegistry transformRegistry;
     @Autowired
     TransformHandler transformHandler;
     @Autowired
@@ -178,7 +178,7 @@ public class TransformController
     {
         model.addAttribute(MODEL_TITLE, getSimpleTransformEngineName() + " Test Page");
         model.addAttribute(MODEL_PROXY_PATH_PREFIX, getPathPrefix());
-        TransformConfig transformConfig = ((TransformRegistry) transformRegistry).getTransformConfig();
+        TransformConfig transformConfig = transformRegistry.getTransformConfig();
         transformConfig = setOrClearCoreVersion(transformConfig, 0);
         model.addAttribute("transformOptions", getOptionNames(transformConfig.getTransformOptions()));
         return "test"; // display test.html
@@ -267,9 +267,17 @@ public class TransformController
             @RequestParam(value = CONFIG_VERSION, defaultValue = CONFIG_VERSION_DEFAULT) int configVersion)
     {
         logger.info("GET Transform Config version: " + configVersion);
-        TransformConfig transformConfig = ((TransformRegistry) transformRegistry).getTransformConfig();
+        TransformConfig transformConfig = transformRegistry.getTransformConfig();
         transformConfig = setOrClearCoreVersion(transformConfig, configVersion);
-        return new ResponseEntity<>(transformConfig, OK);
+
+        if (transformRegistry.isRecoveryModeOn())
+        {
+            return ResponseEntity.ok().header(X_ALFRESCO_RETRY_NEEDED_HEADER).body(transformConfig);
+        }
+        else
+        {
+            return ResponseEntity.ok().body(transformConfig);
+        }
     }
 
     // Only used for testing, but could be used in place of the /transform endpoint used by Alfresco Repository's
