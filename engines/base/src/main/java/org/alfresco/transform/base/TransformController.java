@@ -272,7 +272,7 @@ public class TransformController
 
         if (transformRegistry.isRecoveryModeOn())
         {
-            return ResponseEntity.ok().header(X_ALFRESCO_RETRY_NEEDED_HEADER).body(transformConfig);
+            return ResponseEntity.ok().header(X_ALFRESCO_RETRY_NEEDED_HEADER, "RecoveryModeOn").body(transformConfig);
         }
         else
         {
