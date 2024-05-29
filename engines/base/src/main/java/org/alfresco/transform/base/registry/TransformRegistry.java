@@ -41,8 +41,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -65,6 +68,7 @@ import static org.alfresco.transform.registry.TransformerType.PIPELINE_TRANSFORM
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
+@Scope( proxyMode = ScopedProxyMode.TARGET_CLASS )
 public class TransformRegistry extends AbstractTransformRegistry
 {
     private static final Logger logger = LoggerFactory.getLogger(TransformRegistry.class);
@@ -142,6 +146,7 @@ public class TransformRegistry extends AbstractTransformRegistry
      * Load the registry on application startup. This allows Components in projects that extend the t-engine base
      * to use @PostConstruct to add to {@code transformConfigSources}, before the registry is loaded.
      */
+    @Async
     void initRegistryOnAppStartup(final ContextRefreshedEvent event)
     {
         customTransformerList = event.getApplicationContext().getBean(CustomTransformers.class).toList();
