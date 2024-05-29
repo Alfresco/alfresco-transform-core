@@ -102,7 +102,7 @@ public class TransformController
     private static final String MODEL_TITLE = "title";
     private static final String MODEL_PROXY_PATH_PREFIX = "proxyPathPrefix";
     private static final String MODEL_MESSAGE = "message";
-    public static final String X_ALFRESCO_RETRY_NEEDED_HEADER = "X-Alfresco-Retry-Needed";
+    private static final String X_ALFRESCO_RETRY_NEEDED_HEADER = "X-Alfresco-Retry-Needed";
 
     @Autowired(required = false)
     private List<TransformEngine> transformEngines;
