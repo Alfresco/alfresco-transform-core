@@ -41,25 +41,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Recover;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
@@ -76,6 +68,7 @@ import static org.alfresco.transform.registry.TransformerType.PIPELINE_TRANSFORM
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
+@Scope( proxyMode = ScopedProxyMode.TARGET_CLASS )
 public class TransformRegistry extends AbstractTransformRegistry
 {
     private static final Logger logger = LoggerFactory.getLogger(TransformRegistry.class);
@@ -86,6 +79,8 @@ public class TransformRegistry extends AbstractTransformRegistry
     private List<TransformConfigSource> transformConfigSources;
     @Value("${container.isTRouter}")
     private boolean isTRouter;
+
+    private final AtomicBoolean isRecoveryModeOn = new AtomicBoolean(true);
 
     // Not autowired - avoids a circular reference in the router - initialised on startup event
     private List<CustomTransformer> customTransformerList;
@@ -152,24 +147,10 @@ public class TransformRegistry extends AbstractTransformRegistry
      * to use @PostConstruct to add to {@code transformConfigSources}, before the registry is loaded.
      */
     @Async
-    @Retryable(include = {IllegalStateException.class},
-        maxAttemptsExpression = "#{${transform.engine.config.retry.attempts}}",
-        backoff = @Backoff(delayExpression = "#{${transform.engine.config.retry.timeout} * 1000}"))
     void initRegistryOnAppStartup(final ContextRefreshedEvent event)
     {
         customTransformerList = event.getApplicationContext().getBean(CustomTransformers.class).toList();
         retrieveConfig();
-    }
-
-    /**
-     * Recovery method in case all the retries fail. If not specified, the @Retryable method will cause the application
-     * to stop, which we don't want as the t-engine issue may have been sorted out in an hour when the next scheduled
-     * try is made.
-     */
-    @Recover
-    void recover(IllegalStateException e)
-    {
-        logger.warn(e.getMessage());
     }
 
     /**
@@ -178,17 +159,66 @@ public class TransformRegistry extends AbstractTransformRegistry
     @Scheduled(cron = "${transform.engine.config.cron}")
     public void retrieveEngineConfigs()
     {
-        logger.trace("Refresh TransformRegistry");
+        logger.trace("Refresh TransformRegistry.");
         retrieveConfig();
+    }
+
+    /**
+     * Recovery mode method, executes only when there was failure during initial config retrieval process.
+     */
+    @Scheduled(initialDelayString = "#{${transform.engine.config.retry.timeout} * 1000}",
+            fixedDelayString = "#{${transform.engine.config.retry.timeout} * 1000}")
+    public void retrieveEngineConfigsAfterFailure()
+    {
+        if(isRecoveryModeOn.get())
+        {
+            logger.trace("Recovery mode, attempting to retrieve configs for all registered T-Engines.");
+            retrieveConfig();
+        }
     }
 
     void retrieveConfig()
     {
         CombinedTransformConfig combinedTransformConfig = new CombinedTransformConfig();
+        TreeMap<String, LocalTransformConfigSource> availableTransformers = new TreeMap<>();
 
-        transformConfigSources.stream()
-            .sorted(Comparator.comparing(TransformConfigSource::getSortOnName))
-            .forEach(source -> {
+        logger.debug("Retrieving available TransformConfig.");
+        for (TransformConfigSource source : transformConfigSources)
+        {
+            try
+            {
+                String sortOnName = source.getSortOnName();
+                TransformConfig transformConfig = source.getTransformConfig();
+                availableTransformers.put(
+                        sortOnName,
+                        new LocalTransformConfigSource(transformConfig, sortOnName, source.getReadFrom(), source.getBaseUrl())
+                );
+            }
+            catch (IllegalStateException e)
+            {
+                if (isRecoveryModeOn.getAcquire())
+                {
+                    logger.trace("Failed to retrieved TransformConfig during recovery mode. {}", e.getMessage());
+                }
+                else
+                {
+                    logger.warn(
+                            "Failed to retrieved TransformConfig during refreshment. Stops refreshing TransformRegistry. {}",
+                            e.getMessage()
+                    );
+                    return;
+                }
+            }
+        }
+
+        if(transformConfigSources.size() == availableTransformers.size()
+                && isRecoveryModeOn.compareAndExchange(true, false))
+        {
+            logger.trace("All TransformConfigSources have been retrieved, turning off recovery mode.");
+        }
+
+        logger.debug("Creating CombinedTransformConfig.");
+        availableTransformers.values().forEach(source -> {
                 TransformConfig transformConfig = source.getTransformConfig();
                 setCoreVersionOnSingleStepTransformers(transformConfig, coreVersion);
                 combinedTransformConfig.addTransformConfig(transformConfig, source.getReadFrom(), source.getBaseUrl(),
@@ -281,6 +311,11 @@ public class TransformRegistry extends AbstractTransformRegistry
     public boolean isReadyForTransformRequests()
     {
         return getData().getTransforms().size() > 0;
+    }
+
+    public boolean isRecoveryModeOn()
+    {
+        return isRecoveryModeOn.getAcquire();
     }
 
     @Override
