@@ -27,6 +27,7 @@
         <dependency.jackson.version>2.16.1</dependency.jackson.version>
         <dependency.tika.version>2.9.2</dependency.tika.version>
         <dependency.poi.version>5.2.5</dependency.poi.version>
+        <dependency.imaging.version>1.0.0-alpha5</dependency.imaging.version>
         <dependency.snakeyaml.version>2.2</dependency.snakeyaml.version>
         <!--The override can be removed when transitive (from tika) bouncycastle dependency is free of vulnerabilities-->
         <dependency.bouncycastle.version.override>1.78.1</dependency.bouncycastle.version.override>
@@ -159,6 +160,12 @@
                 <groupId>org.apache.pdfbox</groupId>
                 <artifactId>pdfbox-tools</artifactId>
                 <version>${dependency.pdfbox.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-imaging -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-imaging</artifactId>
+                <version>${dependency.imaging.version}</version>
             </dependency>
             <!-- Jackson -->
             <dependency>
