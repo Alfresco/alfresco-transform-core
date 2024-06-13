@@ -290,23 +290,7 @@ class ImageToPdfTransformerTest
         }
     }
 
-    static Stream<ImageFile> imageFilesOfVariousSizeAndResolution()
-    {
-        return Stream.of(
-                ImageFile.of("MNT-24205.tiff", MIMETYPE_IMAGE_TIFF),
-                ImageFile.of("459x594-50.tif", MIMETYPE_IMAGE_TIFF),
-                ImageFile.of("459x594-72.tif", MIMETYPE_IMAGE_TIFF),
-                ImageFile.of("459x594-300.tif", MIMETYPE_IMAGE_TIFF),
-                ImageFile.of("612x792-50.tif", MIMETYPE_IMAGE_TIFF),
-                ImageFile.of("612x792-72.tif", MIMETYPE_IMAGE_TIFF),
-                ImageFile.of("612x792-300.tif", MIMETYPE_IMAGE_TIFF),
-                ImageFile.of("765x990-50.tif", MIMETYPE_IMAGE_TIFF),
-                ImageFile.of("765x990-72.tif", MIMETYPE_IMAGE_TIFF),
-                ImageFile.of("765x990-300.tif", MIMETYPE_IMAGE_TIFF)
-                        );
-    }
-
-    static Stream<Arguments> imageFilesOfVariousSizeAndResolution1()
+    static Stream<Arguments> imageFilesOfVariousSizeAndResolution()
     {
         return Stream.of(
                 Arguments.of(ImageFile.of("MNT-24205.tiff", MIMETYPE_IMAGE_TIFF), 612.0f, 792.0f),
@@ -323,7 +307,7 @@ class ImageToPdfTransformerTest
     }
 
     @ParameterizedTest
-    @MethodSource("imageFilesOfVariousSizeAndResolution1")
+    @MethodSource("imageFilesOfVariousSizeAndResolution")
     void testTransformTiffToPDF_withVariousImageSizes(ImageFile imageFile, float expectedWidth, float expectedHeight) throws Exception
     {
         TransformOptions transformOptions = TransformOptions.of("DEFAULT");
