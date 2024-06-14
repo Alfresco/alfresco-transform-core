@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -30,6 +30,8 @@ import static org.alfresco.transform.common.RequestParamMap.END_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.PDF_FORMAT;
 import static org.alfresco.transform.common.RequestParamMap.PDF_ORIENTATION;
 import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.TIFF_TAG_XRESOLUTION;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.TIFF_TAG_YRESOLUTION;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -45,6 +47,12 @@ import java.util.stream.Stream;
 
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
+import org.apache.commons.imaging.Imaging;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.ImageMetadata;
+import org.apache.commons.imaging.formats.tiff.TiffField;
+import org.apache.commons.imaging.formats.tiff.TiffImageMetadata;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -75,8 +83,9 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
     private static final String START_PAGE_GREATER_THAN_END_PAGE_ERROR_MESSAGE = "Start page number cannot be greater than end page.";
     private static final String INVALID_OPTION_ERROR_MESSAGE = "Parameter '%s' is invalid: \"%s\" - it must be an integer.";
     private static final String INVALID_IMAGE_ERROR_MESSAGE = "Image file (%s) format (%s) not supported by ImageIO.";
-    private static final String DEFAULT_PDF_FORMAT_STRING = "DEFAULT";
+    private static final String DEFAULT_PDF_FORMAT_STRING = "DEFAULT"; // pdf format to use when no pdf format specified
     private static final String DEFAULT_PDF_ORIENTATION_STRING = "DEFAULT";
+    private static final float PDFBOX_POINTS_PER_INCH = 72.0F;
 
     @Override
     public String getTransformerName()
@@ -99,6 +108,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
             final String pdfOrientation = parseOptionIfPresent(transformOptions, PDF_ORIENTATION, String.class).orElse(DEFAULT_PDF_ORIENTATION_STRING);
             verifyOptions(startPage, endPage);
 
+            final Map<String, Integer> resolution = determineImageResolution(imageFile);
             final ImageReader imageReader = findImageReader(imageInputStream, imageFile.getName(), sourceMimetype);
             for (int i = 0; i < imageReader.getNumImages(true); i++)
             {
@@ -111,7 +121,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
                     break;
                 }
 
-                scaleAndDrawImage(pdfDocument, imageReader.read(i), pdfFormat, pdfOrientation);
+                scaleAndDrawImage(pdfDocument, imageReader.read(i), pdfFormat, pdfOrientation, resolution);
             }
 
             pdfDocument.save(pdfFile);
@@ -131,11 +141,22 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         return imageReader;
     }
 
-    private void scaleAndDrawImage(final PDDocument pdfDocument, final BufferedImage bufferedImage, final String pdfFormat, final String pdfOrientation)
+    private void scaleAndDrawImage(final PDDocument pdfDocument, final BufferedImage bufferedImage, final String pdfFormat, final String pdfOrientation, final Map<String, Integer> resolution)
         throws IOException
     {
         final PDImageXObject image = LosslessFactory.createFromImage(pdfDocument, bufferedImage);
-        final PDPage pdfPage = new PDPage(resolvePdfFormat(pdfFormat, pdfOrientation, image.getWidth(), image.getHeight()));
+
+        int imageWidth = image.getWidth();
+        int imageHeight = image.getHeight();
+        // if the image has a resolution which differs from pdfbox then adjust size in pixels according to pdfbox ppi
+        if (resolution.get("X") > 0 && resolution.get("X") != PDFBOX_POINTS_PER_INCH &&
+            resolution.get("Y") > 0 && resolution.get("Y") != PDFBOX_POINTS_PER_INCH)
+        {
+            imageWidth = (int)(((float)imageWidth / resolution.get("X")) * PDFBOX_POINTS_PER_INCH);
+            imageHeight = (int)(((float)imageHeight / resolution.get("Y")) * PDFBOX_POINTS_PER_INCH);
+        }
+
+        final PDPage pdfPage = new PDPage(resolvePdfFormat(pdfFormat, pdfOrientation, imageWidth, imageHeight));
         pdfDocument.addPage(pdfPage);
         try (PDPageContentStream pdfPageContent = new PDPageContentStream(pdfDocument, pdfPage))
         {
@@ -256,5 +277,45 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         {
             throw new IllegalArgumentException(START_PAGE_GREATER_THAN_END_PAGE_ERROR_MESSAGE);
         }
+    }
+
+    private static Map<String, Integer> determineImageResolution(File imageFile)
+    {
+        int xResolution = 0;
+        int yResolution = 0;
+
+        try
+        {
+            final ImageMetadata metadata = Imaging.getMetadata(imageFile);
+            if (metadata instanceof TiffImageMetadata)
+            {
+                final TiffImageMetadata tiffImageMetadata = (TiffImageMetadata) metadata;
+                xResolution = findMetadataField(tiffImageMetadata, TIFF_TAG_XRESOLUTION);
+                yResolution = findMetadataField(tiffImageMetadata, TIFF_TAG_YRESOLUTION);
+            }
+        }
+        catch (IOException e)
+        {
+            // treat as though no resolution exists
+        }
+        return Map.of("X", xResolution, "Y", yResolution);
+    }
+
+    static private int findMetadataField(TiffImageMetadata tiffImageMetadata, TagInfo tagInfo)
+    {
+        int value = 0;
+        try
+        {
+            TiffField field = tiffImageMetadata.findField(tagInfo);
+            if (field != null)
+            {
+                value = field.getIntValue();
+            }
+        }
+        catch (ImagingException e)
+        {
+            // treat as though field not found
+        }
+        return value;
     }
 }

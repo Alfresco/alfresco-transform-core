@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -287,6 +287,41 @@ class ImageToPdfTransformerTest
             assertNotNull(actualPdfDocument);
             assertEquals(actualImage.getWidth(), actualPdfDocument.getPage(0).getMediaBox().getWidth());
             assertEquals(actualImage.getHeight(), actualPdfDocument.getPage(0).getMediaBox().getHeight());
+        }
+    }
+
+    static Stream<Arguments> imageFilesOfVariousSizeAndResolution()
+    {
+        return Stream.of(
+                Arguments.of(ImageFile.of("MNT-24205.tiff", MIMETYPE_IMAGE_TIFF), 612.0f, 792.0f),
+                Arguments.of(ImageFile.of("459x594-50.tif", MIMETYPE_IMAGE_TIFF), 660.0f, 855.0f),
+                Arguments.of(ImageFile.of("459x594-72.tif", MIMETYPE_IMAGE_TIFF), 459.0f, 594.0f),
+                Arguments.of(ImageFile.of("459x594-300.tif", MIMETYPE_IMAGE_TIFF), 110.0f, 142.0f),
+                Arguments.of(ImageFile.of("612x792-50.tif", MIMETYPE_IMAGE_TIFF), 881.0f, 1140.0f),
+                Arguments.of(ImageFile.of("612x792-72.tif", MIMETYPE_IMAGE_TIFF), 612.0f, 792.0f),
+                Arguments.of(ImageFile.of("612x792-300.tif", MIMETYPE_IMAGE_TIFF), 146.0f, 190.0f),
+                Arguments.of(ImageFile.of("765x990-50.tif", MIMETYPE_IMAGE_TIFF), 1101.0f, 1425.0f),
+                Arguments.of(ImageFile.of("765x990-72.tif", MIMETYPE_IMAGE_TIFF), 765.0f, 990.0f),
+                Arguments.of(ImageFile.of("765x990-300.tif", MIMETYPE_IMAGE_TIFF), 183.0f, 237.0f)
+                        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("imageFilesOfVariousSizeAndResolution")
+    void testTransformTiffToPDF_withVariousImageSizes(ImageFile imageFile, float expectedWidth, float expectedHeight) throws Exception
+    {
+        TransformOptions transformOptions = TransformOptions.of("DEFAULT");
+
+        File source = loadFile(imageFile.fileName);
+
+        // when
+        transformer.transform(imageFile.mimetype, MIMETYPE_PDF, transformOptions.toMap(), source, targetFile, transformManager);
+
+        try (PDDocument actualPdfDocument = PDDocument.load(targetFile))
+        {
+            assertNotNull(actualPdfDocument);
+            assertEquals(expectedWidth, actualPdfDocument.getPage(0).getMediaBox().getWidth(),"Pdf width");
+            assertEquals(expectedHeight,actualPdfDocument.getPage(0).getMediaBox().getHeight(),"Pdf height");
         }
     }
 
