@@ -2,7 +2,7 @@
 
 # LibreOffice is from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt.
 
-FROM alfresco/alfresco-base-java:jre17-rockylinux8-202306121108
+FROM alfresco/alfresco-base-java:jre17-rockylinux8-202312191347
 
 ARG LIBREOFFICE_VERSION=7.2.5
 
