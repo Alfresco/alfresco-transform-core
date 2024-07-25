@@ -21,7 +21,7 @@
         <acs-compatible.java.version>11</acs-compatible.java.version>
         <image.tag>latest</image.tag>
         <image.registry>quay.io</image.registry>
-        <dependency.pdfbox.version>2.0.30</dependency.pdfbox.version>
+        <dependency.pdfbox.version>3.0.2</dependency.pdfbox.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.18</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
         <dependency.jackson.version>2.17.2</dependency.jackson.version>
