@@ -9,7 +9,7 @@ LIBREOFFICE_VERSION=7.2.5
 
 # Cache the LibreOffice distribution, as it is takes a long time to download and it can cause the
 # build to fail (no output for more than 10 minutes)
-LIBREOFFICE_RPM_URL="https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz"
+LIBREOFFICE_RPM_URL="https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz"
 if [ -f "${HOME}/artifacts/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz" ]; then
     echo "Using cached LibreOffice distribution..."
 else
