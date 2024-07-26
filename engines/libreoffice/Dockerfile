@@ -6,7 +6,7 @@ FROM alfresco/alfresco-base-java:jre17-rockylinux8-202306121108
 
 ARG LIBREOFFICE_VERSION=7.2.5
 
-ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz
+ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz
 ENV JAVA_OPTS=""
 
 # Set default user information
