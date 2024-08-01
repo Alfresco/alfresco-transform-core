@@ -5,7 +5,10 @@
 # ImageMagick is from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt.
 # alfresco-pdf-renderer uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt.
 
-FROM alfresco/alfresco-base-java:jre17-rockylinux8-202306121108
+# ACTUAL IMAGE
+# More infos about this image: https://github.com/Alfresco/alfresco-docker-base-java
+# jre17-rockylinux8 (29/07/2024)
+FROM alfresco/alfresco-base-java@sha256:18ac53e9a267dc4389eaff80ad1f5b8deaf53da09c234de5fcc6e05ebcd4a77c
 
 ARG EXIFTOOL_VERSION=12.25
 ARG EXIFTOOL_FOLDER=Image-ExifTool-${EXIFTOOL_VERSION}

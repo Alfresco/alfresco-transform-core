@@ -2,7 +2,10 @@
 
 # Tika is from Apache. See the license at http://www.apache.org/licenses/LICENSE-2.0.
 
-FROM alfresco/alfresco-base-java:jre17-rockylinux8-202306121108
+# ACTUAL IMAGE
+# More infos about this image: https://github.com/Alfresco/alfresco-docker-base-java
+# jre17-rockylinux8 (29/07/2024)
+FROM alfresco/alfresco-base-java@sha256:18ac53e9a267dc4389eaff80ad1f5b8deaf53da09c234de5fcc6e05ebcd4a77c
 
 ARG EXIFTOOL_VERSION=12.25
 ARG EXIFTOOL_FOLDER=Image-ExifTool-${EXIFTOOL_VERSION}
