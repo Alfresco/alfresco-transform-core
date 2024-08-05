@@ -12,8 +12,8 @@ ARG EXIFTOOL_VERSION=12.25
 ARG EXIFTOOL_FOLDER=Image-ExifTool-${EXIFTOOL_VERSION}
 ARG EXIFTOOL_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/org/exiftool/image-exiftool/${EXIFTOOL_VERSION}/image-exiftool-${EXIFTOOL_VERSION}.tgz
 
-ARG IMAGEMAGICK_VERSION=7.1.0-16-ci-10
-ENV IMAGEMAGICK_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}-ci-3/imagemagick-distribution-${IMAGEMAGICK_VERSION}-ci-3
+ARG IMAGEMAGICK_VERSION=7.1.0-16
+ENV IMAGEMAGICK_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}-ci-10/imagemagick-distribution-${IMAGEMAGICK_VERSION}-ci-10
 ENV IMAGEMAGICK_DEP_RPM_URL=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
 ARG LIBREOFFICE_VERSION=7.2.5
@@ -40,7 +40,7 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
     if [ "$(uname -m)" = "x86_64" ]; then \
       yum install -y ${IMAGEMAGICK_RPM_URL}-el9.rpm ${IMAGEMAGICK_RPM_URL}-el9-libs.rpm; \
     else \
-      yum install -y ${IMAGEMAGICK_RPM_URL}-arm64.rpm ${IMAGEMAGICK_RPM_URL}-arm64-libs.rpm; \
+      yum install -y ${IMAGEMAGICK_RPM_URL}-el9-aarch64.rpm ${IMAGEMAGICK_RPM_URL}-libs-el9-aarch64.rpm; \
     fi && \
     yum install -y cairo cups-libs libSM libGLU && \
     if [ "$(uname -m)" = "x86_64" ]; then \
