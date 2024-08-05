@@ -2,13 +2,11 @@
 
 # ImageMagick is from ImageMagick Studio LLC. See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt.
 
-# ACTUAL IMAGE
 # More infos about this image: https://github.com/Alfresco/alfresco-docker-base-java
-# jre17-rockylinux9 (29/07/2024)
-FROM alfresco/alfresco-base-java@sha256:8dca9445141dd07b9a6b7a9962f0505546b2ed041b4d5cc785cc9c2d39eeda19
+FROM alfresco/alfresco-base-java:jre17-rockylinux9@sha256:905004d3b37334182a836146c4566151e003a0a6f99976571f8ceae256d78687
 
 # For other ImageMagick versions please look at https://github.com/Alfresco/imagemagick-build tags
-ARG IMAGEMAGICK_VERSION=7.1.0-16
+ARG IMAGEMAGICK_VERSION=7.1.0-16-ci-10
 
 ENV IMAGEMAGICK_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}-ci-3/imagemagick-distribution-${IMAGEMAGICK_VERSION}-ci-3
 ENV IMAGEMAGICK_DEP_RPM_URL=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm

@@ -2,10 +2,8 @@
 
 # alfresco-pdf-renderer uses the PDFium library from Google Inc. See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt.
 
-# ACTUAL IMAGE
 # More infos about this image: https://github.com/Alfresco/alfresco-docker-base-java
-# jre17-rockylinux9 (29/07/2024)
-FROM alfresco/alfresco-base-java@sha256:8dca9445141dd07b9a6b7a9962f0505546b2ed041b4d5cc785cc9c2d39eeda19
+FROM alfresco/alfresco-base-java:jre17-rockylinux9@sha256:905004d3b37334182a836146c4566151e003a0a6f99976571f8ceae256d78687
 
 ARG PDF_RENDERER_VERSION=1.2
 ENV ALFRESCO_PDF_RENDERER_LIB_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/releases/org/alfresco/alfresco-pdf-renderer/${PDF_RENDERER_VERSION}/alfresco-pdf-renderer-${PDF_RENDERER_VERSION}-linux.tgz

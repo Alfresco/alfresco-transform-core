@@ -2,16 +2,14 @@
 
 # LibreOffice is from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt.
 
-# ACTUAL IMAGE
 # More infos about this image: https://github.com/Alfresco/alfresco-docker-base-java
-# jre17-rockylinux9 (29/07/2024)
-FROM alfresco/alfresco-base-java@sha256:8dca9445141dd07b9a6b7a9962f0505546b2ed041b4d5cc785cc9c2d39eeda19
+FROM alfresco/alfresco-base-java:jre17-rockylinux9@sha256:905004d3b37334182a836146c4566151e003a0a6f99976571f8ceae256d78687
 
 ARG LIBREOFFICE_VERSION=7.2.5
 
 ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz
-ENV LIBREOFFICE_ARM64_RPM_URL=https://dl.rockylinux.org/pub/rocky/8/Devel/aarch64/os/Packages/l/
-ENV LIBREOFFICE_ARM64_RPM_VERSION=libreoffice-6.4.7.2
+ENV LIBREOFFICE_ARM64_RPM_URL=https://dl.rockylinux.org/pub/rocky/9/devel/aarch64/os/Packages/l/
+ENV LIBREOFFICE_ARM64_RPM_VERSION=libreoffice-7.1.8.1
 ENV JAVA_OPTS=""
 
 # Set default user information
