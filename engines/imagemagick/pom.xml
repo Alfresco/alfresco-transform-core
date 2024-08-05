@@ -180,6 +180,7 @@
                                     <goal>build</goal>
                                 </goals>
                                 <configuration>
+                                    <verbose>true</verbose>
                                     <images>
                                         <image>
                                             <name>${image.name}:${image.tag}</name>
