@@ -21,7 +21,7 @@ ARG USERID=33003
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
 RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
-    yum install -y cairo cups-libs libSM libGLU && \
+    yum install -y cairo cups-libs libSM libGLU procps && \
     if [ "$(uname -m)" = "x86_64" ]; then \
         test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
         ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
