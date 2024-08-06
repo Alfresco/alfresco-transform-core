@@ -42,7 +42,7 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
     else \
       yum install -y ${IMAGEMAGICK_RPM_URL}-el9-aarch64.rpm ${IMAGEMAGICK_RPM_URL}-libs-el9-aarch64.rpm; \
     fi && \
-    yum install -y cairo cups-libs libSM libGLU && \
+    yum install -y cairo cups-libs libSM libGLU procps && \
     if [ "$(uname -m)" = "x86_64" ]; then \
       test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
       ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
