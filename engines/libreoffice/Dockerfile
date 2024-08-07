@@ -2,13 +2,14 @@
 
 # LibreOffice is from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt.
 
-FROM alfresco/alfresco-base-java:jre17-rockylinux8-202306121108
+# More infos about this image: https://github.com/Alfresco/alfresco-docker-base-java
+FROM alfresco/alfresco-base-java:jre17-rockylinux9@sha256:1f6cc5acfe73b3dc80b0f3850c23a171d13ae1693a09ba32d7f8e0c71800116a
 
 ARG LIBREOFFICE_VERSION=7.2.5
 
 ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz
-ENV LIBREOFFICE_ARM64_RPM_URL=https://dl.rockylinux.org/pub/rocky/8/Devel/aarch64/os/Packages/l/
-ENV LIBREOFFICE_ARM64_RPM_VERSION=libreoffice-6.4.7.2
+ENV LIBREOFFICE_ARM64_RPM_URL=https://dl.rockylinux.org/pub/rocky/9/devel/aarch64/os/Packages/l/
+ENV LIBREOFFICE_ARM64_RPM_VERSION=libreoffice-7.1.8.1
 ENV JAVA_OPTS=""
 
 # Set default user information
@@ -20,7 +21,7 @@ ARG USERID=33003
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
 RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
-    yum install -y cairo cups-libs libSM libGLU && \
+    yum install -y cairo cups-libs libSM libGLU procps && \
     if [ "$(uname -m)" = "x86_64" ]; then \
         test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
         ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \

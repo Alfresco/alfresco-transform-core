@@ -16,42 +16,42 @@ updates:
   registries:
   - maven-alfresco-internal
 - package-ecosystem: docker
-  directory: "/engines/aio"
+  directory: "engines/aio"
   schedule:
     interval: daily
     time: "22:00"
     timezone: Europe/London
   open-pull-requests-limit: 99
 - package-ecosystem: docker
-  directory: "/engines/libreoffice"
+  directory: "engines/libreoffice"
   schedule:
     interval: daily
     time: "22:00"
     timezone: Europe/London
   open-pull-requests-limit: 99
 - package-ecosystem: docker
-  directory: "/engines/imagemagick"
+  directory: "engines/imagemagick"
   schedule:
     interval: daily
     time: "22:00"
     timezone: Europe/London
   open-pull-requests-limit: 99
 - package-ecosystem: docker
-  directory: "/engines/misc"
+  directory: "engines/misc"
   schedule:
     interval: daily
     time: "22:00"
     timezone: Europe/London
   open-pull-requests-limit: 99
 - package-ecosystem: docker
-  directory: "/engines/tika"
+  directory: "engines/tika"
   schedule:
     interval: daily
     time: "22:00"
     timezone: Europe/London
   open-pull-requests-limit: 99
 - package-ecosystem: docker
-  directory: "/engines/pdfrenderer"
+  directory: "engines/pdfrenderer"
   schedule:
     interval: daily
     time: "22:00"
