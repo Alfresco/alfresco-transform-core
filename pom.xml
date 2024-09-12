@@ -28,7 +28,7 @@
         <dependency.tika.version>2.9.2</dependency.tika.version>
         <dependency.poi.version>5.2.5</dependency.poi.version>
         <dependency.imaging.version>1.0.0-alpha5</dependency.imaging.version>
-        <dependency.snakeyaml.version>2.2</dependency.snakeyaml.version>
+        <dependency.snakeyaml.version>2.3</dependency.snakeyaml.version>
         <!--The override can be removed when transitive (from tika) bouncycastle dependency is free of vulnerabilities-->
         <dependency.bouncycastle.version.override>1.78.1</dependency.bouncycastle.version.override>
 
