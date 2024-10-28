@@ -40,14 +40,13 @@ public final class PdfRendererOptionsBuilder
 {
     private Integer page;
     private Integer width;
-    private Integer                    height;
-    private Boolean             allowPdfEnlargement;
+    private Integer height;
+    private Boolean allowPdfEnlargement;
     private Boolean maintainPdfAspectRatio;
 
-    private PdfRendererOptionsBuilder()
-    {}
+    private PdfRendererOptionsBuilder() {}
 
-    public      PdfRendererOptionsBuilder withPage(final String page)
+    public PdfRendererOptionsBuilder withPage(final String page)
     {
         return withPage(stringToInteger(page));
     }
