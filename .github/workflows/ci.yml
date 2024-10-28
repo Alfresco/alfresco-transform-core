@@ -40,6 +40,14 @@ jobs:
     if: >
       !contains(github.event.head_commit.message, '[release]')
     steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v7.0.0
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: changed-files
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v7.0.0
+        with:
+          write-list-to-env: true
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v7.0.0
 
   veracode_sca:
