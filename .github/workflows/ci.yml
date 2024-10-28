@@ -45,8 +45,6 @@ jobs:
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v7.0.0
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - id: changed-files
         uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v7.0.0
         with:
