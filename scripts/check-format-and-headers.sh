@@ -7,6 +7,12 @@ else
   modified_files=${GITHUB_MODIFIED_FILES}
 fi
 
+if [[ -z ${modified_files} ]]
+then
+  echo "No modified files, exiting."
+  exit 0
+fi
+
 include_list=""
 for file in ${modified_files}
 do
