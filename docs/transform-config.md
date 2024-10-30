@@ -16,8 +16,8 @@ Current configuration files are:
 
 Additional config files (which may be resources on the classpath or external
 files) are specified in Spring Boot properties or such as
-`transform.config.file.<filename>` or environment variables like
-`TRANSFORM_CONFIG_FILE_<filename>`.
+`-Dtransform.config.file.<name>=/path/to/file/filename.json` or environment variables like
+`export TRANSFORM_CONFIG_FILE_<name>="/path/to/file/filename.json"`.
 
 The following is a simple t-config file from an example Hello World
 t-engine.
