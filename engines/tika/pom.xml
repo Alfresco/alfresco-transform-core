@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-transform-core</artifactId>
-        <version>5.1.5-A3</version>
+        <version>5.1.5-A4-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
