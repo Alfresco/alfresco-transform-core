@@ -29,6 +29,8 @@
         <dependency.poi.version>5.2.5</dependency.poi.version>
         <dependency.imaging.version>1.0.0-alpha5</dependency.imaging.version>
         <dependency.snakeyaml.version>2.3</dependency.snakeyaml.version>
+        <!-- The override can be removed when logback version in spring-boot-starter-parent is updated and free of vulnerabilities -->
+        <logback.version>1.5.16</logback.version>
         <!--The override can be removed when transitive (from tika) bouncycastle dependency is free of vulnerabilities-->
         <dependency.bouncycastle.version.override>1.79</dependency.bouncycastle.version.override>
 
