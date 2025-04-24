@@ -26,7 +26,7 @@
         <env.project_version>${project.version}</env.project_version>
         <dependency.jackson.version>2.18.2</dependency.jackson.version>
         <dependency.tika.version>2.9.2</dependency.tika.version>
-        <dependency.poi.version>5.2.5</dependency.poi.version>
+        <dependency.poi.version>5.4.1</dependency.poi.version>
         <dependency.imaging.version>1.0.0-alpha5</dependency.imaging.version>
         <dependency.snakeyaml.version>2.3</dependency.snakeyaml.version>
         <!-- The override can be removed when logback version in spring-boot-starter-parent is updated and free of vulnerabilities -->
