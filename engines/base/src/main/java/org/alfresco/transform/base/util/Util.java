@@ -64,4 +64,15 @@ public class Util
     {
         return param == null ? null : Long.parseLong(param);
     }
+
+    /**
+     * check if given file name is a doc file
+     * @param filename
+     * @return if file is .doc*
+     */
+    public static boolean isDocFile(String filename)
+    {
+        String extension = filename.substring(filename.lastIndexOf('.') );
+        return extension.startsWith(".doc");
+    }
 }

@@ -28,8 +28,10 @@ package org.alfresco.transform.base.fs;
 
 import jakarta.servlet.http.Part;
 import org.alfresco.transform.base.logging.LogEntry;
+import org.alfresco.transform.base.util.Util;
 import org.alfresco.transform.common.ExtensionService;
 import org.alfresco.transform.exceptions.TransformException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
@@ -73,10 +75,9 @@ public class FileManager
             if (request != null && request.getParts() != null) {
                 String submittedFileName = request.getParts().stream()
                         .map(Part::getSubmittedFileName)
-                        .filter(name -> name != null && extension.contains(".doc"))
                         .findFirst()
                         .orElse(null);
-                file = (submittedFileName != null)
+                file = (!StringUtils.isEmpty(submittedFileName) && Util.isDocFile(submittedFileName))
                         ? TempFileProvider.createTempDirForDocFile(submittedFileName)
                         : TempFileProvider.createTempFile("source_", extension);
             }
@@ -99,8 +100,7 @@ public class FileManager
     }
 
 
-    public static File createSourceFileWithSameName(HttpServletRequest request, String sourceFileName, InputStream inputStream, String sourceMimetype) {
-
+    public static File createSourceDocFileWithSameName(HttpServletRequest request, String sourceFileName, InputStream inputStream, String sourceMimetype) {
         try
         {
             File file = TempFileProvider.createTempDirForDocFile(sourceFileName);
@@ -269,8 +269,6 @@ public class FileManager
                     throw new RuntimeException("Failed to create temp directory: " + tempDir);
                 }
                 return new File(tempDir, sourceFileName);
-//                return File.createTempFile(sourceFileName, ".docx", tempDir);
-//                return File.createTempFile(sourceFileName, ".docx", alfrescoTempDirectory);
             }
             catch (Exception e)
             {

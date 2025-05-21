@@ -29,6 +29,7 @@ package org.alfresco.transform.base.transform;
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.fs.FileManager;
 import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
+import org.alfresco.transform.base.util.Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,11 +57,13 @@ public class TransformManagerImpl implements TransformManager
     private String targetMimetype;
     private File sourceFile;
     private File targetFile;
+
     private boolean keepTargetFile;
     private boolean createSourceFileCalled;
     private boolean createTargetFileCalled;
     private Boolean startedWithSourceFile;
     private Boolean startedWithTargetFile;
+    private String sourceFileName;
 
     public void setRequest(HttpServletRequest request)
     {
@@ -150,6 +153,17 @@ public class TransformManagerImpl implements TransformManager
         keepTargetFile = true;
     }
 
+    public String getSourceFileName()
+    {
+        return sourceFileName;
+    }
+
+    public void setSourceFileName(String sourceFileName)
+    {
+        this.sourceFileName = sourceFileName;
+    }
+
+
     @Override public File createSourceFile()
     {
         if (createSourceFileCalled)
@@ -158,10 +172,12 @@ public class TransformManagerImpl implements TransformManager
         }
         createSourceFileCalled = true;
 
-        if (sourceFile == null) {
-            sourceFile = StringUtils.isEmpty(this.processHandler.sourceFileName)
-                    ? FileManager.createSourceFile(request, inputStream, sourceMimetype)
-                    : FileManager.createSourceFileWithSameName(request, this.processHandler.sourceFileName, inputStream, sourceMimetype);
+        if (sourceFile == null)
+        {
+            boolean isDocFile = !StringUtils.isEmpty(this.sourceFileName) && Util.isDocFile(this.sourceFileName);
+            sourceFile = isDocFile
+                    ? FileManager.createSourceDocFileWithSameName(request, this.sourceFileName, inputStream, sourceMimetype)
+                    : FileManager.createSourceFile(request, inputStream, sourceMimetype);
         }
         return sourceFile;
     }

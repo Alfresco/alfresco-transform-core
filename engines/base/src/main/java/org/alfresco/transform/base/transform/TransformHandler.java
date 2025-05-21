@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.base.transform;
 
+import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.sfs.SharedFileStoreClient;
 import org.alfresco.transform.base.messaging.TransformReplySender;
 import org.alfresco.transform.base.model.FileRefResponse;
@@ -101,6 +102,8 @@ public class TransformHandler
     private TransformerDebug transformerDebug;
 
     private final AtomicInteger httpRequestCount = new AtomicInteger(1);
+    @Autowired
+    private TransformManager transformManager;
 
     public ResponseEntity<Resource> handleHttpRequest(HttpServletRequest request,
             MultipartFile sourceMultipartFile, String sourceMimetype, String targetMimetype,
@@ -190,7 +193,7 @@ public class TransformHandler
         ProbeTransform probeTransform)
     {
         TransformReply reply = createBasicTransformReply(request);
-        new ProcessHandler(request.getSourceFileName(),request.getSourceMediaType(), request.getTargetMediaType(),
+        new ProcessHandler(request.getSourceMediaType(), request.getTargetMediaType(),
             request.getTransformRequestOptions(),"unset", transformRegistry,
             transformerDebug, probeTransform, customTransformers)
         {
@@ -199,6 +202,7 @@ public class TransformHandler
             {
                 checkTransformRequestValid(request, reply);
                 reference = TransformStack.getReference(reply.getInternalContext());
+                transformManager.setSourceFileName(request.getSourceFileName());
                 initTarget();
                 super.init();
             }
