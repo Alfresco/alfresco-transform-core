@@ -310,6 +310,11 @@ public class TransformRequest implements Serializable
             return this;
         }
 
+        public Builder withSourceFileName(final String sourceFileName) {
+            request.sourceFileName = sourceFileName;
+            return this;
+        }
+
         public TransformRequest build()
         {
             return request;

@@ -54,7 +54,6 @@ public class TransformManagerImpl implements TransformManager
     private OutputStreamLengthRecorder outputStreamLengthRecorder;
     private String sourceMimetype;
     private String targetMimetype;
-    private String sourceFileName;
     private File sourceFile;
     private File targetFile;
     private boolean keepTargetFile;
@@ -160,9 +159,9 @@ public class TransformManagerImpl implements TransformManager
         createSourceFileCalled = true;
 
         if (sourceFile == null) {
-            sourceFile = StringUtils.isEmpty(sourceFileName)
+            sourceFile = StringUtils.isEmpty(this.processHandler.sourceFileName)
                     ? FileManager.createSourceFile(request, inputStream, sourceMimetype)
-                    : FileManager.createSourceFileWithSameName(request, sourceFileName, inputStream, sourceMimetype);
+                    : FileManager.createSourceFileWithSameName(request, this.processHandler.sourceFileName, inputStream, sourceMimetype);
         }
         return sourceFile;
     }
