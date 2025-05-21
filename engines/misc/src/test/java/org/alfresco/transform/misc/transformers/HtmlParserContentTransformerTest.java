@@ -66,7 +66,7 @@ public class HtmlParserContentTransformerTest
                        "<p>" + TEXT_P2 + "</p>" + NEWLINE +
                        "<p>" + TEXT_P3 + "</p>" + NEWLINE;
         String partC = "</body></html>";
-        final String expected = TITLE + NEWLINE + TEXT_P1 + NEWLINE + TEXT_P2 + NEWLINE + TEXT_P3 + NEWLINE;
+        final String expected = TITLE + NEWLINE + TEXT_P1 + NEWLINE + TEXT_P2 + NEWLINE + TEXT_P3;
 
         File tmpS = null;
         File tmpD = null;
