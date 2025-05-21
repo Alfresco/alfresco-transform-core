@@ -190,7 +190,7 @@ public class TransformHandler
         ProbeTransform probeTransform)
     {
         TransformReply reply = createBasicTransformReply(request);
-        new ProcessHandler(request.getSourceMediaType(), request.getTargetMediaType(),
+        new ProcessHandler(request.getSourceFileName(),request.getSourceMediaType(), request.getTargetMediaType(),
             request.getTransformRequestOptions(),"unset", transformRegistry,
             transformerDebug, probeTransform, customTransformers)
         {

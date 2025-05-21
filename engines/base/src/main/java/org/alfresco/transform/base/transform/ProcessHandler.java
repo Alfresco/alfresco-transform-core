@@ -68,6 +68,7 @@ abstract class ProcessHandler extends FragmentHandler
     private static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
         TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, DIRECT_ACCESS_URL);
 
+    protected String sourceFileName=null;
     protected final String sourceMimetype;
     protected final String targetMimetype;
     private final Map<String, String> transformOptions;
@@ -81,6 +82,22 @@ abstract class ProcessHandler extends FragmentHandler
         String reference, TransformServiceRegistry transformRegistry, TransformerDebug transformerDebug,
         ProbeTransform probeTransform, CustomTransformers customTransformers)
     {
+        this.sourceMimetype = sourceMimetype;
+        this.targetMimetype = targetMimetype;
+        this.transformOptions = cleanTransformOptions(transformOptions);
+        this.reference = reference;
+
+        this.transformRegistry = transformRegistry;
+        this.transformerDebug = transformerDebug;
+        this.probeTransform = probeTransform;
+        this.customTransformers = customTransformers;
+    }
+
+    ProcessHandler(String sourceFileName,String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+                   String reference, TransformServiceRegistry transformRegistry, TransformerDebug transformerDebug,
+                   ProbeTransform probeTransform, CustomTransformers customTransformers)
+    {
+        this.sourceFileName = sourceFileName;
         this.sourceMimetype = sourceMimetype;
         this.targetMimetype = targetMimetype;
         this.transformOptions = cleanTransformOptions(transformOptions);

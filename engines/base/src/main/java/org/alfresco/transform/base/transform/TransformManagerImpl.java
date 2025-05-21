@@ -29,6 +29,7 @@ package org.alfresco.transform.base.transform;
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.fs.FileManager;
 import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -53,6 +54,7 @@ public class TransformManagerImpl implements TransformManager
     private OutputStreamLengthRecorder outputStreamLengthRecorder;
     private String sourceMimetype;
     private String targetMimetype;
+    private String sourceFileName;
     private File sourceFile;
     private File targetFile;
     private boolean keepTargetFile;
@@ -157,9 +159,10 @@ public class TransformManagerImpl implements TransformManager
         }
         createSourceFileCalled = true;
 
-        if (sourceFile == null)
-        {
-            sourceFile = FileManager.createSourceFile(request, inputStream, sourceMimetype);
+        if (sourceFile == null) {
+            sourceFile = StringUtils.isEmpty(sourceFileName)
+                    ? FileManager.createSourceFile(request, inputStream, sourceMimetype)
+                    : FileManager.createSourceFileWithSameName(request, sourceFileName, inputStream, sourceMimetype);
         }
         return sourceFile;
     }

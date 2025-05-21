@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.base.fs;
 
+import jakarta.servlet.http.Part;
 import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.common.ExtensionService;
 import org.alfresco.transform.exceptions.TransformException;
@@ -43,6 +44,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.alfresco.transform.common.ExtensionService.getExtensionForMimetype;
@@ -65,8 +67,23 @@ public class FileManager
     {
         try
         {
-            String extension = "."+getExtensionForMimetype(sourceMimetype);
-            File file = TempFileProvider.createTempFile("source_", extension);
+
+            String extension = "." + getExtensionForMimetype(sourceMimetype);
+            File file;
+            if (request != null && request.getParts() != null) {
+                String submittedFileName = request.getParts().stream()
+                        .map(Part::getSubmittedFileName)
+                        .filter(name -> name != null && extension.contains(".doc"))
+                        .findFirst()
+                        .orElse(null);
+                file = (submittedFileName != null)
+                        ? TempFileProvider.createTempDirForDocFile(submittedFileName)
+                        : TempFileProvider.createTempFile("source_", extension);
+            }
+            else
+            {
+                file = TempFileProvider.createTempFile("source_", extension);
+            }
             Files.copy(inputStream, file.toPath(), REPLACE_EXISTING);
             if (request != null)
             {
@@ -80,6 +97,27 @@ public class FileManager
             throw new TransformException(INSUFFICIENT_STORAGE, "Failed to store the source file", e);
         }
     }
+
+
+    public static File createSourceFileWithSameName(HttpServletRequest request, String sourceFileName, InputStream inputStream, String sourceMimetype) {
+
+        try
+        {
+            File file = TempFileProvider.createTempDirForDocFile(sourceFileName);
+            Files.copy(inputStream, file.toPath(), REPLACE_EXISTING);
+            if (request != null)
+            {
+                request.setAttribute(SOURCE_FILE, file);
+            }
+            LogEntry.setSource(file.getName(), file.length());
+            return file;
+        }  catch (Exception e)
+        {
+            throw new TransformException(INSUFFICIENT_STORAGE, "Failed to store the source file", e);
+        }
+
+    }
+
 
     public static File createTargetFile(HttpServletRequest request, String sourceMimetype, String targetMimetype)
     {
@@ -216,6 +254,27 @@ public class FileManager
                 throw new RuntimeException(
                     "Failed to created temp file: \n   prefix: " + prefix +
                     "\n   suffix: " + suffix + "\n   directory: " + directory, e);
+            }
+        }
+
+        public static File createTempDirForDocFile(String sourceFileName)
+        {
+            final File alfrescoTempDirectory = getTempDir();
+            try
+            {
+                UUID uuid = UUID.randomUUID();
+                final File tempDir = new File(alfrescoTempDirectory, uuid.toString());
+                if (!tempDir.exists() && !tempDir.mkdirs() && !tempDir.exists())
+                {
+                    throw new RuntimeException("Failed to create temp directory: " + tempDir);
+                }
+                return new File(tempDir, sourceFileName);
+//                return File.createTempFile(sourceFileName, ".docx", tempDir);
+//                return File.createTempFile(sourceFileName, ".docx", alfrescoTempDirectory);
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException("Failed to created temp file: \n   file: " + sourceFileName +"\n", e);
             }
         }
 

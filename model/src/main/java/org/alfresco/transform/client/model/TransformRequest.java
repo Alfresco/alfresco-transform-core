@@ -48,6 +48,7 @@ public class TransformRequest implements Serializable
     private int schema;
     private Map<String, String> transformRequestOptions = new HashMap<>();
     private InternalContext internalContext;
+    private String sourceFileName;
 
     // regions [Accessors]
     public String getRequestId()
@@ -158,6 +159,14 @@ public class TransformRequest implements Serializable
     public void setInternalContext(InternalContext internalContext)
     {
         this.internalContext = internalContext;
+    }
+
+    public String getSourceFileName() {
+        return sourceFileName;
+    }
+
+    public void setSourceFileName(String sourceFileName) {
+        this.sourceFileName = sourceFileName;
     }
 
     //endregion
