@@ -66,7 +66,7 @@ public class AIOTest extends AbstractBaseTest
         expectedOptions = null;
         expectedSourceSuffix = null;
         sourceFileBytes = readTestFile(sourceExtension);
-        expectedTargetFileBytes = Files.readAllBytes(getTestFile("quick2." + targetExtension, true).toPath());
+        expectedTargetFileBytes = Files.readAllBytes(getTestFile("quick3." + targetExtension, true).toPath());
         sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
     }
 
