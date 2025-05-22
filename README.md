@@ -1,7 +1,7 @@
 ## Alfresco Transform Core
 [![Build Status](https://github.com/Alfresco/alfresco-transform-core/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Alfresco/alfresco-transform-core/actions/workflows/ci.yml)
 
-Contains the common transformer (T-Engine) code, plus a few implementations
+Contains the common transformer (T-Engine) code, plus a few implementations.
 
 > When upgrading to 3.0.0, you will find that a number of classes in the alfresco-transform-model
 have moved. See the [alfresco-transform-model README](https://github.com/Alfresco/alfresco-transform-core/blob/master/model/README.md)

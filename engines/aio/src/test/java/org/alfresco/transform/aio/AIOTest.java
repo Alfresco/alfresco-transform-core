@@ -26,27 +26,26 @@
  */
 package org.alfresco.transform.aio;
 
+import java.nio.file.Files;
+import java.util.StringJoiner;
+
 import org.alfresco.transform.base.AbstractBaseTest;
 import org.alfresco.transform.base.TransformController;
+import static org.alfresco.transform.base.TransformControllerTest.getLogMessagesFor;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
+import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_LATEST;
 import org.alfresco.transform.config.TransformConfig;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-import java.nio.file.Files;
-import java.util.StringJoiner;
-
-import static org.alfresco.transform.base.TransformControllerTest.getLogMessagesFor;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
-import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_LATEST;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Test All-In-One.
