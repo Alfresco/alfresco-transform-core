@@ -101,7 +101,7 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
 
         // Create the extractor
         EncodingAwareStringBean extractor = new EncodingAwareStringBean();
-        extractor.setCollapse(false);
+        extractor.setCollapse(true);
         extractor.setLinks(false);
         extractor.setReplaceNonBreakingSpaces(false);
         extractor.setURL(sourceFile, sourceEncoding);

@@ -75,7 +75,7 @@ public class MiscTest extends AbstractBaseTest
         expectedOptions = null;
         expectedSourceSuffix = null;
         sourceFileBytes = readTestFile(sourceExtension);
-        expectedTargetFileBytes = Files.readAllBytes(getTestFile("quick2." + targetExtension, true).toPath());
+        expectedTargetFileBytes = Files.readAllBytes(getTestFile("quick3." + targetExtension, true).toPath());
         sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
     }
 
@@ -288,6 +288,7 @@ public class MiscTest extends AbstractBaseTest
     public void testHTMLtoString() throws Exception
     {
         final String NEWLINE = System.getProperty("line.separator");
+        final String SPACE = " ";
         final String TITLE = "Testing!";
         final String TEXT_P1 = "This is some text in English";
         final String TEXT_P2 = "This is more text in English";
@@ -297,7 +298,7 @@ public class MiscTest extends AbstractBaseTest
                        "<p>" + TEXT_P2 + "</p>" + NEWLINE +
                        "<p>" + TEXT_P3 + "</p>" + NEWLINE;
         String partC = "</body></html>";
-        final String expected = TITLE + NEWLINE + TEXT_P1 + NEWLINE + TEXT_P2 + NEWLINE + TEXT_P3 + NEWLINE;
+        final String expected = TITLE + SPACE + TEXT_P1 + SPACE + TEXT_P2 + SPACE + TEXT_P3;
 
         MvcResult result = sendRequest("html",
             "UTF-8",
