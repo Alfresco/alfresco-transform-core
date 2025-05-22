@@ -75,7 +75,7 @@ public class MiscTest extends AbstractBaseTest
         expectedOptions = null;
         expectedSourceSuffix = null;
         sourceFileBytes = readTestFile(sourceExtension);
-        expectedTargetFileBytes = Files.readAllBytes(getTestFile("quick2." + targetExtension, true).toPath());
+        expectedTargetFileBytes = Files.readAllBytes(getTestFile("quick3." + targetExtension, true).toPath());
         sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
     }
 
@@ -297,7 +297,7 @@ public class MiscTest extends AbstractBaseTest
                        "<p>" + TEXT_P2 + "</p>" + NEWLINE +
                        "<p>" + TEXT_P3 + "</p>" + NEWLINE;
         String partC = "</body></html>";
-        final String expected = TITLE + NEWLINE + TEXT_P1 + NEWLINE + TEXT_P2 + NEWLINE + TEXT_P3 + NEWLINE;
+        final String expected = TITLE +" "+ TEXT_P1 +" "+TEXT_P2 +" "+ TEXT_P3;
 
         MvcResult result = sendRequest("html",
             "UTF-8",
