@@ -26,20 +26,21 @@
  */
 package org.alfresco.transform.base.transform;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.fs.FileManager;
-import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
-import org.alfresco.transform.base.util.Util;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import jakarta.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.fs.FileManager;
+import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
+import org.alfresco.transform.base.util.Util;
 
 /**
  * Manages the input and output streams and any temporary files that have been created.
@@ -75,7 +76,8 @@ public class TransformManagerImpl implements TransformManager
         this.processHandler = processHandler;
     }
 
-    @Override public String getRequestId()
+    @Override
+    public String getRequestId()
     {
         return processHandler.getReference();
     }
@@ -163,8 +165,8 @@ public class TransformManagerImpl implements TransformManager
         this.sourceFileName = sourceFileName;
     }
 
-
-    @Override public File createSourceFile()
+    @Override
+    public File createSourceFile()
     {
         if (createSourceFileCalled)
         {
@@ -182,7 +184,8 @@ public class TransformManagerImpl implements TransformManager
         return sourceFile;
     }
 
-    @Override public File createTargetFile()
+    @Override
+    public File createTargetFile()
     {
         if (createTargetFileCalled)
         {
@@ -229,13 +232,17 @@ public class TransformManagerImpl implements TransformManager
         startedWithSourceFile = null;
     }
 
-    public void deleteDocUUIDFolder() {
-        if (sourceFile == null) return;
-        if(Util.isDocFile(sourceFile.getPath())) {
+    public void deleteDocUUIDFolder()
+    {
+        if (sourceFile == null)
+            return;
+        if (Util.isDocFile(sourceFile.getPath()))
+        {
             File parentDir = sourceFile.getParentFile();
             if (parentDir != null
-                    && !StringUtils.equalsAny(parentDir.getName().toLowerCase(), "alfresco","temp","tmp")
-                    && !parentDir.delete()) {
+                    && !StringUtils.equalsAny(parentDir.getName().toLowerCase(), "alfresco", "temp", "tmp")
+                    && !parentDir.delete())
+            {
                 logger.error("Failed to delete parent directory {}", parentDir.getPath());
             }
         }
