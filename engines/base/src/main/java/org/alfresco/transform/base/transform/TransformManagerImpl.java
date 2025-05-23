@@ -222,10 +222,23 @@ public class TransformManagerImpl implements TransformManager
         {
             logger.error("Failed to delete temporary source file {}", sourceFile.getPath());
         }
+        deleteDocUUIDFolder();
         outputStreamLengthRecorder = null;
         sourceFile = null;
         createSourceFileCalled = false;
         startedWithSourceFile = null;
+    }
+
+    public void deleteDocUUIDFolder() {
+        if (sourceFile == null) return;
+        if(Util.isDocFile(sourceFile.getPath())) {
+            File parentDir = sourceFile.getParentFile();
+            if (parentDir != null
+                    && !StringUtils.equalsAny(parentDir.getName().toLowerCase(), "alfresco","temp","tmp")
+                    && !parentDir.delete()) {
+                logger.error("Failed to delete parent directory {}", parentDir.getPath());
+            }
+        }
     }
 
     public void deleteTargetFile()
