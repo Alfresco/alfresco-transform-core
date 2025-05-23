@@ -77,6 +77,7 @@ public class FileManager
             if (request != null && request.getParts() != null)
             {
                 String submittedFileName = request.getParts().stream()
+                        .filter(part -> part instanceof MultipartFile && StringUtils.isNotEmpty(part.getSubmittedFileName()))
                         .map(Part::getSubmittedFileName)
                         .findFirst()
                         .orElse(null);

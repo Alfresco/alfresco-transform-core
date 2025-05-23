@@ -228,6 +228,7 @@ public class TransformManagerImpl implements TransformManager
         deleteDocUUIDFolder();
         outputStreamLengthRecorder = null;
         sourceFile = null;
+        sourceFileName = null;
         createSourceFileCalled = false;
         startedWithSourceFile = null;
     }
