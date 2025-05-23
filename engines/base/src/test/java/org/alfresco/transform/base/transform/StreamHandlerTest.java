@@ -81,12 +81,6 @@ public class StreamHandlerTest
         return new BufferedInputStream(new FileInputStream(sourceFile));
     }
 
-    private File tempDocFile() throws IOException
-    {
-        return File.createTempFile("temp_", ".docx", tempDir);
-
-    }
-
     private File tempFile() throws IOException
     {
         return File.createTempFile("temp_", null, tempDir);
@@ -169,67 +163,6 @@ public class StreamHandlerTest
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
         {
             transformManager.setInputStream(inputStream);
-            OutputStream outputStreamLengthRecorder = transformManager.setOutputStream(outputStream);
-
-            File sourceFileCreatedByTransform = transformManager.createSourceFile();
-            assertTrue(sourceFileCreatedByTransform.exists());
-            write(outputStreamLengthRecorder, read(sourceFileCreatedByTransform) + CHANGE);
-
-            transformManager.copyTargetFileToOutputStream();
-            transformManager.getOutputStream().close();
-            closeInputStreamWithoutException(inputStream);
-            Long outputLength = transformManager.getOutputLength();
-            transformManager.deleteSourceFile();
-            transformManager.deleteTargetFile();
-
-            assertEquals(EXPECTED, read(outputStream));
-            assertEquals(EXPECTED.length(), outputLength);
-            assertFalse(sourceFileCreatedByTransform.exists());
-        }
-    }
-
-    @Test
-    public void testStartWithInputStreamAndCallCreateSourceFileForDocxFiles() throws Exception
-    {
-        try (InputStream inputStream = getSourceInputStreamFromBytes();
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
-        {
-            transformManager.setSourceFileName("test.docx");
-            transformManager.setInputStream(inputStream);
-            OutputStream outputStreamLengthRecorder = transformManager.setOutputStream(outputStream);
-
-            File sourceFileCreatedByTransform = transformManager.createSourceFile();
-            assertTrue(sourceFileCreatedByTransform.exists());
-            write(outputStreamLengthRecorder, read(sourceFileCreatedByTransform) + CHANGE);
-
-            transformManager.copyTargetFileToOutputStream();
-            transformManager.getOutputStream().close();
-            closeInputStreamWithoutException(inputStream);
-            Long outputLength = transformManager.getOutputLength();
-            transformManager.deleteSourceFile();
-            transformManager.deleteTargetFile();
-
-            assertEquals(EXPECTED, read(outputStream));
-            assertEquals(EXPECTED.length(), outputLength);
-            assertFalse(sourceFileCreatedByTransform.exists());
-        }
-    }
-
-    @Test
-    public void testStartWithInputStreamAndCallCreateSourceFileForDocxFilesWithHttpRequest() throws Exception
-    {
-        try (InputStream inputStream = getSourceInputStreamFromBytes();
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
-        {
-            HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
-            Part mockPart = Mockito.mock(Part.class);
-            Mockito.when(mockPart.getSubmittedFileName()).thenReturn("dummy.docx");
-            Collection<Part> parts = Arrays.asList(mockPart);
-            Mockito.when(mockRequest.getParts()).thenReturn(parts);
-
-            transformManager.setSourceMimetype("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-            transformManager.setInputStream(inputStream);
-            transformManager.setRequest(mockRequest);
             OutputStream outputStreamLengthRecorder = transformManager.setOutputStream(outputStream);
 
             File sourceFileCreatedByTransform = transformManager.createSourceFile();
@@ -641,6 +574,67 @@ public class StreamHandlerTest
                     return os;
                 }
             }.handleTransformRequest();
+        }
+    }
+
+    @Test
+    public void testStartWithInputStreamAndCallCreateSourceFileForDocxFiles() throws Exception
+    {
+        try (InputStream inputStream = getSourceInputStreamFromBytes();
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
+        {
+            transformManager.setSourceFileName("test.docx");
+            transformManager.setInputStream(inputStream);
+            OutputStream outputStreamLengthRecorder = transformManager.setOutputStream(outputStream);
+
+            File sourceFileCreatedByTransform = transformManager.createSourceFile();
+            assertTrue(sourceFileCreatedByTransform.exists());
+            write(outputStreamLengthRecorder, read(sourceFileCreatedByTransform) + CHANGE);
+
+            transformManager.copyTargetFileToOutputStream();
+            transformManager.getOutputStream().close();
+            closeInputStreamWithoutException(inputStream);
+            Long outputLength = transformManager.getOutputLength();
+            transformManager.deleteSourceFile();
+            transformManager.deleteTargetFile();
+
+            assertEquals(EXPECTED, read(outputStream));
+            assertEquals(EXPECTED.length(), outputLength);
+            assertFalse(sourceFileCreatedByTransform.exists());
+        }
+    }
+
+    @Test
+    public void testStartWithInputStreamAndCallCreateSourceFileForDocxFilesWithHttpRequest() throws Exception
+    {
+        try (InputStream inputStream = getSourceInputStreamFromBytes();
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
+        {
+            HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+            Part mockPart = Mockito.mock(Part.class);
+            Mockito.when(mockPart.getSubmittedFileName()).thenReturn("dummy.docx");
+            Collection<Part> parts = Arrays.asList(mockPart);
+            Mockito.when(mockRequest.getParts()).thenReturn(parts);
+
+            transformManager.setSourceMimetype("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            transformManager.setInputStream(inputStream);
+            transformManager.setRequest(mockRequest);
+            OutputStream outputStreamLengthRecorder = transformManager.setOutputStream(outputStream);
+
+            File sourceFileCreatedByTransform = transformManager.createSourceFile();
+            assertTrue(sourceFileCreatedByTransform.exists());
+            write(outputStreamLengthRecorder, read(sourceFileCreatedByTransform) + CHANGE);
+
+            transformManager.copyTargetFileToOutputStream();
+            transformManager.getOutputStream().close();
+            closeInputStreamWithoutException(inputStream);
+            Long outputLength = transformManager.getOutputLength();
+            transformManager.deleteSourceFile();
+            transformManager.deleteTargetFile();
+
+            assertEquals(EXPECTED, read(outputStream));
+            assertEquals(EXPECTED.length(), outputLength);
+            assertFalse(sourceFileCreatedByTransform.exists());
         }
     }
 }

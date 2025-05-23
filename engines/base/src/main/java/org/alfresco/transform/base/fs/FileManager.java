@@ -120,7 +120,6 @@ public class FileManager
         {
             throw new TransformException(INSUFFICIENT_STORAGE, "Failed to store the source file", e);
         }
-
     }
 
     public static File createTargetFile(HttpServletRequest request, String sourceMimetype, String targetMimetype)
@@ -263,21 +262,12 @@ public class FileManager
 
         public static File createTempDirForDocFile(String sourceFileName)
         {
-            final File alfrescoTempDirectory = getTempDir();
-            try
+            File tempDir = new File(getTempDir(), UUID.randomUUID().toString());
+            if (!tempDir.mkdirs() && !tempDir.exists())
             {
-                UUID uuid = UUID.randomUUID();
-                final File tempDir = new File(alfrescoTempDirectory, uuid.toString());
-                if (!tempDir.exists() && !tempDir.mkdirs() && !tempDir.exists())
-                {
-                    throw new RuntimeException("Failed to create temp directory: " + tempDir);
-                }
-                return new File(tempDir, sourceFileName);
+                throw new TransformException(INSUFFICIENT_STORAGE, "Failed to create temp directory: " + tempDir);
             }
-            catch (Exception e)
-            {
-                throw new RuntimeException("Failed to created temp file: \n   file: " + sourceFileName + "\n", e);
-            }
+            return new File(tempDir, sourceFileName);
         }
 
         private static File getTempDir()

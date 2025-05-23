@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Locale;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
@@ -236,12 +237,14 @@ public class TransformManagerImpl implements TransformManager
     public void deleteDocUUIDFolder()
     {
         if (sourceFile == null)
+        {
             return;
+        }
         if (Util.isDocFile(sourceFile.getPath()))
         {
             File parentDir = sourceFile.getParentFile();
             if (parentDir != null
-                    && !StringUtils.equalsAny(parentDir.getName().toLowerCase(), "alfresco", "temp", "tmp")
+                    && !StringUtils.equalsAny(parentDir.getName().toLowerCase(Locale.ROOT), "alfresco", "temp", "tmp")
                     && !parentDir.delete())
             {
                 logger.error("Failed to delete parent directory {}", parentDir.getPath());
