@@ -26,9 +26,9 @@
  */
 package org.alfresco.transform.base.transform;
 
-import org.alfresco.transform.base.CustomTransformer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -42,20 +42,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mockito;
+
+import org.alfresco.transform.base.CustomTransformer;
 
 /**
- * Tests {@link StreamHandler}, {@link TransformManagerImpl#createSourceFile()} and
- * {@link TransformManagerImpl#createTargetFile()} methods.
+ * Tests {@link StreamHandler}, {@link TransformManagerImpl#createSourceFile()} and {@link TransformManagerImpl#createTargetFile()} methods.
  */
 public class StreamHandlerTest
 {
     public static final String ORIGINAL = "Original";
     public static final String CHANGE = " plus some change";
-    public static final String EXPECTED = ORIGINAL+ CHANGE;
+    public static final String EXPECTED = ORIGINAL + CHANGE;
 
     TransformManagerImpl transformManager = new TransformManagerImpl();
     @TempDir
@@ -132,12 +136,12 @@ public class StreamHandlerTest
     public void testStartWithInputStream() throws Exception
     {
         try (InputStream inputStream = getSourceInputStreamFromBytes();
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
         {
             transformManager.setInputStream(inputStream);
             OutputStream outputStreamLengthRecorder = transformManager.setOutputStream(outputStream);
 
-            write(outputStreamLengthRecorder, read(inputStream)+CHANGE);
+            write(outputStreamLengthRecorder, read(inputStream) + CHANGE);
 
             transformManager.copyTargetFileToOutputStream();
             transformManager.getOutputStream().close();
@@ -155,14 +159,14 @@ public class StreamHandlerTest
     public void testStartWithInputStreamAndCallCreateSourceFile() throws Exception
     {
         try (InputStream inputStream = getSourceInputStreamFromBytes();
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
         {
             transformManager.setInputStream(inputStream);
             OutputStream outputStreamLengthRecorder = transformManager.setOutputStream(outputStream);
 
             File sourceFileCreatedByTransform = transformManager.createSourceFile();
             assertTrue(sourceFileCreatedByTransform.exists());
-            write(outputStreamLengthRecorder, read(sourceFileCreatedByTransform)+CHANGE);
+            write(outputStreamLengthRecorder, read(sourceFileCreatedByTransform) + CHANGE);
 
             transformManager.copyTargetFileToOutputStream();
             transformManager.getOutputStream().close();
@@ -185,12 +189,12 @@ public class StreamHandlerTest
         transformManager.setSourceFile(sourceFile);
 
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(sourceFile));
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
         {
             transformManager.setInputStream(inputStream);
             OutputStream outputStreamLengthRecorder = transformManager.setOutputStream(outputStream);
 
-            write(outputStreamLengthRecorder, read(inputStream)+CHANGE);
+            write(outputStreamLengthRecorder, read(inputStream) + CHANGE);
 
             transformManager.copyTargetFileToOutputStream();
             closeInputStreamWithoutException(inputStream);
@@ -213,14 +217,14 @@ public class StreamHandlerTest
         transformManager.setSourceFile(sourceFile);
 
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(sourceFile));
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
         {
             transformManager.setInputStream(inputStream);
             OutputStream outputStreamLengthRecorder = transformManager.setOutputStream(outputStream);
 
             File sourceFileCreatedByTransform = transformManager.createSourceFile();
             assertEquals(sourceFile, sourceFileCreatedByTransform);
-            write(outputStreamLengthRecorder, read(sourceFileCreatedByTransform)+CHANGE);
+            write(outputStreamLengthRecorder, read(sourceFileCreatedByTransform) + CHANGE);
 
             transformManager.copyTargetFileToOutputStream();
             closeInputStreamWithoutException(inputStream);
@@ -247,14 +251,14 @@ public class StreamHandlerTest
     public void testStartWithOutputStreamAndCallCreateTargetFile() throws Exception
     {
         try (InputStream inputStream = getSourceInputStreamFromBytes();
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
         {
             transformManager.setInputStream(inputStream);
             transformManager.setOutputStream(outputStream);
 
             File targetFileCreatedByTransform = transformManager.createTargetFile();
             assertTrue(targetFileCreatedByTransform.exists());
-            write(targetFileCreatedByTransform, read(inputStream)+CHANGE);
+            write(targetFileCreatedByTransform, read(inputStream) + CHANGE);
 
             transformManager.copyTargetFileToOutputStream();
             transformManager.getOutputStream().close();
@@ -276,12 +280,12 @@ public class StreamHandlerTest
         transformManager.setTargetFile(targetFile);
 
         try (InputStream inputStream = getSourceInputStreamFromBytes();
-             OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(targetFile)))
+                OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(targetFile)))
         {
             transformManager.setInputStream(inputStream);
             OutputStream outputStreamLengthRecorder = transformManager.setOutputStream(outputStream);
 
-            write(outputStreamLengthRecorder, read(inputStream)+CHANGE);
+            write(outputStreamLengthRecorder, read(inputStream) + CHANGE);
 
             transformManager.copyTargetFileToOutputStream();
             transformManager.getOutputStream().close();
@@ -304,14 +308,14 @@ public class StreamHandlerTest
         transformManager.setTargetFile(targetFile);
 
         try (InputStream inputStream = getSourceInputStreamFromBytes();
-             OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(targetFile)))
+                OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(targetFile)))
         {
             transformManager.setInputStream(inputStream);
             transformManager.setOutputStream(outputStream);
 
             File targetFileCreatedByTransform = transformManager.createTargetFile();
             assertEquals(targetFile, targetFileCreatedByTransform);
-            write(targetFileCreatedByTransform, read(inputStream)+CHANGE);
+            write(targetFileCreatedByTransform, read(inputStream) + CHANGE);
 
             transformManager.copyTargetFileToOutputStream();
             transformManager.getOutputStream().close();
@@ -344,12 +348,12 @@ public class StreamHandlerTest
         transformManager.keepTargetFile();
 
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(sourceFile));
-             OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(targetFile)))
+                OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(targetFile)))
         {
             transformManager.setInputStream(inputStream);
             OutputStream outputStreamLengthRecorder = transformManager.setOutputStream(outputStream);
 
-            write(outputStreamLengthRecorder, read(inputStream)+CHANGE);
+            write(outputStreamLengthRecorder, read(inputStream) + CHANGE);
 
             transformManager.copyTargetFileToOutputStream();
             closeInputStreamWithoutException(inputStream);
@@ -375,12 +379,12 @@ public class StreamHandlerTest
         transformManager.setTargetFile(targetFile);
 
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(sourceFile));
-             OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(targetFile)))
+                OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(targetFile)))
         {
             transformManager.setInputStream(inputStream);
             OutputStream outputStreamLengthRecorder = transformManager.setOutputStream(outputStream);
 
-            write(outputStreamLengthRecorder, read(inputStream)+CHANGE);
+            write(outputStreamLengthRecorder, read(inputStream) + CHANGE);
 
             transformManager.copyTargetFileToOutputStream();
             closeInputStreamWithoutException(inputStream);
@@ -404,12 +408,12 @@ public class StreamHandlerTest
         transformManager.setTargetFile(targetFile);
 
         try (InputStream inputStream = getSourceInputStreamFromBytes();
-             OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(targetFile)))
+                OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(targetFile)))
         {
             transformManager.setInputStream(inputStream);
             OutputStream outputStreamLengthRecorder = transformManager.setOutputStream(outputStream);
 
-            write(outputStreamLengthRecorder, read(inputStream)+CHANGE);
+            write(outputStreamLengthRecorder, read(inputStream) + CHANGE);
 
             transformManager.copyTargetFileToOutputStream();
             closeInputStreamWithoutException(inputStream);
@@ -437,7 +441,7 @@ public class StreamHandlerTest
         @Override
         protected void transform(CustomTransformer customTransformer) throws Exception
         {
-            write(outputStream, read(inputStream)+CHANGE);
+            write(outputStream, read(inputStream) + CHANGE);
         }
     }
 
@@ -448,8 +452,7 @@ public class StreamHandlerTest
 
         try (ByteArrayOutputStream os = new ByteArrayOutputStream())
         {
-            new FakeStreamHandler()
-            {
+            new FakeStreamHandler() {
                 @Override
                 protected void init() throws IOException
                 {
@@ -480,8 +483,7 @@ public class StreamHandlerTest
         File sourceFile = tempFile();
         write(sourceFile, ORIGINAL);
 
-        new FakeStreamHandler()
-        {
+        new FakeStreamHandler() {
             @Override
             protected void init() throws IOException
             {
@@ -512,8 +514,7 @@ public class StreamHandlerTest
         File sourceFile = tempFile();
         write(sourceFile, ORIGINAL);
 
-        new FakeStreamHandler()
-        {
+        new FakeStreamHandler() {
             @Override
             protected InputStream getInputStream() throws IOException
             {
@@ -533,8 +534,7 @@ public class StreamHandlerTest
     {
         File targetFile = tempFile();
 
-        new FakeStreamHandler()
-        {
+        new FakeStreamHandler() {
             @Override
             protected InputStream getInputStream()
             {
@@ -560,8 +560,7 @@ public class StreamHandlerTest
     {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream())
         {
-            new FakeStreamHandler()
-            {
+            new FakeStreamHandler() {
                 @Override
                 protected InputStream getInputStream()
                 {
@@ -574,6 +573,68 @@ public class StreamHandlerTest
                     return os;
                 }
             }.handleTransformRequest();
+        }
+    }
+
+    @Test
+    public void testStartWithInputStreamAndCallCreateSourceFileForDocxFiles() throws Exception
+    {
+        try (
+                InputStream in = getSourceInputStreamFromBytes();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                OutputStream rec = transformManager.setOutputStream(out))
+        {
+            transformManager.setSourceFileName("test.docx");
+            transformManager.setInputStream(in);
+
+            File src = transformManager.createSourceFile();
+            assertTrue(src.exists());
+            write(rec, read(src) + CHANGE);
+
+            transformManager.copyTargetFileToOutputStream();
+            transformManager.getOutputStream().close();
+            closeInputStreamWithoutException(in);
+            Long outputLength = transformManager.getOutputLength();
+            transformManager.deleteSourceFile();
+            transformManager.deleteTargetFile();
+
+            assertEquals(EXPECTED, read(out));
+            assertEquals(EXPECTED.length(), outputLength);
+            assertFalse(src.exists());
+        }
+    }
+
+    @Test
+    public void testStartWithInputStreamAndCallCreateSourceFileForDocxFilesWithHttpRequest() throws Exception
+    {
+        try (
+                InputStream in = getSourceInputStreamFromBytes();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                OutputStream rec = transformManager.setOutputStream(out))
+        {
+            HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+            Part mockPart = Mockito.mock(Part.class);
+            Mockito.when(mockPart.getSubmittedFileName()).thenReturn("dummy.docx");
+            Mockito.when(mockRequest.getParts()).thenReturn(Arrays.asList(mockPart));
+
+            transformManager.setSourceMimetype("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            transformManager.setInputStream(in);
+            transformManager.setRequest(mockRequest);
+
+            File src = transformManager.createSourceFile();
+            assertTrue(src.exists());
+            write(rec, read(src) + CHANGE);
+
+            transformManager.copyTargetFileToOutputStream();
+            transformManager.getOutputStream().close();
+            closeInputStreamWithoutException(in);
+            Long outputLength = transformManager.getOutputLength();
+            transformManager.deleteSourceFile();
+            transformManager.deleteTargetFile();
+
+            assertEquals(EXPECTED, read(out));
+            assertEquals(EXPECTED.length(), outputLength);
+            assertFalse(src.exists());
         }
     }
 }
