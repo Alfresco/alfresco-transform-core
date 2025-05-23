@@ -26,20 +26,14 @@
  */
 package org.alfresco.transform.misc;
 
-import org.alfresco.transform.base.AbstractBaseTest;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-
 import static java.nio.charset.StandardCharsets.UTF_8;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_KEYNOTE;
@@ -51,11 +45,20 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
+import org.alfresco.transform.base.AbstractBaseTest;
 
 /**
  * Test Misc. Includes calling the 3rd party libraries.
@@ -83,9 +86,9 @@ public class MiscTest extends AbstractBaseTest
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
     {
         final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
-            .param("sourceEncoding", sourceEncoding)
-            .param("targetMimetype", targetMimetype)
-            .param("sourceMimetype", sourceMimetype);
+                .param("sourceEncoding", sourceEncoding)
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype);
 
         // Only the 'string' transformer should have the targetEncoding.
         if (!"message/rfc822".equals(sourceMimetype) && !"text/html".equals(sourceMimetype))
@@ -103,16 +106,16 @@ public class MiscTest extends AbstractBaseTest
     {
         String expected = "Gym class featuring a brown fox and lazy dog";
         MvcResult result = sendRequest("eml",
-            null,
-            MIMETYPE_RFC822,
-            "txt",
-            MIMETYPE_TEXT_PLAIN,
-            null,
-            null,
-            null,
-            readTestFile("eml"));
+                null,
+                MIMETYPE_RFC822,
+                "txt",
+                MIMETYPE_TEXT_PLAIN,
+                null,
+                null,
+                null,
+                readTestFile("eml"));
         assertTrue(result.getResponse().getContentAsString().contains(expected),
-            "Content from eml transform didn't contain expected value. ");
+                "Content from eml transform didn't contain expected value. ");
     }
 
     /**
@@ -123,17 +126,17 @@ public class MiscTest extends AbstractBaseTest
     {
         String expected = "El r\u00E1pido zorro marr\u00F3n salta sobre el perro perezoso";
         MvcResult result = sendRequest("eml",
-            null,
-            MIMETYPE_RFC822,
-            "txt",
-            MIMETYPE_TEXT_PLAIN,
-            null,
-            null,
+                null,
+                MIMETYPE_RFC822,
+                "txt",
+                MIMETYPE_TEXT_PLAIN,
+                null,
+                null,
                 null, readTestFile("spanish.eml"));
 
         String contentResult = new String(result.getResponse().getContentAsByteArray(), UTF_8);
         assertTrue(contentResult.contains(expected),
-            "Content from eml transform didn't contain expected value. ");
+                "Content from eml transform didn't contain expected value. ");
     }
 
     /**
@@ -145,16 +148,16 @@ public class MiscTest extends AbstractBaseTest
         String expected = "Mail with attachment content";
         String notExpected = "File attachment content";
         MvcResult result = sendRequest("eml",
-            null,
-            MIMETYPE_RFC822,
-            "txt",
-            MIMETYPE_TEXT_PLAIN,
-            null,
-            null,
-            null,
-            readTestFile("attachment.eml"));
+                null,
+                MIMETYPE_RFC822,
+                "txt",
+                MIMETYPE_TEXT_PLAIN,
+                null,
+                null,
+                null,
+                readTestFile("attachment.eml"));
         assertTrue(result.getResponse().getContentAsString().contains(expected),
-            "Content from eml transform didn't contain expected value. ");
+                "Content from eml transform didn't contain expected value. ");
         assertFalse(result.getResponse().getContentAsString().contains(notExpected));
     }
 
@@ -166,16 +169,16 @@ public class MiscTest extends AbstractBaseTest
     {
         String expected = "alternative plain text";
         MvcResult result = sendRequest("eml",
-            null,
-            MIMETYPE_RFC822,
-            "txt",
-            MIMETYPE_TEXT_PLAIN,
-            null,
-            null,
-            null,
-            readTestFile("alternative.eml"));
+                null,
+                MIMETYPE_RFC822,
+                "txt",
+                MIMETYPE_TEXT_PLAIN,
+                null,
+                null,
+                null,
+                readTestFile("alternative.eml"));
         assertTrue(result.getResponse().getContentAsString().contains(expected),
-            "Content from eml transform didn't contain expected value. ");
+                "Content from eml transform didn't contain expected value. ");
     }
 
     /**
@@ -186,16 +189,16 @@ public class MiscTest extends AbstractBaseTest
     {
         String expected = "nested alternative plain text";
         MvcResult result = sendRequest("eml",
-            null,
-            MIMETYPE_RFC822,
-            "txt",
-            MIMETYPE_TEXT_PLAIN,
-            null,
-            null,
-            null,
-            readTestFile("nested.alternative.eml"));
+                null,
+                MIMETYPE_RFC822,
+                "txt",
+                MIMETYPE_TEXT_PLAIN,
+                null,
+                null,
+                null,
+                readTestFile("nested.alternative.eml"));
         assertTrue(result.getResponse().getContentAsString().contains(expected),
-            "Content from eml transform didn't contain expected value. ");
+                "Content from eml transform didn't contain expected value. ");
     }
 
     /**
@@ -204,21 +207,20 @@ public class MiscTest extends AbstractBaseTest
     @Test
     public void testExtractMetadataRFC822() throws Exception
     {
-        String expected =
-                "{"+
-                    "\"{http://www.alfresco.org/model/content/1.0}addressee\":\"Nevin Nollop <nevin.nollop@gmail.com>\","+
-                    "\"{http://www.alfresco.org/model/content/1.0}addressees\":\"Nevin Nollop <nevinn@alfresco.com>\","+
-                    "\"{http://www.alfresco.org/model/content/1.0}description\":\"The quick brown fox jumps over the lazy dog\","+
-                    "\"{http://www.alfresco.org/model/content/1.0}originator\":\"Nevin Nollop <nevin.nollop@alfresco.com>\","+
-                    "\"{http://www.alfresco.org/model/content/1.0}sentdate\":1086351802000,"+
-                    "\"{http://www.alfresco.org/model/content/1.0}subjectline\":\"The quick brown fox jumps over the lazy dog\","+
-                    "\"{http://www.alfresco.org/model/content/1.0}title\":\"The quick brown fox jumps over the lazy dog\","+
-                    "\"{http://www.alfresco.org/model/imap/1.0}dateSent\":1086351802000,"+
-                    "\"{http://www.alfresco.org/model/imap/1.0}messageCc\":\"Nevin Nollop <nevinn@alfresco.com>\","+
-                    "\"{http://www.alfresco.org/model/imap/1.0}messageFrom\":\"Nevin Nollop <nevin.nollop@alfresco.com>\","+
-                    "\"{http://www.alfresco.org/model/imap/1.0}messageId\":\"<20040604122322.GV1905@phoenix.home>\","+
-                    "\"{http://www.alfresco.org/model/imap/1.0}messageSubject\":\"The quick brown fox jumps over the lazy dog\","+
-                    "\"{http://www.alfresco.org/model/imap/1.0}messageTo\":\"Nevin Nollop <nevin.nollop@gmail.com>\""+
+        String expected = "{" +
+                "\"{http://www.alfresco.org/model/content/1.0}addressee\":\"Nevin Nollop <nevin.nollop@gmail.com>\"," +
+                "\"{http://www.alfresco.org/model/content/1.0}addressees\":\"Nevin Nollop <nevinn@alfresco.com>\"," +
+                "\"{http://www.alfresco.org/model/content/1.0}description\":\"The quick brown fox jumps over the lazy dog\"," +
+                "\"{http://www.alfresco.org/model/content/1.0}originator\":\"Nevin Nollop <nevin.nollop@alfresco.com>\"," +
+                "\"{http://www.alfresco.org/model/content/1.0}sentdate\":1086351802000," +
+                "\"{http://www.alfresco.org/model/content/1.0}subjectline\":\"The quick brown fox jumps over the lazy dog\"," +
+                "\"{http://www.alfresco.org/model/content/1.0}title\":\"The quick brown fox jumps over the lazy dog\"," +
+                "\"{http://www.alfresco.org/model/imap/1.0}dateSent\":1086351802000," +
+                "\"{http://www.alfresco.org/model/imap/1.0}messageCc\":\"Nevin Nollop <nevinn@alfresco.com>\"," +
+                "\"{http://www.alfresco.org/model/imap/1.0}messageFrom\":\"Nevin Nollop <nevin.nollop@alfresco.com>\"," +
+                "\"{http://www.alfresco.org/model/imap/1.0}messageId\":\"<20040604122322.GV1905@phoenix.home>\"," +
+                "\"{http://www.alfresco.org/model/imap/1.0}messageSubject\":\"The quick brown fox jumps over the lazy dog\"," +
+                "\"{http://www.alfresco.org/model/imap/1.0}messageTo\":\"Nevin Nollop <nevin.nollop@gmail.com>\"" +
                 "}";
         MvcResult result = sendRequest("eml",
                 null,
@@ -240,18 +242,16 @@ public class MiscTest extends AbstractBaseTest
     public void testExtractMetadataOptionRFC822() throws Exception
     {
         // {"messageSubject":["{http://www.alfresco.org/model/imap/1.0}messageSubject","{http://www.alfresco.org/model/content/1.0}subjectline","{http://www.alfresco.org/model/content/1.0}description","{http://www.alfresco.org/model/content/1.0}title"],"Thread-Index":["{http://www.alfresco.org/model/imap/1.0}threadIndex"],"messageTo":["{http://www.alfresco.org/model/imap/1.0}messageTo","{http://www.alfresco.org/model/content/1.0}addressee"],"messageSent":["{http://www.alfresco.org/model/content/1.0}sentdate","{http://www.alfresco.org/model/imap/1.0}dateSent"],"Message-ID":["{http://www.alfresco.org/model/imap/1.0}messageId"],"messageCc":["{http://www.alfresco.org/model/imap/1.0}messageCc","{http://www.alfresco.org/model/content/1.0}addressees"],"messageReceived":["{http://www.alfresco.org/model/imap/1.0}dateReceived"],"messageFrom":["{http://www.alfresco.org/model/imap/1.0}messageFrom","{http://www.alfresco.org/model/content/1.0}originator"]}
-        String extractMapping =
-                "{\"messageSubject\":[" +
-                    "\"{http://www.alfresco.org/model/imap/1.0}messageSubject\"," +
-                    "\"{http://www.alfresco.org/model/content/1.0}title\"]," +
+        String extractMapping = "{\"messageSubject\":[" +
+                "\"{http://www.alfresco.org/model/imap/1.0}messageSubject\"," +
+                "\"{http://www.alfresco.org/model/content/1.0}title\"]," +
                 "\"Thread-Index\":[" +
-                    "\"{http://www.alfresco.org/model/imap/1.0}threadIndex\"]," +
+                "\"{http://www.alfresco.org/model/imap/1.0}threadIndex\"]," +
                 "\"messageFrom\":[" +
-                    "\"{http://www.alfresco.org/model/dod5015/1.0}dodProp1\"]}\n";
-        String expected =
-                "{\"{http://www.alfresco.org/model/content/1.0}title\":\"The quick brown fox jumps over the lazy dog\","+
-                 "\"{http://www.alfresco.org/model/dod5015/1.0}dodProp1\":\"Nevin Nollop <nevin.nollop@alfresco.com>\"," +
-                 "\"{http://www.alfresco.org/model/imap/1.0}messageSubject\":\"The quick brown fox jumps over the lazy dog\"}";
+                "\"{http://www.alfresco.org/model/dod5015/1.0}dodProp1\"]}\n";
+        String expected = "{\"{http://www.alfresco.org/model/content/1.0}title\":\"The quick brown fox jumps over the lazy dog\"," +
+                "\"{http://www.alfresco.org/model/dod5015/1.0}dodProp1\":\"Nevin Nollop <nevin.nollop@alfresco.com>\"," +
+                "\"{http://www.alfresco.org/model/imap/1.0}messageSubject\":\"The quick brown fox jumps over the lazy dog\"}";
         MvcResult result = sendRequest("eml",
                 null,
                 MIMETYPE_RFC822,
@@ -273,14 +273,14 @@ public class MiscTest extends AbstractBaseTest
     {
         String expected = "&nbsp;";
         MvcResult result = sendRequest("eml",
-            null,
-            MIMETYPE_RFC822,
-            "txt",
-            MIMETYPE_TEXT_PLAIN,
-            null,
-            null,
-            null,
-            readTestFile("htmlChars.eml"));
+                null,
+                MIMETYPE_RFC822,
+                "txt",
+                MIMETYPE_TEXT_PLAIN,
+                null,
+                null,
+                null,
+                readTestFile("htmlChars.eml"));
         assertFalse(result.getResponse().getContentAsString().contains(expected));
     }
 
@@ -295,23 +295,23 @@ public class MiscTest extends AbstractBaseTest
         final String TEXT_P3 = "C'est en Fran\u00e7ais et Espa\u00f1ol";
         String partA = "<html><head><title>" + TITLE + "</title></head>" + NEWLINE;
         String partB = "<body><p>" + TEXT_P1 + "</p>" + NEWLINE +
-                       "<p>" + TEXT_P2 + "</p>" + NEWLINE +
-                       "<p>" + TEXT_P3 + "</p>" + NEWLINE;
+                "<p>" + TEXT_P2 + "</p>" + NEWLINE +
+                "<p>" + TEXT_P3 + "</p>" + NEWLINE;
         String partC = "</body></html>";
         final String expected = TITLE + SPACE + TEXT_P1 + SPACE + TEXT_P2 + SPACE + TEXT_P3;
 
         MvcResult result = sendRequest("html",
-            "UTF-8",
-            MIMETYPE_HTML,
-            "txt",
-            MIMETYPE_TEXT_PLAIN,
-            null,
-            null,
-            null,
-            expected.getBytes());
+                "UTF-8",
+                MIMETYPE_HTML,
+                "txt",
+                MIMETYPE_TEXT_PLAIN,
+                null,
+                null,
+                null,
+                expected.getBytes());
 
         String contentResult = new String(result.getResponse().getContentAsByteArray(),
-            targetEncoding);
+                targetEncoding);
         assertTrue(contentResult.contains(expected), "The content did not include \"" + expected);
     }
 
@@ -331,17 +331,17 @@ public class MiscTest extends AbstractBaseTest
         }
 
         MvcResult result = sendRequest("txt",
-            "MacDingbat",
-            MIMETYPE_TEXT_PLAIN,
-            "txt",
-            MIMETYPE_TEXT_PLAIN,
-            "UTF-8",
-            null,
-            null,
-            content);
+                "MacDingbat",
+                MIMETYPE_TEXT_PLAIN,
+                "txt",
+                MIMETYPE_TEXT_PLAIN,
+                "UTF-8",
+                null,
+                null,
+                content);
 
         String contentResult = new String(result.getResponse().getContentAsByteArray(),
-            targetEncoding);
+                targetEncoding);
         assertTrue(contentResult.contains(expected), "The content did not include \"" + expected);
     }
 
@@ -352,17 +352,17 @@ public class MiscTest extends AbstractBaseTest
         byte[] content = new byte[0];
 
         MvcResult result = sendRequest("txt",
-            "UTF-8",
-            MIMETYPE_TEXT_PLAIN,
-            "txt",
-            MIMETYPE_TEXT_PLAIN,
-            "UTF-8",
-            null,
-            null,
-            content);
+                "UTF-8",
+                MIMETYPE_TEXT_PLAIN,
+                "txt",
+                MIMETYPE_TEXT_PLAIN,
+                "UTF-8",
+                null,
+                null,
+                content);
 
         assertEquals(0, result.getResponse().getContentLength(),
-            "Returned content should be empty for an empty source file");
+                "Returned content should be empty for an empty source file");
     }
 
     @Test
@@ -378,14 +378,14 @@ public class MiscTest extends AbstractBaseTest
         String expected = sb.toString();
 
         MvcResult result = sendRequest("txt",
-            "UTF-8",
-            MIMETYPE_TEXT_PLAIN,
-            "pdf",
-            MIMETYPE_PDF,
-            null,
-            "1",
-            null,
-            expected.getBytes());
+                "UTF-8",
+                MIMETYPE_TEXT_PLAIN,
+                "pdf",
+                MIMETYPE_PDF,
+                null,
+                "1",
+                null,
+                expected.getBytes());
 
         // Read back in the PDF and check it
         PDDocument doc = PDDocument.load(result.getResponse().getContentAsByteArray());
@@ -404,56 +404,55 @@ public class MiscTest extends AbstractBaseTest
     public void testAppleIWorksPages() throws Exception
     {
         MvcResult result = sendRequest("numbers", null, MIMETYPE_IWORK_NUMBERS,
-            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("pages"));
+                "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("pages"));
         assertTrue(result.getResponse().getContentAsByteArray().length > 0L,
-            "Expected image content but content is empty.");
+                "Expected image content but content is empty.");
     }
 
     @Test
     public void testAppleIWorksNumbers() throws Exception
     {
         MvcResult result = sendRequest("numbers", null, MIMETYPE_IWORK_NUMBERS,
-            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("numbers"));
+                "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("numbers"));
         assertTrue(result.getResponse().getContentAsByteArray().length > 0L,
-            "Expected image content but content is empty.");
+                "Expected image content but content is empty.");
     }
 
     @Test
     public void testAppleIWorksKey() throws Exception
     {
         MvcResult result = sendRequest("key", null, MIMETYPE_IWORK_KEYNOTE,
-            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("key"));
+                "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("key"));
         assertTrue(result.getResponse().getContentAsByteArray().length > 0L,
-            "Expected image content but content is empty.");
+                "Expected image content but content is empty.");
     }
 
-//    @Test
-// TODO Doesn't work with java 11, enable when fixed
+    // @Test
+    // TODO Doesn't work with java 11, enable when fixed
     public void testOOXML() throws Exception
     {
         MvcResult result = sendRequest("docx", null, MIMETYPE_OPENXML_WORDPROCESSING,
-            "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("docx"));
+                "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("docx"));
         assertTrue(result.getResponse().getContentAsByteArray().length > 0L,
-            "Expected image content but content is empty.");
+                "Expected image content but content is empty.");
     }
 
     private MvcResult sendRequest(String sourceExtension,
-        String sourceEncoding,
-        String sourceMimetype,
-        String targetExtension,
-        String targetMimetype,
-        String targetEncoding,
-        String pageLimit,
-        String extractMapping,
-        byte[] content) throws Exception
+            String sourceEncoding,
+            String sourceMimetype,
+            String targetExtension,
+            String targetMimetype,
+            String targetEncoding,
+            String pageLimit,
+            String extractMapping,
+            byte[] content) throws Exception
     {
         final MockMultipartFile sourceFile = new MockMultipartFile("file",
-            "test_file." + sourceExtension, sourceMimetype, content);
+                "test_file." + sourceExtension, sourceMimetype, content);
 
-        final MockHttpServletRequestBuilder requestBuilder = super
-            .mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile)
-            .param(TARGET_MIMETYPE, targetMimetype)
-            .param(SOURCE_MIMETYPE, sourceMimetype);
+        final MockHttpServletRequestBuilder requestBuilder = super.mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile)
+                .param(TARGET_MIMETYPE, targetMimetype)
+                .param(SOURCE_MIMETYPE, sourceMimetype);
 
         // SourceEncoding is available in the options but is not used to select the transformer as it is a known
         // like the source mimetype.
@@ -475,12 +474,12 @@ public class MiscTest extends AbstractBaseTest
         }
 
         return mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andExpect(header().string("Content-Disposition",
-                  "attachment; filename*=" +
-                  (targetEncoding == null ? "UTF-8" : targetEncoding) +
-                  "''transform." + targetExtension))
-              .andReturn();
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*=" +
+                                (targetEncoding == null ? "UTF-8" : targetEncoding) +
+                                "''transform." + targetExtension))
+                .andReturn();
     }
 
     private String clean(String text)

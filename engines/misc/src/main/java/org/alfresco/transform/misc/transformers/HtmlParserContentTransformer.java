@@ -26,14 +26,7 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
-import org.htmlparser.Parser;
-import org.htmlparser.beans.StringBean;
-import org.htmlparser.util.ParserException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -45,27 +38,29 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.util.Map;
 
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+import org.htmlparser.Parser;
+import org.htmlparser.beans.StringBean;
+import org.htmlparser.util.ParserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 
 /**
- * Content transformer which wraps the HTML Parser library for
- * parsing HTML content.
+ * Content transformer which wraps the HTML Parser library for parsing HTML content.
  *
  * <p>
  * This code is based on a class of the same name originally implemented in alfresco-repository.
  * </p>
  *
  * <p>
- * Since HTML Parser was updated from v1.6 to v2.1, META tags
- * defining an encoding for the content via http-equiv=Content-Type
- * will ONLY be respected if the encoding of the content item
- * itself is set to ISO-8859-1.
+ * Since HTML Parser was updated from v1.6 to v2.1, META tags defining an encoding for the content via http-equiv=Content-Type will ONLY be respected if the encoding of the content item itself is set to ISO-8859-1.
  * </p>
  *
  * <p>
- * Tika Note - could be converted to use the Tika HTML parser,
- * but we'd potentially need a custom text handler to replicate
- * the current settings around links and non-breaking spaces.
+ * Tika Note - could be converted to use the Tika HTML parser, but we'd potentially need a custom text handler to replicate the current settings around links and non-breaking spaces.
  * </p>
  *
  * @author Derek Hulley
@@ -78,7 +73,7 @@ import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 public class HtmlParserContentTransformer implements CustomTransformerFileAdaptor
 {
     private static final Logger logger = LoggerFactory.getLogger(
-        HtmlParserContentTransformer.class);
+            HtmlParserContentTransformer.class);
 
     @Override
     public String getTransformerName()
@@ -88,8 +83,8 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
 
     @Override
     public void transform(final String sourceMimetype, final String targetMimetype,
-                          final Map<String, String> transformOptions,
-                          final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
+            final Map<String, String> transformOptions,
+            final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
     {
         String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
         checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
@@ -110,7 +105,7 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
 
         // write it to the writer
         try (Writer writer = new BufferedWriter(
-            new OutputStreamWriter(new FileOutputStream(targetFile))))
+                new OutputStreamWriter(new FileOutputStream(targetFile))))
         {
             writer.write(text);
         }
@@ -123,13 +118,13 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
             if (encoding != null && !Charset.isSupported(encoding))
             {
                 throw new IllegalArgumentException(
-                    parameterName + "=" + encoding + " is not supported by the JVM.");
+                        parameterName + "=" + encoding + " is not supported by the JVM.");
             }
         }
         catch (IllegalCharsetNameException e)
         {
             throw new IllegalArgumentException(
-                parameterName + "=" + encoding + " is not a valid encoding.");
+                    parameterName + "=" + encoding + " is not a valid encoding.");
         }
     }
 
@@ -138,24 +133,19 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
      * This code is based on a class of the same name, originally implemented in alfresco-repository.
      * </p>
      *
-     * A version of {@link StringBean} which allows control of the
-     * encoding in the underlying HTML Parser.
-     * Unfortunately, StringBean doesn't allow easy over-riding of
-     * this, so we have to duplicate some code to control this.
-     * This allows us to correctly handle HTML files where the encoding
-     * is specified against the content property (rather than in the
-     * HTML Head Meta), see ALF-10466 for details.
+     * A version of {@link StringBean} which allows control of the encoding in the underlying HTML Parser. Unfortunately, StringBean doesn't allow easy over-riding of this, so we have to duplicate some code to control this. This allows us to correctly handle HTML files where the encoding is specified against the content property (rather than in the HTML Head Meta), see ALF-10466 for details.
      */
     public static class EncodingAwareStringBean extends StringBean
     {
         private static final long serialVersionUID = -9033414360428669553L;
 
         /**
-         * Sets the File to extract strings from, and the encoding
-         * it's in (if known to Alfresco)
+         * Sets the File to extract strings from, and the encoding it's in (if known to Alfresco)
          *
-         * @param file     The File that text should be fetched from.
-         * @param encoding The encoding of the input
+         * @param file
+         *            The File that text should be fetched from.
+         * @param encoding
+         *            The encoding of the input
          */
         public void setURL(File file, String encoding)
         {
@@ -183,9 +173,9 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
                     }
 
                     mPropertySupport.firePropertyChange(StringBean.PROP_URL_PROPERTY, previousURL,
-                        getURL());
+                            getURL());
                     mPropertySupport.firePropertyChange(StringBean.PROP_CONNECTION_PROPERTY, conn,
-                        mParser.getConnection());
+                            mParser.getConnection());
                     setStrings();
                 }
                 catch (ParserException pe)

@@ -26,7 +26,9 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,8 +37,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 public class HtmlParserContentTransformerTest
 {
@@ -46,12 +47,9 @@ public class HtmlParserContentTransformerTest
     HtmlParserContentTransformer transformer = new HtmlParserContentTransformer();
 
     /**
-     * Checks that we correctly handle text in different encodings,
-     * no matter if the encoding is specified on the Content Property
-     * or in a meta tag within the HTML itself. (ALF-10466)
+     * Checks that we correctly handle text in different encodings, no matter if the encoding is specified on the Content Property or in a meta tag within the HTML itself. (ALF-10466)
      *
-     * On Windows, org.htmlparser.beans.StringBean.carriageReturn() appends a new system dependent new line
-     * so we must be careful when checking the returned text
+     * On Windows, org.htmlparser.beans.StringBean.carriageReturn() appends a new system dependent new line so we must be careful when checking the returned text
      */
     @Test
     public void testEncodingHandling() throws Exception
@@ -63,8 +61,8 @@ public class HtmlParserContentTransformerTest
         final String TEXT_P3 = "C'est en Fran\u00e7ais et Espa\u00f1ol";
         String partA = "<html><head><title>" + TITLE + "</title></head>" + NEWLINE;
         String partB = "<body><p>" + TEXT_P1 + "</p>" + NEWLINE +
-                       "<p>" + TEXT_P2 + "</p>" + NEWLINE +
-                       "<p>" + TEXT_P3 + "</p>" + NEWLINE;
+                "<p>" + TEXT_P2 + "</p>" + NEWLINE +
+                "<p>" + TEXT_P3 + "</p>" + NEWLINE;
         String partC = "</body></html>";
         final String expected = TITLE + NEWLINE + TEXT_P1 + NEWLINE + TEXT_P2 + NEWLINE + TEXT_P3;
 
@@ -122,8 +120,8 @@ public class HtmlParserContentTransformerTest
             // Content set to ISO 8859-1, meta set to UTF-8
             tmpS = File.createTempFile("AlfrescoTestSource_", ".html");
             String str = partA +
-                         "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">" +
-                         partB + partC;
+                    "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">" +
+                    partB + partC;
 
             writeToFile(tmpS, str, "UTF-8");
 
@@ -137,13 +135,15 @@ public class HtmlParserContentTransformerTest
             tmpD.delete();
 
             // Note - we can't test UTF-16 with only a meta encoding,
-            //  because without that the parser won't know about the
-            //  2 byte format so won't be able to identify the meta tag
+            // because without that the parser won't know about the
+            // 2 byte format so won't be able to identify the meta tag
         }
         finally
         {
-            if (tmpS != null && tmpS.exists()) tmpS.delete();
-            if (tmpD != null && tmpD.exists()) tmpD.delete();
+            if (tmpS != null && tmpS.exists())
+                tmpS.delete();
+            if (tmpD != null && tmpD.exists())
+                tmpD.delete();
         }
     }
 

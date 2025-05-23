@@ -26,20 +26,21 @@
  */
 package org.alfresco.transform.misc;
 
-import java.util.Map;
-
-import org.alfresco.transform.base.TransformEngine;
 import static org.alfresco.transform.base.logging.StandardMessages.COMMUNITY_LICENCE;
-import org.alfresco.transform.base.probes.ProbeTransform;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
-import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.config.reader.TransformConfigResourceReader;
+
+import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.ImmutableMap;
+import org.alfresco.transform.base.TransformEngine;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 
 @Component
 public class MiscTransformEngine implements TransformEngine
