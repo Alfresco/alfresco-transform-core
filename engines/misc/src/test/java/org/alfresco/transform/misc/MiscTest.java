@@ -288,7 +288,6 @@ public class MiscTest extends AbstractBaseTest
     public void testHTMLtoString() throws Exception
     {
         final String NEWLINE = System.getProperty("line.separator");
-        final String SPACE = " ";
         final String TITLE = "Testing!";
         final String TEXT_P1 = "This is some text in English";
         final String TEXT_P2 = "This is more text in English";
@@ -298,7 +297,7 @@ public class MiscTest extends AbstractBaseTest
                 "<p>" + TEXT_P2 + "</p>" + NEWLINE +
                 "<p>" + TEXT_P3 + "</p>" + NEWLINE;
         String partC = "</body></html>";
-        final String expected = TITLE + SPACE + TEXT_P1 + SPACE + TEXT_P2 + SPACE + TEXT_P3;
+        final String expected = TITLE + " " + TEXT_P1 + " " + TEXT_P2 + " " + TEXT_P3;
 
         MvcResult result = sendRequest("html",
                 "UTF-8",
