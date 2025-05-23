@@ -59,7 +59,6 @@ public class TransformManagerImpl implements TransformManager
     private String targetMimetype;
     private File sourceFile;
     private File targetFile;
-
     private boolean keepTargetFile;
     private boolean createSourceFileCalled;
     private boolean createTargetFileCalled;
