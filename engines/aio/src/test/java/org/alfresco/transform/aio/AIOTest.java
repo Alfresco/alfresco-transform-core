@@ -48,7 +48,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 /**
- * Test All-In-One.
+ * Test All-In-One
  */
 public class AIOTest extends AbstractBaseTest
 {
