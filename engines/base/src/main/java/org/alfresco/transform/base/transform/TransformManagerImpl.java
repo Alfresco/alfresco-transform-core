@@ -46,6 +46,7 @@ import org.alfresco.transform.base.util.Util;
 /**
  * Manages the input and output streams and any temporary files that have been created.
  */
+@SuppressWarnings("PMD.GodClass")
 @Component
 public class TransformManagerImpl implements TransformManager
 {

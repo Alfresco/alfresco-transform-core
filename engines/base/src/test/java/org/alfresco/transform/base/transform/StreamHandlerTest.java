@@ -55,6 +55,7 @@ import org.alfresco.transform.base.CustomTransformer;
 /**
  * Tests {@link StreamHandler}, {@link TransformManagerImpl#createSourceFile()} and {@link TransformManagerImpl#createTargetFile()} methods.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public class StreamHandlerTest
 {
     public static final String ORIGINAL = "Original";
