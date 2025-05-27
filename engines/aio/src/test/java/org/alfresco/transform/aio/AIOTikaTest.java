@@ -26,12 +26,14 @@
  */
 package org.alfresco.transform.aio;
 
-import com.google.common.collect.ImmutableSet;
-import org.alfresco.transform.tika.TikaTest;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.alfresco.transform.base.html.OptionsHelper.getOptionNames;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.common.collect.ImmutableSet;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.transform.tika.TikaTest;
 
 /**
  * Test Tika functionality in All-In-One.
@@ -74,8 +76,7 @@ public class AIOTikaTest extends TikaTest
                 "width",
                 "pdfFont",
                 "pdfFontSize",
-                "collapseHtml"
-            ),
-            getOptionNames(controller.transformConfig(0).getBody().getTransformOptions()));
+                "collapseHtml"),
+                getOptionNames(controller.transformConfig(0).getBody().getTransformOptions()));
     }
 }

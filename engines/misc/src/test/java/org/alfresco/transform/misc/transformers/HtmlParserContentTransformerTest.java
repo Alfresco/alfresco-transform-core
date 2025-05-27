@@ -149,15 +149,17 @@ public class HtmlParserContentTransformerTest
     }
 
     /**
-     * Tests the transformer with different collapsing methods.
-     * If the collapsing is set to false, it should not collapse the new lines between paragraphs.
-     * If the collapsing is set to true, it should collapse the new lines.
+     * Tests the transformer with different collapsing methods. If the collapsing is set to false, it should not collapse the new lines between paragraphs. If the collapsing is set to true, it should collapse the new lines.
      */
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void testTransformerWithDifferentCollapsingMethods(boolean shouldCollapse) throws Exception {
+    public void testTransformerWithDifferentCollapsingMethods(boolean shouldCollapse) throws Exception
+    {
         final HtmlParserContentTransformer transformer = new HtmlParserContentTransformer();
-        if(!shouldCollapse){transformer.init();} // This is just to set the collapsing flag false
+        if (!shouldCollapse)
+        {
+            transformer.init();
+        } // This is just to set the collapsing flag false
 
         final String NEWLINE = System.getProperty("line.separator");
         final String TITLE = "Testing!";
@@ -174,7 +176,8 @@ public class HtmlParserContentTransformerTest
         File tmpS = null;
         File tmpD = null;
 
-        try {
+        try
+        {
             tmpS = File.createTempFile("AlfrescoTestSource_", ".html");
             writeToFile(tmpS, partA + partB + partC, "UTF-8");
 
@@ -187,7 +190,8 @@ public class HtmlParserContentTransformerTest
             tmpS.delete();
             tmpD.delete();
         }
-        finally {
+        finally
+        {
             if (tmpS != null && tmpS.exists())
                 tmpS.delete();
             if (tmpD != null && tmpD.exists())
