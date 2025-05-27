@@ -83,7 +83,7 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
 
     private static final String HTML_COLLAPSE = "collapseHtml";
     private static final String HTML_OPTIONS = "htmlOptions";
-    private static boolean COLLAPSE_HTML;
+    private static boolean COLLAPSE_HTML = true;
 
     @Autowired
     private MiscTransformEngine transformEngine;
