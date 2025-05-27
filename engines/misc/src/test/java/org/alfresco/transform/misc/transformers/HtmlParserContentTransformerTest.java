@@ -35,6 +35,7 @@ import java.util.Map;
 
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -137,12 +138,21 @@ public class HtmlParserContentTransformerTest
             // because without that the parser won't know about the
             // 2 byte format so won't be able to identify the meta tag
         }
+        catch (Exception e)
+        {
+            e.printStackTrace(); // Log the exception for debugging and Don't throw it, just to ensure the test completes
+            fail("Test Failed: " + e.getMessage());
+        }
         finally
         {
             if (tmpS != null && tmpS.exists())
+            {
                 tmpS.delete();
+            }
             if (tmpD != null && tmpD.exists())
+            {
                 tmpD.delete();
+            }
         }
     }
 
@@ -151,7 +161,7 @@ public class HtmlParserContentTransformerTest
      */
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void testTransformerWithDifferentCollapsingMethods(boolean shouldCollapse) throws Exception
+    public void testTransformerWithDifferentCollapsingMethods(boolean shouldCollapse)
     {
         final HtmlParserContentTransformer transformer = new HtmlParserContentTransformer();
         if (!shouldCollapse)
@@ -187,25 +197,46 @@ public class HtmlParserContentTransformerTest
             tmpS.delete();
             tmpD.delete();
         }
+        catch (Exception e)
+        {
+            e.printStackTrace(); // Log the exception for debugging and Don't throw it, just to ensure the test completes
+            fail("Test Failed: " + e.getMessage());
+        }
         finally
         {
             if (tmpS != null && tmpS.exists())
+            {
                 tmpS.delete();
+            }
             if (tmpD != null && tmpD.exists())
+            {
                 tmpD.delete();
+            }
         }
     }
 
-    private void writeToFile(File file, String content, String encoding) throws Exception
+    private void writeToFile(File file, String content, String encoding)
     {
         try (OutputStreamWriter ow = new OutputStreamWriter(new FileOutputStream(file), encoding))
         {
             ow.append(content);
         }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
-    private String readFromFile(File file, final String encoding) throws Exception
+    private String readFromFile(File file, final String encoding)
     {
-        return new String(Files.readAllBytes(file.toPath()), encoding);
+        try
+        {
+            return new String(Files.readAllBytes(file.toPath()), encoding);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null; // Return null if there is an error reading the file
+        }
     }
 }

@@ -26,14 +26,12 @@
  */
 package org.alfresco.transform.aio;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import static org.alfresco.transform.base.html.OptionsHelper.getOptionNames;
-
-import com.google.common.collect.ImmutableSet;
+import org.alfresco.transform.tika.TikaTest;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.transform.tika.TikaTest;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Test Tika functionality in All-In-One.

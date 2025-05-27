@@ -38,7 +38,6 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_KEYNOTE;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_NUMBERS;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_WORDPROCESSING;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_RFC822;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
@@ -65,8 +64,8 @@ import org.alfresco.transform.base.AbstractBaseTest;
  */
 public class MiscTest extends AbstractBaseTest
 {
-    protected final String sourceEncoding = "UTF-8";
-    protected final String targetEncoding = "UTF-8";
+    protected static final String sourceEncoding = "UTF-8";
+    protected static final String targetEncoding = "UTF-8";
     protected final String targetMimetype = MIMETYPE_TEXT_PLAIN;
 
     @BeforeEach
@@ -428,13 +427,13 @@ public class MiscTest extends AbstractBaseTest
 
     // @Test
     // TODO Doesn't work with java 11, enable when fixed
-    public void testOOXML() throws Exception
-    {
-        MvcResult result = sendRequest("docx", null, MIMETYPE_OPENXML_WORDPROCESSING,
-                "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("docx"));
-        assertTrue(result.getResponse().getContentAsByteArray().length > 0L,
-                "Expected image content but content is empty.");
-    }
+    // public void testOOXML() throws Exception
+    // {
+    // MvcResult result = sendRequest("docx", null, MIMETYPE_OPENXML_WORDPROCESSING,
+    // "jpeg", MIMETYPE_IMAGE_JPEG, null, null, null, readTestFile("docx"));
+    // assertTrue(result.getResponse().getContentAsByteArray().length > 0L,
+    // "Expected image content but content is empty.");
+    // }
 
     private MvcResult sendRequest(String sourceExtension,
             String sourceEncoding,
