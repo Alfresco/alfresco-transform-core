@@ -26,8 +26,6 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,15 +36,23 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.util.Map;
 
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.TransformOption;
+import org.alfresco.transform.config.TransformOptionValue;
+import org.alfresco.transform.config.Transformer;
+import org.alfresco.transform.misc.MiscTransformEngine;
 import org.htmlparser.Parser;
 import org.htmlparser.beans.StringBean;
 import org.htmlparser.util.ParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
+import jakarta.annotation.PostConstruct;
 
 /**
  * Content transformer which wraps the HTML Parser library for parsing HTML content.
@@ -75,10 +81,23 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
     private static final Logger logger = LoggerFactory.getLogger(
             HtmlParserContentTransformer.class);
 
+    private static final String HTML_COLLAPSE = "collapseHtml";
+    private static final String HTML_OPTIONS = "htmlOptions";
+    private static boolean COLLAPSE_HTML;
+
+    @Autowired
+    private MiscTransformEngine transformEngine;
+
     @Override
     public String getTransformerName()
     {
         return "html";
+    }
+
+    @PostConstruct
+    public void init()
+    {
+        COLLAPSE_HTML = hasHtmlCollapseOption();
     }
 
     @Override
@@ -96,7 +115,7 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
 
         // Create the extractor
         EncodingAwareStringBean extractor = new EncodingAwareStringBean();
-        extractor.setCollapse(true);
+        extractor.setCollapse(COLLAPSE_HTML);
         extractor.setLinks(false);
         extractor.setReplaceNonBreakingSpaces(false);
         extractor.setURL(sourceFile, sourceEncoding);
@@ -109,6 +128,18 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
         {
             writer.write(text);
         }
+    }
+
+    private boolean hasHtmlCollapseOption(){
+       TransformConfig transformConfig = transformEngine.getTransformConfig();
+       for(Transformer transformer : transformConfig.getTransformers())
+       {
+          if(getTransformerName().equals(transformer.getTransformerName())){
+                TransformOption currentTransformOption = new TransformOptionValue(false, HTML_COLLAPSE);
+                return  transformer.getTransformOptions().contains(HTML_OPTIONS) && transformConfig.getTransformOptions().get(HTML_OPTIONS).contains(currentTransformOption);
+          }
+       }
+       return false;
     }
 
     private void checkEncodingParameter(String encoding, String parameterName)
