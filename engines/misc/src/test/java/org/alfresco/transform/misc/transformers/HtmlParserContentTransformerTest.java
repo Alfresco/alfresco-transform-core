@@ -140,8 +140,7 @@ public class HtmlParserContentTransformerTest
         }
         catch (Exception e)
         {
-            e.printStackTrace(); // Log the exception for debugging and Don't throw it, just to ensure the test completes
-            fail("Test Failed: " + e.getMessage());
+            fail("Test Failed: " + e.getMessage()); // fail the test if any exception occurs
         }
         finally
         {
@@ -199,8 +198,7 @@ public class HtmlParserContentTransformerTest
         }
         catch (Exception e)
         {
-            e.printStackTrace(); // Log the exception for debugging and Don't throw it, just to ensure the test completes
-            fail("Test Failed: " + e.getMessage());
+            fail("Test Failed: " + e.getMessage()); // fail the test if any exception occurs
         }
         finally
         {
@@ -223,7 +221,7 @@ public class HtmlParserContentTransformerTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            fail("Failed to write to file: " + e.getMessage()); // fail the test if any exception occurs
         }
     }
 
@@ -235,7 +233,7 @@ public class HtmlParserContentTransformerTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            fail("Failed to read from file: " + e.getMessage());
             return null; // Return null if there is an error reading the file
         }
     }
