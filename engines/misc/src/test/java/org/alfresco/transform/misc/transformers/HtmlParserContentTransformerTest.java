@@ -26,10 +26,6 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
@@ -37,7 +33,9 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.*;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -183,7 +181,6 @@ public class HtmlParserContentTransformerTest
 
             tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
             Map<String, String> parameters = new HashMap<>();
-            parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "UTF-8");
             transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD, null);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
