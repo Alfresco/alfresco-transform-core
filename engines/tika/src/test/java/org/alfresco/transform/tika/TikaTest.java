@@ -487,7 +487,6 @@ public class TikaTest extends AbstractBaseTest
     public void optionListTest()
     {
         assertEquals(ImmutableSet.of(
-                "htmlOptions",
                 "includeContents",
                 "targetEncoding",
                 "extractMapping",

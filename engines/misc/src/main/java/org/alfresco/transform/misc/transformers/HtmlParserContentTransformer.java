@@ -95,9 +95,12 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
     }
 
     @PostConstruct
-    public void init()
-    {
+    public void init() {
         COLLAPSE_HTML = hasHtmlCollapseOption();
+        if(logger.isDebugEnabled())
+        {
+            logger.debug("HTML to TEXT collapsing option is set to=" + COLLAPSE_HTML);
+        }
     }
 
     @Override
@@ -131,6 +134,8 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
     }
 
     private boolean hasHtmlCollapseOption(){
+        if(transformEngine == null){return false;}
+        // Check if the transform config has the HTML collapse option enabled
        TransformConfig transformConfig = transformEngine.getTransformConfig();
        for(Transformer transformer : transformConfig.getTransformers())
        {
