@@ -37,7 +37,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -45,49 +45,6 @@ public class HtmlParserContentTransformerTest
 {
     private static final String SOURCE_MIMETYPE = "text/html";
     private static final String TARGET_MIMETYPE = "text/plain";
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    public void testTransformerWithDifferentCollapsingMethods(boolean shouldCollapse) throws Exception {
-        final HtmlParserContentTransformer transformer = new HtmlParserContentTransformer();
-        if(!shouldCollapse){transformer.init();} // This is just to set the collapsing flag false
-
-        final String NEWLINE = System.getProperty("line.separator");
-        final String TITLE = "Testing!";
-        final String TEXT_P1 = "This is some text in English";
-        final String TEXT_P2 = "This is more text in English";
-        final String TEXT_P3 = "C'est en Fran\u00e7ais et Espa\u00f1ol";
-        String partA = "<html><head><title>" + TITLE + "</title></head>" + NEWLINE;
-        String partB = "<body><p>" + TEXT_P1 + "</p>" + NEWLINE +
-                "<p>" + TEXT_P2 + "</p>" + NEWLINE +
-                "<p>" + TEXT_P3 + "</p>" + NEWLINE;
-        String partC = "</body></html>";
-        final String expected = TITLE + NEWLINE + TEXT_P1 + NEWLINE + TEXT_P2 + NEWLINE + TEXT_P3 + (shouldCollapse ? "" : NEWLINE); // Just a added newline if collapsing is not collapsing
-
-        File tmpS = null;
-        File tmpD = null;
-
-        try {
-            tmpS = File.createTempFile("AlfrescoTestSource_", ".html");
-            writeToFile(tmpS, partA + partB + partC, "UTF-8");
-
-            tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
-            Map<String, String> parameters = new HashMap<>();
-            parameters = new HashMap<>();
-            parameters.put(SOURCE_ENCODING, "UTF-8");
-            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD, null);
-            assertEquals(expected, readFromFile(tmpD, "UTF-8"));
-            tmpS.delete();
-            tmpD.delete();
-        }
-        finally {
-            if (tmpS != null && tmpS.exists())
-                tmpS.delete();
-            if (tmpD != null && tmpD.exists())
-                tmpD.delete();
-        }
-    }
-
 
     /**
      * Checks that we correctly handle text in different encodings, no matter if the encoding is specified on the Content Property or in a meta tag within the HTML itself. (ALF-10466)
@@ -184,6 +141,53 @@ public class HtmlParserContentTransformerTest
         }
         finally
         {
+            if (tmpS != null && tmpS.exists())
+                tmpS.delete();
+            if (tmpD != null && tmpD.exists())
+                tmpD.delete();
+        }
+    }
+
+    /**
+     * Tests the transformer with different collapsing methods.
+     * If the collapsing is set to false, it should not collapse the new lines between paragraphs.
+     * If the collapsing is set to true, it should collapse the new lines.
+     */
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testTransformerWithDifferentCollapsingMethods(boolean shouldCollapse) throws Exception {
+        final HtmlParserContentTransformer transformer = new HtmlParserContentTransformer();
+        if(!shouldCollapse){transformer.init();} // This is just to set the collapsing flag false
+
+        final String NEWLINE = System.getProperty("line.separator");
+        final String TITLE = "Testing!";
+        final String TEXT_P1 = "This is some text in English";
+        final String TEXT_P2 = "This is more text in English";
+        final String TEXT_P3 = "C'est en Fran\u00e7ais et Espa\u00f1ol";
+        String partA = "<html><head><title>" + TITLE + "</title></head>" + NEWLINE;
+        String partB = "<body><p>" + TEXT_P1 + "</p>" + NEWLINE +
+                "<p>" + TEXT_P2 + "</p>" + NEWLINE +
+                "<p>" + TEXT_P3 + "</p>" + NEWLINE;
+        String partC = "</body></html>";
+        final String expected = TITLE + NEWLINE + TEXT_P1 + NEWLINE + TEXT_P2 + NEWLINE + TEXT_P3 + (shouldCollapse ? "" : NEWLINE); // Just a added newline if collapsing is not collapsing
+
+        File tmpS = null;
+        File tmpD = null;
+
+        try {
+            tmpS = File.createTempFile("AlfrescoTestSource_", ".html");
+            writeToFile(tmpS, partA + partB + partC, "UTF-8");
+
+            tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
+            Map<String, String> parameters = new HashMap<>();
+            parameters = new HashMap<>();
+            parameters.put(SOURCE_ENCODING, "UTF-8");
+            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD, null);
+            assertEquals(expected, readFromFile(tmpD, "UTF-8"));
+            tmpS.delete();
+            tmpD.delete();
+        }
+        finally {
             if (tmpS != null && tmpS.exists())
                 tmpS.delete();
             if (tmpD != null && tmpD.exists())

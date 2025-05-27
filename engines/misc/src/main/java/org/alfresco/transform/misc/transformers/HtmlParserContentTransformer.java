@@ -81,9 +81,9 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
     private static final Logger logger = LoggerFactory.getLogger(
             HtmlParserContentTransformer.class);
 
-    private static final String HTML_COLLAPSE = "collapseHtml";
-    private static final String HTML_OPTIONS = "htmlOptions";
-    private static boolean COLLAPSE_HTML = true;
+    private final String HTML_COLLAPSE = "collapseHtml";
+    private final String HTML_OPTIONS = "htmlOptions";
+    private boolean COLLAPSE_HTML = true;
 
     @Autowired
     private MiscTransformEngine transformEngine;
