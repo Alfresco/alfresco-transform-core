@@ -70,24 +70,11 @@ public class FileManager
     {
         try
         {
-
             String extension = "." + getExtensionForMimetype(sourceMimetype);
-            File file;
-            if (request != null && request.getParts() != null)
-            {
-                String submittedFileName = request.getParts().stream()
-                        .filter(part -> part instanceof MultipartFile && StringUtils.isNotEmpty(part.getSubmittedFileName()))
-                        .map(Part::getSubmittedFileName)
-                        .findFirst()
-                        .orElse(null);
-                file = !StringUtils.isEmpty(submittedFileName)
-                        ? TempFileProvider.createTempDirForDocFile(submittedFileName)
-                        : TempFileProvider.createTempFile("source_", extension);
-            }
-            else
-            {
-                file = TempFileProvider.createTempFile("source_", extension);
-            }
+            File file = (request != null && request.getParts() != null)
+                    ? createFileFromRequest(request, extension)
+                    : TempFileProvider.createTempFile("source_", extension);
+
             Files.copy(inputStream, file.toPath(), REPLACE_EXISTING);
             if (request != null)
             {
@@ -102,11 +89,27 @@ public class FileManager
         }
     }
 
-    public static File createSourceDocFileWithSameName(String sourceFileName, InputStream inputStream)
+    private static File createFileFromRequest(HttpServletRequest request, String extension) throws Exception
+    {
+        String submittedFileName = request.getParts().stream()
+                .filter(part -> part instanceof MultipartFile && StringUtils.isNotEmpty(part.getSubmittedFileName()))
+                .map(Part::getSubmittedFileName)
+                .findFirst()
+                .orElse(null);
+        return StringUtils.isNotEmpty(submittedFileName)
+                ? TempFileProvider.createFileWithinUUIDTempDir(submittedFileName)
+                : TempFileProvider.createTempFile("source_", extension);
+    }
+
+    public static File createSourceFileUsingOriginalFileName(String sourceFileName, InputStream inputStream, String sourceMimetype)
     {
         try
         {
-            File file = TempFileProvider.createTempDirForDocFile(sourceFileName);
+            String extension = "." + getExtensionForMimetype(sourceMimetype);
+            File file = StringUtils.isEmpty(sourceFileName)
+                    ? TempFileProvider.createTempFile("source_", extension)
+                    : TempFileProvider.createFileWithinUUIDTempDir(sourceFileName);
+
             Files.copy(inputStream, file.toPath(), REPLACE_EXISTING);
             LogEntry.setSource(file.getName(), file.length());
             return file;
@@ -255,7 +258,7 @@ public class FileManager
             }
         }
 
-        public static File createTempDirForDocFile(String sourceFileName)
+        public static File createFileWithinUUIDTempDir(String sourceFileName)
         {
             File tempDir = new File(getTempDir(), UUID.randomUUID().toString());
             if (!tempDir.mkdirs() && !tempDir.exists())

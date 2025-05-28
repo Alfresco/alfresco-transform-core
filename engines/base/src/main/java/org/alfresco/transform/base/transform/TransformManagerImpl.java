@@ -177,7 +177,7 @@ public class TransformManagerImpl implements TransformManager
         if (sourceFile == null)
         {
             sourceFile = request == null
-                    ? FileManager.createSourceDocFileWithSameName(sourceFileName, inputStream)
+                    ? FileManager.createSourceFileUsingOriginalFileName(sourceFileName, inputStream, sourceMimetype)
                     : FileManager.createSourceFile(request, inputStream, sourceMimetype);
         }
         return sourceFile;
