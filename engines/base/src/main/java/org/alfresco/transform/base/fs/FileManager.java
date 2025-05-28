@@ -43,6 +43,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Objects;
 import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
@@ -94,9 +95,9 @@ public class FileManager
         try
         {
             String submittedFileName = request.getParts().stream()
-                    .filter(part -> part instanceof MultipartFile && StringUtils.isNotEmpty(part.getSubmittedFileName()))
+                    .filter(part -> Objects.nonNull(part) && StringUtils.isNotEmpty(part.getSubmittedFileName()))
                     .map(Part::getSubmittedFileName)
-                    .findFirst()
+                    .findAny()
                     .orElse(null);
             return StringUtils.isNotEmpty(submittedFileName)
                     ? TempFileProvider.createFileWithinUUIDTempDir(submittedFileName)
