@@ -89,7 +89,7 @@ public class FileManager
         }
     }
 
-    private static File createFileFromRequest(HttpServletRequest request, String extension) throws Exception
+    private static File createFileFromRequest(HttpServletRequest request, String extension)
     {
         try
         {
