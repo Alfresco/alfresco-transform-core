@@ -91,14 +91,22 @@ public class FileManager
 
     private static File createFileFromRequest(HttpServletRequest request, String extension) throws Exception
     {
-        String submittedFileName = request.getParts().stream()
-                .filter(part -> part instanceof MultipartFile && StringUtils.isNotEmpty(part.getSubmittedFileName()))
-                .map(Part::getSubmittedFileName)
-                .findFirst()
-                .orElse(null);
-        return StringUtils.isNotEmpty(submittedFileName)
-                ? TempFileProvider.createFileWithinUUIDTempDir(submittedFileName)
-                : TempFileProvider.createTempFile("source_", extension);
+        try
+        {
+            String submittedFileName = request.getParts().stream()
+                    .filter(part -> part instanceof MultipartFile && StringUtils.isNotEmpty(part.getSubmittedFileName()))
+                    .map(Part::getSubmittedFileName)
+                    .findFirst()
+                    .orElse(null);
+            return StringUtils.isNotEmpty(submittedFileName)
+                    ? TempFileProvider.createFileWithinUUIDTempDir(submittedFileName)
+                    : TempFileProvider.createTempFile("source_", extension);
+        }
+        catch (Exception e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR, "Failed to create source file from request", e);
+        }
+
     }
 
     public static File createSourceFileUsingOriginalFileName(String sourceFileName, InputStream inputStream, String sourceMimetype)
