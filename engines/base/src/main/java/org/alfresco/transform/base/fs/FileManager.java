@@ -55,7 +55,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
 import org.alfresco.transform.base.logging.LogEntry;
-import org.alfresco.transform.base.util.Util;
 import org.alfresco.transform.common.ExtensionService;
 import org.alfresco.transform.exceptions.TransformException;
 
@@ -81,7 +80,7 @@ public class FileManager
                         .map(Part::getSubmittedFileName)
                         .findFirst()
                         .orElse(null);
-                file = (!StringUtils.isEmpty(submittedFileName) && Util.isDocFile(submittedFileName))
+                file = !StringUtils.isEmpty(submittedFileName)
                         ? TempFileProvider.createTempDirForDocFile(submittedFileName)
                         : TempFileProvider.createTempFile("source_", extension);
             }
@@ -103,16 +102,12 @@ public class FileManager
         }
     }
 
-    public static File createSourceDocFileWithSameName(HttpServletRequest request, String sourceFileName, InputStream inputStream, String sourceMimetype)
+    public static File createSourceDocFileWithSameName(String sourceFileName, InputStream inputStream)
     {
         try
         {
             File file = TempFileProvider.createTempDirForDocFile(sourceFileName);
             Files.copy(inputStream, file.toPath(), REPLACE_EXISTING);
-            if (request != null)
-            {
-                request.setAttribute(SOURCE_FILE, file);
-            }
             LogEntry.setSource(file.getName(), file.length());
             return file;
         }

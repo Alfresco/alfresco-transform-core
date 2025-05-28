@@ -41,7 +41,6 @@ import org.springframework.stereotype.Component;
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.fs.FileManager;
 import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
-import org.alfresco.transform.base.util.Util;
 
 /**
  * Manages the input and output streams and any temporary files that have been created.
@@ -177,9 +176,8 @@ public class TransformManagerImpl implements TransformManager
 
         if (sourceFile == null)
         {
-            boolean isDocFile = !StringUtils.isEmpty(this.sourceFileName) && Util.isDocFile(this.sourceFileName);
-            sourceFile = isDocFile
-                    ? FileManager.createSourceDocFileWithSameName(request, this.sourceFileName, inputStream, sourceMimetype)
+            sourceFile = request == null
+                    ? FileManager.createSourceDocFileWithSameName(sourceFileName, inputStream)
                     : FileManager.createSourceFile(request, inputStream, sourceMimetype);
         }
         return sourceFile;
@@ -226,7 +224,7 @@ public class TransformManagerImpl implements TransformManager
         {
             logger.error("Failed to delete temporary source file {}", sourceFile.getPath());
         }
-        if (sourceFile != null && Util.isDocFile(sourceFile.getPath()))
+        if (sourceFile != null)
         {
             File parentDir = sourceFile.getParentFile();
             if (parentDir != null
