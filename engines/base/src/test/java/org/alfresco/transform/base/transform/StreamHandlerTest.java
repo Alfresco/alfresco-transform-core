@@ -585,12 +585,14 @@ public class StreamHandlerTest
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 OutputStream rec = transformManager.setOutputStream(out))
         {
-            transformManager.setSourceFileName("test.docx");
+            String testFilename = "test.docx";
+            transformManager.setSourceFileName(testFilename);
             transformManager.setInputStream(in);
 
             File src = transformManager.createSourceFile();
             assertTrue(src.exists());
             write(rec, read(src) + CHANGE);
+            assertEquals(testFilename, src.getName());
 
             transformManager.copyTargetFileToOutputStream();
             transformManager.getOutputStream().close();
