@@ -67,21 +67,23 @@ public class FileManager
     private FileManager()
     {}
 
-    public static File createSourceFile(HttpServletRequest request, InputStream inputStream, String sourceMimetype)
+    public static File createSourceFile(HttpServletRequest request, InputStream inputStream, String sourceMimetype, String sourceFileName)
     {
         try
         {
-            String extension = "." + getExtensionForMimetype(sourceMimetype);
-            File file = (request != null && request.getParts() != null)
-                    ? createFileFromRequest(request, extension)
-                    : TempFileProvider.createTempFile("source_", extension);
-
-            Files.copy(inputStream, file.toPath(), REPLACE_EXISTING);
+            if (sourceFileName == null && request != null && request.getParts() != null)
+            {
+                sourceFileName = request.getParts().stream()
+                        .filter(part -> Objects.nonNull(part) && StringUtils.isNotEmpty(part.getSubmittedFileName()))
+                        .map(Part::getSubmittedFileName)
+                        .findAny()
+                        .orElse(null);
+            }
+            File file = createSourceFileWithName(sourceFileName, inputStream, sourceMimetype);
             if (request != null)
             {
                 request.setAttribute(SOURCE_FILE, file);
             }
-            LogEntry.setSource(file.getName(), file.length());
             return file;
         }
         catch (Exception e)
@@ -90,27 +92,7 @@ public class FileManager
         }
     }
 
-    private static File createFileFromRequest(HttpServletRequest request, String extension)
-    {
-        try
-        {
-            String submittedFileName = request.getParts().stream()
-                    .filter(part -> Objects.nonNull(part) && StringUtils.isNotEmpty(part.getSubmittedFileName()))
-                    .map(Part::getSubmittedFileName)
-                    .findAny()
-                    .orElse(null);
-            return StringUtils.isNotEmpty(submittedFileName)
-                    ? TempFileProvider.createFileWithinUUIDTempDir(submittedFileName)
-                    : TempFileProvider.createTempFile("source_", extension);
-        }
-        catch (Exception e)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR, "Failed to create source file from request", e);
-        }
-
-    }
-
-    public static File createSourceFileUsingOriginalFileName(String sourceFileName, InputStream inputStream, String sourceMimetype)
+    public static File createSourceFileWithName(String sourceFileName, InputStream inputStream, String sourceMimetype)
     {
         try
         {
