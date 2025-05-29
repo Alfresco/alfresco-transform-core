@@ -26,15 +26,12 @@
  */
 package org.alfresco.transform.misc;
 
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import java.nio.file.Files;
 
-import static org.alfresco.transform.common.RequestParamMap.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import org.alfresco.transform.base.AbstractBaseTest;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_KEYNOTE;
@@ -42,20 +39,22 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_NUMBERS;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_RFC822;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
-
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.common.RequestParamMap.HTML_COLLAPSE;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
+import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-import org.alfresco.transform.base.AbstractBaseTest;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test Misc. Includes calling the 3rd party libraries.
@@ -86,8 +85,7 @@ public class MiscTest extends AbstractBaseTest
                 .param("sourceEncoding", sourceEncoding)
                 .param("targetMimetype", targetMimetype)
                 .param("sourceMimetype", sourceMimetype)
-                .param(HTML_COLLAPSE,"true");
-
+                .param(HTML_COLLAPSE, "true");
 
         // Only the 'string' transformer should have the targetEncoding.
         if (!"message/rfc822".equals(sourceMimetype) && !"text/html".equals(sourceMimetype))

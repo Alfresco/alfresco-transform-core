@@ -26,12 +26,6 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import static org.alfresco.transform.common.RequestParamMap.HTML_COLLAPSE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
@@ -39,6 +33,10 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.alfresco.transform.common.RequestParamMap.HTML_COLLAPSE;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -82,7 +80,7 @@ public class HtmlParserContentTransformerTest
 
             Map<String, String> parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
-            parameters.put(HTML_COLLAPSE,String.valueOf(true));
+            parameters.put(HTML_COLLAPSE, String.valueOf(true));
             transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD, null);
 
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
@@ -96,7 +94,7 @@ public class HtmlParserContentTransformerTest
             tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
             parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "UTF-8");
-            parameters.put(HTML_COLLAPSE,String.valueOf(true));
+            parameters.put(HTML_COLLAPSE, String.valueOf(true));
             transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD, null);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
@@ -108,7 +106,7 @@ public class HtmlParserContentTransformerTest
 
             tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
             parameters = new HashMap<>();
-            parameters.put(HTML_COLLAPSE,String.valueOf(true));
+            parameters.put(HTML_COLLAPSE, String.valueOf(true));
             parameters.put(SOURCE_ENCODING, "UTF-16");
             transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD, null);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
@@ -135,7 +133,7 @@ public class HtmlParserContentTransformerTest
 
             parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "ISO-8859-1");
-            parameters.put(HTML_COLLAPSE,String.valueOf(true));
+            parameters.put(HTML_COLLAPSE, String.valueOf(true));
             transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD, null);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();
@@ -194,7 +192,7 @@ public class HtmlParserContentTransformerTest
             tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
             Map<String, String> parameters = new HashMap<>();
             parameters.put(SOURCE_ENCODING, "UTF-8");
-            parameters.put(HTML_COLLAPSE,String.valueOf(shouldCollapse));
+            parameters.put(HTML_COLLAPSE, String.valueOf(shouldCollapse));
             transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD, null);
             assertEquals(expected, readFromFile(tmpD, "UTF-8"));
             tmpS.delete();

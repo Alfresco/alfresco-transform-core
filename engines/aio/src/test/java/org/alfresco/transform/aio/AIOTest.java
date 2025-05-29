@@ -26,7 +26,6 @@
  */
 package org.alfresco.transform.aio;
 
-import static org.alfresco.transform.common.RequestParamMap.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -34,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.alfresco.transform.base.TransformControllerTest.getLogMessagesFor;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.common.RequestParamMap.*;
 
 import java.nio.file.Files;
 import java.util.StringJoiner;

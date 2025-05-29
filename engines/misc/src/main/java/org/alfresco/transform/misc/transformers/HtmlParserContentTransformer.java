@@ -26,6 +26,8 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import static org.alfresco.transform.common.RequestParamMap.*;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,25 +38,15 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.util.Map;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
-
-import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.config.TransformOption;
-import org.alfresco.transform.config.TransformOptionValue;
-import org.alfresco.transform.config.Transformer;
-import org.alfresco.transform.misc.MiscTransformEngine;
 import org.htmlparser.Parser;
 import org.htmlparser.beans.StringBean;
 import org.htmlparser.util.ParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-
-import static org.alfresco.transform.common.RequestParamMap.*;
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 
 /**
  * Content transformer which wraps the HTML Parser library for parsing HTML content.
@@ -97,10 +89,12 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
         String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
         checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
         boolean collapse = true;
-        try {
+        try
+        {
             collapse = Boolean.parseBoolean(transformOptions.get(HTML_COLLAPSE));
         }
-        catch (Exception e){
+        catch (Exception e)
+        {
             logger.error("Error parsing collapse option, defaulting to true", e);
         }
 
