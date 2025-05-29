@@ -69,6 +69,9 @@ public interface RequestParamMap
     String PDF_FONT = "pdfFont";
     String PDF_FONT_SIZE = "pdfFontSize";
 
+    // Html parameter names for the transform config
+    String HTML_COLLAPSE = "collapseHtml";
+
     // Parameters interpreted by the TransformController
     String DIRECT_ACCESS_URL = "directAccessUrl";
 
@@ -90,7 +93,4 @@ public interface RequestParamMap
     String ENDPOINT_ERROR = "/error";
     String ENDPOINT_LOG = "/log";
     String ENDPOINT_ROOT = "/";
-
-    // Html parameter names for the transform config
-    String HTML_COLLAPSE = "collapseHtml";
 }
