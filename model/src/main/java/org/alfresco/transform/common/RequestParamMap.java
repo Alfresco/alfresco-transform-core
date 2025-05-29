@@ -90,4 +90,7 @@ public interface RequestParamMap
     String ENDPOINT_ERROR = "/error";
     String ENDPOINT_LOG = "/log";
     String ENDPOINT_ROOT = "/";
+
+    // Html parameter names for the transform config
+    String HTML_COLLAPSE = "collapseHtml";
 }

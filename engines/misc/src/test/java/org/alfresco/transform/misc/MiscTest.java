@@ -28,6 +28,7 @@ package org.alfresco.transform.misc;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import static org.alfresco.transform.common.RequestParamMap.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -41,9 +42,6 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_NUMBERS;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_RFC822;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
-import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -87,7 +85,9 @@ public class MiscTest extends AbstractBaseTest
         final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
                 .param("sourceEncoding", sourceEncoding)
                 .param("targetMimetype", targetMimetype)
-                .param("sourceMimetype", sourceMimetype);
+                .param("sourceMimetype", sourceMimetype)
+                .param(HTML_COLLAPSE,"true");
+
 
         // Only the 'string' transformer should have the targetEncoding.
         if (!"message/rfc822".equals(sourceMimetype) && !"text/html".equals(sourceMimetype))

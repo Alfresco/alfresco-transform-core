@@ -38,7 +38,7 @@ import java.util.Map;
 
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.config.TransformOption;
 import org.alfresco.transform.config.TransformOptionValue;
@@ -53,6 +53,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
+
+import static org.alfresco.transform.common.RequestParamMap.*;
 
 /**
  * Content transformer which wraps the HTML Parser library for parsing HTML content.
@@ -81,26 +83,10 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
     private static final Logger logger = LoggerFactory.getLogger(
             HtmlParserContentTransformer.class);
 
-    private static final String HTML_COLLAPSE = "collapseHtml";
-    private static final String HTML_OPTIONS = "htmlOptions";
-    private boolean COLLAPSE_HTML = true;
-
-    @Autowired
-    private MiscTransformEngine transformEngine;
-
     @Override
     public String getTransformerName()
     {
         return "html";
-    }
-
-    @PostConstruct
-    public void init() {
-        COLLAPSE_HTML = hasHtmlCollapseOption();
-        if(logger.isDebugEnabled())
-        {
-            logger.debug("HTML to TEXT collapsing option is set to=" + COLLAPSE_HTML);
-        }
     }
 
     @Override
@@ -110,6 +96,13 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
     {
         String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
         checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
+        boolean collapse = true;
+        try {
+            collapse = Boolean.parseBoolean(transformOptions.get(HTML_COLLAPSE));
+        }
+        catch (Exception e){
+            logger.error("Error parsing collapse option, defaulting to true", e);
+        }
 
         if (logger.isDebugEnabled())
         {
@@ -118,7 +111,7 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
 
         // Create the extractor
         EncodingAwareStringBean extractor = new EncodingAwareStringBean();
-        extractor.setCollapse(COLLAPSE_HTML);
+        extractor.setCollapse(collapse);
         extractor.setLinks(false);
         extractor.setReplaceNonBreakingSpaces(false);
         extractor.setURL(sourceFile, sourceEncoding);
@@ -131,20 +124,6 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
         {
             writer.write(text);
         }
-    }
-
-    private boolean hasHtmlCollapseOption(){
-        if(transformEngine == null){return false;}
-        // Check if the transform config has the HTML collapse option enabled
-       TransformConfig transformConfig = transformEngine.getTransformConfig();
-       for(Transformer transformer : transformConfig.getTransformers())
-       {
-          if(getTransformerName().equals(transformer.getTransformerName())){
-                TransformOption currentTransformOption = new TransformOptionValue(false, HTML_COLLAPSE);
-                return  transformer.getTransformOptions().contains(HTML_OPTIONS) && transformConfig.getTransformOptions().get(HTML_OPTIONS).contains(currentTransformOption);
-          }
-       }
-       return false;
     }
 
     private void checkEncodingParameter(String encoding, String parameterName)
