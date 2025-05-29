@@ -26,6 +26,12 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import static org.alfresco.transform.common.RequestParamMap.HTML_COLLAPSE;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
@@ -33,10 +39,6 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.alfresco.transform.common.RequestParamMap.HTML_COLLAPSE;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

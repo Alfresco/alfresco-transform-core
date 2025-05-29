@@ -26,12 +26,14 @@
  */
 package org.alfresco.transform.misc;
 
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import java.nio.file.Files;
 
-import org.alfresco.transform.base.AbstractBaseTest;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IWORK_KEYNOTE;
@@ -43,18 +45,20 @@ import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.alfresco.transform.common.RequestParamMap.HTML_COLLAPSE;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
+
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.alfresco.transform.base.AbstractBaseTest;
 
 /**
  * Test Misc. Includes calling the 3rd party libraries.
