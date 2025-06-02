@@ -57,17 +57,17 @@ public class HtmlParserContentTransformerTest
     public void testEncodingHandling() throws Exception
     {
         final HtmlParserContentTransformer transformer = new HtmlParserContentTransformer();
-        final String NEWLINE = System.getProperty("line.separator");
-        final String TITLE = "Testing!";
-        final String TEXT_P1 = "This is some text in English";
-        final String TEXT_P2 = "This is more text in English";
-        final String TEXT_P3 = "C'est en Fran\u00e7ais et Espa\u00f1ol";
-        String partA = "<html><head><title>" + TITLE + "</title></head>" + NEWLINE;
-        String partB = "<body><p>" + TEXT_P1 + "</p>" + NEWLINE +
-                "<p>" + TEXT_P2 + "</p>" + NEWLINE +
-                "<p>" + TEXT_P3 + "</p>" + NEWLINE;
+        final String newline = System.getProperty("line.separator");
+        final String title = "Testing!";
+        final String textp1 = "This is some text in English";
+        final String textp2 = "This is more text in English";
+        final String textp3 = "C'est en Fran\u00e7ais et Espa\u00f1ol";
+        String partA = "<html><head><title>" + title + "</title></head>" + newline;
+        String partB = "<body><p>" + textp1 + "</p>" + newline +
+                "<p>" + textp2 + "</p>" + newline +
+                "<p>" + textp3 + "</p>" + newline;
         String partC = "</body></html>";
-        final String expected = TITLE + NEWLINE + TEXT_P1 + NEWLINE + TEXT_P2 + NEWLINE + TEXT_P3;
+        final String expected = title + newline + textp1 + newline + textp2 + newline + textp3;
 
         File tmpS = null;
         File tmpD = null;
@@ -171,17 +171,17 @@ public class HtmlParserContentTransformerTest
     {
         final HtmlParserContentTransformer transformer = new HtmlParserContentTransformer();
 
-        final String NEWLINE = System.getProperty("line.separator");
-        final String TITLE = "Testing!";
-        final String TEXT_P1 = "This is some text in English";
-        final String TEXT_P2 = "This is more text in English";
-        final String TEXT_P3 = "C'est en Fran\u00e7ais et Espa\u00f1ol";
-        String partA = "<html><head><title>" + TITLE + "</title></head>" + NEWLINE;
-        String partB = "<body><p>" + TEXT_P1 + "</p>" + NEWLINE +
-                "<p>" + TEXT_P2 + "</p>" + NEWLINE +
-                "<p>" + TEXT_P3 + "</p>" + NEWLINE;
+        final String newline = System.getProperty("line.separator");
+        final String title = "Testing!";
+        final String textp1 = "This is some text in English";
+        final String textp2 = "This is more text in English";
+        final String textp3 = "C'est en Fran\u00e7ais et Espa\u00f1ol";
+        String partA = "<html><head><title>" + title + "</title></head>" + newline;
+        String partB = "<body><p>" + textp1 + "</p>" + newline +
+                "<p>" + textp2 + "</p>" + newline +
+                "<p>" + textp3 + "</p>" + newline;
         String partC = "</body></html>";
-        final String expected = TITLE + NEWLINE + TEXT_P1 + NEWLINE + TEXT_P2 + NEWLINE + TEXT_P3 + (shouldCollapse ? "" : NEWLINE); // Just a added newline if collapsing is not collapsing
+        final String expected = title + newline + textp1 + newline + textp2 + newline + textp3 + (shouldCollapse ? "" : newline); // Just a added newline if collapsing is not collapsing
 
         File tmpS = null;
         File tmpD = null;
@@ -227,17 +227,17 @@ public class HtmlParserContentTransformerTest
     {
         final HtmlParserContentTransformer transformer = new HtmlParserContentTransformer();
 
-        final String NEWLINE = System.getProperty("line.separator");
-        final String TITLE = "Testing!";
-        final String TEXT_P1 = "This is some text in English";
-        final String TEXT_P2 = "This is more text in English";
-        final String TEXT_P3 = "C'est en Fran\u00e7ais et Espa\u00f1ol";
-        String partA = "<html><head><title>" + TITLE + "</title></head>" + NEWLINE;
-        String partB = "<body><p>" + TEXT_P1 + "</p>" + NEWLINE +
-                "<p>" + TEXT_P2 + "</p>" + NEWLINE +
-                "<p>" + TEXT_P3 + "</p>" + NEWLINE;
+        final String newline = System.getProperty("line.separator");
+        final String title = "Testing!";
+        final String textp1 = "This is some text in English";
+        final String textp2 = "This is more text in English";
+        final String textp3 = "C'est en Fran\u00e7ais et Espa\u00f1ol";
+        String partA = "<html><head><title>" + title + "</title></head>" + newline;
+        String partB = "<body><p>" + textp1 + "</p>" + newline +
+                "<p>" + textp2 + "</p>" + newline +
+                "<p>" + textp3 + "</p>" + newline;
         String partC = "</body></html>";
-        final String expected = TITLE + NEWLINE + TEXT_P1 + NEWLINE + TEXT_P2 + NEWLINE + TEXT_P3;
+        final String expected = title + newline + textp1 + newline + textp2 + newline + textp3;
 
         File tmpS = null;
         File tmpD = null;

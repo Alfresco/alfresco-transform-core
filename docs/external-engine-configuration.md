@@ -40,6 +40,7 @@ The following externalized T-engines properties are available:
 | FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.misc.acs |
 | MISC_PDFBOX_DEFAULT_FONT | Default font used by PdfBox | NotoSans-Regular |
+| MISC_HTML_COLLAPSE | Html Collasping Option for HTML to TXT transformation | true | 
 
 ## Libreoffice
 | Property | Description | Default value |
@@ -99,3 +100,4 @@ The following externalized T-engines properties are available:
 | IMAGEMAGICK_CODERS | Path to Imagemagick custom coders. |  |
 | IMAGEMAGICK_CONFIG | Path to Imagemagick custom config. |  |
 | MISC_PDFBOX_DEFAULT_FONT | Default font used by PdfBox | NotoSans-Regular |
+| MISC_HTML_COLLAPSE | Html Collasping Option for HTML to TXT transformation explicitly for Misc Engine | true |
