@@ -217,6 +217,62 @@ public class HtmlParserContentTransformerTest
         }
     }
 
+    /**
+     * Tests the transformer with wrong boolean values for the collapse option. It should not throw an exception and should use the default value for collapsing.
+     */
+
+    @ParameterizedTest
+    @ValueSource(strings = {"cat", "dog", "", "1234abcd", "@#$%"})
+    public void testTransformerWithWrongBooleanValues(String booleanValues)
+    {
+        final HtmlParserContentTransformer transformer = new HtmlParserContentTransformer();
+
+        final String NEWLINE = System.getProperty("line.separator");
+        final String TITLE = "Testing!";
+        final String TEXT_P1 = "This is some text in English";
+        final String TEXT_P2 = "This is more text in English";
+        final String TEXT_P3 = "C'est en Fran\u00e7ais et Espa\u00f1ol";
+        String partA = "<html><head><title>" + TITLE + "</title></head>" + NEWLINE;
+        String partB = "<body><p>" + TEXT_P1 + "</p>" + NEWLINE +
+                "<p>" + TEXT_P2 + "</p>" + NEWLINE +
+                "<p>" + TEXT_P3 + "</p>" + NEWLINE;
+        String partC = "</body></html>";
+        final String expected = TITLE + NEWLINE + TEXT_P1 + NEWLINE + TEXT_P2 + NEWLINE + TEXT_P3;
+
+        File tmpS = null;
+        File tmpD = null;
+
+        try
+        {
+            tmpS = File.createTempFile("AlfrescoTestSource_", ".html");
+            writeToFile(tmpS, partA + partB + partC, "UTF-8");
+
+            tmpD = File.createTempFile("AlfrescoTestTarget_", ".txt");
+            Map<String, String> parameters = new HashMap<>();
+            parameters.put(SOURCE_ENCODING, "UTF-8");
+            parameters.put(HTML_COLLAPSE, booleanValues);
+            transformer.transform(SOURCE_MIMETYPE, TARGET_MIMETYPE, parameters, tmpS, tmpD, null);
+            assertEquals(expected, readFromFile(tmpD, "UTF-8"));
+            tmpS.delete();
+            tmpD.delete();
+        }
+        catch (Exception e)
+        {
+            fail("Test Failed: " + e.getMessage()); // fail the test if any exception occurs
+        }
+        finally
+        {
+            if (tmpS != null && tmpS.exists())
+            {
+                tmpS.delete();
+            }
+            if (tmpD != null && tmpD.exists())
+            {
+                tmpD.delete();
+            }
+        }
+    }
+
     private void writeToFile(File file, String content, String encoding)
     {
         try (OutputStreamWriter ow = new OutputStreamWriter(new FileOutputStream(file), encoding))

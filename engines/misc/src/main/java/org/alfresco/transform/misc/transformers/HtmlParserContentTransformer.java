@@ -44,6 +44,7 @@ import org.htmlparser.beans.StringBean;
 import org.htmlparser.util.ParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.transform.base.TransformManager;
@@ -76,6 +77,9 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
     private static final Logger logger = LoggerFactory.getLogger(
             HtmlParserContentTransformer.class);
 
+    @Value("${transform.core.misc.htmlOptions.collapseHtml:true}")
+    private String collapseOptionDefault;
+
     @Override
     public String getTransformerName()
     {
@@ -89,12 +93,22 @@ public class HtmlParserContentTransformer implements CustomTransformerFileAdapto
     {
         String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
         checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
-        boolean collapse = true;
+        boolean collapse;
 
         var collapseOption = transformOptions.get(HTML_COLLAPSE);
-        if (collapseOption != null && collapseOption.equalsIgnoreCase("false"))
+        // If the collapse option is set, use it, otherwise use the default value
+        if (collapseOption != null && (collapseOption.trim().equalsIgnoreCase("true") || collapseOption.trim().equalsIgnoreCase("false")))
         {
-            collapse = false;
+            collapse = Boolean.parseBoolean(collapseOption);
+        }
+        else
+        {
+            // Use the default value from the configuration
+            collapse = collapseOptionDefault == null || Boolean.parseBoolean(collapseOptionDefault);
+            if (logger.isDebugEnabled())
+            {
+                logger.debug("Using default html collapse option: " + collapseOptionDefault);
+            }
         }
 
         if (logger.isDebugEnabled())
