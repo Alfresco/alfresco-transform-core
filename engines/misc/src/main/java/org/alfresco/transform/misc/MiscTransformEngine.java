@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,20 +26,21 @@
  */
 package org.alfresco.transform.misc;
 
-import com.google.common.collect.ImmutableMap;
-import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.config.reader.TransformConfigResourceReader;
-import org.alfresco.transform.config.TransformConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.Map;
-
 import static org.alfresco.transform.base.logging.StandardMessages.COMMUNITY_LICENCE;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+
+import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformEngine;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 
 @Component
 public class MiscTransformEngine implements TransformEngine
@@ -74,6 +75,6 @@ public class MiscTransformEngine implements TransformEngine
     public ProbeTransform getProbeTransform()
     {
         return new ProbeTransform("probe.html", MIMETYPE_HTML, MIMETYPE_TEXT_PLAIN, transformOptions,
-                119, 30, 150, 1024, 60 * 2 + 1, 60 * 2);
+                107, 30, 150, 1024, 60 * 2 + 1, 60 * 2);
     }
 }

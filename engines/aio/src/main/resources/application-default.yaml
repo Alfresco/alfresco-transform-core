@@ -27,3 +27,5 @@ transform:
     misc:
         pdfBox:
           defaultFont: ${MISC_PDFBOX_DEFAULT_FONT:NotoSans-Regular}
+        htmlOptions:
+          collapseHtml: ${MISC_HTML_COLLAPSE:true}
