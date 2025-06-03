@@ -1,5 +1,8 @@
 {
   "transformOptions": {
+    "htmlOptions": [
+      {"value": {"name": "collapseHtml"}}
+    ],
     "textToPdfOptions": [
       {"value": {"name": "pageLimit"}},
       {"value": {"name": "pdfFont"}},
@@ -24,8 +27,7 @@
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "text/html",                                     "targetMediaType": "text/plain"}
       ],
-      "transformOptions": [
-       ]
+      "transformOptions": ["htmlOptions"]
     },
     {
       "transformerName": "string",

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,12 +26,14 @@
  */
 package org.alfresco.transform.aio;
 
-import com.google.common.collect.ImmutableSet;
-import org.alfresco.transform.tika.TikaTest;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.alfresco.transform.base.html.OptionsHelper.getOptionNames;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.common.collect.ImmutableSet;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.transform.tika.TikaTest;
 
 /**
  * Test Tika functionality in All-In-One.
@@ -73,8 +75,8 @@ public class AIOTikaTest extends TikaTest
                 "thumbnail",
                 "width",
                 "pdfFont",
-                "pdfFontSize"
-            ),
-            getOptionNames(controller.transformConfig(0).getBody().getTransformOptions()));
+                "pdfFontSize",
+                "collapseHtml"),
+                getOptionNames(controller.transformConfig(0).getBody().getTransformOptions()));
     }
 }
