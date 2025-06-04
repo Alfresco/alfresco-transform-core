@@ -43,10 +43,8 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Objects;
 import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.Part;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
@@ -71,15 +69,13 @@ public class FileManager
     {
         try
         {
-            if (sourceFileName == null && request != null && request.getParts() != null)
-            {
-                sourceFileName = request.getParts().stream()
-                        .filter(part -> Objects.nonNull(part) && StringUtils.isNotEmpty(part.getSubmittedFileName()))
-                        .map(Part::getSubmittedFileName)
-                        .findAny()
-                        .orElse(null);
-            }
-            File file = createSourceFileWithName(sourceFileName, inputStream, sourceMimetype);
+            String extension = "." + getExtensionForMimetype(sourceMimetype);
+            File file = StringUtils.isEmpty(sourceFileName)
+                    ? TempFileProvider.createTempFile("source_", extension)
+                    : TempFileProvider.createFileWithinUUIDTempDir(sourceFileName);
+
+            Files.copy(inputStream, file.toPath(), REPLACE_EXISTING);
+
             if (request != null)
             {
                 request.setAttribute(SOURCE_FILE, file);
