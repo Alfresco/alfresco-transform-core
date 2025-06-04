@@ -89,25 +89,6 @@ public class FileManager
         }
     }
 
-    public static File createSourceFileWithName(String sourceFileName, InputStream inputStream, String sourceMimetype)
-    {
-        try
-        {
-            String extension = "." + getExtensionForMimetype(sourceMimetype);
-            File file = StringUtils.isEmpty(sourceFileName)
-                    ? TempFileProvider.createTempFile("source_", extension)
-                    : TempFileProvider.createFileWithinUUIDTempDir(sourceFileName);
-
-            Files.copy(inputStream, file.toPath(), REPLACE_EXISTING);
-            LogEntry.setSource(file.getName(), file.length());
-            return file;
-        }
-        catch (Exception e)
-        {
-            throw new TransformException(INSUFFICIENT_STORAGE, "Failed to store the source file", e);
-        }
-    }
-
     public static File createTargetFile(HttpServletRequest request, String sourceMimetype, String targetMimetype)
     {
         try

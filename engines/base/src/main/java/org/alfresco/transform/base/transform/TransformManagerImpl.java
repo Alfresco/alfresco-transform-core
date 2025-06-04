@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.Objects;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -175,7 +176,7 @@ public class TransformManagerImpl implements TransformManager
 
         if (sourceFile == null)
         {
-            String sourceFileName = transformOptions.getOrDefault(RequestParamMap.SOURCE_FILENAME, null);
+            String sourceFileName = Objects.nonNull(transformOptions) ? transformOptions.getOrDefault(RequestParamMap.SOURCE_FILENAME, null) : null;
             sourceFile = FileManager.createSourceFile(request, inputStream, sourceMimetype, sourceFileName);
         }
         return sourceFile;
