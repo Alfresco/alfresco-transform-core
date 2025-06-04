@@ -26,18 +26,21 @@
  */
 package org.alfresco.transform.base.transform;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.fs.FileManager;
-import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
+import jakarta.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.fs.FileManager;
+import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
+import org.alfresco.transform.common.RequestParamMap;
 
 /**
  * Manages the input and output streams and any temporary files that have been created.
@@ -60,6 +63,7 @@ public class TransformManagerImpl implements TransformManager
     private boolean createTargetFileCalled;
     private Boolean startedWithSourceFile;
     private Boolean startedWithTargetFile;
+    private Map<String, String> transformOptions;
 
     public void setRequest(HttpServletRequest request)
     {
@@ -71,7 +75,8 @@ public class TransformManagerImpl implements TransformManager
         this.processHandler = processHandler;
     }
 
-    @Override public String getRequestId()
+    @Override
+    public String getRequestId()
     {
         return processHandler.getReference();
     }
@@ -149,7 +154,18 @@ public class TransformManagerImpl implements TransformManager
         keepTargetFile = true;
     }
 
-    @Override public File createSourceFile()
+    public Map<String, String> getTransformOptions()
+    {
+        return transformOptions;
+    }
+
+    public void setTransformOptions(Map<String, String> transformOptions)
+    {
+        this.transformOptions = transformOptions;
+    }
+
+    @Override
+    public File createSourceFile()
     {
         if (createSourceFileCalled)
         {
@@ -159,12 +175,14 @@ public class TransformManagerImpl implements TransformManager
 
         if (sourceFile == null)
         {
-            sourceFile = FileManager.createSourceFile(request, inputStream, sourceMimetype);
+            String sourceFileName = transformOptions.getOrDefault(RequestParamMap.SOURCE_FILENAME, null);
+            sourceFile = FileManager.createSourceFile(request, inputStream, sourceMimetype, sourceFileName);
         }
         return sourceFile;
     }
 
-    @Override public File createTargetFile()
+    @Override
+    public File createTargetFile()
     {
         if (createTargetFileCalled)
         {

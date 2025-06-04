@@ -26,16 +26,16 @@
  */
 package org.alfresco.transform.base.fs;
 
-import org.alfresco.transform.base.logging.LogEntry;
-import org.alfresco.transform.common.ExtensionService;
-import org.alfresco.transform.exceptions.TransformException;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.util.UriUtils;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
-import jakarta.servlet.http.HttpServletRequest;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.util.StringUtils.getFilename;
+
+import static org.alfresco.transform.common.ExtensionService.getExtensionForMimetype;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,14 +43,21 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Objects;
+import java.util.UUID;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.alfresco.transform.common.ExtensionService.getExtensionForMimetype;
-import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.util.StringUtils.getFilename;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriUtils;
+
+import org.alfresco.transform.base.logging.LogEntry;
+import org.alfresco.transform.common.ExtensionService;
+import org.alfresco.transform.exceptions.TransformException;
 
 public class FileManager
 {
@@ -58,16 +65,21 @@ public class FileManager
     public static final String TARGET_FILE = "targetFile";
 
     private FileManager()
-    {
-    }
+    {}
 
-    public static File createSourceFile(HttpServletRequest request, InputStream inputStream, String sourceMimetype)
+    public static File createSourceFile(HttpServletRequest request, InputStream inputStream, String sourceMimetype, String sourceFileName)
     {
         try
         {
-            String extension = "."+getExtensionForMimetype(sourceMimetype);
-            File file = TempFileProvider.createTempFile("source_", extension);
-            Files.copy(inputStream, file.toPath(), REPLACE_EXISTING);
+            if (sourceFileName == null && request != null && request.getParts() != null)
+            {
+                sourceFileName = request.getParts().stream()
+                        .filter(part -> Objects.nonNull(part) && StringUtils.isNotEmpty(part.getSubmittedFileName()))
+                        .map(Part::getSubmittedFileName)
+                        .findAny()
+                        .orElse(null);
+            }
+            File file = createSourceFileWithName(sourceFileName, inputStream, sourceMimetype);
             if (request != null)
             {
                 request.setAttribute(SOURCE_FILE, file);
@@ -81,11 +93,30 @@ public class FileManager
         }
     }
 
+    public static File createSourceFileWithName(String sourceFileName, InputStream inputStream, String sourceMimetype)
+    {
+        try
+        {
+            String extension = "." + getExtensionForMimetype(sourceMimetype);
+            File file = StringUtils.isEmpty(sourceFileName)
+                    ? TempFileProvider.createTempFile("source_", extension)
+                    : TempFileProvider.createFileWithinUUIDTempDir(sourceFileName);
+
+            Files.copy(inputStream, file.toPath(), REPLACE_EXISTING);
+            LogEntry.setSource(file.getName(), file.length());
+            return file;
+        }
+        catch (Exception e)
+        {
+            throw new TransformException(INSUFFICIENT_STORAGE, "Failed to store the source file", e);
+        }
+    }
+
     public static File createTargetFile(HttpServletRequest request, String sourceMimetype, String targetMimetype)
     {
         try
         {
-            String extension = "."+ExtensionService.getExtensionForTargetMimetype(targetMimetype, sourceMimetype);
+            String extension = "." + ExtensionService.getExtensionForTargetMimetype(targetMimetype, sourceMimetype);
             File file = TempFileProvider.createTempFile("target_", extension);
             if (request != null)
             {
@@ -120,20 +151,20 @@ public class FileManager
             else
             {
                 throw new TransformException(INTERNAL_SERVER_ERROR,
-                    "Could not read the target file: " + file.getPath());
+                        "Could not read the target file: " + file.getPath());
             }
         }
         catch (MalformedURLException e)
         {
             throw new TransformException(INTERNAL_SERVER_ERROR,
-                "The target filename was malformed: " + file.getPath(), e);
+                    "The target filename was malformed: " + file.getPath(), e);
         }
     }
 
     public static InputStream getMultipartFileInputStream(MultipartFile sourceMultipartFile)
     {
         InputStream inputStream;
-        if (sourceMultipartFile ==  null)
+        if (sourceMultipartFile == null)
         {
             throw new TransformException(BAD_REQUEST, "Required request part 'file' is not present");
         }
@@ -192,7 +223,7 @@ public class FileManager
         // targetFilename should never be null (will be "transform."+<something>), so we should not worry about encodePath(null)
         targetFilename = UriUtils.encodePath(getFilename(targetFilename), "UTF-8");
         return ResponseEntity.ok().header(CONTENT_DISPOSITION,
-            "attachment; filename*=UTF-8''" + targetFilename).body(targetResource);
+                "attachment; filename*=UTF-8''" + targetFilename).body(targetResource);
     }
 
     /**
@@ -201,8 +232,7 @@ public class FileManager
     public static class TempFileProvider
     {
         private TempFileProvider()
-        {
-        }
+        {}
 
         public static File createTempFile(final String prefix, final String suffix)
         {
@@ -214,9 +244,20 @@ public class FileManager
             catch (IOException e)
             {
                 throw new RuntimeException(
-                    "Failed to created temp file: \n   prefix: " + prefix +
-                    "\n   suffix: " + suffix + "\n   directory: " + directory, e);
+                        "Failed to created temp file: \n   prefix: " + prefix +
+                                "\n   suffix: " + suffix + "\n   directory: " + directory,
+                        e);
             }
+        }
+
+        public static File createFileWithinUUIDTempDir(String sourceFileName)
+        {
+            File tempDir = new File(getTempDir(), UUID.randomUUID().toString());
+            if (!tempDir.mkdirs() && !tempDir.exists())
+            {
+                throw new TransformException(INSUFFICIENT_STORAGE, "Failed to create temp directory: " + tempDir);
+            }
+            return new File(tempDir, sourceFileName);
         }
 
         private static File getTempDir()
