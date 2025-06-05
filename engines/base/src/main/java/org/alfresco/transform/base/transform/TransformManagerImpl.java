@@ -30,10 +30,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -222,6 +224,16 @@ public class TransformManagerImpl implements TransformManager
         if (sourceFile != null && !sourceFile.delete())
         {
             logger.error("Failed to delete temporary source file {}", sourceFile.getPath());
+        }
+        if (sourceFile != null)
+        {
+            File parentDir = sourceFile.getParentFile();
+            if (parentDir != null
+                    && !StringUtils.equalsAny(parentDir.getName().toLowerCase(Locale.ROOT), "alfresco", "temp", "tmp")
+                    && !parentDir.delete())
+            {
+                logger.error("Failed to delete parent directory {}", parentDir.getPath());
+            }
         }
         outputStreamLengthRecorder = null;
         sourceFile = null;
