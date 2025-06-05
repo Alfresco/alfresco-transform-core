@@ -26,6 +26,7 @@ import org.alfresco.transform.config.CoreVersionDecorator;
 /**
  * Request parameters and transform options used in the core transformers.
  */
+@SuppressWarnings("PMD.ConstantsInInterface")
 public interface RequestParamMap
 {
     // html parameter names
