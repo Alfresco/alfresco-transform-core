@@ -74,7 +74,7 @@ public interface RequestParamMap
     String HTML_COLLAPSE = "collapseHtml";
 
     // source file name for the libre transform options
-    String SOURCE_FILENAME = "sourceFileName";
+    String SOURCE_FILENAME = "sourceFilename";
 
     // Parameters interpreted by the TransformController
     String DIRECT_ACCESS_URL = "directAccessUrl";

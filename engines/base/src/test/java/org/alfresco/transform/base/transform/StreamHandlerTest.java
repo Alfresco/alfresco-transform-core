@@ -577,7 +577,7 @@ public class StreamHandlerTest
     }
 
     @Test
-    public void testStartWithInputStreamAndCallCreateSourceFileWithTransformOptions() throws Exception
+    public void testStartWithInputStreamAndCallCreateSourceFileWithSourceFileName() throws Exception
     {
         try (
                 InputStream in = getSourceInputStreamFromBytes();
@@ -585,8 +585,7 @@ public class StreamHandlerTest
                 OutputStream rec = transformManager.setOutputStream(out))
         {
             String testFilename = "test.docx";
-            Map<String, String> options = new HashMap<>();
-            options.put(RequestParamMap.SOURCE_FILENAME, testFilename);
+            transformManager.setSourceFileName(testFilename);
             transformManager.setInputStream(in);
 
             File src = transformManager.createSourceFile();

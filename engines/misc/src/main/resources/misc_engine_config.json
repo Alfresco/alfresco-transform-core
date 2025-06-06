@@ -19,9 +19,6 @@
       {"value": {"name": "endPage"}},
       {"value": {"name": "pdfFormat"}},
       {"value": {"name": "pdfOrientation"}}
-    ],
-    "sourceFileNameOption": [
-      {"value": {"name": "sourceFileName"}}
     ]
   },
   "transformers": [
