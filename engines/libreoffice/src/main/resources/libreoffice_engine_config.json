@@ -1,9 +1,4 @@
 {
-  "transformOptions": {
-    "libreOfficeOption": [
-      {"value": {"name": "sourceFileName"}}
-    ]
-  },
   "transformers": [
     {
       "transformerName": "libreoffice",
@@ -246,7 +241,8 @@
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",                                                      "targetMediaType": "application/vnd.ms-excel" },
         {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",      "maxSourceSizeBytes": 12582912,                 "targetMediaType": "application/pdf" }
       ],
-      "transformOptions": ["libreOfficeOption"]
+      "transformOptions": [
+      ]
     }
   ]
 }

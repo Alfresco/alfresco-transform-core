@@ -38,8 +38,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.Map.Entry;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
-import static org.alfresco.transform.common.RequestParamMap.TIMEOUT;
+import static org.alfresco.transform.common.RequestParamMap.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 class TransformRegistryHelper
@@ -100,11 +99,12 @@ class TransformRegistryHelper
 
         // The transformOptions sometimes contains sourceEncoding and timeout, even though they should not be used
         // to select a transformer. Would like to change this, but cannot as we need to support all ACS repo versions.
-        if (actualOptions.containsKey(SOURCE_ENCODING) || actualOptions.containsKey(TIMEOUT))
+        if (actualOptions.containsKey(SOURCE_ENCODING) || actualOptions.containsKey(TIMEOUT) || actualOptions.containsKey(SOURCE_FILENAME))
         {
             actualOptions = new HashMap<>(actualOptions);
             actualOptions.remove(SOURCE_ENCODING);
             actualOptions.remove(TIMEOUT);
+            actualOptions.remove(SOURCE_FILENAME);
         }
 
         final List<SupportedTransform> builtTransformList = buildTransformList(data,
