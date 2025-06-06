@@ -587,7 +587,6 @@ public class StreamHandlerTest
             String testFilename = "test.docx";
             Map<String, String> options = new HashMap<>();
             options.put(RequestParamMap.SOURCE_FILENAME, testFilename);
-            transformManager.setTransformOptions(options);
             transformManager.setInputStream(in);
 
             File src = transformManager.createSourceFile();

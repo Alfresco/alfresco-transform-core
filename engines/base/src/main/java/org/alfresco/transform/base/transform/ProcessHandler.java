@@ -30,11 +30,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 
-import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_EXTENSION;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
-import static org.alfresco.transform.common.RequestParamMap.TARGET_EXTENSION;
-import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
+import static org.alfresco.transform.common.RequestParamMap.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,6 +50,7 @@ import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.base.registry.CustomTransformers;
 import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.common.RequestParamMap;
 import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.registry.TransformServiceRegistry;
@@ -64,7 +61,7 @@ import org.alfresco.transform.registry.TransformServiceRegistry;
 abstract class ProcessHandler extends FragmentHandler
 {
     private static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
-            TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, DIRECT_ACCESS_URL);
+            TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, DIRECT_ACCESS_URL, SOURCE_FILENAME);
 
     protected final String sourceMimetype;
     protected final String targetMimetype;
@@ -81,6 +78,7 @@ abstract class ProcessHandler extends FragmentHandler
     {
         this.sourceMimetype = sourceMimetype;
         this.targetMimetype = targetMimetype;
+        this.transformManager.setSourceFileName(transformOptions.getOrDefault(RequestParamMap.SOURCE_FILENAME, null));
         this.transformOptions = cleanTransformOptions(transformOptions);
         this.reference = reference;
 
@@ -115,7 +113,6 @@ abstract class ProcessHandler extends FragmentHandler
         LogEntry.start();
         transformManager.setSourceMimetype(sourceMimetype);
         transformManager.setTargetMimetype(targetMimetype);
-        transformManager.setTransformOptions(transformOptions);
         probeTransform.incrementTransformerCount();
         try
         {

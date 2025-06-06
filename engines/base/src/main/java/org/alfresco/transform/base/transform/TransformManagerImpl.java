@@ -31,8 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +41,6 @@ import org.springframework.stereotype.Component;
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.fs.FileManager;
 import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
-import org.alfresco.transform.common.RequestParamMap;
 
 /**
  * Manages the input and output streams and any temporary files that have been created.
@@ -66,7 +63,17 @@ public class TransformManagerImpl implements TransformManager
     private boolean createTargetFileCalled;
     private Boolean startedWithSourceFile;
     private Boolean startedWithTargetFile;
-    private Map<String, String> transformOptions;
+    private String sourceFileName = null;
+
+    public String getSourceFileName()
+    {
+        return sourceFileName;
+    }
+
+    public void setSourceFileName(String sourceFileName)
+    {
+        this.sourceFileName = sourceFileName;
+    }
 
     public void setRequest(HttpServletRequest request)
     {
@@ -157,16 +164,6 @@ public class TransformManagerImpl implements TransformManager
         keepTargetFile = true;
     }
 
-    public Map<String, String> getTransformOptions()
-    {
-        return transformOptions;
-    }
-
-    public void setTransformOptions(Map<String, String> transformOptions)
-    {
-        this.transformOptions = transformOptions;
-    }
-
     @Override
     public File createSourceFile()
     {
@@ -178,8 +175,8 @@ public class TransformManagerImpl implements TransformManager
 
         if (sourceFile == null)
         {
-            String sourceFileName = Objects.nonNull(transformOptions) ? transformOptions.getOrDefault(RequestParamMap.SOURCE_FILENAME, null) : null;
-            sourceFile = FileManager.createSourceFile(request, inputStream, sourceMimetype, sourceFileName);
+            String fileName = StringUtils.isNotEmpty(sourceFileName) ? sourceFileName : null;
+            sourceFile = FileManager.createSourceFile(request, inputStream, sourceMimetype, fileName);
         }
         return sourceFile;
     }
