@@ -63,7 +63,7 @@ public class TransformManagerImpl implements TransformManager
     private boolean createTargetFileCalled;
     private Boolean startedWithSourceFile;
     private Boolean startedWithTargetFile;
-    private String sourceFileName = null;
+    private String sourceFileName;
 
     public String getSourceFileName()
     {
@@ -175,8 +175,7 @@ public class TransformManagerImpl implements TransformManager
 
         if (sourceFile == null)
         {
-            String fileName = StringUtils.isNotEmpty(sourceFileName) ? sourceFileName : null;
-            sourceFile = FileManager.createSourceFile(request, inputStream, sourceMimetype, fileName);
+            sourceFile = FileManager.createSourceFile(request, inputStream, sourceMimetype, sourceFileName);
         }
         return sourceFile;
     }
@@ -234,6 +233,7 @@ public class TransformManagerImpl implements TransformManager
         }
         outputStreamLengthRecorder = null;
         sourceFile = null;
+        sourceFileName = null;
         createSourceFileCalled = false;
         startedWithSourceFile = null;
     }

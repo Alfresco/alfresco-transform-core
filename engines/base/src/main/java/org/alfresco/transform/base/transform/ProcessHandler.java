@@ -50,7 +50,6 @@ import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.base.registry.CustomTransformers;
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.common.RequestParamMap;
 import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.registry.TransformServiceRegistry;
@@ -78,7 +77,7 @@ abstract class ProcessHandler extends FragmentHandler
     {
         this.sourceMimetype = sourceMimetype;
         this.targetMimetype = targetMimetype;
-        this.transformManager.setSourceFileName(transformOptions.getOrDefault(RequestParamMap.SOURCE_FILENAME, null));
+        this.transformManager.setSourceFileName(transformOptions.getOrDefault(SOURCE_FILENAME, null));
         this.transformOptions = cleanTransformOptions(transformOptions);
         this.reference = reference;
 
