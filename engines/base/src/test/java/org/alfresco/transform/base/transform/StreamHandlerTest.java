@@ -42,14 +42,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import org.alfresco.transform.base.CustomTransformer;
-import org.alfresco.transform.common.RequestParamMap;
 
 /**
  * Tests {@link StreamHandler}, {@link TransformManagerImpl#createSourceFile()} and {@link TransformManagerImpl#createTargetFile()} methods.
