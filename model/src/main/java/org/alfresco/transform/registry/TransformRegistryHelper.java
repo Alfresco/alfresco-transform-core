@@ -96,7 +96,7 @@ class TransformRegistryHelper
             return cachedTransformList;
         }
 
-        // The transformOptions sometimes contains sourceEncoding and timeout, even though they should not be used
+        // The transformOptions sometimes contains sourceEncoding / timeout / file name, even though they should not be used
         // to select a transformer. Would like to change this, but cannot as we need to support all ACS repo versions.
         if (actualOptions.containsKey(SOURCE_ENCODING) || actualOptions.containsKey(TIMEOUT) || actualOptions.containsKey(SOURCE_FILENAME))
         {

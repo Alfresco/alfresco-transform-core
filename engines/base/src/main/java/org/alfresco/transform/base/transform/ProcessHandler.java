@@ -64,6 +64,7 @@ abstract class ProcessHandler extends FragmentHandler
 
     protected final String sourceMimetype;
     protected final String targetMimetype;
+    protected final String sourceFileName;
     private final Map<String, String> transformOptions;
     protected String reference;
     private final TransformServiceRegistry transformRegistry;
@@ -77,7 +78,7 @@ abstract class ProcessHandler extends FragmentHandler
     {
         this.sourceMimetype = sourceMimetype;
         this.targetMimetype = targetMimetype;
-        this.transformManager.setSourceFileName(transformOptions.getOrDefault(SOURCE_FILENAME, null));
+        this.sourceFileName = transformOptions.getOrDefault(SOURCE_FILENAME, null);
         this.transformOptions = cleanTransformOptions(transformOptions);
         this.reference = reference;
 
@@ -112,6 +113,7 @@ abstract class ProcessHandler extends FragmentHandler
         LogEntry.start();
         transformManager.setSourceMimetype(sourceMimetype);
         transformManager.setTargetMimetype(targetMimetype);
+        transformManager.setSourceFileName(sourceFileName);
         probeTransform.incrementTransformerCount();
         try
         {
