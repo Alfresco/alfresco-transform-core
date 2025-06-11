@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2022 - 2023 Alfresco Software Limited
+ * Copyright (C) 2022 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
