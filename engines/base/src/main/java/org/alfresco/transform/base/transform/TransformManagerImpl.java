@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2023 Alfresco Software Limited
+ * Copyright (C) 2005 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,18 +26,21 @@
  */
 package org.alfresco.transform.base.transform;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.fs.FileManager;
-import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Locale;
+import jakarta.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.fs.FileManager;
+import org.alfresco.transform.base.util.OutputStreamLengthRecorder;
 
 /**
  * Manages the input and output streams and any temporary files that have been created.
@@ -60,6 +63,17 @@ public class TransformManagerImpl implements TransformManager
     private boolean createTargetFileCalled;
     private Boolean startedWithSourceFile;
     private Boolean startedWithTargetFile;
+    private String sourceFileName;
+
+    public String getSourceFileName()
+    {
+        return sourceFileName;
+    }
+
+    public void setSourceFileName(String sourceFileName)
+    {
+        this.sourceFileName = sourceFileName;
+    }
 
     public void setRequest(HttpServletRequest request)
     {
@@ -71,7 +85,8 @@ public class TransformManagerImpl implements TransformManager
         this.processHandler = processHandler;
     }
 
-    @Override public String getRequestId()
+    @Override
+    public String getRequestId()
     {
         return processHandler.getReference();
     }
@@ -149,7 +164,8 @@ public class TransformManagerImpl implements TransformManager
         keepTargetFile = true;
     }
 
-    @Override public File createSourceFile()
+    @Override
+    public File createSourceFile()
     {
         if (createSourceFileCalled)
         {
@@ -159,12 +175,13 @@ public class TransformManagerImpl implements TransformManager
 
         if (sourceFile == null)
         {
-            sourceFile = FileManager.createSourceFile(request, inputStream, sourceMimetype);
+            sourceFile = FileManager.createSourceFile(request, inputStream, sourceMimetype, sourceFileName);
         }
         return sourceFile;
     }
 
-    @Override public File createTargetFile()
+    @Override
+    public File createTargetFile()
     {
         if (createTargetFileCalled)
         {
@@ -204,8 +221,19 @@ public class TransformManagerImpl implements TransformManager
         {
             logger.error("Failed to delete temporary source file {}", sourceFile.getPath());
         }
+        if (sourceFile != null)
+        {
+            File parentDir = sourceFile.getParentFile();
+            if (parentDir != null
+                    && !StringUtils.equalsAny(parentDir.getName().toLowerCase(Locale.ROOT), "alfresco", "temp", "tmp")
+                    && !parentDir.delete())
+            {
+                logger.error("Failed to delete parent directory {}", parentDir.getPath());
+            }
+        }
         outputStreamLengthRecorder = null;
         sourceFile = null;
+        sourceFileName = null;
         createSourceFileCalled = false;
         startedWithSourceFile = null;
     }
