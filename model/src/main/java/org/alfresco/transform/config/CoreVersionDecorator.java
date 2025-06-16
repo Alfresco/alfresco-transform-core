@@ -173,6 +173,15 @@ public class CoreVersionDecorator
         {
             transformerTransformOptions.remove(DIRECT_ACCESS_URL);
         }
+        if (CoreFunction.SOURCE_FILENAME.isSupported(coreVersion))
+        {
+            // Add SOURCE_FILENAME to a copy of this Transformer's transform options.
+            transformerTransformOptions.add(SOURCE_FILENAME);
+        }
+        else
+        {
+            transformerTransformOptions.remove(SOURCE_FILENAME);
+        }
 
         return transformerTransformOptions;
     }
