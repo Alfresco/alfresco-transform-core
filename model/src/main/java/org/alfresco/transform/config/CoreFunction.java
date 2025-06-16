@@ -21,14 +21,13 @@
  */
 package org.alfresco.transform.config;
 
-import org.apache.maven.artifact.versioning.ComparableVersion;
-
 import static org.alfresco.transform.config.CoreFunction.Constants.NO_UPPER_VERSION;
 import static org.alfresco.transform.config.CoreFunction.Constants.NO_VERSION;
 
+import org.apache.maven.artifact.versioning.ComparableVersion;
+
 /**
- * Provides a mapping between a transform {@code coreVersion} and functionality (such as the use of Direct Access URLs)
- * supported in that version of the {@code alfresco-transform-base}, so that clients know if they may use it.
+ * Provides a mapping between a transform {@code coreVersion} and functionality (such as the use of Direct Access URLs) supported in that version of the {@code alfresco-transform-base}, so that clients know if they may use it.
  */
 public enum CoreFunction
 {
@@ -41,7 +40,10 @@ public enum CoreFunction
 
     /** Original way to talk to a T-Engine **/
     // The toValue really should be null rather than "9999" but gives us an upper test value
-    HTTP(null, "99999");
+    HTTP(null, "99999"),
+
+    /** Additional transform option to preserve original file name **/
+    SOURCE_FILENAME("5.1.8", null);
 
     private final ComparableVersion fromVersion;
     private final ComparableVersion toVersion;
