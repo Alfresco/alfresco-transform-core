@@ -177,10 +177,10 @@ public class TransformControllerAllInOneTest
     {
         // The transformer's options should not include directAccessUrl as this is the default version of config
         assertConfig(ENDPOINT_TRANSFORM_CONFIG,
-                "Pdf2Jpg,null,imageOptions,sourceFilename\n"
-                        + "Pdf2Png,null,imageOptions,sourceFilename\n"
+                "Pdf2Jpg,null,imageOptions\n"
+                        + "Pdf2Png,null,imageOptions\n"
                         + "TxT2Pdf,null,docOptions\n"
-                        + "Txt2JpgViaPdf,null,imageOptions,sourceFilename\n"
+                        + "Txt2JpgViaPdf,null,imageOptions\n"
                         + "Txt2PngViaPdf,null,imageOptions",
                 "docOptions,imageOptions", mockMvc, objectMapper);
     }
