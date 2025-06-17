@@ -114,11 +114,11 @@ import org.alfresco.transform.config.TransformConfig;
  * Also see {@link TransformControllerAllInOneTest}.
  */
 @AutoConfigureMockMvc
-@SpringBootTest(classes={org.alfresco.transform.base.Application.class})
+@SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
 @ContextConfiguration(classes = {
-    FakeTransformEngineWithTwoCustomTransformers.class,
-    FakeTransformerTxT2Pdf.class,
-    FakeTransformerPdf2Png.class})
+        FakeTransformEngineWithTwoCustomTransformers.class,
+        FakeTransformerTxT2Pdf.class,
+        FakeTransformerPdf2Png.class})
 public class TransformControllerTest
 {
     @Autowired
@@ -154,35 +154,33 @@ public class TransformControllerTest
         transformController.startup();
 
         assertEquals(
-            "--------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
-             + "Startup 0000 TwoCustomTransformers\n"
-             + "Line 2 0000 TwoCustomTransformers\n"
-             + "Line 3\n"
-             + "--------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
-             + "Starting application components... Done",
-            controllerLogMessages.toString());
+                "--------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
+                        + "Startup 0000 TwoCustomTransformers\n"
+                        + "Line 2 0000 TwoCustomTransformers\n"
+                        + "Line 3\n"
+                        + "--------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
+                        + "Starting application components... Done",
+                controllerLogMessages.toString());
     }
 
     public static StringJoiner getLogMessagesFor(Class classBeingLogged)
     {
         StringJoiner logMessages = new StringJoiner("\n");
         Logger logger = (Logger) LoggerFactory.getLogger(classBeingLogged);
-        AppenderBase<ILoggingEvent> logAppender = new AppenderBase<>()
-        {
+        AppenderBase<ILoggingEvent> logAppender = new AppenderBase<>() {
             @Override
             protected void append(ILoggingEvent iLoggingEvent)
             {
                 logMessages.add(iLoggingEvent.getMessage());
             }
         };
-        logAppender.setContext((LoggerContext)LoggerFactory.getILoggerFactory());
+        logAppender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
         logger.setLevel(Level.DEBUG);
         logger.addAppender(logAppender);
         logAppender.start();
 
         return logMessages;
     }
-
 
     private void testPageWithOrWithoutIngresPrefix(String url, boolean behindIngres, String... expected) throws Exception
     {
@@ -192,13 +190,13 @@ public class TransformControllerTest
             ReflectionTestUtils.setField(transformController, "behindIngres", behindIngres);
 
             mockMvc.perform(MockMvcRequestBuilders.get(url))
-                   .andExpect(status().isOk())
-                   .andExpect(content().string(containsString(expected[0])))
-                   .andExpect(content().string(containsString(expected[1])))
-                   .andExpect(content().string(containsString(expected[2])))
-                   .andExpect(content().string(containsString(expected[3])))
-                   .andExpect(content().string(containsString(expected[4])))
-                   .andExpect(content().string(containsString(expected[5])));
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString(expected[0])))
+                    .andExpect(content().string(containsString(expected[1])))
+                    .andExpect(content().string(containsString(expected[2])))
+                    .andExpect(content().string(containsString(expected[3])))
+                    .andExpect(content().string(containsString(expected[4])))
+                    .andExpect(content().string(containsString(expected[5])));
         }
         finally
         {
@@ -210,79 +208,80 @@ public class TransformControllerTest
     public void testVersionEndpointIncludesAvailable() throws Exception
     {
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_VERSION))
-               .andExpect(status().isOk())
-               .andExpect(content().string("TwoCustomTransformers "+coreVersion));
+                .andExpect(status().isOk())
+                .andExpect(content().string("TwoCustomTransformers " + coreVersion));
     }
 
     @Test
     public void testRootEndpointReturnsTestPage() throws Exception
     {
         testPageWithOrWithoutIngresPrefix(ENDPOINT_ROOT, false,
-            "TwoCustomTransformers Test Page",
-            "action=\"/test\"",
-            "<a href=\"/log\">Log</a>",
-            "<a href=\"/ready\">Ready</a>",
-            "<a href=\"/live\">Live</a>",
-            "<a href=\"/transform/config?configVersion=9999\">Config</a>");
+                "TwoCustomTransformers Test Page",
+                "action=\"/test\"",
+                "<a href=\"/log\">Log</a>",
+                "<a href=\"/ready\">Ready</a>",
+                "<a href=\"/live\">Live</a>",
+                "<a href=\"/transform/config?configVersion=9999\">Config</a>");
     }
 
     @Test
     public void testRootEndpointReturnsTestPageWithIngres() throws Exception
     {
         testPageWithOrWithoutIngresPrefix(ENDPOINT_ROOT, true,
-            "TwoCustomTransformers Test Page",
-            "action=\"/twocustomtransformers/test\"",
-            "href=\"/twocustomtransformers/log\"",
-            "<a href=\"/twocustomtransformers/ready\">Ready</a>",
-            "<a href=\"/twocustomtransformers/live\">Live</a>",
-            "<a href=\"/twocustomtransformers/transform/config?configVersion=9999\">Config</a>");
+                "TwoCustomTransformers Test Page",
+                "action=\"/twocustomtransformers/test\"",
+                "href=\"/twocustomtransformers/log\"",
+                "<a href=\"/twocustomtransformers/ready\">Ready</a>",
+                "<a href=\"/twocustomtransformers/live\">Live</a>",
+                "<a href=\"/twocustomtransformers/transform/config?configVersion=9999\">Config</a>");
     }
 
     @Test
     public void testErrorEndpointReturnsErrorPage() throws Exception
     {
         testPageWithOrWithoutIngresPrefix(ENDPOINT_ERROR, false,
-            "TwoCustomTransformers Error Page",
-            "<a href=\"/\">Test</a>",
-            "<a href=\"/log\">Log</a>",
-            "<a href=\"/ready\">Ready</a>",
-            "<a href=\"/live\">Live</a>",
-            "<a href=\"/transform/config?configVersion=9999\">Config</a>");    }
+                "TwoCustomTransformers Error Page",
+                "<a href=\"/\">Test</a>",
+                "<a href=\"/log\">Log</a>",
+                "<a href=\"/ready\">Ready</a>",
+                "<a href=\"/live\">Live</a>",
+                "<a href=\"/transform/config?configVersion=9999\">Config</a>");
+    }
 
     @Test
     public void testErrorEndpointReturnsErrorPageWithIngres() throws Exception
     {
         testPageWithOrWithoutIngresPrefix(ENDPOINT_ERROR, true,
-            "TwoCustomTransformers Error Page",
-            "href=\"/twocustomtransformers/\"",
-            "href=\"/twocustomtransformers/log\"",
-            "<a href=\"/twocustomtransformers/ready\">Ready</a>",
-            "<a href=\"/twocustomtransformers/live\">Live</a>",
-            "<a href=\"/twocustomtransformers/transform/config?configVersion=9999\">Config</a>");
+                "TwoCustomTransformers Error Page",
+                "href=\"/twocustomtransformers/\"",
+                "href=\"/twocustomtransformers/log\"",
+                "<a href=\"/twocustomtransformers/ready\">Ready</a>",
+                "<a href=\"/twocustomtransformers/live\">Live</a>",
+                "<a href=\"/twocustomtransformers/transform/config?configVersion=9999\">Config</a>");
     }
 
     @Test
     public void testLogEndpointReturnsLogPage() throws Exception
     {
         testPageWithOrWithoutIngresPrefix(ENDPOINT_LOG, false,
-            "TwoCustomTransformers Log Entries",
-            "<a href=\"/\">Test</a>",
-            "Log",
-            "<a href=\"/ready\">Ready</a>",
-            "<a href=\"/live\">Live</a>",
-            "<a href=\"/transform/config?configVersion=9999\">Config</a>");
+                "TwoCustomTransformers Log Entries",
+                "<a href=\"/\">Test</a>",
+                "Log",
+                "<a href=\"/ready\">Ready</a>",
+                "<a href=\"/live\">Live</a>",
+                "<a href=\"/transform/config?configVersion=9999\">Config</a>");
     }
 
     @Test
     public void testLogEndpointReturnsLogPageWithIngres() throws Exception
     {
         testPageWithOrWithoutIngresPrefix(ENDPOINT_LOG, true,
-            "TwoCustomTransformers Log Entries",
-            "href=\"/twocustomtransformers/\"",
-            "Log",
-            "<a href=\"/twocustomtransformers/ready\">Ready</a>",
-            "<a href=\"/twocustomtransformers/live\">Live</a>",
-            "<a href=\"/twocustomtransformers/transform/config?configVersion=9999\">Config</a>");
+                "TwoCustomTransformers Log Entries",
+                "href=\"/twocustomtransformers/\"",
+                "Log",
+                "<a href=\"/twocustomtransformers/ready\">Ready</a>",
+                "<a href=\"/twocustomtransformers/live\">Live</a>",
+                "<a href=\"/twocustomtransformers/transform/config?configVersion=9999\">Config</a>");
     }
 
     @Test
@@ -290,8 +289,8 @@ public class TransformControllerTest
     {
         resetProbeForTesting(transformController);
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_READY))
-               .andExpect(status().isOk())
-               .andExpect(content().string(containsString("Success - ")));
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Success - ")));
     }
 
     @Test
@@ -321,59 +320,60 @@ public class TransformControllerTest
         // coreValue is not set as this is the default version of config
         // The transformer's options should not include directAccessUrl as this is the default version of config
         assertConfig(ENDPOINT_TRANSFORM_CONFIG,
-            "Pdf2Png,null,imageOptions\n"
-                + "TxT2Pdf,null,docOptions\n"
-                + "Txt2JpgViaPdf,null,imageOptions\n"
-                + "Txt2PngViaPdf,null,imageOptions",
-            "docOptions,imageOptions", mockMvc, objectMapper);
+                "Pdf2Png,null,imageOptions\n"
+                        + "TxT2Pdf,null,docOptions\n"
+                        + "Txt2JpgViaPdf,null,imageOptions\n"
+                        + "Txt2PngViaPdf,null,imageOptions",
+                "docOptions,imageOptions", mockMvc, objectMapper);
     }
 
     @Test
     public void testConfigLatestEndpointReturnsCoreVersionAndDirectAccessUrlOption() throws Exception
     {
         assertConfig(ENDPOINT_TRANSFORM_CONFIG_LATEST,
-            "Pdf2Png,"+coreVersion+",directAccessUrl,imageOptions\n"
-                + "TxT2Pdf,"+coreVersion+",directAccessUrl,docOptions\n"
-                + "Txt2JpgViaPdf,null,imageOptions\n"
-                + "Txt2PngViaPdf,"+coreVersion+",directAccessUrl,imageOptions",
-            "directAccessUrl,docOptions,imageOptions", mockMvc, objectMapper);
+                "Pdf2Png," + coreVersion + ",directAccessUrl,imageOptions,sourceFilename\n"
+                        + "TxT2Pdf," + coreVersion + ",directAccessUrl,docOptions,sourceFilename\n"
+                        + "Txt2JpgViaPdf,null,imageOptions\n"
+                        + "Txt2PngViaPdf," + coreVersion + ",directAccessUrl,imageOptions,sourceFilename",
+                "directAccessUrl,docOptions,imageOptions,sourceFilename", mockMvc, objectMapper);
     }
 
     static void assertConfig(String url, String expectedTransformers, String expectedOptions,
-        MockMvc mockMvc, ObjectMapper objectMapper) throws Exception
+            MockMvc mockMvc, ObjectMapper objectMapper) throws Exception
     {
         TransformConfig config = objectMapper.readValue(
-            mockMvc.perform(MockMvcRequestBuilders.get(url))
-                   .andExpect(status().isOk())
-                   .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-                   .andReturn()
-                   .getResponse()
-                   .getContentAsString(), TransformConfig.class);
+                mockMvc.perform(MockMvcRequestBuilders.get(url))
+                        .andExpect(status().isOk())
+                        .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString(),
+                TransformConfig.class);
 
         // Gets a list of transformerNames,coreVersion,optionNames
         assertEquals(expectedTransformers,
-            config.getTransformers().stream()
-                  .map(t -> t.getTransformerName()+","
-                            +t.getCoreVersion()+","
-                            +t.getTransformOptions().stream().sorted().collect(Collectors.joining(",")))
-                  .sorted()
-                  .collect(Collectors.joining("\n")));
+                config.getTransformers().stream()
+                        .map(t -> t.getTransformerName() + ","
+                                + t.getCoreVersion() + ","
+                                + t.getTransformOptions().stream().sorted().collect(Collectors.joining(",")))
+                        .sorted()
+                        .collect(Collectors.joining("\n")));
 
         assertEquals(expectedOptions,
-            config.getTransformOptions().keySet().stream()
-                  .sorted()
-                  .collect(Collectors.joining(",")));
+                config.getTransformOptions().keySet().stream()
+                        .sorted()
+                        .collect(Collectors.joining(",")));
     }
 
     @Test
     public void testTransformEndpointThatUsesTransformRequests() throws Exception
     {
-        final Map<String,File> sfsRef2File = new HashMap<>();
+        final Map<String, File> sfsRef2File = new HashMap<>();
         when(fakeSfsClient.saveFile(any())).thenAnswer((Answer) invocation -> {
             File originalFile = (File) invocation.getArguments()[0];
 
             // Make a copy as the original might get deleted
-            File fileCopy = new File(tempDir, originalFile.getName()+"copy");
+            File fileCopy = new File(tempDir, originalFile.getName() + "copy");
             FileUtils.copyFile(originalFile, fileCopy);
 
             String fileRef = UUID.randomUUID().toString();
@@ -381,9 +381,8 @@ public class TransformControllerTest
             return new FileRefResponse(new FileRefEntity(fileRef));
         });
 
-        when(fakeSfsClient.retrieveFile(any())).thenAnswer((Answer) invocation ->
-            ResponseEntity.ok().header(CONTENT_DISPOSITION,"attachment; filename*=UTF-8''transform.tmp")
-            .body((Resource) new UrlResource(sfsRef2File.get(invocation.getArguments()[0]).toURI())));
+        when(fakeSfsClient.retrieveFile(any())).thenAnswer((Answer) invocation -> ResponseEntity.ok().header(CONTENT_DISPOSITION, "attachment; filename*=UTF-8''transform.tmp")
+                .body((Resource) new UrlResource(sfsRef2File.get(invocation.getArguments()[0]).toURI())));
 
         File sourceFile = getTestFile("original.txt", true, tempDir);
         String sourceFileRef = fakeSfsClient.saveFile(sourceFile).getEntry().getFileRef();
@@ -392,7 +391,7 @@ public class TransformControllerTest
                 .withRequestId("1")
                 .withSchema(1)
                 .withClientData("Alfresco Digital Business Platform")
-//                .withTransformRequestOptions(ImmutableMap.of(DIRECT_ACCESS_URL, "file://"+sourceFile.toPath()))
+                // .withTransformRequestOptions(ImmutableMap.of(DIRECT_ACCESS_URL, "file://"+sourceFile.toPath()))
                 .withSourceReference(sourceFileRef)
                 .withSourceMediaType(MIMETYPE_TEXT_PLAIN)
                 .withSourceSize(sourceFile.length())
@@ -423,16 +422,16 @@ public class TransformControllerTest
     public void testTransformEndpointThatUploadsAndDownloadsContent() throws Exception
     {
         mockMvc.perform(
-            MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
-                .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
-                    "Start".getBytes(StandardCharsets.UTF_8)))
-                .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
-                .param(TARGET_MIMETYPE, MIMETYPE_PDF)
-                .param(PAGE_REQUEST_PARAM, "1"))
-            .andExpect(status().isOk())
-            .andExpect(header().string("Content-Disposition",
-            "attachment; filename*=UTF-8''transform.pdf"))
-            .andExpect(content().string("Start -> TxT2Pdf(page=1)"));
+                MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
+                        .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
+                                "Start".getBytes(StandardCharsets.UTF_8)))
+                        .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
+                        .param(TARGET_MIMETYPE, MIMETYPE_PDF)
+                        .param(PAGE_REQUEST_PARAM, "1"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*=UTF-8''transform.pdf"))
+                .andExpect(content().string("Start -> TxT2Pdf(page=1)"));
     }
 
     @Test
@@ -445,24 +444,25 @@ public class TransformControllerTest
             transformController.transformHandler = transformHandlerSpy;
 
             mockMvc.perform(
-                MockMvcRequestBuilders.multipart(ENDPOINT_TEST)
-                    .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
-                        "Start".getBytes(StandardCharsets.UTF_8)))
-                    .param(SOURCE_MIMETYPE, MIMETYPE_IMAGE_BMP)
-                    .param("_"+SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
-                    .param(TARGET_MIMETYPE, MIMETYPE_PDF)
-                    .param("_"+TARGET_MIMETYPE, "")
-                    .param(PAGE_REQUEST_PARAM, "replaced")
-                    .param("name1", "hasNoValueSoRemoved").param("value1", "")
-                    .param("name2", PAGE_REQUEST_PARAM).param("value2", "1")
-                    .param("name3", SOURCE_ENCODING).param("value3", "UTF-8"));
+                    MockMvcRequestBuilders.multipart(ENDPOINT_TEST)
+                            .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
+                                    "Start".getBytes(StandardCharsets.UTF_8)))
+                            .param(SOURCE_MIMETYPE, MIMETYPE_IMAGE_BMP)
+                            .param("_" + SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
+                            .param(TARGET_MIMETYPE, MIMETYPE_PDF)
+                            .param("_" + TARGET_MIMETYPE, "")
+                            .param(PAGE_REQUEST_PARAM, "replaced")
+                            .param("name1", "hasNoValueSoRemoved").param("value1", "")
+                            .param("name2", PAGE_REQUEST_PARAM).param("value2", "1")
+                            .param("name3", SOURCE_ENCODING).param("value3", "UTF-8"));
 
             verify(transformHandlerSpy).handleHttpRequest(any(), any(), eq(MIMETYPE_TEXT_PLAIN), eq(MIMETYPE_PDF),
-                eq(ImmutableMap.of(
-                    SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN,
-                    TARGET_MIMETYPE, MIMETYPE_PDF,
-                    PAGE_REQUEST_PARAM, "1",
-                    SOURCE_ENCODING, "UTF-8")), any());
+                    eq(ImmutableMap.of(
+                            SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN,
+                            TARGET_MIMETYPE, MIMETYPE_PDF,
+                            PAGE_REQUEST_PARAM, "1",
+                            SOURCE_ENCODING, "UTF-8")),
+                    any());
         }
         finally
         {
@@ -474,25 +474,25 @@ public class TransformControllerTest
     public void testInterceptOfMissingServletRequestParameterException() throws Exception
     {
         mockMvc.perform(
-               MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
-                   .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
-                       "Start".getBytes(StandardCharsets.UTF_8))))
-               .andExpect(status().isBadRequest())
-               .andExpect(status().reason(containsString("Request parameter '"+SOURCE_MIMETYPE+"' is missing")));
+                MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
+                        .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
+                                "Start".getBytes(StandardCharsets.UTF_8))))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("Request parameter '" + SOURCE_MIMETYPE + "' is missing")));
     }
 
     @Test
     public void testInterceptOfTransformException_noTransformers() throws Exception
     {
         mockMvc.perform(
-            MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
-               .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
-                    "Start".getBytes(StandardCharsets.UTF_8)))
-               .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
-               .param(TARGET_MIMETYPE, MIMETYPE_PDF)
-               .param("unknown", "1"))
-               .andExpect(status().isBadRequest())
-               .andExpect(content().string(containsString("TwoCustomTransformers Error Page")))
-               .andExpect(content().string(containsString("No transforms for: text/plain (5 bytes) -&gt; application/pdf unknown=1")));
+                MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
+                        .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
+                                "Start".getBytes(StandardCharsets.UTF_8)))
+                        .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
+                        .param(TARGET_MIMETYPE, MIMETYPE_PDF)
+                        .param("unknown", "1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("TwoCustomTransformers Error Page")))
+                .andExpect(content().string(containsString("No transforms for: text/plain (5 bytes) -&gt; application/pdf unknown=1")));
     }
 }
