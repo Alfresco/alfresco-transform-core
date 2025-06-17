@@ -10,6 +10,7 @@
         <form method="POST" enctype="multipart/form-data" th:action="${proxyPathPrefix+'/test'}">
             <table>
                 <tr><td><div style="text-align:right">file</div></td><td><input type="file" name="file" /></td></tr>
+                <tr><td><div style="text-align:right">sourceFilename</div></td><td><input type="text" name="sourceFilename"/></td></tr>
                 <tr><td><div style="text-align:right">directAccessUrl</div></td><td><input type="text" name="directAccessUrl"/></td></tr>
                 <tr><td><div style="text-align:right">sourceMimetype</div></td><td><input type="text" name="sourceMimetype" value="" /></td>
                   <td><select name="_sourceMimetype">

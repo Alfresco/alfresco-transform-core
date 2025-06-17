@@ -26,6 +26,7 @@ import org.alfresco.transform.config.CoreVersionDecorator;
 /**
  * Request parameters and transform options used in the core transformers.
  */
+@SuppressWarnings("PMD.ConstantsInInterface")
 public interface RequestParamMap
 {
     // html parameter names
@@ -71,6 +72,9 @@ public interface RequestParamMap
 
     // Html parameter names for the transform config
     String HTML_COLLAPSE = "collapseHtml";
+
+    // source file name for the libre transform options
+    String SOURCE_FILENAME = "sourceFilename";
 
     // Parameters interpreted by the TransformController
     String DIRECT_ACCESS_URL = "directAccessUrl";

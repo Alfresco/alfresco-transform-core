@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2022 - 2023 Alfresco Software Limited
+ * Copyright (C) 2022 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,19 +26,12 @@
  */
 package org.alfresco.transform.base.transform;
 
-import org.alfresco.transform.base.CustomTransformer;
-import org.alfresco.transform.base.TransformController;
-import org.alfresco.transform.base.logging.LogEntry;
-import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.base.registry.CustomTransformers;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transform.common.TransformerDebug;
-import org.alfresco.transform.registry.TransformServiceRegistry;
-import org.springframework.web.multipart.MultipartFile;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
 
-import jakarta.jms.Destination;
-import jakarta.servlet.http.HttpServletRequest;
+import static org.alfresco.transform.common.RequestParamMap.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -46,30 +39,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import jakarta.jms.Destination;
+import jakarta.servlet.http.HttpServletRequest;
 
-import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_EXTENSION;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
-import static org.alfresco.transform.common.RequestParamMap.TARGET_EXTENSION;
-import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.OK;
+import org.springframework.web.multipart.MultipartFile;
+
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformController;
+import org.alfresco.transform.base.logging.LogEntry;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.base.registry.CustomTransformers;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.common.TransformerDebug;
+import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.registry.TransformServiceRegistry;
 
 /**
- * Provides the transform logic common to http (upload/download), message and probe requests. See
- * {@link TransformHandler#handleHttpRequest(HttpServletRequest, MultipartFile, String, String, Map, ProbeTransform)},
- * {@link TransformHandler#handleMessageRequest(TransformRequest, Long, Destination, ProbeTransform)} and
- * {@link TransformHandler#handleProbeRequest(String, String, Map, File, File, ProbeTransform)}. Note the handing of transform requests
- * via a message queue is the same as via the {@link TransformController#transform(TransformRequest, Long, Destination)}.
+ * Provides the transform logic common to http (upload/download), message and probe requests. See {@link TransformHandler#handleHttpRequest(HttpServletRequest, MultipartFile, String, String, Map, ProbeTransform)}, {@link TransformHandler#handleMessageRequest(TransformRequest, Long, Destination, ProbeTransform)} and {@link TransformHandler#handleProbeRequest(String, String, Map, File, File, ProbeTransform)}. Note the handing of transform requests via a message queue is the same as via the {@link TransformController#transform(TransformRequest, Long, Destination)}.
  */
 abstract class ProcessHandler extends FragmentHandler
 {
     private static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
-        TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, DIRECT_ACCESS_URL);
+            TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, DIRECT_ACCESS_URL, SOURCE_FILENAME);
 
     protected final String sourceMimetype;
     protected final String targetMimetype;
+    protected final String sourceFileName;
     private final Map<String, String> transformOptions;
     protected String reference;
     private final TransformServiceRegistry transformRegistry;
@@ -78,11 +73,12 @@ abstract class ProcessHandler extends FragmentHandler
     private final CustomTransformers customTransformers;
 
     ProcessHandler(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-        String reference, TransformServiceRegistry transformRegistry, TransformerDebug transformerDebug,
-        ProbeTransform probeTransform, CustomTransformers customTransformers)
+            String reference, TransformServiceRegistry transformRegistry, TransformerDebug transformerDebug,
+            ProbeTransform probeTransform, CustomTransformers customTransformers)
     {
         this.sourceMimetype = sourceMimetype;
         this.targetMimetype = targetMimetype;
+        this.sourceFileName = transformOptions.getOrDefault(SOURCE_FILENAME, null);
         this.transformOptions = cleanTransformOptions(transformOptions);
         this.reference = reference;
 
@@ -107,7 +103,6 @@ abstract class ProcessHandler extends FragmentHandler
         super.init();
     }
 
-
     public String getReference()
     {
         return reference;
@@ -118,6 +113,7 @@ abstract class ProcessHandler extends FragmentHandler
         LogEntry.start();
         transformManager.setSourceMimetype(sourceMimetype);
         transformManager.setTargetMimetype(targetMimetype);
+        transformManager.setSourceFileName(sourceFileName);
         probeTransform.incrementTransformerCount();
         try
         {
@@ -131,13 +127,13 @@ abstract class ProcessHandler extends FragmentHandler
         }
         catch (TransformException e)
         {
-            transformerDebug.logFailure(reference, "  Error: "+e.getMessage());
+            transformerDebug.logFailure(reference, "  Error: " + e.getMessage());
             LogEntry.setStatusCodeAndMessage(e.getStatus(), e.getMessage());
             handleTransformException(e);
         }
         catch (Exception e)
         {
-            transformerDebug.logFailure(reference, "  Error: "+e.getMessage());
+            transformerDebug.logFailure(reference, "  Error: " + e.getMessage());
             LogEntry.setStatusCodeAndMessage(INTERNAL_SERVER_ERROR, e.getMessage());
             handleException(e);
         }
@@ -174,8 +170,7 @@ abstract class ProcessHandler extends FragmentHandler
     }
 
     protected void sendTransformResponse(TransformManagerImpl transformManager)
-    {
-    }
+    {}
 
     protected void handleTransformException(TransformException e)
     {
@@ -188,19 +183,19 @@ abstract class ProcessHandler extends FragmentHandler
     }
 
     private String getTransformerName(final String sourceMimetype, long sourceSizeInBytes, final String targetMimetype,
-        final Map<String, String> transformOptions)
+            final Map<String, String> transformOptions)
     {
         final String transformerName = transformRegistry.findTransformerName(sourceMimetype,
-            sourceSizeInBytes, targetMimetype, transformOptions, null);
+                sourceSizeInBytes, targetMimetype, transformOptions, null);
         if (transformerName == null)
         {
-            throw new TransformException(BAD_REQUEST, "No transforms for: "+
-                sourceMimetype+
-                (sourceSizeInBytes >= 0 ? " ("+TransformerDebug.fileSize(sourceSizeInBytes)+")" : "")+
-                 " -> "+targetMimetype+
-                transformOptions.entrySet().stream()
-                    .map(entry -> entry.getKey()+"="+entry.getValue())
-                    .collect(Collectors.joining(", ", " ", "")));
+            throw new TransformException(BAD_REQUEST, "No transforms for: " +
+                    sourceMimetype +
+                    (sourceSizeInBytes >= 0 ? " (" + TransformerDebug.fileSize(sourceSizeInBytes) + ")" : "") +
+                    " -> " + targetMimetype +
+                    transformOptions.entrySet().stream()
+                            .map(entry -> entry.getKey() + "=" + entry.getValue())
+                            .collect(Collectors.joining(", ", " ", "")));
         }
         return transformerName;
     }
@@ -210,7 +205,7 @@ abstract class ProcessHandler extends FragmentHandler
         CustomTransformer customTransformer = customTransformers.get(transformName);
         if (customTransformer == null)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR, "Custom Transformer "+transformName+" not found");
+            throw new TransformException(INTERNAL_SERVER_ERROR, "Custom Transformer " + transformName + " not found");
         }
         return customTransformer;
     }
