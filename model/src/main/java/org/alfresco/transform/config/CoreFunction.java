@@ -43,7 +43,7 @@ public enum CoreFunction
     HTTP(null, "99999"),
 
     /** Additional transform option to preserve original file name **/
-    SOURCE_FILENAME("5.1.9", null);
+    SOURCE_FILENAME("5.1.8", null);
 
     private final ComparableVersion fromVersion;
     private final ComparableVersion toVersion;

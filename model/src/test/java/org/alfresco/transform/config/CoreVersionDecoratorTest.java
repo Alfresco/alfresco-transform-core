@@ -309,13 +309,14 @@ class CoreVersionDecoratorTest
         String sourceFileName = SOURCE_FILENAME;
 
         // Create transform config with no SOURCE_FILENAME option
+        String sourceFileNameSupport = "5.1.8";
         TransformConfig transformConfig = newTransformConfigForSourceFileName(
-                "5.1.9", "5.1.9", "5.1.9",
-                "5.1.9", "5.1.9",
+                sourceFileNameSupport, sourceFileNameSupport, sourceFileNameSupport,
+                sourceFileNameSupport, sourceFileNameSupport,
                 false, false);
 
         // Add SOURCE_FILENAME to all single step transformers
-        setCoreVersionOnSingleStepTransformers(transformConfig, "5.1.9");
+        setCoreVersionOnSingleStepTransformers(transformConfig, sourceFileNameSupport);
 
         // Check that SOURCE_FILENAME is present in all single step transformers' options
 
@@ -327,10 +328,10 @@ class CoreVersionDecoratorTest
                         CONFIG_VERSION_INCLUDES_CORE_VERSION));
 
         // Supported version: SOURCE_FILENAME should be present
-        assertEquals(newTransformConfigForSourceFileName("5.1.9", "5.1.9", "5.1.9", "5.1.9", "5.1.9",
+        assertEquals(newTransformConfigForSourceFileName(sourceFileNameSupport, sourceFileNameSupport, sourceFileNameSupport, sourceFileNameSupport, sourceFileNameSupport,
                 true, true),
                 setOrClearCoreVersion(
-                        newTransformConfigForSourceFileName("5.1.9", "5.1.9", "5.1.9", "5.1.9", "5.1.9", true, true),
+                        newTransformConfigForSourceFileName(sourceFileNameSupport, sourceFileNameSupport, sourceFileNameSupport, sourceFileNameSupport, sourceFileNameSupport, true, true),
                         CONFIG_VERSION_INCLUDES_CORE_VERSION));
     }
 
