@@ -26,25 +26,12 @@
  */
 package org.alfresco.transform.base;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.alfresco.transform.base.fakes.FakeTransformEngineWithAllInOne;
-import org.alfresco.transform.base.fakes.FakeTransformEngineWithOneCustomTransformer;
-import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
-import org.alfresco.transform.base.fakes.FakeTransformerPdf2Jpg;
-import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
-import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
-import java.util.concurrent.TimeUnit;
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import static org.alfresco.transform.base.TransformControllerTest.assertConfig;
 import static org.alfresco.transform.base.TransformControllerTest.getLogMessagesFor;
@@ -64,28 +51,42 @@ import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_VERSION;
 import static org.alfresco.transform.common.RequestParamMap.PAGE_REQUEST_PARAM;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.nio.charset.StandardCharsets;
+import java.util.StringJoiner;
+import java.util.concurrent.TimeUnit;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import org.alfresco.transform.base.fakes.FakeTransformEngineWithAllInOne;
+import org.alfresco.transform.base.fakes.FakeTransformEngineWithOneCustomTransformer;
+import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
+import org.alfresco.transform.base.fakes.FakeTransformerPdf2Jpg;
+import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
+import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
 
 /**
- * Testing TransformController functionality where there are multiple TransformEngines brought together
- * in a single t-engine.
+ * Testing TransformController functionality where there are multiple TransformEngines brought together in a single t-engine.
  *
  * Repeats a set of tests from {@link TransformControllerTest}, which tests the single TransformEngine case.
  */
 @AutoConfigureMockMvc
-@SpringBootTest(classes={org.alfresco.transform.base.Application.class})
+@SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
 @ContextConfiguration(classes = {
-    FakeTransformEngineWithAllInOne.class,
-    FakeTransformEngineWithTwoCustomTransformers.class,
-    FakeTransformerTxT2Pdf.class,
-    FakeTransformerPdf2Png.class,
-    FakeTransformEngineWithOneCustomTransformer.class,
-    FakeTransformerPdf2Jpg.class})
+        FakeTransformEngineWithAllInOne.class,
+        FakeTransformEngineWithTwoCustomTransformers.class,
+        FakeTransformerTxT2Pdf.class,
+        FakeTransformerPdf2Png.class,
+        FakeTransformEngineWithOneCustomTransformer.class,
+        FakeTransformerPdf2Jpg.class})
 public class TransformControllerAllInOneTest
 {
     @Autowired
@@ -112,45 +113,45 @@ public class TransformControllerAllInOneTest
         transformController.startup();
 
         assertEquals(
-            "--------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
-             + "Startup 0000 AllInOne\n"
-             + "Line 2 0000 AllInOne\n"
-             + "Line 3\n"
-             + "--------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
-             + "Starting application components... Done",
-            controllerLogMessages.toString());
+                "--------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
+                        + "Startup 0000 AllInOne\n"
+                        + "Line 2 0000 AllInOne\n"
+                        + "Line 3\n"
+                        + "--------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
+                        + "Starting application components... Done",
+                controllerLogMessages.toString());
     }
 
     @Test
     public void testVersionEndpointIncludesAvailable() throws Exception
     {
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_VERSION))
-               .andExpect(status().isOk())
-               .andExpect(content().string("AllInOne "+coreVersion));
+                .andExpect(status().isOk())
+                .andExpect(content().string("AllInOne " + coreVersion));
     }
 
     @Test
     public void testRootEndpointReturnsTestPage() throws Exception
     {
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_ROOT))
-               .andExpect(status().isOk())
-               .andExpect(content().string(containsString("AllInOne Test Page")));
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("AllInOne Test Page")));
     }
 
     @Test
     public void testErrorEndpointReturnsErrorPage() throws Exception
     {
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_ERROR))
-               .andExpect(status().isOk())
-               .andExpect(content().string(containsString("AllInOne Error Page")));
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("AllInOne Error Page")));
     }
 
     @Test
     public void testLogEndpointReturnsLogPage() throws Exception
     {
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_LOG))
-               .andExpect(status().isOk())
-               .andExpect(content().string(containsString("AllInOne Log Entries")));
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("AllInOne Log Entries")));
     }
 
     @Test
@@ -158,8 +159,8 @@ public class TransformControllerAllInOneTest
     {
         resetProbeForTesting(transformController);
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_READY))
-               .andExpect(status().isOk())
-               .andExpect(content().string(containsString("Success - ")));
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Success - ")));
     }
 
     @Test
@@ -167,8 +168,8 @@ public class TransformControllerAllInOneTest
     {
         resetProbeForTesting(transformController);
         mockMvc.perform(MockMvcRequestBuilders.get(ENDPOINT_LIVE))
-               .andExpect(status().isOk())
-               .andExpect(content().string(containsString("Success - ")));
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Success - ")));
     }
 
     @Test
@@ -176,57 +177,58 @@ public class TransformControllerAllInOneTest
     {
         // The transformer's options should not include directAccessUrl as this is the default version of config
         assertConfig(ENDPOINT_TRANSFORM_CONFIG,
-            "Pdf2Jpg,null,imageOptions\n"
-                + "Pdf2Png,null,imageOptions\n"
-                + "TxT2Pdf,null,docOptions\n"
-                + "Txt2JpgViaPdf,null,imageOptions\n"
-                + "Txt2PngViaPdf,null,imageOptions",
-            "docOptions,imageOptions", mockMvc, objectMapper);
+                "Pdf2Jpg,null,imageOptions,sourceFilename\n"
+                        + "Pdf2Png,null,imageOptions,sourceFilename\n"
+                        + "TxT2Pdf,null,docOptions\n"
+                        + "Txt2JpgViaPdf,null,imageOptions,sourceFilename\n"
+                        + "Txt2PngViaPdf,null,imageOptions",
+                "docOptions,imageOptions", mockMvc, objectMapper);
     }
 
     @Test
     public void testConfigLatestEndpointReturnsCoreVersionAndDirectAccessUrlOption() throws Exception
     {
         assertConfig(ENDPOINT_TRANSFORM_CONFIG_LATEST,
-            "Pdf2Jpg,"+coreVersion+",directAccessUrl,imageOptions\n"
-                + "Pdf2Png,"+coreVersion+",directAccessUrl,imageOptions\n"
-                + "TxT2Pdf,"+coreVersion+",directAccessUrl,docOptions\n"
-                + "Txt2JpgViaPdf,"+coreVersion+",directAccessUrl,imageOptions\n"
-                + "Txt2PngViaPdf,"+coreVersion+",directAccessUrl,imageOptions",
-            "directAccessUrl,docOptions,imageOptions", mockMvc, objectMapper);
+                "Pdf2Jpg," + coreVersion + ",directAccessUrl,imageOptions,sourceFilename\n"
+                        + "Pdf2Png," + coreVersion + ",directAccessUrl,imageOptions,sourceFilename\n"
+                        + "TxT2Pdf," + coreVersion + ",directAccessUrl,docOptions,sourceFilename\n"
+                        + "Txt2JpgViaPdf," + coreVersion + ",directAccessUrl,imageOptions,sourceFilename\n"
+                        + "Txt2PngViaPdf," + coreVersion + ",directAccessUrl,imageOptions,sourceFilename",
+                "directAccessUrl,docOptions,imageOptions,sourceFilename", mockMvc, objectMapper);
     }
 
     @Test
     public void testTransformEndpointUsingTransformEngineWithTwoCustomTransformers() throws Exception
     {
-      await()
-          .atMost(10, TimeUnit.SECONDS)
-          .untilAsserted(() -> mockMvc.perform(
-                  MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
-                      .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
-                          "Start".getBytes(StandardCharsets.UTF_8)))
-                      .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
-                      .param(TARGET_MIMETYPE, MIMETYPE_PDF)
-                      .param(PAGE_REQUEST_PARAM, "1"))
-              .andExpect(status().isOk())
-              .andExpect(header().string("Content-Disposition",
-                  "attachment; filename*=UTF-8''transform.pdf"))
-              .andExpect(content().string("Start -> TxT2Pdf(page=1)")));
+        await()
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted(() -> mockMvc.perform(
+                        MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
+                                .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
+                                        "Start".getBytes(StandardCharsets.UTF_8)))
+                                .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
+                                .param(TARGET_MIMETYPE, MIMETYPE_PDF)
+                                .param(PAGE_REQUEST_PARAM, "1"))
+                        .andExpect(status().isOk())
+                        .andExpect(header().string("Content-Disposition",
+                                "attachment; filename*=UTF-8''transform.pdf"))
+                        .andExpect(content().string("Start -> TxT2Pdf(page=1)")));
     }
 
-     @Test
-     public void testTransformEndpointUsingTransformEngineWithOneCustomTransformer() throws Exception {
-       await()
-           .atMost(10, TimeUnit.SECONDS)
-           .untilAsserted(() -> mockMvc.perform(
-                   MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
-                       .file(new MockMultipartFile("file", null, MIMETYPE_PDF,
-                           "Start".getBytes(StandardCharsets.UTF_8)))
-                       .param(SOURCE_MIMETYPE, MIMETYPE_PDF)
-                       .param(TARGET_MIMETYPE, MIMETYPE_IMAGE_JPEG))
-               .andExpect(status().isOk())
-               .andExpect(header().string("Content-Disposition",
-                   "attachment; filename*=UTF-8''transform.jpeg"))
-               .andExpect(content().string("Start -> Pdf2Jpg()")));
-     }
+    @Test
+    public void testTransformEndpointUsingTransformEngineWithOneCustomTransformer() throws Exception
+    {
+        await()
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted(() -> mockMvc.perform(
+                        MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
+                                .file(new MockMultipartFile("file", null, MIMETYPE_PDF,
+                                        "Start".getBytes(StandardCharsets.UTF_8)))
+                                .param(SOURCE_MIMETYPE, MIMETYPE_PDF)
+                                .param(TARGET_MIMETYPE, MIMETYPE_IMAGE_JPEG))
+                        .andExpect(status().isOk())
+                        .andExpect(header().string("Content-Disposition",
+                                "attachment; filename*=UTF-8''transform.jpeg"))
+                        .andExpect(content().string("Start -> Pdf2Jpg()")));
+    }
 }
