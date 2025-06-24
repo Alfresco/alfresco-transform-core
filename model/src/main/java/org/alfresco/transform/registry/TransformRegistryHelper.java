@@ -45,6 +45,8 @@ import org.alfresco.transform.exceptions.TransformException;
 
 class TransformRegistryHelper
 {
+    public static final String TRANSFORM_OPTIONS_KEY_PATTERN = "%s-%s";
+
     private TransformRegistryHelper()
     {}
 
@@ -60,7 +62,7 @@ class TransformRegistryHelper
         final Set<TransformOption> options = new HashSet<>();
         for (String name : transformOptionNames)
         {
-            final Set<TransformOption> oneSetOfTransformOptions = transformOptions.get(name);
+            final Set<TransformOption> oneSetOfTransformOptions = transformOptions.get(String.format(TRANSFORM_OPTIONS_KEY_PATTERN, readFrom, name));
             if (oneSetOfTransformOptions == null)
             {
                 logError.accept("transformOptions in " + readFrom + " with the name " + name +
