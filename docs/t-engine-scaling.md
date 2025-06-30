@@ -98,17 +98,17 @@ Below is a single example that combines memory limits, JVM options, concurrency,
 ```yaml
   transform-core-aio:
     image: quay.io/alfresco/alfresco-transform-core-aio:5.1.7
-    mem_limit: 2048m
+    mem_limit: 2048m # Sets the container memory limit
     environment:
-      JAVA_OPTS: >-
+      JAVA_OPTS: >- # Sets the JVM heap size on container memory limit
         -XX:MinRAMPercentage=50
         -XX:MaxRAMPercentage=80
       ACTIVEMQ_URL: nio://activemq:61616
       FILE_STORE_URL: >-
         http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
-      SPRING_ACTIVEMQ_BROKER-URL: "nio://activemq:61616?jms.prefetchPolicy.all=2000"
-      SPRING_ACTIVEMQ_POOL_MAX-CONNECTIONS: 100
-      JMS_LISTENER_CONCURRENCY: 1-100
+      SPRING_ACTIVEMQ_BROKER-URL: "nio://activemq:61616?jms.prefetchPolicy.all=2000" # Increases the message prefetch
+      SPRING_ACTIVEMQ_POOL_MAX-CONNECTIONS: 100 # Increases the ActiveMQ connection pool 
+      JMS_LISTENER_CONCURRENCY: 1-100 # Increases the JMS listener concurrency
     ports:
       - "8090:8090"
 ```
