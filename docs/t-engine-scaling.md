@@ -25,29 +25,55 @@ transform-core-aio:
     replicas: 2 # two instances of t-engine will be created
 ```
 
+### Non-containerized deployment
+  An all-in-one Transform Core T-Engine is the default option for the Docker Compose. However, Kubernetes deployments with Helm
+  continue to use the five separate T-Engines to provide balanced throughput and scalability improvements. Multiple instances
+  of an individual T-Engine could be configured. An additional load balancer is required if the same T-Engine has multiple instances.
+  
+  These custom T-Engine options are:
+  1. LibreOffice
+  2. ImageMagick
+  3. PdfRenderer
+  4. Tika
+  5. Misc
+
+### Example
+  Engine configuration is part of the T-Router SpringBoot `application.yaml` config:
+```yaml
+transformer:
+  url:
+    imagemagick: http://imagemagick-host:8091
+    pdf_renderer: http://pdf-renderer-host:8090 # Different ports must be assigned to individual instances
+  queue:
+    imagemagick: org.alfresco.transform.engine.imagemagick.acs
+    pdf_renderer: org.alfresco.transform.engine.alfresco-pdf-renderer.acs
+  engine:
+    protocol: ${TRANSFORMER_ENGINE_PROTOCOL:jms}  # this value can be one of the following (http, jms)
+```
+
 ### Limitations
 
-1. Alfresco Content Services (ACS) Repository can only be configured with a single T-Engine service URL.
+-  Alfresco Content Services (ACS) Repository can only be configured with a single T-Engine service URL.
    ```
    localTransform.core-aio.url=http://transform-core-aio:8090/
    ```
-2. T-Router can only be configured with a single T-Engine service URL.
+-  T-Router can only be configured with a single T-Engine service URL.
    ```
    CORE_AIO_URL: http://transform-core-aio:8090
    ```
-3. Search and Search Reindexing has a dependency on a single T-Engine service URL.
+-  Search and Search Reindexing has a dependency on a single T-Engine service URL.
    ```
    ALFRESCO_ACCEPTED_CONTENT_MEDIA_TYPES_CACHE_BASE_URL: >-
       http://transform-core-aio:8090/transform/config
    ```
-4. T-Engine depends on ActiveMQ and shared-file-store. When running multiple T-Engine instances (nodes),
+-  T-Engine depends on ActiveMQ and shared-file-store. When running multiple T-Engine instances (nodes),
 same URL for ActiveMQ and shared file store must be provided to all of the T-Engine nodes.
 
-5. The default port of a T-Engine is 8090. Whereas T-Router has the default Port 8095. When creating multiple docker images,
+-  The default port of a T-Engine is 8090. Whereas T-Router has the default Port 8095. When creating multiple docker images,
 maximum host port could be 8094, hence the maximum number of images will be 5 (8090-8084). It needs careful port re-configurations
 for either T-Router or T-Engine and their dependencies.
 
-6. In Kubernetes environments, horizontal scaling is typically handled automatically via deployments and built-in load balancing.
+-  In Kubernetes environments, horizontal scaling is typically handled automatically via deployments and built-in load balancing.
 In other environments, own load balancer is required in front of T-Engine to distribute requests.
 
 ## Vertical Scaling
@@ -65,12 +91,9 @@ Vertical scaling can be achieved through Docker, JVM, Spring Boot, or ActiveMQ c
   in combination with the container's `mem_limit` parameter. This allows the JVM to dynamically adjust its heap size based on
   the memory available to the container. This is important for handling more messages or larger payloads.  
   **Default:** Not set (JVM uses its own default heap sizing).
-  Note: JVM maximum RAM percentage to 100% of `mem_limit` is not recommended, as this can cause the JVM to use all available
-  container memory, leaving no room for other processes and potentially leading to container restarts due to out-of-memory (OOM)
-  errors.
 
 
-- **`SPRING_ACTIVEMQ_POOL_MAX-CONNECTIONS` (Spring Boot):**  
+- **`SPRING_ACTIVEMQ_POOL_MAXCONNECTIONS` (Spring Boot):**  
   Configures the maximum number of pooled connections to ActiveMQ. Increasing this value allows more simultaneous connections to
   the message broker, which can improve throughput under heavy load.  
   **Default:** 1 set by Spring Autoconfiguration, 20 set by base engine's application.yaml
@@ -85,11 +108,17 @@ Vertical scaling can be achieved through Docker, JVM, Spring Boot, or ActiveMQ c
   **Default:** 1 set by Spring Autoconfiguration, 1-10 set by base engine's application.yaml
 
 
-- **`SPRING_ACTIVEMQ_BROKER-URL` with `jms.prefetchPolicy.all` (Spring Boot/ActiveMQ):**  
+- **`SPRING_ACTIVEMQ_BROKERURL` with `jms.prefetchPolicy.all` (Spring Boot/ActiveMQ):**  
   Sets the ActiveMQ broker URL. Use this property to configure the broker connection, including prefetch policy settings.
   It controls how many messages are prefetched from the queue by each consumer before processing. A higher prefetch value can
   improve throughput but may increase memory usage. Note that raising this number might lead to starvation of concurrent consumers!  
   **Default:** `tcp://localhost:61616` (prefetch policy default is 1000 for queues)
+
+  **Note:** The T-Engines consumers should be considered as slow consumers. Processing each message can take a significant amount of time.
+  So, the prefetch size should be correctly set (based on performance tests) to distribute the messages equally across the nodes
+  and consumers. The default prefetch size of 1000 messages should be decreased, otherwise a single consumer will fetch all the
+  messages, and it will lead to performance degradation.
+
 
 ### Comprehensive Example
 
@@ -106,10 +135,21 @@ Below is a single example that combines memory limits, JVM options, concurrency,
       ACTIVEMQ_URL: nio://activemq:61616
       FILE_STORE_URL: >-
         http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
-      SPRING_ACTIVEMQ_BROKER-URL: "nio://activemq:61616?jms.prefetchPolicy.all=2000" # Increases the message prefetch
-      SPRING_ACTIVEMQ_POOL_MAX-CONNECTIONS: 100 # Increases the ActiveMQ connection pool 
+      SPRING_ACTIVEMQ_BROKERURL: "nio://activemq:61616?jms.prefetchPolicy.all=100" # Decreases the message prefetch
+      SPRING_ACTIVEMQ_POOL_MAXCONNECTIONS: 100 # Increases the ActiveMQ connection pool 
       JMS_LISTENER_CONCURRENCY: 1-100 # Increases the JMS listener concurrency
     ports:
       - "8090:8090"
 ```
 
+### Limitations
+
+- **`mem_limit` (Docker):**
+  The maximum memory assigned to the container should be carefully decided. It depends on the host machine’s RAM size, total
+  memory assigned/required to the other containers (if present) in the same host machine.
+
+
+- **`JAVA_OPTS` (JVM):**
+  JVM maximum RAM percentage to 100% of `mem_limit` is not recommended, as this can cause the JVM to use all available
+  container memory, leaving no room for other processes and potentially leading to container restarts due to out-of-memory (OOM)
+  errors.
