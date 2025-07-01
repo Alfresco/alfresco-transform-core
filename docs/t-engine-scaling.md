@@ -20,35 +20,90 @@ transform-core-aio:
     FILE_STORE_URL: >-
       http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
   ports:
-    - "8090-8091:8090" # host ports 8090 and 8091 will be used
+    - "8090-8091:8090" # Host ports 8090 and 8091 will be used
   deploy:
-    replicas: 2 # two instances of t-engine will be created
+    replicas: 2 # Two instances of t-engine will be created
 ```
 
-### Non-containerized deployment
-  An all-in-one Transform Core T-Engine is the default option for the Docker Compose. However, Kubernetes deployments with Helm
-  continue to use the five separate T-Engines to provide balanced throughput and scalability improvements. Multiple instances
-  of an individual T-Engine could be configured. An additional load balancer is required if the same T-Engine has multiple instances.
-  
-  These custom T-Engine options are:
+### Scaling of individual T-Engines
+There are options to use five separate T-Engines instead of one single `all-in-one` T-Engine. These options are:
   1. LibreOffice
   2. ImageMagick
   3. PdfRenderer
   4. Tika
   5. Misc
 
+Horizontal Scaling could be achieved for these T-Engines as well - by creating multiple Docker images for each of the T-Engines.
+
 ### Example
-  Engine configuration is part of the T-Router SpringBoot `application.yaml` config:
+LibreOffice:
 ```yaml
-transformer:
-  url:
-    imagemagick: http://imagemagick-host:8091
-    pdf_renderer: http://pdf-renderer-host:8090 # Different ports must be assigned to individual instances
-  queue:
-    imagemagick: org.alfresco.transform.engine.imagemagick.acs
-    pdf_renderer: org.alfresco.transform.engine.alfresco-pdf-renderer.acs
-  engine:
-    protocol: ${TRANSFORMER_ENGINE_PROTOCOL:jms}  # this value can be one of the following (http, jms)
+libreoffice:
+  image: quay.io/alfresco/alfresco-libreoffice:5.1.7
+  environment:
+    ACTIVEMQ_URL: nio://activemq:61616
+    FILE_STORE_URL: >-
+      http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
+  ports:
+    - "8090-8091:8090" # Host ports 8090 and 8091 will be used
+  deploy:
+    replicas: 2 # Two instances of t-engine will be created
+```
+
+ImageMagick:
+```yaml
+imagemagick:
+  image: quay.io/alfresco/alfresco-imagemagick:5.1.7
+  environment:
+    ACTIVEMQ_URL: nio://activemq:61616
+    FILE_STORE_URL: >-
+      http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
+  ports:
+    - "8091-8092:8091" # Host ports 8091 and 8092 will be used
+  deploy:
+    replicas: 2 # Two instances of t-engine will be created
+```
+
+PDF Renderer:
+```yaml
+pdf-renderer:
+  image: quay.io/alfresco/alfresco-pdf-renderer:5.1.7
+  environment:
+    ACTIVEMQ_URL: nio://activemq:61616
+    FILE_STORE_URL: >-
+      http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
+  ports:
+  - "8092-8093:8092" # Host ports 8092 and 8093 will be used
+  deploy:
+  replicas: 2 # Two instances of t-engine will be created
+```
+
+Tika:
+```yaml
+tika:
+  image: quay.io/alfresco/alfresco-tika:5.1.7
+  environment:
+    ACTIVEMQ_URL: nio://activemq:61616
+    FILE_STORE_URL: >-
+      http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
+  ports:
+  - "8093-8094:8093" # Host ports 8093 and 8094 will be used
+  deploy:
+  replicas: 2 # Two instances of t-engine will be created
+```
+
+Misc:
+```yaml
+transform-misc:
+  image: quay.io/alfresco/alfresco-transform-misc:5.1.7
+  environment:
+    ACTIVEMQ_URL: nio://activemq:61616
+    FILE_STORE_URL: >-
+      http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
+  ports:
+  - "8094-8095:8094" # Host ports 8094 and 8095 will be used
+  deploy:
+  replicas: 2 # Two instances of t-engine will be created
 ```
 
 ### Limitations
