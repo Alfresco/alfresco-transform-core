@@ -44,7 +44,7 @@ libre-office:
     FILE_STORE_URL: >-
       http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
   ports:
-    - "8201-8202:8201" # Host ports 8201 and 8202 will be used
+    - "8201-8202:8090" # Host ports 8201 and 8202 will be used
   deploy:
     replicas: 2 # Two instances of libre-office t-engine will be created
 
@@ -55,7 +55,7 @@ image-magick:
     FILE_STORE_URL: >-
       http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
   ports:
-    - "8203-8204:8203" # Host ports 8203 and 8204 will be used
+    - "8203-8204:8090" # Host ports 8203 and 8204 will be used
   deploy:
     replicas: 2 # Two instances of image-magick t-engine will be created
 
@@ -66,7 +66,7 @@ pdf-renderer:
     FILE_STORE_URL: >-
       http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
   ports:
-  - "8205-8206:8205" # Host ports 8205 and 8206 will be used
+  - "8205-8206:8090" # Host ports 8205 and 8206 will be used
   deploy:
   replicas: 2 # Two instances of pdf-renderer t-engine will be created
 
@@ -77,7 +77,7 @@ tika:
     FILE_STORE_URL: >-
       http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
   ports:
-  - "8207-8208:8207" # Host ports 8207 and 8208 will be used
+  - "8207-8208:8090" # Host ports 8207 and 8208 will be used
   deploy:
   replicas: 2 # Two instances of tika t-engine will be created
 
@@ -88,7 +88,7 @@ transform-misc:
     FILE_STORE_URL: >-
       http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
   ports:
-  - "8209-8210:8209" # Host ports 8209 and 8210 will be used
+  - "8209-8210:8090" # Host ports 8209 and 8210 will be used
   deploy:
   replicas: 2 # Two instances of transform-misc t-engine will be created
 ```
