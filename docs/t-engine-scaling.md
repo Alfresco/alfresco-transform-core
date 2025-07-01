@@ -36,36 +36,29 @@ There are options to use five separate T-Engines instead of one single `all-in-o
 Horizontal Scaling could be achieved for these T-Engines as well - by creating multiple Docker images for each of the T-Engines.
 
 ### Example
-LibreOffice:
 ```yaml
-libreoffice:
+libre-office:
   image: quay.io/alfresco/alfresco-libreoffice:5.1.7
   environment:
     ACTIVEMQ_URL: nio://activemq:61616
     FILE_STORE_URL: >-
       http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
   ports:
-    - "8090-8091:8090" # Host ports 8090 and 8091 will be used
+    - "8201-8202:8201" # Host ports 8201 and 8202 will be used
   deploy:
-    replicas: 2 # Two instances of t-engine will be created
-```
+    replicas: 2 # Two instances of libre-office t-engine will be created
 
-ImageMagick:
-```yaml
-imagemagick:
+image-magick:
   image: quay.io/alfresco/alfresco-imagemagick:5.1.7
   environment:
     ACTIVEMQ_URL: nio://activemq:61616
     FILE_STORE_URL: >-
       http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
   ports:
-    - "8091-8092:8091" # Host ports 8091 and 8092 will be used
+    - "8203-8204:8203" # Host ports 8203 and 8204 will be used
   deploy:
-    replicas: 2 # Two instances of t-engine will be created
-```
+    replicas: 2 # Two instances of image-magick t-engine will be created
 
-PdfRenderer:
-```yaml
 pdf-renderer:
   image: quay.io/alfresco/alfresco-pdf-renderer:5.1.7
   environment:
@@ -73,13 +66,10 @@ pdf-renderer:
     FILE_STORE_URL: >-
       http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
   ports:
-  - "8092-8093:8092" # Host ports 8092 and 8093 will be used
+  - "8205-8206:8205" # Host ports 8205 and 8206 will be used
   deploy:
-  replicas: 2 # Two instances of t-engine will be created
-```
+  replicas: 2 # Two instances of pdf-renderer t-engine will be created
 
-Tika:
-```yaml
 tika:
   image: quay.io/alfresco/alfresco-tika:5.1.7
   environment:
@@ -87,13 +77,10 @@ tika:
     FILE_STORE_URL: >-
       http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
   ports:
-  - "8093-8094:8093" # Host ports 8093 and 8094 will be used
+  - "8207-8208:8207" # Host ports 8207 and 8208 will be used
   deploy:
-  replicas: 2 # Two instances of t-engine will be created
-```
+  replicas: 2 # Two instances of tika t-engine will be created
 
-Misc:
-```yaml
 transform-misc:
   image: quay.io/alfresco/alfresco-transform-misc:5.1.7
   environment:
@@ -101,9 +88,9 @@ transform-misc:
     FILE_STORE_URL: >-
       http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
   ports:
-  - "8094-8095:8094" # Host ports 8094 and 8095 will be used
+  - "8209-8210:8209" # Host ports 8209 and 8210 will be used
   deploy:
-  replicas: 2 # Two instances of t-engine will be created
+  replicas: 2 # Two instances of transform-misc t-engine will be created
 ```
 
 ### Limitations
