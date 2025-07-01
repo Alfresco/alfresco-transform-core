@@ -33,7 +33,7 @@
         <!--The override can be removed when transitive (from tika) bouncycastle dependency is free of vulnerabilities-->
         <dependency.bouncycastle.version.override>1.79</dependency.bouncycastle.version.override>
 
-        <spotless-plugin.version>2.43.0</spotless-plugin.version>
+        <spotless-plugin.version>2.44.5</spotless-plugin.version>
         <!-- Do not match any files by default, but this can be overridden from the command line. -->
         <spotless-include-list>NO_AUTOMATED_FORMATTING</spotless-include-list>
 
