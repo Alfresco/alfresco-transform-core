@@ -1,11 +1,10 @@
 # T-Engine Scaling
 
 The T-Engine can be scaled both horizontally and vertically. For either approach, we recommend keeping the `TRANSFORMER_ENGINE_PROTOCOL`
-at its default value of `jms`. This setting enables the use of a JMS queue named `org.alfresco.transform.engine.aio.acs` for
-async requests in the ActiveMQ.
+at its default value of `jms`. This setting enables the use of a JMS messaging with the ActiveMQ broker.
 
 ## Horizontal Scaling
-T-Engine is intended to be run as a Docker image. Horizontal Scaling could be achieved through creating multiple Docker images.
+T-Engine is intended to be run as a Docker image. Horizontal Scaling could be achieved through creating multiple Docker containers.
 
 T-Engine relies on JMS queues, which provide built-in load balancing. This design allows you to safely run multiple instances
 of the T-Engine service. Reliable messaging ensures that each message is delivered once and only once to a consumer. In point-to-point
@@ -33,7 +32,7 @@ There are options to use five separate T-Engines instead of one single `all-in-o
   4. Tika
   5. Misc
 
-Horizontal Scaling could be achieved for these T-Engines as well - by creating multiple Docker images for each of the T-Engines.
+Horizontal Scaling could be achieved for these T-Engines as well - by creating multiple Docker containers for each of the T-Engines.
 
 ### Example
 ```yaml
@@ -110,10 +109,6 @@ transform-misc:
    ```
 -  T-Engine depends on ActiveMQ and shared-file-store. When running multiple T-Engine instances (nodes),
 same URL for ActiveMQ and shared file store must be provided to all of the T-Engine nodes.
-
--  The default port of a T-Engine is 8090. Whereas T-Router has the default Port 8095. When creating multiple docker images,
-maximum host port could be 8094, hence the maximum number of images will be 5 (8090-8084). It needs careful port re-configurations
-for either T-Router or T-Engine and their dependencies.
 
 -  In Kubernetes environments, horizontal scaling is typically handled automatically via deployments and built-in load balancing.
 In other environments, own load balancer is required in front of T-Engine to distribute requests.
