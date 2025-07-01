@@ -64,7 +64,7 @@ imagemagick:
     replicas: 2 # Two instances of t-engine will be created
 ```
 
-PDF Renderer:
+PdfRenderer:
 ```yaml
 pdf-renderer:
   image: quay.io/alfresco/alfresco-pdf-renderer:5.1.7
