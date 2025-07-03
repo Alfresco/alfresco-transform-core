@@ -21,6 +21,9 @@ server:
   port: ${SERVER_PORT:8090}
   error:
     include-message: ALWAYS
+  tomcat:
+    max-part-count: 10000
+    max-part-header-size: 8192B
 
 logging:
   level:
