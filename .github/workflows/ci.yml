@@ -38,6 +38,14 @@ jobs:
   pre_commit:
     runs-on: ubuntu-latest
     steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.26.0
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: changed-files
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v8.26.0
+        with:
+          write-list-to-env: true
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v8.26.0
 
   veracode_sca:
