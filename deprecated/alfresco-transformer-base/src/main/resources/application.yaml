@@ -5,7 +5,7 @@ spring:
       max-file-size: 8192MB
       max-request-size: 8192MB
   activemq:
-    broker-url: ${ACTIVEMQ_URL:nio://localhost:61616}?jms.watchTopicAdvisories=false
+    broker-url: ${ACTIVEMQ_URL:nio://localhost:61616}${ACTIVEMQ_CONN_OPTIONS:?jms.watchTopicAdvisories=false}
     user: ${ACTIVEMQ_USER:admin}
     password: ${ACTIVEMQ_PASSWORD:admin}
     pool:

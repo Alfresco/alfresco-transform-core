@@ -145,11 +145,11 @@ Vertical scaling can be achieved through Docker, JVM, Spring Boot, or ActiveMQ c
   **Default:** 1 set by Spring Autoconfiguration, 1-10 set by base engine's application.yaml
 
 
-- **`SPRING_ACTIVEMQ_BROKERURL` with `jms.prefetchPolicy.all` (Spring Boot/ActiveMQ):**  
-  Sets the ActiveMQ broker URL. Use this property to configure the broker connection, including prefetch policy settings.
+- **`ACTIVEMQ_CONN_OPTIONS` with `jms.prefetchPolicy.all` (Spring Boot/ActiveMQ):**  
+  Overrides the default ActiveMQ connection options of broker URL by including prefetch policy settings.
   It controls how many messages are prefetched from the queue by each consumer before processing. A higher prefetch value can
   improve throughput but may increase memory usage. Note that raising this number might lead to starvation of concurrent consumers!  
-  **Default:** `tcp://localhost:61616` (prefetch policy default is 1000 for queues)
+  **Default:** `?jms.watchTopicAdvisories=false` (prefetch policy default is 1000 for queues)
 
   **Note:** The T-Engines consumers should be considered as slow consumers. Processing each message can take a significant amount of time.
   So, the prefetch size should be correctly set (based on performance tests) to distribute the messages equally across the nodes
@@ -172,7 +172,7 @@ Below is a single example that combines memory limits, JVM options, concurrency,
       ACTIVEMQ_URL: nio://activemq:61616
       FILE_STORE_URL: >-
         http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
-      SPRING_ACTIVEMQ_BROKERURL: "nio://activemq:61616?jms.prefetchPolicy.all=100" # Decreases the message prefetch
+      ACTIVEMQ_CONN_OPTIONS: ?jms.watchTopicAdvisories=false&jms.prefetchPolicy.all=100
       SPRING_ACTIVEMQ_POOL_MAXCONNECTIONS: 100 # Increases the ActiveMQ connection pool 
       JMS_LISTENER_CONCURRENCY: 1-100 # Increases the JMS listener concurrency
     ports:
