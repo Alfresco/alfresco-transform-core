@@ -32,10 +32,7 @@
         <dependency.snakeyaml.version>2.3</dependency.snakeyaml.version>
         <!--The override can be removed when transitive (from tika) bouncycastle dependency is free of vulnerabilities-->
         <dependency.bouncycastle.version.override>1.79</dependency.bouncycastle.version.override>
-
         <spotless-plugin.version>2.44.2</spotless-plugin.version>
-        <!-- Do not match any files by default, but this can be overridden from the command line. -->
-        <spotless-include-list>NO_AUTOMATED_FORMATTING</spotless-include-list>
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
     </properties>
