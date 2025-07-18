@@ -254,23 +254,6 @@
                   <skip>${parent.core.deploy.skip}</skip>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>${spotless-plugin.version}</version>
-                <configuration>
-                    <java>
-                        <eclipse>
-                            <file>https://raw.githubusercontent.com/Alfresco/alfresco-community-repo/refs/heads/master/alfresco-formatter.xml</file>
-                        </eclipse>
-                        <importOrder>
-                            <order>\#java|\#javax|\#jakarta,\#,\#org.alfresco,java|javax|jakarta,,org.alfresco</order>
-                        </importOrder>
-                        <removeUnusedImports />
-                        <formatAnnotations />
-                    </java>
-                </configuration>
-            </plugin>
         </plugins>
 
         <pluginManagement>
@@ -388,11 +371,8 @@
                     <version>${spotless-plugin.version}</version>
                     <configuration>
                         <java>
-                            <includes>
-                                ${spotless-include-list}
-                            </includes>
                             <eclipse>
-                                <file>alfresco-formatter.xml</file>
+                                <file>https://raw.githubusercontent.com/Alfresco/alfresco-community-repo/refs/heads/master/alfresco-formatter.xml</file>
                             </eclipse>
                             <importOrder>
                                 <order>\#java|\#javax|\#jakarta,\#,\#org.alfresco,java|javax|jakarta,,org.alfresco</order>
