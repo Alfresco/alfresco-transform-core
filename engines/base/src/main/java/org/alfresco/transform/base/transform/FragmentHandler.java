@@ -26,12 +26,12 @@
  */
 package org.alfresco.transform.base.transform;
 
-import org.alfresco.transform.exceptions.TransformException;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * Separation of transform fragments logic from the {@link ProcessHandler} logic and {@link StreamHandler}.
@@ -42,8 +42,7 @@ public abstract class FragmentHandler extends StreamHandler
     private boolean noMoreFragments;
 
     protected void initTarget()
-    {
-    }
+    {}
 
     public OutputStream respondWithFragment(Integer index, boolean finished) throws IOException
     {
@@ -74,8 +73,7 @@ public abstract class FragmentHandler extends StreamHandler
     }
 
     protected void logFragment(Integer index, Long outputLength)
-    {
-    }
+    {}
 
     @Override
     protected void handleSuccessfulTransform() throws IOException

@@ -34,7 +34,7 @@ public class JacksonSerializer
     public static <T> byte[] serialize(T value) throws Exception
     {
         try (final ByteArrayOutputStream stream = new ByteArrayOutputStream(1024);
-             final OutputStreamWriter writer = new OutputStreamWriter(stream, UTF_8))
+                final OutputStreamWriter writer = new OutputStreamWriter(stream, UTF_8))
         {
             MAPPER.writer().writeValue(writer, value);
             return stream.toByteArray();

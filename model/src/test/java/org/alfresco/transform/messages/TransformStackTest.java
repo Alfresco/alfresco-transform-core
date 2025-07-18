@@ -21,16 +21,15 @@
  */
 package org.alfresco.transform.messages;
 
-import com.google.common.collect.ImmutableMap;
-import org.alfresco.transform.client.model.InternalContext;
-import org.alfresco.transform.client.model.MultiStep;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.common.TransformerDebug;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+
+import static org.alfresco.transform.messages.TransformStack.OPTIONS_LEVEL;
+import static org.alfresco.transform.messages.TransformStack.SEPARATOR;
+import static org.alfresco.transform.messages.TransformStack.TOP_STACK_LEVEL;
+import static org.alfresco.transform.messages.TransformStack.getInitialSourceReference;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -38,14 +37,17 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.alfresco.transform.messages.TransformStack.OPTIONS_LEVEL;
-import static org.alfresco.transform.messages.TransformStack.SEPARATOR;
-import static org.alfresco.transform.messages.TransformStack.TOP_STACK_LEVEL;
-import static org.alfresco.transform.messages.TransformStack.getInitialSourceReference;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
+import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import org.alfresco.transform.client.model.InternalContext;
+import org.alfresco.transform.client.model.MultiStep;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.common.TransformerDebug;
 
 class TransformStackTest
 {
@@ -401,7 +403,7 @@ class TransformStackTest
             TransformStack.Step step = TransformStack.currentStep(internalContext);
             String transformerName = step.getTransformerName();
             int depth = internalContext.getMultiStep().getTransformsToBeDone().size() - 2;
-            System.out.println(transformStepCount + "           ".substring(0, depth*2+1) + transformerName);
+            System.out.println(transformStepCount + "           ".substring(0, depth * 2 + 1) + transformerName);
             TransformStack.LevelBuilder nextLevel = TEST_LEVELS.get(transformerName);
             if (nextLevel == null)
             {
@@ -491,15 +493,16 @@ class TransformStackTest
         TransformStack.addTransformLevel(internalContext, TEST_LEVELS.get("top"));
 
         for (String value : Arrays.asList(
-                "P" + SEPARATOR + "20" + SEPARATOR + START + SEPARATOR +  "1" + STEP,
-                "P" + SEPARATOR +  "4" + SEPARATOR + "123" + SEPARATOR + "12" + STEP + STEP))
+                "P" + SEPARATOR + "20" + SEPARATOR + START + SEPARATOR + "1" + STEP,
+                "P" + SEPARATOR + "4" + SEPARATOR + "123" + SEPARATOR + "12" + STEP + STEP))
         {
             System.out.println("TransformLevel   value: " + value);
             internalContext.getMultiStep().getTransformsToBeDone().set(TOP_STACK_LEVEL, value);
             Assertions.assertNull(TransformStack.checkStructure(internalContext, "T-Reply"));
             // call a getter just in case we have missed something
             TransformStack.currentStep(internalContext);
-        };
+        }
+        ;
     }
 
     @Test
@@ -508,12 +511,13 @@ class TransformStackTest
         TransformStack.addTransformLevel(internalContext, TEST_LEVELS.get("top"));
 
         for (String value : Arrays.asList(
-                "P" + SEPARATOR + "e20" + SEPARATOR + START + SEPARATOR +  "1" + STEP))
+                "P" + SEPARATOR + "e20" + SEPARATOR + START + SEPARATOR + "1" + STEP))
         {
             System.out.println("TransformLevel   value: " + value);
             internalContext.getMultiStep().getTransformsToBeDone().set(TOP_STACK_LEVEL, value);
             Assertions.assertNull(TransformStack.checkStructure(internalContext, "T-Reply"));
-        };
+        }
+        ;
     }
 
     @Test
@@ -522,13 +526,14 @@ class TransformStackTest
         TransformStack.addTransformLevel(internalContext, TEST_LEVELS.get("top"));
 
         for (String value : Arrays.asList(
-                "P" + SEPARATOR + "x20" + SEPARATOR + START + SEPARATOR +  "1" + STEP))
+                "P" + SEPARATOR + "x20" + SEPARATOR + START + SEPARATOR + "1" + STEP))
         {
             System.out.println("TransformLevel   value: " + value);
             internalContext.getMultiStep().getTransformsToBeDone().set(TOP_STACK_LEVEL, value);
             assertEquals("T-Reply InternalContext did not have levels set correctly",
-                TransformStack.checkStructure(internalContext, "T-Reply"));
-        };
+                    TransformStack.checkStructure(internalContext, "T-Reply"));
+        }
+        ;
     }
 
     @Test
@@ -542,25 +547,25 @@ class TransformStackTest
         for (String value : Arrays.asList(
                 null,
                 "",
-                "F" + SEPARATOR + "12" + SEPARATOR + START + SEPARATOR +  "2",
-                "F" + SEPARATOR + "-1" + SEPARATOR + START + SEPARATOR +  "2" + STEP,
-                "F" + SEPARATOR +  "1" + SEPARATOR + "-3"  + SEPARATOR +  "2" + STEP,
-                "F" + SEPARATOR +  "1" + SEPARATOR + START + SEPARATOR + "-2" + STEP,
-                "F" + SEPARATOR +  "a" + SEPARATOR + START + SEPARATOR + "-2" + STEP,
-                "F" + SEPARATOR +  "1" + SEPARATOR + START + SEPARATOR +  "b" + STEP,
-                "P" + SEPARATOR +  "0" + SEPARATOR + START + SEPARATOR + "12" + SEPARATOR + "name",
-                "P" + SEPARATOR +  "0" + SEPARATOR + START + SEPARATOR + "12" + SEPARATOR + "name" + SEPARATOR + "source",
-                "P" + SEPARATOR +  "0" + SEPARATOR + START + SEPARATOR + "12" + SEPARATOR + "name" + SEPARATOR + "source" + SEPARATOR +       "",
-                "P" + SEPARATOR +  "0" + SEPARATOR + START + SEPARATOR + "12" + SEPARATOR + "name" + SEPARATOR +       "" + SEPARATOR + "target",
-                "F" + SEPARATOR + MAX_INT_PLUS_1 + SEPARATOR +            START + SEPARATOR +            "2" + STEP,
-                "F" + SEPARATOR +            "1" + SEPARATOR + MAX_LONG_PLUS_1  + SEPARATOR +            "2" + STEP,
-                "F" + SEPARATOR +            "1" + SEPARATOR +            START + SEPARATOR + MAX_INT_PLUS_1 + STEP
-                ))
+                "F" + SEPARATOR + "12" + SEPARATOR + START + SEPARATOR + "2",
+                "F" + SEPARATOR + "-1" + SEPARATOR + START + SEPARATOR + "2" + STEP,
+                "F" + SEPARATOR + "1" + SEPARATOR + "-3" + SEPARATOR + "2" + STEP,
+                "F" + SEPARATOR + "1" + SEPARATOR + START + SEPARATOR + "-2" + STEP,
+                "F" + SEPARATOR + "a" + SEPARATOR + START + SEPARATOR + "-2" + STEP,
+                "F" + SEPARATOR + "1" + SEPARATOR + START + SEPARATOR + "b" + STEP,
+                "P" + SEPARATOR + "0" + SEPARATOR + START + SEPARATOR + "12" + SEPARATOR + "name",
+                "P" + SEPARATOR + "0" + SEPARATOR + START + SEPARATOR + "12" + SEPARATOR + "name" + SEPARATOR + "source",
+                "P" + SEPARATOR + "0" + SEPARATOR + START + SEPARATOR + "12" + SEPARATOR + "name" + SEPARATOR + "source" + SEPARATOR + "",
+                "P" + SEPARATOR + "0" + SEPARATOR + START + SEPARATOR + "12" + SEPARATOR + "name" + SEPARATOR + "" + SEPARATOR + "target",
+                "F" + SEPARATOR + MAX_INT_PLUS_1 + SEPARATOR + START + SEPARATOR + "2" + STEP,
+                "F" + SEPARATOR + "1" + SEPARATOR + MAX_LONG_PLUS_1 + SEPARATOR + "2" + STEP,
+                "F" + SEPARATOR + "1" + SEPARATOR + START + SEPARATOR + MAX_INT_PLUS_1 + STEP))
         {
             System.out.println("TransformLevel   value: " + value);
             internalContext.getMultiStep().getTransformsToBeDone().set(TOP_STACK_LEVEL, value);
             assertEquals("T-Reply InternalContext did not have levels set correctly",
                     TransformStack.checkStructure(internalContext, "T-Reply"));
-        };
+        }
+        ;
     }
 }

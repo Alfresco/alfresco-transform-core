@@ -29,9 +29,11 @@ package org.alfresco.transform.libreoffice;
 
 import org.alfresco.transform.base.LivenessReadinessProbeTest;
 
-public class LibreOfficeLivenessReadinessProbeIT extends LivenessReadinessProbeTest {
+public class LibreOfficeLivenessReadinessProbeIT extends LivenessReadinessProbeTest
+{
     @Override
-    protected ImagesForTests getImageForTest() {
+    protected ImagesForTests getImageForTest()
+    {
         return new ImagesForTests("alfresco-libreoffice", "text/plain", "application/pdf", "original.txt");
     }
 }

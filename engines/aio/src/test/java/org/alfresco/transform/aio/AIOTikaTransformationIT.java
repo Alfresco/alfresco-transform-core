@@ -29,5 +29,4 @@ package org.alfresco.transform.aio;
 import org.alfresco.transform.tika.TikaTransformationIT;
 
 public class AIOTikaTransformationIT extends TikaTransformationIT
-{
-}
+{}

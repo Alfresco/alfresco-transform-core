@@ -26,16 +26,14 @@
  */
 package org.alfresco.transform.base;
 
-import org.alfresco.transform.config.TransformConfig;
-
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
+import org.alfresco.transform.config.TransformConfig;
+
 /**
- * Interface to be implemented by transform specific code. The {@code transformerName} should match the transformerName
- * in the {@link TransformConfig} returned by the {@link TransformEngine}. So that it is automatically picked up, it
- * must exist in a package under {@code org.alfresco.transform} and have the Spring {@code @Component} annotation.
+ * Interface to be implemented by transform specific code. The {@code transformerName} should match the transformerName in the {@link TransformConfig} returned by the {@link TransformEngine}. So that it is automatically picked up, it must exist in a package under {@code org.alfresco.transform} and have the Spring {@code @Component} annotation.
  *
  * Implementations may also use the {@link TransformManager} if they wish to interact with the base t-engine.
  */
@@ -44,6 +42,6 @@ public interface CustomTransformer
     String getTransformerName();
 
     void transform(String sourceMimetype, InputStream inputStream,
-                   String targetMimetype, OutputStream outputStream,
-                   Map<String, String> transformOptions, TransformManager transformManager) throws Exception;
+            String targetMimetype, OutputStream outputStream,
+            Map<String, String> transformOptions, TransformManager transformManager) throws Exception;
 }

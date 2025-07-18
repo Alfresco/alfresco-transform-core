@@ -25,10 +25,10 @@ import java.util.StringJoiner;
 import java.util.stream.Stream;
 
 /**
- * The client data supplied and echoed back to content repository (the client). May be modified to include
- * TransformerDebug.
+ * The client data supplied and echoed back to content repository (the client). May be modified to include TransformerDebug.
  */
-public class RepositoryClientData {
+public class RepositoryClientData
+{
     public static final String CLIENT_DATA_SEPARATOR = "\u23D0";
     public static final String DEBUG_SEPARATOR = "\u23D1";
     public static final String REPO_ID = "Repo";
@@ -66,23 +66,29 @@ public class RepositoryClientData {
         return isRepositoryClientData() ? split[REQUEST_ID_INDEX] : "";
     }
 
-    public String getRenditionName() {
+    public String getRenditionName()
+    {
         return isRepositoryClientData() ? split[RENDITION_INDEX] : "";
     }
 
-    public void appendDebug(String message) {
+    public void appendDebug(String message)
+    {
         if (isDebugRequested())
         {
             split[DEBUG_INDEX] += DEBUG_SEPARATOR + message;
         }
     }
 
-    public boolean isDebugRequested() {
+    public boolean isDebugRequested()
+    {
         return isRepositoryClientData() && split[9].startsWith(DEBUG);
     }
 
-    @Override public String toString() {
-        if (split == null) {
+    @Override
+    public String toString()
+    {
+        if (split == null)
+        {
             return origClientData;
         }
         StringJoiner sj = new StringJoiner(CLIENT_DATA_SEPARATOR);
@@ -90,7 +96,8 @@ public class RepositoryClientData {
         return sj.toString();
     }
 
-    public static Builder builder() {
+    public static Builder builder()
+    {
         return new Builder();
     }
 
@@ -99,14 +106,13 @@ public class RepositoryClientData {
         private final RepositoryClientData clientData = new RepositoryClientData(emptyClientData());
 
         private Builder()
-        {
-        }
+        {}
 
         private static String emptyClientData()
         {
             StringJoiner sj = new StringJoiner(CLIENT_DATA_SEPARATOR);
-            sj.add(REPO_ID+"ACS1234");
-            for (int i=0; i<EXPECTED_ELEMENTS-2; i++)
+            sj.add(REPO_ID + "ACS1234");
+            for (int i = 0; i < EXPECTED_ELEMENTS - 2; i++)
             {
                 sj.add("");
             }
@@ -116,7 +122,7 @@ public class RepositoryClientData {
 
         public Builder withRepoId(final String version)
         {
-            clientData.split[REPO_INDEX] = REPO_ID+version;
+            clientData.split[REPO_INDEX] = REPO_ID + version;
             return this;
         }
 
@@ -134,13 +140,13 @@ public class RepositoryClientData {
 
         public Builder withDebug()
         {
-            clientData.split[DEBUG_INDEX]=DEBUG;
+            clientData.split[DEBUG_INDEX] = DEBUG;
             return this;
         }
 
         public Builder withDebugMessage(final String message)
         {
-            clientData.split[DEBUG_INDEX]=DEBUG+DEBUG_SEPARATOR+message;
+            clientData.split[DEBUG_INDEX] = DEBUG + DEBUG_SEPARATOR + message;
             return this;
         }
 

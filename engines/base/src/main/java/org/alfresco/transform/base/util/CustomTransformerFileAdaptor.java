@@ -26,17 +26,16 @@
  */
 package org.alfresco.transform.base.util;
 
-import org.alfresco.transform.base.CustomTransformer;
-import org.alfresco.transform.base.TransformManager;
-
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformManager;
+
 /**
- * Helper interface for older code that uses Files rather than InputStreams and OutputStreams.
- * If you can, refactor your code to NOT use Files.
+ * Helper interface for older code that uses Files rather than InputStreams and OutputStreams. If you can, refactor your code to NOT use Files.
  */
 public interface CustomTransformerFileAdaptor extends CustomTransformer
 {

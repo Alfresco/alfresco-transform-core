@@ -21,17 +21,18 @@
  */
 package org.alfresco.transform.common;
 
-import org.junit.jupiter.api.Test;
-
-import java.util.StringJoiner;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.alfresco.transform.common.RepositoryClientData.CLIENT_DATA_SEPARATOR;
 import static org.alfresco.transform.common.RepositoryClientData.DEBUG;
 import static org.alfresco.transform.common.RepositoryClientData.DEBUG_SEPARATOR;
 import static org.alfresco.transform.common.RepositoryClientData.REPO_ID;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.StringJoiner;
+
+import org.junit.jupiter.api.Test;
 
 public class RepositoryClientDataTest
 {
@@ -41,11 +42,11 @@ public class RepositoryClientDataTest
     void AcsClientDataWithDebugTest()
     {
         repositoryClientData = RepositoryClientData.builder()
-                                   .withRepoId("ACS1234")
-                                   .withRenditionName("renditionName")
-                                   .withRequestId("e123")
-                                   .withDebug()
-                                   .build();
+                .withRepoId("ACS1234")
+                .withRenditionName("renditionName")
+                .withRequestId("e123")
+                .withDebug()
+                .build();
         String clientData = repositoryClientData.toString();
 
         assertEquals("ACS1234", repositoryClientData.getAcsVersion());
@@ -59,17 +60,17 @@ public class RepositoryClientDataTest
     void AcsClientDataWithoutDebugTest()
     {
         String clientData = new StringJoiner(CLIENT_DATA_SEPARATOR)
-            .add(REPO_ID + "ACS1234")
-            .add("1")
-            .add("renditionName")
-            .add("3")
-            .add("4")
-            .add("5")
-            .add("54321")
-            .add("7")
-            .add("8")
-            .add("9")
-            .toString();
+                .add(REPO_ID + "ACS1234")
+                .add("1")
+                .add("renditionName")
+                .add("3")
+                .add("4")
+                .add("5")
+                .add("54321")
+                .add("7")
+                .add("8")
+                .add("9")
+                .toString();
         repositoryClientData = new RepositoryClientData(clientData);
 
         assertEquals("ACS1234", repositoryClientData.getAcsVersion());
@@ -83,17 +84,17 @@ public class RepositoryClientDataTest
     void noLeadingRepoTest()
     {
         String clientData = new StringJoiner(CLIENT_DATA_SEPARATOR)
-            .add("ACS1234")
-            .add("1")
-            .add("renditionName")
-            .add("3")
-            .add("4")
-            .add("5")
-            .add("54321")
-            .add("7")
-            .add("8")
-            .add("9")
-            .toString();
+                .add("ACS1234")
+                .add("1")
+                .add("renditionName")
+                .add("3")
+                .add("4")
+                .add("5")
+                .add("54321")
+                .add("7")
+                .add("8")
+                .add("9")
+                .toString();
         repositoryClientData = new RepositoryClientData(clientData);
 
         assertEquals("", repositoryClientData.getAcsVersion());
@@ -107,16 +108,16 @@ public class RepositoryClientDataTest
     void tooFewElementsTest()
     {
         String clientData = new StringJoiner(CLIENT_DATA_SEPARATOR)
-            .add(REPO_ID + "ACS1234")
-            .add("1")
-            .add("renditionName")
-            .add("3")
-            .add("4")
-            .add("5")
-            .add("54321")
-            .add("7")
-            .add("8")
-            .toString();
+                .add(REPO_ID + "ACS1234")
+                .add("1")
+                .add("renditionName")
+                .add("3")
+                .add("4")
+                .add("5")
+                .add("54321")
+                .add("7")
+                .add("8")
+                .toString();
         repositoryClientData = new RepositoryClientData(clientData);
 
         assertEquals("", repositoryClientData.getAcsVersion());
@@ -130,18 +131,18 @@ public class RepositoryClientDataTest
     void tooManyElementsTest()
     {
         String clientData = new StringJoiner(CLIENT_DATA_SEPARATOR)
-            .add(REPO_ID + "ACS1234")
-            .add("1")
-            .add("renditionName")
-            .add("3")
-            .add("4")
-            .add("5")
-            .add("54321")
-            .add("7")
-            .add("8")
-            .add(DEBUG)
-            .add("10")
-            .toString();
+                .add(REPO_ID + "ACS1234")
+                .add("1")
+                .add("renditionName")
+                .add("3")
+                .add("4")
+                .add("5")
+                .add("54321")
+                .add("7")
+                .add("8")
+                .add(DEBUG)
+                .add("10")
+                .toString();
         repositoryClientData = new RepositoryClientData(clientData);
         assertEquals("", repositoryClientData.getAcsVersion());
         assertEquals("", repositoryClientData.getRenditionName());
@@ -169,27 +170,27 @@ public class RepositoryClientDataTest
     void debugTest()
     {
         String clientData = new StringJoiner(CLIENT_DATA_SEPARATOR)
-            .add(REPO_ID + "ACS1234")
-            .add("1")
-            .add("2")
-            .add("3")
-            .add("4")
-            .add("5")
-            .add("6")
-            .add("7")
-            .add("8")
-            .add(DEBUG)
-            .toString();
+                .add(REPO_ID + "ACS1234")
+                .add("1")
+                .add("2")
+                .add("3")
+                .add("4")
+                .add("5")
+                .add("6")
+                .add("7")
+                .add("8")
+                .add(DEBUG)
+                .toString();
         repositoryClientData = new RepositoryClientData(clientData);
 
         assertEquals(clientData, repositoryClientData.toString());
 
         repositoryClientData.appendDebug("Some debug");
-        assertEquals(clientData+DEBUG_SEPARATOR+"Some debug",
-            repositoryClientData.toString());
+        assertEquals(clientData + DEBUG_SEPARATOR + "Some debug",
+                repositoryClientData.toString());
 
         repositoryClientData.appendDebug("Some other debug");
-        assertEquals(clientData+DEBUG_SEPARATOR+"Some debug"+DEBUG_SEPARATOR+"Some other debug",
-            repositoryClientData.toString());
+        assertEquals(clientData + DEBUG_SEPARATOR + "Some debug" + DEBUG_SEPARATOR + "Some other debug",
+                repositoryClientData.toString());
     }
 }

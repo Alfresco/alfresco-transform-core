@@ -30,8 +30,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Transform Configuration with multiple {@link Transformer}s and {@link TransformOption}s.
- * It can be used for one or more Transformers.
+ * Transform Configuration with multiple {@link Transformer}s and {@link TransformOption}s. It can be used for one or more Transformers.
  */
 public class TransformConfig
 {
@@ -122,10 +121,12 @@ public class TransformConfig
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         TransformConfig that = (TransformConfig) o;
-        return  transformOptions.equals(that.transformOptions) &&
+        return transformOptions.equals(that.transformOptions) &&
                 transformers.equals(that.transformers) &&
                 removeTransformers.equals(that.removeTransformers) &&
                 addSupported.equals(that.addSupported) &&
@@ -145,9 +146,9 @@ public class TransformConfig
     public String toString()
     {
         return "TransformConfig{" +
-               "transformOptions=" + transformOptions +
-               ", transformers=" + transformers +
-               '}';
+                "transformOptions=" + transformOptions +
+                ", transformers=" + transformers +
+                '}';
     }
 
     public static Builder builder()
@@ -159,7 +160,8 @@ public class TransformConfig
     {
         private final TransformConfig transformConfig = new TransformConfig();
 
-        private Builder() {}
+        private Builder()
+        {}
 
         public TransformConfig build()
         {

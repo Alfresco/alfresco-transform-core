@@ -21,50 +21,40 @@
  */
 package org.alfresco.transform.messages;
 
-import org.alfresco.transform.client.model.InternalContext;
-import org.alfresco.transform.client.model.MultiStep;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.common.TransformerDebug;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import org.apache.commons.lang3.StringUtils;
+
+import org.alfresco.transform.client.model.InternalContext;
+import org.alfresco.transform.client.model.MultiStep;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.common.TransformerDebug;
+
 /**
- * Represents the current state of a top level transform request in terms of its current nested call stack, which is
- * the current transform step being performed and what other transform steps are still to be executed in the current
- * level. This information is encoded in the {@link MultiStep} structure of the
- * internal context passed between T-Router and T-Engines. Ideally we would have changed the structure,
- * but for backward compatibility we are using the existing structure, which allows T-Engines that were developed
- * previously to be used unchanged.<p><br/>
+ * Represents the current state of a top level transform request in terms of its current nested call stack, which is the current transform step being performed and what other transform steps are still to be executed in the current level. This information is encoded in the {@link MultiStep} structure of the internal context passed between T-Router and T-Engines. Ideally we would have changed the structure, but for backward compatibility we are using the existing structure, which allows T-Engines that were developed previously to be used unchanged.
+ * <p>
+ * <br/>
  *
- * Originally the T-Router only allowed pipeline and single step transforms, so it was possible to represent them as a
- * flat list. However the original design was of a nested structure. Pipelines are just one example, with failover
- * transforms being the other. To bring the T-Router up to the same level of functionality as the Repository, it too
- * needs to support nested transforms. <p><br/>
+ * Originally the T-Router only allowed pipeline and single step transforms, so it was possible to represent them as a flat list. However the original design was of a nested structure. Pipelines are just one example, with failover transforms being the other. To bring the T-Router up to the same level of functionality as the Repository, it too needs to support nested transforms.
+ * <p>
+ * <br/>
  *
- * <li>@{code transformsToBeDone[0]} holds the original Transformer Request Options as a list of key values pairs.
- *     Needed so that we don't lose values as we walk down the individual transform steps</li>
- * <li>@{code transformsToBeDone[1]} holds the original source reference so that we don't delete the original source
- *     until the whole transform is known to be successful, so that a queue entry may be retried on failure.</li>
+ * <li>@{code transformsToBeDone[0]} holds the original Transformer Request Options as a list of key values pairs. Needed so that we don't lose values as we walk down the individual transform steps</li>
+ * <li>@{code transformsToBeDone[1]} holds the original source reference so that we don't delete the original source until the whole transform is known to be successful, so that a queue entry may be retried on failure.</li>
  * <li>@{code transformsToBeDone[2]} holds information about the top level transform</li>
  * <li>@{code transformsToBeDone[size()-1]} holds information about the most nested transform being processed</li>
- * <li>Each level contains a list of step transforms. Just one for a singe step transform or a list for pipeline and
- *     failover transforms</li>
- * <li>When a step is processed it will result in the creation of another level if it is a pipeline or failover
- *     transform</li>
+ * <li>Each level contains a list of step transforms. Just one for a singe step transform or a list for pipeline and failover transforms</li>
+ * <li>When a step is processed it will result in the creation of another level if it is a pipeline or failover transform</li>
  * <li>As steps are completed, they are removed</li>
  * <li>When there are no steps left in a level the level is removed</li>
  *
- * Each level is represented by a String with a pipeline or failover flag @{code 'P'|'F'} followed by a step counter
- * and start time used in debug, a retry count and a sequence of transform steps. Each step is made up of three parts:
- * @{code<transformerName>|<sourceMimetype>|<targetMimetype> . All fields are separated by a @code{'\u23D0'} character.
- * The last step in the sequence is the current transform being performed. The top level transform is a pipeline of
- * one step. Although the source and target mimetypes are always the same for failover transforms, they use the same
- * structure.
+ * Each level is represented by a String with a pipeline or failover flag @{code 'P'|'F'} followed by a step counter and start time used in debug, a retry count and a sequence of transform steps. Each step is made up of three parts:
+ * 
+ * @{code<transformerName>|<sourceMimetype>|<targetMimetype> . All fields are separated by a @code{'\u23D0'} character. The last step in the sequence is the current transform being performed. The top level transform is a pipeline of one step. Although the source and target mimetypes are always the same for failover transforms, they use the same structure.
  */
 public class TransformStack
 {
@@ -84,7 +74,7 @@ public class TransformStack
     private static final int RETRY_INDEX = 3;
 
     private static final int FIELDS_IN_HEADER = 4; // flag | counter | retry
-    private static final int FIELDS_PER_STEP  = 3; // name | source | target
+    private static final int FIELDS_PER_STEP = 3; // name | source | target
 
     public static LevelBuilder levelBuilder(String flag)
     {
@@ -116,7 +106,7 @@ public class TransformStack
             stringJoiner.add("1");
             stringJoiner.add("0");
             stringJoiner.add("0");
-            for (int i=reverseOrderStepElements.size()-1; i>=0; i--)
+            for (int i = reverseOrderStepElements.size() - 1; i >= 0; i--)
             {
                 stringJoiner.add(reverseOrderStepElements.get(i));
             }
@@ -150,11 +140,11 @@ public class TransformStack
     }
 
     public static void setInitialTransformRequestOptions(InternalContext internalContext,
-                                                         Map<String, String> transformRequestOptions)
+            Map<String, String> transformRequestOptions)
     {
         init(internalContext);
         StringJoiner sj = new StringJoiner(SEPARATOR);
-        transformRequestOptions.forEach((key,value)-> sj.add(key).add(value));
+        transformRequestOptions.forEach((key, value) -> sj.add(key).add(value));
         levels(internalContext).set(OPTIONS_LEVEL, sj.toString());
     }
 
@@ -170,13 +160,13 @@ public class TransformStack
 
         // To avoid the case where split() discards the last value, when it is a zero length string, we add and remove
         // a space. None of the keys or value may be null.
-        String[] split = (level(internalContext, OPTIONS_LEVEL)+' ').split(SEPARATOR_REGEX);
+        String[] split = (level(internalContext, OPTIONS_LEVEL) + ' ').split(SEPARATOR_REGEX);
         String lastValue = split[split.length - 1];
-        split[split.length-1] = lastValue.substring(0, lastValue.length()-1);
+        split[split.length - 1] = lastValue.substring(0, lastValue.length() - 1);
 
-        for (int i = split.length-2; i >= 0; i-=2)
+        for (int i = split.length - 2; i >= 0; i -= 2)
         {
-            transformRequestOptions.put(split[i], split[i+1]);
+            transformRequestOptions.put(split[i], split[i + 1]);
         }
         return transformRequestOptions;
     }
@@ -198,7 +188,7 @@ public class TransformStack
 
     private static void init(InternalContext internalContext)
     {
-        while(levels(internalContext).size() < TOP_STACK_LEVEL)
+        while (levels(internalContext).size() < TOP_STACK_LEVEL)
         {
             levels(internalContext).add(null);
         }
@@ -220,9 +210,9 @@ public class TransformStack
     {
 
         int levelsLeft = levels(internalContext).size() - TOP_STACK_LEVEL;
-        return  levelsLeft <= 0 || // there has been an error, so we have lost the stack
+        return levelsLeft <= 0 || // there has been an error, so we have lost the stack
                 levelsLeft == 1 && // on top level wrapper level
-                isTransformLevelFinished(internalContext); // the one step has been processed (removed)
+                        isTransformLevelFinished(internalContext); // the one step has been processed (removed)
 
     }
 
@@ -238,7 +228,7 @@ public class TransformStack
 
     public static void incrementReference(InternalContext internalContext)
     {
-        setHeaderField(internalContext, REFERENCE_INDEX, Integer.toString(getReferenceCounter(internalContext)+1));
+        setHeaderField(internalContext, REFERENCE_INDEX, Integer.toString(getReferenceCounter(internalContext) + 1));
     }
 
     public static void resetAttemptedRetries(InternalContext internalContext)
@@ -253,7 +243,7 @@ public class TransformStack
 
     public static void incrementAttemptedRetries(InternalContext internalContext)
     {
-        setHeaderField(internalContext, RETRY_INDEX,getAttemptedRetries(internalContext)+1);
+        setHeaderField(internalContext, RETRY_INDEX, getAttemptedRetries(internalContext) + 1);
     }
 
     private static void setHeaderField(InternalContext internalContext, int index, long value)
@@ -265,17 +255,17 @@ public class TransformStack
     {
         List<String> levels = levels(internalContext);
         int size = levels.size();
-        String level = levels.get(size-1);
+        String level = levels.get(size - 1);
         int j = indexOfField(level, index);
-        int k = level.indexOf(SEPARATOR, j+1);
-        levels.set(size-1, level.substring(0, j) + value + level.substring(k));
+        int k = level.indexOf(SEPARATOR, j + 1);
+        levels.set(size - 1, level.substring(0, j) + value + level.substring(k));
     }
 
     public static String getReference(InternalContext internalContext)
     {
         StringJoiner ref = new StringJoiner(".");
         List<String> levels = levels(internalContext);
-        for (int i=TOP_STACK_LEVEL; i<levels.size(); i++)
+        for (int i = TOP_STACK_LEVEL; i < levels.size(); i++)
         {
             ref.add(getHeaderFieldString(levels.get(i), REFERENCE_INDEX));
         }
@@ -284,7 +274,7 @@ public class TransformStack
 
     public static void setReferenceInADummyTopLevelIfUnset(InternalContext internalContext, String reference)
     {
-        if (!reference.isBlank() && getReference(internalContext).isBlank() ) // When top transform level not set
+        if (!reference.isBlank() && getReference(internalContext).isBlank()) // When top transform level not set
         {
             init(internalContext);
             addTransformLevel(internalContext, levelBuilder(PIPELINE_FLAG));
@@ -325,7 +315,7 @@ public class TransformStack
     public static void removeTransformLevel(InternalContext internalContext)
     {
         List<String> levels = levels(internalContext);
-        levels.remove(levels.size()-1);
+        levels.remove(levels.size() - 1);
     }
 
     public static void removeRemainingTransformLevels(TransformReply reply, TransformerDebug transformerDebug)
@@ -370,7 +360,7 @@ public class TransformStack
 
     private static int getStepCount(InternalContext internalContext)
     {
-        return (StringUtils.countMatches(currentLevel(internalContext), SEPARATOR)+1-FIELDS_IN_HEADER)/FIELDS_PER_STEP;
+        return (StringUtils.countMatches(currentLevel(internalContext), SEPARATOR) + 1 - FIELDS_IN_HEADER) / FIELDS_PER_STEP;
     }
 
     public static void removeSuccessfulStep(TransformReply reply, TransformerDebug transformerDebug)
@@ -384,7 +374,7 @@ public class TransformStack
     }
 
     private static void removeFinishedSteps(TransformReply reply, boolean successful,
-                                            TransformerDebug transformerDebug)
+            TransformerDebug transformerDebug)
     {
         TransformStack.removeStep(reply, successful, transformerDebug);
 
@@ -414,8 +404,8 @@ public class TransformStack
         // remove one step as it was a successful pipeline step or an unsuccessful failover step
         List<String> levels = levels(internalContext);
         int size = levels.size();
-        String level = levels.get(size-1);
-        levels.set(size-1, level.substring(0,
+        String level = levels.get(size - 1);
+        levels.set(size - 1, level.substring(0,
                 (successfulFailoverStep || unsuccessfulPipelineStep ? indexOfLastStep(level) : indexOfNextStep(level)) - 1));
 
         if (!isTransformLevelFinished(internalContext))
@@ -426,12 +416,12 @@ public class TransformStack
 
     private static int indexOfNextStep(String level)
     {
-        int j = level.length()-1;
+        int j = level.length() - 1;
         for (int i = FIELDS_PER_STEP; i >= 1 && j > 0; i--)
         {
-            j = level.lastIndexOf(SEPARATOR, j-1);
+            j = level.lastIndexOf(SEPARATOR, j - 1);
         }
-        return j+1;
+        return j + 1;
     }
 
     private static int indexOfLastStep(String level)
@@ -444,23 +434,23 @@ public class TransformStack
         int j = 0;
         for (int i = n; i >= 1; i--)
         {
-            j = level.indexOf(SEPARATOR, j+1);
+            j = level.indexOf(SEPARATOR, j + 1);
         }
-        return j+1;
+        return j + 1;
     }
 
     public static String checkStructure(InternalContext internalContext, String type)
     {
         // A null value will have been replaced with an empty array, so no need to check for that.
         String errorMessage = levels(internalContext).size() < (TOP_STACK_LEVEL + 1)
-                ? type+" InternalContext did not have the Stack set"
+                ? type + " InternalContext did not have the Stack set"
                 : !validTransformOptions(internalContext)
-                ? type+" InternalContext did not have the TransformOptions set correctly"
-                : levels(internalContext).size() == 1
-                ? type+" InternalContext levels were not set"
-                : !validLevels(levels(internalContext))
-                ? type+" InternalContext did not have levels set correctly"
-                : null;
+                        ? type + " InternalContext did not have the TransformOptions set correctly"
+                        : levels(internalContext).size() == 1
+                                ? type + " InternalContext levels were not set"
+                                : !validLevels(levels(internalContext))
+                                        ? type + " InternalContext did not have levels set correctly"
+                                        : null;
         return errorMessage;
     }
 
@@ -476,11 +466,11 @@ public class TransformStack
             return true;
         }
         String[] split = keysAndValues.split(SEPARATOR_REGEX);
-        if (split.length%2 != 0)
+        if (split.length % 2 != 0)
         {
             return false;
         }
-        for (int i = split.length-2; i >= 0; i-=2)
+        for (int i = split.length - 2; i >= 0; i -= 2)
         {
             if (split[i].isEmpty())
             {
@@ -492,7 +482,7 @@ public class TransformStack
 
     private static boolean validLevels(List<String> levels)
     {
-        for (int i=levels.size()-1; i >=TOP_STACK_LEVEL; i--)
+        for (int i = levels.size() - 1; i >= TOP_STACK_LEVEL; i--)
         {
             String level = levels.get(i);
             if (!validLevel(level))
@@ -510,18 +500,19 @@ public class TransformStack
             return false;
         }
         String[] split = level.split(SEPARATOR_REGEX);
-        if (split.length   <  FIELDS_IN_HEADER+FIELDS_PER_STEP || // must be at least 1 step
-            (split.length-FIELDS_IN_HEADER)%FIELDS_PER_STEP != 0 ||
-            (!PIPELINE_FLAG.equals(split[FLAG_INDEX]) &&
-             !FAILOVER_FLAG.equals(split[FLAG_INDEX])) ||
-            !aValidReference(split[REFERENCE_INDEX]) ||
-            !aPositiveLong(split[START_INDEX]) ||
-            !aPositiveInt(split[RETRY_INDEX]))
+        if (split.length < FIELDS_IN_HEADER + FIELDS_PER_STEP || // must be at least 1 step
+                (split.length - FIELDS_IN_HEADER) % FIELDS_PER_STEP != 0 ||
+                (!PIPELINE_FLAG.equals(split[FLAG_INDEX]) &&
+                        !FAILOVER_FLAG.equals(split[FLAG_INDEX]))
+                ||
+                !aValidReference(split[REFERENCE_INDEX]) ||
+                !aPositiveLong(split[START_INDEX]) ||
+                !aPositiveInt(split[RETRY_INDEX]))
         {
             return false;
         }
 
-        for (int i=split.length-1; i>=FIELDS_IN_HEADER; i--)
+        for (int i = split.length - 1; i >= FIELDS_IN_HEADER; i--)
         {
             if (split[i].isBlank())
             {

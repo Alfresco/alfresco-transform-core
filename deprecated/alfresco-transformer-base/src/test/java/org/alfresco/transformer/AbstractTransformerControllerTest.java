@@ -26,38 +26,26 @@
  */
 package org.alfresco.transformer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import org.alfresco.transform.client.model.InternalContext;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.config.SupportedSourceAndTarget;
-import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.config.TransformOption;
-import org.alfresco.transform.config.TransformOptionGroup;
-import org.alfresco.transform.config.TransformOptionValue;
-import org.alfresco.transform.config.Transformer;
-import org.alfresco.transform.messages.TransformStack;
-import org.alfresco.transform.registry.TransformServiceRegistry;
-import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
-import org.alfresco.transformer.model.FileRefEntity;
-import org.alfresco.transformer.model.FileRefResponse;
-import org.alfresco.transformer.probes.ProbeTestTransform;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG_LATEST;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -70,34 +58,42 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG_LATEST;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.ACCEPT;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import org.alfresco.transform.client.model.InternalContext;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.config.SupportedSourceAndTarget;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.TransformOption;
+import org.alfresco.transform.config.TransformOptionGroup;
+import org.alfresco.transform.config.TransformOptionValue;
+import org.alfresco.transform.config.Transformer;
+import org.alfresco.transform.messages.TransformStack;
+import org.alfresco.transform.registry.TransformServiceRegistry;
+import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
+import org.alfresco.transformer.probes.ProbeTestTransform;
 
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * Super class for testing controllers without a server. Includes tests for the AbstractTransformerController itself.
+ *             Super class for testing controllers without a server. Includes tests for the AbstractTransformerController itself.
  */
 @Deprecated
 public abstract class AbstractTransformerControllerTest
@@ -135,44 +131,46 @@ public abstract class AbstractTransformerControllerTest
     /**
      * The expected result. Taken resting target quick file's bytes.
      *
-     * Note: These checks generally don't work on Windows (Mac and Linux are okay). Possibly to do with byte order
-     * loading.
+     * Note: These checks generally don't work on Windows (Mac and Linux are okay). Possibly to do with byte order loading.
      */
     protected byte[] expectedTargetFileBytes;
 
     // Called by sub class
     protected abstract void mockTransformCommand(String sourceExtension,
-        String targetExtension, String sourceMimetype,
-        boolean readTargetFileBytes) throws IOException;
+            String targetExtension, String sourceMimetype,
+            boolean readTargetFileBytes) throws IOException;
 
     protected abstract AbstractTransformerController getController();
 
     protected abstract void updateTransformRequestWithSpecificOptions(
-        TransformRequest transformRequest);
+            TransformRequest transformRequest);
 
     /**
-     * This method ends up being the core of the mock.
-     * It copies content from an existing file in the resources folder to the desired location
-     * in order to simulate a successful transformation.
+     * This method ends up being the core of the mock. It copies content from an existing file in the resources folder to the desired location in order to simulate a successful transformation.
      *
-     * @param actualTargetExtension Requested extension.
-     * @param testFile              The test file (transformed) - basically the result.
-     * @param targetFile            The location where the content from the testFile should be copied
-     * @throws IOException in case of any errors.
+     * @param actualTargetExtension
+     *            Requested extension.
+     * @param testFile
+     *            The test file (transformed) - basically the result.
+     * @param targetFile
+     *            The location where the content from the testFile should be copied
+     * @throws IOException
+     *             in case of any errors.
      */
     void generateTargetFileFromResourceFile(String actualTargetExtension, File testFile,
-        File targetFile) throws IOException
+            File targetFile) throws IOException
     {
         if (testFile != null)
         {
             try (var inputStream = new FileInputStream(testFile);
-                    var outputStream = new FileOutputStream(targetFile)) 
+                    var outputStream = new FileOutputStream(targetFile))
             {
                 FileChannel source = inputStream.getChannel();
                 FileChannel target = outputStream.getChannel();
                 target.transferFrom(source, 0, source.size());
 
-            } catch (Exception e) 
+            }
+            catch (Exception e)
             {
                 throw e;
             }
@@ -183,13 +181,14 @@ public abstract class AbstractTransformerControllerTest
             if (testFile != null)
             {
                 try (var inputStream = new FileInputStream(testFile);
-                        var outputStream = new FileOutputStream(targetFile)) 
+                        var outputStream = new FileOutputStream(targetFile))
                 {
                     FileChannel source = inputStream.getChannel();
                     FileChannel target = outputStream.getChannel();
                     target.transferFrom(source, 0, source.size());
 
-                } catch (Exception e) 
+                }
+                catch (Exception e)
                 {
                     throw e;
                 }
@@ -213,11 +212,11 @@ public abstract class AbstractTransformerControllerTest
                     " does not exist in the resources directory");
         }
         // added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test resource duplication
-        if (testFileUrl!=null)
+        if (testFileUrl != null)
         {
             // Each use of the tempDir should result in a unique directory being used
             testFile = new File(tempDir, testFilename);
-            Files.copy(classLoader.getResourceAsStream(testFilename), testFile.toPath(),REPLACE_EXISTING);
+            Files.copy(classLoader.getResourceAsStream(testFilename), testFile.toPath(), REPLACE_EXISTING);
         }
 
         return testFileUrl == null ? null : testFile;
@@ -236,7 +235,7 @@ public abstract class AbstractTransformerControllerTest
     }
 
     private MockHttpServletRequestBuilder mockMvcRequestWithoutMockMultipartFile(String url,
-                                                           String... params)
+            String... params)
     {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM);
 
@@ -253,10 +252,10 @@ public abstract class AbstractTransformerControllerTest
     }
 
     private MockHttpServletRequestBuilder mockMvcRequestWithMockMultipartFile(String url, MockMultipartFile sourceFile,
-        String... params)
+            String... params)
     {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM).file(
-            sourceFile);
+                sourceFile);
 
         if (params.length % 2 != 0)
         {
@@ -298,11 +297,11 @@ public abstract class AbstractTransformerControllerTest
     public void simpleTransformTest() throws Exception
     {
         mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
-               .andExpect(status().is(OK.value()))
-               .andExpect(content().bytes(expectedTargetFileBytes))
-               .andExpect(header().string("Content-Disposition",
-                   "attachment; filename*= UTF-8''quick." + targetExtension));
+                mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
+                .andExpect(status().is(OK.value()))
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*= UTF-8''quick." + targetExtension));
     }
 
     @Test
@@ -310,22 +309,22 @@ public abstract class AbstractTransformerControllerTest
     {
         long start = System.currentTimeMillis();
         mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension,
-            "testDelay", "400"))
-               .andExpect(status().is(OK.value()))
-               .andExpect(content().bytes(expectedTargetFileBytes))
-               .andExpect(header().string("Content-Disposition",
-                   "attachment; filename*= UTF-8''quick." + targetExtension));
+                "testDelay", "400"))
+                .andExpect(status().is(OK.value()))
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*= UTF-8''quick." + targetExtension));
         long ms = System.currentTimeMillis() - start;
         System.out.println("Transform incluing test delay was " + ms);
         assertTrue(ms >= 400, "Delay sending the result back was too small " + ms);
-        assertTrue(ms <= 500,"Delay sending the result back was too big " + ms);
+        assertTrue(ms <= 500, "Delay sending the result back was too big " + ms);
     }
 
     @Test
     public void noTargetFileTest() throws Exception
     {
         mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", "xxx"))
-               .andExpect(status().is(INTERNAL_SERVER_ERROR.value()));
+                .andExpect(status().is(INTERNAL_SERVER_ERROR.value()));
     }
 
     @Test
@@ -333,14 +332,14 @@ public abstract class AbstractTransformerControllerTest
     public void dotDotSourceFilenameTest() throws Exception
     {
         sourceFile = new MockMultipartFile("file", "../quick." + sourceExtension, sourceMimetype,
-            expectedSourceFileBytes);
+                expectedSourceFileBytes);
 
         mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
-               .andExpect(status().is(OK.value()))
-               .andExpect(content().bytes(expectedTargetFileBytes))
-               .andExpect(header().string("Content-Disposition",
-                   "attachment; filename*= UTF-8''quick." + targetExtension));
+                mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
+                .andExpect(status().is(OK.value()))
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*= UTF-8''quick." + targetExtension));
     }
 
     @Test
@@ -348,14 +347,14 @@ public abstract class AbstractTransformerControllerTest
     public void noExtensionSourceFilenameTest() throws Exception
     {
         sourceFile = new MockMultipartFile("file", "../quick", sourceMimetype,
-            expectedSourceFileBytes);
+                expectedSourceFileBytes);
 
         mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
-               .andExpect(status().is(OK.value()))
-               .andExpect(content().bytes(expectedTargetFileBytes))
-               .andExpect(header().string("Content-Disposition",
-                   "attachment; filename*= UTF-8''quick." + targetExtension));
+                mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
+                .andExpect(status().is(OK.value()))
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*= UTF-8''quick." + targetExtension));
     }
 
     @Test
@@ -365,9 +364,9 @@ public abstract class AbstractTransformerControllerTest
         sourceFile = new MockMultipartFile("file", "abc/", sourceMimetype, expectedSourceFileBytes);
 
         mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
-               .andExpect(status().is(BAD_REQUEST.value()))
-               .andExpect(status().reason(containsString("The source filename was not supplied")));
+                mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
+                .andExpect(status().is(BAD_REQUEST.value()))
+                .andExpect(status().reason(containsString("The source filename was not supplied")));
     }
 
     @Test
@@ -376,17 +375,17 @@ public abstract class AbstractTransformerControllerTest
         sourceFile = new MockMultipartFile("file", "", sourceMimetype, expectedSourceFileBytes);
 
         mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
-               .andExpect(status().is(BAD_REQUEST.value()));
+                mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", targetExtension))
+                .andExpect(status().is(BAD_REQUEST.value()));
     }
 
     @Test
     public void noTargetExtensionTest() throws Exception
     {
         mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
-               .andExpect(status().is(BAD_REQUEST.value()))
-               .andExpect(status().reason(
-                   containsString("Request parameter 'targetExtension' is missing")));
+                .andExpect(status().is(BAD_REQUEST.value()))
+                .andExpect(status().reason(
+                        containsString("Request parameter 'targetExtension' is missing")));
     }
 
     @Test
@@ -396,14 +395,14 @@ public abstract class AbstractTransformerControllerTest
         probeTestTransform.setLivenessPercent(110);
 
         long[][] values = new long[][]{
-            {5000, 0, Long.MAX_VALUE}, // 1st transform is ignored
-            {1000, 1000, 2100},        // 1000 + 1000*1.1
-            {3000, 2000, 4200},        // 2000 + 2000*1.1
-            {2000, 2000, 4200},
-            {6000, 3000, 6300},
-            {8000, 4000, 8400},
-            {4444, 4000, 8400},        // no longer in the first few, so normal and max times don't change
-            {5555, 4000, 8400}
+                {5000, 0, Long.MAX_VALUE}, // 1st transform is ignored
+                {1000, 1000, 2100}, // 1000 + 1000*1.1
+                {3000, 2000, 4200}, // 2000 + 2000*1.1
+                {2000, 2000, 4200},
+                {6000, 3000, 6300},
+                {8000, 4000, 8400},
+                {4444, 4000, 8400}, // no longer in the first few, so normal and max times don't change
+                {5555, 4000, 8400}
         };
 
         for (long[] v : values)
@@ -427,16 +426,16 @@ public abstract class AbstractTransformerControllerTest
         // Serialize and call the transformer
         String tr = objectMapper.writeValueAsString(transformRequest);
         String transformationReplyAsString = mockMvc
-            .perform(MockMvcRequestBuilders
-                .post(ENDPOINT_TRANSFORM)
-                .header(ACCEPT, APPLICATION_JSON_VALUE)
-                .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .content(tr))
-            .andExpect(status().is(BAD_REQUEST.value()))
-            .andReturn().getResponse().getContentAsString();
+                .perform(MockMvcRequestBuilders
+                        .post(ENDPOINT_TRANSFORM)
+                        .header(ACCEPT, APPLICATION_JSON_VALUE)
+                        .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                        .content(tr))
+                .andExpect(status().is(BAD_REQUEST.value()))
+                .andReturn().getResponse().getContentAsString();
 
         TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,
-            TransformReply.class);
+                TransformReply.class);
 
         // Assert the reply
         assertEquals(BAD_REQUEST.value(), transformReply.getStatus());
@@ -455,8 +454,8 @@ public abstract class AbstractTransformerControllerTest
     public void testGetTransformConfigInfo() throws Exception
     {
         TransformConfig expectedTransformConfig = objectMapper
-            .readValue(getTestFile(getEngineConfigName(), true),
-                TransformConfig.class);
+                .readValue(getTestFile(getEngineConfigName(), true),
+                        TransformConfig.class);
         expectedTransformConfig.getTransformers().forEach(transformer -> {
             transformer.setCoreVersion(coreVersion);
             transformer.getTransformOptions().add(DIRECT_ACCESS_URL);
@@ -464,13 +463,13 @@ public abstract class AbstractTransformerControllerTest
         expectedTransformConfig.getTransformOptions().put(DIRECT_ACCESS_URL, Set.of(new TransformOptionValue(false, DIRECT_ACCESS_URL)));
 
         ReflectionTestUtils.setField(transformRegistry, "engineConfig",
-            new ClassPathResource(getEngineConfigName()));
+                new ClassPathResource(getEngineConfigName()));
 
         String response = mockMvc
-            .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG_LATEST))
-            .andExpect(status().is(OK.value()))
-            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-            .andReturn().getResponse().getContentAsString();
+                .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG_LATEST))
+                .andExpect(status().is(OK.value()))
+                .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+                .andReturn().getResponse().getContentAsString();
 
         TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
         assertEquals(expectedTransformConfig, transformConfig);
@@ -481,17 +480,17 @@ public abstract class AbstractTransformerControllerTest
     public void testGetTransformConfigInfoExcludingCoreVersion() throws Exception
     {
         TransformConfig expectedTransformConfig = objectMapper
-            .readValue(getTestFile(getEngineConfigName(), true),
-                TransformConfig.class);
+                .readValue(getTestFile(getEngineConfigName(), true),
+                        TransformConfig.class);
 
         ReflectionTestUtils.setField(transformRegistry, "engineConfig",
-            new ClassPathResource(getEngineConfigName()));
+                new ClassPathResource(getEngineConfigName()));
 
         String response = mockMvc
-            .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
-            .andExpect(status().is(OK.value()))
-            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-            .andReturn().getResponse().getContentAsString();
+                .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
+                .andExpect(status().is(OK.value()))
+                .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+                .andReturn().getResponse().getContentAsString();
 
         TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
         assertEquals(expectedTransformConfig, transformConfig);
@@ -503,13 +502,13 @@ public abstract class AbstractTransformerControllerTest
         TransformConfig expectedResult = buildCompleteTransformConfig();
 
         ReflectionTestUtils.setField(transformRegistry, "engineConfig",
-            new ClassPathResource("engine_config_with_duplicates.json"));
+                new ClassPathResource("engine_config_with_duplicates.json"));
 
         String response = mockMvc
-            .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
-            .andExpect(status().is(OK.value()))
-            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-            .andReturn().getResponse().getContentAsString();
+                .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
+                .andExpect(status().is(OK.value()))
+                .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+                .andReturn().getResponse().getContentAsString();
 
         TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
 
@@ -517,9 +516,9 @@ public abstract class AbstractTransformerControllerTest
         assertEquals(expectedResult, transformConfig);
         assertEquals(3, transformConfig.getTransformOptions().get("engineXOptions").size());
         assertEquals(1,
-            transformConfig.getTransformers().get(0).getSupportedSourceAndTargetList().size());
+                transformConfig.getTransformers().get(0).getSupportedSourceAndTargetList().size());
         assertEquals(1,
-            transformConfig.getTransformers().get(0).getTransformOptions().size());
+                transformConfig.getTransformers().get(0).getTransformOptions().size());
     }
 
     @Test
@@ -530,13 +529,13 @@ public abstract class AbstractTransformerControllerTest
         expectedResult.setTransformers(ImmutableList.of(transformer));
 
         ReflectionTestUtils.setField(transformRegistry, "engineConfig",
-            new ClassPathResource("engine_config_incomplete.json"));
+                new ClassPathResource("engine_config_incomplete.json"));
 
         String response = mockMvc
-            .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
-            .andExpect(status().is(OK.value()))
-            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-            .andReturn().getResponse().getContentAsString();
+                .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
+                .andExpect(status().is(OK.value()))
+                .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+                .andReturn().getResponse().getContentAsString();
 
         TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
 
@@ -553,13 +552,13 @@ public abstract class AbstractTransformerControllerTest
         expectedResult.setTransformers(ImmutableList.of(transformer));
 
         ReflectionTestUtils.setField(transformRegistry, "engineConfig",
-            new ClassPathResource("engine_config_no_transform_options.json"));
+                new ClassPathResource("engine_config_no_transform_options.json"));
 
         String response = mockMvc
-            .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
-            .andExpect(status().is(OK.value()))
-            .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-            .andReturn().getResponse().getContentAsString();
+                .perform(MockMvcRequestBuilders.get(ENDPOINT_TRANSFORM_CONFIG))
+                .andExpect(status().is(OK.value()))
+                .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+                .andReturn().getResponse().getContentAsString();
 
         TransformConfig transformConfig = objectMapper.readValue(response, TransformConfig.class);
 
@@ -572,16 +571,16 @@ public abstract class AbstractTransformerControllerTest
         TransformConfig expectedResult = new TransformConfig();
 
         Set<TransformOption> transformOptionGroup = ImmutableSet.of(
-            new TransformOptionValue(false, "cropGravity"));
+                new TransformOptionValue(false, "cropGravity"));
         Set<TransformOption> transformOptions = ImmutableSet.of(
-            new TransformOptionValue(false, "page"),
-            new TransformOptionValue(false, "width"),
-            new TransformOptionGroup(false, transformOptionGroup));
+                new TransformOptionValue(false, "page"),
+                new TransformOptionValue(false, "width"),
+                new TransformOptionGroup(false, transformOptionGroup));
         Map<String, Set<TransformOption>> transformOptionsMap = ImmutableMap.of("engineXOptions",
-            transformOptions);
+                transformOptions);
 
         Transformer transformer = buildTransformer("application/pdf", "image/png", "engineXOptions",
-            "engineX");
+                "engineX");
         List<Transformer> transformers = ImmutableList.of(transformer);
 
         expectedResult.setTransformOptions(transformOptionsMap);
@@ -591,7 +590,7 @@ public abstract class AbstractTransformerControllerTest
     }
 
     private Transformer buildTransformer(String sourceMediaType, String targetMediaType,
-        String transformOptions, String transformerName)
+            String transformOptions, String transformerName)
     {
         Transformer transformer = buildTransformer(sourceMediaType, targetMediaType);
         transformer.setTransformerName(transformerName);
@@ -603,10 +602,10 @@ public abstract class AbstractTransformerControllerTest
     private Transformer buildTransformer(String sourceMediaType, String targetMediaType)
     {
         Set<SupportedSourceAndTarget> supportedSourceAndTargetList = ImmutableSet.of(
-            SupportedSourceAndTarget.builder()
-                .withSourceMediaType(sourceMediaType)
-                .withTargetMediaType(targetMediaType)
-                .build());
+                SupportedSourceAndTarget.builder()
+                        .withSourceMediaType(sourceMediaType)
+                        .withTargetMediaType(targetMediaType)
+                        .build());
 
         Transformer transformer = new Transformer();
         transformer.setSupportedSourceAndTargetList(supportedSourceAndTargetList);

@@ -27,11 +27,13 @@
 package org.alfresco.transformer;
 
 import static java.text.MessageFormat.format;
-import static org.alfresco.transformer.EngineClient.sendTRequest;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_METADATA_EXTRACT;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;
+
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_METADATA_EXTRACT;
+import static org.alfresco.transformer.EngineClient.sendTRequest;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,22 +44,21 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * Super class of metadata integration tests. Sub classes should provide the following:
- * <p>
- * <ul>
- * <li>A method providing a 
- * Stream of test files: {@code public static Stream<TestFileInfo> engineTransformations()}; </li>
- * <li> Provide expected json files (&lt;sourceFilename>"_metadata.json") as resources on the classpath.</li>
- * <li> Override the method {@code testTransformation(TestFileInfo testFileInfo)} such that it calls 
- * the super method as a {@code @ParameterizedTest} for example:</li> </ul>
- * <pre>
+ *             Super class of metadata integration tests. Sub classes should provide the following:
+ *             <p>
+ *             <ul>
+ *             <li>A method providing a Stream of test files: {@code public static Stream<TestFileInfo> engineTransformations()};</li>
+ *             <li>Provide expected json files (&lt;sourceFilename>"_metadata.json") as resources on the classpath.</li>
+ *             <li>Override the method {@code testTransformation(TestFileInfo testFileInfo)} such that it calls the super method as a {@code @ParameterizedTest} for example:</li>
+ *             </ul>
+ * 
+ *             <pre>
  * &#64;ParameterizedTest
  * 
  * &#64;MethodSource("engineTransformations")
@@ -69,7 +70,7 @@ import org.springframework.http.ResponseEntity;
  * { 
  *      super.testTransformation(TestFileInfo testFileInfo)
  * }
- * </pre> 
+ *             </pre>
  *
  * @author adavis
  * @author dedwards
@@ -84,7 +85,6 @@ public abstract class AbstractMetadataExtractsIT
 
     private final ObjectMapper jsonObjectMapper = new ObjectMapper();
 
-    
     public void testTransformation(TestFileInfo testFileInfo)
     {
         final String sourceMimetype = testFileInfo.getMimeType();
@@ -106,7 +106,7 @@ public abstract class AbstractMetadataExtractsIT
 
             Map<String, Serializable> expectedMetadata = readExpectedMetadata(metadataFilename, actualMetadataFile);
             assertEquals(expectedMetadata, actualMetadata,
-                    sourceFile+": The metadata did not match the expected value. It has been saved in "+actualMetadataFile.getAbsolutePath());
+                    sourceFile + ": The metadata did not match the expected value. It has been saved in " + actualMetadataFile.getAbsolutePath());
             actualMetadataFile.delete();
         }
         catch (Exception e)
@@ -122,8 +122,8 @@ public abstract class AbstractMetadataExtractsIT
         {
             if (inputStream == null)
             {
-                fail("The expected metadata file "+filename+" did not exist.\n"+
-                     "The actual metadata has been saved in "+actualMetadataFile.getAbsoluteFile());
+                fail("The expected metadata file " + filename + " did not exist.\n" +
+                        "The actual metadata has been saved in " + actualMetadataFile.getAbsoluteFile());
             }
             return readMetadata(inputStream);
         }

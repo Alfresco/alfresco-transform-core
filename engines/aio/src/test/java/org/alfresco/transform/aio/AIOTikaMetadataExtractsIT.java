@@ -29,5 +29,4 @@ package org.alfresco.transform.aio;
 import org.alfresco.transform.tika.TikaMetadataExtractsIT;
 
 public class AIOTikaMetadataExtractsIT extends TikaMetadataExtractsIT
-{
-}
+{}

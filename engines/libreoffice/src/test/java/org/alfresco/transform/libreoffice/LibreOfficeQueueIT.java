@@ -30,12 +30,11 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_WORDPROCES
 
 import java.util.UUID;
 
-import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.base.messaging.AbstractQueueIT;
+import org.alfresco.transform.client.model.TransformRequest;
 
 /**
- * @author Lucian Tuca
- * created on 15/01/2019
+ * @author Lucian Tuca created on 15/01/2019
  */
 public class LibreOfficeQueueIT extends AbstractQueueIT
 {
@@ -43,16 +42,16 @@ public class LibreOfficeQueueIT extends AbstractQueueIT
     protected TransformRequest buildRequest()
     {
         return TransformRequest
-            .builder()
-            .withRequestId(UUID.randomUUID().toString())
-            .withSourceMediaType(MIMETYPE_OPENXML_WORDPROCESSING)
-            .withTargetMediaType(MIMETYPE_OPENXML_WORDPROCESSING)
-            .withTargetExtension("doc")
-            .withSchema(1)
-            .withClientData("ACS")
-            .withSourceReference(UUID.randomUUID().toString())
-            .withSourceSize(32L)
-            .withInternalContextForTransformEngineTests()
-            .build();
+                .builder()
+                .withRequestId(UUID.randomUUID().toString())
+                .withSourceMediaType(MIMETYPE_OPENXML_WORDPROCESSING)
+                .withTargetMediaType(MIMETYPE_OPENXML_WORDPROCESSING)
+                .withTargetExtension("doc")
+                .withSchema(1)
+                .withClientData("ACS")
+                .withSourceReference(UUID.randomUUID().toString())
+                .withSourceSize(32L)
+                .withInternalContextForTransformEngineTests()
+                .build();
     }
 }

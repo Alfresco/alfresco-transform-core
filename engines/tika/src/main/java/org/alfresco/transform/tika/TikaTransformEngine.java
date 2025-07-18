@@ -26,18 +26,19 @@
  */
 package org.alfresco.transform.tika;
 
-import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.config.reader.TransformConfigResourceReader;
-import org.alfresco.transform.config.TransformConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.Collections;
-
 import static org.alfresco.transform.base.logging.StandardMessages.COMMUNITY_LICENCE;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+
+import java.util.Collections;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformEngine;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 
 @Component
 public class TikaTransformEngine implements TransformEngine

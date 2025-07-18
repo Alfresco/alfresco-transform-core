@@ -26,10 +26,14 @@
  */
 package org.alfresco.transform.base.messaging;
 
-import org.alfresco.transform.base.TransformController;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.exceptions.TransformException;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import java.util.Optional;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,22 +43,15 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
 
-import jakarta.jms.Destination;
-import jakarta.jms.JMSException;
-import jakarta.jms.Message;
-import java.util.Optional;
-
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import org.alfresco.transform.base.TransformController;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
- * Queue Transformer service.
- * This service reads all the requests for the particular engine, forwards them to the worker
- * component (at this time the injected controller - to be refactored) and sends back the reply
- * to the {@link Message#getJMSReplyTo()} value. If this value is missing we've got to a dead end.
+ * Queue Transformer service. This service reads all the requests for the particular engine, forwards them to the worker component (at this time the injected controller - to be refactored) and sends back the reply to the {@link Message#getJMSReplyTo()} value. If this value is missing we've got to a dead end.
  *
- * @author Lucian Tuca
- * created on 18/12/2018
+ * @author Lucian Tuca created on 18/12/2018
  */
 @Component
 @ConditionalOnProperty(name = "activemq.url")
@@ -87,16 +84,16 @@ public class QueueTransformService
             if (replyToQueue == null)
             {
                 logger.error(
-                    "Cannot find 'replyTo' destination queue for message with correlationID {}. Stopping. ",
-                    correlationId);
+                        "Cannot find 'replyTo' destination queue for message with correlationID {}. Stopping. ",
+                        correlationId);
                 return;
             }
         }
         catch (JMSException e)
         {
             logger.error(
-                "Cannot find 'replyTo' destination queue for message with correlationID {}. Stopping. ",
-                correlationId);
+                    "Cannot find 'replyTo' destination queue for message with correlationID {}. Stopping. ",
+                    correlationId);
             return;
         }
 
@@ -111,7 +108,7 @@ public class QueueTransformService
         {
             logger.error(e.getMessage(), e);
             replyWithError(replyToQueue, HttpStatus.valueOf(e.getStatus().value()),
-                e.getMessage(), correlationId);
+                    e.getMessage(), correlationId);
             return;
         }
 
@@ -119,7 +116,7 @@ public class QueueTransformService
         {
             logger.error("T-Request from message with correlationID {} is null!", correlationId);
             replyWithInternalSvErr(replyToQueue,
-                "JMS exception during T-Request deserialization: ", correlationId);
+                    "JMS exception during T-Request deserialization: ", correlationId);
             return;
         }
 
@@ -127,10 +124,10 @@ public class QueueTransformService
     }
 
     /**
-     * Tries to convert the JMS {@link Message} to a {@link TransformRequest}
-     * If any error occurs, a {@link TransformException} is thrown
+     * Tries to convert the JMS {@link Message} to a {@link TransformRequest} If any error occurs, a {@link TransformException} is thrown
      *
-     * @param msg Message to be deserialized
+     * @param msg
+     *            Message to be deserialized
      * @return The converted {@link TransformRequest} instance
      */
     private Optional<TransformRequest> convert(final Message msg, String correlationId)
@@ -142,42 +139,39 @@ public class QueueTransformService
         }
         catch (MessageConversionException e)
         {
-            String message =
-                "MessageConversionException during T-Request deserialization of message with correlationID "
-                + correlationId + ": ";
+            String message = "MessageConversionException during T-Request deserialization of message with correlationID "
+                    + correlationId + ": ";
             throw new TransformException(BAD_REQUEST, message + e.getMessage());
         }
         catch (JMSException e)
         {
-            String message =
-                "JMSException during T-Request deserialization of message with correlationID "
-                + correlationId + ": ";
+            String message = "JMSException during T-Request deserialization of message with correlationID "
+                    + correlationId + ": ";
             throw new TransformException(INTERNAL_SERVER_ERROR, message + e.getMessage());
         }
         catch (Exception e)
         {
-            String message =
-                "Exception during T-Request deserialization of message with correlationID "
-                + correlationId + ": ";
+            String message = "Exception during T-Request deserialization of message with correlationID "
+                    + correlationId + ": ";
             throw new TransformException(INTERNAL_SERVER_ERROR, message + e.getMessage());
         }
     }
 
     private void replyWithInternalSvErr(final Destination destination, final String msg,
-        final String correlationId)
+            final String correlationId)
     {
         replyWithError(destination, INTERNAL_SERVER_ERROR, msg, correlationId);
     }
 
     private void replyWithError(final Destination replyToQueue, final HttpStatus status,
-        final String msg,
-        final String correlationId)
+            final String msg,
+            final String correlationId)
     {
         final TransformReply reply = TransformReply
-            .builder()
-            .withStatus(status.value())
-            .withErrorDetails(msg)
-            .build();
+                .builder()
+                .withStatus(status.value())
+                .withErrorDetails(msg)
+                .build();
 
         transformReplySender.send(replyToQueue, reply, correlationId);
     }

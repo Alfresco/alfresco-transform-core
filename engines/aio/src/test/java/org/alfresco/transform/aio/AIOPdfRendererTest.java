@@ -32,5 +32,4 @@ import org.alfresco.transform.pdfrenderer.PdfRendererTest;
  * Test PdfRenderer functionality in All-In-One.
  */
 public class AIOPdfRendererTest extends PdfRendererTest
-{
-}
+{}

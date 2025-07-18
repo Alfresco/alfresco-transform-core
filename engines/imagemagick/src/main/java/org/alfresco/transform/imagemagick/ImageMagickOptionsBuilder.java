@@ -26,15 +26,17 @@
  */
 package org.alfresco.transform.imagemagick;
 
-import com.google.common.collect.ImmutableList;
-import org.alfresco.transform.exceptions.TransformException;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
+import static org.alfresco.transform.base.util.Util.stringToBoolean;
+import static org.alfresco.transform.base.util.Util.stringToInteger;
 
 import java.util.List;
 import java.util.StringJoiner;
 
-import static org.alfresco.transform.base.util.Util.stringToBoolean;
-import static org.alfresco.transform.base.util.Util.stringToInteger;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import com.google.common.collect.ImmutableList;
+
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * ImageMagick options builder.
@@ -44,7 +46,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 public final class ImageMagickOptionsBuilder
 {
     private static final List<String> GRAVITY_VALUES = ImmutableList.of("North", "NorthEast",
-        "East", "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center");
+            "East", "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center");
 
     private Integer startPage;
     private Integer endPage;
@@ -64,7 +66,8 @@ public final class ImageMagickOptionsBuilder
     private Boolean maintainAspectRatio;
     private String commandOptions;
 
-    private ImageMagickOptionsBuilder() {}
+    private ImageMagickOptionsBuilder()
+    {}
 
     public ImageMagickOptionsBuilder withStartPage(final String startPage)
     {
@@ -270,7 +273,7 @@ public final class ImageMagickOptionsBuilder
         }
 
         if (cropGravity != null || cropWidth != null || cropHeight != null || cropPercentage != null ||
-            cropXOffset != null || cropYOffset != null)
+                cropXOffset != null || cropYOffset != null)
         {
             if (cropGravity != null)
             {
@@ -349,8 +352,8 @@ public final class ImageMagickOptionsBuilder
         }
 
         return (commandOptions == null || "".equals(
-            commandOptions.trim()) ? "" : commandOptions + ' ') +
-               args.toString();
+                commandOptions.trim()) ? "" : commandOptions + ' ') +
+                args.toString();
     }
 
     public static ImageMagickOptionsBuilder builder()

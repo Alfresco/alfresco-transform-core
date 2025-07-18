@@ -26,9 +26,10 @@
  */
 package org.alfresco.transformer.executors;
 
-import static org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import static org.alfresco.transformer.executors.RuntimeExec.ExecutionResult;
 
 import java.io.File;
 import java.util.Map;
@@ -81,7 +82,7 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
             if (version.isEmpty())
             {
                 throw new TransformException(INTERNAL_SERVER_ERROR,
-                    "Transformer version check failed to create any output");
+                        "Transformer version check failed to create any output");
             }
             return version;
         }

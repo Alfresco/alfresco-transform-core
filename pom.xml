@@ -34,8 +34,6 @@
         <dependency.bouncycastle.version.override>1.79</dependency.bouncycastle.version.override>
 
         <spotless-plugin.version>2.45.0</spotless-plugin.version>
-        <!-- Do not match any files by default, but this can be overridden from the command line. -->
-        <spotless-include-list>NO_AUTOMATED_FORMATTING</spotless-include-list>
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
     </properties>
@@ -257,10 +255,6 @@
                   <skip>${parent.core.deploy.skip}</skip>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-            </plugin>
         </plugins>
 
         <pluginManagement>
@@ -378,11 +372,8 @@
                     <version>${spotless-plugin.version}</version>
                     <configuration>
                         <java>
-                            <includes>
-                                ${spotless-include-list}
-                            </includes>
                             <eclipse>
-                                <file>alfresco-formatter.xml</file>
+                                <file>https://raw.githubusercontent.com/Alfresco/alfresco-community-repo/refs/heads/master/alfresco-formatter.xml</file>
                             </eclipse>
                             <importOrder>
                                 <order>\#java|\#javax|\#jakarta,\#,\#org.alfresco,java|javax|jakarta,,org.alfresco</order>

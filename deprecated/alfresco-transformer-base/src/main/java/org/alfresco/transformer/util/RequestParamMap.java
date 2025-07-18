@@ -29,8 +29,7 @@ package org.alfresco.transformer.util;
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * Extends the list of transform options with historic request parameters or 'extra' parameters used in testing
- * or communication in the all-in-one transformer.
+ *             Extends the list of transform options with historic request parameters or 'extra' parameters used in testing or communication in the all-in-one transformer.
  */
 @Deprecated
 public interface RequestParamMap extends org.alfresco.transform.client.util.RequestParamMap
@@ -44,5 +43,5 @@ public interface RequestParamMap extends org.alfresco.transform.client.util.Requ
     String TRANSFORM_NAME_PROPERTY = "transformName";
     String TRANSFORM_NAME_PARAMETER = "alfresco.transform-name-parameter";
 
-    String TEST_DELAY               = "testDelay";
+    String TEST_DELAY = "testDelay";
 }

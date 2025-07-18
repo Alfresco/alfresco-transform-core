@@ -27,14 +27,11 @@
 package org.alfresco.transform.base;
 
 import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 
 /**
- * Interface to be implemented by transform specific code. Provides information about the t-engine as a whole.
- * Also see {@link CustomTransformer} which provides the code that performs transformation. There may be several
- * in a single t-engine. So that it is automatically picked up, it must exist in a package under
- * {@code org.alfresco.transform} and have the Spring {@code @Component} annotation.
+ * Interface to be implemented by transform specific code. Provides information about the t-engine as a whole. Also see {@link CustomTransformer} which provides the code that performs transformation. There may be several in a single t-engine. So that it is automatically picked up, it must exist in a package under {@code org.alfresco.transform} and have the Spring {@code @Component} annotation.
  */
 public interface TransformEngine
 {
@@ -49,10 +46,7 @@ public interface TransformEngine
     String getStartupMessage();
 
     /**
-     * @return a definition of what the t-engine supports. Normally read from a json Resource on the classpath using a
-     * {@link TransformConfigResourceReader}. To combine to code from multiple t-engine into a single t-engine
-     * include all the TransformEngines and CustomTransform implementations, plus a wrapper TransformEngine for the
-     * others. The wrapper should return {@code null} from this method.
+     * @return a definition of what the t-engine supports. Normally read from a json Resource on the classpath using a {@link TransformConfigResourceReader}. To combine to code from multiple t-engine into a single t-engine include all the TransformEngines and CustomTransform implementations, plus a wrapper TransformEngine for the others. The wrapper should return {@code null} from this method.
      */
     TransformConfig getTransformConfig();
 

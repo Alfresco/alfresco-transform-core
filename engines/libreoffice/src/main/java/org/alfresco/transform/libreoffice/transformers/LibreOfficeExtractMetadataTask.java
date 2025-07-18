@@ -26,6 +26,15 @@
  */
 package org.alfresco.transform.libreoffice.transformers;
 
+import static org.artofsolving.jodconverter.office.OfficeUtils.SERVICE_DESKTOP;
+import static org.artofsolving.jodconverter.office.OfficeUtils.cast;
+import static org.artofsolving.jodconverter.office.OfficeUtils.toUrl;
+
+import java.io.File;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertySet;
@@ -43,24 +52,16 @@ import org.artofsolving.jodconverter.office.OfficeContext;
 import org.artofsolving.jodconverter.office.OfficeException;
 import org.artofsolving.jodconverter.office.OfficeTask;
 
-import java.io.File;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.artofsolving.jodconverter.office.OfficeUtils.SERVICE_DESKTOP;
-import static org.artofsolving.jodconverter.office.OfficeUtils.cast;
-import static org.artofsolving.jodconverter.office.OfficeUtils.toUrl;
-
 /**
  * @deprecated The JodConverterMetadataExtracter has not been in use since 6.0.1
  *
- * Extracts values from Open Office documents into the following:
- * <pre>
+ *             Extracts values from Open Office documents into the following:
+ * 
+ *             <pre>
  *   <b>author:</b>                 --      cm:author
  *   <b>title:</b>                  --      cm:title
  *   <b>description:</b>            --      cm:description
- * </pre>
+ *             </pre>
  *
  * @author Neil McErlean
  * @author adavis
@@ -68,10 +69,7 @@ import static org.artofsolving.jodconverter.office.OfficeUtils.toUrl;
 @Deprecated
 public class LibreOfficeExtractMetadataTask implements OfficeTask
 {
-    /*
-     * These keys are used by Alfresco to map properties into a content model and do need to
-     * have lower-case initial letters.
-     */
+    /* These keys are used by Alfresco to map properties into a content model and do need to have lower-case initial letters. */
     private static final String KEY_AUTHOR = "author";
     private static final String KEY_TITLE = "title";
     private static final String KEY_DESCRIPTION = "description";
@@ -192,7 +190,8 @@ public class LibreOfficeExtractMetadataTask implements OfficeTask
      * OOo throws exceptions if we ask for properties that aren't there, so we'll tread carefully.
      *
      * @param propSet
-     * @param propertyName property name as used by the OOo API.
+     * @param propertyName
+     *            property name as used by the OOo API.
      * @throws UnknownPropertyException
      * @throws WrappedTargetException
      */

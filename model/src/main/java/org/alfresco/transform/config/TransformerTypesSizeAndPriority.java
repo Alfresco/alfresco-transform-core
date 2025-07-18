@@ -25,15 +25,15 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * Base object with {@code transformerName}, {@code sourceMediaType}, {@code targetMediaType},
- * {@code maxSourceSizeBytes} and {@code priority}.
+ * Base object with {@code transformerName}, {@code sourceMediaType}, {@code targetMediaType}, {@code maxSourceSizeBytes} and {@code priority}.
  */
 public abstract class TransformerTypesSizeAndPriority extends TransformerAndTypes
 {
     Long maxSourceSizeBytes = null;
     Integer priority = null;
 
-    protected TransformerTypesSizeAndPriority() {}
+    protected TransformerTypesSizeAndPriority()
+    {}
 
     public Long getMaxSourceSizeBytes()
     {
@@ -58,11 +58,14 @@ public abstract class TransformerTypesSizeAndPriority extends TransformerAndType
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        TransformerTypesSizeAndPriority that = (TransformerTypesSizeAndPriority)o;
-        return  getMaxSourceSizeBytes().equals(that.getMaxSourceSizeBytes()) &&
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+        TransformerTypesSizeAndPriority that = (TransformerTypesSizeAndPriority) o;
+        return getMaxSourceSizeBytes().equals(that.getMaxSourceSizeBytes()) &&
                 getPriority() == that.getPriority();
     }
 
@@ -77,10 +80,13 @@ public abstract class TransformerTypesSizeAndPriority extends TransformerAndType
     {
         StringJoiner sj = new StringJoiner(", ");
         String superToString = super.toString();
-        if (superToString != null) sj.add(superToString);
-        if (maxSourceSizeBytes != null) sj.add("\"maxSourceSizeBytes\": \""+maxSourceSizeBytes+'"');
-        if (priority != null) sj.add("\"priority\": \""+priority+'"');
-        return "{"+sj.toString()+"}";
+        if (superToString != null)
+            sj.add(superToString);
+        if (maxSourceSizeBytes != null)
+            sj.add("\"maxSourceSizeBytes\": \"" + maxSourceSizeBytes + '"');
+        if (priority != null)
+            sj.add("\"priority\": \"" + priority + '"');
+        return "{" + sj.toString() + "}";
     }
 
     public static class Builder<B extends TransformerTypesSizeAndPriority.Builder, T extends TransformerTypesSizeAndPriority>
@@ -97,13 +103,13 @@ public abstract class TransformerTypesSizeAndPriority extends TransformerAndType
         public B withMaxSourceSizeBytes(final long maxSourceSizeBytes)
         {
             t.setMaxSourceSizeBytes(maxSourceSizeBytes);
-            return (B)this;
+            return (B) this;
         }
 
         public B withPriority(final int priority)
         {
             t.setPriority(priority);
-            return (B)this;
+            return (B) this;
         }
     }
 }

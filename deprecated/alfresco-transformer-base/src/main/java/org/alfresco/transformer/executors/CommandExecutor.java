@@ -26,16 +26,16 @@
  */
 package org.alfresco.transformer.executors;
 
-import org.alfresco.transformer.logging.LogEntry;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.alfresco.transformer.logging.LogEntry;
+
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * Basic interface for executing transformations via Shell commands
+ *             Basic interface for executing transformations via Shell commands
  *
  * @author Cezar Leahu
  */
@@ -47,7 +47,7 @@ public interface CommandExecutor extends Transformer
     String version();
 
     default void run(String options, File sourceFile, File targetFile,
-        Long timeout)
+            Long timeout)
     {
         LogEntry.setOptions(options);
 
@@ -60,7 +60,7 @@ public interface CommandExecutor extends Transformer
     }
 
     default void run(String options, File sourceFile, String pageRange, File targetFile,
-        Long timeout)
+            Long timeout)
     {
         LogEntry.setOptions(pageRange + (pageRange.isEmpty() ? "" : " ") + options);
 

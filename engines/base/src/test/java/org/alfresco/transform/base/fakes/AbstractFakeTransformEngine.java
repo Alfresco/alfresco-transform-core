@@ -26,9 +26,10 @@
  */
 package org.alfresco.transform.base.fakes;
 
+import org.springframework.boot.test.context.TestComponent;
+
 import org.alfresco.transform.base.TransformEngine;
 import org.alfresco.transform.base.probes.ProbeTransform;
-import org.springframework.boot.test.context.TestComponent;
 
 /**
  * Subclass MUST be named FakeTransformEngineWith\<something> otherwise the engine name will be "undefined".
@@ -39,18 +40,20 @@ public abstract class AbstractFakeTransformEngine implements TransformEngine
 
     private static final String FAKE_TRANSFORM_ENGINE_WITH = "FakeTransformEngineWith";
 
-    @Override public String getTransformEngineName()
+    @Override
+    public String getTransformEngineName()
     {
         String simpleClassName = getClass().getSimpleName();
         return simpleClassName.startsWith(FAKE_TRANSFORM_ENGINE_WITH)
-            ? "0000 "+simpleClassName.substring(FAKE_TRANSFORM_ENGINE_WITH.length())
-            : "undefined";
+                ? "0000 " + simpleClassName.substring(FAKE_TRANSFORM_ENGINE_WITH.length())
+                : "undefined";
     }
 
-    @Override public String getStartupMessage()
+    @Override
+    public String getStartupMessage()
     {
-        return "Startup "+getTransformEngineName()+
-                "\nLine 2 "+getTransformEngineName()+
+        return "Startup " + getTransformEngineName() +
+                "\nLine 2 " + getTransformEngineName() +
                 "\nLine 3";
     }
 

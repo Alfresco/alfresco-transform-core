@@ -8,12 +8,13 @@
 package org.alfresco.transform.base.clients;
 
 import static java.util.Collections.emptyMap;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
+
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 
 import java.util.Map;
 
-import org.alfresco.transform.base.MtlsTestUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -23,6 +24,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import org.alfresco.transform.base.MtlsTestUtils;
+
 /**
  * @author Cezar Leahu
  */
@@ -31,16 +34,16 @@ public class HttpClient
     private static final RestTemplate REST_TEMPLATE = MtlsTestUtils.getRestTemplate();
 
     public static ResponseEntity<Resource> sendTRequest(
-        final String engineUrl, final String sourceFile,
-        final String sourceMimetype, final String targetMimetype, final String targetExtension)
+            final String engineUrl, final String sourceFile,
+            final String sourceMimetype, final String targetMimetype, final String targetExtension)
     {
         return sendTRequest(engineUrl, sourceFile, sourceMimetype, targetMimetype, targetExtension, emptyMap());
     }
 
     public static ResponseEntity<Resource> sendTRequest(
-        final String engineUrl, final String sourceFile,
-        final String sourceMimetype, final String targetMimetype, final String targetExtension,
-        final Map<String, String> transformOptions)
+            final String engineUrl, final String sourceFile,
+            final String sourceMimetype, final String targetMimetype, final String targetExtension,
+            final Map<String, String> transformOptions)
     {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MULTIPART_FORM_DATA);

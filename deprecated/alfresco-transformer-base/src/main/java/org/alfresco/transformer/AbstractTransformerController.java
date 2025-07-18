@@ -26,17 +26,50 @@
  */
 package org.alfresco.transformer;
 
-import org.alfresco.transform.common.TransformerDebug;
-import org.alfresco.transform.client.model.InternalContext;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.messages.TransformRequestValidator;
-import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.registry.TransformServiceRegistry;
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
-import org.alfresco.transformer.logging.LogEntry;
-import org.alfresco.transformer.model.FileRefResponse;
+import static java.util.stream.Collectors.joining;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+import static org.springframework.util.StringUtils.getFilenameExtension;
+
+import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION;
+import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
+import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
+import static org.alfresco.transform.config.CoreVersionDecorator.setOrClearCoreVersion;
+import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTempFile;
+import static org.alfresco.transformer.fs.FileManager.buildFile;
+import static org.alfresco.transformer.fs.FileManager.createAttachment;
+import static org.alfresco.transformer.fs.FileManager.createSourceFile;
+import static org.alfresco.transformer.fs.FileManager.createTargetFile;
+import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
+import static org.alfresco.transformer.fs.FileManager.deleteFile;
+import static org.alfresco.transformer.fs.FileManager.getFilenameFromContentDisposition;
+import static org.alfresco.transformer.fs.FileManager.save;
+import static org.alfresco.transformer.util.RequestParamMap.FILE;
+import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
+import static org.alfresco.transformer.util.RequestParamMap.SOURCE_EXTENSION;
+import static org.alfresco.transformer.util.RequestParamMap.SOURCE_MIMETYPE;
+import static org.alfresco.transformer.util.RequestParamMap.TARGET_EXTENSION;
+import static org.alfresco.transformer.util.RequestParamMap.TARGET_MIMETYPE;
+import static org.alfresco.transformer.util.RequestParamMap.TEST_DELAY;
+import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PROPERTY;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,85 +89,57 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static java.util.stream.Collectors.joining;
-import static org.alfresco.transform.config.CoreVersionDecorator.setOrClearCoreVersion;
-import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
-import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION;
-import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
-import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTempFile;
-import static org.alfresco.transformer.fs.FileManager.buildFile;
-import static org.alfresco.transformer.fs.FileManager.createAttachment;
-import static org.alfresco.transformer.fs.FileManager.createSourceFile;
-import static org.alfresco.transformer.fs.FileManager.createTargetFile;
-import static org.alfresco.transformer.fs.FileManager.createTargetFileName;
-import static org.alfresco.transformer.fs.FileManager.deleteFile;
-import static org.alfresco.transformer.fs.FileManager.getFilenameFromContentDisposition;
-import static org.alfresco.transformer.fs.FileManager.save;
-import static org.alfresco.transformer.util.RequestParamMap.FILE;
-import static org.alfresco.transformer.util.RequestParamMap.SOURCE_ENCODING;
-import static org.alfresco.transformer.util.RequestParamMap.SOURCE_EXTENSION;
-import static org.alfresco.transformer.util.RequestParamMap.SOURCE_MIMETYPE;
-import static org.alfresco.transformer.util.RequestParamMap.TARGET_EXTENSION;
-import static org.alfresco.transformer.util.RequestParamMap.TARGET_MIMETYPE;
-import static org.alfresco.transformer.util.RequestParamMap.TEST_DELAY;
-import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PROPERTY;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
-import static org.springframework.util.StringUtils.getFilenameExtension;
+import org.alfresco.transform.client.model.InternalContext;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.common.TransformerDebug;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.messages.TransformRequestValidator;
+import org.alfresco.transform.registry.TransformServiceRegistry;
+import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
+import org.alfresco.transformer.logging.LogEntry;
+import org.alfresco.transformer.model.FileRefResponse;
 
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * <p>Abstract Controller, provides structure and helper methods to sub-class transformer controllers. Sub classes
- * should implement {@link #transformImpl(String, String, String, Map, File, File)} and unimplemented methods from
- * {@link TransformController}.</p>
+ *             <p>
+ *             Abstract Controller, provides structure and helper methods to sub-class transformer controllers. Sub classes should implement {@link #transformImpl(String, String, String, Map, File, File)} and unimplemented methods from {@link TransformController}.
+ *             </p>
  *
- * <p>Status Codes:</p>
- * <ul>
- * <li>200 Success</li>
- * <li>400 Bad Request: Request parameter <name> is missing (missing mandatory parameter)</li>
- * <li>400 Bad Request: Request parameter <name> is of the wrong type</li>
- * <li>400 Bad Request: Transformer exit code was not 0 (possible problem with the source file)</li>
- * <li>400 Bad Request: The source filename was not supplied</li>
- * <li>500 Internal Server Error: (no message with low level IO problems)</li>
- * <li>500 Internal Server Error: The target filename was not supplied (should not happen as targetExtension is checked)</li>
- * <li>500 Internal Server Error: Transformer version check exit code was not 0</li>
- * <li>500 Internal Server Error: Transformer version check failed to create any output</li>
- * <li>500 Internal Server Error: Could not read the target file</li>
- * <li>500 Internal Server Error: The target filename was malformed (should not happen because of other checks)</li>
- * <li>500 Internal Server Error: Transformer failed to create an output file (the exit code was 0, so there should be some content)</li>
- * <li>500 Internal Server Error: Filename encoding error</li>
- * <li>507 Insufficient Storage: Failed to store the source file</li>
+ *             <p>
+ *             Status Codes:
+ *             </p>
+ *             <ul>
+ *             <li>200 Success</li>
+ *             <li>400 Bad Request: Request parameter <name> is missing (missing mandatory parameter)</li>
+ *             <li>400 Bad Request: Request parameter <name> is of the wrong type</li>
+ *             <li>400 Bad Request: Transformer exit code was not 0 (possible problem with the source file)</li>
+ *             <li>400 Bad Request: The source filename was not supplied</li>
+ *             <li>500 Internal Server Error: (no message with low level IO problems)</li>
+ *             <li>500 Internal Server Error: The target filename was not supplied (should not happen as targetExtension is checked)</li>
+ *             <li>500 Internal Server Error: Transformer version check exit code was not 0</li>
+ *             <li>500 Internal Server Error: Transformer version check failed to create any output</li>
+ *             <li>500 Internal Server Error: Could not read the target file</li>
+ *             <li>500 Internal Server Error: The target filename was malformed (should not happen because of other checks)</li>
+ *             <li>500 Internal Server Error: Transformer failed to create an output file (the exit code was 0, so there should be some content)</li>
+ *             <li>500 Internal Server Error: Filename encoding error</li>
+ *             <li>507 Insufficient Storage: Failed to store the source file</li>
  *
- * <li>408 Request Timeout         -- TODO implement general timeout mechanism rather than depend on transformer timeout
- * (might be possible for external processes)</li>
- * <li>415 Unsupported Media Type  -- TODO possibly implement a check on supported source and target mimetypes (probably not)</li>
- * <li>429 Too Many Requests: Returned by liveness probe</li>
- * </ul>
- * <p>Provides methods to help super classes perform /transform requests. Also responses to /version, /ready and /live
- * requests.</p>
+ *             <li>408 Request Timeout -- TODO implement general timeout mechanism rather than depend on transformer timeout (might be possible for external processes)</li>
+ *             <li>415 Unsupported Media Type -- TODO possibly implement a check on supported source and target mimetypes (probably not)</li>
+ *             <li>429 Too Many Requests: Returned by liveness probe</li>
+ *             </ul>
+ *             <p>
+ *             Provides methods to help super classes perform /transform requests. Also responses to /version, /ready and /live requests.
+ *             </p>
  */
 @Deprecated
 public abstract class AbstractTransformerController implements TransformController
 {
     private static final Logger logger = LoggerFactory.getLogger(
-        AbstractTransformerController.class);
+            AbstractTransformerController.class);
 
     // Request parameters that are not part of transform options
     public static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
@@ -166,16 +171,16 @@ public abstract class AbstractTransformerController implements TransformControll
 
     @PostMapping(value = ENDPOINT_TRANSFORM, consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> transform(HttpServletRequest request,
-                                              @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
-                                              @RequestParam(TARGET_EXTENSION) String targetExtension,
-                                              @RequestParam(value = SOURCE_MIMETYPE, required = false) String sourceMimetype,
-                                              @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,
-                                              @RequestParam Map<String, String> requestParameters,
-                                              @RequestParam(value = TEST_DELAY, required = false) Long testDelay,
+            @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
+            @RequestParam(TARGET_EXTENSION) String targetExtension,
+            @RequestParam(value = SOURCE_MIMETYPE, required = false) String sourceMimetype,
+            @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,
+            @RequestParam Map<String, String> requestParameters,
+            @RequestParam(value = TEST_DELAY, required = false) Long testDelay,
 
-                                              // The TRANSFORM_NAME_PROPERTY param allows ACS legacy transformers to specify which transform to use,
-                                              // It can be removed once legacy transformers are removed from ACS.
-                                              @RequestParam(value = TRANSFORM_NAME_PROPERTY, required = false) String requestTransformName)
+            // The TRANSFORM_NAME_PROPERTY param allows ACS legacy transformers to specify which transform to use,
+            // It can be removed once legacy transformers are removed from ACS.
+            @RequestParam(value = TRANSFORM_NAME_PROPERTY, required = false) String requestTransformName)
     {
         if (logger.isDebugEnabled())
         {
@@ -189,7 +194,7 @@ public abstract class AbstractTransformerController implements TransformControll
         String sourceFilename;
         if (directUrl.isBlank())
         {
-            if (sourceMultipartFile ==  null)
+            if (sourceMultipartFile == null)
             {
                 throw new TransformException(BAD_REQUEST, "Required request part 'file' is not present");
             }
@@ -208,7 +213,7 @@ public abstract class AbstractTransformerController implements TransformControll
 
         Map<String, String> transformOptions = getTransformOptions(requestParameters);
         String transformName = getTransformerName(sourceMimetype, targetMimetype, requestTransformName, sourceFile, transformOptions);
-        String reference = "e"+httpRequestCount.getAndIncrement();
+        String reference = "e" + httpRequestCount.getAndIncrement();
         transformerDebug.pushTransform(reference, sourceMimetype, targetMimetype, sourceFile, transformName);
         transformerDebug.logOptions(reference, requestParameters);
         try
@@ -260,17 +265,18 @@ public abstract class AbstractTransformerController implements TransformControll
     /**
      * '/transform' endpoint which consumes and produces 'application/json'
      *
-     * This is the way to tell Spring to redirect the request to this endpoint
-     * instead of the one which produces 'html'
+     * This is the way to tell Spring to redirect the request to this endpoint instead of the one which produces 'html'
      *
-     * @param request The transformation request
-     * @param timeout Transformation timeout
+     * @param request
+     *            The transformation request
+     * @param timeout
+     *            Transformation timeout
      * @return A transformation reply
      */
     @PostMapping(value = ENDPOINT_TRANSFORM, produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<TransformReply> transform(@RequestBody TransformRequest request,
-        @RequestParam(value = "timeout", required = false) Long timeout)
+            @RequestParam(value = "timeout", required = false) Long timeout)
     {
         logger.trace("Received {}, timeout {} ms", request, timeout);
 
@@ -288,10 +294,10 @@ public abstract class AbstractTransformerController implements TransformControll
         {
             reply.setStatus(BAD_REQUEST.value());
             reply.setErrorDetails(errors
-                .getAllErrors()
-                .stream()
-                .map(Object::toString)
-                .collect(joining(", ")));
+                    .getAllErrors()
+                    .stream()
+                    .map(Object::toString)
+                    .collect(joining(", ")));
 
             transformerDebug.logFailure(reply);
             logger.trace("Invalid request, sending {}", reply);
@@ -343,7 +349,7 @@ public abstract class AbstractTransformerController implements TransformControll
 
         // Create local temp target file in order to run the transformation
         final String targetFilename = createTargetFileName(sourceFile.getName(),
-            request.getTargetExtension());
+                request.getTargetExtension());
         final File targetFile = buildFile(targetFilename);
 
         // Run the transformation
@@ -417,7 +423,7 @@ public abstract class AbstractTransformerController implements TransformControll
         catch (Exception e)
         {
             logger.error("Failed to delete local temp target file '{}'. Error will be ignored ",
-                targetFile, e);
+                    targetFile, e);
         }
         try
         {
@@ -461,14 +467,16 @@ public abstract class AbstractTransformerController implements TransformControll
     /**
      * Loads the file with the specified sourceReference from Alfresco Shared File Store
      *
-     * @param sourceReference reference to the file in Alfresco Shared File Store
-     * @param sourceExtension default extension if the file in Alfresco Shared File Store has none
+     * @param sourceReference
+     *            reference to the file in Alfresco Shared File Store
+     * @param sourceExtension
+     *            default extension if the file in Alfresco Shared File Store has none
      * @return the file containing the source content for the transformation
      */
     private File loadSourceFile(final String sourceReference, final String sourceExtension)
     {
         ResponseEntity<Resource> responseEntity = alfrescoSharedFileStoreClient
-            .retrieveFile(sourceReference);
+                .retrieveFile(sourceReference);
         getProbeTestTransform().incrementTransformerCount();
 
         HttpHeaders headers = responseEntity.getHeaders();
@@ -482,14 +490,14 @@ public abstract class AbstractTransformerController implements TransformControll
         if (body == null)
         {
             String message = "Source file with reference: " + sourceReference + " is null or empty. "
-                             + "Transformation will fail and stop now as there is no content to be transformed.";
+                    + "Transformation will fail and stop now as there is no content to be transformed.";
             logger.warn(message);
             throw new TransformException(BAD_REQUEST, message);
         }
         final File file = createTempFile("source_", "." + extension);
 
         logger.debug("Read source content {} length={} contentType={}",
-            sourceReference, size, contentType);
+                sourceReference, size, contentType);
 
         save(body, file);
         LogEntry.setSource(filename, size);
@@ -500,23 +508,23 @@ public abstract class AbstractTransformerController implements TransformControll
     {
         final StringBuilder sb = new StringBuilder();
         sb.append(prefix).append(" - ")
-          .append(e.getClass().getSimpleName()).append(": ")
-          .append(e.getMessage());
+                .append(e.getClass().getSimpleName()).append(": ")
+                .append(e.getMessage());
 
         while (e.getCause() != null)
         {
             e = e.getCause();
             sb.append(", cause ")
-              .append(e.getClass().getSimpleName()).append(": ")
-              .append(e.getMessage());
+                    .append(e.getClass().getSimpleName()).append(": ")
+                    .append(e.getMessage());
         }
 
         return sb.toString();
     }
 
     private String getTransformerName(String sourceMimetype, String targetMimetype,
-                                      String requestTransformName, File sourceFile,
-                                      Map<String, String> transformOptions)
+            String requestTransformName, File sourceFile,
+            Map<String, String> transformOptions)
     {
         // Check if transformName was provided in the request (this can happen for ACS legacy transformers)
         String transformName = requestTransformName;
@@ -532,7 +540,7 @@ public abstract class AbstractTransformerController implements TransformControll
     }
 
     protected String getTransformerName(final File sourceFile, final String sourceMimetype,
-        final String targetMimetype, final Map<String, String> transformOptions)
+            final String targetMimetype, final Map<String, String> transformOptions)
     {
         // The transformOptions always contains sourceEncoding when sent to a T-Engine, even though it should not be
         // used to select a transformer. Similar to source and target mimetypes and extensions, but these are not
@@ -563,7 +571,7 @@ public abstract class AbstractTransformerController implements TransformControll
         if (namesAndValues.length % 2 != 0)
         {
             logger.error(
-                "Incorrect number of parameters. Should have an even number as they are names and values.");
+                    "Incorrect number of parameters. Should have an even number as they are names and values.");
         }
 
         Map<String, String> transformOptions = new HashMap<>();
@@ -571,7 +579,7 @@ public abstract class AbstractTransformerController implements TransformControll
         {
             String name = namesAndValues[i].toString();
             Object value = namesAndValues[i + 1];
-            if (value != null && (!(value instanceof String) || !((String)value).isBlank()))
+            if (value != null && (!(value instanceof String) || !((String) value).isBlank()))
             {
                 transformOptions.put(name, value.toString());
             }

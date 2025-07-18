@@ -31,8 +31,8 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 
 import java.util.UUID;
 
-import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.base.messaging.AbstractQueueIT;
+import org.alfresco.transform.client.model.TransformRequest;
 
 public class MiscQueueIT extends AbstractQueueIT
 {
@@ -40,16 +40,16 @@ public class MiscQueueIT extends AbstractQueueIT
     protected TransformRequest buildRequest()
     {
         return TransformRequest
-            .builder()
-            .withRequestId(UUID.randomUUID().toString())
-            .withSourceMediaType(MIMETYPE_HTML)
-            .withTargetMediaType(MIMETYPE_TEXT_PLAIN)
-            .withTargetExtension("txt")
-            .withSchema(1)
-            .withClientData("ACS")
-            .withSourceReference(UUID.randomUUID().toString())
-            .withSourceSize(32L)
-            .withInternalContextForTransformEngineTests()
-            .build();
+                .builder()
+                .withRequestId(UUID.randomUUID().toString())
+                .withSourceMediaType(MIMETYPE_HTML)
+                .withTargetMediaType(MIMETYPE_TEXT_PLAIN)
+                .withTargetExtension("txt")
+                .withSchema(1)
+                .withClientData("ACS")
+                .withSourceReference(UUID.randomUUID().toString())
+                .withSourceSize(32L)
+                .withInternalContextForTransformEngineTests()
+                .build();
     }
 }

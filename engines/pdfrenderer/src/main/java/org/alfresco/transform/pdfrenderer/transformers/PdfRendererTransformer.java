@@ -26,20 +26,6 @@
  */
 package org.alfresco.transform.pdfrenderer.transformers;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.executors.AbstractCommandExecutor;
-import org.alfresco.transform.base.executors.RuntimeExec;
-import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transform.pdfrenderer.PdfRendererOptionsBuilder;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import jakarta.annotation.PostConstruct;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.alfresco.transform.base.util.Util.stringToLong;
 import static org.alfresco.transform.common.RequestParamMap.ALLOW_PDF_ENLARGEMENT;
 import static org.alfresco.transform.common.RequestParamMap.HEIGHT_REQUEST_PARAM;
@@ -48,9 +34,23 @@ import static org.alfresco.transform.common.RequestParamMap.PAGE_REQUEST_PARAM;
 import static org.alfresco.transform.common.RequestParamMap.TIMEOUT;
 import static org.alfresco.transform.common.RequestParamMap.WIDTH_REQUEST_PARAM;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.executors.AbstractCommandExecutor;
+import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
+import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.pdfrenderer.PdfRendererOptionsBuilder;
+
 /**
- * CommandExecutor implementation for running PDF Renderer transformations. It runs the
- * transformation logic as a separate Shell process.
+ * CommandExecutor implementation for running PDF Renderer transformations. It runs the transformation logic as a separate Shell process.
  */
 @Component
 public class PdfRendererTransformer extends AbstractCommandExecutor implements CustomTransformerFileAdaptor
@@ -69,7 +69,8 @@ public class PdfRendererTransformer extends AbstractCommandExecutor implements C
         super.checkCommand = createCheckCommand();
     }
 
-    @Override public String getTransformerName()
+    @Override
+    public String getTransformerName()
     {
         return "pdfrenderer";
     }
@@ -103,7 +104,7 @@ public class PdfRendererTransformer extends AbstractCommandExecutor implements C
 
     @Override
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                          File sourceFile, File targetFile, TransformManager transformManager) throws TransformException
+            File sourceFile, File targetFile, TransformManager transformManager) throws TransformException
     {
         final String options = PdfRendererOptionsBuilder
                 .builder()
