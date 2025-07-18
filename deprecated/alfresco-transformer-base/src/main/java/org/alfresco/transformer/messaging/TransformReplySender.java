@@ -28,20 +28,20 @@ package org.alfresco.transformer.messaging;
 
 import jakarta.jms.Destination;
 
-import org.alfresco.transform.client.model.TransformReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.transform.client.model.TransformReply;
+
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * TODO: Duplicated from the Router
- * TransformReplySender Bean
- * <p/>
- * JMS message sender/publisher
+ *             TODO: Duplicated from the Router TransformReplySender Bean
+ *             <p/>
+ *             JMS message sender/publisher
  *
  * @author Cezar Leahu
  */
@@ -65,7 +65,7 @@ public class TransformReplySender
         {
             try
             {
-                //jmsTemplate.setSessionTransacted(true); // do we need this?
+                // jmsTemplate.setSessionTransacted(true); // do we need this?
                 jmsTemplate.convertAndSend(destination, reply, m -> {
                     m.setJMSCorrelationID(correlationId);
                     return m;

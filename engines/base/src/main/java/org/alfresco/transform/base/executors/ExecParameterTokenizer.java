@@ -35,24 +35,17 @@ import java.util.Objects;
 import java.util.StringTokenizer;
 
 /**
- * This class is used to tokenize strings used as parameters for {@link RuntimeExec} objects.
- * Examples of such strings are as follows (ImageMagick-like parameters):
+ * This class is used to tokenize strings used as parameters for {@link RuntimeExec} objects. Examples of such strings are as follows (ImageMagick-like parameters):
  * <ul>
  * <li><tt>-font Helvetica -pointsize 50</tt></li>
  * <li><tt>-font Helvetica -pointsize 50 -draw "circle 100,100 150,150"</tt></li>
  * <li><tt>-font Helvetica -pointsize 50 -draw "gravity south fill black text 0,12 'CopyRight'"</tt></li>
  * </ul>
- * The first is the simple case which would be parsed into Strings as follows:
- * <tt>"-font", "Helvetica", "-pointsize", "50"</tt>
+ * The first is the simple case which would be parsed into Strings as follows: <tt>"-font", "Helvetica", "-pointsize", "50"</tt>
  * <p/>
- * The second is more complex in that it includes a quoted parameter, which would be parsed as a single String:
- * <tt>"-font", "Helvetica", "-pointsize", "50", "circle 100,100 150,150"</tt>
- * Note however that the quotation characters will be stripped from the token.
+ * The second is more complex in that it includes a quoted parameter, which would be parsed as a single String: <tt>"-font", "Helvetica", "-pointsize", "50", "circle 100,100 150,150"</tt> Note however that the quotation characters will be stripped from the token.
  * <p/>
- * The third shows an example with embedded quotation marks, which would parse to:
- * <tt>"-font", "Helvetica", "-pointsize", "50", "gravity south fill black text 0,12 'CopyRight'"</tt>
- * In this case, the embedded quotation marks (which must be different from those surrounding the parameter)
- * are preserved in the extracted token.
+ * The third shows an example with embedded quotation marks, which would parse to: <tt>"-font", "Helvetica", "-pointsize", "50", "gravity south fill black text 0,12 'CopyRight'"</tt> In this case, the embedded quotation marks (which must be different from those surrounding the parameter) are preserved in the extracted token.
  * <p/>
  * The class does not understand escaped quotes such as <tt>p1 p2 "a b c \"hello\" d" p4</tt>
  *
@@ -77,15 +70,12 @@ public class ExecParameterTokenizer
     }
 
     /**
-     * This method returns the tokens in a parameter string.
-     * Any tokens not contained within single or double quotes will be tokenized in the normal
-     * way i.e. by using whitespace separators and the standard StringTokenizer algorithm.
-     * Any tokens which are contained within single or double quotes will be returned as single
-     * String instances and will have their quote marks removed.
+     * This method returns the tokens in a parameter string. Any tokens not contained within single or double quotes will be tokenized in the normal way i.e. by using whitespace separators and the standard StringTokenizer algorithm. Any tokens which are contained within single or double quotes will be returned as single String instances and will have their quote marks removed.
      * <p/>
      * See above for examples.
      *
-     * @throws NullPointerException if the string to be tokenized was null.
+     * @throws NullPointerException
+     *             if the string to be tokenized was null.
      */
     public List<String> getAllTokens()
     {
@@ -103,7 +93,7 @@ public class ExecParameterTokenizer
             {
                 // Contains no quotes.
                 for (StringTokenizer standardTokenizer = new StringTokenizer(
-                    str); standardTokenizer.hasMoreTokens(); )
+                        str); standardTokenizer.hasMoreTokens();)
                 {
                     tokens.add(standardTokenizer.nextToken());
                 }
@@ -114,7 +104,7 @@ public class ExecParameterTokenizer
                 // So we need to identify the quoted regions within the string.
                 List<Pair<Integer, Integer>> quotedRegions = new ArrayList<>();
 
-                for (Pair<Integer, Integer> next = identifyNextQuotedRegion(str, 0); next != null; )
+                for (Pair<Integer, Integer> next = identifyNextQuotedRegion(str, 0); next != null;)
                 {
                     quotedRegions.add(next);
                     next = identifyNextQuotedRegion(str, next.getSecond() + 1);
@@ -135,12 +125,10 @@ public class ExecParameterTokenizer
     }
 
     /**
-     * The substrings will be a list of quoted and unquoted substrings.
-     * The unquoted ones need to be further tokenized in the normal way.
-     * The quoted ones must not be tokenized, but need their quotes stripped off.
+     * The substrings will be a list of quoted and unquoted substrings. The unquoted ones need to be further tokenized in the normal way. The quoted ones must not be tokenized, but need their quotes stripped off.
      */
     private List<Substring> getSubstrings(String str,
-        List<Pair<Integer, Integer>> quotedRegionIndices)
+            List<Pair<Integer, Integer>> quotedRegionIndices)
     {
         List<Substring> result = new ArrayList<>();
 
@@ -151,10 +139,10 @@ public class ExecParameterTokenizer
             {
                 int startIndexOfNextQuotedRegion = nextQuotedRegionIndices.getFirst() - 1;
                 result.add(new UnquotedSubstring(
-                    str.substring(cursorPosition, startIndexOfNextQuotedRegion)));
+                        str.substring(cursorPosition, startIndexOfNextQuotedRegion)));
             }
             result.add(new QuotedSubstring(str.substring(nextQuotedRegionIndices.getFirst(),
-                nextQuotedRegionIndices.getSecond())));
+                    nextQuotedRegionIndices.getSecond())));
             cursorPosition = nextQuotedRegionIndices.getSecond();
         }
 
@@ -198,12 +186,12 @@ public class ExecParameterTokenizer
     }
 
     private Pair<Integer, Integer> findIndexOfClosingQuote(String str, int indexOfStartingQuote,
-        char quoteChar)
+            char quoteChar)
     {
         // So we know which type of quote char we're dealing with. Either ' or ".
         // Now we need to find the closing quote.
         int indexAfterClosingQuote = str.indexOf(quoteChar,
-            indexOfStartingQuote + 1) + 1; // + 1 to search after opening quote. + 1 to give result including closing quote.
+                indexOfStartingQuote + 1) + 1; // + 1 to search after opening quote. + 1 to give result including closing quote.
 
         if (indexAfterClosingQuote == 0) // -1 + 1
         {
@@ -295,8 +283,10 @@ public class ExecParameterTokenizer
         /**
          * Make a new one.
          *
-         * @param first  The first member.
-         * @param second The second member.
+         * @param first
+         *            The first member.
+         * @param second
+         *            The second member.
          */
         public Pair(F first, S second)
         {
@@ -334,16 +324,20 @@ public class ExecParameterTokenizer
             this.second = second;
         }
 
-        @Override public boolean equals(Object o)
+        @Override
+        public boolean equals(Object o)
         {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
             Pair<?, ?> pair = (Pair<?, ?>) o;
             return Objects.equals(first, pair.first) &&
-                   Objects.equals(second, pair.second);
+                    Objects.equals(second, pair.second);
         }
 
-        @Override public int hashCode()
+        @Override
+        public int hashCode()
         {
             return Objects.hash(first, second);
         }
@@ -355,4 +349,3 @@ public class ExecParameterTokenizer
         }
     }
 }
-

@@ -31,17 +31,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.config.TransformOption;
-import org.alfresco.transform.config.Transformer;
-import org.alfresco.transform.config.SupportedSourceAndTarget;
-import org.alfresco.transform.config.TransformStep;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import org.alfresco.transform.config.SupportedSourceAndTarget;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.TransformOption;
+import org.alfresco.transform.config.TransformStep;
+import org.alfresco.transform.config.Transformer;
 
 public class TransformConfigReaderYamlTest
 {
@@ -55,8 +55,8 @@ public class TransformConfigReaderYamlTest
         assertNotNull(transformers);
         assertEquals(Collections.emptyList(), transformers);
     }
- 
-     @Test
+
+    @Test
     public void testMixedRoutesFile() throws Exception
     {
         final List<Transformer> expected = prepareSample4();
@@ -79,167 +79,156 @@ public class TransformConfigReaderYamlTest
     {
         var result = new ArrayList<Transformer>();
         result.add(Transformer.builder()
-                    .withTransformerName("CORE_AIO")
-                    .withSupportedSourceAndTargetList(ImmutableSet.of(
+                .withTransformerName("CORE_AIO")
+                .withSupportedSourceAndTargetList(ImmutableSet.of(
                         SupportedSourceAndTarget.builder()
-                            .withSourceMediaType("image/gif")
-                            .withTargetMediaType("image/gif")
-                            .build()
-                        ))
-                    .withTransformOptions(ImmutableSet.of("imageMagickOptions"))     
-                    .build());
+                                .withSourceMediaType("image/gif")
+                                .withTargetMediaType("image/gif")
+                                .build()))
+                .withTransformOptions(ImmutableSet.of("imageMagickOptions"))
+                .build());
 
         result.add(Transformer.builder()
-                    .withTransformerName("IMAGEMAGICK")
-                    .withSupportedSourceAndTargetList(ImmutableSet.of(
+                .withTransformerName("IMAGEMAGICK")
+                .withSupportedSourceAndTargetList(ImmutableSet.of(
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("image/gif")
-                        .withTargetMediaType("image/gif")
-                        .build()
-                        ))
-                    .withTransformOptions(ImmutableSet.of("imageMagickOptions"))     
-                    .build());
+                                .withSourceMediaType("image/gif")
+                                .withTargetMediaType("image/gif")
+                                .build()))
+                .withTransformOptions(ImmutableSet.of("imageMagickOptions"))
+                .build());
 
         result.add(Transformer.builder()
-                    .withTransformerName("CORE_AIO")
-                    .withSupportedSourceAndTargetList(ImmutableSet.of(
+                .withTransformerName("CORE_AIO")
+                .withSupportedSourceAndTargetList(ImmutableSet.of(
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("application/msword")
-                        .withTargetMediaType("application/pdf")
-                        .withMaxSourceSizeBytes(18874368L)
-                        .build()
-                        ))
-                    .build());
+                                .withSourceMediaType("application/msword")
+                                .withTargetMediaType("application/pdf")
+                                .withMaxSourceSizeBytes(18874368L)
+                                .build()))
+                .build());
 
         result.add(Transformer.builder()
-                    .withTransformerName("PDF_RENDERER")
-                    .withSupportedSourceAndTargetList(ImmutableSet.of(
+                .withTransformerName("PDF_RENDERER")
+                .withSupportedSourceAndTargetList(ImmutableSet.of(
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("application/vnd.ms-powerpoint")
-                        .withTargetMediaType("application/pdf")
-                        .withPriority(55)
-                        .withMaxSourceSizeBytes(50331648L)
-                        .build()
-                        ))
-                    .build());
+                                .withSourceMediaType("application/vnd.ms-powerpoint")
+                                .withTargetMediaType("application/pdf")
+                                .withPriority(55)
+                                .withMaxSourceSizeBytes(50331648L)
+                                .build()))
+                .build());
 
         result.add(Transformer.builder()
-                    .withTransformerName("CORE_AIO")
-                    .withSupportedSourceAndTargetList(ImmutableSet.of(
+                .withTransformerName("CORE_AIO")
+                .withSupportedSourceAndTargetList(ImmutableSet.of(
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/plain")
-                        .withTargetMediaType("text/plain")
-                        .build(),
+                                .withSourceMediaType("text/plain")
+                                .withTargetMediaType("text/plain")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/mediawiki")
-                        .withTargetMediaType("text/plain")
-                        .build(),
+                                .withSourceMediaType("text/mediawiki")
+                                .withTargetMediaType("text/plain")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/css")
-                        .withTargetMediaType("text/plain")
-                        .build(),
+                                .withSourceMediaType("text/css")
+                                .withTargetMediaType("text/plain")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/csv")
-                        .withTargetMediaType("text/plain")
-                        .build(),
+                                .withSourceMediaType("text/csv")
+                                .withTargetMediaType("text/plain")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/xml")
-                        .withTargetMediaType("text/plain")
-                        .build(),
+                                .withSourceMediaType("text/xml")
+                                .withTargetMediaType("text/plain")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/html")
-                        .withTargetMediaType("text/plain")
-                        .build(),
+                                .withSourceMediaType("text/html")
+                                .withTargetMediaType("text/plain")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("application/x-javascript")
-                        .withTargetMediaType("text/plain")
-                        .build(),
+                                .withSourceMediaType("application/x-javascript")
+                                .withTargetMediaType("text/plain")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("application/dita+xml")
-                        .withTargetMediaType("text/plain")
-                        .build()
-                        ))
-                    .withTransformOptions(ImmutableSet.of("stringOptions"))     
-                    .build());
+                                .withSourceMediaType("application/dita+xml")
+                                .withTargetMediaType("text/plain")
+                                .build()))
+                .withTransformOptions(ImmutableSet.of("stringOptions"))
+                .build());
 
         result.add(Transformer.builder()
-                    .withTransformerName("officeToImageViaPdf")
-                    .withTransformerPipeline(ImmutableList.of(
+                .withTransformerName("officeToImageViaPdf")
+                .withTransformerPipeline(ImmutableList.of(
                         new TransformStep("libreoffice", "application/pdf"),
-                        new TransformStep("pdfToImageViaPng", null)
-                        ))
-                    .withTransformOptions(ImmutableSet.of(
+                        new TransformStep("pdfToImageViaPng", null)))
+                .withTransformOptions(ImmutableSet.of(
                         "pdfRendererOptions",
-                        "imageMagickOptions"
-                        ))
-                    .build());
-                    
+                        "imageMagickOptions"))
+                .build());
+
         result.add(Transformer.builder()
-                    .withTransformerName("textToImageViaPdf")
-                    .withTransformerPipeline(ImmutableList.of(
+                .withTransformerName("textToImageViaPdf")
+                .withTransformerPipeline(ImmutableList.of(
                         new TransformStep("libreoffice", "application/pdf"),
-                        new TransformStep("pdfToImageViaPng", null)
-                        ))
-                    .withTransformOptions(ImmutableSet.of(
+                        new TransformStep("pdfToImageViaPng", null)))
+                .withTransformOptions(ImmutableSet.of(
                         "pdfRendererOptions",
-                        "imageMagickOptions"
-                        ))
-                    .withSupportedSourceAndTargetList(ImmutableSet.of(
+                        "imageMagickOptions"))
+                .withSupportedSourceAndTargetList(ImmutableSet.of(
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/plain")
-                        .withTargetMediaType("image/gif")
-                        .build(),
+                                .withSourceMediaType("text/plain")
+                                .withTargetMediaType("image/gif")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/plain")
-                        .withTargetMediaType("image/jpeg")
-                        .build(),
+                                .withSourceMediaType("text/plain")
+                                .withTargetMediaType("image/jpeg")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/plain")
-                        .withTargetMediaType("image/tiff")
-                        .build(),
+                                .withSourceMediaType("text/plain")
+                                .withTargetMediaType("image/tiff")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/plain")
-                        .withTargetMediaType("image/png")
-                        .build(),
+                                .withSourceMediaType("text/plain")
+                                .withTargetMediaType("image/png")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/csv")
-                        .withTargetMediaType("image/gif")
-                        .build(),
+                                .withSourceMediaType("text/csv")
+                                .withTargetMediaType("image/gif")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/csv")
-                        .withTargetMediaType("image/jpeg")
-                        .build(),
+                                .withSourceMediaType("text/csv")
+                                .withTargetMediaType("image/jpeg")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/csv")
-                        .withTargetMediaType("image/tiff")
-                        .build(),
+                                .withSourceMediaType("text/csv")
+                                .withTargetMediaType("image/tiff")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/csv")
-                        .withTargetMediaType("image/png")
-                        .build(),
+                                .withSourceMediaType("text/csv")
+                                .withTargetMediaType("image/png")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/xml")
-                        .withTargetMediaType("image/gif")
-                        .build(),
+                                .withSourceMediaType("text/xml")
+                                .withTargetMediaType("image/gif")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/xml")
-                        .withTargetMediaType("image/jpeg")
-                        .build(),
+                                .withSourceMediaType("text/xml")
+                                .withTargetMediaType("image/jpeg")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/xml")
-                        .withTargetMediaType("image/tiff")
-                        .build(),
+                                .withSourceMediaType("text/xml")
+                                .withTargetMediaType("image/tiff")
+                                .build(),
                         SupportedSourceAndTarget.builder()
-                        .withSourceMediaType("text/xml")
-                        .withTargetMediaType("image/png")
-                        .build()
-                        ))
-                    .withTransformOptions(ImmutableSet.of(
+                                .withSourceMediaType("text/xml")
+                                .withTargetMediaType("image/png")
+                                .build()))
+                .withTransformOptions(ImmutableSet.of(
                         "pdfRendererOptions",
-                        "imageMagickOptions"
-                        ))
-                    .build());
-                    
+                        "imageMagickOptions"))
+                .build());
+
         return result;
     }
 }

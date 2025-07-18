@@ -26,8 +26,33 @@
  */
 package org.alfresco.transform.tika.transformers;
 
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_TIFF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_CSV;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_XHTML;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_XML;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.net.URL;
+import java.util.List;
+import java.util.Objects;
+import java.util.regex.Pattern;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.sax.TransformerHandler;
+import javax.xml.transform.stream.StreamResult;
+
 import com.google.common.collect.ImmutableList;
-import org.alfresco.transform.tika.parsers.TikaOfficeDetectParser;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.extractor.DocumentSelector;
@@ -49,31 +74,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.sax.SAXTransformerFactory;
-import javax.xml.transform.sax.TransformerHandler;
-import javax.xml.transform.stream.StreamResult;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.net.URL;
-import java.util.List;
-import java.util.Objects;
-import java.util.regex.Pattern;
-
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_TIFF;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_CSV;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_XHTML;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_XML;
+import org.alfresco.transform.tika.parsers.TikaOfficeDetectParser;
 
 @Component
 public class Tika
@@ -113,10 +114,9 @@ public class Tika
     public static final Parser tikaOfficeDetectParser = new TikaOfficeDetectParser();
     public final PDFParserConfig pdfParserConfig = new PDFParserConfig();
 
-    public static final DocumentSelector pdfBoxEmbededDocumentSelector = new DocumentSelector()
-    {
+    public static final DocumentSelector pdfBoxEmbededDocumentSelector = new DocumentSelector() {
         private final List<String> disabledMediaTypes = ImmutableList.of(MIMETYPE_IMAGE_JPEG,
-            MIMETYPE_IMAGE_TIFF, MIMETYPE_IMAGE_PNG);
+                MIMETYPE_IMAGE_TIFF, MIMETYPE_IMAGE_PNG);
 
         @Override
         public boolean select(Metadata metadata)
@@ -198,7 +198,7 @@ public class Tika
         notExtractBookmarksText = notExtractBookmarksText == null ? false : notExtractBookmarksText;
 
         transform(parser, documentSelector, includeContents, notExtractBookmarksText, inputStream,
-            outputStream, targetMimetype, targetEncoding);
+                outputStream, targetMimetype, targetEncoding);
     }
 
     private String getValue(String arg, boolean valueExpected, Object value, String optionName)
@@ -220,23 +220,23 @@ public class Tika
     }
 
     private void transform(Parser parser, DocumentSelector documentSelector,
-        Boolean includeContents,
-        Boolean notExtractBookmarksText,
-        InputStream inputStream,
-        OutputStream outputStream, String targetMimetype, String targetEncoding)
+            Boolean includeContents,
+            Boolean notExtractBookmarksText,
+            InputStream inputStream,
+            OutputStream outputStream, String targetMimetype, String targetEncoding)
     {
         try (Writer ow = new BufferedWriter(new OutputStreamWriter(outputStream, targetEncoding)))
         {
             Metadata metadata = new Metadata();
             ParseContext context = buildParseContext(documentSelector, includeContents,
-                notExtractBookmarksText);
+                    notExtractBookmarksText);
             ContentHandler handler = getContentHandler(targetMimetype, ow);
 
             parser.parse(inputStream, handler, metadata, context);
         }
         catch (UnsupportedEncodingException e)
         {
-            throw new IllegalArgumentException("Unsupported encoding "+e.getMessage(), e);
+            throw new IllegalArgumentException("Unsupported encoding " + e.getMessage(), e);
         }
         catch (SAXException | TikaException | IOException e)
         {
@@ -268,7 +268,7 @@ public class Tika
                     return new ExpandedTitleContentHandler(transformerHandler);
                 }
                 else if (MIMETYPE_XHTML.equals(targetMimetype) ||
-                         MIMETYPE_XML.equals(targetMimetype))
+                        MIMETYPE_XML.equals(targetMimetype))
                 {
                     transformerHandler.getTransformer().setOutputProperty(OutputKeys.METHOD, XML);
                 }
@@ -307,7 +307,7 @@ public class Tika
 
         @Override
         public void ignorableWhitespace(char[] ch, int start, int length)
-            throws SAXException
+                throws SAXException
         {
             if (length == 1 && ch[0] == '\t')
             {
@@ -321,7 +321,7 @@ public class Tika
 
         @Override
         public void characters(char[] ch, int start, int length)
-            throws SAXException
+                throws SAXException
         {
             if (inCell)
             {
@@ -357,7 +357,7 @@ public class Tika
 
         @Override
         public void startElement(String uri, String localName, String name,
-            Attributes atts) throws SAXException
+                Attributes atts) throws SAXException
         {
             if (localName.equals("td"))
             {
@@ -376,7 +376,7 @@ public class Tika
 
         @Override
         public void endElement(String uri, String localName, String name)
-            throws SAXException
+                throws SAXException
         {
             if (localName.equals("td"))
             {
@@ -395,7 +395,7 @@ public class Tika
     }
 
     private ParseContext buildParseContext(DocumentSelector documentSelector,
-        Boolean includeContents, Boolean notExtractBookmarksText)
+            Boolean includeContents, Boolean notExtractBookmarksText)
     {
         ParseContext context = new ParseContext();
 

@@ -28,9 +28,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * Represents an individual transformer option or group of options that are required or optional (default).
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
-              include = JsonTypeInfo.As.WRAPPER_OBJECT)
+        include = JsonTypeInfo.As.WRAPPER_OBJECT)
 @JsonSubTypes({@JsonSubTypes.Type(value = TransformOptionValue.class, name = "value"),
-               @JsonSubTypes.Type(value = TransformOptionGroup.class, name = "group")})
+        @JsonSubTypes.Type(value = TransformOptionGroup.class, name = "group")})
 public interface TransformOption
 {
     boolean isRequired();

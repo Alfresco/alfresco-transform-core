@@ -21,13 +21,12 @@
  */
 package org.alfresco.transform.registry;
 
-import org.alfresco.transform.config.OverrideSupported;
-
 import java.util.Objects;
 
+import org.alfresco.transform.config.OverrideSupported;
+
 /**
- * Key based using {@code transformerName} and {@code sourceMediaType} used as a key to lookup default values held in
- * {@link OverrideSupported} objects.
+ * Key based using {@code transformerName} and {@code sourceMediaType} used as a key to lookup default values held in {@link OverrideSupported} objects.
  */
 class TransformerAndSourceType
 {
@@ -71,9 +70,9 @@ class TransformerAndSourceType
         {
             return false;
         }
-        TransformerAndSourceType that = (TransformerAndSourceType)o;
+        TransformerAndSourceType that = (TransformerAndSourceType) o;
         return Objects.equals(transformerName, that.transformerName) &&
-               Objects.equals(sourceMediaType, that.sourceMediaType);
+                Objects.equals(sourceMediaType, that.sourceMediaType);
     }
 
     @Override

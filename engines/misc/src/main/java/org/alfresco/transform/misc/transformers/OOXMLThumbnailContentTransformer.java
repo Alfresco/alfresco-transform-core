@@ -26,8 +26,13 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.Map;
+
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.openxml4j.opc.PackageRelationship;
@@ -37,17 +42,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.Map;
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 
 /**
- * Extracts out Thumbnail JPEGs from OOXML files for thumbnailing and previewing.
- * This transformer will only work for OOXML files where thumbnailing was enabled,
- * which isn't on by default on Windows, but is more common on Mac.
+ * Extracts out Thumbnail JPEGs from OOXML files for thumbnailing and previewing. This transformer will only work for OOXML files where thumbnailing was enabled, which isn't on by default on Windows, but is more common on Mac.
  *
  * <p>
  * This code is based on a class of the same name originally implemented in alfresco-repository.
@@ -60,7 +59,7 @@ import java.util.Map;
 public class OOXMLThumbnailContentTransformer implements CustomTransformerFileAdaptor
 {
     private static final Logger logger = LoggerFactory.getLogger(
-        OOXMLThumbnailContentTransformer.class);
+            OOXMLThumbnailContentTransformer.class);
 
     public String getTransformerName()
     {
@@ -69,12 +68,12 @@ public class OOXMLThumbnailContentTransformer implements CustomTransformerFileAd
 
     @Override
     public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
-                          final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
+            final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
     {
         if (logger.isDebugEnabled())
         {
             logger.debug("Performing OOXML to jpeg transform with sourceMimetype=" + sourceMimetype
-                         + " targetMimetype=" + targetMimetype);
+                    + " targetMimetype=" + targetMimetype);
         }
 
         try (OPCPackage pkg = OPCPackage.open(sourceFile.getPath()))
@@ -82,7 +81,7 @@ public class OOXMLThumbnailContentTransformer implements CustomTransformerFileAd
 
             // Does it have a thumbnail?
             PackageRelationshipCollection rels = pkg.getRelationshipsByType(
-                PackageRelationshipTypes.THUMBNAIL);
+                    PackageRelationshipTypes.THUMBNAIL);
             if (rels.size() > 0)
             {
                 // Get the thumbnail part
@@ -98,7 +97,7 @@ public class OOXMLThumbnailContentTransformer implements CustomTransformerFileAd
             {
                 logger.debug("No thumbnail present in file.");
                 throw new Exception(
-                    "No thumbnail present in file, unable to generate " + targetMimetype);
+                        "No thumbnail present in file, unable to generate " + targetMimetype);
             }
         }
         catch (IOException e)
@@ -107,33 +106,7 @@ public class OOXMLThumbnailContentTransformer implements CustomTransformerFileAd
         }
     }
 
-    /*
-    // TODO Add this back to engine_config.json when the transformer is fixed for java 11
-    {
-      "transformerName": "ooxmlThumbnail",
-      "supportedSourceAndTargetList": [
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",    "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12",                           "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",    "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12",                           "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",  "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.ms-powerpoint.presentation.macroenabled.12",                 "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",     "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12",                    "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.template",      "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.ms-powerpoint.template.macroenabled.12",                     "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.ms-powerpoint.addin.macroenabled.12",                        "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide",         "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.ms-powerpoint.slide.macroenabled.12",                        "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",          "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template",       "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.ms-excel.sheet.macroenabled.12",                             "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12",                          "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12",                             "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12",                      "targetMediaType": "image/jpeg"}
-      ],
-      "transformOptions": [
-      ]
-    }
-     */
+    /* // TODO Add this back to engine_config.json when the transformer is fixed for java 11 { "transformerName": "ooxmlThumbnail", "supportedSourceAndTargetList": [ {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.ms-word.document.macroenabled.12", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.ms-word.template.macroenabled.12", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.ms-powerpoint.presentation.macroenabled.12", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow", "targetMediaType":
+     * "image/jpeg"}, {"sourceMediaType": "application/vnd.ms-powerpoint.slideshow.macroenabled.12", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.template", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.ms-powerpoint.template.macroenabled.12", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.ms-powerpoint.addin.macroenabled.12", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.openxmlformats-officedocument.presentationml.slide", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.ms-powerpoint.slide.macroenabled.12", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.template", "targetMediaType": "image/jpeg"}, {"sourceMediaType":
+     * "application/vnd.ms-excel.sheet.macroenabled.12", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.ms-excel.template.macroenabled.12", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.ms-excel.addin.macroenabled.12", "targetMediaType": "image/jpeg"}, {"sourceMediaType": "application/vnd.ms-excel.sheet.binary.macroenabled.12", "targetMediaType": "image/jpeg"} ], "transformOptions": [ ] } */
 }

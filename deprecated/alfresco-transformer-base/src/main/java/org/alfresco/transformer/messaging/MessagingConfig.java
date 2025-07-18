@@ -29,7 +29,6 @@ package org.alfresco.transformer.messaging;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Queue;
 
-import org.alfresco.transform.messages.TransformRequestValidator;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,14 +44,14 @@ import org.springframework.lang.NonNull;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import org.alfresco.transform.messages.TransformRequestValidator;
+
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * JMS and messaging configuration for the T-Engines. Contains the basic config in order to have the
- * T-Engine able to read from queues and send a reply back.
+ *             JMS and messaging configuration for the T-Engines. Contains the basic config in order to have the T-Engine able to read from queues and send a reply back.
  *
- * @author Lucian Tuca
- * created on 18/12/2018
+ * @author Lucian Tuca created on 18/12/2018
  */
 @Deprecated
 @Configuration
@@ -79,8 +78,8 @@ public class MessagingConfig implements JmsListenerConfigurer
     @Bean
     @ConditionalOnProperty(name = "activemq.url")
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(
-        final ConnectionFactory connectionFactory,
-        final TransformMessageConverter transformMessageConverter)
+            final ConnectionFactory connectionFactory,
+            final TransformMessageConverter transformMessageConverter)
     {
         final DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
@@ -102,10 +101,8 @@ public class MessagingConfig implements JmsListenerConfigurer
     @Bean
     @ConditionalOnProperty(name = "activemq.url")
     public Queue engineRequestQueue(
-        @Value("${queue.engineRequestQueue}") String engineRequestQueueValue)
+            @Value("${queue.engineRequestQueue}") String engineRequestQueueValue)
     {
         return new ActiveMQQueue(engineRequestQueueValue);
     }
 }
-
-

@@ -37,7 +37,7 @@ public class TransformReply implements Serializable
     private int schema;
     private InternalContext internalContext;
 
-    //region [Accessors]
+    // region [Accessors]
     public String getRequestId()
     {
         return requestId;
@@ -118,7 +118,7 @@ public class TransformReply implements Serializable
         this.internalContext = internalContext;
     }
 
-    //endregion
+    // endregion
 
     @Override
     public boolean equals(Object o)
@@ -137,18 +137,19 @@ public class TransformReply implements Serializable
         return Objects.hash(requestId);
     }
 
-    @Override public String toString()
+    @Override
+    public String toString()
     {
         return "TransformReply{" +
-               "requestId='" + requestId + '\'' +
-               ", status=" + status +
-               ", errorDetails='" + errorDetails + '\'' +
-               ", sourceReference='" + sourceReference + '\'' +
-               ", targetReference='" + targetReference + '\'' +
-               ", clientData='" + clientData + '\'' +
-               ", schema=" + schema +
-               ", internalContext=" + internalContext +
-               '}';
+                "requestId='" + requestId + '\'' +
+                ", status=" + status +
+                ", errorDetails='" + errorDetails + '\'' +
+                ", sourceReference='" + sourceReference + '\'' +
+                ", targetReference='" + targetReference + '\'' +
+                ", clientData='" + clientData + '\'' +
+                ", schema=" + schema +
+                ", internalContext=" + internalContext +
+                '}';
     }
 
     public static Builder builder()
@@ -160,7 +161,8 @@ public class TransformReply implements Serializable
     {
         private final TransformReply reply = new TransformReply();
 
-        private Builder() {}
+        private Builder()
+        {}
 
         public Builder withRequestId(final String requestId)
         {

@@ -31,16 +31,17 @@ import java.util.Objects;
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * TODO: Copied from org.alfresco.store.entity (alfresco-shared-file-store). To be discussed
+ *             TODO: Copied from org.alfresco.store.entity (alfresco-shared-file-store). To be discussed
  *
- * POJO that represents content reference ({@link java.util.UUID})
+ *             POJO that represents content reference ({@link java.util.UUID})
  */
 @Deprecated
 public class FileRefEntity
 {
     private String fileRef;
 
-    public FileRefEntity() {}
+    public FileRefEntity()
+    {}
 
     public FileRefEntity(String fileRef)
     {
@@ -60,8 +61,10 @@ public class FileRefEntity
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         FileRefEntity that = (FileRefEntity) o;
         return Objects.equals(fileRef, that.fileRef);
     }

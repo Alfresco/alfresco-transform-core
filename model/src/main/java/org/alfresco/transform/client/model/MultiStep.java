@@ -28,8 +28,7 @@ import java.util.List;
 /**
  * Holds required contextual information for a multi-step transform.
  *
- * @author Lucian Tuca
- * created on 19/12/2018
+ * @author Lucian Tuca created on 19/12/2018
  */
 // This class is in the package org.alfresco.transform.messages in HxP because that is more readable, but in
 // org.alfresco.transform.client.model in Alfresco for backward compatibility.
@@ -71,14 +70,15 @@ public class MultiStep implements Serializable
         this.transformsToBeDone = transformsToBeDone;
     }
 
-    //endregion
+    // endregion
 
-    @Override public String toString()
+    @Override
+    public String toString()
     {
         return "MultiStep{" +
-               "initialRequestId='" + initialRequestId + '\'' +
-               ", initialSourceMediaType='" + initialSourceMediaType + '\'' +
-               ", transformsToBeDone=" + transformsToBeDone +
-               '}';
+                "initialRequestId='" + initialRequestId + '\'' +
+                ", initialSourceMediaType='" + initialSourceMediaType + '\'' +
+                ", transformsToBeDone=" + transformsToBeDone +
+                '}';
     }
 }

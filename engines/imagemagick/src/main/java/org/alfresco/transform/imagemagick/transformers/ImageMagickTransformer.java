@@ -52,11 +52,15 @@ import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.THUMBNAIL;
 import static org.alfresco.transform.common.RequestParamMap.TIMEOUT;
 
-import jakarta.annotation.PostConstruct;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import jakarta.annotation.PostConstruct;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.executors.AbstractCommandExecutor;
@@ -64,13 +68,9 @@ import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.imagemagick.ImageMagickOptionsBuilder;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
- * Converts image files into different types of images. Transformer supports multi-page images and allows to specify via parameters `startPage` and `endPage` range of pages that should be converted.
- * In case of a one-page target image type (like `jpeg` or `png`) parameters `startPage` and `endPage` will be set to 0 by default - this means that only first page will be converted.
+ * Converts image files into different types of images. Transformer supports multi-page images and allows to specify via parameters `startPage` and `endPage` range of pages that should be converted. In case of a one-page target image type (like `jpeg` or `png`) parameters `startPage` and `endPage` will be set to 0 by default - this means that only first page will be converted.
  */
 @Component
 public class ImageMagickTransformer extends AbstractCommandExecutor implements CustomTransformerFileAdaptor
@@ -122,7 +122,7 @@ public class ImageMagickTransformer extends AbstractCommandExecutor implements C
         RuntimeExec runtimeExec = new RuntimeExec();
         Map<String, String[]> commandsAndArguments = new HashMap<>();
         commandsAndArguments.put(".*",
-            new String[]{exe, "${source}", "SPLIT:${options}", "-strip", "-quiet", "${target}"});
+                new String[]{exe, "${source}", "SPLIT:${options}", "-strip", "-quiet", "${target}"});
         runtimeExec.setCommandsAndArguments(commandsAndArguments);
 
         Map<String, String> processProperties = new HashMap<>();
@@ -130,7 +130,7 @@ public class ImageMagickTransformer extends AbstractCommandExecutor implements C
         processProperties.put("DYLD_FALLBACK_LIBRARY_PATH", dyn);
         processProperties.put("LD_LIBRARY_PATH", dyn);
 
-        //Optional properties (see also https://imagemagick.org/script/resources.php#environment)
+        // Optional properties (see also https://imagemagick.org/script/resources.php#environment)
         if (coders != null && !coders.isBlank())
         {
             processProperties.put("MAGICK_CODER_MODULE_PATH", coders);
@@ -146,7 +146,7 @@ public class ImageMagickTransformer extends AbstractCommandExecutor implements C
         runtimeExec.setDefaultProperties(defaultProperties);
 
         runtimeExec.setErrorCodes(
-            "1,2,255,400,405,410,415,420,425,430,435,440,450,455,460,465,470,475,480,485,490,495,499,700,705,710,715,720,725,730,735,740,750,755,760,765,770,775,780,785,790,795,799");
+                "1,2,255,400,405,410,415,420,425,430,435,440,450,455,460,465,470,475,480,485,490,495,499,700,705,710,715,720,725,730,735,740,750,755,760,765,770,775,780,785,790,795,799");
 
         return runtimeExec;
     }
@@ -163,7 +163,7 @@ public class ImageMagickTransformer extends AbstractCommandExecutor implements C
 
     @Override
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                          File sourceFile, File targetFile, TransformManager transformManager) throws TransformException
+            File sourceFile, File targetFile, TransformManager transformManager) throws TransformException
     {
         String startPageString = transformOptions.get(START_PAGE);
         String endPageString = transformOptions.get(END_PAGE);
@@ -202,8 +202,7 @@ public class ImageMagickTransformer extends AbstractCommandExecutor implements C
 
         String pageRange = calculatePageRange(
                 stringToInteger(startPageString),
-                stringToInteger(endPageString)
-        );
+                stringToInteger(endPageString));
 
         Long timeout = stringToLong(transformOptions.get(TIMEOUT));
 
@@ -214,10 +213,10 @@ public class ImageMagickTransformer extends AbstractCommandExecutor implements C
     {
         return startPage == null
                 ? endPage == null
-                ? ""
-                : "[" + endPage + ']'
+                        ? ""
+                        : "[" + endPage + ']'
                 : endPage == null || startPage.equals(endPage)
-                ? "[" + startPage + ']'
-                : "[" + startPage + '-' + endPage + ']';
+                        ? "[" + startPage + ']'
+                        : "[" + startPage + '-' + endPage + ']';
     }
 }

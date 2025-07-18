@@ -26,13 +26,14 @@
  */
 package org.alfresco.transform.example;
 
-import org.alfresco.transform.base.CustomTransformer;
-import org.alfresco.transform.base.TransformManager;
-import org.springframework.stereotype.Component;
-
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformManager;
 
 @Component
 public class HelloTransformer implements CustomTransformer

@@ -26,7 +26,15 @@
  */
 package org.alfresco.transform.base.config;
 
-import org.alfresco.transform.base.WebClientBuilderAdjuster;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -52,17 +60,11 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
+import org.alfresco.transform.base.WebClientBuilderAdjuster;
 
 @Configuration
-public class MTLSConfig {
+public class MTLSConfig
+{
 
     @Value("${client.ssl.key-store:#{null}}")
     private Resource keyStoreResource;
@@ -89,7 +91,7 @@ public class MTLSConfig {
     public WebClientBuilderAdjuster webClientBuilderAdjuster(SslContextFactory.Client sslContextFactory)
     {
         return builder -> {
-            if(isTlsOrMtlsConfigured())
+            if (isTlsOrMtlsConfigured())
             {
                 ClientConnector clientConnector = new ClientConnector();
                 clientConnector.setSslContextFactory(sslContextFactory);
@@ -103,23 +105,26 @@ public class MTLSConfig {
     @Bean
     public RestTemplate restTemplate(SSLContextBuilder sslContextBuilder) throws NoSuchAlgorithmException, KeyManagementException
     {
-        if(isTlsOrMtlsConfigured())
+        if (isTlsOrMtlsConfigured())
         {
             return createRestTemplateWithSslContext(sslContextBuilder);
-        } else {
+        }
+        else
+        {
             return new RestTemplate();
         }
     }
 
     @Bean
-    public SSLContextBuilder sslContextBuilder() throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableKeyException {
+    public SSLContextBuilder sslContextBuilder() throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableKeyException
+    {
         SSLContextBuilder sslContextBuilder = new SSLContextBuilder();
-        if(isKeystoreConfigured())
+        if (isKeystoreConfigured())
         {
             KeyStore keyStore = getKeyStore(keyStoreType, keyStoreResource, keyStorePassword);
             sslContextBuilder.loadKeyMaterial(keyStore, keyStorePassword);
         }
-        if(isTruststoreConfigured())
+        if (isTruststoreConfigured())
         {
             sslContextBuilder
                     .setKeyStoreType(trustStoreType)
@@ -156,20 +161,20 @@ public class MTLSConfig {
         return keyStoreResource != null;
     }
 
-    private RestTemplate createRestTemplateWithSslContext(SSLContextBuilder sslContextBuilder) throws NoSuchAlgorithmException, KeyManagementException {
-        final SSLConnectionSocketFactoryBuilder sslConnectionSocketFactoryBuilder =
-                SSLConnectionSocketFactoryBuilder.create()
-                    .setSslContext(sslContextBuilder.build())
-                    .setTlsVersions(TLS.V_1_2, TLS.V_1_3);
-        if (hostNameVerificationDisabled) {
+    private RestTemplate createRestTemplateWithSslContext(SSLContextBuilder sslContextBuilder) throws NoSuchAlgorithmException, KeyManagementException
+    {
+        final SSLConnectionSocketFactoryBuilder sslConnectionSocketFactoryBuilder = SSLConnectionSocketFactoryBuilder.create()
+                .setSslContext(sslContextBuilder.build())
+                .setTlsVersions(TLS.V_1_2, TLS.V_1_3);
+        if (hostNameVerificationDisabled)
+        {
             sslConnectionSocketFactoryBuilder.setHostnameVerifier(NoopHostnameVerifier.INSTANCE);
         }
         final SSLConnectionSocketFactory sslConnectionSocketFactory = sslConnectionSocketFactoryBuilder.build();
 
-        final Registry<ConnectionSocketFactory> sslSocketFactoryRegistry =
-                RegistryBuilder.<ConnectionSocketFactory> create()
-                        .register("https", sslConnectionSocketFactory)
-                        .build();
+        final Registry<ConnectionSocketFactory> sslSocketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
+                .register("https", sslConnectionSocketFactory)
+                .build();
 
         final PoolingHttpClientConnectionManager sslConnectionManager = new PoolingHttpClientConnectionManager(sslSocketFactoryRegistry);
 

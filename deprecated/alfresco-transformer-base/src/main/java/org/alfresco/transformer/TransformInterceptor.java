@@ -33,22 +33,22 @@ import static org.alfresco.transformer.fs.FileManager.deleteFile;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.alfresco.transformer.logging.LogEntry;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
+
+import org.alfresco.transformer.logging.LogEntry;
 
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * TransformInterceptor
- * <br/>
- * Handles ThreadLocal Log entries for each request.
+ *             TransformInterceptor <br/>
+ *             Handles ThreadLocal Log entries for each request.
  */
 @Deprecated
 public class TransformInterceptor implements AsyncHandlerInterceptor
 {
     @Override
     public boolean preHandle(HttpServletRequest request,
-        HttpServletResponse response, Object handler)
+            HttpServletResponse response, Object handler)
     {
         LogEntry.start();
         return true;
@@ -56,7 +56,7 @@ public class TransformInterceptor implements AsyncHandlerInterceptor
 
     @Override
     public void afterCompletion(HttpServletRequest request,
-        HttpServletResponse response, Object handler, Exception ex)
+            HttpServletResponse response, Object handler, Exception ex)
     {
         // TargetFile cannot be deleted until completion, otherwise 0 bytes are sent.
         deleteFile(request, SOURCE_FILE);

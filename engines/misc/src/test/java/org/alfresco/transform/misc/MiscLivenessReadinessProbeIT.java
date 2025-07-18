@@ -29,9 +29,11 @@ package org.alfresco.transform.misc;
 
 import org.alfresco.transform.base.LivenessReadinessProbeTest;
 
-public class MiscLivenessReadinessProbeIT extends LivenessReadinessProbeTest {
+public class MiscLivenessReadinessProbeIT extends LivenessReadinessProbeTest
+{
     @Override
-    protected ImagesForTests getImageForTest() {
+    protected ImagesForTests getImageForTest()
+    {
         return new ImagesForTests("alfresco-transform-misc", "text/plain", "text/plain", "original.txt");
     }
 }

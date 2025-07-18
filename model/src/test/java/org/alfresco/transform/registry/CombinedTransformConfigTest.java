@@ -21,26 +21,28 @@
  */
 package org.alfresco.transform.registry;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import org.alfresco.transform.config.SupportedSourceAndTarget;
-import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.config.TransformStep;
-import org.alfresco.transform.config.Transformer;
-import org.junit.jupiter.api.Test;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptySet;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.transform.config.SupportedSourceAndTarget;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.TransformStep;
+import org.alfresco.transform.config.Transformer;
 
 /**
  * Test the CombinedTransformConfig, extended by both T-Router and ACS repository.
@@ -194,8 +196,7 @@ public class CombinedTransformConfigTest
     private static final String ROUTER_CONFIG_HAS_NO_BASE_URL = null;
     private static final String BASE_URL_B = "baseUrlB";
 
-    private final CombinedTransformConfig config = new CombinedTransformConfig()
-    {
+    private final CombinedTransformConfig config = new CombinedTransformConfig() {
         @Override
         protected boolean isPassThroughTransformName(String name)
         {
@@ -210,8 +211,8 @@ public class CombinedTransformConfigTest
     private TransformConfig readTransformConfigFromResource(String filename) throws IOException
     {
         return objectMapper.readValue(
-            getClass().getClassLoader().getResourceAsStream(filename),
-            TransformConfig.class);
+                getClass().getClassLoader().getResourceAsStream(filename),
+                TransformConfig.class);
     }
 
     private String expectedWildcardError(String errorReason)
@@ -225,7 +226,7 @@ public class CombinedTransformConfigTest
     // tEngineTransformers). The override is expected to good unless an error message is provided.
     // A check is made at the end that A2D is possible and that A2B is not possible.
     private void assertOverride(List<Transformer> tEngineTransformers,
-                                List<Transformer> tRouterTransformers, String expectedError)
+            List<Transformer> tRouterTransformers, String expectedError)
     {
         Transformer expectedTransformer = tRouterTransformers.isEmpty()
                 ? tEngineTransformers.get(tEngineTransformers.size() - 1)
@@ -658,7 +659,7 @@ public class CombinedTransformConfigTest
         assertEquals("No supported source and target mimetypes could be added to the transformer \"5\" as " +
                 "intermediate steps should have a target mimetype. Read from readFromB", registry.errorMessages.get(0));
         assertEquals("Transformer \"5\" has no supported source and target mimetypes, so will be ignored. "
-                         + "Read from readFromB", registry.errorMessages.get(1));
+                + "Read from readFromB", registry.errorMessages.get(1));
     }
 
     @Test
@@ -668,7 +669,7 @@ public class CombinedTransformConfigTest
                 .withTransformerPipeline(List.of(
                         new TransformStep("1", "mimetype/b"),
                         new TransformStep("2", "mimetype/c"),
-                        new TransformStep("3", "mimetype/d")))  // the last step's mimetype should be null
+                        new TransformStep("3", "mimetype/d"))) // the last step's mimetype should be null
                 .build();
         final TransformConfig transformConfig = TransformConfig.builder()
                 .withTransformers(ImmutableList.of(
@@ -683,9 +684,9 @@ public class CombinedTransformConfigTest
 
         assertEquals(2, registry.errorMessages.size());
         assertEquals("No supported source and target mimetypes could be added to the transformer \"5\" as " +
-            "the final step should not have a target mimetype. Read from readFromB", registry.errorMessages.get(0));
+                "the final step should not have a target mimetype. Read from readFromB", registry.errorMessages.get(0));
         assertEquals("Transformer \"5\" has no supported source and target mimetypes, "
-            + "so will be ignored. Read from readFromB", registry.errorMessages.get(1));
+                + "so will be ignored. Read from readFromB", registry.errorMessages.get(1));
     }
 
     @Test
@@ -747,10 +748,10 @@ public class CombinedTransformConfigTest
                 .withTransformerPipeline(List.of(
                         new TransformStep("2", "mimetype/c"),
                         new TransformStep("3", null)))
-                        .withSupportedSourceAndTargetList(Set.of(
-                                SupportedSourceAndTarget.builder()
-                                        .withSourceMediaType("mimetype/a")
-                                        .withTargetMediaType("mimetype/d")
+                .withSupportedSourceAndTargetList(Set.of(
+                        SupportedSourceAndTarget.builder()
+                                .withSourceMediaType("mimetype/a")
+                                .withTargetMediaType("mimetype/d")
                                 .build()))
                 .build();
         final TransformConfig transformConfig = TransformConfig.builder()
@@ -767,11 +768,11 @@ public class CombinedTransformConfigTest
         assertEquals(0, registry.errorMessages.size());
         assertEquals(3, config.buildTransformConfig().getTransformers().size());
         assertEquals("1", registry.findTransformerName("mimetype/a", -1,
-            "mimetype/d", emptyMap(), null));
+                "mimetype/d", emptyMap(), null));
         assertEquals("2", registry.findTransformerName("mimetype/a", -1,
-            "mimetype/c", emptyMap(), null));
+                "mimetype/c", emptyMap(), null));
         assertEquals("3", registry.findTransformerName("mimetype/c", -1,
-            "mimetype/d", emptyMap(), null));
+                "mimetype/d", emptyMap(), null));
     }
 
     @Test
@@ -798,7 +799,7 @@ public class CombinedTransformConfigTest
         assertEquals(0, registry.errorMessages.size());
         assertEquals(3, config.buildTransformConfig().getTransformers().size());
         assertEquals("1", registry.findTransformerName("mimetype/a", -1,
-            "mimetype/d", emptyMap(), null));
+                "mimetype/d", emptyMap(), null));
     }
 
     @Test
@@ -810,16 +811,15 @@ public class CombinedTransformConfigTest
                 .withTransformerPipeline(List.of(
                         new TransformStep("2", "mimetype/c"),
                         new TransformStep("2", null)))
-                        .withSupportedSourceAndTargetList(Set.of(
-                                SupportedSourceAndTarget.builder()
-                                        .withSourceMediaType("mimetype/a")
-                                        .withTargetMediaType("mimetype/d")
-                                .build()
-                            ))
+                .withSupportedSourceAndTargetList(Set.of(
+                        SupportedSourceAndTarget.builder()
+                                .withSourceMediaType("mimetype/a")
+                                .withTargetMediaType("mimetype/d")
+                                .build()))
                 .build();
         final TransformConfig transformConfig = TransformConfig.builder()
                 .withTransformers(ImmutableList.of(
-                        TRANSFORMER2_B2C,   // Does NOT support a->c so steps are invalid for a->d
+                        TRANSFORMER2_B2C, // Does NOT support a->c so steps are invalid for a->d
                         TRANSFORMER3_C2D,
                         pipeline))
                 .build();
@@ -833,9 +833,9 @@ public class CombinedTransformConfigTest
         assertEquals(expected, registry.errorMessages.get(0));
         assertEquals(2, config.buildTransformConfig().getTransformers().size());
         assertEquals("2", registry.findTransformerName("mimetype/b", -1,
-            "mimetype/c", emptyMap(), null));
+                "mimetype/c", emptyMap(), null));
         assertEquals("3", registry.findTransformerName("mimetype/c", -1,
-            "mimetype/d", emptyMap(), null));
+                "mimetype/d", emptyMap(), null));
     }
 
     @Test
@@ -847,20 +847,19 @@ public class CombinedTransformConfigTest
                 .withTransformerPipeline(List.of(
                         new TransformStep("2", "mimetype/c"),
                         new TransformStep("2", null)))
-                        .withSupportedSourceAndTargetList(Set.of(
-                                SupportedSourceAndTarget.builder()
-                                        .withSourceMediaType("mimetype/a")
-                                        .withTargetMediaType("mimetype/d")
+                .withSupportedSourceAndTargetList(Set.of(
+                        SupportedSourceAndTarget.builder()
+                                .withSourceMediaType("mimetype/a")
+                                .withTargetMediaType("mimetype/d")
                                 .build(),
-                                SupportedSourceAndTarget.builder() // Always going to be invalid with these steps
-                                        .withSourceMediaType("mimetype/x")
-                                        .withTargetMediaType("mimetype/y")
-                                .build()
-                            ))
+                        SupportedSourceAndTarget.builder() // Always going to be invalid with these steps
+                                .withSourceMediaType("mimetype/x")
+                                .withTargetMediaType("mimetype/y")
+                                .build()))
                 .build();
         final TransformConfig transformConfig = TransformConfig.builder()
                 .withTransformers(ImmutableList.of(
-                        TRANSFORMER2_B2C,   // Does NOT support a->c so steps are invalid for a->d
+                        TRANSFORMER2_B2C, // Does NOT support a->c so steps are invalid for a->d
                         TRANSFORMER3_C2D,
                         pipeline))
                 .build();
@@ -886,7 +885,7 @@ public class CombinedTransformConfigTest
                 .build();
         final TransformConfig transformConfig = TransformConfig.builder()
                 .withTransformers(ImmutableList.of(
-                        TRANSFORMER2_B2X,   // Does NOT support <anything>->c so steps are invalid
+                        TRANSFORMER2_B2X, // Does NOT support <anything>->c so steps are invalid
                         TRANSFORMER3_C2D,
                         pipeline))
                 .build();
@@ -897,11 +896,11 @@ public class CombinedTransformConfigTest
 
         assertEquals(2, registry.errorMessages.size());
         assertEquals("No supported source and target mimetypes could be added to the transformer \"1\" as "
-                         + "the first step transformer \"2\" does not support to \"mimetype/c\". Read from readFromB",
-            registry.errorMessages.get(0));
+                + "the first step transformer \"2\" does not support to \"mimetype/c\". Read from readFromB",
+                registry.errorMessages.get(0));
         assertEquals("Transformer \"1\" has no supported source and target mimetypes, so will be ignored. "
-                         + "Read from readFromB",
-            registry.errorMessages.get(1));
+                + "Read from readFromB",
+                registry.errorMessages.get(1));
         assertEquals(2, config.buildTransformConfig().getTransformers().size());
     }
 
@@ -1028,9 +1027,9 @@ public class CombinedTransformConfigTest
 
         assertEquals(2, registry.errorMessages.size());
         assertEquals(expectedWildcardError("the step transformer \"2\" does not support \"mimetype/b\" "
-            + "to \"mimetype/c\""), registry.errorMessages.get(0));
+                + "to \"mimetype/c\""), registry.errorMessages.get(0));
         assertEquals("Transformer \"4\" has no supported source and target mimetypes, so will be ignored. "
-            + "Read from readFromB", registry.errorMessages.get(1));
+                + "Read from readFromB", registry.errorMessages.get(1));
 
         // The pipeline is removed, so 3 are expected
         assertEquals(3, config.buildTransformConfig().getTransformers().size());

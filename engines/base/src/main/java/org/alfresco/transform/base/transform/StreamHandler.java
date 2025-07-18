@@ -26,22 +26,17 @@
  */
 package org.alfresco.transform.base.transform;
 
-import org.alfresco.transform.base.CustomTransformer;
-import org.alfresco.transform.base.TransformManager;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformManager;
+
 /**
- * Separation of InputStream, OutputStream, sourceFile and targetFile from the {@link ProcessHandler} logic. Allows
- * {@link CustomTransformer} implementations to call {@link TransformManager#createSourceFile()} and
- * {@link TransformManager#createTargetFile()} so that extra Files are not created if there was one already in
- * existence.
+ * Separation of InputStream, OutputStream, sourceFile and targetFile from the {@link ProcessHandler} logic. Allows {@link CustomTransformer} implementations to call {@link TransformManager#createSourceFile()} and {@link TransformManager#createTargetFile()} so that extra Files are not created if there was one already in existence.
  *
- * Subclasses MUST call transformManager.setSourceFile(File) and transformManager.setSourceFile(File) if they start
- * with files rather than streams, before calling the {@link #init()} method which calls
- * transformManager.setOutputStream(InputStream) and transformManager.setOutputStream(OutputStream).
+ * Subclasses MUST call transformManager.setSourceFile(File) and transformManager.setSourceFile(File) if they start with files rather than streams, before calling the {@link #init()} method which calls transformManager.setOutputStream(InputStream) and transformManager.setOutputStream(OutputStream).
  */
 public abstract class StreamHandler
 {
@@ -95,8 +90,7 @@ public abstract class StreamHandler
     }
 
     protected void onSuccessfulTransform()
-    {
-    }
+    {}
 
     protected void closeOutputStream() throws IOException
     {
@@ -112,8 +106,7 @@ public abstract class StreamHandler
                 inputStream.close();
             }
             catch (IOException ignore)
-            {
-            }
+            {}
         }
     }
 

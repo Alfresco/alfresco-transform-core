@@ -26,9 +26,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Represents a group of one or more options. If the group is optional, child options that are marked as required are
- * only required if any child in the group is supplied by the client. If the group is required, child options are
- * optional or required based on their own setting alone.
+ * Represents a group of one or more options. If the group is optional, child options that are marked as required are only required if any child in the group is supplied by the client. If the group is required, child options are optional or required based on their own setting alone.
  *
  * In a pipeline transformation, a group of options
  */
@@ -37,8 +35,7 @@ public class TransformOptionGroup extends AbstractTransformOption
     private Set<TransformOption> transformOptions = new HashSet<>();
 
     public TransformOptionGroup()
-    {
-    }
+    {}
 
     public TransformOptionGroup(boolean required, Set<TransformOption> transformOptions)
     {
@@ -59,9 +56,12 @@ public class TransformOptionGroup extends AbstractTransformOption
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
         TransformOptionGroup that = (TransformOptionGroup) o;
         return Objects.equals(transformOptions, that.transformOptions);
     }
@@ -76,7 +76,7 @@ public class TransformOptionGroup extends AbstractTransformOption
     public String toString()
     {
         return "TransformOptionGroup{" +
-               "transformOptions=" + transformOptions +
-               '}';
+                "transformOptions=" + transformOptions +
+                '}';
     }
 }

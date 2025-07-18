@@ -26,18 +26,19 @@
  */
 package org.alfresco.transform.base.registry;
 
-import org.alfresco.transform.base.CustomTransformer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import jakarta.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.CustomTransformer;
 
 @Component
 public class CustomTransformers
@@ -54,22 +55,21 @@ public class CustomTransformers
     {
         if (customTransformerList != null)
         {
-            customTransformerList.forEach(customTransformer ->
-                   customTransformersByName.put(customTransformer.getTransformerName(), customTransformer));
+            customTransformerList.forEach(customTransformer -> customTransformersByName.put(customTransformer.getTransformerName(), customTransformer));
 
             List<String> nonNullTransformerNames = customTransformerList.stream()
-                .map(CustomTransformer::getTransformerName)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                    .map(CustomTransformer::getTransformerName)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
 
             if (!nonNullTransformerNames.isEmpty())
             {
                 logger.info("Custom Transformers:");
                 nonNullTransformerNames
-                    .stream()
-                    .sorted()
-                    .map(name -> "  "+name)
-                    .forEach(logger::debug);
+                        .stream()
+                        .sorted()
+                        .map(name -> "  " + name)
+                        .forEach(logger::debug);
             }
         }
     }
@@ -80,7 +80,7 @@ public class CustomTransformers
         return customTransformer == null ? customTransformersByName.get(null) : customTransformer;
     }
 
-    public void put(String name, CustomTransformer  customTransformer)
+    public void put(String name, CustomTransformer customTransformer)
     {
         customTransformersByName.put(name, customTransformer);
     }

@@ -26,18 +26,19 @@
  */
 package org.alfresco.transform.pdfrenderer;
 
-import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.config.reader.TransformConfigResourceReader;
-import org.alfresco.transform.config.TransformConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.Collections;
-
 import static org.alfresco.transform.base.logging.StandardMessages.COMMUNITY_LICENCE;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
+
+import java.util.Collections;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformEngine;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 
 @Component
 public class PdfRendererTransformEngine implements TransformEngine
@@ -52,9 +53,10 @@ public class PdfRendererTransformEngine implements TransformEngine
     }
 
     @Override
-    public String getStartupMessage() {
+    public String getStartupMessage()
+    {
         return COMMUNITY_LICENCE +
-                "This transformer uses alfresco-pdf-renderer which uses the PDFium library from Google Inc. "+
+                "This transformer uses alfresco-pdf-renderer which uses the PDFium library from Google Inc. " +
                 "See the license at https://pdfium.googlesource.com/pdfium/+/master/LICENSE or in /pdfium.txt";
     }
 

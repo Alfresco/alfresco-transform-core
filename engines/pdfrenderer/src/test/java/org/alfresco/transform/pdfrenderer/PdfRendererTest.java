@@ -26,37 +26,6 @@
  */
 package org.alfresco.transform.pdfrenderer;
 
-import org.alfresco.transform.base.AbstractBaseTest;
-import org.alfresco.transform.base.executors.RuntimeExec;
-import org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
-import org.alfresco.transform.base.model.FileRefEntity;
-import org.alfresco.transform.base.model.FileRefResponse;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.pdfrenderer.transformers.PdfRendererTransformer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -77,6 +46,39 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.util.StringUtils.getFilenameExtension;
+
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.UUID;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import org.alfresco.transform.base.AbstractBaseTest;
+import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
+import org.alfresco.transform.base.model.FileRefEntity;
+import org.alfresco.transform.base.model.FileRefResponse;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.pdfrenderer.transformers.PdfRendererTransformer;
 
 /**
  * Test PdfRenderer with mocked external command.
@@ -118,8 +120,8 @@ public class PdfRendererTest extends AbstractBaseTest
 
     @Override
     public void mockTransformCommand(String sourceExtension,
-        String targetExtension, String sourceMimetype,
-        boolean readTargetFileBytes) throws IOException
+            String targetExtension, String sourceMimetype,
+            boolean readTargetFileBytes) throws IOException
     {
         this.sourceExtension = sourceExtension;
         this.targetExtension = targetExtension;
@@ -133,57 +135,57 @@ public class PdfRendererTest extends AbstractBaseTest
         sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
 
         when(mockTransformCommand.execute(any(), anyLong())).thenAnswer(
-            (Answer<RuntimeExec.ExecutionResult>) invocation -> {
-                Map<String, String> actualProperties = invocation.getArgument(0);
-                assertEquals(3, actualProperties.size(), "There should be 3 properties");
+                (Answer<RuntimeExec.ExecutionResult>) invocation -> {
+                    Map<String, String> actualProperties = invocation.getArgument(0);
+                    assertEquals(3, actualProperties.size(), "There should be 3 properties");
 
-                String actualOptions = actualProperties.get("options");
-                String actualSource = actualProperties.get("source");
-                String actualTarget = actualProperties.get("target");
-                String actualTargetExtension = getFilenameExtension(actualTarget);
+                    String actualOptions = actualProperties.get("options");
+                    String actualSource = actualProperties.get("source");
+                    String actualTarget = actualProperties.get("target");
+                    String actualTargetExtension = getFilenameExtension(actualTarget);
 
-                assertNotNull(actualSource);
-                assertNotNull(actualTarget);
-                if (expectedSourceSuffix != null)
-                {
-                    assertTrue(actualSource.endsWith(expectedSourceSuffix),
-                        "The source file \"" + actualSource +
-                               "\" should have ended in \"" + expectedSourceSuffix + "\"");
-                    actualSource = actualSource.substring(0,
-                        actualSource.length() - expectedSourceSuffix.length());
-                }
+                    assertNotNull(actualSource);
+                    assertNotNull(actualTarget);
+                    if (expectedSourceSuffix != null)
+                    {
+                        assertTrue(actualSource.endsWith(expectedSourceSuffix),
+                                "The source file \"" + actualSource +
+                                        "\" should have ended in \"" + expectedSourceSuffix + "\"");
+                        actualSource = actualSource.substring(0,
+                                actualSource.length() - expectedSourceSuffix.length());
+                    }
 
-                assertNotNull(actualOptions);
-                if (expectedOptions != null)
-                {
-                    assertEquals(expectedOptions, actualOptions,"expectedOptions");
-                }
+                    assertNotNull(actualOptions);
+                    if (expectedOptions != null)
+                    {
+                        assertEquals(expectedOptions, actualOptions, "expectedOptions");
+                    }
 
-                Long actualTimeout = invocation.getArgument(1);
-                assertNotNull(actualTimeout);
-                if (expectedTimeout != null)
-                {
-                    assertEquals(expectedTimeout, actualTimeout,"expectedTimeout");
-                }
+                    Long actualTimeout = invocation.getArgument(1);
+                    assertNotNull(actualTimeout);
+                    if (expectedTimeout != null)
+                    {
+                        assertEquals(expectedTimeout, actualTimeout, "expectedTimeout");
+                    }
 
-                // Copy a test file into the target file location if it exists
-                int i = actualTarget.lastIndexOf('_');
-                if (i >= 0)
-                {
-                    String testFilename = actualTarget.substring(i + 1);
-                    File testFile = getTestFile(testFilename, false);
-                    File targetFile = new File(actualTarget);
-                    generateTargetFileFromResourceFile(actualTargetExtension, testFile,
-                        targetFile);
-                }
+                    // Copy a test file into the target file location if it exists
+                    int i = actualTarget.lastIndexOf('_');
+                    if (i >= 0)
+                    {
+                        String testFilename = actualTarget.substring(i + 1);
+                        File testFile = getTestFile(testFilename, false);
+                        File targetFile = new File(actualTarget);
+                        generateTargetFileFromResourceFile(actualTargetExtension, testFile,
+                                targetFile);
+                    }
 
-                // Check the supplied source file has not been changed.
-                byte[] actualSourceFileBytes = Files.readAllBytes(new File(actualSource).toPath());
-                assertTrue(Arrays.equals(sourceFileBytes, actualSourceFileBytes),
-                    "Source file is not the same");
+                    // Check the supplied source file has not been changed.
+                    byte[] actualSourceFileBytes = Files.readAllBytes(new File(actualSource).toPath());
+                    assertTrue(Arrays.equals(sourceFileBytes, actualSourceFileBytes),
+                            "Source file is not the same");
 
-                return mockExecutionResult;
-            });
+                    return mockExecutionResult;
+                });
 
         when(mockExecutionResult.getExitValue()).thenReturn(0);
         when(mockExecutionResult.getStdErr()).thenReturn("STDERROR");
@@ -195,23 +197,23 @@ public class PdfRendererTest extends AbstractBaseTest
     {
         expectedOptions = "--width=321 --height=654 --allow-enlargement --maintain-aspect-ratio --page=2";
         mockMvc
-            .perform(MockMvcRequestBuilders
-                .multipart(ENDPOINT_TRANSFORM)
-                .file(sourceFile)
-                .param("targetExtension", targetExtension)
-                .param("targetMimetype", targetMimetype)
-                .param("sourceMimetype", sourceMimetype)
+                .perform(MockMvcRequestBuilders
+                        .multipart(ENDPOINT_TRANSFORM)
+                        .file(sourceFile)
+                        .param("targetExtension", targetExtension)
+                        .param("targetMimetype", targetMimetype)
+                        .param("sourceMimetype", sourceMimetype)
 
-                .param("page", "2")
+                        .param("page", "2")
 
-                .param("width", "321")
-                .param("height", "654")
-                .param("allowPdfEnlargement", "true")
-                .param("maintainPdfAspectRatio", "true"))
-            .andExpect(status().isOk())
-            .andExpect(content().bytes(expectedTargetFileBytes))
-            .andExpect(header().string("Content-Disposition",
-                "attachment; filename*=UTF-8''transform." + targetExtension));
+                        .param("width", "321")
+                        .param("height", "654")
+                        .param("allowPdfEnlargement", "true")
+                        .param("maintainPdfAspectRatio", "true"))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Test
@@ -219,23 +221,23 @@ public class PdfRendererTest extends AbstractBaseTest
     {
         expectedOptions = "--width=321 --height=654 --page=2";
         mockMvc
-            .perform(MockMvcRequestBuilders
-                .multipart(ENDPOINT_TRANSFORM)
-                .file(sourceFile)
-                .param("targetExtension", targetExtension)
-                .param("targetMimetype", targetMimetype)
-                .param("sourceMimetype", sourceMimetype)
+                .perform(MockMvcRequestBuilders
+                        .multipart(ENDPOINT_TRANSFORM)
+                        .file(sourceFile)
+                        .param("targetExtension", targetExtension)
+                        .param("targetMimetype", targetMimetype)
+                        .param("sourceMimetype", sourceMimetype)
 
-                .param("page", "2")
+                        .param("page", "2")
 
-                .param("width", "321")
-                .param("height", "654")
-                .param("allowPdfEnlargement", "false")
-                .param("maintainPdfAspectRatio", "false"))
-            .andExpect(status().isOk())
-            .andExpect(content().bytes(expectedTargetFileBytes))
-            .andExpect(header().string("Content-Disposition",
-                "attachment; filename*=UTF-8''transform." + targetExtension));
+                        .param("width", "321")
+                        .param("height", "654")
+                        .param("allowPdfEnlargement", "false")
+                        .param("maintainPdfAspectRatio", "false"))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Override
@@ -253,9 +255,9 @@ public class PdfRendererTest extends AbstractBaseTest
         when(mockExecutionResult.getExitValue()).thenReturn(1);
 
         mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", "xxx"))
-               .andExpect(status().is(BAD_REQUEST.value()))
-               .andExpect(status()
-                   .reason(containsString("Transformer exit code was not 0: \nSTDERR")));
+                .andExpect(status().is(BAD_REQUEST.value()))
+                .andExpect(status()
+                        .reason(containsString("Transformer exit code was not 0: \nSTDERR")));
     }
 
     @Test
@@ -272,11 +274,11 @@ public class PdfRendererTest extends AbstractBaseTest
         HttpHeaders headers = new HttpHeaders();
         headers.set(CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
         ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
-            sourceFile), headers, OK);
+                sourceFile), headers, OK);
 
         when(sharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
         when(sharedFileStoreClient.saveFile(any()))
-            .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
+                .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
         when(mockExecutionResult.getExitValue()).thenReturn(0);
 
         // Update the Transformation Request with any specific params before sending it
@@ -285,16 +287,16 @@ public class PdfRendererTest extends AbstractBaseTest
         // Serialize and call the transformer
         String tr = objectMapper.writeValueAsString(transformRequest);
         String transformationReplyAsString = mockMvc
-            .perform(MockMvcRequestBuilders
-                .post(ENDPOINT_TRANSFORM)
-                .header(ACCEPT, APPLICATION_JSON_VALUE)
-                .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .content(tr))
-            .andExpect(status().is(CREATED.value()))
-            .andReturn().getResponse().getContentAsString();
+                .perform(MockMvcRequestBuilders
+                        .post(ENDPOINT_TRANSFORM)
+                        .header(ACCEPT, APPLICATION_JSON_VALUE)
+                        .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                        .content(tr))
+                .andExpect(status().is(CREATED.value()))
+                .andReturn().getResponse().getContentAsString();
 
         TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,
-            TransformReply.class);
+                TransformReply.class);
 
         // Assert the reply
         assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
@@ -305,7 +307,7 @@ public class PdfRendererTest extends AbstractBaseTest
     @Test
     public void testOverridingExecutorPaths()
     {
-        //System test property value can me modified in the pom.xml
+        // System test property value can me modified in the pom.xml
         assertEquals(execPath, System.getProperty("PDF_RENDERER_EXE"));
     }
 }

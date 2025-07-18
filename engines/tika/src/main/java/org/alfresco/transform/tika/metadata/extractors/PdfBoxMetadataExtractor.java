@@ -26,8 +26,8 @@
  */
 package org.alfresco.transform.tika.metadata.extractors;
 
-import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
-import org.alfresco.transform.tika.transformers.Tika;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
+
 import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.Parser;
@@ -36,12 +36,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
+import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
+import org.alfresco.transform.tika.transformers.Tika;
 
 /**
  * Metadata extractor for the PDF documents.
  *
- * Configuration:   (see PdfBoxMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
+ * Configuration: (see PdfBoxMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
  *
  * <pre>
  *   <b>author:</b>                 --      cm:author

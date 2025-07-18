@@ -18,17 +18,16 @@ import jakarta.jms.MessageProducer;
 import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
 
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.command.ActiveMQQueue;
+
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
 
 /**
  * JMSClient
  *
- * Contains the bare minimum logic necessary for sending and receiving T-Request/Reply messages
- * through the basic vanilla ActiveMQ client.
+ * Contains the bare minimum logic necessary for sending and receiving T-Request/Reply messages through the basic vanilla ActiveMQ client.
  *
  * Used by Aspose t-engine and t-router, but likely to be useful in other t-engines.
  *
@@ -51,29 +50,28 @@ public class JmsClient
     }
 
     public void sendBytesMessage(final TransformRequest request)
-        throws Exception
+            throws Exception
     {
         sendBytesMessage(request, request.getRequestId());
     }
 
     public void sendBytesMessage(final TransformRequest request, final String correlationID)
-        throws Exception
+            throws Exception
     {
         sendBytesMessage(JacksonSerializer.serialize(request), correlationID);
     }
 
     public void sendBytesMessage(final TransformRequest request, final String correlationID,
-        final Destination replyTo) throws Exception
+            final Destination replyTo) throws Exception
     {
         sendBytesMessage(JacksonSerializer.serialize(request), correlationID, replyTo);
     }
 
-    public void sendBytesMessage(final byte[] data, final String correlationID) throws
-        Exception
+    public void sendBytesMessage(final byte[] data, final String correlationID) throws Exception
     {
         try (final Connection connection = factory.createConnection();
-             final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-             final MessageProducer producer = session.createProducer(queue))
+                final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                final MessageProducer producer = session.createProducer(queue))
         {
             producer.setDeliveryMode(DeliveryMode.PERSISTENT);
             final BytesMessage message = session.createBytesMessage();
@@ -87,11 +85,11 @@ public class JmsClient
     }
 
     public void sendBytesMessage(final byte[] data, final String correlationID,
-        final Destination replyTo) throws Exception
+            final Destination replyTo) throws Exception
     {
         try (final Connection connection = factory.createConnection();
-             final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-             final MessageProducer producer = session.createProducer(queue))
+                final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                final MessageProducer producer = session.createProducer(queue))
         {
             producer.setDeliveryMode(DeliveryMode.PERSISTENT);
             final BytesMessage message = session.createBytesMessage();
@@ -109,23 +107,22 @@ public class JmsClient
     }
 
     public void sendTextMessage(final TransformRequest request)
-        throws Exception
+            throws Exception
     {
         sendTextMessage(request, request.getRequestId());
     }
 
     public void sendTextMessage(final TransformRequest request, final String correlationID)
-        throws Exception
+            throws Exception
     {
         sendTextMessage(new String(JacksonSerializer.serialize(request)), correlationID);
     }
 
-    public void sendTextMessage(final String data, final String correlationID) throws
-        Exception
+    public void sendTextMessage(final String data, final String correlationID) throws Exception
     {
         try (final Connection connection = factory.createConnection();
-             final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-             final MessageProducer producer = session.createProducer(queue))
+                final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                final MessageProducer producer = session.createProducer(queue))
         {
             producer.setDeliveryMode(DeliveryMode.PERSISTENT);
             final TextMessage message = session.createTextMessage(data);
@@ -143,11 +140,11 @@ public class JmsClient
     }
 
     public TransformReply receiveMessage(final long timeout)
-        throws Exception
+            throws Exception
     {
         try (final Connection connection = factory.createConnection();
-             final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-             final MessageConsumer consumer = session.createConsumer(queue))
+                final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                final MessageConsumer consumer = session.createConsumer(queue))
         {
             connection.start();
 
@@ -167,11 +164,9 @@ public class JmsClient
         try
         {
             while (receiveMessage(2 * 1000) != null)
-            {
-            }
+            {}
         }
         catch (Exception ignore)
-        {
-        }
+        {}
     }
 }

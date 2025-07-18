@@ -8,8 +8,10 @@
 package org.alfresco.transformer;
 
 import static java.util.Collections.emptyMap;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
+
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 
 import java.util.Map;
 
@@ -31,23 +33,23 @@ import org.springframework.web.client.RestTemplate;
 public class EngineClient
 {
     private static final RestTemplate REST_TEMPLATE = new RestTemplate();
-    
+
     public static ResponseEntity<Resource> sendTRequest(
-        final String engineUrl, final String sourceFile,
-        final String sourceMimetype, final String targetMimetype, final String targetExtension)
+            final String engineUrl, final String sourceFile,
+            final String sourceMimetype, final String targetMimetype, final String targetExtension)
     {
         return sendTRequest(engineUrl, sourceFile, sourceMimetype, targetMimetype, targetExtension,
-            emptyMap());
+                emptyMap());
     }
 
     public static ResponseEntity<Resource> sendTRequest(
-        final String engineUrl, final String sourceFile,
-        final String sourceMimetype, final String targetMimetype, final String targetExtension,
-        final Map<String, String> transformOptions)
+            final String engineUrl, final String sourceFile,
+            final String sourceMimetype, final String targetMimetype, final String targetExtension,
+            final Map<String, String> transformOptions)
     {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MULTIPART_FORM_DATA);
-        //headers.setAccept(ImmutableList.of(MULTIPART_FORM_DATA));
+        // headers.setAccept(ImmutableList.of(MULTIPART_FORM_DATA));
 
         final MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file", new ClassPathResource(sourceFile));

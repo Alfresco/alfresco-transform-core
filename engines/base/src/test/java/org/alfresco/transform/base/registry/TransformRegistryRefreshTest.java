@@ -7,10 +7,12 @@
  */
 package org.alfresco.transform.base.registry;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
 import com.google.common.collect.ImmutableMap;
-import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
-import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
-import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,19 +23,16 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.verify;
+import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
+import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
+import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
 
 @AutoConfigureMockMvc
-@SpringBootTest(classes={org.alfresco.transform.base.Application.class}, properties={"transform.engine.config.cron=*/1 * * * * *"})
+@SpringBootTest(classes = {org.alfresco.transform.base.Application.class}, properties = {"transform.engine.config.cron=*/1 * * * * *"})
 @ContextConfiguration(classes = {
-    FakeTransformEngineWithTwoCustomTransformers.class,
-    FakeTransformerTxT2Pdf.class,
-    FakeTransformerPdf2Png.class})
+        FakeTransformEngineWithTwoCustomTransformers.class,
+        FakeTransformerTxT2Pdf.class,
+        FakeTransformerPdf2Png.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class TransformRegistryRefreshTest
 {
@@ -53,11 +52,11 @@ public class TransformRegistryRefreshTest
 
         // As we can't change the content of a classpath resource, lets change what is read.
         ReflectionTestUtils.setField(transformConfigFiles, "files", ImmutableMap.of(
-            "a",   "config/addA2B.json",
-            "foo", "config/addB2C.json"));
+                "a", "config/addA2B.json",
+                "foo", "config/addB2C.json"));
         transformConfigFromFiles.initFileConfig();
 
-        Awaitility.await().pollDelay(3, TimeUnit.SECONDS).until( () -> { // i.e. Thread.sleep(3_000) - but keeps sona happy
+        Awaitility.await().pollDelay(3, TimeUnit.SECONDS).until(() -> { // i.e. Thread.sleep(3_000) - but keeps sona happy
             transformRegistry.retrieveConfig();
             assertEquals(6, transformRegistry.getTransformConfig().getTransformers().size());
             return true;
@@ -67,8 +66,8 @@ public class TransformRegistryRefreshTest
     private void waitForRegistryReady() throws InterruptedException
     {
         Awaitility.await().atMost(1, TimeUnit.SECONDS)
-                  .pollInterval(100, TimeUnit.MILLISECONDS)
-                  .pollDelay(Duration.ZERO)
-                  .until(() -> transformRegistry.isReadyForTransformRequests());
+                .pollInterval(100, TimeUnit.MILLISECONDS)
+                .pollDelay(Duration.ZERO)
+                .until(() -> transformRegistry.isReadyForTransformRequests());
     }
 }

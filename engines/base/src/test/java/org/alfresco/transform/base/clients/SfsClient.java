@@ -21,7 +21,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
-import org.alfresco.transform.base.MtlsTestUtils;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import com.google.common.collect.ImmutableMap;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpHead;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -36,10 +38,7 @@ import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
+import org.alfresco.transform.base.MtlsTestUtils;
 
 /**
  * Used by Aspose t-engine and t-router, but likely to be useful in other t-engines.
@@ -69,12 +68,12 @@ public class SfsClient
         final File file = readFile(fileToUploadName);
 
         final HttpPost post = new HttpPost(
-            sfsBaseUrl+"/alfresco/api/-default-/private/sfs/versions/1/file");
+                sfsBaseUrl + "/alfresco/api/-default-/private/sfs/versions/1/file");
         post.setEntity(MultipartEntityBuilder
-            .create()
-            .setMode(HttpMultipartMode.LEGACY)
-            .addPart("file", new FileBody(file, ContentType.DEFAULT_BINARY))
-            .build());
+                .create()
+                .setMode(HttpMultipartMode.LEGACY)
+                .addPart("file", new FileBody(file, ContentType.DEFAULT_BINARY))
+                .build());
 
         try (CloseableHttpClient client = MtlsTestUtils.getHttpClient())
         {
@@ -83,7 +82,7 @@ public class SfsClient
             if (status >= 200 && status < 300)
             {
                 return JacksonSerializer.readStringValue(EntityUtils.toString(((HttpEntityContainer) response).getEntity()),
-                    "entry.fileRef");
+                        "entry.fileRef");
             }
             else
             {
@@ -114,7 +113,7 @@ public class SfsClient
     {
         final String[] array = uri.toString().split("!");
         try (final FileSystem fs = FileSystems.newFileSystem(URI.create(array[0]),
-            ImmutableMap.of("create", "true")))
+                ImmutableMap.of("create", "true")))
         {
             File temp = File.createTempFile("temp-", "", new File(System.getProperty("user.dir")));
             temp.deleteOnExit();
@@ -124,7 +123,7 @@ public class SfsClient
         }
     }
 
-    public static boolean checkFile(final String uuid) throws Exception 
+    public static boolean checkFile(final String uuid) throws Exception
     {
         return checkFile(uuid, SFS_BASE_URL);
     }
@@ -132,8 +131,8 @@ public class SfsClient
     public static boolean checkFile(final String uuid, final String sfsBaseUrl) throws Exception
     {
         final HttpHead head = new HttpHead(format(
-            sfsBaseUrl+"/alfresco/api/-default-/private/sfs/versions/1/file/{0}",
-            uuid));
+                sfsBaseUrl + "/alfresco/api/-default-/private/sfs/versions/1/file/{0}",
+                uuid));
 
         try (CloseableHttpClient client = MtlsTestUtils.getHttpClient())
         {
@@ -151,8 +150,8 @@ public class SfsClient
     public static File downloadFile(final String uuid, final String sfsBaseUrl) throws Exception
     {
         final HttpGet get = new HttpGet(format(
-            sfsBaseUrl+"/alfresco/api/-default-/private/sfs/versions/1/file/{0}",
-            uuid));
+                sfsBaseUrl + "/alfresco/api/-default-/private/sfs/versions/1/file/{0}",
+                uuid));
 
         try (CloseableHttpClient client = MtlsTestUtils.getHttpClient())
         {
@@ -169,7 +168,7 @@ public class SfsClient
             }
 
             final File file = File.createTempFile(uuid, "_tmp",
-                new File(System.getProperty("user.dir")));
+                    new File(System.getProperty("user.dir")));
             file.deleteOnExit();
 
             try (OutputStream os = new FileOutputStream(file))

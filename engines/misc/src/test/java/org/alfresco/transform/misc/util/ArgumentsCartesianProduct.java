@@ -43,8 +43,7 @@ import org.junit.jupiter.params.provider.Arguments;
 public class ArgumentsCartesianProduct
 {
     /**
-     * Creates arguments cartesian product of fixed object and a stream of objects.
-     * Example: a ✕ {x,y,z} = {a,x}, {a,y}, {a,z}
+     * Creates arguments cartesian product of fixed object and a stream of objects. Example: a ✕ {x,y,z} = {a,x}, {a,y}, {a,z}
      */
     public static Stream<Arguments> of(final Object fixedFirstArgument, final Stream<?> secondArguments)
     {
@@ -52,8 +51,7 @@ public class ArgumentsCartesianProduct
     }
 
     /**
-     * Creates arguments cartesian product of a stream of objects and fixed object.
-     * Example: {a,b,c} ✕ y ✕ z = {a,y,z}, {b,y,z}, {c,y,z}
+     * Creates arguments cartesian product of a stream of objects and fixed object. Example: {a,b,c} ✕ y ✕ z = {a,y,z}, {b,y,z}, {c,y,z}
      */
     public static Stream<Arguments> of(final Stream<?> firstArguments, final Object... otherFixedArguments)
     {
@@ -61,8 +59,7 @@ public class ArgumentsCartesianProduct
     }
 
     /**
-     * Creates arguments cartesian product of two streams of objects.
-     * Example: {a,b} ✕ {y,z} = {a,y}, {a,z}, {b,y}, {b,z}
+     * Creates arguments cartesian product of two streams of objects. Example: {a,b} ✕ {y,z} = {a,y}, {a,z}, {b,y}, {b,z}
      */
     public static Stream<Arguments> of(final Stream<?> firstArguments, final Stream<?> secondArguments)
     {
@@ -70,8 +67,7 @@ public class ArgumentsCartesianProduct
     }
 
     /**
-     * Creates arguments cartesian product of multiple streams of objects.
-     * Example: {a,b} ✕ {k,l,m} ✕ ... ✕ {y,z} = {a,k,...,y}, {a,k,...,z}, {a,l,...,y}, ..., {b,m,...,z}
+     * Creates arguments cartesian product of multiple streams of objects. Example: {a,b} ✕ {k,l,m} ✕ ... ✕ {y,z} = {a,k,...,y}, {a,k,...,z}, {a,l,...,y}, ..., {b,m,...,z}
      */
     public static Stream<Arguments> of(final Stream<?>... argumentsStreams)
     {
@@ -79,18 +75,17 @@ public class ArgumentsCartesianProduct
     }
 
     /**
-     * Creates arguments cartesian product of multiple streams of arguments.
-     * Example: {a,b} ✕ {k,l,m} ✕ ... ✕ {y,z} = {a,k,...,y}, {a,k,...,z}, {a,l,...,y}, ..., {b,m,...,z}
+     * Creates arguments cartesian product of multiple streams of arguments. Example: {a,b} ✕ {k,l,m} ✕ ... ✕ {y,z} = {a,k,...,y}, {a,k,...,z}, {a,l,...,y}, ..., {b,m,...,z}
      */
     @SafeVarargs
     @SuppressWarnings("unchecked")
     public static Stream<Arguments> ofArguments(final Stream<Arguments>... argumentsStreams)
     {
         return cartesianProductOf(argumentsStreams)
-            .map(argumentsStream -> (Stream<Arguments>) argumentsStream)
-            .map(argumentsStream -> Arguments.of(argumentsStream
-                    .flatMap(arguments -> Arrays.stream(arguments.get()))
-                    .toArray()));
+                .map(argumentsStream -> (Stream<Arguments>) argumentsStream)
+                .map(argumentsStream -> Arguments.of(argumentsStream
+                        .flatMap(arguments -> Arrays.stream(arguments.get()))
+                        .toArray()));
     }
 
     private static Stream<Stream<?>> cartesianProductOf(final Stream<?>... streams)
@@ -101,17 +96,17 @@ public class ArgumentsCartesianProduct
         }
 
         return Stream.of(streams)
-            .filter(Objects::nonNull)
-            .map(stream -> stream.map(Collections::<Object>singletonList))
-            .reduce((result, nextElements) -> {
-                final List<List<Object>> nextElementsCopy = nextElements.collect(Collectors.toList());
-                return result.flatMap(resultPortion -> nextElementsCopy.stream().map(nextElementsPortion -> {
-                    final List<Object> extendedResultPortion = new ArrayList<>();
-                    extendedResultPortion.addAll(resultPortion);
-                    extendedResultPortion.addAll(nextElementsPortion);
-                    return extendedResultPortion;
-                }));
-            }).orElse(Stream.empty())
-            .map(Collection::stream);
+                .filter(Objects::nonNull)
+                .map(stream -> stream.map(Collections::<Object> singletonList))
+                .reduce((result, nextElements) -> {
+                    final List<List<Object>> nextElementsCopy = nextElements.collect(Collectors.toList());
+                    return result.flatMap(resultPortion -> nextElementsCopy.stream().map(nextElementsPortion -> {
+                        final List<Object> extendedResultPortion = new ArrayList<>();
+                        extendedResultPortion.addAll(resultPortion);
+                        extendedResultPortion.addAll(nextElementsPortion);
+                        return extendedResultPortion;
+                    }));
+                }).orElse(Stream.empty())
+                .map(Collection::stream);
     }
 }

@@ -26,9 +26,6 @@
  */
 package org.alfresco.transform.tika.transformers;
 
-import static org.alfresco.transform.tika.transformers.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
-import static org.alfresco.transform.tika.transformers.Tika.TARGET_ENCODING;
-import static org.alfresco.transform.tika.transformers.Tika.TARGET_MIMETYPE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.lenient;
@@ -37,16 +34,21 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import static org.alfresco.transform.tika.transformers.Tika.NOT_EXTRACT_BOOKMARKS_TEXT;
+import static org.alfresco.transform.tika.transformers.Tika.TARGET_ENCODING;
+import static org.alfresco.transform.tika.transformers.Tika.TARGET_MIMETYPE;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.alfresco.transform.base.TransformManager;
 import org.apache.tika.parser.Parser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import org.alfresco.transform.base.TransformManager;
 
 @ExtendWith(MockitoExtension.class)
 public class TikaExtractBookmarksTest
@@ -95,7 +97,7 @@ public class TikaExtractBookmarksTest
         // when default set to false, with no options passed we should get a call method without NOT_EXTRACT_BOOKMARKS_TEXT
         verify(executorSpyDefaultFalse, times(1)).call(mockInputStream, mockOutputStream, null, null,
                 TARGET_MIMETYPE + targetMimetype, TARGET_ENCODING + defaultEncoding);
-        
+
         // use transforms with notExtractBookmarksText set to true
         clearInvocations(executorSpyDefaultTrue, executorSpyDefaultFalse);
         transformOptions.put("notExtractBookmarksText", "true");

@@ -35,7 +35,7 @@ public class SupportedTransform
     private final int priority;
 
     SupportedTransform(String name, Set<TransformOption> transformOptions,
-        long maxSourceSizeBytes, int priority)
+            long maxSourceSizeBytes, int priority)
     {
         // Logically the top level TransformOptionGroup is required, so that child options are optional or required
         // based on their own setting.
@@ -68,13 +68,15 @@ public class SupportedTransform
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         SupportedTransform that = (SupportedTransform) o;
         return maxSourceSizeBytes == that.maxSourceSizeBytes &&
-               priority == that.priority &&
-               Objects.equals(transformOptions, that.transformOptions) &&
-               Objects.equals(name, that.name);
+                priority == that.priority &&
+                Objects.equals(transformOptions, that.transformOptions) &&
+                Objects.equals(name, that.name);
     }
 
     @Override
@@ -89,4 +91,3 @@ public class SupportedTransform
         return name + ':' + maxSourceSizeBytes + ':' + priority;
     }
 }
-

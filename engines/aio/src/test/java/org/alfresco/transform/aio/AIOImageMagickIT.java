@@ -29,5 +29,4 @@ package org.alfresco.transform.aio;
 import org.alfresco.transform.imagemagick.ImageMagickTransformationIT;
 
 public class AIOImageMagickIT extends ImageMagickTransformationIT
-{
-}
+{}

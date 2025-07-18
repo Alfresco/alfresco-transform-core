@@ -33,10 +33,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import java.io.File;
+import javax.net.ssl.SSLException;
+import jakarta.annotation.PostConstruct;
 
-import org.alfresco.transform.base.WebClientBuilderAdjuster;
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transform.base.model.FileRefResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,8 +53,9 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import jakarta.annotation.PostConstruct;
-import javax.net.ssl.SSLException;
+import org.alfresco.transform.base.WebClientBuilderAdjuster;
+import org.alfresco.transform.base.model.FileRefResponse;
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * Simple Rest client that call Alfresco Shared File Store
@@ -77,19 +77,21 @@ public class SharedFileStoreClient
     private WebClient client;
 
     @PostConstruct
-    public void init() throws SSLException {
+    public void init() throws SSLException
+    {
         final WebClient.Builder clientBuilder = WebClient.builder();
         adjuster.adjust(clientBuilder);
         client = clientBuilder.baseUrl(url.endsWith("/") ? url : url + "/")
-                          .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                          .defaultHeader(ACCEPT, APPLICATION_JSON_VALUE)
-                          .build();
+                .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .defaultHeader(ACCEPT, APPLICATION_JSON_VALUE)
+                .build();
     }
 
     /**
      * Retrieves a file from Shared File Store using given file reference
      *
-     * @param fileRef File reference
+     * @param fileRef
+     *            File reference
      * @return ResponseEntity<Resource>
      */
     public ResponseEntity<Resource> retrieveFile(String fileRef)
@@ -97,7 +99,7 @@ public class SharedFileStoreClient
         try
         {
             return restTemplate.getForEntity(url + "/" + fileRef,
-                org.springframework.core.io.Resource.class);
+                    org.springframework.core.io.Resource.class);
         }
         catch (HttpClientErrorException e)
         {
@@ -108,7 +110,8 @@ public class SharedFileStoreClient
     /**
      * Stores given file in Shared File Store
      *
-     * @param file File to be stored
+     * @param file
+     *            File to be stored
      * @return A FileRefResponse containing detail about file's reference
      */
     public FileRefResponse saveFile(File file)
@@ -121,9 +124,9 @@ public class SharedFileStoreClient
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MULTIPART_FORM_DATA);
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map,
-                headers);
+                    headers);
             ResponseEntity<FileRefResponse> responseEntity = restTemplate
-                .exchange(url, POST, requestEntity, FileRefResponse.class);
+                    .exchange(url, POST, requestEntity, FileRefResponse.class);
             return responseEntity.getBody();
         }
         catch (HttpClientErrorException e)
@@ -140,7 +143,7 @@ public class SharedFileStoreClient
             logger.debug("                  Deleting intermediate file {}", fileReference);
 
             client.delete().uri(fileReference)
-                  .exchange().block();
+                    .exchange().block();
         }
         catch (Exception e)
         {

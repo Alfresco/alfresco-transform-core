@@ -21,35 +21,35 @@
  */
 package org.alfresco.transform.registry;
 
-import org.alfresco.transform.config.CoreFunction;
-import org.alfresco.transform.config.TransformOption;
-import org.alfresco.transform.config.Transformer;
+import static org.alfresco.transform.registry.TransformRegistryHelper.lookupTransformOptions;
+import static org.alfresco.transform.registry.TransformRegistryHelper.retrieveTransformListBySize;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.alfresco.transform.registry.TransformRegistryHelper.lookupTransformOptions;
-import static org.alfresco.transform.registry.TransformRegistryHelper.retrieveTransformListBySize;
+import org.alfresco.transform.config.CoreFunction;
+import org.alfresco.transform.config.TransformOption;
+import org.alfresco.transform.config.Transformer;
 
 /**
- * Used to work out if a transformation is supported. Sub classes should implement {@link #getData()} to return an
- * instance of the {@link TransformCache} class. This allows sub classes to periodically replace the registry's data with newer
- * values. They may also extend the Data class to include extra fields and methods.
+ * Used to work out if a transformation is supported. Sub classes should implement {@link #getData()} to return an instance of the {@link TransformCache} class. This allows sub classes to periodically replace the registry's data with newer values. They may also extend the Data class to include extra fields and methods.
  */
 public abstract class AbstractTransformRegistry implements TransformServiceRegistry
 {
     /**
      * Logs an error message if there is an error in the configuration.
      *
-     * @param msg to be logged.
+     * @param msg
+     *            to be logged.
      */
     protected abstract void logError(String msg);
 
     /**
      * Logs a warning message if there is a problem in the configuration.
      *
-     * @param msg to be logged.
+     * @param msg
+     *            to be logged.
      */
     protected void logWarn(String msg)
     {
@@ -64,70 +64,71 @@ public abstract class AbstractTransformRegistry implements TransformServiceRegis
     public abstract TransformCache getData();
 
     /**
-     * Registers a single transformer. This is an internal method called by
-     * {@link CombinedTransformConfig#registerCombinedTransformers(AbstractTransformRegistry)}.
+     * Registers a single transformer. This is an internal method called by {@link CombinedTransformConfig#registerCombinedTransformers(AbstractTransformRegistry)}.
      *
-     * @param transformer      to be registered
-     * @param transformOptions all the transform options
-     * @param baseUrl          where the config was be read from. Only needed when it is remote. Is null when local.
-     *                         Does not need to be a URL. May just be a name.
-     * @param readFrom         debug message for log messages, indicating what type of config was read.
+     * @param transformer
+     *            to be registered
+     * @param transformOptions
+     *            all the transform options
+     * @param baseUrl
+     *            where the config was be read from. Only needed when it is remote. Is null when local. Does not need to be a URL. May just be a name.
+     * @param readFrom
+     *            debug message for log messages, indicating what type of config was read.
      */
     protected void register(final Transformer transformer,
-        final Map<String, Set<TransformOption>> transformOptions, final String baseUrl,
-        final String readFrom)
+            final Map<String, Set<TransformOption>> transformOptions, final String baseUrl,
+            final String readFrom)
     {
         getData().incrementTransformerCount();
         transformer
-            .getSupportedSourceAndTargetList()
-            .forEach(e -> getData().appendTransform(e.getSourceMediaType(), e.getTargetMediaType(),
-                new SupportedTransform(
-                    transformer.getTransformerName(),
-                    lookupTransformOptions(transformer.getTransformOptions(), transformOptions,
-                        readFrom, this::logError),
-                    e.getMaxSourceSizeBytes(),
-                    e.getPriority()),
-                    transformer.getTransformerName(),
-                    transformer.getCoreVersion()));
+                .getSupportedSourceAndTargetList()
+                .forEach(e -> getData().appendTransform(e.getSourceMediaType(), e.getTargetMediaType(),
+                        new SupportedTransform(
+                                transformer.getTransformerName(),
+                                lookupTransformOptions(transformer.getTransformOptions(), transformOptions,
+                                        readFrom, this::logError),
+                                e.getMaxSourceSizeBytes(),
+                                e.getPriority()),
+                        transformer.getTransformerName(),
+                        transformer.getCoreVersion()));
     }
 
     /**
-     * Works out the name of the transformer (might not map to an actual transformer) that will be used to transform
-     * content of a given source mimetype and size into a target mimetype given a list of actual transform option names
-     * and values (Strings) plus the data contained in the Transform objects registered with this class.
+     * Works out the name of the transformer (might not map to an actual transformer) that will be used to transform content of a given source mimetype and size into a target mimetype given a list of actual transform option names and values (Strings) plus the data contained in the Transform objects registered with this class.
      *
-     * @param sourceMimetype    the mimetype of the source content
-     * @param sourceSizeInBytes the size in bytes of the source content. Ignored if negative.
-     * @param targetMimetype    the mimetype of the target
-     * @param actualOptions     the actual name value pairs available that could be passed to the Transform Service.
-     * @param renditionName     (optional) name for the set of options and target mimetype. If supplied is used to cache
-     *                          results to avoid having to work out if a given transformation is supported a second time.
-     *                          The sourceMimetype and sourceSizeInBytes may still change. In the case of ACS this is the
-     *                          rendition name.
+     * @param sourceMimetype
+     *            the mimetype of the source content
+     * @param sourceSizeInBytes
+     *            the size in bytes of the source content. Ignored if negative.
+     * @param targetMimetype
+     *            the mimetype of the target
+     * @param actualOptions
+     *            the actual name value pairs available that could be passed to the Transform Service.
+     * @param renditionName
+     *            (optional) name for the set of options and target mimetype. If supplied is used to cache results to avoid having to work out if a given transformation is supported a second time. The sourceMimetype and sourceSizeInBytes may still change. In the case of ACS this is the rendition name.
      */
     @Override
     public String findTransformerName(final String sourceMimetype, final long sourceSizeInBytes,
-        final String targetMimetype, final Map<String, String> actualOptions,
-        final String renditionName)
+            final String targetMimetype, final Map<String, String> actualOptions,
+            final String renditionName)
     {
         return retrieveTransformListBySize(getData(), sourceMimetype, targetMimetype, actualOptions,
-            renditionName)
-            .stream()
-            .filter(t -> t.getMaxSourceSizeBytes() == -1 ||
-                         t.getMaxSourceSizeBytes() >= sourceSizeInBytes)
-            .findFirst()
-            .map(SupportedTransform::getName)
-            .orElse(null);
+                renditionName)
+                        .stream()
+                        .filter(t -> t.getMaxSourceSizeBytes() == -1 ||
+                                t.getMaxSourceSizeBytes() >= sourceSizeInBytes)
+                        .findFirst()
+                        .map(SupportedTransform::getName)
+                        .orElse(null);
     }
 
     @Override
     public long findMaxSize(final String sourceMimetype, final String targetMimetype,
-        final Map<String, String> actualOptions, final String renditionName)
+            final Map<String, String> actualOptions, final String renditionName)
     {
         final List<SupportedTransform> supportedTransforms = retrieveTransformListBySize(getData(),
-            sourceMimetype, targetMimetype, actualOptions, renditionName);
-        return supportedTransforms.isEmpty() ? 0 :
-               supportedTransforms.get(supportedTransforms.size() - 1).getMaxSourceSizeBytes();
+                sourceMimetype, targetMimetype, actualOptions, renditionName);
+        return supportedTransforms.isEmpty() ? 0 : supportedTransforms.get(supportedTransforms.size() - 1).getMaxSourceSizeBytes();
     }
 
     @Override

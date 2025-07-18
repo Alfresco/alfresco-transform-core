@@ -37,7 +37,8 @@ public class FileRefEntity
 {
     private String fileRef;
 
-    public FileRefEntity() {}
+    public FileRefEntity()
+    {}
 
     public FileRefEntity(String fileRef)
     {
@@ -57,8 +58,10 @@ public class FileRefEntity
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         FileRefEntity that = (FileRefEntity) o;
         return Objects.equals(fileRef, that.fileRef);
     }

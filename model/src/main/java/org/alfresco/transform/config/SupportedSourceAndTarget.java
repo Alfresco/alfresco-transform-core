@@ -25,8 +25,7 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * Represents a single source and target combination supported by a transformer. Each combination has an optional
- * maximum size and priority.
+ * Represents a single source and target combination supported by a transformer. Each combination has an optional maximum size and priority.
  */
 public class SupportedSourceAndTarget extends Types
 {
@@ -34,8 +33,7 @@ public class SupportedSourceAndTarget extends Types
     Integer priority = null;
 
     public SupportedSourceAndTarget()
-    {
-    }
+    {}
 
     public Long getMaxSourceSizeBytes()
     {
@@ -60,12 +58,15 @@ public class SupportedSourceAndTarget extends Types
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        SupportedSourceAndTarget that = (SupportedSourceAndTarget)o;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+        SupportedSourceAndTarget that = (SupportedSourceAndTarget) o;
         return Objects.equals(maxSourceSizeBytes, that.maxSourceSizeBytes) &&
-               Objects.equals(priority, that.priority);
+                Objects.equals(priority, that.priority);
     }
 
     @Override
@@ -79,9 +80,12 @@ public class SupportedSourceAndTarget extends Types
     {
         StringJoiner sj = new StringJoiner(", ");
         String superToString = super.toString();
-        if (superToString != null) sj.add(superToString);
-        if (maxSourceSizeBytes != null) sj.add("\"maxSourceSizeBytes\": \""+maxSourceSizeBytes+'"');
-        if (priority != null) sj.add("\"priority\": \""+priority+'"');
+        if (superToString != null)
+            sj.add(superToString);
+        if (maxSourceSizeBytes != null)
+            sj.add("\"maxSourceSizeBytes\": \"" + maxSourceSizeBytes + '"');
+        if (priority != null)
+            sj.add("\"priority\": \"" + priority + '"');
         return "{" + sj.toString() + "}";
     }
 
