@@ -26,21 +26,23 @@
  */
 package org.alfresco.transform.base.http;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import org.alfresco.transform.config.TransformOption;
-import org.alfresco.transform.config.TransformOptionGroup;
-import org.alfresco.transform.config.TransformOptionValue;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import static org.alfresco.transform.base.html.OptionsHelper.getOptionNames;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import static org.alfresco.transform.base.html.OptionsHelper.getOptionNames;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.transform.config.TransformOption;
+import org.alfresco.transform.config.TransformOptionGroup;
+import org.alfresco.transform.config.TransformOptionValue;
 
 public class OptionsHelperTest
 {
@@ -56,7 +58,7 @@ public class OptionsHelperTest
     public void singleOptionNameWithSingleValue()
     {
         Map<String, Set<TransformOption>> transformOptionsByName = ImmutableMap.of("Dummy", ImmutableSet.of(
-            new TransformOptionValue(true, "startPage")));
+                new TransformOptionValue(true, "startPage")));
 
         assertEquals(ImmutableSet.of("startPage"), getOptionNames(transformOptionsByName));
     }
@@ -65,7 +67,7 @@ public class OptionsHelperTest
     public void whenOptionNameEndsInOptions_stripIt()
     {
         Map<String, Set<TransformOption>> transformOptionsByName = ImmutableMap.of("DummyOptions", ImmutableSet.of(
-            new TransformOptionValue(true, "startPage")));
+                new TransformOptionValue(true, "startPage")));
 
         assertEquals(ImmutableSet.of("startPage"), getOptionNames(transformOptionsByName));
     }
@@ -74,7 +76,7 @@ public class OptionsHelperTest
     public void singleOptionNameWithASingleRequiredValue()
     {
         Map<String, Set<TransformOption>> transformOptionsByName = ImmutableMap.of("DummyOptions", ImmutableSet.of(
-            new TransformOptionValue(true, "startPage")));
+                new TransformOptionValue(true, "startPage")));
 
         assertEquals(ImmutableSet.of("startPage"), getOptionNames(transformOptionsByName));
     }
@@ -83,8 +85,8 @@ public class OptionsHelperTest
     public void singleOptionNameWithACoupleOfValues()
     {
         Map<String, Set<TransformOption>> transformOptionsByName = ImmutableMap.of("DummyOptions", ImmutableSet.of(
-            new TransformOptionValue(false, "startPage"),
-            new TransformOptionValue(true, "endPage")));
+                new TransformOptionValue(false, "startPage"),
+                new TransformOptionValue(true, "endPage")));
 
         assertEquals(ImmutableSet.of("startPage", "endPage"), getOptionNames(transformOptionsByName));
     }
@@ -93,11 +95,11 @@ public class OptionsHelperTest
     public void sortedValues()
     {
         Map<String, Set<TransformOption>> transformOptionsByName = ImmutableMap.of("DummyOptions", ImmutableSet.of(
-            new TransformOptionValue(false, "a"),
-            new TransformOptionValue(false, "n"),
-            new TransformOptionValue(false, "k"),
-            new TransformOptionValue(false, "f"),
-            new TransformOptionValue(true, "z")));
+                new TransformOptionValue(false, "a"),
+                new TransformOptionValue(false, "n"),
+                new TransformOptionValue(false, "k"),
+                new TransformOptionValue(false, "f"),
+                new TransformOptionValue(true, "z")));
 
         assertEquals(ImmutableList.of("a", "f", "k", "n", "z"), new ArrayList<>(getOptionNames(transformOptionsByName)));
     }
@@ -108,13 +110,12 @@ public class OptionsHelperTest
         Map<String, Set<TransformOption>> transformOptionsByName = ImmutableMap.of("DummyOptions", ImmutableSet.of(
                 new TransformOptionValue(false, "startPage"),
                 new TransformOptionValue(true, "endPage")),
-            "Another", ImmutableSet.of(
-                new TransformOptionValue(false, "scale")),
-            "YetAnother", ImmutableSet.of(
-                new TransformOptionValue(false, "x"),
-                new TransformOptionValue(false, "y"),
-                new TransformOptionValue(true, "ratio"))
-        );
+                "Another", ImmutableSet.of(
+                        new TransformOptionValue(false, "scale")),
+                "YetAnother", ImmutableSet.of(
+                        new TransformOptionValue(false, "x"),
+                        new TransformOptionValue(false, "y"),
+                        new TransformOptionValue(true, "ratio")));
 
         assertEquals(ImmutableSet.of(
                 "startPage",
@@ -123,7 +124,7 @@ public class OptionsHelperTest
                 "x",
                 "y",
                 "ratio"),
-            getOptionNames(transformOptionsByName));
+                getOptionNames(transformOptionsByName));
     }
 
     @Test
@@ -132,13 +133,12 @@ public class OptionsHelperTest
         Map<String, Set<TransformOption>> transformOptionsByName = ImmutableMap.of("DummyOptions", ImmutableSet.of(
                 new TransformOptionValue(false, "startPage"),
                 new TransformOptionValue(true, "endPage")),
-            "Another", ImmutableSet.of(
-                new TransformOptionValue(false, "scale")),
-            "YetAnother", ImmutableSet.of(
-                new TransformOptionValue(false, "x"),
-                new TransformOptionValue(false, "y"),
-                new TransformOptionValue(true, "scale"))
-        );
+                "Another", ImmutableSet.of(
+                        new TransformOptionValue(false, "scale")),
+                "YetAnother", ImmutableSet.of(
+                        new TransformOptionValue(false, "x"),
+                        new TransformOptionValue(false, "y"),
+                        new TransformOptionValue(true, "scale")));
 
         assertEquals(ImmutableSet.of(
                 "startPage",
@@ -146,27 +146,27 @@ public class OptionsHelperTest
                 "scale",
                 "x",
                 "y"),
-            getOptionNames(transformOptionsByName));
+                getOptionNames(transformOptionsByName));
     }
 
     @Test
     public void nestedGroups()
     {
         Map<String, Set<TransformOption>> transformOptionsByName = ImmutableMap.of("DummyOptions", ImmutableSet.of(
-            new TransformOptionValue(false, "1"),
-            new TransformOptionValue(true, "2"),
-            new TransformOptionGroup(false, ImmutableSet.of(
-                new TransformOptionValue(false, "3.1"),
-                new TransformOptionValue(true, "3.2"),
-                new TransformOptionValue(false, "3.3"))),
-            new TransformOptionGroup(true, ImmutableSet.of(
-                new TransformOptionValue(false, "4.1"),
+                new TransformOptionValue(false, "1"),
+                new TransformOptionValue(true, "2"),
                 new TransformOptionGroup(false, ImmutableSet.of(
-                    new TransformOptionValue(false, "4.2.1"),
-                    new TransformOptionGroup(true, ImmutableSet.of(
-                        new TransformOptionValue(false, "4.2.2.1"))),
-                    new TransformOptionValue(true, "4.2.3"))),
-                new TransformOptionValue(false, "4.3")))));
+                        new TransformOptionValue(false, "3.1"),
+                        new TransformOptionValue(true, "3.2"),
+                        new TransformOptionValue(false, "3.3"))),
+                new TransformOptionGroup(true, ImmutableSet.of(
+                        new TransformOptionValue(false, "4.1"),
+                        new TransformOptionGroup(false, ImmutableSet.of(
+                                new TransformOptionValue(false, "4.2.1"),
+                                new TransformOptionGroup(true, ImmutableSet.of(
+                                        new TransformOptionValue(false, "4.2.2.1"))),
+                                new TransformOptionValue(true, "4.2.3"))),
+                        new TransformOptionValue(false, "4.3")))));
 
         assertEquals(ImmutableSet.of(
                 "1",
@@ -179,6 +179,6 @@ public class OptionsHelperTest
                 "4.2.2.1",
                 "4.2.3",
                 "4.3"),
-            getOptionNames(transformOptionsByName));
+                getOptionNames(transformOptionsByName));
     }
 }

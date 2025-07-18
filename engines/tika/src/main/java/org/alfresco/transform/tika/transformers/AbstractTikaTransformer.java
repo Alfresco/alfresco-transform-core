@@ -26,18 +26,7 @@
  */
 package org.alfresco.transform.tika.transformers;
 
-import org.alfresco.transform.base.CustomTransformer;
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.executors.RuntimeExec;
-import org.alfresco.transform.base.logging.LogEntry;
-import org.alfresco.transform.common.RequestParamMap;
-import org.apache.tika.extractor.DocumentSelector;
-import org.apache.tika.parser.Parser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
+import static java.lang.Boolean.parseBoolean;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -47,7 +36,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-import static java.lang.Boolean.parseBoolean;
+import org.apache.tika.extractor.DocumentSelector;
+import org.apache.tika.parser.Parser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.logging.LogEntry;
+import org.alfresco.transform.common.RequestParamMap;
 
 public abstract class AbstractTikaTransformer implements CustomTransformer
 {
@@ -85,7 +86,7 @@ public abstract class AbstractTikaTransformer implements CustomTransformer
     public String getTransformerName()
     {
         String simpleClassName = getClass().getSimpleName();
-        return simpleClassName.substring(0, simpleClassName.length()-"Transformer".length());
+        return simpleClassName.substring(0, simpleClassName.length() - "Transformer".length());
     }
 
     @Override

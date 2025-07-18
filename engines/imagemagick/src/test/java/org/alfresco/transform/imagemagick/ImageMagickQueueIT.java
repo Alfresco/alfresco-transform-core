@@ -31,12 +31,11 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
 
 import java.util.UUID;
 
-import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.base.messaging.AbstractQueueIT;
+import org.alfresco.transform.client.model.TransformRequest;
 
 /**
- * @author Lucian Tuca
- * created on 15/01/2019
+ * @author Lucian Tuca created on 15/01/2019
  */
 public class ImageMagickQueueIT extends AbstractQueueIT
 {
@@ -44,16 +43,16 @@ public class ImageMagickQueueIT extends AbstractQueueIT
     protected TransformRequest buildRequest()
     {
         return TransformRequest
-            .builder()
-            .withRequestId(UUID.randomUUID().toString())
-            .withSourceMediaType(MIMETYPE_IMAGE_PNG)
-            .withTargetMediaType(MIMETYPE_IMAGE_JPEG)
-            .withTargetExtension("jpeg")
-            .withSchema(1)
-            .withClientData("ACS")
-            .withSourceReference(UUID.randomUUID().toString())
-            .withSourceSize(32L)
-            .withInternalContextForTransformEngineTests()
-            .build();
+                .builder()
+                .withRequestId(UUID.randomUUID().toString())
+                .withSourceMediaType(MIMETYPE_IMAGE_PNG)
+                .withTargetMediaType(MIMETYPE_IMAGE_JPEG)
+                .withTargetExtension("jpeg")
+                .withSchema(1)
+                .withClientData("ACS")
+                .withSourceReference(UUID.randomUUID().toString())
+                .withSourceSize(32L)
+                .withInternalContextForTransformEngineTests()
+                .build();
     }
 }

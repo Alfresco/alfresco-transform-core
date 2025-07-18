@@ -32,5 +32,4 @@ import org.alfresco.transform.libreoffice.LibreOfficeTest;
  * Test LibreOffice functionality in All-In-One.
  */
 public class AIOLibreOfficeTest extends LibreOfficeTest
-{
-}
+{}

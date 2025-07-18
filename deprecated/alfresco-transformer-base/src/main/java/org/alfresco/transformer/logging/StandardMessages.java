@@ -32,8 +32,7 @@ package org.alfresco.transformer.logging;
 @Deprecated
 public interface StandardMessages
 {
-    String LICENCE =
-        "If the Alfresco software was purchased under a paid Alfresco license, the terms of the paid license agreement \n" +
-        "will prevail. Otherwise, the software is provided under terms of the GNU LGPL v3 license. \n" +
-        "See the license at http://www.gnu.org/licenses/lgpl-3.0.txt. or in /LICENSE.txt \n\n";
+    String LICENCE = "If the Alfresco software was purchased under a paid Alfresco license, the terms of the paid license agreement \n" +
+            "will prevail. Otherwise, the software is provided under terms of the GNU LGPL v3 license. \n" +
+            "See the license at http://www.gnu.org/licenses/lgpl-3.0.txt. or in /LICENSE.txt \n\n";
 }

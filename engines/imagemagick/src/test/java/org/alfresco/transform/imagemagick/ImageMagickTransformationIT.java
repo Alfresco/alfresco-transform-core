@@ -30,8 +30,13 @@ import static java.text.MessageFormat.format;
 import static java.util.Collections.emptyMap;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static org.alfresco.transform.base.clients.HttpClient.sendTRequest;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.springframework.http.HttpStatus.OK;
+
 import static org.alfresco.transform.base.clients.FileInfo.testFile;
+import static org.alfresco.transform.base.clients.HttpClient.sendTRequest;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_BMP;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_CGM;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_GIF;
@@ -64,18 +69,12 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_TIFF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_XBM;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_XPM;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_XWD;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.springframework.http.HttpStatus.OK;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-
-import org.alfresco.transform.base.clients.FileInfo;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -84,10 +83,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
+import org.alfresco.transform.base.clients.FileInfo;
+
 /**
  * @author Cezar Leahu
  */
-public class ImageMagickTransformationIT {
+public class ImageMagickTransformationIT
+{
     private static final Logger logger = LoggerFactory.getLogger(ImageMagickTransformationIT.class);
     private static final String ENGINE_URL = "http://localhost:8090";
     private static final List<Pair<String, String>> targetExtensions = new ImmutableList.Builder<Pair<String, String>>()
@@ -152,38 +154,38 @@ public class ImageMagickTransformationIT {
             .build();
 
     private static final Map<String, FileInfo> TEST_FILES = Stream.of(
-            testFile(MIMETYPE_IMAGE_BMP, "bmp", "quick.bmp"), 
+            testFile(MIMETYPE_IMAGE_BMP, "bmp", "quick.bmp"),
             testFile(MIMETYPE_IMAGE_GIF, "gif", "quick.gif"),
             testFile(MIMETYPE_IMAGE_JPEG, "jpg", "quick.jpg"),
-            testFile(MIMETYPE_IMAGE_PBM, "pbm", "quick.pbm"), 
+            testFile(MIMETYPE_IMAGE_PBM, "pbm", "quick.pbm"),
             testFile(MIMETYPE_IMAGE_PGM, "pgm", "quick.pgm"),
-            testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"), 
+            testFile(MIMETYPE_IMAGE_PNG, "png", "quick.png"),
             testFile(MIMETYPE_IMAGE_PNM, "pnm", "quick.pnm"),
-            testFile(MIMETYPE_IMAGE_PPM, "ppm", "quick.ppm"), 
+            testFile(MIMETYPE_IMAGE_PPM, "ppm", "quick.ppm"),
             testFile(MIMETYPE_IMAGE_XBM, "xbm", "quick.xbm"),
-            testFile(MIMETYPE_IMAGE_XPM, "xpm", "quick.xpm"), 
+            testFile(MIMETYPE_IMAGE_XPM, "xpm", "quick.xpm"),
             testFile(MIMETYPE_IMAGE_PSD, "psd", "quick.psd"),
-            testFile(MIMETYPE_IMAGE_TIFF, "tiff", "quick.tiff"), 
-            testFile(MIMETYPE_IMAGE_XWD, "xwd", "quick.xwd")
-        ).collect(toMap(FileInfo::getPath, identity()));
+            testFile(MIMETYPE_IMAGE_TIFF, "tiff", "quick.tiff"),
+            testFile(MIMETYPE_IMAGE_XWD, "xwd", "quick.xwd")).collect(toMap(FileInfo::getPath, identity()));
 
-    public static Stream<Pair<FileInfo, Pair<String,String>>> engineTransformations() {
+    public static Stream<Pair<FileInfo, Pair<String, String>>> engineTransformations()
+    {
         return Stream
-            .of(
-                allTargets("quick.bmp", targetExtensions),
-                allTargets("quick.gif", targetExtensions), 
-                allTargets("quick.jpg", targetExtensions),
-                allTargets("quick.pbm", targetExtensions), 
-                allTargets("quick.pgm", targetExtensions),
-                allTargets("quick.png", targetExtensions), 
-                allTargets("quick.pnm", targetExtensions),
-                allTargets("quick.ppm", targetExtensions), 
-                allTargets("quick.psd", targetExtensionsForPSD),
-                allTargets("quick.tiff", targetExtensions), 
-                allTargets("quick.xbm", targetExtensions),
-                allTargets("quick.xpm", targetExtensions), 
-                allTargets("quick.xwd", targetExtensions)
-            ).flatMap(identity());
+                .of(
+                        allTargets("quick.bmp", targetExtensions),
+                        allTargets("quick.gif", targetExtensions),
+                        allTargets("quick.jpg", targetExtensions),
+                        allTargets("quick.pbm", targetExtensions),
+                        allTargets("quick.pgm", targetExtensions),
+                        allTargets("quick.png", targetExtensions),
+                        allTargets("quick.pnm", targetExtensions),
+                        allTargets("quick.ppm", targetExtensions),
+                        allTargets("quick.psd", targetExtensionsForPSD),
+                        allTargets("quick.tiff", targetExtensions),
+                        allTargets("quick.xbm", targetExtensions),
+                        allTargets("quick.xpm", targetExtensions),
+                        allTargets("quick.xwd", targetExtensions))
+                .flatMap(identity());
     }
 
     @ParameterizedTest
@@ -194,13 +196,13 @@ public class ImageMagickTransformationIT {
         String targetExtension = entry.getRight().getLeft();
         String sourceMimetype = entry.getLeft().getMimeType();
         String targetMimetype = entry.getRight().getRight();
-        
+
         final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
-            sourceFile, sourceMimetype, targetMimetype, targetExtension);
+                sourceFile, sourceMimetype, targetMimetype, targetExtension);
         try
         {
             final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, sourceMimetype,
-                targetMimetype, targetExtension, emptyMap());
+                    targetMimetype, targetExtension, emptyMap());
             assertEquals(OK, response.getStatusCode(), descriptor);
         }
         catch (Exception e)
@@ -209,10 +211,10 @@ public class ImageMagickTransformationIT {
         }
     }
 
-    private static Stream<Pair<FileInfo, Pair<String,String>>> allTargets(final String sourceFile, List<Pair<String,String>> targetExtensionsList)
+    private static Stream<Pair<FileInfo, Pair<String, String>>> allTargets(final String sourceFile, List<Pair<String, String>> targetExtensionsList)
     {
         return targetExtensionsList
-            .stream()
-            .map(k -> Pair.of(TEST_FILES.get(sourceFile), k));
+                .stream()
+                .map(k -> Pair.of(TEST_FILES.get(sourceFile), k));
     }
 }

@@ -21,14 +21,14 @@
  */
 package org.alfresco.transform.registry;
 
-import org.alfresco.transform.config.TransformOption;
-import org.alfresco.transform.config.Transformer;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.alfresco.transform.config.TransformOption;
+import org.alfresco.transform.config.Transformer;
 
 /**
  * Helper class for testing an {@link AbstractTransformRegistry}.
@@ -69,8 +69,8 @@ public class FakeTransformRegistry extends AbstractTransformRegistry
 
     @Override
     protected void register(final Transformer transformer,
-                            final Map<String, Set<TransformOption>> transformOptions, final String baseUrl,
-                            final String readFrom)
+            final Map<String, Set<TransformOption>> transformOptions, final String baseUrl,
+            final String readFrom)
     {
         super.register(transformer, transformOptions, baseUrl, readFrom);
 

@@ -29,5 +29,4 @@ package org.alfresco.transform.aio;
 import org.alfresco.transform.misc.MiscTransformsIT;
 
 public class AIOMiscTransformsIT extends MiscTransformsIT
-{
-}
+{}

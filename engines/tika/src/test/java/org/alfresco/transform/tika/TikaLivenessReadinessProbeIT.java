@@ -29,10 +29,11 @@ package org.alfresco.transform.tika;
 
 import org.alfresco.transform.base.LivenessReadinessProbeTest;
 
-
-public class TikaLivenessReadinessProbeIT extends LivenessReadinessProbeTest {
+public class TikaLivenessReadinessProbeIT extends LivenessReadinessProbeTest
+{
     @Override
-    protected ImagesForTests getImageForTest() {
+    protected ImagesForTests getImageForTest()
+    {
         return new ImagesForTests("alfresco-tika", "text/plain", "text/plain", "original.txt");
     }
 }

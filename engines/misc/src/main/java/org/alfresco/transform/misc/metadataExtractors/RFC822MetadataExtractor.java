@@ -26,17 +26,8 @@
  */
 package org.alfresco.transform.misc.metadataExtractors;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
 
-import jakarta.mail.Header;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeMessage.RecipientType;
-import jakarta.mail.internet.MimeUtility;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -46,13 +37,23 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import jakarta.mail.Header;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMessage.RecipientType;
+import jakarta.mail.internet.MimeUtility;
 
-import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
 
 /**
  * Metadata extractor for RFC822 mime emails.
  *
- * Configuration:   (see HtmlMetadataExtractor_metadata_extract.properties and misc_engine_config.json)
+ * Configuration: (see HtmlMetadataExtractor_metadata_extract.properties and misc_engine_config.json)
  *
  * <pre>
  *   <b>messageFrom:</b>              --      imap:messageFrom, cm:originator
@@ -106,8 +107,7 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractorEmbedder
         if (mimeMessage != null)
         {
             /**
-             * Extract RFC822 values that doesn't match to headers and need to be encoded.
-             * Or those special fields that require some code to extract data
+             * Extract RFC822 values that doesn't match to headers and need to be encoded. Or those special fields that require some code to extract data
              */
             String tmp = InternetAddress.toString(mimeMessage.getFrom());
             tmp = tmp != null ? MimeUtility.decodeText(tmp) : null;
@@ -126,18 +126,11 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractorEmbedder
             /**
              * Received field from RFC 822
              *
-             * "Received"    ":"        ; one per relay
-             *   ["from" domain]        ; sending host
-             *   ["by"   domain]        ; receiving host
-             *   ["via"  atom]          ; physical path
-             *  ("with" atom)           ; link/mail protocol
-             *   ["id"   msg-id]        ; receiver msg id
-             *   ["for"  addr-spec]     ; initial form
-             * ";"    date-time         ; time received
+             * "Received" ":" ; one per relay ["from" domain] ; sending host ["by" domain] ; receiving host ["via" atom] ; physical path ("with" atom) ; link/mail protocol ["id" msg-id] ; receiver msg id ["for" addr-spec] ; initial form ";" date-time ; time received
              */
             Date rxDate = mimeMessage.getReceivedDate();
 
-            if(rxDate != null)
+            if (rxDate != null)
             {
                 // The email implementation extracted the received date for us.
                 putRawValue(KEY_MESSAGE_RECEIVED, rxDate, rawProperties);
@@ -146,12 +139,12 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractorEmbedder
             {
                 // the email implementation did not parse the received date for us.
                 String[] rx = mimeMessage.getHeader("received");
-                if(rx != null && rx.length > 0)
+                if (rx != null && rx.length > 0)
                 {
                     String lastReceived = rx[0];
                     lastReceived = MimeUtility.unfold(lastReceived);
                     int x = lastReceived.lastIndexOf(';');
-                    if(x > 0)
+                    if (x > 0)
                     {
                         String dateStr = lastReceived.substring(x + 1).trim();
                         putRawValue(KEY_MESSAGE_RECEIVED, dateStr, rawProperties);
@@ -174,9 +167,7 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractorEmbedder
                 putRawValue(KEY_MESSAGE_SUBJECT, decodedSubject, rawProperties);
             }
 
-            /*
-             * Extract values from all header fields, including extension fields "X-"
-             */
+            /* Extract values from all header fields, including extension fields "X-" */
             Set<String> keys = getExtractMapping().keySet();
             Enumeration<Header> headers = mimeMessage.getAllHeaders();
             while (headers.hasMoreElements())

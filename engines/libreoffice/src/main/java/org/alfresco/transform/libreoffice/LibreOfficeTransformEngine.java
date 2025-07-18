@@ -26,18 +26,19 @@
  */
 package org.alfresco.transform.libreoffice;
 
-import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.config.reader.TransformConfigResourceReader;
-import org.alfresco.transform.config.TransformConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.Collections;
-
 import static org.alfresco.transform.base.logging.StandardMessages.COMMUNITY_LICENCE;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
+
+import java.util.Collections;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformEngine;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 
 @Component
 public class LibreOfficeTransformEngine implements TransformEngine
@@ -70,6 +71,6 @@ public class LibreOfficeTransformEngine implements TransformEngine
     public ProbeTransform getProbeTransform()
     {
         return new ProbeTransform("probe.doc", MIMETYPE_WORD, MIMETYPE_PDF, Collections.emptyMap(),
-            9728, 1024, 150, 10240, 60 * 30 + 1, 60 * 15 + 20);
+                9728, 1024, 150, 10240, 60 * 30 + 1, 60 * 15 + 20);
     }
 }

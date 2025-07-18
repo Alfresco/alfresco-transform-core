@@ -26,14 +26,7 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import com.google.common.collect.ImmutableList;
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -44,14 +37,18 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
+import com.google.common.collect.ImmutableList;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 
 /**
- * Converts Apple iWorks files to JPEGs for thumbnailing and previewing.
- * The transformer will only work for iWorks 2013/14 files. Support for iWorks 2008/9 has been dropped as we cannot
- * support both, because the newer format does not contain a PDF. If we say this transformer supports PDF, Share will
- * assume incorrectly that we can convert to PDF and we would only get a preview for the older format and never the
- * newer one. Both formats have the same mimetype.
+ * Converts Apple iWorks files to JPEGs for thumbnailing and previewing. The transformer will only work for iWorks 2013/14 files. Support for iWorks 2008/9 has been dropped as we cannot support both, because the newer format does not contain a PDF. If we say this transformer supports PDF, Share will assume incorrectly that we can convert to PDF and we would only get a preview for the older format and never the newer one. Both formats have the same mimetype.
  *
  * <p>
  * This code is based on a class of the same name originally implemented in alfresco-repository.
@@ -65,16 +62,16 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 public class AppleIWorksContentTransformer implements CustomTransformerFileAdaptor
 {
     private static final Logger logger = LoggerFactory.getLogger(
-        AppleIWorksContentTransformer.class);
+            AppleIWorksContentTransformer.class);
 
     // Apple's zip entry names for previews in iWorks have changed over time.
     private static final List<String> PDF_PATHS = ImmutableList.of(
-        "QuickLook/Preview.pdf");  // iWorks 2008/9
+            "QuickLook/Preview.pdf"); // iWorks 2008/9
     private static final List<String> JPG_PATHS = ImmutableList.of(
-        "QuickLook/Thumbnail.jpg", // iWorks 2008/9
-        "preview.jpg");            // iWorks 2013/14 (720 x 552) We use the best quality image. Others are:
-                                   //                (225 x 173) preview-web.jpg
-                                   //                 (53 x  41) preview-micro.jpg
+            "QuickLook/Thumbnail.jpg", // iWorks 2008/9
+            "preview.jpg"); // iWorks 2013/14 (720 x 552) We use the best quality image. Others are:
+                            // (225 x 173) preview-web.jpg
+                            // (53 x 41) preview-micro.jpg
 
     @Override
     public String getTransformerName()
@@ -84,15 +81,15 @@ public class AppleIWorksContentTransformer implements CustomTransformerFileAdapt
 
     @Override
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                          File sourceFile, File targetFile, TransformManager transformManager)
+            File sourceFile, File targetFile, TransformManager transformManager)
     {
         logger.debug("Performing IWorks to jpeg transform with sourceMimetype={} targetMimetype={}",
-            sourceMimetype, targetMimetype);
+                sourceMimetype, targetMimetype);
 
         // iWorks files are zip (or package) files.
         // If it's not a zip file, the resultant ZipException will be caught as an IOException below.
         try (ZipArchiveInputStream iWorksZip = new ZipArchiveInputStream(
-            new BufferedInputStream(new FileInputStream(sourceFile))))
+                new BufferedInputStream(new FileInputStream(sourceFile))))
         {
             // Look through the zip file entries for the preview/thumbnail.
             List<String> paths = MIMETYPE_IMAGE_JPEG.equals(targetMimetype) ? JPG_PATHS : PDF_PATHS;
@@ -112,14 +109,14 @@ public class AppleIWorksContentTransformer implements CustomTransformerFileAdapt
             if (!found)
             {
                 throw new RuntimeException(
-                    "The source " + sourceMimetype + " file did not contain a " + targetMimetype + " preview");
+                        "The source " + sourceMimetype + " file did not contain a " + targetMimetype + " preview");
             }
         }
         catch (IOException e)
         {
             throw new RuntimeException(
-                "Unable to transform " + sourceMimetype + " file. It should have been a zip format file.",
-                e);
+                    "Unable to transform " + sourceMimetype + " file. It should have been a zip format file.",
+                    e);
         }
     }
 }

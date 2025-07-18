@@ -26,11 +26,6 @@
  */
 package org.alfresco.transformer.metadataExtractors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,46 +43,39 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * Helper methods for metadata extract and embed.
- * <p>
- * <i>Much of the code is based on AbstractMappingMetadataExtracter from the
- * content repository. The code has been simplified to only set up mapping one way.</i>
- * <p>
- * If a transform specifies that it can convert from {@code "<MIMETYPE>"} to {@code "alfresco-metadata-extract"}
- * (specified in the {@code engine_config.json}), it is indicating that it can extract metadata from {@code <MIMETYPE>}.
+ *             Helper methods for metadata extract and embed.
+ *             <p>
+ *             <i>Much of the code is based on AbstractMappingMetadataExtracter from the content repository. The code has been simplified to only set up mapping one way.</i>
+ *             <p>
+ *             If a transform specifies that it can convert from {@code "<MIMETYPE>"} to {@code "alfresco-metadata-extract"} (specified in the {@code engine_config.json}), it is indicating that it can extract metadata from {@code <MIMETYPE>}.
  *
- * The transform results in a Map of extracted properties encoded as json being returned to the content repository.
- * <ul>
- *   <li>The content repository will use a transform in preference to any metadata extractors it might have defined
- *   locally for the same MIMETYPE.</li>
- *   <li>The T-Engine's Controller class will call a method in a class that extends {@link AbstractMetadataExtractor}
- *   based on the source and target mediatypes in the normal way.</li>
- *   <li>The method extracts ALL available metadata is extracted from the document and then calls
- *   {@link #mapMetadataAndWrite(File, Map, Map)}.</li>
- *   <li>Selected values from the available metadata are mapped into content repository property names and values,
- *   depending on what is defined in a {@code "<classname>_metadata_extract.properties"} file.</li>
- *   <li>The selected values are set back to the content repository as a JSON representation of a Map, where the values
- *   are applied to the source node.</li>
- * </ul>
- * To support the same functionality as metadata extractors configured inside the content repository,
- * extra key value pairs may be returned from {@link #extractMetadata}. These are:
- * <ul>
- *     <li>{@code "sys:overwritePolicy"} which can specify the
- *     {@code org.alfresco.repo.content.metadata.MetadataExtracter.OverwritePolicy} name. Defaults to "PRAGMATIC".</li>
- *     <li>{@code "sys:enableStringTagging"} if {@code "true"} finds or creates tags for each string mapped to
- *     {@code cm:taggable}. Defaults to {@code "false"} to ignore mapping strings to tags.</li>
- *     <li>{@code "sys:carryAspectProperties"} </li>
- *     <li>{@code "sys:stringTaggingSeparators"} </li>
- * </ul>
+ *             The transform results in a Map of extracted properties encoded as json being returned to the content repository.
+ *             <ul>
+ *             <li>The content repository will use a transform in preference to any metadata extractors it might have defined locally for the same MIMETYPE.</li>
+ *             <li>The T-Engine's Controller class will call a method in a class that extends {@link AbstractMetadataExtractor} based on the source and target mediatypes in the normal way.</li>
+ *             <li>The method extracts ALL available metadata is extracted from the document and then calls {@link #mapMetadataAndWrite(File, Map, Map)}.</li>
+ *             <li>Selected values from the available metadata are mapped into content repository property names and values, depending on what is defined in a {@code "<classname>_metadata_extract.properties"} file.</li>
+ *             <li>The selected values are set back to the content repository as a JSON representation of a Map, where the values are applied to the source node.</li>
+ *             </ul>
+ *             To support the same functionality as metadata extractors configured inside the content repository, extra key value pairs may be returned from {@link #extractMetadata}. These are:
+ *             <ul>
+ *             <li>{@code "sys:overwritePolicy"} which can specify the {@code org.alfresco.repo.content.metadata.MetadataExtracter.OverwritePolicy} name. Defaults to "PRAGMATIC".</li>
+ *             <li>{@code "sys:enableStringTagging"} if {@code "true"} finds or creates tags for each string mapped to {@code cm:taggable}. Defaults to {@code "false"} to ignore mapping strings to tags.</li>
+ *             <li>{@code "sys:carryAspectProperties"}</li>
+ *             <li>{@code "sys:stringTaggingSeparators"}</li>
+ *             </ul>
  *
- * If a transform specifies that it can convert from {@code "<MIMETYPE>"} to {@code "alfresco-metadata-embed"}, it is
- * indicating that it can embed metadata in {@code <MIMETYPE>}.
+ *             If a transform specifies that it can convert from {@code "<MIMETYPE>"} to {@code "alfresco-metadata-embed"}, it is indicating that it can embed metadata in {@code <MIMETYPE>}.
  *
- * The transform results in a new version of supplied source file that contains the metadata supplied in the transform
- * options.
+ *             The transform results in a new version of supplied source file that contains the metadata supplied in the transform options.
  * 
  * @author Jesper Steen Møller
  * @author Derek Hulley
@@ -136,10 +124,10 @@ public abstract class AbstractMetadataExtractor
     }
 
     public abstract Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions,
-                                                              File sourceFile) throws Exception;
+            File sourceFile) throws Exception;
 
     public void embedMetadata(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                              File sourceFile, File targetFile) throws Exception
+            File sourceFile, File targetFile) throws Exception
     {
         // Default nothing, as embedding is not supported in most cases
     }
@@ -208,9 +196,8 @@ public abstract class AbstractMetadataExtractor
     /**
      * Based on AbstractMappingMetadataExtracter#getDefaultMapping.
      *
-     * This method provides a <i>mapping</i> of where to store the values extracted from the documents. The list of
-     * properties need <b>not</b> include all metadata values extracted from the document. This mapping should be
-     * defined in a file based on the class name: {@code "<classname>_metadata_extract.properties"}
+     * This method provides a <i>mapping</i> of where to store the values extracted from the documents. The list of properties need <b>not</b> include all metadata values extracted from the document. This mapping should be defined in a file based on the class name: {@code "<classname>_metadata_extract.properties"}
+     * 
      * @return Returns a static mapping. It may not be null.
      */
     private Map<String, Set<String>> buildExtractMapping()
@@ -219,7 +206,7 @@ public abstract class AbstractMetadataExtractor
         Properties properties = readProperties(filename);
         if (properties == null)
         {
-            logger.error("Failed to read "+filename);
+            logger.error("Failed to read " + filename);
         }
 
         Map<String, String> namespacesByPrefix = getNamespaces(properties);
@@ -260,13 +247,10 @@ public abstract class AbstractMetadataExtractor
     /**
      * Based on AbstractMappingMetadataExtracter#getDefaultEmbedMapping.
      *
-     * This method provides a <i>mapping</i> of model properties that should be embedded in the content.  The list of
-     * properties need <b>not</b> include all properties. This mapping should be defined in a file based on the class
-     * name: {@code "<classname>_metadata_embed.properties"}
+     * This method provides a <i>mapping</i> of model properties that should be embedded in the content. The list of properties need <b>not</b> include all properties. This mapping should be defined in a file based on the class name: {@code "<classname>_metadata_embed.properties"}
      * <p>
-     * If no {@code "<classname>_metadata_embed.properties"} file is found, a reverse of the
-     * {@code "<classname>_metadata_extract.properties"} will be assumed. A last win approach will be used for handling
-     * duplicates.
+     * If no {@code "<classname>_metadata_embed.properties"} file is found, a reverse of the {@code "<classname>_metadata_extract.properties"} will be assumed. A last win approach will be used for handling duplicates.
+     * 
      * @return Returns a static mapping. It may not be null.
      */
     private Map<String, Set<String>> buildEmbedMapping()
@@ -306,7 +290,8 @@ public abstract class AbstractMetadataExtractor
             modelProperty = getQNameString(namespacesByPrefix, entry, modelProperty, EMBED);
             String[] metadataKeysArray = metadataKeysString.split(",");
             Set<String> metadataKeys = new HashSet<String>(metadataKeysArray.length);
-            for (String metadataKey : metadataKeysArray) {
+            for (String metadataKey : metadataKeysArray)
+            {
                 metadataKeys.add(metadataKey.trim());
             }
             // Create the entry
@@ -367,8 +352,7 @@ public abstract class AbstractMetadataExtractor
             }
         }
         catch (IOException ignore)
-        {
-        }
+        {}
         return properties;
     }
 
@@ -410,21 +394,21 @@ public abstract class AbstractMetadataExtractor
     }
 
     /**
-     * Adds a value to the map, conserving null values.  Values are converted to null if:
+     * Adds a value to the map, conserving null values. Values are converted to null if:
      * <ul>
-     *   <li>it is an empty string value after trimming</li>
-     *   <li>it is an empty collection</li>
-     *   <li>it is an empty array</li>
+     * <li>it is an empty string value after trimming</li>
+     * <li>it is an empty collection</li>
+     * <li>it is an empty array</li>
      * </ul>
-     * String values are trimmed before being put into the map.
-     * Otherwise, it is up to the extracter to ensure that the value is a <tt>Serializable</tt>.
-     * It is not appropriate to implicitly convert values in order to make them <tt>Serializable</tt>
-     * - the best conversion method will depend on the value's specific meaning.
+     * String values are trimmed before being put into the map. Otherwise, it is up to the extracter to ensure that the value is a <tt>Serializable</tt>. It is not appropriate to implicitly convert values in order to make them <tt>Serializable</tt> - the best conversion method will depend on the value's specific meaning.
      *
-     * @param key           the destination key
-     * @param value         the serializable value
-     * @param destination   the map to put values into
-     * @return              Returns <tt>true</tt> if set, otherwise <tt>false</tt>
+     * @param key
+     *            the destination key
+     * @param value
+     *            the serializable value
+     * @param destination
+     *            the map to put values into
+     * @return Returns <tt>true</tt> if set, otherwise <tt>false</tt>
      */
     // Copied from the content repository's AbstractMappingMetadataExtracter.
     protected boolean putRawValue(String key, Serializable value, Map<String, Serializable> destination)
@@ -471,11 +455,10 @@ public abstract class AbstractMetadataExtractor
     }
 
     /**
-     * The {@code transformOptions} may contain a replacement set of mappings. These will be used in place of the
-     * default mappings from read from file if supplied.
+     * The {@code transformOptions} may contain a replacement set of mappings. These will be used in place of the default mappings from read from file if supplied.
      */
     public void extractMetadata(String sourceMimetype, Map<String, String> transformOptions, File sourceFile,
-                                File targetFile) throws Exception
+            File targetFile) throws Exception
     {
         Map<String, Set<String>> mapping = getExtractMappingFromOptions(transformOptions, defaultExtractMapping);
 
@@ -493,8 +476,7 @@ public abstract class AbstractMetadataExtractor
         }
     }
 
-    private Map<String, Set<String>> getExtractMappingFromOptions(Map<String, String> transformOptions, Map<String,
-            Set<String>> defaultExtractMapping)
+    private Map<String, Set<String>> getExtractMappingFromOptions(Map<String, String> transformOptions, Map<String, Set<String>> defaultExtractMapping)
     {
         String extractMappingOption = transformOptions.get(EXTRACT_MAPPING);
         if (extractMappingOption != null)
@@ -506,15 +488,14 @@ public abstract class AbstractMetadataExtractor
             }
             catch (JsonProcessingException e)
             {
-                throw new IllegalArgumentException("Failed to read "+ EXTRACT_MAPPING +" from request", e);
+                throw new IllegalArgumentException("Failed to read " + EXTRACT_MAPPING + " from request", e);
             }
         }
         return defaultExtractMapping;
     }
 
     /**
-     * @deprecated use {@link #extractMetadata(String, Map, File, File)} rather than calling this method.
-     * By default call the overloaded method with the default {@code extractMapping}.
+     * @deprecated use {@link #extractMetadata(String, Map, File, File)} rather than calling this method. By default call the overloaded method with the default {@code extractMapping}.
      */
     @Deprecated
     public void mapMetadataAndWrite(File targetFile, Map<String, Serializable> metadata) throws IOException
@@ -523,12 +504,12 @@ public abstract class AbstractMetadataExtractor
     }
 
     public void mapMetadataAndWrite(File targetFile, Map<String, Serializable> metadata,
-                                    Map<String, Set<String>> extractMapping) throws IOException
+            Map<String, Set<String>> extractMapping) throws IOException
     {
         if (logger.isDebugEnabled())
         {
             logger.debug("Raw metadata:");
-            metadata.forEach((k,v) -> logger.debug("  "+k+"="+v));
+            metadata.forEach((k, v) -> logger.debug("  " + k + "=" + v));
         }
 
         metadata = mapRawToSystem(metadata, extractMapping);
@@ -538,12 +519,14 @@ public abstract class AbstractMetadataExtractor
     /**
      * Based on AbstractMappingMetadataExtracter#mapRawToSystem.
      *
-     * @param rawMetadata    Metadata keyed by document properties
-     * @param extractMapping Mapping between document ans system properties
-     * @return               Returns the metadata keyed by the system properties
+     * @param rawMetadata
+     *            Metadata keyed by document properties
+     * @param extractMapping
+     *            Mapping between document ans system properties
+     * @return Returns the metadata keyed by the system properties
      */
     private Map<String, Serializable> mapRawToSystem(Map<String, Serializable> rawMetadata,
-                                                     Map<String, Set<String>> extractMapping)
+            Map<String, Set<String>> extractMapping)
     {
         boolean debugEnabled = logger.isDebugEnabled();
         if (debugEnabled)
@@ -571,12 +554,12 @@ public abstract class AbstractMetadataExtractor
                 continue;
             }
 
-           Set<String> systemQNames = extractMapping.get(documentKey);
+            Set<String> systemQNames = extractMapping.get(documentKey);
             for (String systemQName : systemQNames)
             {
                 if (debugEnabled)
                 {
-                    logger.debug("  "+systemQName+"="+documentValue+" ("+documentKey+")");
+                    logger.debug("  " + systemQName + "=" + documentValue + " (" + documentKey + ")");
                 }
                 systemProperties.put(systemQName, documentValue);
             }

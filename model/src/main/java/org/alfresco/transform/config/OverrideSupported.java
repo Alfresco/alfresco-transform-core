@@ -22,8 +22,9 @@
 package org.alfresco.transform.config;
 
 /**
- * Holds information to overriding existing {@link SupportedSourceAndTarget} objects with new {@code priority} and
- * {@code maxSourceSizeBytes} values.<p><br>
+ * Holds information to overriding existing {@link SupportedSourceAndTarget} objects with new {@code priority} and {@code maxSourceSizeBytes} values.
+ * <p>
+ * <br>
  *
  * <pre>
  *   "overrideSupported" : [

@@ -47,14 +47,7 @@ import org.xml.sax.SAXException;
 ///////// THIS FILE WAS A COPY OF THE CODE IN alfresco-repository /////////////
 
 /**
- * <a href="http://tika.apache.org/Apache Tika">Apache Tika</a> assumes that
- * you either know exactly what your content is, or that
- * you'll leave it to auto-detection.
- * Within Alfresco, we usually do know. However, from time
- * to time, we don't know if we have one of the old or one
- * of the new office files (eg .xls and .xlsx).
- * This class allows automatically selects the appropriate
- * old (OLE2) or new (OOXML) Tika parser as required.
+ * <a href="http://tika.apache.org/Apache Tika">Apache Tika</a> assumes that you either know exactly what your content is, or that you'll leave it to auto-detection. Within Alfresco, we usually do know. However, from time to time, we don't know if we have one of the old or one of the new office files (eg .xls and .xlsx). This class allows automatically selects the appropriate old (OLE2) or new (OOXML) Tika parser as required.
  *
  * @author Nick Burch
  */
@@ -72,9 +65,9 @@ public class TikaOfficeDetectParser implements Parser
     }
 
     public void parse(InputStream stream,
-        ContentHandler handler, Metadata metadata,
-        ParseContext parseContext) throws IOException, SAXException,
-        TikaException
+            ContentHandler handler, Metadata metadata,
+            ParseContext parseContext) throws IOException, SAXException,
+            TikaException
     {
         byte[] initial4 = new byte[4];
         InputStream wrapped;
@@ -109,8 +102,8 @@ public class TikaOfficeDetectParser implements Parser
      * @deprecated This method will be removed in Apache Tika 1.0.
      */
     public void parse(InputStream stream,
-        ContentHandler handler, Metadata metadata)
-        throws IOException, SAXException, TikaException
+            ContentHandler handler, Metadata metadata)
+            throws IOException, SAXException, TikaException
     {
         parse(stream, handler, metadata, new ParseContext());
     }

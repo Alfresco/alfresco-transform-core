@@ -26,17 +26,18 @@
  */
 package org.alfresco.transform.misc;
 
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.base.clients.FileInfo.testFile;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_RFC822;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_XHTML;
 
 import java.util.stream.Stream;
 
-import org.alfresco.transform.base.metadata.AbstractMetadataExtractsIT;
-import org.alfresco.transform.base.clients.FileInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import org.alfresco.transform.base.clients.FileInfo;
+import org.alfresco.transform.base.metadata.AbstractMetadataExtractsIT;
 
 /**
  * Metadata integration tests in the Misc T-Engine.
@@ -53,7 +54,7 @@ public class MiscMetadataExtractsIT extends AbstractMetadataExtractsIT
     {
         super.testTransformation(fileInfo);
     }
-    
+
     private static Stream<FileInfo> engineTransformations()
     {
         return Stream.of(
@@ -66,7 +67,6 @@ public class MiscMetadataExtractsIT extends AbstractMetadataExtractsIT
                 // Special test cases from the repo tests
                 // ======================================
                 testFile(MIMETYPE_RFC822, "eml", "quick.spanish.eml"),
-                testFile(MIMETYPE_HTML, "html", "quick.japanese.html")
-        );
+                testFile(MIMETYPE_HTML, "html", "quick.japanese.html"));
     }
 }

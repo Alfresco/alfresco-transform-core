@@ -26,12 +26,13 @@
  */
 package org.alfresco.transformer;
 
-import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
+
+import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,8 +46,7 @@ import org.springframework.util.LinkedMultiValueMap;
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * Super class for testing controllers with a server. Includes tests for the AbstractTransformerController itself.
- * Note: Currently uses json rather than HTML as json is returned by this spring boot test harness.
+ *             Super class for testing controllers with a server. Includes tests for the AbstractTransformerController itself. Note: Currently uses json rather than HTML as json is returned by this spring boot test harness.
  */
 @Deprecated
 public abstract class AbstractHttpRequestTest
@@ -74,7 +74,7 @@ public abstract class AbstractHttpRequestTest
     public void logPageExists()
     {
         String result = restTemplate.getForObject("http://localhost:" + port + "/log",
-            String.class);
+                String.class);
 
         String title = getTransformerName() + ' ' + "Log";
         assertTrue("\"" + title + "\" should be part of the page title", result.contains(title));
@@ -84,11 +84,11 @@ public abstract class AbstractHttpRequestTest
     public void errorPageExists()
     {
         String result = restTemplate.getForObject("http://localhost:" + port + "/error",
-            String.class);
+                String.class);
 
         String title = getTransformerName() + ' ' + "Error Page";
         assertTrue("\"" + title + "\" should be part of the page title",
-            result.contains("Error Page"));
+                result.contains("Error Page"));
     }
 
     @Test
@@ -111,18 +111,18 @@ public abstract class AbstractHttpRequestTest
     private void assertMissingParameter(String name)
     {
         assertTransformError(true,
-            getTransformerName() + " - Request parameter '" + name + "' is missing", null);
+                getTransformerName() + " - Request parameter '" + name + "' is missing", null);
     }
 
     protected void assertTransformError(boolean addFile,
-                                        String errorMessage,
-                                        LinkedMultiValueMap<String, Object> additionalParams)
+            String errorMessage,
+            LinkedMultiValueMap<String, Object> additionalParams)
     {
         LinkedMultiValueMap<String, Object> parameters = new LinkedMultiValueMap<>();
         if (addFile)
         {
             parameters.add("file",
-                new org.springframework.core.io.ClassPathResource("quick." + getSourceExtension()));
+                    new org.springframework.core.io.ClassPathResource("quick." + getSourceExtension()));
         }
         if (additionalParams != null)
         {
@@ -132,7 +132,7 @@ public abstract class AbstractHttpRequestTest
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MULTIPART_FORM_DATA);
         HttpEntity<LinkedMultiValueMap<String, Object>> entity = new HttpEntity<>(parameters,
-            headers);
+                headers);
 
         sendTranformationRequest(entity, errorMessage);
     }
@@ -153,10 +153,10 @@ public abstract class AbstractHttpRequestTest
     }
 
     protected void sendTranformationRequest(
-        final HttpEntity<LinkedMultiValueMap<String, Object>> entity, final String errorMessage)
+            final HttpEntity<LinkedMultiValueMap<String, Object>> entity, final String errorMessage)
     {
         final ResponseEntity<String> response = restTemplate.exchange(ENDPOINT_TRANSFORM, POST, entity,
-            String.class, "");
+                String.class, "");
         assertEquals(errorMessage, getErrorMessage(response.getBody()));
     }
 

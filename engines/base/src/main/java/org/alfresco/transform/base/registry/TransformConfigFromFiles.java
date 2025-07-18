@@ -26,8 +26,14 @@
  */
 package org.alfresco.transform.base.registry;
 
-import org.alfresco.transform.config.reader.TransformConfigResourceReader;
-import org.alfresco.transform.config.TransformConfig;
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import jakarta.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -35,13 +41,8 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import static java.util.stream.Collectors.toList;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 
 /**
  * Makes {@link TransformConfig} from files on the classpath or externally available to the {@link TransformRegistry}.
@@ -66,30 +67,29 @@ public class TransformConfigFromFiles
         final List<Resource> resources = new ArrayList<>();
         resources.addAll(transformConfigFiles.retrieveResources());
         resources.addAll(transformConfigFilesHistoric.retrieveResources());
-        resources.forEach(resource ->
-        {
+        resources.forEach(resource -> {
             String filename = resource.getFilename();
             transformConfigSources.add(
-                new AbstractTransformConfigSource(filename, filename, isTRouter ? null : "---")
-                {
-                    @Override public TransformConfig getTransformConfig()
-                    {
-                        return transformConfigResourceReader.read(resource);
-                    }
-                });
+                    new AbstractTransformConfigSource(filename, filename, isTRouter ? null : "---") {
+                        @Override
+                        public TransformConfig getTransformConfig()
+                        {
+                            return transformConfigResourceReader.read(resource);
+                        }
+                    });
         });
     }
 
     public static List<Resource> retrieveResources(Map<String, String> additional)
     {
         return additional
-                   .values()
-                   .stream()
-                   .filter(Objects::nonNull)
-                   .map(String::trim)
-                   .filter(s -> !s.isBlank())
-                   .map(TransformConfigFromFiles::retrieveResource)
-                   .collect(toList());
+                .values()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .map(TransformConfigFromFiles::retrieveResource)
+                .collect(toList());
     }
 
     public static Resource retrieveResource(final String filename)

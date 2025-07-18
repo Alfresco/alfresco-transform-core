@@ -26,18 +26,19 @@
  */
 package org.alfresco.transformer.config;
 
-import org.alfresco.transform.messages.TransformRequestValidator;
-import org.alfresco.transform.registry.TransformServiceRegistry;
-import org.alfresco.transform.common.TransformerDebug;
-import org.alfresco.transformer.TransformInterceptor;
-import org.alfresco.transformer.TransformRegistryImpl;
-import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+import org.alfresco.transform.common.TransformerDebug;
+import org.alfresco.transform.messages.TransformRequestValidator;
+import org.alfresco.transform.registry.TransformServiceRegistry;
+import org.alfresco.transformer.TransformInterceptor;
+import org.alfresco.transformer.TransformRegistryImpl;
+import org.alfresco.transformer.clients.AlfrescoSharedFileStoreClient;
 
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
@@ -50,8 +51,8 @@ public class WebApplicationConfig implements WebMvcConfigurer
     public void addInterceptors(InterceptorRegistry registry)
     {
         registry
-            .addInterceptor(transformInterceptor())
-            .addPathPatterns(ENDPOINT_TRANSFORM, "/live", "/ready");
+                .addInterceptor(transformInterceptor())
+                .addPathPatterns(ENDPOINT_TRANSFORM, "/live", "/ready");
     }
 
     @Bean

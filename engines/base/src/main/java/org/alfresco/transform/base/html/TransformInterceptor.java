@@ -42,7 +42,7 @@ public class TransformInterceptor implements AsyncHandlerInterceptor
 {
     @Override
     public void afterCompletion(HttpServletRequest request,
-        HttpServletResponse response, Object handler, Exception ex)
+            HttpServletResponse response, Object handler, Exception ex)
     {
         deleteFile(request, SOURCE_FILE);
         deleteFile(request, TARGET_FILE);

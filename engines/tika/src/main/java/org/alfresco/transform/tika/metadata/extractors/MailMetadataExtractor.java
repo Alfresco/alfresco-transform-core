@@ -26,7 +26,11 @@
  */
 package org.alfresco.transform.tika.metadata.extractors;
 
-import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
+
+import java.io.Serializable;
+import java.util.Map;
+
 import org.apache.tika.metadata.Message;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
@@ -36,15 +40,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
-import java.util.Map;
-
-import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
+import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
 
 /**
  * Outlook MAPI format email metadata extractor.
  *
- * Configuration:   (see MailMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
+ * Configuration: (see MailMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
  *
  * <pre>
  *   <b>sentDate:</b>               --      cm:sentdate
@@ -57,8 +58,7 @@ import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbe
  *   <b>bccNames:</b>               --
  * </pre>
  *
- * TIKA note - to/cc/bcc go into the html part, not the metadata.
- *  Also, email addresses not included as yet.
+ * TIKA note - to/cc/bcc go into the html part, not the metadata. Also, email addresses not included as yet.
  *
  * @author Kevin Roast
  * @author adavis
@@ -91,7 +91,7 @@ public class MailMetadataExtractor extends AbstractTikaMetadataExtractorEmbeddor
 
     @Override
     protected Map<String, Serializable> extractSpecific(Metadata metadata,
-                                                        Map<String, Serializable> properties, Map<String,String> headers)
+            Map<String, Serializable> properties, Map<String, String> headers)
     {
         putRawValue(KEY_ORIGINATOR, metadata.get(TikaCoreProperties.CREATOR), properties);
         putRawValue(KEY_SUBJECT, metadata.get(TikaCoreProperties.TITLE), properties);

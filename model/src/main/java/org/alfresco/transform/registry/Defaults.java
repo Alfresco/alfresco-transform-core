@@ -21,19 +21,17 @@
  */
 package org.alfresco.transform.registry;
 
-import org.alfresco.transform.config.SupportedDefaults;
+import static java.util.stream.Collectors.toSet;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toSet;
+import org.alfresco.transform.config.SupportedDefaults;
 
 /**
- * Maintains a list of defaults of {@code maxSourceSizeBytes} and {@code priority} keyed on
- * {@code transformerName} and {@code sourceMediaType} so that it can provide a lookup when we
- * join everything together in {@link CombinedTransformConfig#combineTransformerConfig(AbstractTransformRegistry)}.
+ * Maintains a list of defaults of {@code maxSourceSizeBytes} and {@code priority} keyed on {@code transformerName} and {@code sourceMediaType} so that it can provide a lookup when we join everything together in {@link CombinedTransformConfig#combineTransformerConfig(AbstractTransformRegistry)}.
  *
  * @see SupportedDefaults
  */
@@ -49,8 +47,7 @@ class Defaults
 
     public void add(SupportedDefaults supportedDefault)
     {
-        TransformerAndSourceType key =
-                new TransformerAndSourceType(supportedDefault.getTransformerName(), supportedDefault.getSourceMediaType());
+        TransformerAndSourceType key = new TransformerAndSourceType(supportedDefault.getTransformerName(), supportedDefault.getSourceMediaType());
         Long maxSourceSizeBytes = supportedDefault.getMaxSourceSizeBytes();
         if (maxSourceSizeBytes != null)
         {
@@ -84,7 +81,7 @@ class Defaults
     }
 
     private <T> T getDefault(String transformerName, String sourceMediaType, T supportedSourceAndTargetValue,
-                            Map<TransformerAndSourceType, T> map)
+            Map<TransformerAndSourceType, T> map)
     {
         if (supportedSourceAndTargetValue != null)
         {
@@ -96,7 +93,7 @@ class Defaults
         // 2: source media type default
         // 3: system wide default
         TransformerAndSourceType key = new TransformerAndSourceType(transformerName, sourceMediaType);
-        for (int i=0; ; i++)
+        for (int i = 0;; i++)
         {
             T value = map.get(key);
             if (value != null)
@@ -106,10 +103,16 @@ class Defaults
 
             switch (i)
             {
-                case 0:
-                case 2: key.setSourceMediaType(null);                                          break;
-                case 1: key.setSourceMediaType(sourceMediaType); key.setTransformerName(null); break;
-                default: throw new IllegalStateException("Should have found an entry with a null, null lookup");
+            case 0:
+            case 2:
+                key.setSourceMediaType(null);
+                break;
+            case 1:
+                key.setSourceMediaType(sourceMediaType);
+                key.setTransformerName(null);
+                break;
+            default:
+                throw new IllegalStateException("Should have found an entry with a null, null lookup");
             }
         }
     }
@@ -117,15 +120,13 @@ class Defaults
     public Set<SupportedDefaults> getSupportedDefaults()
     {
         return Stream.concat(maxSourceSizeBytesDefaults.keySet().stream(), priorityDefaults.keySet().stream())
-                .filter(key ->
-                {
+                .filter(key -> {
                     // Discard the entry added by clear()
                     return !SYSTEM_WIDE_KEY.equals(key) ||
-                           !DEFAULT_MAX_SOURCE_SIZE_BYTES.equals(maxSourceSizeBytesDefaults.get(key)) ||
-                           !DEFAULT_PRIORITY.equals(priorityDefaults.get(key));
+                            !DEFAULT_MAX_SOURCE_SIZE_BYTES.equals(maxSourceSizeBytesDefaults.get(key)) ||
+                            !DEFAULT_PRIORITY.equals(priorityDefaults.get(key));
                 })
-                .map(key ->
-                {
+                .map(key -> {
                     Long maxSourceSizeBytes = maxSourceSizeBytesDefaults.get(key);
                     Integer priority = priorityDefaults.get(key);
                     return SupportedDefaults.builder()

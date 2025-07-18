@@ -27,21 +27,16 @@
 package org.alfresco.transformer;
 
 import static java.text.MessageFormat.format;
+
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.logging.LogEntry;
-import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
@@ -53,13 +48,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transformer.logging.LogEntry;
+import org.alfresco.transformer.probes.ProbeTestTransform;
+
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * TransformController interface.
- * <br/>
- * It contains much of the common boilerplate code that each of
- * its concrete implementations need as default methods.
+ *             TransformController interface. <br/>
+ *             It contains much of the common boilerplate code that each of its concrete implementations need as default methods.
  */
 @Deprecated
 public interface TransformController
@@ -69,19 +68,24 @@ public interface TransformController
     /**
      * Should be overridden in subclasses to initiate the transformation.
      *
-     * @param transformName the name of the transformer in the engine_config.json file
-     * @param sourceMimetype mimetype of the source
-     * @param targetMimetype mimetype of the target
-     * @param transformOptions transform options from the client
-     * @param sourceFile the source file
-     * @param targetFile the target file
+     * @param transformName
+     *            the name of the transformer in the engine_config.json file
+     * @param sourceMimetype
+     *            mimetype of the source
+     * @param targetMimetype
+     *            mimetype of the target
+     * @param transformOptions
+     *            transform options from the client
+     * @param sourceFile
+     *            the source file
+     * @param targetFile
+     *            the target file
      */
     void transformImpl(String transformName, String sourceMimetype, String targetMimetype,
-                       Map<String, String> transformOptions, File sourceFile, File targetFile);
+            Map<String, String> transformOptions, File sourceFile, File targetFile);
 
     /**
-     * @deprecated use {@link #transformImpl(String, String, String, Map, File, File)} and timeout should be part of
-     * the transformOptions created from the TransformRequest.
+     * @deprecated use {@link #transformImpl(String, String, String, Map, File, File)} and timeout should be part of the transformOptions created from the TransformRequest.
      */
     @Deprecated
     ResponseEntity<TransformReply> transform(TransformRequest transformRequest, Long timeout);
@@ -91,10 +95,9 @@ public interface TransformController
      */
     @Deprecated
     default void processTransform(final File sourceFile, final File targetFile,
-        final String sourceMimetype, final String targetMimetype,
-        final Map<String, String> transformOptions, final Long timeout)
-    {
-    }
+            final String sourceMimetype, final String targetMimetype,
+            final Map<String, String> transformOptions, final Long timeout)
+    {}
 
     /**
      * @return a friendly name for the T-Engine.
@@ -131,8 +134,7 @@ public interface TransformController
     }
 
     /**
-     * @return the name of a template to display when there is an error when using the test UI for the T-Engine.
-     * Defaults to {@code "error"}.
+     * @return the name of a template to display when there is an error when using the test UI for the T-Engine. Defaults to {@code "error"}.
      * @See #transformForm
      */
     @GetMapping("/error")
@@ -142,8 +144,7 @@ public interface TransformController
     }
 
     /**
-     * @return the name of a template to display log messages when using the test UI for the T-Engine.
-     * Defaults to {@code "log"}.
+     * @return the name of a template to display log messages when using the test UI for the T-Engine. Defaults to {@code "log"}.
      * @See #transformForm
      */
     @GetMapping("/log")
@@ -178,13 +179,13 @@ public interface TransformController
         return probe(request, true);
     }
 
-    //region [Exception Handlers]
+    // region [Exception Handlers]
     @ExceptionHandler(TypeMismatchException.class)
     default void handleParamsTypeMismatch(HttpServletResponse response,
-        MissingServletRequestParameterException e) throws IOException
+            MissingServletRequestParameterException e) throws IOException
     {
         final String message = format("Request parameter ''{0}'' is of the wrong type", e
-            .getParameterName());
+                .getParameterName());
         final int statusCode = BAD_REQUEST.value();
 
         logger.error(message, e);
@@ -196,7 +197,7 @@ public interface TransformController
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     default void handleMissingParams(HttpServletResponse response,
-        MissingServletRequestParameterException e) throws IOException
+            MissingServletRequestParameterException e) throws IOException
     {
         final String message = format("Request parameter ''{0}'' is missing", e.getParameterName());
         final int statusCode = BAD_REQUEST.value();
@@ -210,7 +211,7 @@ public interface TransformController
 
     @ExceptionHandler(TransformException.class)
     default void transformExceptionWithMessage(HttpServletResponse response,
-        TransformException e) throws IOException
+            TransformException e) throws IOException
     {
         final String message = e.getMessage();
         final int statusCode = e.getStatus().value();
@@ -223,5 +224,5 @@ public interface TransformController
         response.sendError(statusCode, getTransformerName() + " - " + message);
     }
 
-    //endregion
+    // endregion
 }

@@ -26,21 +26,21 @@
  */
 package org.alfresco.transform.base.fakes;
 
-import org.alfresco.transform.base.CustomTransformer;
-import org.alfresco.transform.base.TransformManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.TestComponent;
-
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.TestComponent;
+
+import org.alfresco.transform.base.CustomTransformer;
+import org.alfresco.transform.base.TransformManager;
+
 /**
- * Subclass MUST be named FakeTransformer\<something>. Appends the name of the CustomTransformer and any t-options
- * to the output. The output is always a String regardless of the stated mimetypes.
+ * Subclass MUST be named FakeTransformer\<something>. Appends the name of the CustomTransformer and any t-options to the output. The output is always a String regardless of the stated mimetypes.
  */
 @TestComponent
 public abstract class AbstractFakeTransformer implements CustomTransformer
@@ -65,9 +65,9 @@ public abstract class AbstractFakeTransformer implements CustomTransformer
                 .append(getTransformerName())
                 .append("(")
                 .append(transformOptions.entrySet()
-                                        .stream()
-                                        .map(e -> e.getKey() + '=' + e.getValue())
-                                        .collect(Collectors.joining(", ")))
+                        .stream()
+                        .map(e -> e.getKey() + '=' + e.getValue())
+                        .collect(Collectors.joining(", ")))
                 .append(')')
                 .toString();
         logger.info(newValue);

@@ -21,30 +21,31 @@
  */
 package org.alfresco.transform.common;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
+import static org.alfresco.transform.common.RepositoryClientData.DEBUG_SEPARATOR;
+
+import java.util.StringJoiner;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import com.google.common.collect.ImmutableMap;
-import org.alfresco.transform.client.model.InternalContext;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.messages.TransformStack;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-import java.util.StringJoiner;
-
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
-import static org.alfresco.transform.common.RepositoryClientData.DEBUG_SEPARATOR;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.alfresco.transform.client.model.InternalContext;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.messages.TransformStack;
 
 /**
- * Tests TransformerDebug. AbstractRouterTest in the t-router contains more complete end to end tests. The tests in this
- * class are a smoke test at the moment.
+ * Tests TransformerDebug. AbstractRouterTest in the t-router contains more complete end to end tests. The tests in this class are a smoke test at the moment.
  */
 class TransformerDebugTest
 {
@@ -61,7 +62,7 @@ class TransformerDebugTest
     }
 
     private void twoStepTransform(boolean isTRouter, boolean fail, Level logLevel, String renditionName,
-        long sourceSize)
+            long sourceSize)
     {
         transformerDebug.setIsTRouter(isTRouter);
         monitorLogs(logLevel);
@@ -90,7 +91,7 @@ class TransformerDebugTest
         transformerDebug.logOptions(request);
         TransformStack.removeSuccessfulStep(reply, transformerDebug);
 
-        request.setTransformRequestOptions(ImmutableMap.of("k1", "v1", "k2","v2"));
+        request.setTransformRequestOptions(ImmutableMap.of("k1", "v1", "k2", "v2"));
         transformerDebug.pushTransform(request);
         transformerDebug.logOptions(request);
         if (fail)
@@ -107,16 +108,15 @@ class TransformerDebugTest
 
     private void monitorLogs(Level logLevel)
     {
-        Logger logger = (Logger)LoggerFactory.getLogger(TransformerDebug.class);
-        AppenderBase<ILoggingEvent> logAppender = new AppenderBase<>()
-        {
+        Logger logger = (Logger) LoggerFactory.getLogger(TransformerDebug.class);
+        AppenderBase<ILoggingEvent> logAppender = new AppenderBase<>() {
             @Override
             protected void append(ILoggingEvent iLoggingEvent)
             {
                 transformerDebugOutput.add(iLoggingEvent.getMessage());
             }
         };
-        logAppender.setContext((LoggerContext)LoggerFactory.getILoggerFactory());
+        logAppender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
         logger.setLevel(logLevel);
         logger.addAppender(logAppender);
         logAppender.start();
@@ -128,12 +128,12 @@ class TransformerDebugTest
         twoStepTransform(true, false, Level.DEBUG, "", 1234L);
 
         Assertions.assertEquals("" +
-                        "1                 txt  pdf   1.2 KB wrapper\n" +
-                        "1.1               txt  doc   transformer1\n" +
-                        "1.2               doc  pdf   transformer2\n" +
-                        "1.2                 k1=\"v1\"\n" +
-                        "1.2                 k2=\"v2\"\n" +
-                        "1                 Finished in -- ms",
+                "1                 txt  pdf   1.2 KB wrapper\n" +
+                "1.1               txt  doc   transformer1\n" +
+                "1.2               doc  pdf   transformer2\n" +
+                "1.2                 k1=\"v1\"\n" +
+                "1.2                 k2=\"v2\"\n" +
+                "1                 Finished in -- ms",
                 getTransformerDebugOutput());
     }
 
@@ -145,14 +145,14 @@ class TransformerDebugTest
         // With trace there are "Finished" lines for nested transforms, like a T-Engine's debug but still without
         // the size and rendition name
         Assertions.assertEquals("" +
-                        "1                 txt  pdf   1.2 KB wrapper\n" +
-                        "1.1               txt  doc   transformer1\n" +
-                        "1.1               Finished in -- ms\n" +
-                        "1.2               doc  pdf   transformer2\n" +
-                        "1.2                 k1=\"v1\"\n" +
-                        "1.2                 k2=\"v2\"\n" +
-                        "1.2               Finished in -- ms\n" +
-                        "1                 Finished in -- ms",
+                "1                 txt  pdf   1.2 KB wrapper\n" +
+                "1.1               txt  doc   transformer1\n" +
+                "1.1               Finished in -- ms\n" +
+                "1.2               doc  pdf   transformer2\n" +
+                "1.2                 k1=\"v1\"\n" +
+                "1.2                 k2=\"v2\"\n" +
+                "1.2               Finished in -- ms\n" +
+                "1                 Finished in -- ms",
                 getTransformerDebugOutput());
     }
 
@@ -164,14 +164,14 @@ class TransformerDebugTest
         // Note the first and last lines would only ever be logged on the router, but the expected data includes
         // the extra "Finished" lines, sizes and renditions (if set in client data).
         Assertions.assertEquals("" +
-                        "1                 txt  pdf   1.2 KB wrapper\n" +
-                        "1.1               txt  doc   1.2 KB transformer1\n" +
-                        "1.1               Finished in -- ms\n" +
-                        "1.2               doc  pdf   1.2 KB transformer2\n" +
-                        "1.2                 k1=\"v1\"\n" +
-                        "1.2                 k2=\"v2\"\n" +
-                        "1.2               Finished in -- ms\n" +
-                        "1                 Finished in -- ms",
+                "1                 txt  pdf   1.2 KB wrapper\n" +
+                "1.1               txt  doc   1.2 KB transformer1\n" +
+                "1.1               Finished in -- ms\n" +
+                "1.2               doc  pdf   1.2 KB transformer2\n" +
+                "1.2                 k1=\"v1\"\n" +
+                "1.2                 k2=\"v2\"\n" +
+                "1.2               Finished in -- ms\n" +
+                "1                 Finished in -- ms",
                 getTransformerDebugOutput());
     }
 
@@ -181,13 +181,13 @@ class TransformerDebugTest
         twoStepTransform(true, true, Level.DEBUG, "", 1234L);
 
         Assertions.assertEquals("" +
-                                    "1                 txt  pdf   1.2 KB wrapper\n" +
-                                    "1.1               txt  doc   transformer1\n" +
-                                    "1.2               doc  pdf   transformer2\n" +
-                                    "1.2                 k1=\"v1\"\n" +
-                                    "1.2                 k2=\"v2\"\n" +
-                                    "1.2               Dummy error",
-            getTransformerDebugOutput());
+                "1                 txt  pdf   1.2 KB wrapper\n" +
+                "1.1               txt  doc   transformer1\n" +
+                "1.2               doc  pdf   transformer2\n" +
+                "1.2                 k1=\"v1\"\n" +
+                "1.2                 k2=\"v2\"\n" +
+                "1.2               Dummy error",
+                getTransformerDebugOutput());
     }
 
     @Test
@@ -196,13 +196,13 @@ class TransformerDebugTest
         twoStepTransform(true, false, Level.DEBUG, "renditionName", 1234L);
 
         Assertions.assertEquals("" +
-                                    "1                 txt  pdf   1.2 KB -- renditionName -- wrapper\n" +
-                                    "1.1               txt  doc   transformer1\n" +
-                                    "1.2               doc  pdf   transformer2\n" +
-                                    "1.2                 k1=\"v1\"\n" +
-                                    "1.2                 k2=\"v2\"\n" +
-                                    "1                 Finished in -- ms",
-            getTransformerDebugOutput());
+                "1                 txt  pdf   1.2 KB -- renditionName -- wrapper\n" +
+                "1.1               txt  doc   transformer1\n" +
+                "1.2               doc  pdf   transformer2\n" +
+                "1.2                 k1=\"v1\"\n" +
+                "1.2                 k2=\"v2\"\n" +
+                "1                 Finished in -- ms",
+                getTransformerDebugOutput());
     }
 
     @Test
@@ -211,13 +211,13 @@ class TransformerDebugTest
         twoStepTransform(true, false, Level.DEBUG, "transform:alfresco-metadata-extract", 1234L);
 
         Assertions.assertEquals("" +
-                                    "1                 txt  pdf   1.2 KB -- metadataExtract -- wrapper\n" +
-                                    "1.1               txt  doc   transformer1\n" +
-                                    "1.2               doc  pdf   transformer2\n" +
-                                    "1.2                 k1=\"v1\"\n" +
-                                    "1.2                 k2=\"v2\"\n" +
-                                    "1                 Finished in -- ms",
-            getTransformerDebugOutput());
+                "1                 txt  pdf   1.2 KB -- metadataExtract -- wrapper\n" +
+                "1.1               txt  doc   transformer1\n" +
+                "1.2               doc  pdf   transformer2\n" +
+                "1.2                 k1=\"v1\"\n" +
+                "1.2                 k2=\"v2\"\n" +
+                "1                 Finished in -- ms",
+                getTransformerDebugOutput());
     }
 
     @Test
@@ -226,13 +226,13 @@ class TransformerDebugTest
         twoStepTransform(true, false, Level.DEBUG, "transform:alfresco-metadata-embed", 1234L);
 
         Assertions.assertEquals("" +
-                                    "1                 txt  pdf   1.2 KB -- metadataEmbed -- wrapper\n" +
-                                    "1.1               txt  doc   transformer1\n" +
-                                    "1.2               doc  pdf   transformer2\n" +
-                                    "1.2                 k1=\"v1\"\n" +
-                                    "1.2                 k2=\"v2\"\n" +
-                                    "1                 Finished in -- ms",
-            getTransformerDebugOutput());
+                "1                 txt  pdf   1.2 KB -- metadataEmbed -- wrapper\n" +
+                "1.1               txt  doc   transformer1\n" +
+                "1.2               doc  pdf   transformer2\n" +
+                "1.2                 k1=\"v1\"\n" +
+                "1.2                 k2=\"v2\"\n" +
+                "1                 Finished in -- ms",
+                getTransformerDebugOutput());
     }
 
     @Test
@@ -241,28 +241,28 @@ class TransformerDebugTest
         twoStepTransform(true, false, Level.DEBUG, "", 1);
 
         Assertions.assertEquals("" +
-                                    "1                 txt  pdf   1 byte wrapper\n" +
-                                    "1.1               txt  doc   transformer1\n" +
-                                    "1.2               doc  pdf   transformer2\n" +
-                                    "1.2                 k1=\"v1\"\n" +
-                                    "1.2                 k2=\"v2\"\n" +
-                                    "1                 Finished in -- ms",
-            getTransformerDebugOutput());
+                "1                 txt  pdf   1 byte wrapper\n" +
+                "1.1               txt  doc   transformer1\n" +
+                "1.2               doc  pdf   transformer2\n" +
+                "1.2                 k1=\"v1\"\n" +
+                "1.2                 k2=\"v2\"\n" +
+                "1                 Finished in -- ms",
+                getTransformerDebugOutput());
     }
 
     @Test
     void testSourceSize23TB()
     {
-        twoStepTransform(true, false, Level.DEBUG, "", 23L*1024*1024*1024*1024);
+        twoStepTransform(true, false, Level.DEBUG, "", 23L * 1024 * 1024 * 1024 * 1024);
 
         Assertions.assertEquals("" +
-                                    "1                 txt  pdf   23 TB wrapper\n" +
-                                    "1.1               txt  doc   transformer1\n" +
-                                    "1.2               doc  pdf   transformer2\n" +
-                                    "1.2                 k1=\"v1\"\n" +
-                                    "1.2                 k2=\"v2\"\n" +
-                                    "1                 Finished in -- ms",
-            getTransformerDebugOutput());
+                "1                 txt  pdf   23 TB wrapper\n" +
+                "1.1               txt  doc   transformer1\n" +
+                "1.2               doc  pdf   transformer2\n" +
+                "1.2                 k1=\"v1\"\n" +
+                "1.2                 k2=\"v2\"\n" +
+                "1                 Finished in -- ms",
+                getTransformerDebugOutput());
     }
 
     @Test
@@ -301,7 +301,7 @@ class TransformerDebugTest
         transformerDebug.logFailure(reply);
 
         String expectedDebug = "                  T-Request was null - a major error";
-        String expectedClientData = origClientData+DEBUG_SEPARATOR+expectedDebug;
+        String expectedClientData = origClientData + DEBUG_SEPARATOR + expectedDebug;
         Assertions.assertEquals(expectedDebug, getTransformerDebugOutput());
         assertEquals(expectedClientData, reply.getClientData());
     }
@@ -309,15 +309,15 @@ class TransformerDebugTest
     @Test
     void tesGetOptionAndValue()
     {
-        String sixtyChars    = "12345678 10 345678 20 345678 30 345678 40 345678 50 abcdefgh";
+        String sixtyChars = "12345678 10 345678 20 345678 30 345678 40 345678 50 abcdefgh";
         String sixtyOneChars = "12345678 10 345678 20 345678 30 345678 40 345678 50 abcd12345";
-        String expected      = "12345678 10 345678 20 345678 30 345678 40 345678 50 ...12345";
+        String expected = "12345678 10 345678 20 345678 30 345678 40 345678 50 ...12345";
 
         assertEquals("ref                 key=\"value\"",
                 transformerDebug.getOptionAndValue("ref", "key", "value"));
-        assertEquals("ref                 key=\""+sixtyChars+"\"",
+        assertEquals("ref                 key=\"" + sixtyChars + "\"",
                 transformerDebug.getOptionAndValue("ref", "key", sixtyChars));
-        assertEquals("ref                 key=\""+expected+"\"",
+        assertEquals("ref                 key=\"" + expected + "\"",
                 transformerDebug.getOptionAndValue("ref", "key", sixtyOneChars));
     }
 }

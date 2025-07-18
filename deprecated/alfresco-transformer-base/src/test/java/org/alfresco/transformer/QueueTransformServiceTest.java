@@ -40,10 +40,6 @@ import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transformer.messaging.TransformMessageConverter;
-import org.alfresco.transformer.messaging.TransformReplySender;
 import org.apache.activemq.command.ActiveMQObjectMessage;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,6 +50,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jms.support.converter.MessageConversionException;
+
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transformer.messaging.TransformMessageConverter;
+import org.alfresco.transformer.messaging.TransformReplySender;
 
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
@@ -106,12 +107,12 @@ public class QueueTransformServiceTest
         msg.setJMSReplyTo(destination);
 
         TransformReply reply = TransformReply
-            .builder()
-            .withStatus(INTERNAL_SERVER_ERROR.value())
-            .withErrorDetails(
-                "JMS exception during T-Request deserialization of message with correlationID "
-                + msg.getCorrelationId() + ": null")
-            .build();
+                .builder()
+                .withStatus(INTERNAL_SERVER_ERROR.value())
+                .withErrorDetails(
+                        "JMS exception during T-Request deserialization of message with correlationID "
+                                + msg.getCorrelationId() + ": null")
+                .build();
 
         doReturn(null).when(transformMessageConverter).fromMessage(msg);
 
@@ -125,7 +126,7 @@ public class QueueTransformServiceTest
 
     @Test
     public void testConvertMessageThrowsMessageConversionExceptionThenReplyWithBadRequest()
-        throws JMSException
+            throws JMSException
     {
         ActiveMQObjectMessage msg = new ActiveMQObjectMessage();
         msg.setCorrelationId("1234");
@@ -133,12 +134,12 @@ public class QueueTransformServiceTest
         msg.setJMSReplyTo(destination);
 
         TransformReply reply = TransformReply
-            .builder()
-            .withStatus(BAD_REQUEST.value())
-            .withErrorDetails(
-                "Message conversion exception during T-Request deserialization of message with correlationID"
-                + msg.getCorrelationId() + ": null")
-            .build();
+                .builder()
+                .withStatus(BAD_REQUEST.value())
+                .withErrorDetails(
+                        "Message conversion exception during T-Request deserialization of message with correlationID"
+                                + msg.getCorrelationId() + ": null")
+                .build();
 
         doThrow(MessageConversionException.class).when(transformMessageConverter).fromMessage(msg);
 
@@ -152,7 +153,7 @@ public class QueueTransformServiceTest
 
     @Test
     public void testConvertMessageThrowsJMSExceptionThenReplyWithInternalServerError()
-        throws JMSException
+            throws JMSException
     {
         ActiveMQObjectMessage msg = new ActiveMQObjectMessage();
         msg.setCorrelationId("1234");
@@ -160,12 +161,12 @@ public class QueueTransformServiceTest
         msg.setJMSReplyTo(destination);
 
         TransformReply reply = TransformReply
-            .builder()
-            .withStatus(INTERNAL_SERVER_ERROR.value())
-            .withErrorDetails(
-                "JMSException during T-Request deserialization of message with correlationID " +
-                msg.getCorrelationId() + ": null")
-            .build();
+                .builder()
+                .withStatus(INTERNAL_SERVER_ERROR.value())
+                .withErrorDetails(
+                        "JMSException during T-Request deserialization of message with correlationID " +
+                                msg.getCorrelationId() + ": null")
+                .build();
 
         doThrow(JMSException.class).when(transformMessageConverter).fromMessage(msg);
 
@@ -186,13 +187,13 @@ public class QueueTransformServiceTest
 
         TransformRequest request = new TransformRequest();
         TransformReply reply = TransformReply
-            .builder()
-            .withStatus(CREATED.value())
-            .build();
+                .builder()
+                .withStatus(CREATED.value())
+                .build();
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
         doReturn(new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus())))
-            .when(transformController).transform(request, null);
+                .when(transformController).transform(request, null);
 
         queueTransformService.receive(msg);
 
@@ -217,7 +218,7 @@ public class QueueTransformServiceTest
 
     @Test
     public void testWhenExceptionOnCorrelationIdIsThrownThenContinueFlowWithNullCorrelationId()
-        throws JMSException
+            throws JMSException
     {
         Message msg = mock(Message.class);
         Destination destination = mock(Destination.class);
@@ -227,13 +228,13 @@ public class QueueTransformServiceTest
 
         TransformRequest request = new TransformRequest();
         TransformReply reply = TransformReply
-            .builder()
-            .withStatus(CREATED.value())
-            .build();
+                .builder()
+                .withStatus(CREATED.value())
+                .build();
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
         doReturn(new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus())))
-            .when(transformController).transform(request, null);
+                .when(transformController).transform(request, null);
 
         queueTransformService.receive(msg);
 

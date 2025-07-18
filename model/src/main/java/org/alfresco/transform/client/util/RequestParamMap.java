@@ -25,6 +25,5 @@ package org.alfresco.transform.client.util;
  * @deprecated will be removed in a future release when the deprecated alfresco-transform-model is removed.
  */
 @Deprecated
-public interface RequestParamMap extends  org.alfresco.transform.common.RequestParamMap
-{
-}
+public interface RequestParamMap extends org.alfresco.transform.common.RequestParamMap
+{}

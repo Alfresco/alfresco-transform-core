@@ -29,5 +29,4 @@ package org.alfresco.transform.aio;
 import org.alfresco.transform.libreoffice.LibreOfficeTransformationIT;
 
 public class AIOLibreOfficeTransformationIT extends LibreOfficeTransformationIT
-{
-}
+{}

@@ -21,17 +21,17 @@
  */
 package org.alfresco.transform.client.model;
 
-import org.alfresco.transform.common.ExtensionService;
-import org.alfresco.transform.messages.TransformStack;
+import static org.alfresco.transform.messages.TransformStack.PIPELINE_FLAG;
+import static org.alfresco.transform.messages.TransformStack.levelBuilder;
+import static org.alfresco.transform.messages.TransformStack.setInitialTransformRequestOptions;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.alfresco.transform.messages.TransformStack.PIPELINE_FLAG;
-import static org.alfresco.transform.messages.TransformStack.levelBuilder;
-import static org.alfresco.transform.messages.TransformStack.setInitialTransformRequestOptions;
+import org.alfresco.transform.common.ExtensionService;
+import org.alfresco.transform.messages.TransformStack;
 
 // This class is in the package org.alfresco.transform.messages in HxP because that is more readable, but in
 // org.alfresco.transform.client.model in Alfresco for backward compatibility.
@@ -160,7 +160,7 @@ public class TransformRequest implements Serializable
         this.internalContext = internalContext;
     }
 
-    //endregion
+    // endregion
 
     @Override
     public boolean equals(Object o)
@@ -179,34 +179,32 @@ public class TransformRequest implements Serializable
         return Objects.hash(requestId);
     }
 
-    @Override public String toString()
+    @Override
+    public String toString()
     {
         return "TransformRequest{" +
-               "requestId='" + requestId + '\'' +
-               ", sourceReference='" + sourceReference + '\'' +
-               ", sourceMediaType='" + sourceMediaType + '\'' +
-               ", sourceSize=" + sourceSize +
-               ", sourceExtension='" + sourceExtension + '\'' +
-               ", targetMediaType='" + targetMediaType + '\'' +
-               ", targetExtension='" + targetExtension + '\'' +
-               ", clientData='" + clientData + '\'' +
-               ", schema=" + schema +
-               ", transformRequestOptions=" + transformRequestOptions +
-               ", internalContext=" + internalContext +
-               '}';
+                "requestId='" + requestId + '\'' +
+                ", sourceReference='" + sourceReference + '\'' +
+                ", sourceMediaType='" + sourceMediaType + '\'' +
+                ", sourceSize=" + sourceSize +
+                ", sourceExtension='" + sourceExtension + '\'' +
+                ", targetMediaType='" + targetMediaType + '\'' +
+                ", targetExtension='" + targetExtension + '\'' +
+                ", clientData='" + clientData + '\'' +
+                ", schema=" + schema +
+                ", transformRequestOptions=" + transformRequestOptions +
+                ", internalContext=" + internalContext +
+                '}';
     }
 
     /**
-     * Sets up the internal context structure when a client request is initially received by the router,
-     * so that we don't have to keep checking if bits of it are initialised. Prior to making this call,
-     * the id, sourceMimetypes, targetMimetype, transformRequestOptions and sourceReference should have
-     * been set, if they are to be set.
+     * Sets up the internal context structure when a client request is initially received by the router, so that we don't have to keep checking if bits of it are initialised. Prior to making this call, the id, sourceMimetypes, targetMimetype, transformRequestOptions and sourceReference should have been set, if they are to be set.
      */
     public TransformRequest initialiseContextWhenReceivedByRouter()
     {
         setInternalContext(InternalContext.initialise(getInternalContext()));
         setTargetExtension(ExtensionService.getExtensionForTargetMimetype(getTargetMediaType(),
-            getSourceMediaType()));
+                getSourceMediaType()));
         getInternalContext().getMultiStep().setInitialRequestId(getRequestId());
         getInternalContext().getMultiStep().setInitialSourceMediaType(getSourceMediaType());
         getInternalContext().setTransformRequestOptions(getTransformRequestOptions());
@@ -224,7 +222,8 @@ public class TransformRequest implements Serializable
     {
         private final TransformRequest request = new TransformRequest();
 
-        private Builder() {}
+        private Builder()
+        {}
 
         public Builder withRequestId(final String requestId)
         {
@@ -281,7 +280,7 @@ public class TransformRequest implements Serializable
         }
 
         public Builder withTransformRequestOptions(
-            final Map<String, String> transformRequestOptions)
+                final Map<String, String> transformRequestOptions)
         {
             request.transformRequestOptions = transformRequestOptions;
             return this;
@@ -297,7 +296,7 @@ public class TransformRequest implements Serializable
         {
             request.initialiseContextWhenReceivedByRouter();
             TransformStack.addTransformLevel(request.internalContext, levelBuilder(PIPELINE_FLAG)
-                .withStep("dummyTransformerName", request.sourceMediaType, request.targetMediaType));
+                    .withStep("dummyTransformerName", request.sourceMediaType, request.targetMediaType));
             return this;
         }
 

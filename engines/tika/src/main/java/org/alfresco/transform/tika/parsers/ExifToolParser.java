@@ -27,6 +27,7 @@
 package org.alfresco.transform.tika.parsers;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_TIFF;
 
@@ -44,7 +45,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.alfresco.transform.base.executors.RuntimeExec;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.tika.exception.TikaException;
@@ -57,16 +57,19 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.external.ExternalParser;
 import org.apache.tika.parser.external.ExternalParsersFactory;
 import org.apache.tika.parser.image.ImageParser;
-import org.apache.tika.parser.image.TiffParser;
 import org.apache.tika.parser.image.JpegParser;
+import org.apache.tika.parser.image.TiffParser;
 import org.apache.tika.sax.XHTMLContentHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
-public class ExifToolParser extends ExternalParser {
-    
+import org.alfresco.transform.base.executors.RuntimeExec;
+
+public class ExifToolParser extends ExternalParser
+{
+
     private static final Logger logger = LoggerFactory.getLogger(ExifToolParser.class);
 
     private static final String EXIFTOOL_PARSER_CONFIG = "parsers/external/config/exiftool-parser.xml";
@@ -76,80 +79,102 @@ public class ExifToolParser extends ExternalParser {
 
     private String separator;
 
-    public ExifToolParser() {
+    public ExifToolParser()
+    {
         this(null);
     }
 
-    public ExifToolParser(RuntimeExec exifRuntimeExec) {
+    public ExifToolParser(RuntimeExec exifRuntimeExec)
+    {
         super();
-        try {
+        try
+        {
             List<ExternalParser> eParsers = ExternalParsersFactory.create(getExternalParserConfigURL());
             // if ExifTool is not installed then no parsers are returned
-            if (eParsers.size() > 0) {
+            if (eParsers.size() > 0)
+            {
                 ExternalParser eParser = eParsers.get(0);
 
                 String[] commandToBeExecuted;
-                if (exifRuntimeExec==null) {
+                if (exifRuntimeExec == null)
+                {
                     logger.debug("Command to be executed determined from Tika ExternalParser");
                     commandToBeExecuted = eParser.getCommand();
-                } else {
+                }
+                else
+                {
                     logger.debug("Command to be executed determined from RuntimeExec");
                     commandToBeExecuted = exifRuntimeExec.getCommand();
                 }
-                if (commandToBeExecuted==null || commandToBeExecuted.length==0) {
+                if (commandToBeExecuted == null || commandToBeExecuted.length == 0)
+                {
                     commandToBeExecuted = eParser.getCommand();
                 }
 
-                String commandToBeExecutedAsString = String.join( " ", commandToBeExecuted);
-                logger.debug("Command to be executed: " + commandToBeExecutedAsString );
+                String commandToBeExecutedAsString = String.join(" ", commandToBeExecuted);
+                logger.debug("Command to be executed: " + commandToBeExecutedAsString);
 
                 this.setCommand(commandToBeExecutedAsString);
                 this.setIgnoredLineConsumer(eParser.getIgnoredLineConsumer());
                 this.setMetadataExtractionPatterns(eParser.getMetadataExtractionPatterns());
                 this.setSupportedTypes(eParser.getSupportedTypes());
-            } else {
+            }
+            else
+            {
                 logger.error(
                         "Error creating ExifToolParser from config, ExifToolExtractions not enabled. Please check ExifTool is installed correctly.");
             }
-        } catch (IOException | TikaException e) {
+        }
+        catch (IOException | TikaException e)
+        {
             logger.error("Error creating ExifToolParser from config, ExifToolExtractions not enabled: ", e);
         }
     }
 
-    private URL getExternalParserConfigURL(){
+    private URL getExternalParserConfigURL()
+    {
         ClassLoader classLoader = ExifToolParser.class.getClassLoader();
         return classLoader.getResource(EXIFTOOL_PARSER_CONFIG);
     }
 
-    public void setSeparator(String sep) {
+    public void setSeparator(String sep)
+    {
         this.separator = sep;
     }
 
-    public String getSeparator() {
+    public String getSeparator()
+    {
         return this.separator;
     }
 
     @Override
-    public void setCommand(String... command){
+    public void setCommand(String... command)
+    {
         super.setCommand(command);
-        if (command.length==1) {
+        if (command.length == 1)
+        {
             setSeparator(findSeparator(command[0]));
         }
-        else {
+        else
+        {
             setSeparator(DEFAULT_SEPARATOR);
         }
     }
 
-    protected String findSeparator(String command) {
-        if (command.contains(SEPARATOR_SETTING)) {
-            int start = command.indexOf(SEPARATOR_SETTING)+SEPARATOR_SETTING.length()+1;
+    protected String findSeparator(String command)
+    {
+        if (command.contains(SEPARATOR_SETTING))
+        {
+            int start = command.indexOf(SEPARATOR_SETTING) + SEPARATOR_SETTING.length() + 1;
             String separator = DEFAULT_SEPARATOR;
-            if (command.charAt(start)=='\"') {
-                //get all chars up to the next \"
-                int end = command.indexOf("\"", start+1);
-                separator = command.substring(start+1, end);
+            if (command.charAt(start) == '\"')
+            {
+                // get all chars up to the next \"
+                int end = command.indexOf("\"", start + 1);
+                separator = command.substring(start + 1, end);
             }
-            else {
+            else
+            {
                 int end = command.indexOf(" ", start);
                 separator = command.substring(start, end);
             }
@@ -159,50 +184,56 @@ public class ExifToolParser extends ExternalParser {
     }
 
     /**
-     * Adapted from {@link org.apache.tika.parser.external.ExternalParser} 
-     * due to errors attempting to {@link #extractMetadata} from the errorStream in original implementation.  <p>
-     * Executes the configured external command and passes the given document
-     *  stream as a simple XHTML document to the given SAX content handler.
-     * Metadata is only extracted if {@link #setMetadataExtractionPatterns(Map)}
-     *  has been called to set patterns.
+     * Adapted from {@link org.apache.tika.parser.external.ExternalParser} due to errors attempting to {@link #extractMetadata} from the errorStream in original implementation.
+     * <p>
+     * Executes the configured external command and passes the given document stream as a simple XHTML document to the given SAX content handler. Metadata is only extracted if {@link #setMetadataExtractionPatterns(Map)} has been called to set patterns.
      */
     public void parse(InputStream stream, ContentHandler handler, Metadata metadata, ParseContext context)
-            throws IOException, SAXException, TikaException {
+            throws IOException, SAXException, TikaException
+    {
         XHTMLContentHandler xhtml = new XHTMLContentHandler(handler, metadata);
 
         MediaType mediaType = MediaType.parse(metadata.get(Metadata.CONTENT_TYPE));
         TemporaryResources tmp = new TemporaryResources();
-        try {
+        try
+        {
             TikaInputStream tis = TikaInputStream.get(stream, tmp);
 
-            if (this.getSupportedTypes().contains(mediaType)) {
+            if (this.getSupportedTypes().contains(mediaType))
+            {
                 parse(tis, xhtml, metadata, tmp);
             }
 
-            switch (mediaType.getType()+"/"+mediaType.getSubtype()) {
-                case MIMETYPE_IMAGE_JPEG: 
-                    parseAdditional(new JpegParser(), tis, handler, metadata, context, mediaType);
-                    break;
-                case MIMETYPE_IMAGE_TIFF:
-                    parseAdditional(new TiffParser(), tis, handler, metadata, context, mediaType);
-                    break;
-                default:
-                    parseAdditional(new ImageParser(), tis, handler, metadata, context, mediaType);
+            switch (mediaType.getType() + "/" + mediaType.getSubtype())
+            {
+            case MIMETYPE_IMAGE_JPEG:
+                parseAdditional(new JpegParser(), tis, handler, metadata, context, mediaType);
+                break;
+            case MIMETYPE_IMAGE_TIFF:
+                parseAdditional(new TiffParser(), tis, handler, metadata, context, mediaType);
+                break;
+            default:
+                parseAdditional(new ImageParser(), tis, handler, metadata, context, mediaType);
             }
-        } finally {
+        }
+        finally
+        {
             tmp.dispose();
         }
     }
 
     private void parseAdditional(Parser parser, TikaInputStream tis, ContentHandler handler, Metadata metadata, ParseContext context,
-            MediaType mediaType) throws IOException, SAXException, TikaException {
-        if (parser.getSupportedTypes(context).contains(mediaType)) {
-                parser.parse(tis, handler, metadata, context);
+            MediaType mediaType) throws IOException, SAXException, TikaException
+    {
+        if (parser.getSupportedTypes(context).contains(mediaType))
+        {
+            parser.parse(tis, handler, metadata, context);
         }
     }
 
     private void parse(TikaInputStream stream, XHTMLContentHandler xhtml, Metadata metadata, TemporaryResources tmp)
-            throws IOException, SAXException, TikaException {
+            throws IOException, SAXException, TikaException
+    {
         boolean inputToStdIn = true;
         boolean outputFromStdOut = true;
         boolean hasPatterns = (getMetadataExtractionPatterns() != null && !getMetadataExtractionPatterns().isEmpty());
@@ -211,18 +242,24 @@ public class ExifToolParser extends ExternalParser {
 
         // Build our getCommand()
         String[] cmd;
-        if (getCommand().length == 1) {
+        if (getCommand().length == 1)
+        {
             cmd = getCommand()[0].split(" ");
-        } else {
+        }
+        else
+        {
             cmd = new String[getCommand().length];
             System.arraycopy(getCommand(), 0, cmd, 0, getCommand().length);
         }
-        for (int i = 0; i < cmd.length; i++) {
-            if (cmd[i].indexOf(INPUT_FILE_TOKEN) != -1) {
+        for (int i = 0; i < cmd.length; i++)
+        {
+            if (cmd[i].indexOf(INPUT_FILE_TOKEN) != -1)
+            {
                 cmd[i] = cmd[i].replace(INPUT_FILE_TOKEN, stream.getFile().getPath());
                 inputToStdIn = false;
             }
-            if (cmd[i].indexOf(OUTPUT_FILE_TOKEN) != -1) {
+            if (cmd[i].indexOf(OUTPUT_FILE_TOKEN) != -1)
+            {
                 output = tmp.createTemporaryFile();
                 outputFromStdOut = false;
                 cmd[i] = cmd[i].replace(OUTPUT_FILE_TOKEN, output.getPath());
@@ -231,72 +268,102 @@ public class ExifToolParser extends ExternalParser {
 
         // Execute
         Process process = null;
-        try {
-            if (cmd.length == 1) {
+        try
+        {
+            if (cmd.length == 1)
+            {
                 process = Runtime.getRuntime().exec(cmd[0]);
-            } else {
+            }
+            else
+            {
                 process = Runtime.getRuntime().exec(cmd);
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
 
-        try {
-            if (inputToStdIn) {
+        try
+        {
+            if (inputToStdIn)
+            {
                 sendInput(process, stream);
-            } else {
+            }
+            else
+            {
                 process.getOutputStream().close();
             }
 
             InputStream out = process.getInputStream();
             InputStream err = process.getErrorStream();
 
-            if (hasPatterns) {
+            if (hasPatterns)
+            {
 
-                if (outputFromStdOut) {
+                if (outputFromStdOut)
+                {
                     extractOutput(out, xhtml);
-                } else {
+                }
+                else
+                {
                     extractMetadata(out, metadata);
                 }
-            } else {
+            }
+            else
+            {
                 ignoreStream(err);
 
-                if (outputFromStdOut) {
+                if (outputFromStdOut)
+                {
                     extractOutput(out, xhtml);
-                } else {
+                }
+                else
+                {
                     ignoreStream(out);
                 }
             }
-        } finally {
-            try {
+        }
+        finally
+        {
+            try
+            {
                 process.waitFor();
-            } catch (InterruptedException ignore) {
             }
+            catch (InterruptedException ignore)
+            {}
         }
 
         // Grab the output if we haven't already
-        if (!outputFromStdOut) {
+        if (!outputFromStdOut)
+        {
             extractOutput(new FileInputStream(output), xhtml);
         }
     }
 
     /**
-     * Adapted from {@link org.apache.tika.parser.external.ExternalParser}<p>
-     * Starts a thread that extracts the contents of the standard output
-     * stream of the given process to the given XHTML content handler.
-     * The standard output stream is closed once fully processed.
+     * Adapted from {@link org.apache.tika.parser.external.ExternalParser}
+     * <p>
+     * Starts a thread that extracts the contents of the standard output stream of the given process to the given XHTML content handler. The standard output stream is closed once fully processed.
      *
-     * @param stream stream
-     * @param xhtml XHTML content handler
-     * @throws SAXException if the XHTML SAX events could not be handled
-     * @throws IOException if an input error occurred
+     * @param stream
+     *            stream
+     * @param xhtml
+     *            XHTML content handler
+     * @throws SAXException
+     *             if the XHTML SAX events could not be handled
+     * @throws IOException
+     *             if an input error occurred
      */
-    private void extractOutput(InputStream stream, XHTMLContentHandler xhtml) throws SAXException, IOException {
-        try (Reader reader = new InputStreamReader(stream, UTF_8)) {
+    private void extractOutput(InputStream stream, XHTMLContentHandler xhtml) throws SAXException, IOException
+    {
+        try (Reader reader = new InputStreamReader(stream, UTF_8))
+        {
             xhtml.startDocument();
             xhtml.startElement("p");
             char[] buffer = new char[1024];
-            for (int n = reader.read(buffer); n != -1; n = reader.read(buffer)) {
+            for (int n = reader.read(buffer); n != -1; n = reader.read(buffer))
+            {
                 xhtml.characters(buffer, 0, n);
             }
             xhtml.endElement("p");
@@ -305,93 +372,123 @@ public class ExifToolParser extends ExternalParser {
     }
 
     /**
-     * Adapted from {@link org.apache.tika.parser.external.ExternalParser}<p>
-     * Starts a thread that sends the contents of the given input stream
-     * to the standard input stream of the given process. Potential
-     * exceptions are ignored, and the standard input stream is closed
-     * once fully processed. Note that the given input stream is <em>not</em>
-     * closed by this method.
+     * Adapted from {@link org.apache.tika.parser.external.ExternalParser}
+     * <p>
+     * Starts a thread that sends the contents of the given input stream to the standard input stream of the given process. Potential exceptions are ignored, and the standard input stream is closed once fully processed. Note that the given input stream is <em>not</em> closed by this method.
      *
-     * @param process process
-     * @param stream input stream
+     * @param process
+     *            process
+     * @param stream
+     *            input stream
      */
-    private void sendInput(final Process process, final InputStream stream) {
+    private void sendInput(final Process process, final InputStream stream)
+    {
         Thread t = new Thread() {
-            public void run() {
+            public void run()
+            {
                 OutputStream stdin = process.getOutputStream();
-                try {
+                try
+                {
                     IOUtils.copy(stream, stdin);
-                } catch (IOException e) {
-                    logger.error( e.getMessage());
+                }
+                catch (IOException e)
+                {
+                    logger.error(e.getMessage());
                 }
             }
         };
         t.start();
-        try {
+        try
+        {
             t.join();
-        } catch (InterruptedException ignore) {
+        }
+        catch (InterruptedException ignore)
+        {
             logger.error(ignore.getMessage());
         }
     }
 
     /**
-     * Adapted from {@link org.apache.tika.parser.external.ExternalParser}<p>
-     * Starts a thread that reads and discards the contents of the
-     * standard stream of the given process. Potential exceptions
-     * are ignored, and the stream is closed once fully processed.
+     * Adapted from {@link org.apache.tika.parser.external.ExternalParser}
+     * <p>
+     * Starts a thread that reads and discards the contents of the standard stream of the given process. Potential exceptions are ignored, and the stream is closed once fully processed.
      *
-     * @param stream stream
+     * @param stream
+     *            stream
      */
-    private void ignoreStream(final InputStream stream) {
+    private void ignoreStream(final InputStream stream)
+    {
         Thread t = new Thread() {
-            public void run() {
-                try {
+            public void run()
+            {
+                try
+                {
                     IOUtils.copy(stream, NullOutputStream.NULL_OUTPUT_STREAM);
-                } catch (IOException e) {
-                } finally {
+                }
+                catch (IOException e)
+                {}
+                finally
+                {
                     IOUtils.closeQuietly(stream);
                 }
             }
         };
         t.start();
-        try {
+        try
+        {
             t.join();
-        } catch (InterruptedException ignore) {
         }
+        catch (InterruptedException ignore)
+        {}
     }
 
-    private void extractMetadata(final InputStream stream, final Metadata metadata) {
+    private void extractMetadata(final InputStream stream, final Metadata metadata)
+    {
         Thread t = new Thread() {
-            public void run() {
+            public void run()
+            {
                 BufferedReader reader;
                 reader = new BufferedReader(new InputStreamReader(stream, UTF_8));
-                try {
+                try
+                {
                     String line;
-                    while ((line = reader.readLine()) != null) {
-                        for (Pattern p : getMetadataExtractionPatterns().keySet()) {
+                    while ((line = reader.readLine()) != null)
+                    {
+                        for (Pattern p : getMetadataExtractionPatterns().keySet())
+                        {
                             Matcher m = p.matcher(line);
-                            if (m.find()) {
+                            if (m.find())
+                            {
                                 if (getMetadataExtractionPatterns().get(p) != null
-                                        && !getMetadataExtractionPatterns().get(p).equals("")) {
+                                        && !getMetadataExtractionPatterns().get(p).equals(""))
+                                {
                                     metadata.add(getMetadataExtractionPatterns().get(p), m.group(1));
-                                } else {
+                                }
+                                else
+                                {
                                     metadata.add(m.group(1), m.group(2));
                                 }
                             }
                         }
                     }
-                } catch (IOException e) {
+                }
+                catch (IOException e)
+                {
                     // Ignore
-                } finally {
+                }
+                finally
+                {
                     IOUtils.closeQuietly(reader);
                     IOUtils.closeQuietly(stream);
                 }
             }
         };
         t.start();
-        try {
+        try
+        {
             t.join();
-        } catch (InterruptedException ignore) {
         }
+        catch (InterruptedException ignore)
+        {}
     }
 }

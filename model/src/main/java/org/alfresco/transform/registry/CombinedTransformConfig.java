@@ -21,6 +21,20 @@
  */
 package org.alfresco.transform.registry;
 
+import static java.util.stream.Collectors.toSet;
+
+import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionOnMultiStepTransformers;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.alfresco.transform.config.AddSupported;
 import org.alfresco.transform.config.OverrideSupported;
 import org.alfresco.transform.config.RemoveSupported;
@@ -33,30 +47,16 @@ import org.alfresco.transform.config.Transformer;
 import org.alfresco.transform.config.TransformerAndTypes;
 import org.alfresco.transform.config.Types;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.TreeSet;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toSet;
-import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionOnMultiStepTransformers;
-
 /**
- * This class combines one or more T-Engine config and local files and registers them as if they were all in one file.
- * Transform options are shared between all sources.<p><br>
+ * This class combines one or more T-Engine config and local files and registers them as if they were all in one file. Transform options are shared between all sources.
+ * <p>
+ * <br>
  *
- * The caller should make calls to {@link #addTransformConfig(TransformConfig, String, String, AbstractTransformRegistry)}
- * followed by calls to {@link #combineTransformerConfig(AbstractTransformRegistry)} and then
- * {@link #registerCombinedTransformers(AbstractTransformRegistry)}.<p><br>
+ * The caller should make calls to {@link #addTransformConfig(TransformConfig, String, String, AbstractTransformRegistry)} followed by calls to {@link #combineTransformerConfig(AbstractTransformRegistry)} and then {@link #registerCombinedTransformers(AbstractTransformRegistry)}.
+ * <p>
+ * <br>
  *
- * The helper method {@link #combineAndRegister(TransformConfig, String, String, AbstractTransformRegistry)} may be used
- * when there is only one config.
+ * The helper method {@link #combineAndRegister(TransformConfig, String, String, AbstractTransformRegistry)} may be used when there is only one config.
  *
  * @author adavis
  */
@@ -73,7 +73,7 @@ public class CombinedTransformConfig
     private final Defaults defaults = new Defaults();
 
     public static void combineAndRegister(TransformConfig transformConfig, String readFrom, String baseUrl,
-                                          AbstractTransformRegistry registry)
+            AbstractTransformRegistry registry)
     {
         CombinedTransformConfig combinedTransformConfig = new CombinedTransformConfig();
         combinedTransformConfig.addTransformConfig(transformConfig, readFrom, baseUrl, registry);
@@ -94,7 +94,7 @@ public class CombinedTransformConfig
     }
 
     public void addTransformConfig(TransformConfig transformConfig, String readFrom, String baseUrl,
-                                   AbstractTransformRegistry registry)
+            AbstractTransformRegistry registry)
     {
         removeTransformers(transformConfig.getRemoveTransformers(), readFrom, registry);
         supportedDefaults(transformConfig.getSupportedDefaults(), readFrom, registry);
@@ -113,8 +113,7 @@ public class CombinedTransformConfig
         if (!removeTransformersSet.isEmpty())
         {
             Set<String> leftOver = new HashSet<>(removeTransformersSet);
-            combinedTransformers.removeIf(combinedTransformer ->
-            {
+            combinedTransformers.removeIf(combinedTransformer -> {
                 String transformerName = combinedTransformer.get().getTransformerName();
                 if (removeTransformersSet.contains(transformerName))
                 {
@@ -124,7 +123,7 @@ public class CombinedTransformConfig
                 return false;
             });
 
-            Set<String> quotedLeftOver = leftOver.stream().map(transformerName -> "\""+transformerName+'"').collect(toSet());
+            Set<String> quotedLeftOver = leftOver.stream().map(transformerName -> "\"" + transformerName + '"').collect(toSet());
             logWarn(quotedLeftOver, readFrom, registry, "removeTransformers");
         }
     }
@@ -136,9 +135,8 @@ public class CombinedTransformConfig
             Set<SupportedDefaults> leftOver = new HashSet<>(supportedDefaults);
             supportedDefaults.stream()
                     .filter(supportedDefault -> supportedDefault.getMaxSourceSizeBytes() != null ||
-                                                supportedDefault.getPriority() != null)
-                    .forEach(supportedDefault ->
-                    {
+                            supportedDefault.getPriority() != null)
+                    .forEach(supportedDefault -> {
                         defaults.add(supportedDefault);
                         leftOver.remove(supportedDefault);
                     });
@@ -156,8 +154,8 @@ public class CombinedTransformConfig
             Set<T> leftOver = new HashSet<>(tSet);
             tSet.stream()
                     .filter(t -> t.getTransformerName() != null &&
-                                 t.getSourceMediaType() != null &&
-                                 t.getTargetMediaType() != null)
+                            t.getSourceMediaType() != null &&
+                            t.getTargetMediaType() != null)
                     .forEach(t -> process.process(leftOver, t));
 
             logWarn(leftOver, readFrom, registry, elementName);
@@ -183,14 +181,11 @@ public class CombinedTransformConfig
     private void removeSupported(Set<RemoveSupported> removeSupportedSet, String readFrom, AbstractTransformRegistry registry)
     {
         processSupported(removeSupportedSet, readFrom, registry, "removeSupported",
-                (leftOver, removeSupported) ->
-                        combinedTransformers.stream()
+                (leftOver, removeSupported) -> combinedTransformers.stream()
                         .map(Origin::get)
-                        .forEach(transformer ->
-                        {
+                        .forEach(transformer -> {
                             if (transformer.getTransformerName().equals(removeSupported.getTransformerName()) &&
-                                    transformer.getSupportedSourceAndTargetList().removeIf(supported ->
-                                            supported.getSourceMediaType().equals(removeSupported.getSourceMediaType()) &&
+                                    transformer.getSupportedSourceAndTargetList().removeIf(supported -> supported.getSourceMediaType().equals(removeSupported.getSourceMediaType()) &&
                                             supported.getTargetMediaType().equals(removeSupported.getTargetMediaType())))
                             {
                                 leftOver.remove(removeSupported);
@@ -201,61 +196,52 @@ public class CombinedTransformConfig
     private void addSupported(Set<AddSupported> addSupportedSet, String readFrom, AbstractTransformRegistry registry)
     {
         processSupported(addSupportedSet, readFrom, registry, "addSupported",
-                (leftOver, addSupported) ->
-                        combinedTransformers.stream()
-                                .map(Origin::get)
-                                .filter(transformer -> transformer.getTransformerName().equals(addSupported.getTransformerName()))
-                                .forEach(transformerWithName ->
-                                {
-                                    Set<SupportedSourceAndTarget> supportedSourceAndTargetList =
-                                            transformerWithName.getSupportedSourceAndTargetList();
-                                    SupportedSourceAndTarget existingSupported = getExistingSupported(
-                                            supportedSourceAndTargetList,
-                                            addSupported.getSourceMediaType(), addSupported.getTargetMediaType());
-                                    if (existingSupported == null)
-                                    {
-                                        SupportedSourceAndTarget newSupportedSourceAndTarget = SupportedSourceAndTarget.builder()
-                                                .withSourceMediaType(addSupported.getSourceMediaType())
-                                                .withTargetMediaType(addSupported.getTargetMediaType())
-                                                .withMaxSourceSizeBytes(addSupported.getMaxSourceSizeBytes())
-                                                .withPriority(addSupported.getPriority())
-                                                .build();
-                                        supportedSourceAndTargetList.add(newSupportedSourceAndTarget);
-                                        leftOver.remove(addSupported);
-                                    }}));
+                (leftOver, addSupported) -> combinedTransformers.stream()
+                        .map(Origin::get)
+                        .filter(transformer -> transformer.getTransformerName().equals(addSupported.getTransformerName()))
+                        .forEach(transformerWithName -> {
+                            Set<SupportedSourceAndTarget> supportedSourceAndTargetList = transformerWithName.getSupportedSourceAndTargetList();
+                            SupportedSourceAndTarget existingSupported = getExistingSupported(
+                                    supportedSourceAndTargetList,
+                                    addSupported.getSourceMediaType(), addSupported.getTargetMediaType());
+                            if (existingSupported == null)
+                            {
+                                SupportedSourceAndTarget newSupportedSourceAndTarget = SupportedSourceAndTarget.builder()
+                                        .withSourceMediaType(addSupported.getSourceMediaType())
+                                        .withTargetMediaType(addSupported.getTargetMediaType())
+                                        .withMaxSourceSizeBytes(addSupported.getMaxSourceSizeBytes())
+                                        .withPriority(addSupported.getPriority())
+                                        .build();
+                                supportedSourceAndTargetList.add(newSupportedSourceAndTarget);
+                                leftOver.remove(addSupported);
+                            }
+                        }));
     }
 
     private void overrideSupported(Set<OverrideSupported> overrideSupportedSet, String readFrom, AbstractTransformRegistry registry)
     {
         processSupported(overrideSupportedSet, readFrom, registry, "overrideSupported",
-                (leftOver, overrideSupported) ->
-                        combinedTransformers.stream().
-                                map(Origin::get).
-                                filter(transformer -> transformer.getTransformerName().equals(overrideSupported.getTransformerName())).
-                                forEach(transformerWithName ->
-                                {
-                                    Set<SupportedSourceAndTarget> supportedSourceAndTargetList =
-                                            transformerWithName.getSupportedSourceAndTargetList();
-                                    SupportedSourceAndTarget existingSupported = getExistingSupported(
-                                            supportedSourceAndTargetList,
-                                            overrideSupported.getSourceMediaType(), overrideSupported.getTargetMediaType());
-                                    if (existingSupported != null)
-                                    {
-                                        supportedSourceAndTargetList.remove(existingSupported);
-                                        existingSupported.setMaxSourceSizeBytes(overrideSupported.getMaxSourceSizeBytes());
-                                        existingSupported.setPriority(overrideSupported.getPriority());
-                                        supportedSourceAndTargetList.add(existingSupported);
-                                        leftOver.remove(overrideSupported);
-                                    }
-                                }));
+                (leftOver, overrideSupported) -> combinedTransformers.stream().map(Origin::get).filter(transformer -> transformer.getTransformerName().equals(overrideSupported.getTransformerName())).forEach(transformerWithName -> {
+                    Set<SupportedSourceAndTarget> supportedSourceAndTargetList = transformerWithName.getSupportedSourceAndTargetList();
+                    SupportedSourceAndTarget existingSupported = getExistingSupported(
+                            supportedSourceAndTargetList,
+                            overrideSupported.getSourceMediaType(), overrideSupported.getTargetMediaType());
+                    if (existingSupported != null)
+                    {
+                        supportedSourceAndTargetList.remove(existingSupported);
+                        existingSupported.setMaxSourceSizeBytes(overrideSupported.getMaxSourceSizeBytes());
+                        existingSupported.setPriority(overrideSupported.getPriority());
+                        supportedSourceAndTargetList.add(existingSupported);
+                        leftOver.remove(overrideSupported);
+                    }
+                }));
     }
 
     private SupportedSourceAndTarget getExistingSupported(Set<SupportedSourceAndTarget> supportedSourceAndTargetList,
-                                                          String sourceMediaType, String targetMediaType)
+            String sourceMediaType, String targetMediaType)
     {
-        return supportedSourceAndTargetList.stream().filter(supported ->
-                        supported.getSourceMediaType().equals(sourceMediaType) &&
-                        supported.getTargetMediaType().equals(targetMediaType))
+        return supportedSourceAndTargetList.stream().filter(supported -> supported.getSourceMediaType().equals(sourceMediaType) &&
+                supported.getTargetMediaType().equals(targetMediaType))
                 .findFirst()
                 .orElse(null);
     }
@@ -273,7 +259,7 @@ public class CombinedTransformConfig
     public TransformConfig buildTransformConfig()
     {
         List<Transformer> transformers = new ArrayList<>();
-        combinedTransformers.forEach(ct->transformers.add(ct.get()));
+        combinedTransformers.forEach(ct -> transformers.add(ct.get()));
         Set<SupportedDefaults> supportedDefaults = defaults.getSupportedDefaults();
         return TransformConfig
                 .builder()
@@ -285,21 +271,18 @@ public class CombinedTransformConfig
 
     public void registerCombinedTransformers(AbstractTransformRegistry registry)
     {
-        combinedTransformers.forEach(ct ->
-                registry.register(ct.get(), combinedTransformOptions, ct.getBaseUrl(), ct.getReadFrom()));
+        combinedTransformers.forEach(ct -> registry.register(ct.get(), combinedTransformOptions, ct.getBaseUrl(), ct.getReadFrom()));
     }
 
     /**
-     * Discards transformers that are invalid (e.g. transformers that have both pipeline and failover sections). Calls
-     * {@link #removeInvalidTransformer(int, List, AbstractTransformRegistry, Origin, Transformer, String, String,
-     * boolean, boolean)} for each transform, so that individual invalid transforms or overridden
-     * transforms may be discarded.
+     * Discards transformers that are invalid (e.g. transformers that have both pipeline and failover sections). Calls {@link #removeInvalidTransformer(int, List, AbstractTransformRegistry, Origin, Transformer, String, String, boolean, boolean)} for each transform, so that individual invalid transforms or overridden transforms may be discarded.
      *
-     * @param registry that will hold the transforms.
+     * @param registry
+     *            that will hold the transforms.
      */
     private void removeInvalidTransformers(AbstractTransformRegistry registry)
     {
-        for (int i=0; i<combinedTransformers.size(); i++)
+        for (int i = 0; i < combinedTransformers.size(); i++)
         {
             try
             {
@@ -350,39 +333,37 @@ public class CombinedTransformConfig
     }
 
     /**
-     * Discards a transformer that is
-     * 1) invalid:
-     *    a) has no name
-     *    b) the pass through transformer name is specified in a T-Engine
-     *    c) specifies transform options that don't exist,
-     *    d) has the same name as another T-Engine transform (i.e. there should be no duplicate names from t-engines),
-     *    e) the pass through transformer name is specified in a pipeline file
-     *    f) a single step transform defined outside a t-engine without it being an override,
-     *    g) a pipeline or failover transform is being overridden by a single step transform. Invalid because we
-     *       don't know if a t-engine will be able to do it.
-     * 2) an earlier transform with the same name (it is being overridden). If the overridden transform is from a
-     *    T-Engine and the overriding transform is not a pipeline or a failover, we also copy the {@code baseUrl}
-     *    from the overridden transform so that the original T-Engine will still be called.
+     * Discards a transformer that is 1) invalid: a) has no name b) the pass through transformer name is specified in a T-Engine c) specifies transform options that don't exist, d) has the same name as another T-Engine transform (i.e. there should be no duplicate names from t-engines), e) the pass through transformer name is specified in a pipeline file f) a single step transform defined outside a t-engine without it being an override, g) a pipeline or failover transform is being overridden by a single step transform. Invalid because we don't know if a t-engine will be able to do it. 2) an earlier transform with the same name (it is being overridden). If the overridden transform is from a T-Engine and the overriding transform is not a pipeline or a failover, we also copy the {@code baseUrl} from the overridden transform so that the original T-Engine will still be called.
      *
-     * @param i the current transform's index into combinedTransformers.
-     * @param combinedTransformers the full list of transformers in the order they were read.
-     * @param registry that wil hold the transforms.
-     * @param transformAndItsOrigin the current combinedTransformers element.
-     * @param transformer the current transformer.
-     * @param name the current transformer's name.
-     * @param readFrom where the current transformer was read from.
-     * @param isPipeline if the current transform is a pipeline.
-     * @param isFailover if the current transform is a failover.
+     * @param i
+     *            the current transform's index into combinedTransformers.
+     * @param combinedTransformers
+     *            the full list of transformers in the order they were read.
+     * @param registry
+     *            that wil hold the transforms.
+     * @param transformAndItsOrigin
+     *            the current combinedTransformers element.
+     * @param transformer
+     *            the current transformer.
+     * @param name
+     *            the current transformer's name.
+     * @param readFrom
+     *            where the current transformer was read from.
+     * @param isPipeline
+     *            if the current transform is a pipeline.
+     * @param isFailover
+     *            if the current transform is a failover.
      *
      * @return the index of a transform to be removed. {@code -1} is returned if there should not be a remove.
-     * @throws IllegalArgumentException if the current transform has a problem and should be removed.
-     * @throws IllegalStateException if the current transform is dependent on config from another transform which
-     *         is currently unavailable.
+     * @throws IllegalArgumentException
+     *             if the current transform has a problem and should be removed.
+     * @throws IllegalStateException
+     *             if the current transform is dependent on config from another transform which is currently unavailable.
      */
     private int removeInvalidTransformer(int i, List<Origin<Transformer>> combinedTransformers,
-                                         AbstractTransformRegistry registry,
-                                         Origin<Transformer> transformAndItsOrigin, Transformer transformer,
-                                         String name, String readFrom, boolean isPipeline, boolean isFailover)
+            AbstractTransformRegistry registry,
+            Origin<Transformer> transformAndItsOrigin, Transformer transformer,
+            String name, String readFrom, boolean isPipeline, boolean isFailover)
     {
         int indexToRemove = -1;
 
@@ -459,8 +440,7 @@ public class CombinedTransformConfig
                 // so we can talk to its T-Engine
                 String overriddenBaseUrl = overriddenTransformAndItsOrigin.getBaseUrl();
                 Transformer overriddenTransformTransform = transformAndItsOrigin.get();
-                Origin<Transformer> overridingTransform =
-                        new Origin<>(overriddenTransformTransform, overriddenBaseUrl, readFrom);
+                Origin<Transformer> overridingTransform = new Origin<>(overriddenTransformTransform, overriddenBaseUrl, readFrom);
                 combinedTransformers.set(i, overridingTransform);
             }
             indexToRemove = j;
@@ -484,7 +464,7 @@ public class CombinedTransformConfig
     {
         // Lists are short (< 100) entries and this is not a frequent or time critical step, so walking the list
         // should be okay.
-        for (int j = toIndex-1; j >=0; j--)
+        for (int j = toIndex - 1; j >= 0; j--)
         {
             Origin<Transformer> transformAndItsOrigin = combinedTransformers.get(j);
             Transformer transformer = transformAndItsOrigin.get();
@@ -509,10 +489,11 @@ public class CombinedTransformConfig
     }
 
     /**
-     * Sort transformers so there are no forward references, if that is possible.
-     * Logs warning message for those that have missing step transformers and removes them.
-     * @param registry used to log messages
-      */
+     * Sort transformers so there are no forward references, if that is possible. Logs warning message for those that have missing step transformers and removes them.
+     * 
+     * @param registry
+     *            used to log messages
+     */
     private void sortTransformers(AbstractTransformRegistry registry)
     {
         List<Origin<Transformer>> transformers = new ArrayList<>(combinedTransformers.size());
@@ -552,8 +533,7 @@ public class CombinedTransformConfig
             combinedTransformers.clear();
             combinedTransformers.addAll(todo);
             todo.clear();
-        }
-        while (added && !combinedTransformers.isEmpty());
+        } while (added && !combinedTransformers.isEmpty());
 
         transformers.addAll(todo);
 
@@ -604,18 +584,15 @@ public class CombinedTransformConfig
     }
 
     /**
-     * Applies priority and size defaults. Must be called before {@link #addWildcardSupportedSourceAndTarget(AbstractTransformRegistry)}
-     * as it uses the priority value.
+     * Applies priority and size defaults. Must be called before {@link #addWildcardSupportedSourceAndTarget(AbstractTransformRegistry)} as it uses the priority value.
      */
     private void applyDefaults()
     {
         combinedTransformers.stream()
                 .map(Origin::get)
-                .forEach(transformer ->
-                {
+                .forEach(transformer -> {
                     transformer.setSupportedSourceAndTargetList(
-                            transformer.getSupportedSourceAndTargetList().stream().map(supportedSourceAndTarget ->
-                            {
+                            transformer.getSupportedSourceAndTargetList().stream().map(supportedSourceAndTarget -> {
                                 Integer priority = supportedSourceAndTarget.getPriority();
                                 Long maxSourceSizeBytes = supportedSourceAndTarget.getMaxSourceSizeBytes();
                                 if (defaults.valuesUnset(priority, maxSourceSizeBytes))
@@ -633,26 +610,19 @@ public class CombinedTransformConfig
     }
 
     /**
-     * When no supported source and target mimetypes have been defined in a failover or pipeline transformer
-     * this method adds all possible values that make sense.
-     * <lu>
-     *     <li>Failover - all the supported values from the step transformers</li>
-     *     <li>Pipeline - builds up supported source and target values. The list of source types and max sizes will come
-     *                    from the initial step transformer that have a target mimetype that matches the first
-     *                    intermediate mimetype. We then step through all intermediate transformers checking the next
-     *                    intermediate type is supported. When we get to the last step transformer, it provides all the
-     *                    target mimetypes based on the previous intermediate mimetype. Any combinations supported by
-     *                    the first transformer are excluded.</li>
-     * </lu>
-     * @param registry used to log messages
+     * When no supported source and target mimetypes have been defined in a failover or pipeline transformer this method adds all possible values that make sense. <lu>
+     * <li>Failover - all the supported values from the step transformers</li>
+     * <li>Pipeline - builds up supported source and target values. The list of source types and max sizes will come from the initial step transformer that have a target mimetype that matches the first intermediate mimetype. We then step through all intermediate transformers checking the next intermediate type is supported. When we get to the last step transformer, it provides all the target mimetypes based on the previous intermediate mimetype. Any combinations supported by the first transformer are excluded.</li> </lu>
+     * 
+     * @param registry
+     *            used to log messages
      */
     private void addWildcardSupportedSourceAndTarget(AbstractTransformRegistry registry)
     {
         Map<String, Transformer> transformers = new HashMap<>();
         combinedTransformers.forEach(ct -> transformers.put(ct.get().getTransformerName(), ct.get()));
 
-        combinedTransformers.forEach(transformAndItsOrigin ->
-        {
+        combinedTransformers.forEach(transformAndItsOrigin -> {
             Transformer transformer = transformAndItsOrigin.get();
 
             // If there are no SupportedSourceAndTarget, then work out all the wildcard combinations.
@@ -666,13 +636,12 @@ public class CombinedTransformConfig
                 if (isFailover)
                 {
                     Set<SupportedSourceAndTarget> supportedSourceAndTargets = failover.stream().flatMap(
-                            name -> transformers.get(name).getSupportedSourceAndTargetList().stream()).
-                            collect(toSet());
+                            name -> transformers.get(name).getSupportedSourceAndTargetList().stream()).collect(toSet());
 
                     // The failover transform might not be picked if the priority is the same as the step transforms
                     // so reduce it here by 1. In future we might want to specify the priority in the json, but for now
                     // it should be okay.
-                    supportedSourceAndTargets.forEach(s->s.setPriority(s.getPriority()-1));
+                    supportedSourceAndTargets.forEach(s -> s.setPriority(s.getPriority() - 1));
                     transformer.setSupportedSourceAndTargetList(supportedSourceAndTargets);
                     errorReason = "the step transforms don't support any"; // only used if there are none
                 }
@@ -683,7 +652,7 @@ public class CombinedTransformConfig
                     Set<String> firstTransformOptions = null;
                     String firstTransformStepName = null;
                     int numberOfSteps = pipeline.size();
-                    for (int stepIndex=0; stepIndex<numberOfSteps; stepIndex++)
+                    for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
                     {
                         TransformStep step = pipeline.get(stepIndex);
                         String name = step.getTransformerName();
@@ -697,9 +666,7 @@ public class CombinedTransformConfig
                         String stepTrg = step.getTargetMediaType();
                         if (stepIndex == 0)
                         {
-                            sourceMediaTypesAndMaxSizes = stepTransformer.getSupportedSourceAndTargetList().stream().
-                                    filter(s -> stepTrg.equals(s.getTargetMediaType())).
-                                    collect(toSet());
+                            sourceMediaTypesAndMaxSizes = stepTransformer.getSupportedSourceAndTargetList().stream().filter(s -> stepTrg.equals(s.getTargetMediaType())).collect(toSet());
                             sourceMediaType = stepTrg;
                             firstTransformOptions = stepTransformer.getTransformOptions();
                             firstTransformStepName = name;
@@ -713,7 +680,7 @@ public class CombinedTransformConfig
                         else
                         {
                             final String src = sourceMediaType;
-                            if (stepIndex+1 == numberOfSteps) // if final step
+                            if (stepIndex + 1 == numberOfSteps) // if final step
                             {
                                 if (stepTrg != null)
                                 {
@@ -723,22 +690,12 @@ public class CombinedTransformConfig
 
                                 // Create a cartesian product of sourceMediaType,MaxSourceSize and TargetMediaType where
                                 // the source matches the last intermediate.
-                                Set<SupportedSourceAndTarget>  supportedSourceAndTargets = sourceMediaTypesAndMaxSizes.stream().
-                                        flatMap(s -> stepTransformer.getSupportedSourceAndTargetList().stream().
-                                                filter(st ->
-                                                {
-                                                    String targetMimetype = st.getTargetMediaType();
-                                                    return st.getSourceMediaType().equals(src) &&
-                                                            !(MIMETYPE_METADATA_EXTRACT.equals(targetMimetype) ||
-                                                              MIMETYPE_METADATA_EMBED.equals(targetMimetype));
-                                                }).
-                                                map(Types::getTargetMediaType).
-                                                map(trg -> SupportedSourceAndTarget.builder().
-                                                        withSourceMediaType(s.getSourceMediaType()).
-                                                        withMaxSourceSizeBytes(s.getMaxSourceSizeBytes()).
-                                                        withPriority(s.getPriority()).
-                                                        withTargetMediaType(trg).build())).
-                                        collect(toSet());
+                                Set<SupportedSourceAndTarget> supportedSourceAndTargets = sourceMediaTypesAndMaxSizes.stream().flatMap(s -> stepTransformer.getSupportedSourceAndTargetList().stream().filter(st -> {
+                                    String targetMimetype = st.getTargetMediaType();
+                                    return st.getSourceMediaType().equals(src) &&
+                                            !(MIMETYPE_METADATA_EXTRACT.equals(targetMimetype) ||
+                                                    MIMETYPE_METADATA_EMBED.equals(targetMimetype));
+                                }).map(Types::getTargetMediaType).map(trg -> SupportedSourceAndTarget.builder().withSourceMediaType(s.getSourceMediaType()).withMaxSourceSizeBytes(s.getMaxSourceSizeBytes()).withPriority(s.getPriority()).withTargetMediaType(trg).build())).collect(toSet());
 
                                 if (supportedSourceAndTargets.isEmpty())
                                 {
@@ -773,9 +730,8 @@ public class CombinedTransformConfig
                                 }
 
                                 // Check source to target is supported (it normally is)
-                                if (stepTransformer.getSupportedSourceAndTargetList().stream().
-                                        noneMatch(st -> st.getSourceMediaType().equals(src) &&
-                                                        st.getTargetMediaType().equals(stepTrg)))
+                                if (stepTransformer.getSupportedSourceAndTargetList().stream().noneMatch(st -> st.getSourceMediaType().equals(src) &&
+                                        st.getTargetMediaType().equals(stepTrg)))
                                 {
                                     errorReason = "the step transformer " +
                                             transformerName(stepTransformer.getTransformerName()) + " does not support \"" +
@@ -815,22 +771,23 @@ public class CombinedTransformConfig
     private Set<TransformOption> getTransformOptions(Set<String> transformOptionNames)
     {
         Set<TransformOption> transformOptions = new HashSet<>();
-        transformOptionNames.forEach(name->transformOptions.addAll(combinedTransformOptions.get(name)));
+        transformOptionNames.forEach(name -> transformOptions.addAll(combinedTransformOptions.get(name)));
         return transformOptions;
     }
 
     /**
-     * Removes pipeline transformers if the step transformers cannot be chained together via the intermediary types
-     * to produce the set of claimed source and target mimetypes.
-     * @param registry used to log messages
+     * Removes pipeline transformers if the step transformers cannot be chained together via the intermediary types to produce the set of claimed source and target mimetypes.
+     * 
+     * @param registry
+     *            used to log messages
      */
     private void removePipelinesWithUnsupportedTransforms(AbstractTransformRegistry registry)
     {
         Map<String, Transformer> transformersByName = combinedTransformers.stream()
-            .map(Origin::get)
-            .collect(Collectors.toMap(Transformer::getTransformerName, Function.identity()));
+                .map(Origin::get)
+                .collect(Collectors.toMap(Transformer::getTransformerName, Function.identity()));
 
-        for (int i=0; i<combinedTransformers.size(); i++)
+        for (int i = 0; i < combinedTransformers.size(); i++)
         {
             try
             {
@@ -851,33 +808,34 @@ public class CombinedTransformConfig
 
                     List<String> unsupported = new ArrayList<>();
                     transformer.getSupportedSourceAndTargetList()
-                        .forEach(supportedSourceAndTarget -> {
-                            String nextSource = supportedSourceAndTarget.getSourceMediaType();
-                            for (TransformStep step : pipeline)
-                            {
-                                String source = nextSource;
-                                String target = step.getTargetMediaType() == null
-                                    ? supportedSourceAndTarget.getTargetMediaType()
-                                    : step.getTargetMediaType();
-
-                                if (transformersByName.get(step.getTransformerName()).getSupportedSourceAndTargetList().stream()
-                                    .noneMatch(stepsSupportedSourceAndTarget -> source.equals(stepsSupportedSourceAndTarget.getSourceMediaType())
-                                                                             && target.equals(stepsSupportedSourceAndTarget.getTargetMediaType())))
+                            .forEach(supportedSourceAndTarget -> {
+                                String nextSource = supportedSourceAndTarget.getSourceMediaType();
+                                for (TransformStep step : pipeline)
                                 {
-                                    unsupported.add(supportedSourceAndTarget.getSourceMediaType()+"->"+supportedSourceAndTarget.getTargetMediaType());
-                                    break;
+                                    String source = nextSource;
+                                    String target = step.getTargetMediaType() == null
+                                            ? supportedSourceAndTarget.getTargetMediaType()
+                                            : step.getTargetMediaType();
+
+                                    if (transformersByName.get(step.getTransformerName()).getSupportedSourceAndTargetList().stream()
+                                            .noneMatch(stepsSupportedSourceAndTarget -> source.equals(stepsSupportedSourceAndTarget.getSourceMediaType())
+                                                    && target.equals(stepsSupportedSourceAndTarget.getTargetMediaType())))
+                                    {
+                                        unsupported.add(supportedSourceAndTarget.getSourceMediaType() + "->" + supportedSourceAndTarget.getTargetMediaType());
+                                        break;
+                                    }
+                                    nextSource = target;
                                 }
-                                nextSource = target;
-                            }
-                        });
+                            });
 
                     if (!unsupported.isEmpty())
                     {
                         throw new IllegalStateException("Pipeline transformer " + transformerName(name) +
-                                " steps do not support ("+
+                                " steps do not support (" +
                                 unsupported.stream()
-                                    .sorted()
-                                    .collect(Collectors.joining(", "))+
+                                        .sorted()
+                                        .collect(Collectors.joining(", "))
+                                +
                                 ") so will be ignored");
                     }
                 }
@@ -903,7 +861,7 @@ public class CombinedTransformConfig
         return combinedTransformers.size();
     }
 
-    public Map<String,Origin<Transformer>> getTransformerByNameMap()
+    public Map<String, Origin<Transformer>> getTransformerByNameMap()
     {
         return combinedTransformers.stream().collect(Collectors.toMap(origin -> origin.get().getTransformerName(), origin -> origin));
     }

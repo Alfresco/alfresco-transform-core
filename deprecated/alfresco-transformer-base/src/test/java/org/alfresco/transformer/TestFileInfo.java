@@ -39,7 +39,7 @@ public class TestFileInfo
     private final boolean exactMimeType;
 
     public TestFileInfo(final String mimeType, final String extension, final String path,
-        final boolean exactMimeType)
+            final boolean exactMimeType)
     {
         this.mimeType = mimeType;
         this.extension = extension;
@@ -68,13 +68,13 @@ public class TestFileInfo
     }
 
     public static TestFileInfo testFile(final String mimeType, final String extension,
-        final String path, final boolean exactMimeType)
+            final String path, final boolean exactMimeType)
     {
         return new TestFileInfo(mimeType, extension, path, exactMimeType);
     }
 
     public static TestFileInfo testFile(final String mimeType, final String extension,
-        final String path)
+            final String path)
     {
         return new TestFileInfo(mimeType, extension, path, false);
     }

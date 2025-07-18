@@ -30,19 +30,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import jakarta.jms.Queue;
 
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.core.JmsTemplate;
 
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * @author Lucian Tuca
- * created on 15/01/2019
+ * @author Lucian Tuca created on 15/01/2019
  */
 @Deprecated
 @SpringBootTest(properties = {"activemq.url=nio://localhost:61616"})
@@ -55,7 +55,7 @@ public abstract class AbstractQueueTransformServiceIT
     private JmsTemplate jmsTemplate;
 
     private final ActiveMQQueue testingQueue = new ActiveMQQueue(
-        "org.alfresco.transform.engine.IT");
+            "org.alfresco.transform.engine.IT");
 
     @Test
     public void queueTransformServiceIT()

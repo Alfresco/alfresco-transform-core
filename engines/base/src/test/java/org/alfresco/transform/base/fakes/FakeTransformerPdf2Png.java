@@ -27,5 +27,4 @@
 package org.alfresco.transform.base.fakes;
 
 public class FakeTransformerPdf2Png extends AbstractFakeTransformer
-{
-}
+{}

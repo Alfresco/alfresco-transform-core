@@ -26,30 +26,22 @@
  */
 package org.alfresco.transform.base;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.alfresco.transform.base.sfs.SharedFileStoreClient;
-import org.alfresco.transform.base.executors.CommandExecutor;
-import org.alfresco.transform.base.executors.RuntimeExec;
-import org.alfresco.transform.base.model.FileRefEntity;
-import org.alfresco.transform.base.model.FileRefResponse;
-import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.base.transform.TransformHandler;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.registry.TransformServiceRegistry;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -64,25 +56,36 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.ACCEPT;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import org.alfresco.transform.base.executors.CommandExecutor;
+import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.model.FileRefEntity;
+import org.alfresco.transform.base.model.FileRefResponse;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.base.sfs.SharedFileStoreClient;
+import org.alfresco.transform.base.transform.TransformHandler;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.registry.TransformServiceRegistry;
 
 /**
  * Super class for unit testing.
  */
-@SpringBootTest(classes={org.alfresco.transform.base.Application.class})
+@SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
 @AutoConfigureMockMvc
 public abstract class AbstractBaseTest
 {
@@ -123,8 +126,7 @@ public abstract class AbstractBaseTest
     /**
      * The expected result. Taken resting target quick file's bytes.
      *
-     * Note: These checks generally don't work on Windows (Mac and Linux are okay). Possibly to do with byte order
-     * loading.
+     * Note: These checks generally don't work on Windows (Mac and Linux are okay). Possibly to do with byte order loading.
      */
     protected byte[] expectedTargetFileBytes;
 
@@ -134,7 +136,7 @@ public abstract class AbstractBaseTest
     private RuntimeExec origCheckCommand;
 
     protected void setMockExternalCommandsOnTransformer(CommandExecutor commandExecutor, RuntimeExec mockTransformCommand,
-        RuntimeExec mockCheckCommand)
+            RuntimeExec mockCheckCommand)
     {
         this.commandExecutor = commandExecutor;
         origTransformCommand = (RuntimeExec) ReflectionTestUtils.getField(commandExecutor, "transformCommand");
@@ -150,27 +152,27 @@ public abstract class AbstractBaseTest
     }
 
     protected void mockTransformCommand(String sourceExtension,
-        String targetExtension, String sourceMimetype,
-        boolean readTargetFileBytes) throws IOException
-    {
-    }
+            String targetExtension, String sourceMimetype,
+            boolean readTargetFileBytes) throws IOException
+    {}
 
     protected void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest)
-    {
-    }
+    {}
 
     /**
-     * This method ends up being the core of the mock.
-     * It copies content from an existing file in the resources folder to the desired location
-     * in order to simulate a successful transformation.
+     * This method ends up being the core of the mock. It copies content from an existing file in the resources folder to the desired location in order to simulate a successful transformation.
      *
-     * @param actualTargetExtension Requested extension.
-     * @param testFile              The test file (transformed) - basically the result.
-     * @param targetFile            The location where the content from the testFile should be copied
-     * @throws IOException in case of any errors.
+     * @param actualTargetExtension
+     *            Requested extension.
+     * @param testFile
+     *            The test file (transformed) - basically the result.
+     * @param targetFile
+     *            The location where the content from the testFile should be copied
+     * @throws IOException
+     *             in case of any errors.
      */
     public void generateTargetFileFromResourceFile(String actualTargetExtension, File testFile,
-        File targetFile) throws IOException
+            File targetFile) throws IOException
     {
         if (testFile == null)
         {
@@ -179,13 +181,14 @@ public abstract class AbstractBaseTest
         if (testFile != null)
         {
             try (var inputStream = new FileInputStream(testFile);
-                 var outputStream = new FileOutputStream(targetFile))
+                    var outputStream = new FileOutputStream(targetFile))
             {
                 FileChannel source = inputStream.getChannel();
                 FileChannel target = outputStream.getChannel();
                 target.transferFrom(source, 0, source.size());
 
-            } catch (Exception e) 
+            }
+            catch (Exception e)
             {
                 throw e;
             }
@@ -218,7 +221,7 @@ public abstract class AbstractBaseTest
         {
             // Each use of the tempDir should result in a unique directory being used
             testFile = new File(tempDir, testFilename);
-            Files.copy(classLoader.getResourceAsStream(testFilename), testFile.toPath(),REPLACE_EXISTING);
+            Files.copy(classLoader.getResourceAsStream(testFilename), testFile.toPath(), REPLACE_EXISTING);
         }
 
         return testFileUrl == null ? null : testFile;
@@ -253,7 +256,7 @@ public abstract class AbstractBaseTest
     }
 
     private MockHttpServletRequestBuilder mockMvcRequestWithMockMultipartFile(String url, MockMultipartFile sourceFile,
-        String... params)
+            String... params)
     {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM).file(sourceFile);
 
@@ -272,18 +275,18 @@ public abstract class AbstractBaseTest
     protected TransformRequest createTransformRequest(String sourceFileRef, File sourceFile)
     {
         return TransformRequest.builder()
-        .withRequestId("1")
-        .withSchema(1)
-        .withClientData("Alfresco Digital Business Platform")
-        .withTransformRequestOptions(options)
-        .withSourceReference(sourceFileRef)
-        .withSourceExtension(sourceExtension)
-        .withSourceMediaType(sourceMimetype)
-        .withSourceSize(sourceFile.length())
-        .withTargetExtension(targetExtension)
-        .withTargetMediaType(targetMimetype)
-        .withInternalContextForTransformEngineTests()
-        .build();
+                .withRequestId("1")
+                .withSchema(1)
+                .withClientData("Alfresco Digital Business Platform")
+                .withTransformRequestOptions(options)
+                .withSourceReference(sourceFileRef)
+                .withSourceExtension(sourceExtension)
+                .withSourceMediaType(sourceMimetype)
+                .withSourceSize(sourceFile.length())
+                .withTargetExtension(targetExtension)
+                .withTargetMediaType(targetMimetype)
+                .withInternalContextForTransformEngineTests()
+                .build();
     }
 
     public static void resetProbeForTesting(ProbeTransform probe)
@@ -294,21 +297,21 @@ public abstract class AbstractBaseTest
         ReflectionTestUtils.setField(probe, "maxTime", Long.MAX_VALUE);
         ReflectionTestUtils.setField(probe, "nextTransformTime", 0);
 
-        ((AtomicBoolean)ReflectionTestUtils.getField(probe, "initialised")).set(false);
-        ((AtomicBoolean)ReflectionTestUtils.getField(probe, "readySent")).set(false);
-        ((AtomicLong)ReflectionTestUtils.getField(probe, "transformCount")).set(0);
-        ((AtomicBoolean)ReflectionTestUtils.getField(probe, "die")).set(false);
+        ((AtomicBoolean) ReflectionTestUtils.getField(probe, "initialised")).set(false);
+        ((AtomicBoolean) ReflectionTestUtils.getField(probe, "readySent")).set(false);
+        ((AtomicLong) ReflectionTestUtils.getField(probe, "transformCount")).set(0);
+        ((AtomicBoolean) ReflectionTestUtils.getField(probe, "die")).set(false);
     }
 
     @Test
     public void simpleTransformTest() throws Exception
     {
         mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
-               .andExpect(status().isOk())
-               .andExpect(content().bytes(expectedTargetFileBytes))
-               .andExpect(header().string("Content-Disposition",
-                   "attachment; filename*=UTF-8''transform." + targetExtension));
+                mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Test
@@ -317,11 +320,11 @@ public abstract class AbstractBaseTest
         sourceFile = new MockMultipartFile("file", "../quick." + sourceExtension, sourceMimetype, sourceFileBytes);
 
         mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
-               .andExpect(status().isOk())
-               .andExpect(content().bytes(expectedTargetFileBytes))
-               .andExpect(header().string("Content-Disposition",
-                   "attachment; filename*=UTF-8''transform." + targetExtension));
+                mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Test
@@ -330,11 +333,11 @@ public abstract class AbstractBaseTest
         sourceFile = new MockMultipartFile("file", "../quick", sourceMimetype, sourceFileBytes);
 
         mockMvc.perform(
-            mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
-               .andExpect(status().isOk())
-               .andExpect(content().bytes(expectedTargetFileBytes))
-               .andExpect(header().string("Content-Disposition",
-                   "attachment; filename*=UTF-8''transform." + targetExtension));
+                mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Test
@@ -345,14 +348,14 @@ public abstract class AbstractBaseTest
         probeTransform.setLivenessPercent(110);
 
         long[][] values = new long[][]{
-            {5000, 0, Long.MAX_VALUE}, // 1st transform is ignored
-            {1000, 1000, 2100},        // 1000 + 1000*1.1
-            {3000, 2000, 4200},        // 2000 + 2000*1.1
-            {2000, 2000, 4200},
-            {6000, 3000, 6300},
-            {8000, 4000, 8400},
-            {4444, 4000, 8400},        // no longer in the first few, so normal and max times don't change
-            {5555, 4000, 8400}
+                {5000, 0, Long.MAX_VALUE}, // 1st transform is ignored
+                {1000, 1000, 2100}, // 1000 + 1000*1.1
+                {3000, 2000, 4200}, // 2000 + 2000*1.1
+                {2000, 2000, 4200},
+                {6000, 3000, 6300},
+                {8000, 4000, 8400},
+                {4444, 4000, 8400}, // no longer in the first few, so normal and max times don't change
+                {5555, 4000, 8400}
         };
 
         for (long[] v : values)
@@ -376,16 +379,16 @@ public abstract class AbstractBaseTest
         // Serialize and call the transformer
         String tr = objectMapper.writeValueAsString(transformRequest);
         String transformationReplyAsString = mockMvc
-            .perform(MockMvcRequestBuilders
-                .post(ENDPOINT_TRANSFORM)
-                .header(ACCEPT, APPLICATION_JSON_VALUE)
-                .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .content(tr))
-            .andExpect(status().is(BAD_REQUEST.value()))
-            .andReturn().getResponse().getContentAsString();
+                .perform(MockMvcRequestBuilders
+                        .post(ENDPOINT_TRANSFORM)
+                        .header(ACCEPT, APPLICATION_JSON_VALUE)
+                        .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                        .content(tr))
+                .andExpect(status().is(BAD_REQUEST.value()))
+                .andReturn().getResponse().getContentAsString();
 
         TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,
-            TransformReply.class);
+                TransformReply.class);
 
         // Assert the reply
         assertEquals(BAD_REQUEST.value(), transformReply.getStatus());
@@ -437,11 +440,11 @@ public abstract class AbstractBaseTest
         String directUrl = "file://" + dauSourceFile.toPath();
 
         ResultActions resultActions = mockMvc.perform(
-             mockMvcRequest(ENDPOINT_TRANSFORM, null)
-            .param(DIRECT_ACCESS_URL, directUrl))
-            .andExpect(status().isOk())
-            .andExpect(header().string("Content-Disposition",
-                "attachment; filename*=UTF-8''transform."+targetExtension));
+                mockMvcRequest(ENDPOINT_TRANSFORM, null)
+                        .param(DIRECT_ACCESS_URL, directUrl))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*=UTF-8''transform." + targetExtension));
 
         if (expectedTargetFileBytes != null)
         {

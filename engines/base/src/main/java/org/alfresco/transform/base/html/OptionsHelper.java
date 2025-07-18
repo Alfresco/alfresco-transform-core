@@ -26,14 +26,15 @@
  */
 package org.alfresco.transform.base.html;
 
-import org.alfresco.transform.config.TransformOption;
-import org.alfresco.transform.config.TransformOptionGroup;
-import org.alfresco.transform.config.TransformOptionValue;
-import org.springframework.stereotype.Component;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.config.TransformOption;
+import org.alfresco.transform.config.TransformOptionGroup;
+import org.alfresco.transform.config.TransformOptionValue;
 
 /**
  * Used in the html test page, which provides a list of known transform option names.
@@ -42,14 +43,12 @@ import java.util.TreeSet;
 public class OptionsHelper
 {
     private OptionsHelper()
-    {
-    }
+    {}
 
     public static Set<String> getOptionNames(Map<String, Set<TransformOption>> transformOptionsByName)
     {
         Set<String> set = new TreeSet<>();
-        transformOptionsByName.forEach(((optionName, optionSet) ->
-            optionSet.stream().forEach(option -> addOption(set, option))));
+        transformOptionsByName.forEach(((optionName, optionSet) -> optionSet.stream().forEach(option -> addOption(set, option))));
         return set;
     }
 
@@ -57,11 +56,11 @@ public class OptionsHelper
     {
         if (option instanceof TransformOptionGroup)
         {
-            addGroup(set, (TransformOptionGroup)option);
+            addGroup(set, (TransformOptionGroup) option);
         }
         else
         {
-            addValue(set, (TransformOptionValue)option);
+            addValue(set, (TransformOptionValue) option);
         }
     }
 

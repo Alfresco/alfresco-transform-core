@@ -28,8 +28,7 @@ import org.springframework.core.io.Resource;
 public class TransformConfigReaderFactory
 {
     private TransformConfigReaderFactory()
-    {
-    }
+    {}
 
     public static TransformConfigReader create(final Resource resource)
     {
@@ -44,7 +43,7 @@ public class TransformConfigReaderFactory
         {
         case "properties":
             throw new UnsupportedOperationException(".properties configuration files are no longer " +
-                                                    "supported: " + fileName);
+                    "supported: " + fileName);
         case "yaml":
         case "yml":
             return new TransformConfigReaderYaml(resource);

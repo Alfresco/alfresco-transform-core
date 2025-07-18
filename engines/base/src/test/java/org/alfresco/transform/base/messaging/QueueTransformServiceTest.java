@@ -27,21 +27,6 @@
 
 package org.alfresco.transform.base.messaging;
 
-import org.alfresco.transform.base.TransformController;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.apache.activemq.command.ActiveMQObjectMessage;
-import org.apache.activemq.command.ActiveMQQueue;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jms.support.converter.MessageConversionException;
-
-import jakarta.jms.Destination;
-import jakarta.jms.JMSException;
-import jakarta.jms.Message;
-
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -52,7 +37,23 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
-@SpringBootTest(classes={org.alfresco.transform.base.Application.class})
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+
+import org.apache.activemq.command.ActiveMQObjectMessage;
+import org.apache.activemq.command.ActiveMQQueue;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jms.support.converter.MessageConversionException;
+
+import org.alfresco.transform.base.TransformController;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+
+@SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
 public class QueueTransformServiceTest
 {
     @Mock
@@ -94,12 +95,12 @@ public class QueueTransformServiceTest
         msg.setJMSReplyTo(destination);
 
         TransformReply reply = TransformReply
-            .builder()
-            .withStatus(INTERNAL_SERVER_ERROR.value())
-            .withErrorDetails(
-                "JMS exception during T-Request deserialization of message with correlationID "
-                + msg.getCorrelationId() + ": null")
-            .build();
+                .builder()
+                .withStatus(INTERNAL_SERVER_ERROR.value())
+                .withErrorDetails(
+                        "JMS exception during T-Request deserialization of message with correlationID "
+                                + msg.getCorrelationId() + ": null")
+                .build();
 
         doReturn(null).when(transformMessageConverter).fromMessage(msg);
 
@@ -113,7 +114,7 @@ public class QueueTransformServiceTest
 
     @Test
     public void testConvertMessageThrowsMessageConversionExceptionThenReplyWithBadRequest()
-        throws JMSException
+            throws JMSException
     {
         ActiveMQObjectMessage msg = new ActiveMQObjectMessage();
         msg.setCorrelationId("1234");
@@ -121,12 +122,12 @@ public class QueueTransformServiceTest
         msg.setJMSReplyTo(destination);
 
         TransformReply reply = TransformReply
-            .builder()
-            .withStatus(BAD_REQUEST.value())
-            .withErrorDetails(
-                "Message conversion exception during T-Request deserialization of message with correlationID"
-                + msg.getCorrelationId() + ": null")
-            .build();
+                .builder()
+                .withStatus(BAD_REQUEST.value())
+                .withErrorDetails(
+                        "Message conversion exception during T-Request deserialization of message with correlationID"
+                                + msg.getCorrelationId() + ": null")
+                .build();
 
         doThrow(MessageConversionException.class).when(transformMessageConverter).fromMessage(msg);
 
@@ -140,7 +141,7 @@ public class QueueTransformServiceTest
 
     @Test
     public void testConvertMessageThrowsJMSExceptionThenReplyWithInternalServerError()
-        throws JMSException
+            throws JMSException
     {
         ActiveMQObjectMessage msg = new ActiveMQObjectMessage();
         msg.setCorrelationId("1234");
@@ -148,12 +149,12 @@ public class QueueTransformServiceTest
         msg.setJMSReplyTo(destination);
 
         TransformReply reply = TransformReply
-            .builder()
-            .withStatus(INTERNAL_SERVER_ERROR.value())
-            .withErrorDetails(
-                "JMSException during T-Request deserialization of message with correlationID " +
-                msg.getCorrelationId() + ": null")
-            .build();
+                .builder()
+                .withStatus(INTERNAL_SERVER_ERROR.value())
+                .withErrorDetails(
+                        "JMSException during T-Request deserialization of message with correlationID " +
+                                msg.getCorrelationId() + ": null")
+                .build();
 
         doThrow(JMSException.class).when(transformMessageConverter).fromMessage(msg);
 
@@ -174,13 +175,16 @@ public class QueueTransformServiceTest
 
         TransformRequest request = new TransformRequest();
         TransformReply reply = TransformReply
-            .builder()
-            .withStatus(CREATED.value())
-            .build();
+                .builder()
+                .withStatus(CREATED.value())
+                .build();
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
-        doAnswer(invocation -> {transformReplySender.send(destination, reply); return null;})
-            .when(transformController).transform(request, null, destination);
+        doAnswer(invocation -> {
+            transformReplySender.send(destination, reply);
+            return null;
+        })
+                .when(transformController).transform(request, null, destination);
 
         queueTransformService.receive(msg);
 
@@ -205,7 +209,7 @@ public class QueueTransformServiceTest
 
     @Test
     public void testWhenExceptionOnCorrelationIdIsThrownThenContinueFlowWithNullCorrelationId()
-        throws JMSException
+            throws JMSException
     {
         Message msg = mock(Message.class);
         Destination destination = mock(Destination.class);
@@ -215,13 +219,16 @@ public class QueueTransformServiceTest
 
         TransformRequest request = new TransformRequest();
         TransformReply reply = TransformReply
-            .builder()
-            .withStatus(CREATED.value())
-            .build();
+                .builder()
+                .withStatus(CREATED.value())
+                .build();
 
         doReturn(request).when(transformMessageConverter).fromMessage(msg);
-        doAnswer(invocation -> {transformReplySender.send(destination, reply); return null;})
-            .when(transformController).transform(request, null, destination);
+        doAnswer(invocation -> {
+            transformReplySender.send(destination, reply);
+            return null;
+        })
+                .when(transformController).transform(request, null, destination);
 
         queueTransformService.receive(msg);
 

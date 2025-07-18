@@ -23,15 +23,15 @@ package org.alfresco.transform.config.reader;
 
 import java.io.IOException;
 
-import org.alfresco.transform.config.TransformConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.Resource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alfresco.transform.config.TransformConfig;
 
 public class TransformConfigReaderJson implements TransformConfigReader
 {
-    private static final ObjectMapper MAPPER= new ObjectMapper();
-    
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
     private final Resource resource;
 
     TransformConfigReaderJson(final Resource resource)

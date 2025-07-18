@@ -26,31 +26,23 @@
  */
 package org.alfresco.transform.base.fakes;
 
-import org.alfresco.transform.base.TransformManager;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import org.alfresco.transform.base.TransformManager;
+
 /**
- * Returns lines in the supplied input as a sequence of transform result fragments.
- * - If the current line is {@code "Null"} no output is made and {@code null} is passed as the {@code index} to
- *   {@link TransformManager#respondWithFragment(Integer, boolean)}. The {code finished} parameter is unset.
- * - If {@code "Finished"}, the text is written and the {code finished} parameter is set.
- * - If the current line is {@code "NullFinished"} no output is made and {@code null} is passed as the {@code index} to
- *   {@code respondWithFragment}. The {code finished} parameter is set.
- * - If {@code "Ignored"} it will be written to the output, but the {@code respondWithFragment} method will not be
- *   called, so should be ignored if the final line.
- * If the input is "WithoutFragments", {@code respondWithFragment} is not called.
+ * Returns lines in the supplied input as a sequence of transform result fragments. - If the current line is {@code "Null"} no output is made and {@code null} is passed as the {@code index} to {@link TransformManager#respondWithFragment(Integer, boolean)}. The {code finished} parameter is unset. - If {@code "Finished"}, the text is written and the {code finished} parameter is set. - If the current line is {@code "NullFinished"} no output is made and {@code null} is passed as the {@code index} to {@code respondWithFragment}. The {code finished} parameter is set. - If {@code "Ignored"} it will be written to the output, but the {@code respondWithFragment} method will not be called, so should be ignored if the final line. If the input is "WithoutFragments", {@code respondWithFragment} is not called.
  */
 public class FakeTransformerFragments extends AbstractFakeTransformer
 {
     @Override
     public void transform(String sourceMimetype, InputStream inputStream, String targetMimetype,
-        OutputStream outputStream, Map<String, String> transformOptions, TransformManager transformManager)
-        throws Exception
+            OutputStream outputStream, Map<String, String> transformOptions, TransformManager transformManager)
+            throws Exception
     {
         String input = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         String[] lines = input.split("\n");
@@ -69,7 +61,8 @@ public class FakeTransformerFragments extends AbstractFakeTransformer
                 {
                     write(outputStream, line);
                 }
-                if (!"Ignored".equals(line)) {
+                if (!"Ignored".equals(line))
+                {
                     outputStream = transformManager.respondWithFragment(index, finished);
                 }
             }

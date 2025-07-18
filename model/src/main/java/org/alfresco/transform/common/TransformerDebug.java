@@ -21,15 +21,16 @@
  */
 package org.alfresco.transform.common;
 
+import java.io.File;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.messages.TransformStack;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.util.Map;
 
 public class TransformerDebug
 {
@@ -43,7 +44,7 @@ public class TransformerDebug
 
     public static final String MIMETYPE_METADATA_EMBED = "alfresco-metadata-embed";
 
-    private static final String TIMEOUT =  "timeout";
+    private static final String TIMEOUT = "timeout";
 
     // For truncating long option values
     private static final int MAX_OPTION_VALUE = 60;
@@ -65,9 +66,10 @@ public class TransformerDebug
                     getMimetypeExt(step.getSourceMediaType()) +
                     getTargetMimetypeExt(step.getTargetMediaType(), step.getSourceMediaType()) + ' ' +
                     (isTopLevel || !isTRouter()
-                     ? fileSize(request.getSourceSize()) + ' ' +
-                       getRenditionName(new RepositoryClientData(request.getClientData()).getRenditionName())
-                     : "") +
+                            ? fileSize(request.getSourceSize()) + ' ' +
+                                    getRenditionName(new RepositoryClientData(request.getClientData()).getRenditionName())
+                            : "")
+                    +
                     step.getTransformerName();
             if (isDebugToBeReturned(repositoryClientData))
             {
@@ -162,7 +164,6 @@ public class TransformerDebug
         }
     }
 
-
     public void logOptions(String reference, Map<String, String> options)
     {
         if (logger.isDebugEnabled() && !isTRouter && options != null && !options.isEmpty())
@@ -186,8 +187,8 @@ public class TransformerDebug
         int len = value.length();
         if (len > MAX_OPTION_VALUE)
         {
-            value = value.substring(0, MAX_OPTION_VALUE-MAX_OPTION_DOTS.length()-MAX_OPTION_END_CHARS) +
-                    MAX_OPTION_DOTS +value.substring(len-MAX_OPTION_END_CHARS);
+            value = value.substring(0, MAX_OPTION_VALUE - MAX_OPTION_DOTS.length() - MAX_OPTION_END_CHARS) +
+                    MAX_OPTION_DOTS + value.substring(len - MAX_OPTION_END_CHARS);
         }
         return getPaddedReference(reference) +
                 "  " + key + "=\"" + value.replaceAll("\"", "\\\"") + "\"";
@@ -277,7 +278,7 @@ public class TransformerDebug
         else
         {
             sb.append(mimetypeExt);
-            sb.append(spaces(4 - mimetypeExt.length()));   // Pad to normal max ext (4)
+            sb.append(spaces(4 - mimetypeExt.length())); // Pad to normal max ext (4)
         }
         sb.append(' ');
         return sb.toString();
@@ -286,18 +287,18 @@ public class TransformerDebug
     private String getRenditionName(String renditionName)
     {
         return !renditionName.isEmpty()
-                ? "-- "+ replaceWithMetadataRenditionNameIfEmbedOrExtract(renditionName)+" -- "
+                ? "-- " + replaceWithMetadataRenditionNameIfEmbedOrExtract(renditionName) + " -- "
                 : "";
     }
 
     private static String replaceWithMetadataRenditionNameIfEmbedOrExtract(String renditionName)
     {
         String transformName = getTransformName(renditionName);
-        return    transformName.startsWith(MIMETYPE_METADATA_EXTRACT)
+        return transformName.startsWith(MIMETYPE_METADATA_EXTRACT)
                 ? "metadataExtract"
                 : transformName.startsWith(MIMETYPE_METADATA_EMBED)
-                ? "metadataEmbed"
-                : renditionName;
+                        ? "metadataEmbed"
+                        : renditionName;
     }
 
     private static String getTransformName(String renditionName)
@@ -332,9 +333,9 @@ public class TransformerDebug
         {
             return "1 byte";
         }
-        final String[] units = new String[] { "bytes", "KB", "MB", "GB", "TB" };
+        final String[] units = new String[]{"bytes", "KB", "MB", "GB", "TB"};
         long divider = 1;
-        for(int i = 0; i < units.length-1; i++)
+        for (int i = 0; i < units.length - 1; i++)
         {
             long nextDivider = divider * 1024;
             if (size < nextDivider)
@@ -343,7 +344,7 @@ public class TransformerDebug
             }
             divider = nextDivider;
         }
-        return fileSizeFormat(size, divider, units[units.length-1]);
+        return fileSizeFormat(size, divider, units[units.length - 1]);
     }
 
     private static String fileSizeFormat(long size, long divider, String unit)
@@ -352,7 +353,7 @@ public class TransformerDebug
         int decimalPoint = (int) size % 10;
 
         StringBuilder sb = new StringBuilder();
-        sb.append(size/10);
+        sb.append(size / 10);
         if (decimalPoint != 0)
         {
             sb.append(".");

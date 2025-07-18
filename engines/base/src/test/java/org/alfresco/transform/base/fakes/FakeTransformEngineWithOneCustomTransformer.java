@@ -26,42 +26,45 @@
  */
 package org.alfresco.transform.base.fakes;
 
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
 import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.config.SupportedSourceAndTarget;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.config.TransformOptionValue;
 import org.alfresco.transform.config.Transformer;
 
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
-
 public class FakeTransformEngineWithOneCustomTransformer extends AbstractFakeTransformEngine
 {
-    @Override public TransformConfig getTransformConfig()
+    @Override
+    public TransformConfig getTransformConfig()
     {
         String imageOptions = "imageOptions";
         return TransformConfig.builder()
-            .withTransformOptions(ImmutableMap.of(
-                imageOptions, ImmutableSet.of(
-                    new TransformOptionValue(false, "width"),
-                    new TransformOptionValue(false, "height"))))
-            .withTransformers(ImmutableList.of(
-                Transformer.builder()
-                    .withTransformerName("Pdf2Jpg")
-                    .withSupportedSourceAndTargetList(ImmutableSet.of(
-                        SupportedSourceAndTarget.builder()
-                            .withSourceMediaType(MIMETYPE_PDF)
-                            .withTargetMediaType(MIMETYPE_IMAGE_JPEG)
-                            .build()))
-                    .withTransformOptions(ImmutableSet.of(imageOptions))
-                    .build()))
-        .build();
+                .withTransformOptions(ImmutableMap.of(
+                        imageOptions, ImmutableSet.of(
+                                new TransformOptionValue(false, "width"),
+                                new TransformOptionValue(false, "height"))))
+                .withTransformers(ImmutableList.of(
+                        Transformer.builder()
+                                .withTransformerName("Pdf2Jpg")
+                                .withSupportedSourceAndTargetList(ImmutableSet.of(
+                                        SupportedSourceAndTarget.builder()
+                                                .withSourceMediaType(MIMETYPE_PDF)
+                                                .withTargetMediaType(MIMETYPE_IMAGE_JPEG)
+                                                .build()))
+                                .withTransformOptions(ImmutableSet.of(imageOptions))
+                                .build()))
+                .build();
     }
 
-    @Override public ProbeTransform getProbeTransform()
+    @Override
+    public ProbeTransform getProbeTransform()
     {
         return null; // Not used in tests
     }
