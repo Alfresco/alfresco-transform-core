@@ -131,8 +131,6 @@ jobs:
   pmd_scan:
     name: "PMD Scan"
     runs-on: ubuntu-latest
-    needs:
-      - pre_commit
     if: >
       github.event_name == 'pull_request' &&
       !contains(github.event.head_commit.message, '[skip pmd]') &&
