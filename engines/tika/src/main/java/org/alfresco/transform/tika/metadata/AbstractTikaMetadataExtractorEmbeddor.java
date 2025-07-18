@@ -26,8 +26,20 @@
  */
 package org.alfresco.transform.tika.metadata;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.tika.embedder.Embedder;
 import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.metadata.DublinCore;
@@ -51,24 +63,12 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
 
 /**
- * The parent of all Metadata Extractors which use Apache Tika under the hood. This handles all the
- * common parts of processing the files, and the common mappings.
-
+ * The parent of all Metadata Extractors which use Apache Tika under the hood. This handles all the common parts of processing the files, and the common mappings.
+ * 
  * <pre>
  *   <b>author:</b>                 --      cm:author
  *   <b>title:</b>                  --      cm:title
@@ -117,8 +117,7 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
     }
 
     /**
-     * Version which also tries the ISO-8601 formats (in order..),
-     *  and similar formats, which Tika makes use of
+     * Version which also tries the ISO-8601 formats (in order..), and similar formats, which Tika makes use of
      */
     protected Serializable makeDate(String dateStr)
     {
@@ -127,25 +126,29 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
         {
             return this.tikaUTCDateFormater.parseDateTime(dateStr).toDate();
         }
-        catch (IllegalArgumentException ignore) {}
+        catch (IllegalArgumentException ignore)
+        {}
 
         try
         {
             return this.tikaUTCDateFormater.withLocale(Locale.US).parseDateTime(dateStr).toDate();
         }
-        catch (IllegalArgumentException ignore) {}
+        catch (IllegalArgumentException ignore)
+        {}
 
         try
         {
             return this.tikaDateFormater.parseDateTime(dateStr).toDate();
         }
-        catch (IllegalArgumentException ignore) {}
+        catch (IllegalArgumentException ignore)
+        {}
 
         try
         {
             return this.tikaDateFormater.withLocale(Locale.US).parseDateTime(dateStr).toDate();
         }
-        catch (IllegalArgumentException ignore) {}
+        catch (IllegalArgumentException ignore)
+        {}
 
         // Fall back to the normal ones: We just return the String as AbstractMappingMetadataExtracter
         // convertSystemPropertyValues in the repo will do the conversion that was previously done here.
@@ -155,8 +158,7 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
     protected abstract Parser getParser();
 
     /**
-     * Returns the Tika Embedder to modify
-     * the document.
+     * Returns the Tika Embedder to modify the document.
      *
      * @return the Tika embedder
      */
@@ -166,8 +168,7 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
     }
 
     /**
-     * Do we care about the contents of the
-     *  extracted header, or nothing at all?
+     * Do we care about the contents of the extracted header, or nothing at all?
      */
     protected boolean needHeaderContents()
     {
@@ -178,14 +179,13 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
      * Allows implementation specific mappings to be done.
      */
     protected Map<String, Serializable> extractSpecific(Metadata metadata,
-                                                        Map<String, Serializable> properties, Map<String,String> headers)
+            Map<String, Serializable> properties, Map<String, String> headers)
     {
         return properties;
     }
 
     /**
-     * Gets the document selector, used for determining whether to parse embedded resources,
-     * null by default so parse all.
+     * Gets the document selector, used for determining whether to parse embedded resources, null by default so parse all.
      */
     protected DocumentSelector getDocumentSelector(Metadata metadata, String targetMimeType)
     {
@@ -221,11 +221,10 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
         ParseContext context = buildParseContext(metadata, sourceMimetype);
 
         ContentHandler handler;
-        Map<String,String> headers = null;
+        Map<String, String> headers = null;
         if (needHeaderContents())
         {
-            MapCaptureContentHandler headerCapture =
-                    new MapCaptureContentHandler();
+            MapCaptureContentHandler headerCapture = new MapCaptureContentHandler();
             headers = headerCapture.tags;
             handler = new HeadContentHandler(headerCapture);
         }
@@ -238,7 +237,7 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
 
         // First up, copy all the Tika metadata over
         // This allows people to map any of the Tika
-        //  keys onto their own content model
+        // keys onto their own content model
         for (String tikaKey : metadata.names())
         {
             // TODO review this change (part of MNT-15267) - should we really force string concatenation here !?
@@ -246,9 +245,9 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
         }
 
         // Now, map the common Tika metadata keys onto
-        //  the common Alfresco metadata keys. This allows
-        //  existing mapping properties files to continue
-        //  to work without needing any changes
+        // the common Alfresco metadata keys. This allows
+        // existing mapping properties files to continue
+        // to work without needing any changes
 
         // The simple ones
         putRawValue(KEY_AUTHOR, getMetadataValue(metadata, TikaCoreProperties.CREATOR), rawProperties);
@@ -259,7 +258,7 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
         putRawValue(KEY_TAGS, getMetadataValues(metadata, KEY_TAGS), rawProperties);
 
         // Get the subject and description, despite things not
-        //  being nearly as consistent as one might hope
+        // being nearly as consistent as one might hope
         String subject = getMetadataValue(metadata, TikaCoreProperties.SUBJECT);
         String description = getMetadataValue(metadata, TikaCoreProperties.DESCRIPTION);
         if (subject != null && description != null)
@@ -289,19 +288,17 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
         }
 
         // If people created a specific instance
-        //  (eg OfficeMetadataExtractor), then allow that
-        //  instance to map the Tika keys onto its
-        //  existing namespace so that older properties
-        //  files continue to map correctly
+        // (eg OfficeMetadataExtractor), then allow that
+        // instance to map the Tika keys onto its
+        // existing namespace so that older properties
+        // files continue to map correctly
         rawProperties = extractSpecific(metadata, rawProperties, headers);
 
         return rawProperties;
     }
 
     /**
-     * @deprecated The content repository's TikaPoweredMetadataExtracter provides no non test implementations.
-     *             This code exists in case there are custom implementations, that need to be converted to T-Engines.
-     *             It is simply a copy and paste from the content repository and has received limited testing.
+     * @deprecated The content repository's TikaPoweredMetadataExtracter provides no non test implementations. This code exists in case there are custom implementations, that need to be converted to T-Engines. It is simply a copy and paste from the content repository and has received limited testing.
      */
     @Override
     public void embedMetadata(String sourceMimetype, InputStream inputStream,
@@ -335,7 +332,7 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
                 {
                     try
                     {
-                        metadataToEmbed.add(metadataKey, (String)singleValue);
+                        metadataToEmbed.add(metadataKey, (String) singleValue);
                     }
                     catch (ClassCastException e)
                     {
@@ -347,7 +344,7 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
             {
                 try
                 {
-                    metadataToEmbed.add(metadataKey, (String)value);
+                    metadataToEmbed.add(metadataKey, (String) value);
                 }
                 catch (ClassCastException e)
                 {
@@ -395,47 +392,41 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
     protected static Stream<String> distinct(final String[] strings)
     {
         return Stream.of(strings)
-                     .filter(Objects::nonNull)
-                     .map(String::strip)
-                     .filter(s -> !s.isEmpty())
-                     .distinct();
+                .filter(Objects::nonNull)
+                .map(String::strip)
+                .filter(s -> !s.isEmpty())
+                .distinct();
     }
 
     /**
-     * This content handler will capture entries from within
-     *  the header of the Tika content XHTML, but ignore the
-     *  rest.
+     * This content handler will capture entries from within the header of the Tika content XHTML, but ignore the rest.
      */
     protected static class HeadContentHandler extends ContentHandlerDecorator
     {
         /**
          * XHTML XPath parser.
          */
-        private static final XPathParser PARSER =
-                new XPathParser("xhtml", XHTMLContentHandler.XHTML);
+        private static final XPathParser PARSER = new XPathParser("xhtml", XHTMLContentHandler.XHTML);
 
         /**
          * The XPath matcher used to select the XHTML body contents.
          */
-        private static final Matcher MATCHER =
-                PARSER.parse("/xhtml:html/xhtml:head/descendant:node()");
+        private static final Matcher MATCHER = PARSER.parse("/xhtml:html/xhtml:head/descendant:node()");
 
         /**
-         * Creates a content handler that passes all XHTML body events to the
-         * given underlying content handler.
+         * Creates a content handler that passes all XHTML body events to the given underlying content handler.
          *
-         * @param handler content handler
+         * @param handler
+         *            content handler
          */
         protected HeadContentHandler(ContentHandler handler)
         {
             super(new MatchingContentHandler(handler, MATCHER));
         }
     }
+
     /**
-     * This content handler will grab all tags and attributes,
-     *  and record the textual content of the last seen one
-     *  of them.
-     * Normally only used with {@link HeadContentHandler}
+     * This content handler will grab all tags and attributes, and record the textual content of the last seen one of them. Normally only used with {@link HeadContentHandler}
      */
     protected static class MapCaptureContentHandler implements ContentHandler
     {
@@ -461,41 +452,75 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
 
         public void startElement(String namespace, String localname, String qname, Attributes attrs)
         {
-            for(int i=0; i<attrs.getLength(); i++)
+            for (int i = 0; i < attrs.getLength(); i++)
             {
                 tags.put(attrs.getQName(i), attrs.getValue(i));
             }
             text = new StringBuffer();
         }
 
-        public void endDocument() {}
-        public void endPrefixMapping(String paramString) {}
-        public void ignorableWhitespace(char[] paramArrayOfChar, int paramInt1, int paramInt2) {}
-        public void processingInstruction(String paramString1, String paramString2) {}
-        public void setDocumentLocator(Locator paramLocator) {}
-        public void skippedEntity(String paramString) {}
-        public void startDocument() {}
-        public void startPrefixMapping(String paramString1, String paramString2) {}
+        public void endDocument()
+        {}
+
+        public void endPrefixMapping(String paramString)
+        {}
+
+        public void ignorableWhitespace(char[] paramArrayOfChar, int paramInt1, int paramInt2)
+        {}
+
+        public void processingInstruction(String paramString1, String paramString2)
+        {}
+
+        public void setDocumentLocator(Locator paramLocator)
+        {}
+
+        public void skippedEntity(String paramString)
+        {}
+
+        public void startDocument()
+        {}
+
+        public void startPrefixMapping(String paramString1, String paramString2)
+        {}
     }
 
     /**
-     * A content handler that ignores all the content it finds.
-     * Normally used when we only want the metadata, and don't
-     *  care about the file contents.
+     * A content handler that ignores all the content it finds. Normally used when we only want the metadata, and don't care about the file contents.
      */
     protected static class NullContentHandler implements ContentHandler
     {
-        public void characters(char[] paramArrayOfChar, int paramInt1, int paramInt2) {}
-        public void endDocument() {}
-        public void endElement(String paramString1, String paramString2, String paramString3) {}
-        public void endPrefixMapping(String paramString) {}
-        public void ignorableWhitespace(char[] paramArrayOfChar, int paramInt1, int paramInt2) {}
-        public void processingInstruction(String paramString1, String paramString2) {}
-        public void setDocumentLocator(Locator paramLocator) {}
-        public void skippedEntity(String paramString) {}
-        public void startDocument()  {}
+        public void characters(char[] paramArrayOfChar, int paramInt1, int paramInt2)
+        {}
+
+        public void endDocument()
+        {}
+
+        public void endElement(String paramString1, String paramString2, String paramString3)
+        {}
+
+        public void endPrefixMapping(String paramString)
+        {}
+
+        public void ignorableWhitespace(char[] paramArrayOfChar, int paramInt1, int paramInt2)
+        {}
+
+        public void processingInstruction(String paramString1, String paramString2)
+        {}
+
+        public void setDocumentLocator(Locator paramLocator)
+        {}
+
+        public void skippedEntity(String paramString)
+        {}
+
+        public void startDocument()
+        {}
+
         public void startElement(String paramString1, String paramString2,
-                                 String paramString3, Attributes paramAttributes) {}
-        public void startPrefixMapping(String paramString1, String paramString2) {}
+                String paramString3, Attributes paramAttributes)
+        {}
+
+        public void startPrefixMapping(String paramString1, String paramString2)
+        {}
     }
 }

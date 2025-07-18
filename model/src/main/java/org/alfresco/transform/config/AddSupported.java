@@ -22,7 +22,9 @@
 package org.alfresco.transform.config;
 
 /**
- * Holds information to add new {@link SupportedSourceAndTarget} objects to an existing {@link Transformer}.<p><br>
+ * Holds information to add new {@link SupportedSourceAndTarget} objects to an existing {@link Transformer}.
+ * <p>
+ * <br>
  *
  * <pre>
  *   "addSupported": [

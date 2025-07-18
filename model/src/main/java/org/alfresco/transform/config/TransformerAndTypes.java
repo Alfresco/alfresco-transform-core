@@ -25,14 +25,14 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * Base object with {@code transformerName}, {@code sourceMediaType}and {@code targetMediaType}.
- * Used to identify supported transforms.
+ * Base object with {@code transformerName}, {@code sourceMediaType}and {@code targetMediaType}. Used to identify supported transforms.
  */
 public abstract class TransformerAndTypes extends Types
 {
     String transformerName;
 
-    protected TransformerAndTypes() {}
+    protected TransformerAndTypes()
+    {}
 
     public String getTransformerName()
     {
@@ -47,11 +47,14 @@ public abstract class TransformerAndTypes extends Types
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
         TransformerAndTypes that = (TransformerAndTypes) o;
-        return  Objects.equals(transformerName, that.transformerName);
+        return Objects.equals(transformerName, that.transformerName);
     }
 
     @Override
@@ -65,8 +68,10 @@ public abstract class TransformerAndTypes extends Types
     {
         StringJoiner sj = new StringJoiner(", ");
         String superToString = super.toString();
-        if (transformerName != null) sj.add("\"transformerName\": \""+transformerName+'"');
-        if (superToString != null) sj.add(superToString);
+        if (transformerName != null)
+            sj.add("\"transformerName\": \"" + transformerName + '"');
+        if (superToString != null)
+            sj.add(superToString);
         return sj.toString();
     }
 
@@ -84,7 +89,7 @@ public abstract class TransformerAndTypes extends Types
         public B withTransformerName(final String transformerName)
         {
             t.transformerName = transformerName;
-            return (B)this;
+            return (B) this;
         }
     }
 }

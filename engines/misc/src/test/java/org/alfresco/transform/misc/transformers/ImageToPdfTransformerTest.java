@@ -26,6 +26,11 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.then;
+
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_GIF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
@@ -35,12 +40,7 @@ import static org.alfresco.transform.common.RequestParamMap.END_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.PDF_FORMAT;
 import static org.alfresco.transform.common.RequestParamMap.PDF_ORIENTATION;
 import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.then;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -52,9 +52,8 @@ import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import javax.imageio.ImageIO;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.misc.util.ArgumentsCartesianProduct;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,6 +64,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.misc.util.ArgumentsCartesianProduct;
 
 class ImageToPdfTransformerTest
 {
@@ -91,32 +93,30 @@ class ImageToPdfTransformerTest
     static Stream<ImageFile> imageFiles()
     {
         return Stream.of(
-            ImageFile.of("sample.jpg", MIMETYPE_IMAGE_JPEG),
-            ImageFile.of("sample.gif", MIMETYPE_IMAGE_GIF),
-            ImageFile.of("sample.png", MIMETYPE_IMAGE_PNG)
-        );
+                ImageFile.of("sample.jpg", MIMETYPE_IMAGE_JPEG),
+                ImageFile.of("sample.gif", MIMETYPE_IMAGE_GIF),
+                ImageFile.of("sample.png", MIMETYPE_IMAGE_PNG));
     }
 
     static Stream<TransformOptions> defaultTransformOptions()
     {
         return Stream.of(
-            TransformOptions.none(),
-            TransformOptions.of(0, null),
-            TransformOptions.of(0, 0)
-        );
+                TransformOptions.none(),
+                TransformOptions.of(0, null),
+                TransformOptions.of(0, 0));
     }
 
     static Stream<TransformOptions> tiffTransformOptions()
     {
         return Stream.of(
-            TransformOptions.of(0, 0), // (startPage, endPage)
-            TransformOptions.of(0, 1),
-            TransformOptions.of(1, 1),
-            TransformOptions.of(null, 0), // expected 1 page in target file
-            TransformOptions.of(null, 1), // expected 2 pages in target file
-            TransformOptions.of(0, null), // expected all pages in target file
-            TransformOptions.of(1, null), // expected all except first page in target file
-            TransformOptions.none() // expected all pages in target file
+                TransformOptions.of(0, 0), // (startPage, endPage)
+                TransformOptions.of(0, 1),
+                TransformOptions.of(1, 1),
+                TransformOptions.of(null, 0), // expected 1 page in target file
+                TransformOptions.of(null, 1), // expected 2 pages in target file
+                TransformOptions.of(0, null), // expected all pages in target file
+                TransformOptions.of(1, null), // expected all except first page in target file
+                TransformOptions.none() // expected all pages in target file
         );
     }
 
@@ -124,9 +124,8 @@ class ImageToPdfTransformerTest
     {
         ImageFile tiffImage = ImageFile.of("sample.tiff", MIMETYPE_IMAGE_TIFF, 6);
         return Stream.of(
-            ArgumentsCartesianProduct.of(imageFiles(), defaultTransformOptions()),
-            ArgumentsCartesianProduct.of(tiffImage, tiffTransformOptions())
-        ).flatMap(Function.identity());
+                ArgumentsCartesianProduct.of(imageFiles(), defaultTransformOptions()),
+                ArgumentsCartesianProduct.of(tiffImage, tiffTransformOptions())).flatMap(Function.identity());
     }
 
     @ParameterizedTest
@@ -157,10 +156,9 @@ class ImageToPdfTransformerTest
     static Stream<TransformOptions> improperTransformOptions()
     {
         return Stream.of(
-            TransformOptions.of(1, 0),
-            TransformOptions.of(-1, 0),
-            TransformOptions.of(0, -1)
-        );
+                TransformOptions.of(1, 0),
+                TransformOptions.of(-1, 0),
+                TransformOptions.of(0, -1));
     }
 
     @ParameterizedTest
@@ -168,8 +166,7 @@ class ImageToPdfTransformerTest
     void testTransformTiffToPdf_withImproperOptions(TransformOptions transformOptions)
     {
         // when
-        assertThrows(IllegalArgumentException.class, () ->
-            transformer.transform(MIMETYPE_IMAGE_TIFF, MIMETYPE_PDF, transformOptions.toMap(), sourceFile, targetFile, transformManager));
+        assertThrows(IllegalArgumentException.class, () -> transformer.transform(MIMETYPE_IMAGE_TIFF, MIMETYPE_PDF, transformOptions.toMap(), sourceFile, targetFile, transformManager));
     }
 
     @Test
@@ -179,8 +176,7 @@ class ImageToPdfTransformerTest
         transformOptions.put(START_PAGE, "a");
 
         // when
-        assertThrows(IllegalArgumentException.class, () ->
-            transformer.transform(MIMETYPE_IMAGE_TIFF, MIMETYPE_PDF, transformOptions, sourceFile, targetFile, transformManager));
+        assertThrows(IllegalArgumentException.class, () -> transformer.transform(MIMETYPE_IMAGE_TIFF, MIMETYPE_PDF, transformOptions, sourceFile, targetFile, transformManager));
     }
 
     @Test
@@ -190,57 +186,53 @@ class ImageToPdfTransformerTest
         transformOptions.put(END_PAGE, "z");
 
         // when
-        assertThrows(IllegalArgumentException.class, () ->
-            transformer.transform(MIMETYPE_IMAGE_TIFF, MIMETYPE_PDF, transformOptions, sourceFile, targetFile, transformManager));
+        assertThrows(IllegalArgumentException.class, () -> transformer.transform(MIMETYPE_IMAGE_TIFF, MIMETYPE_PDF, transformOptions, sourceFile, targetFile, transformManager));
     }
 
     /** Option and expected dimensions. */
     static Stream<Arguments> validPdfFormats()
     {
         return Stream.of(
-            Arguments.of("DEFAULT", new PDRectangle(sourceFileWidth, sourceFileHeight)),
-            Arguments.of("default", new PDRectangle(sourceFileWidth, sourceFileHeight)),
-            Arguments.of("A0", PDRectangle.A0),
-            Arguments.of("a0", PDRectangle.A0),
-            Arguments.of("A1", PDRectangle.A1),
-            Arguments.of("A2", PDRectangle.A2),
-            Arguments.of("A3", PDRectangle.A3),
-            Arguments.of("A4", PDRectangle.A4),
-            Arguments.of("A5", PDRectangle.A5),
-            Arguments.of("A6", PDRectangle.A6),
-            Arguments.of("A6", PDRectangle.A6),
-            Arguments.of("LETTER", PDRectangle.LETTER),
-            Arguments.of("letter", PDRectangle.LETTER),
-            Arguments.of("LEGAL", PDRectangle.LEGAL),
-            Arguments.of("legal", PDRectangle.LEGAL)
-        );
+                Arguments.of("DEFAULT", new PDRectangle(sourceFileWidth, sourceFileHeight)),
+                Arguments.of("default", new PDRectangle(sourceFileWidth, sourceFileHeight)),
+                Arguments.of("A0", PDRectangle.A0),
+                Arguments.of("a0", PDRectangle.A0),
+                Arguments.of("A1", PDRectangle.A1),
+                Arguments.of("A2", PDRectangle.A2),
+                Arguments.of("A3", PDRectangle.A3),
+                Arguments.of("A4", PDRectangle.A4),
+                Arguments.of("A5", PDRectangle.A5),
+                Arguments.of("A6", PDRectangle.A6),
+                Arguments.of("A6", PDRectangle.A6),
+                Arguments.of("LETTER", PDRectangle.LETTER),
+                Arguments.of("letter", PDRectangle.LETTER),
+                Arguments.of("LEGAL", PDRectangle.LEGAL),
+                Arguments.of("legal", PDRectangle.LEGAL));
     }
 
     /** Option and expected orientation. */
     static Stream<Arguments> validPdfOrientations()
     {
         return Stream.of(
-            Arguments.of("DEFAULT", unchangedRectangle()),
-            Arguments.of("default", unchangedRectangle()),
-            Arguments.of("PORTRAIT", rectangleRotatedIf((width, height) -> width > height)),
-            Arguments.of("portrait", rectangleRotatedIf((width, height) -> width > height)),
-            Arguments.of("LANDSCAPE", rectangleRotatedIf((width, height) -> height > width)),
-            Arguments.of("landscape", rectangleRotatedIf((width, height) -> height > width))
-        );
+                Arguments.of("DEFAULT", unchangedRectangle()),
+                Arguments.of("default", unchangedRectangle()),
+                Arguments.of("PORTRAIT", rectangleRotatedIf((width, height) -> width > height)),
+                Arguments.of("portrait", rectangleRotatedIf((width, height) -> width > height)),
+                Arguments.of("LANDSCAPE", rectangleRotatedIf((width, height) -> height > width)),
+                Arguments.of("landscape", rectangleRotatedIf((width, height) -> height > width)));
     }
 
     static Stream<Arguments> validPdfFormatsAndOrientations()
     {
         return ArgumentsCartesianProduct.ofArguments(
-            validPdfFormats(),
-            validPdfOrientations()
-        );
+                validPdfFormats(),
+                validPdfOrientations());
     }
 
     @ParameterizedTest
     @MethodSource("validPdfFormatsAndOrientations")
     void testTransformImageToPDF_withVariousPdfFormatsAndOrientations(String pdfFormat, PDRectangle expectedPdfFormat,
-        String pdfOrientation, BiFunction<Float, Float, PDRectangle> expectedPdfFormatRotator) throws Exception
+            String pdfOrientation, BiFunction<Float, Float, PDRectangle> expectedPdfFormatRotator) throws Exception
     {
         TransformOptions transformOptions = TransformOptions.of(pdfFormat, pdfOrientation);
 
@@ -302,8 +294,7 @@ class ImageToPdfTransformerTest
                 Arguments.of(ImageFile.of("612x792-300.tif", MIMETYPE_IMAGE_TIFF), 146.0f, 190.0f),
                 Arguments.of(ImageFile.of("765x990-50.tif", MIMETYPE_IMAGE_TIFF), 1101.0f, 1425.0f),
                 Arguments.of(ImageFile.of("765x990-72.tif", MIMETYPE_IMAGE_TIFF), 765.0f, 990.0f),
-                Arguments.of(ImageFile.of("765x990-300.tif", MIMETYPE_IMAGE_TIFF), 183.0f, 237.0f)
-                        );
+                Arguments.of(ImageFile.of("765x990-300.tif", MIMETYPE_IMAGE_TIFF), 183.0f, 237.0f));
     }
 
     @ParameterizedTest
@@ -320,12 +311,12 @@ class ImageToPdfTransformerTest
         try (PDDocument actualPdfDocument = PDDocument.load(targetFile))
         {
             assertNotNull(actualPdfDocument);
-            assertEquals(expectedWidth, actualPdfDocument.getPage(0).getMediaBox().getWidth(),"Pdf width");
-            assertEquals(expectedHeight,actualPdfDocument.getPage(0).getMediaBox().getHeight(),"Pdf height");
+            assertEquals(expectedWidth, actualPdfDocument.getPage(0).getMediaBox().getWidth(), "Pdf width");
+            assertEquals(expectedHeight, actualPdfDocument.getPage(0).getMediaBox().getHeight(), "Pdf height");
         }
     }
 
-    //----------------------------------------------- Helper methods and classes -----------------------------------------------
+    // ----------------------------------------------- Helper methods and classes -----------------------------------------------
 
     private static BiFunction<Float, Float, PDRectangle> unchangedRectangle()
     {
@@ -339,7 +330,7 @@ class ImageToPdfTransformerTest
             return PDRectangle::new;
         }
 
-        return (width, height) -> predicate.test(width, height)? new PDRectangle(height, width) : new PDRectangle(width, height);
+        return (width, height) -> predicate.test(width, height) ? new PDRectangle(height, width) : new PDRectangle(width, height);
     }
 
     private static File loadFile(String fileName)
@@ -451,7 +442,8 @@ class ImageToPdfTransformerTest
         }
     }
 
-    static {
+    static
+    {
         try
         {
             BufferedImage image = ImageIO.read(sourceFile);

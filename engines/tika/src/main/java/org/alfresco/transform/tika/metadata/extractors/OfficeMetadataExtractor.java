@@ -26,7 +26,11 @@
  */
 package org.alfresco.transform.tika.metadata.extractors;
 
-import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
+
+import java.io.Serializable;
+import java.util.Map;
+
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.Office;
 import org.apache.tika.metadata.TikaCoreProperties;
@@ -36,17 +40,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
-import java.util.Map;
-
-import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
+import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
 
 /**
  * Office file format metadata extractor.
  *
- * Configuration:   (see OfficeMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
+ * Configuration: (see OfficeMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
  *
  * This extractor uses the POI library to extract the following:
+ * 
  * <pre>
  *   <b>author:</b>             --      cm:author
  *   <b>title:</b>              --      cm:title
@@ -100,7 +102,7 @@ public class OfficeMetadataExtractor extends AbstractTikaMetadataExtractorEmbedd
 
     @Override
     protected Map<String, Serializable> extractSpecific(Metadata metadata,
-                                                        Map<String, Serializable> properties, Map<String,String> headers)
+            Map<String, Serializable> properties, Map<String, String> headers)
     {
         putRawValue(KEY_CREATE_DATETIME, metadata.get(TikaCoreProperties.CREATED), properties);
         putRawValue(KEY_LAST_SAVE_DATETIME, metadata.get(TikaCoreProperties.MODIFIED), properties);

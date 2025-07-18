@@ -26,9 +26,10 @@
  */
 package org.alfresco.transform.base.executors;
 
-import static org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import static org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
 
 import java.io.File;
 import java.util.Map;

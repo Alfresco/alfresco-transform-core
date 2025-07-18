@@ -55,7 +55,7 @@ public class MessagingInfo
         // Note: as per application.yaml the broker url is appended with "?jms.watchTopicAdvisories=false". If this needs to be fully
         // overridden then it would require explicitly setting both "spring.activemq.broker-url" *and* "activemq.url" (latter to non-false value).
 
-        if ((activemqUrl != null) && (! activemqUrl.equals("false")))
+        if ((activemqUrl != null) && (!activemqUrl.equals("false")))
         {
             logger.info("JMS client is ENABLED - ACTIVEMQ_URL ='{}'", activemqUrl);
         }

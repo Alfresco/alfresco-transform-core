@@ -26,21 +26,24 @@
  */
 package org.alfresco.transform.registry;
 
-import com.google.common.collect.ImmutableMap;
-import org.alfresco.transform.exceptions.TransformException;
-import org.junit.jupiter.api.Test;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+import static org.alfresco.transform.common.RequestParamMap.TIMEOUT;
+import static org.alfresco.transform.registry.TransformRegistryHelper.retrieveTransformListBySize;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptySet;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
-import static org.alfresco.transform.common.RequestParamMap.TIMEOUT;
-import static org.alfresco.transform.registry.TransformRegistryHelper.retrieveTransformListBySize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.transform.exceptions.TransformException;
 
 public class TransformRegistryHelperTest
 {
@@ -50,37 +53,37 @@ public class TransformRegistryHelperTest
         // This test was inspired by a failure to pick libreoffice over textToPdf despite the fact libreoffice has a
         // higher priority.
         SupportedTransform libreoffice = new SupportedTransform("libreoffice", emptySet(), -1, 50);
-        SupportedTransform   textToPdf = new SupportedTransform("textToPdf",   emptySet(), 100,55);
+        SupportedTransform textToPdf = new SupportedTransform("textToPdf", emptySet(), 100, 55);
 
         assertOrder(asList(libreoffice, textToPdf), asList(libreoffice));
         assertOrder(asList(textToPdf, libreoffice), asList(libreoffice));
 
         // * If multiple transforms with the same priority can support the same size, the one with the highest size
-        //   limit (or no limit) is used.
+        // limit (or no limit) is used.
         // * Transforms with a higher priority (lower numerically) are used up to their size limit in preference to
-        //   lower priority transforms. These lower priority transforms will be used above that limit.
+        // lower priority transforms. These lower priority transforms will be used above that limit.
         // * If there are multiple transforms with the same priority and size limit, the last one defined is used to
-        //   allow extensions to override standard transforms.
+        // allow extensions to override standard transforms.
         // * In each of the above cases, it is possible for supplied transforms not to be returned from
-        //   retrieveTransformListBySize as they will never be used. However this method is currently only used
-        //   by (1) AbstractTransformRegistry.findTransformerName which filters out transformers that cannot support a
-        //   given size and then uses the lowest element and (2) AbstractTransformRegistry.findMaxSize and gets the last
-        //   element without filtering and returns its size limit. So there are opportunities to change the code so that
-        //   it does not actually have to remove transformers that will not be used.
+        // retrieveTransformListBySize as they will never be used. However this method is currently only used
+        // by (1) AbstractTransformRegistry.findTransformerName which filters out transformers that cannot support a
+        // given size and then uses the lowest element and (2) AbstractTransformRegistry.findMaxSize and gets the last
+        // element without filtering and returns its size limit. So there are opportunities to change the code so that
+        // it does not actually have to remove transformers that will not be used.
 
         // Test transforms
-        SupportedTransform     p45  = new SupportedTransform(    "p45",  emptySet(),  -1, 45);
-        SupportedTransform     p50  = new SupportedTransform(    "p50",  emptySet(),  -1, 50);
-        SupportedTransform     p55  = new SupportedTransform(    "p55",  emptySet(),  -1, 55);
-        SupportedTransform s100p45  = new SupportedTransform("s100p45",  emptySet(), 100, 45);
-        SupportedTransform s100p50  = new SupportedTransform("s100p50",  emptySet(), 100, 50);
-        SupportedTransform s100p55  = new SupportedTransform("s100p55",  emptySet(), 100, 55);
-        SupportedTransform s200p50  = new SupportedTransform("s200p50",  emptySet(), 200, 50);
+        SupportedTransform p45 = new SupportedTransform("p45", emptySet(), -1, 45);
+        SupportedTransform p50 = new SupportedTransform("p50", emptySet(), -1, 50);
+        SupportedTransform p55 = new SupportedTransform("p55", emptySet(), -1, 55);
+        SupportedTransform s100p45 = new SupportedTransform("s100p45", emptySet(), 100, 45);
+        SupportedTransform s100p50 = new SupportedTransform("s100p50", emptySet(), 100, 50);
+        SupportedTransform s100p55 = new SupportedTransform("s100p55", emptySet(), 100, 55);
+        SupportedTransform s200p50 = new SupportedTransform("s200p50", emptySet(), 200, 50);
         SupportedTransform s200p50b = new SupportedTransform("s200p50b", emptySet(), 200, 50);
-        SupportedTransform s200p55  = new SupportedTransform("s200p55",  emptySet(), 200, 55);
-        SupportedTransform s300p45  = new SupportedTransform("s300p45",  emptySet(), 300, 45);
-        SupportedTransform s300p50  = new SupportedTransform("s300p50",  emptySet(), 300, 50);
-        SupportedTransform s300p55  = new SupportedTransform("s300p55",  emptySet(), 300, 55);
+        SupportedTransform s200p55 = new SupportedTransform("s200p55", emptySet(), 200, 55);
+        SupportedTransform s300p45 = new SupportedTransform("s300p45", emptySet(), 300, 45);
+        SupportedTransform s300p50 = new SupportedTransform("s300p50", emptySet(), 300, 50);
+        SupportedTransform s300p55 = new SupportedTransform("s300p55", emptySet(), 300, 55);
 
         // Just considers the priority
         assertOrder(asList(p50), asList(p50));
@@ -125,8 +128,8 @@ public class TransformRegistryHelperTest
     {
         AtomicInteger transformerCount = new AtomicInteger(0);
         TransformCache data = new TransformCache();
-        transformsInLoadOrder.forEach(t->data.appendTransform("text/plain", "application/pdf", t,
-                "transformer"+transformerCount.getAndIncrement(), null));
+        transformsInLoadOrder.forEach(t -> data.appendTransform("text/plain", "application/pdf", t,
+                "transformer" + transformerCount.getAndIncrement(), null));
 
         List<SupportedTransform> supportedTransforms = retrieveTransformListBySize(data,
                 "text/plain", "application/pdf", null, null);
@@ -160,8 +163,7 @@ public class TransformRegistryHelperTest
     // Similar to the method in AbstractTransformRegistry
     private long findMaxSize(List<SupportedTransform> supportedTransforms)
     {
-        return supportedTransforms.isEmpty() ? 0 :
-                supportedTransforms.get(supportedTransforms.size() - 1).getMaxSourceSizeBytes();
+        return supportedTransforms.isEmpty() ? 0 : supportedTransforms.get(supportedTransforms.size() - 1).getMaxSourceSizeBytes();
     }
 
     @Test
@@ -169,8 +171,7 @@ public class TransformRegistryHelperTest
     {
         TransformCache data = new TransformCache();
 
-        assertThrows(TransformException.class, () ->
-        {
+        assertThrows(TransformException.class, () -> {
             retrieveTransformListBySize(data, null, "application/pdf", null, null);
         });
     }
@@ -180,8 +181,7 @@ public class TransformRegistryHelperTest
     {
         TransformCache data = new TransformCache();
 
-        assertThrows(TransformException.class, () ->
-        {
+        assertThrows(TransformException.class, () -> {
             retrieveTransformListBySize(data, "text/plain", null, null, null);
         });
     }
@@ -192,10 +192,9 @@ public class TransformRegistryHelperTest
         // Almost identical to buildTransformListTargetMimeTypeNullErrorTest
         TransformCache data = new TransformCache();
 
-        assertThrows(TransformException.class, () ->
-        {
+        assertThrows(TransformException.class, () -> {
             retrieveTransformListBySize(data, "text/plain", null,
-                new HashMap<>(ImmutableMap.of(TIMEOUT, "1234")), null);
+                    new HashMap<>(ImmutableMap.of(TIMEOUT, "1234")), null);
         });
     }
 
@@ -205,10 +204,9 @@ public class TransformRegistryHelperTest
         // Almost identical to buildTransformListTargetMimeTypeNullErrorTest
         TransformCache data = new TransformCache();
 
-        assertThrows(TransformException.class, () ->
-        {
+        assertThrows(TransformException.class, () -> {
             retrieveTransformListBySize(data, "text/plain", null,
-                new HashMap<>(ImmutableMap.of(SOURCE_ENCODING, "UTF-8")), null);
+                    new HashMap<>(ImmutableMap.of(SOURCE_ENCODING, "UTF-8")), null);
         });
     }
 }

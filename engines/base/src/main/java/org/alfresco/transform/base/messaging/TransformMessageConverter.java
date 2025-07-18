@@ -27,11 +27,13 @@
 
 package org.alfresco.transform.base.messaging;
 
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Session;
+
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.ImmutableMap;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
@@ -39,13 +41,11 @@ import org.springframework.jms.support.converter.MessageType;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
-import jakarta.jms.JMSException;
-import jakarta.jms.Message;
-import jakarta.jms.Session;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
 
 /**
- * Copied from the t-router. We would need to create a common dependency between t-engine base and t-router that
- * knows about jms to remove this duplication.
+ * Copied from the t-router. We would need to create a common dependency between t-engine base and t-router that knows about jms to remove this duplication.
  *
  * @author Cezar Leahu
  */
@@ -53,16 +53,13 @@ import jakarta.jms.Session;
 public class TransformMessageConverter implements MessageConverter
 {
     private static final MappingJackson2MessageConverter converter;
-    private static final JavaType TRANSFORM_REQUEST_TYPE =
-        TypeFactory.defaultInstance().constructType(TransformRequest.class);
+    private static final JavaType TRANSFORM_REQUEST_TYPE = TypeFactory.defaultInstance().constructType(TransformRequest.class);
 
     static
     {
-        converter = new MappingJackson2MessageConverter()
-        {
+        converter = new MappingJackson2MessageConverter() {
             @Override
-            @NonNull
-            protected JavaType getJavaTypeForMessage(final Message message) throws JMSException
+            @NonNull protected JavaType getJavaTypeForMessage(final Message message) throws JMSException
             {
                 if (message.getStringProperty("_type") == null)
                 {
@@ -74,23 +71,20 @@ public class TransformMessageConverter implements MessageConverter
         converter.setTargetType(MessageType.BYTES);
         converter.setTypeIdPropertyName("_type");
         converter.setTypeIdMappings(ImmutableMap.of(
-            TransformRequest.class.getName(), TransformRequest.class,
-            TransformReply.class.getName(), TransformReply.class)
-        );
+                TransformRequest.class.getName(), TransformRequest.class,
+                TransformReply.class.getName(), TransformReply.class));
     }
 
     @Override
-    @NonNull
-    public Message toMessage(
-        @NonNull final Object object,
-        @NonNull final Session session) throws JMSException, MessageConversionException
+    @NonNull public Message toMessage(
+            @NonNull final Object object,
+            @NonNull final Session session) throws JMSException, MessageConversionException
     {
         return converter.toMessage(object, session);
     }
 
     @Override
-    @NonNull
-    public Object fromMessage(@NonNull final Message message) throws JMSException
+    @NonNull public Object fromMessage(@NonNull final Message message) throws JMSException
     {
         return converter.fromMessage(message);
     }

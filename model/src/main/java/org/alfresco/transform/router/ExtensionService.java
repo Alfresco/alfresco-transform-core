@@ -28,6 +28,5 @@ package org.alfresco.transform.router;
 public class ExtensionService extends org.alfresco.transform.common.ExtensionService
 {
     private ExtensionService()
-    {
-    }
+    {}
 }

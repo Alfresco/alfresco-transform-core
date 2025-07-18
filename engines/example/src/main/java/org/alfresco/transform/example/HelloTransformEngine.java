@@ -27,12 +27,13 @@
 package org.alfresco.transform.example;
 
 import com.google.common.collect.ImmutableMap;
-import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.config.reader.TransformConfigResourceReader;
-import org.alfresco.transform.config.TransformConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformEngine;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 
 @Component
 public class HelloTransformEngine implements TransformEngine
@@ -49,7 +50,7 @@ public class HelloTransformEngine implements TransformEngine
     @Override
     public String getStartupMessage()
     {
-        return "Startup "+getTransformEngineName()+"\nNo 3rd party licenses";
+        return "Startup " + getTransformEngineName() + "\nNo 3rd party licenses";
     }
 
     @Override
@@ -62,7 +63,7 @@ public class HelloTransformEngine implements TransformEngine
     public ProbeTransform getProbeTransform()
     {
         return new ProbeTransform("probe.txt", "text/plain", "text/plain",
-            ImmutableMap.of("sourceEncoding", "UTF-8", "language", "English"),
-            11, 10, 150, 1024, 1, 60 * 2);
+                ImmutableMap.of("sourceEncoding", "UTF-8", "language", "English"),
+                11, 10, 150, 1024, 1, 60 * 2);
     }
 }

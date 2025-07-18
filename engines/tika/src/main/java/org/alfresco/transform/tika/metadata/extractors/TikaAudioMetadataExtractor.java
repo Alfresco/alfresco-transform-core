@@ -26,7 +26,13 @@
  */
 package org.alfresco.transform.tika.metadata.extractors;
 
-import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
+import static org.alfresco.transform.tika.transformers.Tika.readTikaConfig;
+
+import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Map;
+
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
@@ -40,19 +46,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Map;
-
-import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
-import static org.alfresco.transform.tika.transformers.Tika.readTikaConfig;
+import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
 
 /**
- * A Metadata Extractor which makes use of the Apache Tika Audio Parsers to extract metadata from  media files.
- * For backwards compatibility reasons, this doesn't handle the MP3 format, which has its own dedicated extractor
- * in {@link MP3MetadataExtractor}
+ * A Metadata Extractor which makes use of the Apache Tika Audio Parsers to extract metadata from media files. For backwards compatibility reasons, this doesn't handle the MP3 format, which has its own dedicated extractor in {@link MP3MetadataExtractor}
  *
- * Configuration:   (see TikaAudioMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
+ * Configuration: (see TikaAudioMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
  *
  * <pre>
  *   <b>author:</b>                 --      cm:author
@@ -75,7 +74,7 @@ public class TikaAudioMetadataExtractor extends AbstractTikaMetadataExtractorEmb
     private static final Logger logger = LoggerFactory.getLogger(TikaAudioMetadataExtractor.class);
 
     // The Audio related parsers we use
-    private static final Parser[] parsers = new Parser[] {
+    private static final Parser[] parsers = new Parser[]{
             new VorbisParser(),
             new FlacParser(),
             new MP4Parser()
@@ -102,7 +101,7 @@ public class TikaAudioMetadataExtractor extends AbstractTikaMetadataExtractorEmb
 
     @Override
     protected Map<String, Serializable> extractSpecific(Metadata metadata,
-                                                        Map<String, Serializable> properties, Map<String,String> headers)
+            Map<String, Serializable> properties, Map<String, String> headers)
     {
         // Most things can go with the default Tika -> Alfresco Mapping
         // Handle the few special cases here
@@ -124,21 +123,20 @@ public class TikaAudioMetadataExtractor extends AbstractTikaMetadataExtractorEmb
     private Serializable generateReleaseDate(Metadata metadata)
     {
         String date = metadata.get(XMPDM.RELEASE_DATE);
-        if(date == null || date.length() == 0)
+        if (date == null || date.length() == 0)
         {
             return null;
         }
 
         // Is it just a year?
-        if(date.matches("\\d\\d\\d\\d"))
+        if (date.matches("\\d\\d\\d\\d"))
         {
             // Just a year, we need a full date
             // Go for the 1st of the 1st
             Calendar c = Calendar.getInstance();
             c.set(
                     Integer.parseInt(date), Calendar.JANUARY, 1,
-                    0, 0, 0
-            );
+                    0, 0, 0);
             c.set(Calendar.MILLISECOND, 0);
             return c.getTime();
         }
@@ -150,8 +148,9 @@ public class TikaAudioMetadataExtractor extends AbstractTikaMetadataExtractorEmb
     /**
      * Generate the description
      *
-     * @param metadata     the metadata extracted from the file
-     * @return          the description
+     * @param metadata
+     *            the metadata extracted from the file
+     * @return the description
      */
     private String generateDescription(Metadata metadata)
     {

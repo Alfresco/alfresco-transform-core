@@ -26,11 +26,8 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
+import static org.alfresco.transform.common.RequestParamMap.TARGET_ENCODING;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -45,8 +42,12 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.util.Map;
 
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
-import static org.alfresco.transform.common.RequestParamMap.TARGET_ENCODING;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 
 /**
  * Converts any textual format to plain text.
@@ -72,16 +73,13 @@ public class StringExtractingContentTransformer implements CustomTransformerFile
     }
 
     /**
-     * Text to text conversions are done directly using the content reader and writer string
-     * manipulation methods.
+     * Text to text conversions are done directly using the content reader and writer string manipulation methods.
      * <p>
-     * Extraction of text from binary content attempts to take the possible character
-     * encoding into account.  The text produced from this will, if the encoding was correct,
-     * be unformatted but valid.
+     * Extraction of text from binary content attempts to take the possible character encoding into account. The text produced from this will, if the encoding was correct, be unformatted but valid.
      */
     @Override
     public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> transformOptions,
-                          final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
+            final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
     {
         String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
         String targetEncoding = transformOptions.get(TARGET_ENCODING);
@@ -89,7 +87,7 @@ public class StringExtractingContentTransformer implements CustomTransformerFile
         if (logger.isDebugEnabled())
         {
             logger.debug("Performing text to text transform with sourceEncoding=" + sourceEncoding
-                         + " targetEncoding=" + targetEncoding);
+                    + " targetEncoding=" + targetEncoding);
         }
 
         Reader charReader = null;
@@ -100,26 +98,26 @@ public class StringExtractingContentTransformer implements CustomTransformerFile
             if (sourceEncoding == null)
             {
                 charReader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(sourceFile)));
+                        new InputStreamReader(new FileInputStream(sourceFile)));
             }
             else
             {
                 checkEncodingParameter(sourceEncoding, SOURCE_ENCODING);
                 charReader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(sourceFile), sourceEncoding));
+                        new InputStreamReader(new FileInputStream(sourceFile), sourceEncoding));
             }
 
             // Build writer
             if (targetEncoding == null)
             {
                 charWriter = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(targetFile)));
+                        new OutputStreamWriter(new FileOutputStream(targetFile)));
             }
             else
             {
                 checkEncodingParameter(targetEncoding, TARGET_ENCODING);
                 charWriter = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(targetFile), targetEncoding));
+                        new OutputStreamWriter(new FileOutputStream(targetFile), targetEncoding));
             }
 
             // copy from the one to the other
@@ -137,11 +135,25 @@ public class StringExtractingContentTransformer implements CustomTransformerFile
         {
             if (charReader != null)
             {
-                try { charReader.close(); } catch (Throwable e) { logger.error("Failed to close charReader", e); }
+                try
+                {
+                    charReader.close();
+                }
+                catch (Throwable e)
+                {
+                    logger.error("Failed to close charReader", e);
+                }
             }
             if (charWriter != null)
             {
-                try { charWriter.close(); } catch (Throwable e) { logger.error("Failed to close charWriter", e); }
+                try
+                {
+                    charWriter.close();
+                }
+                catch (Throwable e)
+                {
+                    logger.error("Failed to close charWriter", e);
+                }
             }
         }
         // done
@@ -154,13 +166,13 @@ public class StringExtractingContentTransformer implements CustomTransformerFile
             if (!Charset.isSupported(encoding))
             {
                 throw new IllegalArgumentException(
-                    paramterName + "=" + encoding + " is not supported by the JVM.");
+                        paramterName + "=" + encoding + " is not supported by the JVM.");
             }
         }
         catch (IllegalCharsetNameException e)
         {
             throw new IllegalArgumentException(
-                paramterName + "=" + encoding + " is not a valid encoding.");
+                    paramterName + "=" + encoding + " is not a valid encoding.");
         }
     }
 }

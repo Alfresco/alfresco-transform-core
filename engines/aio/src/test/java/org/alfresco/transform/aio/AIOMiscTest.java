@@ -32,5 +32,4 @@ import org.alfresco.transform.misc.MiscTest;
  * Test Misc functionality in All-In-One.
  */
 public class AIOMiscTest extends MiscTest
-{
-}
+{}

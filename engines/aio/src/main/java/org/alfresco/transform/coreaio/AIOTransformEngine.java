@@ -26,19 +26,20 @@
  */
 package org.alfresco.transform.coreaio;
 
-import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.config.TransformConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import static org.alfresco.transform.base.logging.StandardMessages.COMMUNITY_LICENCE;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.alfresco.transform.base.logging.StandardMessages.COMMUNITY_LICENCE;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformEngine;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.config.TransformConfig;
 
 @Component
 public class AIOTransformEngine implements TransformEngine
@@ -62,7 +63,7 @@ public class AIOTransformEngine implements TransformEngine
             message = transformEngines.stream()
                     .filter(transformEngine -> transformEngine != this)
                     .map(transformEngine -> transformEngine.getStartupMessage())
-                    .collect( Collectors.joining("\n"));
+                    .collect(Collectors.joining("\n"));
             message = message.replace(COMMUNITY_LICENCE, "");
         }
         return COMMUNITY_LICENCE + message;

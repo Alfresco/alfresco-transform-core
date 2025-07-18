@@ -29,5 +29,4 @@ package org.alfresco.transform.aio;
 import org.alfresco.transform.pdfrenderer.PdfRendererTransformationIT;
 
 public class AIOPdfRendererIT extends PdfRendererTransformationIT
-{
-}
+{}

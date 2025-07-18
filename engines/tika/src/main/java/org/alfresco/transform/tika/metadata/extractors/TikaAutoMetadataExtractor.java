@@ -26,7 +26,13 @@
  */
 package org.alfresco.transform.tika.metadata.extractors;
 
-import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
+import static org.alfresco.transform.tika.transformers.Tika.readTikaConfig;
+
+import java.io.Serializable;
+import java.util.Map;
+
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TIFF;
@@ -36,19 +42,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
-import java.util.Map;
-
-import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transform.tika.transformers.Tika.readTikaConfig;
+import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
 
 /**
- * A Metadata Extractor which makes use of the Apache Tika auto-detection to select the best parser to extract the
- * metadata from a document. This will be used for all files which Tika can handle, but where no other more explicit
- * extractor is defined.
+ * A Metadata Extractor which makes use of the Apache Tika auto-detection to select the best parser to extract the metadata from a document. This will be used for all files which Tika can handle, but where no other more explicit extractor is defined.
  *
- * Configuration:   (see TikaAutoMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
+ * Configuration: (see TikaAutoMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
  *
  * <pre>
  *   <b>author:</b>                 --      cm:author
@@ -92,27 +91,21 @@ public class TikaAutoMetadataExtractor extends AbstractTikaMetadataExtractorEmbe
     }
 
     /**
-     * Because some editors use JPEG_IMAGE_HEIGHT_TAG when
-     * saving JPEG images , a more reliable source for
-     * image size are the values provided by Tika
-     * and not the exif/tiff metadata read from the file
-     * This will override the tiff:Image size
-     * which gets embedded into the alfresco node properties
-     * for jpeg files that contain such exif information
+     * Because some editors use JPEG_IMAGE_HEIGHT_TAG when saving JPEG images , a more reliable source for image size are the values provided by Tika and not the exif/tiff metadata read from the file This will override the tiff:Image size which gets embedded into the alfresco node properties for jpeg files that contain such exif information
      */
     @Override
     protected Map<String, Serializable> extractSpecific(Metadata metadata,
-                                                        Map<String, Serializable> properties, Map<String,String> headers)
+            Map<String, Serializable> properties, Map<String, String> headers)
     {
         if (MIMETYPE_IMAGE_JPEG.equals(metadata.get(Metadata.CONTENT_TYPE)))
         {
-            //check if the image has exif information
+            // check if the image has exif information
             if (metadata.get(EXIF_IMAGE_WIDTH_TAG) != null
-                && metadata.get(EXIF_IMAGE_HEIGHT_TAG) != null
-                && metadata.get(COMPRESSION_TAG) != null)
+                    && metadata.get(EXIF_IMAGE_HEIGHT_TAG) != null
+                    && metadata.get(COMPRESSION_TAG) != null)
             {
-                //replace the exif size properties that will be embedded in the node with
-                //the guessed dimensions from Tika
+                // replace the exif size properties that will be embedded in the node with
+                // the guessed dimensions from Tika
                 putRawValue(TIFF.IMAGE_LENGTH.getName(), extractSize(metadata.get(EXIF_IMAGE_HEIGHT_TAG)), properties);
                 putRawValue(TIFF.IMAGE_WIDTH.getName(), extractSize(metadata.get(EXIF_IMAGE_WIDTH_TAG)), properties);
                 putRawValue(JPEG_IMAGE_HEIGHT_TAG, metadata.get(EXIF_IMAGE_HEIGHT_TAG), properties);
@@ -123,18 +116,18 @@ public class TikaAutoMetadataExtractor extends AbstractTikaMetadataExtractorEmbe
     }
 
     /**
-     * Exif metadata for size also returns the string "pixels"
-     * after the number value , this function will
-     * stop at the first non digit character found in the text
-     * @param sizeText string text
+     * Exif metadata for size also returns the string "pixels" after the number value , this function will stop at the first non digit character found in the text
+     * 
+     * @param sizeText
+     *            string text
      * @return the size value
      */
     private String extractSize(String sizeText)
     {
         StringBuilder sizeValue = new StringBuilder();
-        for(char c : sizeText.toCharArray())
+        for (char c : sizeText.toCharArray())
         {
-            if(Character.isDigit(c))
+            if (Character.isDigit(c))
             {
                 sizeValue.append(c);
             }

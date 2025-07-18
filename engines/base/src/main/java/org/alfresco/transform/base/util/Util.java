@@ -29,13 +29,13 @@ package org.alfresco.transform.base.util;
 public class Util
 {
     private Util()
-    {
-    }
+    {}
 
     /**
      * Safely converts a {@link String} to an {@link Integer}
      *
-     * @param param String to be converted
+     * @param param
+     *            String to be converted
      * @return Null if param is null or converted value as {@link Integer}
      */
     public static Integer stringToInteger(final String param)
@@ -46,7 +46,8 @@ public class Util
     /**
      * Safely converts a {@link String} to a {@link Boolean}
      *
-     * @param param String to be converted
+     * @param param
+     *            String to be converted
      * @return Null if param is null or converted value as {@link Boolean}
      */
     public static Boolean stringToBoolean(final String param)
@@ -57,7 +58,8 @@ public class Util
     /**
      * Safely converts a {@link String} to a {@link Long}
      *
-     * @param param String to be converted
+     * @param param
+     *            String to be converted
      * @return Null if param is null or converted value as {@link Boolean}
      */
     public static Long stringToLong(final String param)

@@ -22,9 +22,8 @@
 package org.alfresco.transform.registry;
 
 /**
- * Wraps an object so that we know where it was read from. The equals() and hashcode() are that of the wrapped object
- * so it is still possible do set operations.
-  */
+ * Wraps an object so that we know where it was read from. The equals() and hashcode() are that of the wrapped object so it is still possible do set operations.
+ */
 public class Origin<T>
 {
     final T t;
@@ -42,6 +41,7 @@ public class Origin<T>
     {
         return t;
     }
+
     public String getBaseUrl()
     {
         return baseUrl;
@@ -52,4 +52,3 @@ public class Origin<T>
         return readFrom;
     }
 }
-

@@ -26,19 +26,20 @@
  */
 package org.alfresco.transform.tika.metadata.extractors;
 
-import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
+
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.microsoft.ooxml.OOXMLParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
+import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
 
 /**
  * POI-based metadata extractor for Office 07 documents. See http://poi.apache.org/ for information on POI.
  *
- * Configuration:   (see PoiMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
+ * Configuration: (see PoiMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
  *
  * <pre>
  *   <b>author:</b>                 --      cm:author
@@ -47,7 +48,7 @@ import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbe
  *   <b>created:</b>                --      cm:created
  *   <b>Any custom property:</b>    --      [not mapped]
  * </pre>
-
+ * 
  * @author Nick Burch
  * @author Neil McErlean
  * @author Dmitry Velichkevich

@@ -26,22 +26,25 @@
  */
 package org.alfresco.transform.base.fakes;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.config.TransformConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class FakeTransformEngineWithAllInOne extends AbstractFakeTransformEngine
 {
     @Autowired
     private FakeTransformEngineWithTwoCustomTransformers oneOfTheTransformEngines;
 
-    @Override public TransformConfig getTransformConfig()
+    @Override
+    public TransformConfig getTransformConfig()
     {
         // Has no config of its own. The combined config of the others is returned from the t-engine.
         return null;
     }
 
-    @Override public ProbeTransform getProbeTransform()
+    @Override
+    public ProbeTransform getProbeTransform()
     {
         return oneOfTheTransformEngines.getProbeTransform();
     }

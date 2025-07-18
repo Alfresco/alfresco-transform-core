@@ -25,15 +25,15 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * Base object with {@code sourceMediaType} and {@code targetMediaType}.
- * Used to identify supported transforms.
+ * Base object with {@code sourceMediaType} and {@code targetMediaType}. Used to identify supported transforms.
  */
 public class Types
 {
     String sourceMediaType;
     String targetMediaType;
 
-    protected Types() {}
+    protected Types()
+    {}
 
     public String getSourceMediaType()
     {
@@ -58,10 +58,12 @@ public class Types
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Types that = (Types) o;
-        return  Objects.equals(sourceMediaType, that.sourceMediaType) &&
+        return Objects.equals(sourceMediaType, that.sourceMediaType) &&
                 Objects.equals(targetMediaType, that.targetMediaType);
     }
 
@@ -75,8 +77,10 @@ public class Types
     public String toString()
     {
         StringJoiner sj = new StringJoiner(", ");
-        if (sourceMediaType != null) sj.add("\"sourceMediaType\": \""+sourceMediaType+'"');
-        if (targetMediaType != null) sj.add("\"targetMediaType\": \""+targetMediaType+'"');
+        if (sourceMediaType != null)
+            sj.add("\"sourceMediaType\": \"" + sourceMediaType + '"');
+        if (targetMediaType != null)
+            sj.add("\"targetMediaType\": \"" + targetMediaType + '"');
         return sj.toString();
     }
 
@@ -91,19 +95,19 @@ public class Types
 
         public T build()
         {
-            return (T)t;
+            return (T) t;
         }
 
         public B withSourceMediaType(final String sourceMediaType)
         {
             t.sourceMediaType = sourceMediaType;
-            return (B)this;
+            return (B) this;
         }
 
         public B withTargetMediaType(final String targetMediaType)
         {
             t.targetMediaType = targetMediaType;
-            return (B)this;
+            return (B) this;
         }
     }
 }

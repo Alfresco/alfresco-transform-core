@@ -21,18 +21,20 @@
  */
 package org.alfresco.transform.messages;
 
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
+
 import java.util.UUID;
 
-import org.alfresco.transform.client.model.TransformRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
+
+import org.alfresco.transform.client.model.TransformRequest;
 
 /**
  * TransformRequestValidatorTest
@@ -57,7 +59,7 @@ public class TransformRequestValidatorTest
 
         assertEquals(1, errors.getAllErrors().size());
         assertEquals("request cannot be null",
-            errors.getAllErrors().iterator().next().getDefaultMessage());
+                errors.getAllErrors().iterator().next().getDefaultMessage());
     }
 
     @Test
@@ -70,7 +72,7 @@ public class TransformRequestValidatorTest
 
         assertFalse(errors.getAllErrors().isEmpty());
         assertEquals("requestId cannot be null or empty",
-            errors.getAllErrors().iterator().next().getDefaultMessage());
+                errors.getAllErrors().iterator().next().getDefaultMessage());
     }
 
     @Test
@@ -85,7 +87,7 @@ public class TransformRequestValidatorTest
 
         assertFalse(errors.getAllErrors().isEmpty());
         assertEquals("sourceSize cannot be null or have its value smaller than 0",
-            errors.getAllErrors().iterator().next().getDefaultMessage());
+                errors.getAllErrors().iterator().next().getDefaultMessage());
     }
 
     @Test
@@ -101,7 +103,7 @@ public class TransformRequestValidatorTest
 
         assertFalse(errors.getAllErrors().isEmpty());
         assertEquals("sourceMediaType cannot be null or empty",
-            errors.getAllErrors().iterator().next().getDefaultMessage());
+                errors.getAllErrors().iterator().next().getDefaultMessage());
     }
 
     @Test
@@ -118,7 +120,7 @@ public class TransformRequestValidatorTest
 
         assertFalse(errors.getAllErrors().isEmpty());
         assertEquals("targetMediaType cannot be null or empty",
-            errors.getAllErrors().iterator().next().getDefaultMessage());
+                errors.getAllErrors().iterator().next().getDefaultMessage());
     }
 
     @Test
@@ -136,7 +138,7 @@ public class TransformRequestValidatorTest
 
         assertFalse(errors.getAllErrors().isEmpty());
         assertEquals("targetExtension cannot be null or empty",
-            errors.getAllErrors().iterator().next().getDefaultMessage());
+                errors.getAllErrors().iterator().next().getDefaultMessage());
     }
 
     @Test
@@ -155,7 +157,7 @@ public class TransformRequestValidatorTest
 
         assertFalse(errors.getAllErrors().isEmpty());
         assertEquals("clientData cannot be null or empty",
-            errors.getAllErrors().iterator().next().getDefaultMessage());
+                errors.getAllErrors().iterator().next().getDefaultMessage());
     }
 
     @Test
@@ -176,7 +178,7 @@ public class TransformRequestValidatorTest
 
         assertFalse(errors.getAllErrors().isEmpty());
         assertEquals("schema cannot be less than 0",
-            errors.getAllErrors().iterator().next().getDefaultMessage());
+                errors.getAllErrors().iterator().next().getDefaultMessage());
     }
 
     @Test

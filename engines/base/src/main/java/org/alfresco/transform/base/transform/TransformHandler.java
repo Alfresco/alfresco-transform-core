@@ -26,34 +26,18 @@
  */
 package org.alfresco.transform.base.transform;
 
-import org.alfresco.transform.base.sfs.SharedFileStoreClient;
-import org.alfresco.transform.base.messaging.TransformReplySender;
-import org.alfresco.transform.base.model.FileRefResponse;
-import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.base.registry.CustomTransformers;
-import org.alfresco.transform.client.model.InternalContext;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.common.ExtensionService;
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transform.common.TransformerDebug;
-import org.alfresco.transform.messages.TransformRequestValidator;
-import org.alfresco.transform.messages.TransformStack;
-import org.alfresco.transform.registry.TransformServiceRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.validation.DirectFieldBindingResult;
-import org.springframework.validation.Errors;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.multipart.MultipartFile;
+import static java.util.stream.Collectors.joining;
 
-import jakarta.jms.Destination;
-import jakarta.servlet.http.HttpServletRequest;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import static org.alfresco.transform.base.fs.FileManager.createAttachment;
+import static org.alfresco.transform.base.fs.FileManager.createTargetFile;
+import static org.alfresco.transform.base.fs.FileManager.getDirectAccessUrlInputStream;
+import static org.alfresco.transform.base.fs.FileManager.getMultipartFileInputStream;
+import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -66,16 +50,35 @@ import java.io.OutputStream;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import jakarta.jms.Destination;
+import jakarta.servlet.http.HttpServletRequest;
 
-import static java.util.stream.Collectors.joining;
-import static org.alfresco.transform.base.fs.FileManager.createAttachment;
-import static org.alfresco.transform.base.fs.FileManager.createTargetFile;
-import static org.alfresco.transform.base.fs.FileManager.getDirectAccessUrlInputStream;
-import static org.alfresco.transform.base.fs.FileManager.getMultipartFileInputStream;
-import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.DirectFieldBindingResult;
+import org.springframework.validation.Errors;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.multipart.MultipartFile;
+
+import org.alfresco.transform.base.messaging.TransformReplySender;
+import org.alfresco.transform.base.model.FileRefResponse;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.base.registry.CustomTransformers;
+import org.alfresco.transform.base.sfs.SharedFileStoreClient;
+import org.alfresco.transform.client.model.InternalContext;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.common.ExtensionService;
+import org.alfresco.transform.common.TransformerDebug;
+import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.messages.TransformRequestValidator;
+import org.alfresco.transform.messages.TransformStack;
+import org.alfresco.transform.registry.TransformServiceRegistry;
 
 /**
  * Handles the transform requests from either http or a message.
@@ -109,9 +112,8 @@ public class TransformHandler
         AtomicReference<ResponseEntity<Resource>> responseEntity = new AtomicReference<>();
 
         new ProcessHandler(sourceMimetype, targetMimetype, requestParameters,
-            "e" + httpRequestCount.getAndIncrement(), transformRegistry,
-            transformerDebug, probeTransform, customTransformers)
-        {
+                "e" + httpRequestCount.getAndIncrement(), transformRegistry,
+                transformerDebug, probeTransform, customTransformers) {
             @Override
             protected void init() throws IOException
             {
@@ -143,7 +145,7 @@ public class TransformHandler
             protected void sendTransformResponse(TransformManagerImpl transformManager)
             {
                 String extension = ExtensionService.getExtensionForTargetMimetype(targetMimetype, sourceMimetype);
-                responseEntity.set(createAttachment("transform."+extension, transformManager.getTargetFile()));
+                responseEntity.set(createAttachment("transform." + extension, transformManager.getTargetFile()));
             }
         }.handleTransformRequest();
 
@@ -151,12 +153,11 @@ public class TransformHandler
     }
 
     public void handleProbeRequest(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-        File sourceFile, File targetFile, ProbeTransform probeTransform)
+            File sourceFile, File targetFile, ProbeTransform probeTransform)
     {
         new ProcessHandler(sourceMimetype, targetMimetype, transformOptions,
-            "p" + httpRequestCount.getAndIncrement(), transformRegistry,
-            transformerDebug, probeTransform, customTransformers)
-        {
+                "p" + httpRequestCount.getAndIncrement(), transformRegistry,
+                transformerDebug, probeTransform, customTransformers) {
             @Override
             protected void init() throws IOException
             {
@@ -187,13 +188,12 @@ public class TransformHandler
     }
 
     public TransformReply handleMessageRequest(TransformRequest request, Long timeout, Destination replyToQueue,
-        ProbeTransform probeTransform)
+            ProbeTransform probeTransform)
     {
         TransformReply reply = createBasicTransformReply(request);
         new ProcessHandler(request.getSourceMediaType(), request.getTargetMediaType(),
-            request.getTransformRequestOptions(),"unset", transformRegistry,
-            transformerDebug, probeTransform, customTransformers)
-        {
+                request.getTransformRequestOptions(), "unset", transformRegistry,
+                transformerDebug, probeTransform, customTransformers) {
             @Override
             protected void init() throws IOException
             {
@@ -337,12 +337,12 @@ public class TransformHandler
     }
 
     private InputStream getInputStreamForHandleHttpRequest(Map<String, String> requestParameters,
-        MultipartFile sourceMultipartFile)
+            MultipartFile sourceMultipartFile)
     {
         final String directUrl = requestParameters.getOrDefault(DIRECT_ACCESS_URL, "");
         return new BufferedInputStream(directUrl.isBlank()
-            ? getMultipartFileInputStream(sourceMultipartFile)
-            : getDirectAccessUrlInputStream(directUrl));
+                ? getMultipartFileInputStream(sourceMultipartFile)
+                : getDirectAccessUrlInputStream(directUrl));
     }
 
     private InputStream getInputStreamForHandleProbeRequest(File sourceFile)
@@ -419,8 +419,8 @@ public class TransformHandler
         {
             e = e.getCause();
             sb.append(", cause ")
-              .append(e.getClass().getSimpleName()).append(": ")
-              .append(e.getMessage());
+                    .append(e.getClass().getSimpleName()).append(": ")
+                    .append(e.getMessage());
         }
 
         return sb.toString();

@@ -47,11 +47,13 @@ public class SourceTarget
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         SourceTarget that = (SourceTarget) o;
         return Objects.equals(source, that.source) &&
-               Objects.equals(target, that.target);
+                Objects.equals(target, that.target);
     }
 
     @Override

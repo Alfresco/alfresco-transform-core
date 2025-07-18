@@ -31,8 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TransformCache
 {
     // Looks up supported transform routes given source to target media types.
-    private final Map<String, Map<String, List<SupportedTransform>>> transforms =
-        new ConcurrentHashMap<>();
+    private final Map<String, Map<String, List<SupportedTransform>>> transforms = new ConcurrentHashMap<>();
 
     // Looks up coreVersion given the transformer name
     private final Map<String, String> coreVersions = new ConcurrentHashMap<>();
@@ -41,8 +40,7 @@ public class TransformCache
     // Looks up a sorted list of transform routes, for a rendition (if the name is supplied) and the source
     // media type. Unlike a lookup on the transforms map above, processing of the transform options and priorities
     // will have already been done if cached.
-    private final Map<String, Map<String, List<SupportedTransform>>> cachedSupportedTransformList =
-        new ConcurrentHashMap<>();
+    private final Map<String, Map<String, List<SupportedTransform>>> cachedSupportedTransformList = new ConcurrentHashMap<>();
 
     protected int transformerCount = 0;
     protected int transformCount = 0;
@@ -53,13 +51,13 @@ public class TransformCache
     }
 
     public void appendTransform(final String sourceMimetype,
-                                final String targetMimetype, final SupportedTransform transform,
-                                String transformerName, String coreVersion)
+            final String targetMimetype, final SupportedTransform transform,
+            String transformerName, String coreVersion)
     {
         transforms
-            .computeIfAbsent(sourceMimetype, k -> new ConcurrentHashMap<>())
-            .computeIfAbsent(targetMimetype, k -> new ArrayList<>())
-            .add(transform);
+                .computeIfAbsent(sourceMimetype, k -> new ConcurrentHashMap<>())
+                .computeIfAbsent(targetMimetype, k -> new ArrayList<>())
+                .add(transform);
         coreVersions.put(transformerName, coreVersion == null ? "" : coreVersion);
         transformCount++;
     }
@@ -75,27 +73,27 @@ public class TransformCache
     }
 
     public void cache(final String renditionName, final String sourceMimetype,
-        final List<SupportedTransform> transformListBySize)
+            final List<SupportedTransform> transformListBySize)
     {
         cachedSupportedTransformList
-            .get(renditionName)
-            .put(sourceMimetype, transformListBySize);
+                .get(renditionName)
+                .put(sourceMimetype, transformListBySize);
     }
 
     public List<SupportedTransform> retrieveCached(final String renditionName,
-        final String sourceMimetype)
+            final String sourceMimetype)
     {
         return cachedSupportedTransformList
-            .computeIfAbsent(renditionName, k -> new ConcurrentHashMap<>())
-            .get(sourceMimetype);
+                .computeIfAbsent(renditionName, k -> new ConcurrentHashMap<>())
+                .get(sourceMimetype);
     }
 
     @Override
     public String toString()
     {
         return transformerCount == 0 && transformCount == 0
-               ? ""
-               : "(transformers: " + transformerCount + " transforms: " + transformCount + ")";
+                ? ""
+                : "(transformers: " + transformerCount + " transforms: " + transformCount + ")";
     }
 
     public String getCoreVersion(String transformerName)

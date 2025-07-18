@@ -31,8 +31,7 @@ public class TransformOptionValue extends AbstractTransformOption
     private String name;
 
     public TransformOptionValue()
-    {
-    }
+    {}
 
     public TransformOptionValue(boolean required, String name)
     {
@@ -53,9 +52,12 @@ public class TransformOptionValue extends AbstractTransformOption
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
         TransformOptionValue that = (TransformOptionValue) o;
         return Objects.equals(name, that.name);
     }
@@ -70,7 +72,7 @@ public class TransformOptionValue extends AbstractTransformOption
     public String toString()
     {
         return "TransformOptionValue{" +
-               "name='" + name + '\'' +
-               '}';
+                "name='" + name + '\'' +
+                '}';
     }
 }

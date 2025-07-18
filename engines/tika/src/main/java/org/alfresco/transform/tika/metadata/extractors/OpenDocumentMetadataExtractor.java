@@ -26,7 +26,17 @@
  */
 package org.alfresco.transform.tika.metadata.extractors;
 
-import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
+import static org.apache.tika.metadata.DublinCore.NAMESPACE_URI_DC;
+
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
@@ -42,20 +52,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.xml.sax.ContentHandler;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
-import static org.apache.tika.metadata.DublinCore.NAMESPACE_URI_DC;
+import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
 
 /**
  * {@code "application/vnd.oasis.opendocument..."} and {@code "applicationvnd.oasis.opendocument..."} metadata extractor.
  *
- * Configuration:   (see OpenDocumentMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
+ * Configuration: (see OpenDocumentMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
  *
  * <pre>
  *   <b>creationDate:</b>           --      cm:created
@@ -120,7 +122,7 @@ public class OpenDocumentMetadataExtractor extends AbstractTikaMetadataExtractor
 
     @Override
     protected Map<String, Serializable> extractSpecific(Metadata metadata,
-                                                        Map<String, Serializable> properties, Map<String, String> headers)
+            Map<String, Serializable> properties, Map<String, String> headers)
     {
         putRawValue(KEY_CREATION_DATE, getDateOrNull(metadata.get(TikaCoreProperties.CREATED)), properties);
         final String creator = getCreator(metadata);
@@ -167,8 +169,7 @@ public class OpenDocumentMetadataExtractor extends AbstractTikaMetadataExtractor
                 return dateFormatter.parseDateTime(dateString).toDate();
             }
             catch (IllegalArgumentException ignore)
-            {
-            }
+            {}
         }
         return null;
     }

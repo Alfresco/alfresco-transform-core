@@ -26,18 +26,19 @@
  */
 package org.alfresco.transform.imagemagick;
 
-import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.config.reader.TransformConfigResourceReader;
-import org.alfresco.transform.config.TransformConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.Collections;
-
 import static org.alfresco.transform.base.logging.StandardMessages.COMMUNITY_LICENCE;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
+
+import java.util.Collections;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformEngine;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.reader.TransformConfigResourceReader;
 
 @Component
 public class ImageMagickTransformEngine implements TransformEngine
@@ -69,6 +70,6 @@ public class ImageMagickTransformEngine implements TransformEngine
     public ProbeTransform getProbeTransform()
     {
         return new ProbeTransform("probe.jpg", MIMETYPE_IMAGE_JPEG, MIMETYPE_IMAGE_PNG, Collections.emptyMap(),
-            25383, 1024, 150, 1024, 60 * 15 + 1, 60 * 15);
+                25383, 1024, 150, 1024, 60 * 15 + 1, 60 * 15);
     }
 }

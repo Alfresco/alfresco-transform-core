@@ -21,26 +21,26 @@
  */
 package org.alfresco.transform.registry;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import org.alfresco.transform.config.AddSupported;
-import org.alfresco.transform.config.SupportedDefaults;
-import org.alfresco.transform.config.OverrideSupported;
-import org.alfresco.transform.config.RemoveSupported;
-import org.alfresco.transform.config.SupportedSourceAndTarget;
-import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.config.Transformer;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.transform.config.AddSupported;
+import org.alfresco.transform.config.OverrideSupported;
+import org.alfresco.transform.config.RemoveSupported;
+import org.alfresco.transform.config.SupportedDefaults;
+import org.alfresco.transform.config.SupportedSourceAndTarget;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.Transformer;
 
 /**
- * Tests the json elements: {@code removeTransformers}, {@code addSupported}, {@code removeSupported},
- * {@code overrideSupported} and {@code supportedDefaults}.
+ * Tests the json elements: {@code removeTransformers}, {@code addSupported}, {@code removeSupported}, {@code overrideSupported} and {@code supportedDefaults}.
  */
 public class OverrideTransformConfigTests
 {
@@ -200,20 +200,20 @@ public class OverrideTransformConfigTests
 
         final TransformConfig thirdConfig = TransformConfig.builder()
                 .withSupportedDefaults(ImmutableSet.of(
-                        default_1A_200,  // 0: transformer and source media type default
-                        default_2A__45,  // 0: transformer and source media type default
-                        default_3_400,   // 1: transformer default
-                        default_B_400,   // 2: source media type default
-                        default_B_500,   // 2: source media type default - overrides the previous value 400 defined in the same config
+                        default_1A_200, // 0: transformer and source media type default
+                        default_2A__45, // 0: transformer and source media type default
+                        default_3_400, // 1: transformer default
+                        default_B_400, // 2: source media type default
+                        default_B_500, // 2: source media type default - overrides the previous value 400 defined in the same config
                         default__500_50, // 3: system wide default - totally overridden by the next lines.
-                        default__600,    // 3: system wide default
-                        default___50,    // 3: system wide default (combined with the other system default)
-                        default___45))   // 3: system wide default - overrides the value 45 defined in the same config
+                        default__600, // 3: system wide default
+                        default___50, // 3: system wide default (combined with the other system default)
+                        default___45)) // 3: system wide default - overrides the value 45 defined in the same config
                 .build();
 
         final TransformConfig fourthConfig = TransformConfig.builder()
                 .withSupportedDefaults(ImmutableSet.of(
-                        SupportedDefaults.builder()  // 3: system wide default
+                        SupportedDefaults.builder() // 3: system wide default
                                 .withMaxSourceSizeBytes(-1L)
                                 .withPriority(45)
                                 .build()))
@@ -221,15 +221,14 @@ public class OverrideTransformConfigTests
 
         final TransformConfig fifthConfig = TransformConfig.builder()
                 .withSupportedDefaults(ImmutableSet.of(
-                        SupportedDefaults.builder()  // 3: system wide default (reset to the default, so removed)
+                        SupportedDefaults.builder() // 3: system wide default (reset to the default, so removed)
                                 .withPriority(50)
                                 .build(),
-                        SupportedDefaults.builder()  // Invalid as neither priority nor maxSourceSizeBytes are set
+                        SupportedDefaults.builder() // Invalid as neither priority nor maxSourceSizeBytes are set
                                 .withTransformerName("9")
                                 .withSourceMediaType("mimetype/z")
                                 .build()))
                 .build();
-
 
         config.addTransformConfig(firstConfig, READ_FROM_A, BASE_URL_A, registry);
         TransformConfig resultConfig = config.buildTransformConfig();
@@ -279,7 +278,7 @@ public class OverrideTransformConfigTests
         final TransformConfig secondConfig = TransformConfig.builder()
                 .withRemoveSupported(ImmutableSet.of(
                         RemoveSupported.builder()
-                                .withTransformerName("1")             // c -> d does not exist
+                                .withTransformerName("1") // c -> d does not exist
                                 .withSourceMediaType("mimetype/c")
                                 .withTargetMediaType("mimetype/d")
                                 .build(),
@@ -288,20 +287,20 @@ public class OverrideTransformConfigTests
                                 .withSourceMediaType("mimetype/a")
                                 .withTargetMediaType("mimetype/b")
                                 .build(),
-                        RemoveSupported.builder()                     // transformer does not exist
+                        RemoveSupported.builder() // transformer does not exist
                                 .withTransformerName("bad")
                                 .withSourceMediaType("mimetype/a")
                                 .withTargetMediaType("mimetype/d")
                                 .build(),
-                        RemoveSupported.builder()                     // transform name not set
+                        RemoveSupported.builder() // transform name not set
                                 .withSourceMediaType("mimetype/a")
                                 .withTargetMediaType("mimetype/d")
                                 .build(),
-                        RemoveSupported.builder()                     // source type not set
+                        RemoveSupported.builder() // source type not set
                                 .withTransformerName("1")
                                 .withTargetMediaType("mimetype/d")
                                 .build(),
-                        RemoveSupported.builder()                     // target type not set
+                        RemoveSupported.builder() // target type not set
                                 .withTransformerName("1")
                                 .withSourceMediaType("mimetype/a")
                                 .build()))
@@ -334,7 +333,7 @@ public class OverrideTransformConfigTests
                                 .withSourceMediaType("mimetype/c")
                                 .withTargetMediaType("mimetype/d")
                                 .build(),
-                        AddSupported.builder()                     // duplicates original
+                        AddSupported.builder() // duplicates original
                                 .withTransformerName("1")
                                 .withSourceMediaType("mimetype/a")
                                 .withTargetMediaType("mimetype/b")
@@ -347,20 +346,20 @@ public class OverrideTransformConfigTests
                                 .withPriority(44)
                                 .withMaxSourceSizeBytes(1234)
                                 .build(),
-                        AddSupported.builder()                     // transformer does not exist
+                        AddSupported.builder() // transformer does not exist
                                 .withTransformerName("bad")
                                 .withSourceMediaType("mimetype/a")
                                 .withTargetMediaType("mimetype/d")
                                 .build(),
-                        AddSupported.builder()                     // transform name not set
+                        AddSupported.builder() // transform name not set
                                 .withSourceMediaType("mimetype/a")
                                 .withTargetMediaType("mimetype/d")
                                 .build(),
-                        AddSupported.builder()                     // source type not set
+                        AddSupported.builder() // source type not set
                                 .withTransformerName("1")
                                 .withTargetMediaType("mimetype/d")
                                 .build(),
-                        AddSupported.builder()                     // target type not set
+                        AddSupported.builder() // target type not set
                                 .withTransformerName("1")
                                 .withSourceMediaType("mimetype/a")
                                 .build()))
@@ -395,29 +394,29 @@ public class OverrideTransformConfigTests
 
         final TransformConfig secondConfig = TransformConfig.builder()
                 .withOverrideSupported(ImmutableSet.of(
-                        OverrideSupported.builder()                     // does not exist
+                        OverrideSupported.builder() // does not exist
                                 .withTransformerName("1")
                                 .withSourceMediaType("mimetype/c")
                                 .withTargetMediaType("mimetype/d")
                                 .build(),
-                        OverrideSupported.builder()                     // size default -> 200 and priority default -> 100
+                        OverrideSupported.builder() // size default -> 200 and priority default -> 100
                                 .withTransformerName("1")
                                 .withSourceMediaType("mimetype/a")
                                 .withTargetMediaType("mimetype/b")
                                 .withPriority(40)
                                 .build(),
-                        OverrideSupported.builder()                     // size 100 -> 200 and change priority to default
+                        OverrideSupported.builder() // size 100 -> 200 and change priority to default
                                 .withTransformerName("1")
                                 .withSourceMediaType("mimetype/x")
                                 .withTargetMediaType("mimetype/y")
                                 .withMaxSourceSizeBytes(200)
                                 .build(),
-                        OverrideSupported.builder()                     // transformer does not exist
+                        OverrideSupported.builder() // transformer does not exist
                                 .withTransformerName("bad")
                                 .withSourceMediaType("mimetype/a")
                                 .withTargetMediaType("mimetype/d")
                                 .build()))
-                        // OverrideSupported values with missing fields are defaults, so no test values here
+                // OverrideSupported values with missing fields are defaults, so no test values here
                 .build();
 
         String expectedWarnMessage = "Unable to process \"overrideSupported\": [" +
@@ -444,7 +443,7 @@ public class OverrideTransformConfigTests
     }
 
     private void addTransformConfig(TransformConfig secondConfig, String expectedWarnMessage,
-                                    Set<SupportedSourceAndTarget> expectedSupported, String expectedToString)
+            Set<SupportedSourceAndTarget> expectedSupported, String expectedToString)
     {
         config.addTransformConfig(secondConfig, READ_FROM_B, BASE_URL_B, registry);
         TransformConfig resultConfig = config.buildTransformConfig();

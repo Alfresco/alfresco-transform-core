@@ -29,16 +29,17 @@ package org.alfresco.transformer.model;
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * TODO: Copied from org.alfresco.store.entity (alfresco-shared-file-store). To be discussed
+ *             TODO: Copied from org.alfresco.store.entity (alfresco-shared-file-store). To be discussed
  *
- * POJO that describes the ContentRefEntry response, contains {@link FileRefEntity} according to API spec
+ *             POJO that describes the ContentRefEntry response, contains {@link FileRefEntity} according to API spec
  */
 @Deprecated
 public class FileRefResponse
 {
     private FileRefEntity entry;
 
-    public FileRefResponse() {}
+    public FileRefResponse()
+    {}
 
     public FileRefResponse(FileRefEntity entry)
     {
