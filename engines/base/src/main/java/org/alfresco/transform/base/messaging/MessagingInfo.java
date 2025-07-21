@@ -52,8 +52,9 @@ public class MessagingInfo
         // For backwards-compatibility, we continue to rely on setting ACTIVEMQ_URL environment variable (see application.yaml)
         // The MessagingConfig class uses on ConditionalOnProperty (ie. activemq.url is set and not false)
 
-        // Note: as per application.yaml the broker url is appended with "?jms.watchTopicAdvisories=false". If this needs to be fully
-        // overridden then it would require explicitly setting both "spring.activemq.broker-url" *and* "activemq.url" (latter to non-false value).
+        // Note: as per application.yaml the broker url is appended with ACTIVEMQ_URL_PARAMS with default value "?jms.watchTopicAdvisories=false".
+        // If this needs to be fully overridden then it would require explicitly setting both "spring.activemq.broker-url"
+        // *and* "activemq.url" (latter to non-false value). ACTIVEMQ_URL_PARAMS value will be ignored in that case.
 
         if ((activemqUrl != null) && (!activemqUrl.equals("false")))
         {
