@@ -49,6 +49,9 @@ public class MessagingInfo
     @Value("${activemq.url:}")
     private String activemqUrl;
 
+    @Value("${spring.activemq.broker-url}")
+    private String activemqBrokerUrl;
+
     @PostConstruct
     public void init()
     {
@@ -67,5 +70,6 @@ public class MessagingInfo
         {
             logger.info("JMS client is DISABLED - ACTIVEMQ_URL is not set");
         }
+        logger.debug("spring.activemq.broker-url={}", activemqBrokerUrl);
     }
 }
