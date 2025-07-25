@@ -16,6 +16,7 @@ spring:
 
 activemq:
   url: ${ACTIVEMQ_URL:false}
+  url.params: ${ACTIVEMQ_URL_PARAMS:false}
 
 server:
   port: ${SERVER_PORT:8090}
