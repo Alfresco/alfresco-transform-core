@@ -46,6 +46,12 @@ public class MessagingInfo
     @Value("${activemq.url:}")
     private String activemqUrl;
 
+    @Value("${spring.activemq.broker-url}")
+    private String activemqBrokerUrl;
+
+    @Value("${activemq.url.params}")
+    private String activemqUrlParams;
+
     @PostConstruct
     public void init()
     {
@@ -56,7 +62,7 @@ public class MessagingInfo
         // If this needs to be fully overridden then it would require explicitly setting both "spring.activemq.broker-url"
         // *and* "activemq.url" (latter to non-false value). ACTIVEMQ_URL_PARAMS value will be ignored in that case.
 
-        if ((activemqUrl != null) && (!activemqUrl.equals("false")))
+        if (isSet(activemqUrl))
         {
             logger.info("JMS client is ENABLED - ACTIVEMQ_URL ='{}'", activemqUrl);
         }
@@ -64,5 +70,19 @@ public class MessagingInfo
         {
             logger.info("JMS client is DISABLED - ACTIVEMQ_URL is not set");
         }
+        if (isSet(activemqUrlParams))
+        {
+            logger.info("ACTIVEMQ_URL_PARAMS ='{}'", activemqUrlParams);
+        }
+        else
+        {
+            logger.info("ACTIVEMQ_URL_PARAMS is not set");
+        }
+        logger.info("spring.activemq.broker-url='{}'", activemqBrokerUrl);
+    }
+
+    private boolean isSet(String value)
+    {
+        return !"false".equals(value);
     }
 }
