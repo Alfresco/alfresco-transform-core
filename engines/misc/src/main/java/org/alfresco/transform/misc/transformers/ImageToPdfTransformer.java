@@ -135,11 +135,12 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         {
             ImageReader reader = imageReaders.next();
             // Skip the JAI TIFF reader if present (See MNT-25208)
-            if (!"com.github.jaiimageio.impl.plugins.tiff.TIFFImageReader".equals(reader.getClass().getName()))
+            if ("com.github.jaiimageio.impl.plugins.tiff.TIFFImageReader".equals(reader.getClass().getName()))
             {
-                reader.setInput(imageInputStream);
-                return reader;
+                continue;
             }
+            reader.setInput(imageInputStream);
+            return reader;
         }
         throw new IOException(String.format(INVALID_IMAGE_READER_ERROR_MESSAGE, imageName, mimetype));
     }
