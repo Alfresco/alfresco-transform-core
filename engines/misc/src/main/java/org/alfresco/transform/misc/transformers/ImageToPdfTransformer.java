@@ -134,7 +134,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         while (imageReaders.hasNext())
         {
             ImageReader reader = imageReaders.next();
-            // Skip the JAI TIFF reader if present (See MNT-25208)
+            // Only process if not the JAI TIFF reader
             if (!"com.github.jaiimageio.impl.plugins.tiff.TIFFImageReader".equals(reader.getClass().getName()))
             {
                 reader.setInput(imageInputStream);
