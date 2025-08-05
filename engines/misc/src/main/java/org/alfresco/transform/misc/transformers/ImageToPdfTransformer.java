@@ -78,7 +78,6 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
     private static final String START_PAGE_GREATER_THAN_END_PAGE_ERROR_MESSAGE = "Start page number cannot be greater than end page.";
     private static final String INVALID_OPTION_ERROR_MESSAGE = "Parameter '%s' is invalid: \"%s\" - it must be an integer.";
     private static final String INVALID_IMAGE_ERROR_MESSAGE = "Image file (%s) format (%s) not supported by ImageIO.";
-    private static final String INVALID_IMAGE_READER_ERROR_MESSAGE = "No suitable ImageReader found for image file (%s) with format (%s).";
     private static final String DEFAULT_PDF_FORMAT_STRING = "DEFAULT"; // pdf format to use when no pdf format specified
     private static final String DEFAULT_PDF_ORIENTATION_STRING = "DEFAULT";
     private static final float PDFBOX_POINTS_PER_INCH = 72.0F;
@@ -141,7 +140,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
                 return reader;
             }
         }
-        throw new IOException(String.format(INVALID_IMAGE_READER_ERROR_MESSAGE, imageName, mimetype));
+        throw new IOException(String.format(INVALID_IMAGE_ERROR_MESSAGE, imageName, mimetype));
     }
 
     private void scaleAndDrawImage(final PDDocument pdfDocument, final BufferedImage bufferedImage, final String pdfFormat, final String pdfOrientation, final Map<String, Integer> resolution)
