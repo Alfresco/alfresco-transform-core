@@ -81,6 +81,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
     private static final String DEFAULT_PDF_FORMAT_STRING = "DEFAULT"; // pdf format to use when no pdf format specified
     private static final String DEFAULT_PDF_ORIENTATION_STRING = "DEFAULT";
     private static final float PDFBOX_POINTS_PER_INCH = 72.0F;
+    private static final String JAI_TIFF_READER_CLASS = "com.github.jaiimageio.impl.plugins.tiff.TIFFImageReader";
 
     @Override
     public String getTransformerName()
@@ -134,7 +135,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         {
             ImageReader reader = imageReaders.next();
             // Only process if not the JAI TIFF reader
-            if (!"com.github.jaiimageio.impl.plugins.tiff.TIFFImageReader".equals(reader.getClass().getName()))
+            if (!JAI_TIFF_READER_CLASS.equals(reader.getClass().getName()))
             {
                 reader.setInput(imageInputStream);
                 return reader;
