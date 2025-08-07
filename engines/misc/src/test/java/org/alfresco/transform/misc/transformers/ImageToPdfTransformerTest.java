@@ -72,10 +72,11 @@ import org.mockito.MockitoAnnotations;
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.misc.util.ArgumentsCartesianProduct;
 
+@SuppressWarnings("PMD.AvoidAccessibilityAlteration")
 class ImageToPdfTransformerTest
 {
     private static final File sourceFile = loadFile("sample.gif");
-    private static final File sourceTiffFile = loadFile("sample.tiff");
+    private static final File SOURCE_TIFF_FILE = loadFile("sample.tiff");
     private static final int sourceFileWidth;
     private static final int sourceFileHeight;
 
@@ -324,9 +325,8 @@ class ImageToPdfTransformerTest
     @Test
     void testFindImageReaderForTiffFiles()
     {
-        try
+        try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(SOURCE_TIFF_FILE))
         {
-            ImageInputStream imageInputStream = ImageIO.createImageInputStream(sourceTiffFile);
             Method method = ImageToPdfTransformer.class.getDeclaredMethod(
                     "findImageReader", ImageInputStream.class, String.class, String.class);
             method.setAccessible(true);
