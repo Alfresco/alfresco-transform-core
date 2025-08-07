@@ -322,21 +322,25 @@ class ImageToPdfTransformerTest
     }
 
     @Test
-    void testFindImageReaderForTiffFiles() {
-        try {
+    void testFindImageReaderForTiffFiles()
+    {
+        try
+        {
             ImageInputStream imageInputStream = ImageIO.createImageInputStream(sourceTiffFile);
             Method method = ImageToPdfTransformer.class.getDeclaredMethod(
                     "findImageReader", ImageInputStream.class, String.class, String.class);
             method.setAccessible(true);
-            //when
+            // when
             ImageReader imageReader = (ImageReader) method.invoke(
                     transformer, imageInputStream, "sample.tiff", MIMETYPE_IMAGE_TIFF);
 
-            //then
+            // then
             assertNotNull(imageReader, "Image reader should not be null for TIFF file");
             assertEquals("com.sun.imageio.plugins.tiff.TIFFImageReader", imageReader.getClass().getName(),
                     "ImageReader should be com.sun.imageio.plugins.tiff.TIFFImageReader");
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Assertions.fail("Exception occurred: " + e.getMessage());
         }
     }
