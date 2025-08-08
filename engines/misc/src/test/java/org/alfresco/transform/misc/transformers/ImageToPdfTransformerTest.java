@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2024 Alfresco Software Limited
+ * Copyright (C) 2005 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -44,6 +44,7 @@ import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -53,9 +54,12 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -68,9 +72,11 @@ import org.mockito.MockitoAnnotations;
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.misc.util.ArgumentsCartesianProduct;
 
+@SuppressWarnings("PMD.AvoidAccessibilityAlteration")
 class ImageToPdfTransformerTest
 {
     private static final File sourceFile = loadFile("sample.gif");
+    private static final File SOURCE_TIFF_FILE = loadFile("sample.tiff");
     private static final int sourceFileWidth;
     private static final int sourceFileHeight;
 
@@ -316,6 +322,28 @@ class ImageToPdfTransformerTest
         }
     }
 
+    @Test
+    void testFindImageReaderForTiffFiles()
+    {
+        try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(SOURCE_TIFF_FILE))
+        {
+            Method method = ImageToPdfTransformer.class.getDeclaredMethod(
+                    "findImageReader", ImageInputStream.class, String.class, String.class);
+            method.setAccessible(true);
+            // when
+            ImageReader imageReader = (ImageReader) method.invoke(
+                    transformer, imageInputStream, "sample.tiff", MIMETYPE_IMAGE_TIFF);
+
+            // then
+            assertNotNull(imageReader, "Image reader should not be null for TIFF file");
+            assertEquals("com.sun.imageio.plugins.tiff.TIFFImageReader", imageReader.getClass().getName(),
+                    "ImageReader should be com.sun.imageio.plugins.tiff.TIFFImageReader");
+        }
+        catch (Exception e)
+        {
+            Assertions.fail("Exception occurred: " + e.getMessage());
+        }
+    }
     // ----------------------------------------------- Helper methods and classes -----------------------------------------------
 
     private static BiFunction<Float, Float, PDRectangle> unchangedRectangle()
