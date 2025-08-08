@@ -37,10 +37,7 @@ import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -81,7 +78,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
     private static final String DEFAULT_PDF_FORMAT_STRING = "DEFAULT"; // pdf format to use when no pdf format specified
     private static final String DEFAULT_PDF_ORIENTATION_STRING = "DEFAULT";
     private static final float PDFBOX_POINTS_PER_INCH = 72.0F;
-    private static final String JAI_TIFF_READER_CLASS = "com.github.jaiimageio.impl.plugins.tiff.TIFFImageReader";
+    private static final List<String> DENY_LIST = List.of("com.github.jaiimageio.impl.plugins.tiff.TIFFImageReader");
 
     @Override
     public String getTransformerName()
@@ -134,8 +131,8 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         while (imageReaders.hasNext())
         {
             ImageReader reader = imageReaders.next();
-            // Only process if not the JAI TIFF reader
-            if (!JAI_TIFF_READER_CLASS.equals(reader.getClass().getName()))
+            // Only process if the reader class is not in the deny list
+            if (!DENY_LIST.contains(reader.getClass().getName()))
             {
                 reader.setInput(imageInputStream);
                 return reader;
