@@ -197,7 +197,7 @@ public class ExifToolParser extends ExternalParser
         TemporaryResources tmp = new TemporaryResources();
         try
         {
-            TikaInputStream tis = TikaInputStream.get(stream, tmp);
+            TikaInputStream tis = TikaInputStream.get(stream, tmp, metadata);
 
             if (this.getSupportedTypes().contains(mediaType))
             {

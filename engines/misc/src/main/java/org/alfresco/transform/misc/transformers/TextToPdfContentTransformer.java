@@ -44,9 +44,9 @@ import java.io.PushbackInputStream;
 import java.io.Reader;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import jakarta.annotation.PostConstruct;
 
 import org.apache.fontbox.ttf.TrueTypeFont;
@@ -59,6 +59,7 @@ import org.apache.pdfbox.pdmodel.font.FontMapping;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.tools.TextToPDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -252,40 +253,23 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
 
     private static class PagedTextToPDF extends TextToPDF
     {
-        // REPO-1066: duplicating the following lines from org.apache.pdfbox.tools.TextToPDF because they made them private
-        // before the upgrade to pdfbox 2.0.8, in pdfbox 1.8, this piece of code was public in org.apache.pdfbox.pdmodel.font.PDType1Font
+        private static final PDType1Font DEFAULT_FONT = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+        private static final Map<String, PDType1Font> STANDARD_14 = Standard14Fonts.getNames().stream()
+                .collect(Collectors.toMap(a -> a, a -> new PDType1Font(Standard14Fonts.getMappedFontName(a))));
+
+        private String fontName = null;
+        private String defaultFont = null;
+
+        PagedTextToPDF()
+        {
+            super();
+            setFont(DEFAULT_FONT);
+        }
+
         static PDType1Font getStandardFont(String name)
         {
             return STANDARD_14.get(name);
         }
-
-        private static final Map<String, PDType1Font> STANDARD_14 = new HashMap<>();
-
-        static
-        {
-            STANDARD_14.put(PDType1Font.TIMES_ROMAN.getBaseFont(), PDType1Font.TIMES_ROMAN);
-            STANDARD_14.put(PDType1Font.TIMES_BOLD.getBaseFont(), PDType1Font.TIMES_BOLD);
-            STANDARD_14.put(PDType1Font.TIMES_ITALIC.getBaseFont(), PDType1Font.TIMES_ITALIC);
-            STANDARD_14.put(PDType1Font.TIMES_BOLD_ITALIC.getBaseFont(),
-                    PDType1Font.TIMES_BOLD_ITALIC);
-            STANDARD_14.put(PDType1Font.HELVETICA.getBaseFont(), PDType1Font.HELVETICA);
-            STANDARD_14.put(PDType1Font.HELVETICA_BOLD.getBaseFont(), PDType1Font.HELVETICA_BOLD);
-            STANDARD_14.put(PDType1Font.HELVETICA_OBLIQUE.getBaseFont(),
-                    PDType1Font.HELVETICA_OBLIQUE);
-            STANDARD_14.put(PDType1Font.HELVETICA_BOLD_OBLIQUE.getBaseFont(),
-                    PDType1Font.HELVETICA_BOLD_OBLIQUE);
-            STANDARD_14.put(PDType1Font.COURIER.getBaseFont(), PDType1Font.COURIER);
-            STANDARD_14.put(PDType1Font.COURIER_BOLD.getBaseFont(), PDType1Font.COURIER_BOLD);
-            STANDARD_14.put(PDType1Font.COURIER_OBLIQUE.getBaseFont(), PDType1Font.COURIER_OBLIQUE);
-            STANDARD_14.put(PDType1Font.COURIER_BOLD_OBLIQUE.getBaseFont(),
-                    PDType1Font.COURIER_BOLD_OBLIQUE);
-            STANDARD_14.put(PDType1Font.SYMBOL.getBaseFont(), PDType1Font.SYMBOL);
-            STANDARD_14.put(PDType1Font.ZAPF_DINGBATS.getBaseFont(), PDType1Font.ZAPF_DINGBATS);
-        }
-        // duplicating until here
-
-        private String fontName = null;
-        private String defaultFont = null;
 
         // The following code is based on the code in TextToPDF with the addition of
         // checks for page limits.
@@ -369,16 +353,16 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                             contentStream.setFont(font, fontSize);
                             contentStream.beginText();
                             y = page.getMediaBox().getHeight() - margin + height;
-                            contentStream.moveTextPositionByAmount(margin, y);
+                            contentStream.newLineAtOffset(margin, y);
                         }
 
                         if (contentStream == null)
                         {
                             throw new IOException("Error:Expected non-null content stream.");
                         }
-                        contentStream.moveTextPositionByAmount(0, -height);
+                        contentStream.newLineAtOffset(0, -height);
                         y -= height;
-                        contentStream.drawString(nextLineToDraw.toString());
+                        contentStream.showText(nextLineToDraw.toString());
                     }
                 }
 

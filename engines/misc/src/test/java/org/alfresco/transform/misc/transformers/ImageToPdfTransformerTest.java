@@ -57,6 +57,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.junit.jupiter.api.Assertions;
@@ -144,7 +145,7 @@ class ImageToPdfTransformerTest
         transformer.transform(imageFile.mimetype, MIMETYPE_PDF, transformOptions.toMap(), sourceFile, targetFile, transformManager);
 
         then(transformManager).shouldHaveNoInteractions();
-        try (PDDocument actualPdfDocument = PDDocument.load(targetFile))
+        try (PDDocument actualPdfDocument = Loader.loadPDF(targetFile))
         {
             int expectedNumberOfPages = calculateExpectedNumberOfPages(transformOptions, imageFile.firstPage(), imageFile.lastPage());
             assertNotNull(actualPdfDocument);
@@ -245,7 +246,7 @@ class ImageToPdfTransformerTest
         // when
         transformer.transform(MIMETYPE_IMAGE_TIFF, MIMETYPE_PDF, transformOptions.toMap(), sourceFile, targetFile, transformManager);
 
-        try (PDDocument actualPdfDocument = PDDocument.load(targetFile))
+        try (PDDocument actualPdfDocument = Loader.loadPDF(targetFile))
         {
             PDRectangle finalExpectedPdfFormat = expectedPdfFormatRotator.apply(expectedPdfFormat.getWidth(), expectedPdfFormat.getHeight());
             assertNotNull(actualPdfDocument);
@@ -262,7 +263,7 @@ class ImageToPdfTransformerTest
         // when
         transformer.transform(MIMETYPE_IMAGE_TIFF, MIMETYPE_PDF, transformOptions.toMap(), sourceFile, targetFile, transformManager);
 
-        try (PDDocument actualPdfDocument = PDDocument.load(targetFile))
+        try (PDDocument actualPdfDocument = Loader.loadPDF(targetFile))
         {
             BufferedImage actualImage = ImageIO.read(sourceFile);
             assertNotNull(actualPdfDocument);
@@ -279,7 +280,7 @@ class ImageToPdfTransformerTest
         // when
         transformer.transform(MIMETYPE_IMAGE_TIFF, MIMETYPE_PDF, transformOptions.toMap(), sourceFile, targetFile, transformManager);
 
-        try (PDDocument actualPdfDocument = PDDocument.load(targetFile))
+        try (PDDocument actualPdfDocument = Loader.loadPDF(targetFile))
         {
             BufferedImage actualImage = ImageIO.read(sourceFile);
             assertNotNull(actualPdfDocument);
@@ -314,7 +315,7 @@ class ImageToPdfTransformerTest
         // when
         transformer.transform(imageFile.mimetype, MIMETYPE_PDF, transformOptions.toMap(), source, targetFile, transformManager);
 
-        try (PDDocument actualPdfDocument = PDDocument.load(targetFile))
+        try (PDDocument actualPdfDocument = Loader.loadPDF(targetFile))
         {
             assertNotNull(actualPdfDocument);
             assertEquals(expectedWidth, actualPdfDocument.getPage(0).getMediaBox().getWidth(), "Pdf width");
