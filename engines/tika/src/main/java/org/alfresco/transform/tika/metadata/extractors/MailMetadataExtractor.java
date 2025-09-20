@@ -96,7 +96,7 @@ public class MailMetadataExtractor extends AbstractTikaMetadataExtractorEmbeddor
         putRawValue(KEY_ORIGINATOR, metadata.get(TikaCoreProperties.CREATOR), properties);
         putRawValue(KEY_SUBJECT, metadata.get(TikaCoreProperties.TITLE), properties);
         putRawValue(KEY_DESCRIPTION, metadata.get(TikaCoreProperties.SUBJECT), properties);
-        putRawValue(KEY_SENT_DATE, metadata.get(TikaCoreProperties.MODIFIED), properties);
+        putRawValue(KEY_SENT_DATE, metadata.get(TikaCoreProperties.CREATED), properties);
 
         // Store the TO, but not cc/bcc in the addressee field
         putRawValue(KEY_ADDRESSEE, metadata.get(Message.MESSAGE_TO), properties);
