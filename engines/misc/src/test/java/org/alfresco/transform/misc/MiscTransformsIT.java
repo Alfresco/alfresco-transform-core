@@ -179,7 +179,7 @@ public class MiscTransformsIT
             if (MIMETYPE_PDF.equals(targetMimetype))
             {
                 // verify if PDF isn't corrupted
-                final PDDocument pdfFile = Loader.loadPDF(Objects.requireNonNull(response.getBody()).getFile());
+                final PDDocument pdfFile = Loader.loadPDF(Objects.requireNonNull(response.getBody()).getContentAsByteArray());
                 assertNotNull(pdfFile);
             }
         }
