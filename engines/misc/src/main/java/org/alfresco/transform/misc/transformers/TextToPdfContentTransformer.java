@@ -255,7 +255,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
     {
         private static final PDType1Font DEFAULT_FONT = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
         private static final Map<String, PDType1Font> STANDARD_14 = Standard14Fonts.getNames().stream()
-                .collect(Collectors.toMap(a -> a, a -> new PDType1Font(Standard14Fonts.getMappedFontName(a))));
+                .collect(Collectors.toMap(name -> name, name -> new PDType1Font(Standard14Fonts.getMappedFontName(name))));
 
         private String fontName = null;
         private String defaultFont = null;
