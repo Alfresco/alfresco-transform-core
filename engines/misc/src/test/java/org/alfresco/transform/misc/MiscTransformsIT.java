@@ -67,6 +67,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -178,7 +179,7 @@ public class MiscTransformsIT
             if (MIMETYPE_PDF.equals(targetMimetype))
             {
                 // verify if PDF isn't corrupted
-                final PDDocument pdfFile = PDDocument.load(Objects.requireNonNull(response.getBody()).getInputStream());
+                final PDDocument pdfFile = Loader.loadPDF(Objects.requireNonNull(response.getBody()).getContentAsByteArray());
                 assertNotNull(pdfFile);
             }
         }

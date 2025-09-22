@@ -21,11 +21,11 @@
         <acs-compatible.java.version>11</acs-compatible.java.version>
         <image.tag>latest</image.tag>
         <image.registry>quay.io</image.registry>
-        <dependency.pdfbox.version>2.0.30</dependency.pdfbox.version>
+        <dependency.pdfbox.version>3.0.5</dependency.pdfbox.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.20</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
         <dependency.jackson.version>2.19.2</dependency.jackson.version>
-        <dependency.tika.version>2.9.2</dependency.tika.version>
+        <dependency.tika.version>3.2.3</dependency.tika.version>
         <dependency.poi.version>5.4.1</dependency.poi.version>
         <dependency.commons-io.version>2.20.0</dependency.commons-io.version>
         <dependency.imaging.version>1.0.0-alpha6</dependency.imaging.version>
@@ -135,6 +135,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- v1.10 has 0BSD license it must be consulted with Legal -->
+            <dependency>
+                <groupId>org.tukaani</groupId>
+                <artifactId>xz</artifactId>
+                <version>1.9</version>
+            </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>

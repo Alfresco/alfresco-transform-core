@@ -48,8 +48,9 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -171,13 +172,13 @@ public class TextToPdfContentTransformerTest
         writeToFile(sourceFile, TEXT_WITHOUT_A_BREVE, encoding, null, null);
 
         Map<String, String> parameters = new HashMap<>();
-        parameters.put(PDF_FONT, PDType1Font.TIMES_BOLD.getName());
+        parameters.put(PDF_FONT, Standard14Fonts.FontName.TIMES_BOLD.getName());
         parameters.put(PDF_FONT_SIZE, "30");
 
         TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITHOUT_A_BREVE, String.valueOf(-1), true,
                 parameters, false);
 
-        assertEquals(result.getUsedFont(), PDType1Font.TIMES_BOLD.getName());
+        assertEquals(result.getUsedFont(), Standard14Fonts.FontName.TIMES_BOLD.getName());
         assertNull(result.getErrorMessage());
     }
 
@@ -200,7 +201,7 @@ public class TextToPdfContentTransformerTest
         TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITHOUT_A_BREVE, String.valueOf(-1), true,
                 parameters, false);
 
-        assertEquals(result.getUsedFont(), PDType1Font.TIMES_ROMAN.getName());
+        assertEquals(result.getUsedFont(), Standard14Fonts.FontName.TIMES_ROMAN.getName());
         assertNull(result.getErrorMessage());
     }
 
@@ -218,14 +219,14 @@ public class TextToPdfContentTransformerTest
         writeToFile(sourceFile, TEXT_WITH_A_BREVE, encoding, null, null);
 
         Map<String, String> parameters = new HashMap<>();
-        parameters.put(PDF_FONT, PDType1Font.TIMES_BOLD.getName());
+        parameters.put(PDF_FONT, Standard14Fonts.FontName.TIMES_BOLD.getName());
 
         TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITH_A_BREVE, String.valueOf(-1), true,
                 parameters, true);
 
-        assertEquals(result.getUsedFont(), PDType1Font.TIMES_BOLD.getName());
+        assertEquals(result.getUsedFont(), Standard14Fonts.FontName.TIMES_BOLD.getName());
         assertNotNull(result.getErrorMessage());
-        assertTrue(result.getErrorMessage().contains(PDType1Font.TIMES_BOLD.getName()));
+        assertTrue(result.getErrorMessage().contains(Standard14Fonts.FontName.TIMES_BOLD.getName()));
     }
 
     /**
@@ -326,7 +327,7 @@ public class TextToPdfContentTransformerTest
         if (!failed)
         {
             // Read back in the PDF and check it
-            PDDocument doc = PDDocument.load(targetFile);
+            PDDocument doc = Loader.loadPDF(targetFile);
             PDFTextStripper textStripper = new PDFTextStripper();
             StringWriter textWriter = new StringWriter();
             textStripper.writeText(doc, textWriter);

@@ -50,6 +50,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.BeforeEach;
@@ -388,7 +389,7 @@ public class MiscTest extends AbstractBaseTest
                 expected.getBytes());
 
         // Read back in the PDF and check it
-        PDDocument doc = PDDocument.load(result.getResponse().getContentAsByteArray());
+        PDDocument doc = Loader.loadPDF(result.getResponse().getContentAsByteArray());
         PDFTextStripper textStripper = new PDFTextStripper();
         StringWriter textWriter = new StringWriter();
         textStripper.writeText(doc, textWriter);
