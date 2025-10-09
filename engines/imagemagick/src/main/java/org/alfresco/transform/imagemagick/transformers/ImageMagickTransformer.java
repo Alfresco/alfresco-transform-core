@@ -26,39 +26,29 @@
  */
 package org.alfresco.transform.imagemagick.transformers;
 
-import static org.alfresco.transform.base.util.Util.stringToInteger;
 import static org.alfresco.transform.base.util.Util.stringToLong;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_BMP;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JP2;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_XWD;
 import static org.alfresco.transform.common.RequestParamMap.ALLOW_ENLARGEMENT;
 import static org.alfresco.transform.common.RequestParamMap.ALPHA_REMOVE;
 import static org.alfresco.transform.common.RequestParamMap.AUTO_ORIENT;
-import static org.alfresco.transform.common.RequestParamMap.COMMAND_OPTIONS;
 import static org.alfresco.transform.common.RequestParamMap.CROP_GRAVITY;
 import static org.alfresco.transform.common.RequestParamMap.CROP_HEIGHT;
 import static org.alfresco.transform.common.RequestParamMap.CROP_PERCENTAGE;
 import static org.alfresco.transform.common.RequestParamMap.CROP_WIDTH;
 import static org.alfresco.transform.common.RequestParamMap.CROP_X_OFFSET;
 import static org.alfresco.transform.common.RequestParamMap.CROP_Y_OFFSET;
-import static org.alfresco.transform.common.RequestParamMap.END_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.MAINTAIN_ASPECT_RATIO;
 import static org.alfresco.transform.common.RequestParamMap.RESIZE_HEIGHT;
 import static org.alfresco.transform.common.RequestParamMap.RESIZE_PERCENTAGE;
 import static org.alfresco.transform.common.RequestParamMap.RESIZE_WIDTH;
-import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.THUMBNAIL;
 import static org.alfresco.transform.common.RequestParamMap.TIMEOUT;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import jakarta.annotation.PostConstruct;
 
-import org.apache.commons.lang3.StringUtils;
+import org.alfresco.transform.imagemagick.transformers.page.PageRangeFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -70,13 +60,11 @@ import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.imagemagick.ImageMagickOptionsBuilder;
 
 /**
- * Converts image files into different types of images. Transformer supports multi-page images and allows to specify via parameters `startPage` and `endPage` range of pages that should be converted. In case of a one-page target image type (like `jpeg` or `png`) parameters `startPage` and `endPage` will be set to 0 by default - this means that only first page will be converted.
+ * Converts image files into different types of images. Transformer supports multi-page images and allows to specify via parameters `startPage` and `endPage` pageRange of pages that should be converted. In case of a one-page target image type (like `jpeg` or `png`) parameters `startPage` and `endPage` will be set to 0 by default - this means that only first page will be converted.
  */
 @Component
 public class ImageMagickTransformer extends AbstractCommandExecutor implements CustomTransformerFileAdaptor
 {
-    private final List<String> singlePageFormats = List.of(MIMETYPE_IMAGE_BMP, MIMETYPE_IMAGE_JP2, MIMETYPE_IMAGE_JPEG, MIMETYPE_IMAGE_PNG, MIMETYPE_IMAGE_XWD);
-
     @Value("${transform.core.imagemagick.exe}")
     private String exe;
     @Value("${transform.core.imagemagick.dyn}")
@@ -89,6 +77,13 @@ public class ImageMagickTransformer extends AbstractCommandExecutor implements C
     private String coders;
     @Value("${transform.core.imagemagick.config}")
     private String config;
+
+    private PageRangeFactory pageRangeFactory;
+
+    public ImageMagickTransformer(PageRangeFactory pageRangeFactory)
+    {
+        this.pageRangeFactory = pageRangeFactory;
+    }
 
     @PostConstruct
     private void createCommands()
@@ -165,24 +160,8 @@ public class ImageMagickTransformer extends AbstractCommandExecutor implements C
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
             File sourceFile, File targetFile, TransformManager transformManager) throws TransformException
     {
-        String startPageString = transformOptions.get(START_PAGE);
-        String endPageString = transformOptions.get(END_PAGE);
-        if (!singlePageFormats.contains(sourceMimetype) && singlePageFormats.contains(targetMimetype))
-        {
-            if (StringUtils.isEmpty(startPageString))
-            {
-                startPageString = "0";
-            }
-            if (StringUtils.isEmpty(endPageString))
-            {
-                endPageString = startPageString;
-            }
-        }
-
-        final String options = ImageMagickOptionsBuilder
+        String options = ImageMagickOptionsBuilder
                 .builder()
-                .withStartPage(startPageString)
-                .withEndPage(endPageString)
                 .withAlphaRemove(transformOptions.get(ALPHA_REMOVE))
                 .withAutoOrient(transformOptions.get(AUTO_ORIENT))
                 .withCropGravity(transformOptions.get(CROP_GRAVITY))
@@ -197,26 +176,10 @@ public class ImageMagickTransformer extends AbstractCommandExecutor implements C
                 .withResizePercentage(transformOptions.get(RESIZE_PERCENTAGE))
                 .withAllowEnlargement(transformOptions.get(ALLOW_ENLARGEMENT))
                 .withMaintainAspectRatio(transformOptions.get(MAINTAIN_ASPECT_RATIO))
-                .withCommandOptions(transformOptions.get(COMMAND_OPTIONS))
                 .build();
-
-        String pageRange = calculatePageRange(
-                stringToInteger(startPageString),
-                stringToInteger(endPageString));
-
+        String pageRange = pageRangeFactory.create(sourceMimetype, targetMimetype, transformOptions);
         Long timeout = stringToLong(transformOptions.get(TIMEOUT));
 
         run(options, sourceFile, pageRange, targetFile, timeout);
-    }
-
-    private static String calculatePageRange(Integer startPage, Integer endPage)
-    {
-        return startPage == null
-                ? endPage == null
-                        ? ""
-                        : "[" + endPage + ']'
-                : endPage == null || startPage.equals(endPage)
-                        ? "[" + startPage + ']'
-                        : "[" + startPage + '-' + endPage + ']';
     }
 }

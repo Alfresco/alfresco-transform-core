@@ -311,28 +311,6 @@ public class ImageMagickTest extends AbstractBaseTest
                         "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
-    @Test
-    public void deprecatedCommandOptionsTest() throws Exception
-    {
-        // Example of why the commandOptions parameter is a bad idea.
-        expectedOptions = "( horrible command / ); -auto-orient -resize 321x654";
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .multipart(ENDPOINT_TRANSFORM)
-                        .file(sourceFile)
-                        .param("targetExtension", targetExtension)
-                        .param("targetMimetype", targetMimetype)
-                        .param("sourceMimetype", sourceMimetype)
-                        .param("thumbnail", "false")
-                        .param("resizeWidth", "321")
-                        .param("resizeHeight", "654")
-                        .param("commandOptions", "( horrible command / );"))
-                .andExpect(status().isOk())
-                .andExpect(content().bytes(expectedTargetFileBytes))
-                .andExpect(header().string("Content-Disposition",
-                        "attachment; filename*=UTF-8''transform." + targetExtension));
-    }
-
     @Override
     protected void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest)
     {

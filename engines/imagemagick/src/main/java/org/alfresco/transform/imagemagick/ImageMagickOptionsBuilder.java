@@ -48,8 +48,6 @@ public final class ImageMagickOptionsBuilder
     private static final List<String> GRAVITY_VALUES = ImmutableList.of("North", "NorthEast",
             "East", "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center");
 
-    private Integer startPage;
-    private Integer endPage;
     private Boolean alphaRemove;
     private Boolean autoOrient;
     private String cropGravity;
@@ -64,32 +62,9 @@ public final class ImageMagickOptionsBuilder
     private Boolean resizePercentage;
     private Boolean allowEnlargement;
     private Boolean maintainAspectRatio;
-    private String commandOptions;
 
     private ImageMagickOptionsBuilder()
     {}
-
-    public ImageMagickOptionsBuilder withStartPage(final String startPage)
-    {
-        return withStartPage(stringToInteger(startPage));
-    }
-
-    public ImageMagickOptionsBuilder withStartPage(final Integer startPage)
-    {
-        this.startPage = startPage;
-        return this;
-    }
-
-    public ImageMagickOptionsBuilder withEndPage(final String endPage)
-    {
-        return withEndPage(stringToInteger(endPage));
-    }
-
-    public ImageMagickOptionsBuilder withEndPage(final Integer endPage)
-    {
-        this.endPage = endPage;
-        return this;
-    }
 
     public ImageMagickOptionsBuilder withAlphaRemove(final String alphaRemove)
     {
@@ -240,12 +215,6 @@ public final class ImageMagickOptionsBuilder
         return this;
     }
 
-    public ImageMagickOptionsBuilder withCommandOptions(final String commandOptions)
-    {
-        this.commandOptions = commandOptions;
-        return this;
-    }
-
     public String build()
     {
         if (cropGravity != null)
@@ -351,9 +320,7 @@ public final class ImageMagickOptionsBuilder
             }
         }
 
-        return (commandOptions == null || "".equals(
-                commandOptions.trim()) ? "" : commandOptions + ' ') +
-                args.toString();
+        return args.toString();
     }
 
     public static ImageMagickOptionsBuilder builder()

@@ -60,7 +60,6 @@ public interface RequestParamMap
     String RESIZE_PERCENTAGE = "resizePercentage";
     String ALLOW_ENLARGEMENT = "allowEnlargement";
     String MAINTAIN_ASPECT_RATIO = "maintainAspectRatio";
-    String COMMAND_OPTIONS = "commandOptions";
     String TIMEOUT = "timeout";
     String INCLUDE_CONTENTS = "includeContents";
     String NOT_EXTRACT_BOOKMARKS_TEXT = "notExtractBookmarksText";
