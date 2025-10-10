@@ -17,9 +17,8 @@ mvn -B -U -Dmaven.wagon.http.pool=false \
     -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true \
     -Dparent.core.deploy.skip=true -Dtransformer.base.deploy.skip=true \
     "-P${PROFILE},docker-it-setup,${1}" \
-    -DfailIfNoTests=false \
     -Dit.test='**/*IT.java' \
-    verify
+    -DskipUnitTests
 
 docker ps -a -q | xargs -r -l docker stop ; docker ps -a -q | xargs -r -l docker rm
 
