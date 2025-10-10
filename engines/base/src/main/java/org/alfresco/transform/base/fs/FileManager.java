@@ -173,11 +173,11 @@ public class FileManager
         }
         catch (IllegalArgumentException e)
         {
-            throw new TransformException(BAD_REQUEST, "Direct Access URL is invalid.", e);
+            throw new TransformException(BAD_REQUEST, "Direct Access Url is invalid.", e);
         }
         catch (IOException e)
         {
-            throw new TransformException(BAD_REQUEST, "Direct Access URL not found.", e);
+            throw new TransformException(BAD_REQUEST, "Direct Access Url not found.", e);
         }
     }
 
