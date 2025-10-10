@@ -33,6 +33,8 @@ env:
   GIT_EMAIL: ${{ secrets.BOT_GITHUB_EMAIL }}
   GIT_PASSWORD: ${{ secrets.BOT_GITHUB_TOKEN }}
   GITHUB_ACTIONS_DEPLOY_TIMEOUT: 120
+  JAVA_BASE_IMAGE_21: alfresco/alfresco-base-java:jre21-rockylinux9@sha256:27297bffe7d45152194f08a8f38917a7e3d43b9a34dcfcdc29b83a80c4c33a10
+  JAVA_BASE_IMAGE_25: openjdk:25-slim
 
 jobs:
   pre_commit:
@@ -238,10 +240,65 @@ jobs:
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         run: bash _ci/test.sh ${{ matrix.testProfile }}
 
+  e2e_javaruntime_tests:
+    name: "E2E Smoke Tests : ${{ matrix.testName }}"
+    runs-on: ubuntu-latest
+    needs:
+      - pre_commit
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ '17', '21', '25' ]
+        include:
+          - testName: All in One Transformer
+            buildProfile: full-build
+            testProfile: aio-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v8.26.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.26.0
+      - name: "Login to Docker Hub"
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: "Login to Quay.io"
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+      - name: "Enable experimental docker features"
+        run: |
+          echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
+          sudo service docker restart
+      - name: "Clean-up SNAPSHOT artifacts"
+        run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
+      - name: "Build local docker image"
+        timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
+        run: |
+          if [ "${{ matrix.java }}" == "21" ]; then
+            export JAVA_BASE_IMAGE=${{ env.JAVA_BASE_IMAGE_21 }}
+          elif [ "${{ matrix.java }}" == "25" ]; then
+            export JAVA_BASE_IMAGE=${{ env.JAVA_BASE_IMAGE_25 }}
+          fi
+          bash _ci/build.sh ${{ matrix.buildProfile }}
+      - name: "Cache LibreOffice"
+        run: bash _ci/cache_artifacts.sh
+      - name: "Run tests"
+        timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
+        run: |
+          if [ "${{ matrix.java }}" == "21" ]; then
+            export JAVA_BASE_IMAGE=${{ env.JAVA_BASE_IMAGE_21 }}
+          elif [ "${{ matrix.java }}" == "25" ]; then
+            export JAVA_BASE_IMAGE=${{ env.JAVA_BASE_IMAGE_25 }}
+          fi
+          bash _ci/test_IT.sh ${{ matrix.testProfile }}
+
   release:
     name: "Release"
     runs-on: ubuntu-latest
-    needs: [veracode_sca, build_and_test, all_tests_matrix]
+    needs: [veracode_sca, build_and_test, all_tests_matrix, e2e_javaruntime_tests]
     if: >
       !(failure() || cancelled()) &&
       contains(github.event.head_commit.message, '[release]') &&
