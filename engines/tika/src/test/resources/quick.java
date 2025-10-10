@@ -24,8 +24,4 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
-public class quick
-{
-
-}
+public class quick{}
