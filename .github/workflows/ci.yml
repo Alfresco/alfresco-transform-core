@@ -241,7 +241,7 @@ jobs:
         run: bash _ci/test.sh ${{ matrix.testProfile }}
 
   e2e_javaruntime_tests:
-    name: "E2E Smoke Tests : ${{ matrix.testName }}"
+    name: "E2E Smoke Tests : ${{ matrix.testName }} - ${{ matrix.java }}"
     runs-on: ubuntu-latest
     needs:
       - pre_commit
