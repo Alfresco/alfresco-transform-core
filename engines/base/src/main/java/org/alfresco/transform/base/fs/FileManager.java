@@ -160,15 +160,24 @@ public class FileManager
     {
         try
         {
-            return new URL(directUrl).openStream();
+            URL url = new URL(directUrl);
+            String protocol = url.getProtocol().toLowerCase();
+
+            // Only allow http and https protocols
+            if (!(protocol.equals("http") || protocol.equals("https")))
+            {
+                throw new TransformException(BAD_REQUEST, "Only HTTP and HTTPS protocols are allowed");
+            }
+
+            return url.openStream();
         }
         catch (IllegalArgumentException e)
         {
-            throw new TransformException(BAD_REQUEST, "Direct Access Url is invalid.", e);
+            throw new TransformException(BAD_REQUEST, "Direct Access URL is invalid.", e);
         }
         catch (IOException e)
         {
-            throw new TransformException(BAD_REQUEST, "Direct Access Url not found.", e);
+            throw new TransformException(BAD_REQUEST, "Direct Access URL not found.", e);
         }
     }
 
