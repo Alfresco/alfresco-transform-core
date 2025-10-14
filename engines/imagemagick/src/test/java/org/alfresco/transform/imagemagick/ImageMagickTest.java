@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -79,7 +79,7 @@ import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.imagemagick.transformers.ImageMagickTransformer;
+import org.alfresco.transform.imagemagick.transformers.ImageMagickCommandExecutor;
 
 /**
  * Test ImageMagick with mocked external command.
@@ -89,7 +89,7 @@ public class ImageMagickTest extends AbstractBaseTest
     private static String PREFIX_IMAGE = "image/";
 
     @Autowired
-    private ImageMagickTransformer imageMagickTransformer;
+    private ImageMagickCommandExecutor imageMagickCommandExecutor;
 
     @Mock
     protected ExecutionResult mockExecutionResult;
@@ -111,7 +111,7 @@ public class ImageMagickTest extends AbstractBaseTest
     @BeforeEach
     public void before() throws IOException
     {
-        setMockExternalCommandsOnTransformer(imageMagickTransformer, mockTransformCommand, mockCheckCommand);
+        setMockExternalCommandsOnTransformer(imageMagickCommandExecutor, mockTransformCommand, mockCheckCommand);
         mockTransformCommand("jpg", "png", "image/jpeg", true);
     }
 
