@@ -117,6 +117,8 @@ public class TransformController
     private String coreVersion;
     @Value("${container.behind-ingres}")
     private boolean behindIngres;
+    @Value("${transform.test.endpoint.disabled:true}")
+    private boolean disableTestEndpoint;
 
     TransformEngine transformEngine;
     private final AtomicReference<ProbeTransform> probeTransform = new AtomicReference<>();
@@ -176,10 +178,13 @@ public class TransformController
     /**
      * Test UI page to perform a transform.
      */
-    @ConditionalOnExpression("${transform.test.endpoint.enabled}")
     @GetMapping(ENDPOINT_ROOT)
     public String test(Model model)
     {
+        if (disableTestEndpoint)
+        {
+            return null;
+        }
         model.addAttribute(MODEL_TITLE, getSimpleTransformEngineName() + " Test Page");
         model.addAttribute(MODEL_PROXY_PATH_PREFIX, getPathPrefix());
         TransformConfig transformConfig = transformRegistry.getTransformConfig();
@@ -309,7 +314,6 @@ public class TransformController
     }
 
     // Used the t-engine's simple html test UI.
-    @ConditionalOnExpression("${transform.test.endpoint.enabled}")
     @PostMapping(value = ENDPOINT_TEST, consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> testTransform(HttpServletRequest request,
             @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
@@ -317,6 +321,11 @@ public class TransformController
             @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,
             @RequestParam Map<String, String> origRequestParameters)
     {
+        if (disableTestEndpoint)
+        {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
         // Remaps request parameters from test.html and hands them off to the normal transform endpoint.
         // There are name<i> and value<i> parameters which allow dynamic names and values to be used.
         Map<String, String> requestParameters = new HashMap<>();
