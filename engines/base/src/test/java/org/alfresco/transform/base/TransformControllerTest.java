@@ -114,13 +114,13 @@ import org.alfresco.transform.config.TransformConfig;
  *
  * Also see {@link TransformControllerAllInOneTest}.
  */
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
 @ContextConfiguration(classes = {
         FakeTransformEngineWithTwoCustomTransformers.class,
         FakeTransformerTxT2Pdf.class,
         FakeTransformerPdf2Png.class})
-@ActiveProfiles("test")
 public class TransformControllerTest
 {
     @Autowired
