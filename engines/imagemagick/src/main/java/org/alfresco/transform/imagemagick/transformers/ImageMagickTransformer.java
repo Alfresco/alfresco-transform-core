@@ -48,7 +48,6 @@ import java.util.HashMap;
 import java.util.Map;
 import jakarta.annotation.PostConstruct;
 
-import org.alfresco.transform.imagemagick.transformers.page.PageRangeFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -58,6 +57,7 @@ import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.imagemagick.ImageMagickOptionsBuilder;
+import org.alfresco.transform.imagemagick.transformers.page.PageRangeFactory;
 
 /**
  * Converts image files into different types of images. Transformer supports multi-page images and allows to specify via parameters `startPage` and `endPage` pageRange of pages that should be converted. In case of a one-page target image type (like `jpeg` or `png`) parameters `startPage` and `endPage` will be set to 0 by default - this means that only first page will be converted.

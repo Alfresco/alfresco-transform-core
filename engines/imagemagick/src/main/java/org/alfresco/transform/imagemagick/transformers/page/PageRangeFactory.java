@@ -1,11 +1,5 @@
 package org.alfresco.transform.imagemagick.transformers.page;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-
 import static org.alfresco.transform.base.util.Util.stringToInteger;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_BMP;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JP2;
@@ -14,6 +8,12 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_XWD;
 import static org.alfresco.transform.common.RequestParamMap.END_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 @Component
 public class PageRangeFactory
@@ -44,8 +44,8 @@ public class PageRangeFactory
     {
         return startPage == null
                 ? endPage == null
-                ? ""
-                : "[" + endPage + ']'
+                        ? ""
+                        : "[" + endPage + ']'
                 : endPage == null || startPage.equals(endPage)
                         ? "[" + startPage + ']'
                         : "[" + startPage + '-' + endPage + ']';
