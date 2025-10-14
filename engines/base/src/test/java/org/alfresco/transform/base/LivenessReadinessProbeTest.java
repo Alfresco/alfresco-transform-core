@@ -10,11 +10,13 @@ import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
+@ActiveProfiles("test")
 public abstract class LivenessReadinessProbeTest
 {
     protected final Integer MAX_TRANSFORMS = 10;
