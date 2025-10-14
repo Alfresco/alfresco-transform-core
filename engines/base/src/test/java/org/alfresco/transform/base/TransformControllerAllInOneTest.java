@@ -62,6 +62,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -78,6 +79,7 @@ import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
  *
  * Repeats a set of tests from {@link TransformControllerTest}, which tests the single TransformEngine case.
  */
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
 @ContextConfiguration(classes = {

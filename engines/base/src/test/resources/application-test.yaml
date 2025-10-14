@@ -1,0 +1,4 @@
+transform:
+  test:
+    endpoint:
+      disabled: false

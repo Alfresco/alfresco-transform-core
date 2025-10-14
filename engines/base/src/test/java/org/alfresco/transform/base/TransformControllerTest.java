@@ -91,6 +91,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -113,6 +114,7 @@ import org.alfresco.transform.config.TransformConfig;
  *
  * Also see {@link TransformControllerAllInOneTest}.
  */
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
 @ContextConfiguration(classes = {
