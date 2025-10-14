@@ -91,6 +91,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -119,6 +120,7 @@ import org.alfresco.transform.config.TransformConfig;
         FakeTransformEngineWithTwoCustomTransformers.class,
         FakeTransformerTxT2Pdf.class,
         FakeTransformerPdf2Png.class})
+@ActiveProfiles("test")
 public class TransformControllerTest
 {
     @Autowired
