@@ -160,16 +160,7 @@ public class FileManager
     {
         try
         {
-            URL url = new URL(directUrl);
-            String protocol = url.getProtocol().toLowerCase();
-
-            // Only allow http and https protocols
-            if (!(protocol.equals("http") || protocol.equals("https")))
-            {
-                throw new TransformException(BAD_REQUEST, "Only HTTP and HTTPS protocols are allowed");
-            }
-
-            return url.openStream();
+            return new URL(directUrl).openStream();
         }
         catch (IllegalArgumentException e)
         {
