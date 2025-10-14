@@ -293,7 +293,7 @@ jobs:
           elif [ "${{ matrix.java }}" == "25" ]; then
             export JAVA_BASE_IMAGE=${{ env.JAVA_BASE_IMAGE_25 }}
           fi
-          bash _ci/test_IT.sh ${{ matrix.testProfile }}
+          bash _ci/e2e_aioTest.sh ${{ matrix.testProfile }}
 
   release:
     name: "Release"
