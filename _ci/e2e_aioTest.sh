@@ -14,7 +14,6 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 # Do not deploy snapshots for alfresco-transform-core, alfresco-transformer-base and alfresco-base-t-engine
 mvn -B -U -Dmaven.wagon.http.pool=false \
     clean ${DEPLOY} \
-    -Dtest='!AIOImageMagickTest,!AIOLibreOfficeTest,!AIOMiscTest,!AIOPdfRendererTest,!AIOTest,!AIOTikaTest' \
     -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true \
     -Dparent.core.deploy.skip=true -Dtransformer.base.deploy.skip=true \
     "-Dit.test=**/*IT.java" \
