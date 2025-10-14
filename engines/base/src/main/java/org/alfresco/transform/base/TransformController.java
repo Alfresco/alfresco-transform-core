@@ -66,6 +66,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.Resource;
@@ -175,6 +176,7 @@ public class TransformController
     /**
      * Test UI page to perform a transform.
      */
+    @ConditionalOnExpression("${transform.test.endpoint.enabled}")
     @GetMapping(ENDPOINT_ROOT)
     public String test(Model model)
     {
@@ -307,6 +309,7 @@ public class TransformController
     }
 
     // Used the t-engine's simple html test UI.
+    @ConditionalOnExpression("${transform.test.endpoint.enabled}")
     @PostMapping(value = ENDPOINT_TEST, consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> testTransform(HttpServletRequest request,
             @RequestParam(value = FILE, required = false) MultipartFile sourceMultipartFile,
