@@ -13,7 +13,7 @@ ARG EXIFTOOL_FOLDER=Image-ExifTool-${EXIFTOOL_VERSION}
 ARG EXIFTOOL_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/org/exiftool/image-exiftool/${EXIFTOOL_VERSION}/image-exiftool-${EXIFTOOL_VERSION}.tgz
 
 ARG IMAGEMAGICK_VERSION=7.1.0-16
-ENV IMAGEMAGICK_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}-ci-10/imagemagick-distribution-${IMAGEMAGICK_VERSION}-ci-10
+ENV IMAGEMAGICK_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}-ci-11/imagemagick-distribution-${IMAGEMAGICK_VERSION}-ci-11
 ENV IMAGEMAGICK_DEP_RPM_URL=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
 ARG LIBREOFFICE_VERSION=7.2.5
