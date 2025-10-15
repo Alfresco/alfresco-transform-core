@@ -311,6 +311,24 @@ public class ImageMagickTest extends AbstractBaseTest
                         "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
+    @Test
+    public void removedCommandOptionsTest() throws Exception
+    {
+        mockMvc
+                .perform(MockMvcRequestBuilders
+                        .multipart(ENDPOINT_TRANSFORM)
+                        .file(sourceFile)
+                        .param("targetExtension", targetExtension)
+                        .param("targetMimetype", targetMimetype)
+                        .param("sourceMimetype", sourceMimetype)
+                        .param("thumbnail", "false")
+                        .param("resizeWidth", "321")
+                        .param("resizeHeight", "654")
+                        .param("commandOptions", "( horrible command / );"))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("No transforms")));
+    }
+
     @Override
     protected void updateTransformRequestWithSpecificOptions(TransformRequest transformRequest)
     {
