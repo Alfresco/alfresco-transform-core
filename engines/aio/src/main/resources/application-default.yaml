@@ -13,8 +13,8 @@ transform:
         templateProfileDir: ${LIBREOFFICE_TEMPLATE_PROFILE_DIR:}
         isEnabled: ${LIBREOFFICE_IS_ENABLED:true}
     imagemagick:
-        root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.0.11}
-        dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.0.11/lib}
+        root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.1.2}
+        dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.1.2/lib}
         exe: ${IMAGEMAGICK_EXE:/usr/bin/convert}
         coders: ${IMAGEMAGICK_CODERS:}
         config: ${IMAGEMAGICK_CONFIG:}
