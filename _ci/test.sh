@@ -12,7 +12,7 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 [ "${PULL_REQUEST}" = "false" ] && [ "${BRANCH_NAME}" = "master" ] && DEPLOY="deploy" || DEPLOY="verify"
 
 if [ "${SMOKE_TESTS}" = "true" ]; then
-  ADDITIONAL_MAVEN_OPTS="--Dit.test=**/*IT.java"
+  ADDITIONAL_MAVEN_OPTS="-Dit.test=**/*IT.java"
 else
   ADDITIONAL_MAVEN_OPTS=""
 fi
