@@ -54,7 +54,13 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
     else \
       LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1) && \
       dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}${LIBREOFFICE_ARM64_RPM_VERSION} && \
-      update-alternatives --set java java-17-openjdk.aarch64; \
+      if [[ "${JAVA_BASE_IMAGE}" == *"jre17"* ]]; then \
+        update-alternatives --set java java-17-openjdk.aarch64; \
+      elif [[ "${JAVA_BASE_IMAGE}" == *"jre21"* ]]; then \
+        update-alternatives --set java java-21-openjdk.aarch64; \
+      elif [[ "${JAVA_BASE_IMAGE}" == *"jre25"* ]]; then \
+        update-alternatives --set java java-25-openjdk.aarch64; \
+      fi && \
     fi && \
     if [ "$(uname -m)" = "x86_64" ]; then \
       curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz; \
