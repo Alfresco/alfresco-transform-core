@@ -60,7 +60,7 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
         update-alternatives --set java java-21-openjdk.aarch64; \
       elif [ "${JAVA_BASE_IMAGE}" == *"jre25"* ]; then \
         update-alternatives --set java java-25-openjdk.aarch64; \
-      fi && \
+      fi; \
     fi && \
     if [ "$(uname -m)" = "x86_64" ]; then \
       curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz; \
