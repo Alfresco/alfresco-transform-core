@@ -30,30 +30,57 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.alfresco.transform.imagemagick.transformers.ImageMagickCommandExecutor;
+import org.alfresco.transform.imagemagick.transformers.ImageMagickCommandOptions;
 import org.alfresco.transform.imagemagick.transformers.ImageMagickTransformer;
 import org.alfresco.transform.imagemagick.transformers.page.PageRangeFactory;
 
 public class ImageMagickTransformerTest
 {
-    @Test
-    void shouldNotAllowArgumentInjectionThroughCommandOptions()
+    private ImageMagickCommandExecutor imageMagickCommandExecutor;
+    private ImageMagickCommandOptions imageMagickCommandOptions;
+    private ImageMagickTransformer imageMagickTransformer;
+
+    @BeforeEach
+    void setUp()
     {
-        ImageMagickCommandExecutor imageMagickCommandExecutor = mock(ImageMagickCommandExecutor.class);
-        ImageMagickTransformer imageMagickTransformer = new ImageMagickTransformer(imageMagickCommandExecutor, mock(PageRangeFactory.class));
-        Map<String, String> transformOptions = Map.of(
-                "commandOptions", "( horrible command / );");
+        imageMagickCommandExecutor = mock(ImageMagickCommandExecutor.class);
+        PageRangeFactory pageRangeFactory = mock(PageRangeFactory.class);
+        imageMagickCommandOptions = mock(ImageMagickCommandOptions.class);
+        imageMagickTransformer = new ImageMagickTransformer(imageMagickCommandExecutor, pageRangeFactory, imageMagickCommandOptions);
+    }
+
+    @Test
+    void shouldNotAllowArgumentInjectionThroughCommandOptionsWhenDisabled()
+    {
+        when(imageMagickCommandOptions.isCommandOptionsEnabled()).thenReturn(false);
+        Map<String, String> transformOptions = Map.of("commandOptions", "( horrible command / );");
 
         imageMagickTransformer.transform(null, null, transformOptions, null, null, null);
 
         ArgumentCaptor<String> optionsCaptor = ArgumentCaptor.forClass(String.class);
         verify(imageMagickCommandExecutor).run(optionsCaptor.capture(), any(), any(), any(), any());
         assertThat(optionsCaptor.getValue()).doesNotContain("horrible", "horrible command", "( horrible command / );");
+    }
+
+    @Test
+    void shouldAllowArgumentInjectionThroughCommandOptionsWhenEnabled()
+    {
+        when(imageMagickCommandOptions.isCommandOptionsEnabled()).thenReturn(true);
+        Map<String, String> transformOptions = Map.of("commandOptions", "( horrible command / );");
+
+        imageMagickTransformer.transform(null, null, transformOptions, null, null, null);
+
+        ArgumentCaptor<String> optionsCaptor = ArgumentCaptor.forClass(String.class);
+        verify(imageMagickCommandExecutor).run(optionsCaptor.capture(), any(), any(), any(), any());
+        assertThat(optionsCaptor.getValue()).contains("horrible", "horrible command", "( horrible command / );");
     }
 }

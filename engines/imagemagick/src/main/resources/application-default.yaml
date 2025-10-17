@@ -8,3 +8,5 @@ transform:
       exe: ${IMAGEMAGICK_EXE:/usr/bin/convert}
       coders: ${IMAGEMAGICK_CODERS:}
       config: ${IMAGEMAGICK_CONFIG:}
+      commandOptions:
+        enabled: ${IMAGEMAGICK_COMMAND_OPTIONS_ENABLED:false}

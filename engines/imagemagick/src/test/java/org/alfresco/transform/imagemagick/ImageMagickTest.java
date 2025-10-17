@@ -312,8 +312,9 @@ public class ImageMagickTest extends AbstractBaseTest
     }
 
     @Test
-    public void removedCommandOptionsTest() throws Exception
+    public void deprecatedCommandOptionsIsSkippedByDefaultTest() throws Exception
     {
+        expectedOptions = "-auto-orient -resize 321x654";
         mockMvc
                 .perform(MockMvcRequestBuilders
                         .multipart(ENDPOINT_TRANSFORM)
@@ -325,8 +326,10 @@ public class ImageMagickTest extends AbstractBaseTest
                         .param("resizeWidth", "321")
                         .param("resizeHeight", "654")
                         .param("commandOptions", "( horrible command / );"))
-                .andExpect(status().isBadRequest())
-                .andExpect(status().reason(containsString("No transforms")));
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Override

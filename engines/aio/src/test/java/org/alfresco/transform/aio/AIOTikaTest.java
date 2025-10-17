@@ -48,6 +48,7 @@ public class AIOTikaTest extends TikaTest
                 "allowPdfEnlargement",
                 "alphaRemove",
                 "autoOrient",
+                "commandOptions",
                 "cropGravity",
                 "cropHeight",
                 "cropPercentage",

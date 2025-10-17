@@ -30,6 +30,7 @@ import static org.alfresco.transform.base.util.Util.stringToLong;
 import static org.alfresco.transform.common.RequestParamMap.ALLOW_ENLARGEMENT;
 import static org.alfresco.transform.common.RequestParamMap.ALPHA_REMOVE;
 import static org.alfresco.transform.common.RequestParamMap.AUTO_ORIENT;
+import static org.alfresco.transform.common.RequestParamMap.COMMAND_OPTIONS;
 import static org.alfresco.transform.common.RequestParamMap.CROP_GRAVITY;
 import static org.alfresco.transform.common.RequestParamMap.CROP_HEIGHT;
 import static org.alfresco.transform.common.RequestParamMap.CROP_PERCENTAGE;
@@ -62,11 +63,13 @@ public class ImageMagickTransformer implements CustomTransformerFileAdaptor
 {
     private final ImageMagickCommandExecutor imageMagickCommandExecutor;
     private final PageRangeFactory pageRangeFactory;
+    private final ImageMagickCommandOptions imageMagickCommandOptions;
 
-    public ImageMagickTransformer(ImageMagickCommandExecutor imageMagickCommandExecutor, PageRangeFactory pageRangeFactory)
+    public ImageMagickTransformer(ImageMagickCommandExecutor imageMagickCommandExecutor, PageRangeFactory pageRangeFactory, ImageMagickCommandOptions imageMagickCommandOptions)
     {
         this.imageMagickCommandExecutor = imageMagickCommandExecutor;
         this.pageRangeFactory = pageRangeFactory;
+        this.imageMagickCommandOptions = imageMagickCommandOptions;
     }
 
     @Override
@@ -79,7 +82,7 @@ public class ImageMagickTransformer implements CustomTransformerFileAdaptor
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
             File sourceFile, File targetFile, TransformManager transformManager) throws TransformException
     {
-        String options = ImageMagickOptionsBuilder
+        ImageMagickOptionsBuilder builder = ImageMagickOptionsBuilder
                 .builder()
                 .withAlphaRemove(transformOptions.get(ALPHA_REMOVE))
                 .withAutoOrient(transformOptions.get(AUTO_ORIENT))
@@ -94,8 +97,14 @@ public class ImageMagickTransformer implements CustomTransformerFileAdaptor
                 .withResizeHeight(transformOptions.get(RESIZE_HEIGHT))
                 .withResizePercentage(transformOptions.get(RESIZE_PERCENTAGE))
                 .withAllowEnlargement(transformOptions.get(ALLOW_ENLARGEMENT))
-                .withMaintainAspectRatio(transformOptions.get(MAINTAIN_ASPECT_RATIO))
-                .build();
+                .withMaintainAspectRatio(transformOptions.get(MAINTAIN_ASPECT_RATIO));
+
+        if (imageMagickCommandOptions.isCommandOptionsEnabled())
+        {
+            builder.withCommandOptions(transformOptions.get(COMMAND_OPTIONS));
+        }
+        String options = builder.build();
+
         String pageRange = pageRangeFactory.create(sourceMimetype, targetMimetype, transformOptions);
         Long timeout = stringToLong(transformOptions.get(TIMEOUT));
 

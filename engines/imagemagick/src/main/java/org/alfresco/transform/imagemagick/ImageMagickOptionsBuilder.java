@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -62,6 +62,7 @@ public final class ImageMagickOptionsBuilder
     private Boolean resizePercentage;
     private Boolean allowEnlargement;
     private Boolean maintainAspectRatio;
+    private String commandOptions;
 
     private ImageMagickOptionsBuilder()
     {}
@@ -215,6 +216,12 @@ public final class ImageMagickOptionsBuilder
         return this;
     }
 
+    public ImageMagickOptionsBuilder withCommandOptions(final String commandOptions)
+    {
+        this.commandOptions = commandOptions;
+        return this;
+    }
+
     public String build()
     {
         if (cropGravity != null)
@@ -320,7 +327,9 @@ public final class ImageMagickOptionsBuilder
             }
         }
 
-        return args.toString();
+        return (commandOptions == null || "".equals(
+                commandOptions.trim()) ? "" : commandOptions + ' ') +
+                args;
     }
 
     public static ImageMagickOptionsBuilder builder()
