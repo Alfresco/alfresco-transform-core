@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 import jakarta.jms.Destination;
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import org.alfresco.transform.base.CustomTransformer;
@@ -156,6 +157,10 @@ abstract class ProcessHandler extends FragmentHandler
     public void transform(CustomTransformer customTransformer) throws Exception
     {
         customTransformer.transform(sourceMimetype, inputStream, targetMimetype, outputStream, transformOptions, transformManager);
+        long len = transformManager.getOutputLength();
+        if(len == 0) {
+            throw new TransformException(HttpStatus.INTERNAL_SERVER_ERROR, "Corrupted File. Cannot transform..");
+        }
     }
 
     protected abstract long getSourceSize();
