@@ -158,7 +158,8 @@ abstract class ProcessHandler extends FragmentHandler
     {
         customTransformer.transform(sourceMimetype, inputStream, targetMimetype, outputStream, transformOptions, transformManager);
         long len = transformManager.getOutputLength();
-        if(len == 0) {
+        if (len == 0)
+        {
             throw new TransformException(HttpStatus.INTERNAL_SERVER_ERROR, "Corrupted File. Cannot transform..");
         }
     }
