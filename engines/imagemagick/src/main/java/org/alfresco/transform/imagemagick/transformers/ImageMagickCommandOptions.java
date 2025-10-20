@@ -50,7 +50,7 @@ public class ImageMagickCommandOptions
         }
         else
         {
-            LOG.debug("Parameter commandOptions is disabled.");
+            LOG.info("Parameter commandOptions is disabled.");
         }
     }
 
