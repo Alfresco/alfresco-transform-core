@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import jakarta.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -55,15 +56,15 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
     @PostConstruct
     private void createCommands()
     {
-        if (exe == null || exe.isEmpty())
+        if (StringUtils.isEmpty(exe))
         {
             throw new IllegalArgumentException("ImageMagickTransformer IMAGEMAGICK_EXE variable cannot be null or empty");
         }
-        if (dyn == null || dyn.isEmpty())
+        if (StringUtils.isEmpty(dyn))
         {
             throw new IllegalArgumentException("ImageMagickTransformer IMAGEMAGICK_DYN variable cannot be null or empty");
         }
-        if (root == null || root.isEmpty())
+        if (StringUtils.isEmpty(root))
         {
             throw new IllegalArgumentException("ImageMagickTransformer IMAGEMAGICK_ROOT variable cannot be null or empty");
         }

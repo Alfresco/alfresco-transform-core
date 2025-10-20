@@ -46,7 +46,7 @@ public class ImageMagickCommandOptions
     {
         if (commandOptionsEnabled)
         {
-            LOG.warn("Parameter commandOptions is enabled. It is deprecated and, due to security concerns, will be removed in the future.");
+            LOG.warn("Parameter commandOptions is enabled. It is deprecated and due to security concerns, it will be removed in the future.");
         }
         else
         {
