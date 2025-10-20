@@ -3,8 +3,10 @@ queue:
 transform:
   core:
     imagemagick:
-      root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.0.10}
-      dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.0.10/lib}
+      root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.1.2}
+      dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.1.2/lib}
       exe: ${IMAGEMAGICK_EXE:/usr/bin/convert}
       coders: ${IMAGEMAGICK_CODERS:}
       config: ${IMAGEMAGICK_CONFIG:}
+      commandOptions:
+        enabled: ${IMAGEMAGICK_COMMAND_OPTIONS_ENABLED:false}

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -48,8 +48,6 @@ public final class ImageMagickOptionsBuilder
     private static final List<String> GRAVITY_VALUES = ImmutableList.of("North", "NorthEast",
             "East", "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center");
 
-    private Integer startPage;
-    private Integer endPage;
     private Boolean alphaRemove;
     private Boolean autoOrient;
     private String cropGravity;
@@ -68,28 +66,6 @@ public final class ImageMagickOptionsBuilder
 
     private ImageMagickOptionsBuilder()
     {}
-
-    public ImageMagickOptionsBuilder withStartPage(final String startPage)
-    {
-        return withStartPage(stringToInteger(startPage));
-    }
-
-    public ImageMagickOptionsBuilder withStartPage(final Integer startPage)
-    {
-        this.startPage = startPage;
-        return this;
-    }
-
-    public ImageMagickOptionsBuilder withEndPage(final String endPage)
-    {
-        return withEndPage(stringToInteger(endPage));
-    }
-
-    public ImageMagickOptionsBuilder withEndPage(final Integer endPage)
-    {
-        this.endPage = endPage;
-        return this;
-    }
 
     public ImageMagickOptionsBuilder withAlphaRemove(final String alphaRemove)
     {
@@ -353,7 +329,7 @@ public final class ImageMagickOptionsBuilder
 
         return (commandOptions == null || "".equals(
                 commandOptions.trim()) ? "" : commandOptions + ' ') +
-                args.toString();
+                args;
     }
 
     public static ImageMagickOptionsBuilder builder()
