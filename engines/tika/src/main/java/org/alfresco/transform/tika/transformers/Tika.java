@@ -27,6 +27,7 @@
 package org.alfresco.transform.tika.transformers;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
