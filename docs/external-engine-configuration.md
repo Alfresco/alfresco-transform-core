@@ -108,4 +108,4 @@ The following externalized T-engines properties are available:
 | IMAGEMAGICK_CONFIG | Path to Imagemagick custom config. |  |
 | IMAGEMAGICK_COMMAND_OPTIONS_ENABLED | If set to true, enables usage of deprecated commandOptions parameter. |  |
 | MISC_PDFBOX_DEFAULT_FONT | Default font used by PdfBox | NotoSans-Regular |
-| MISC_HTML_COLLAPSE | Html Collasping Option for HTML to TXT transformation explicitly for Misc Engine | true |
+| MISC_HTML_COLLAPSE | Html Collapsing Option for HTML to TXT transformation explicitly for Misc Engine | true |
