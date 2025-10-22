@@ -200,7 +200,7 @@ public class TikaTransformationIT
                 .hasMessageContaining(TransformerMessages.CORRUPTED_FILE_ERROR);
     }
 
-    public static Stream<Triple<String, String, String>> engineTransformationsCorruptedToText()
+    private static Stream<Triple<String, String, String>> engineTransformationsCorruptedToText()
     {
         return Stream
                 .of(
