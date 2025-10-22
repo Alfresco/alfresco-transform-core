@@ -42,10 +42,12 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 
 import org.alfresco.transform.base.clients.HttpClient;
+import org.alfresco.transform.common.TransformerMessages;
 
 /**
  * @author Cezar Leahu
@@ -193,19 +195,24 @@ public class TikaTransformationIT
             fail("Corrupted file should have thrown an exception");
         }).as(description)
                 .isInstanceOf(HttpClientErrorException.class)
-                .hasMessageContaining("The file after transformation is empty. This could be caused by a corrupted source file.");
+                .hasMessageContaining(String.valueOf(HttpStatus.UNPROCESSABLE_ENTITY.value()))
+                .hasMessageContaining(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
+                .hasMessageContaining(TransformerMessages.CORRUPTED_FILE_ERROR);
     }
 
     public static Stream<Triple<String, String, String>> engineTransformationsCorruptedToText()
     {
         return Stream
                 .of(
-                        Stream.of(
-                                Triple.of("quick_corrupted.doc", "txt", "application/msword")),
-                        Stream.of(
-                                Triple.of("quick_corrupted.ppt", "txt", "application/vnd.ms-powerpoint")),
-                        Stream.of(
-                                Triple.of("quick_corrupted.pptx", "txt", "application/vnd.openxmlformats-officedocument.presentationml.presentation")))
+                        textTargets("quick_corrupted.doc", "application/msword"),
+                        textTargets("quick_corrupted.ppt", "application/vnd.ms-powerpoint"),
+                        textTargets("quick_corrupted.pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"))
                 .flatMap(identity());
+    }
+
+    private static Stream<Triple<String, String, String>> textTargets(final String sourceFile,
+            final String sourceMimetype)
+    {
+        return Stream.of(Triple.of(sourceFile, "txt", sourceMimetype));
     }
 }

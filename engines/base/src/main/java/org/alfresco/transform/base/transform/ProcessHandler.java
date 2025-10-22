@@ -52,6 +52,7 @@ import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.base.registry.CustomTransformers;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.common.TransformerDebug;
+import org.alfresco.transform.common.TransformerMessages;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.registry.TransformServiceRegistry;
 
@@ -167,9 +168,10 @@ abstract class ProcessHandler extends FragmentHandler
         // After transformation, throw an error if the length of the output file is zero.
         // It happens when the source file is corrupted.
         long len = transformManager.getOutputLength();
-        if (len == 0)
+        if (len <= 0)
         {
-            throw new TransformException(HttpStatus.UNPROCESSABLE_ENTITY, "The file after transformation is empty. This could be caused by a corrupted source file.");
+            transformerDebug.logFailure(reference, TransformerMessages.CORRUPTED_FILE_ERROR);
+            throw new TransformException(HttpStatus.UNPROCESSABLE_ENTITY, TransformerMessages.CORRUPTED_FILE_ERROR);
         }
 
         sendTransformResponse(transformManager);

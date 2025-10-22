@@ -61,6 +61,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import org.alfresco.transform.base.AbstractBaseTest;
+import org.alfresco.transform.common.TransformerMessages;
 
 /**
  * Test Misc. Includes calling the 3rd party libraries.
@@ -365,7 +366,7 @@ public class MiscTest extends AbstractBaseTest
 
         assertEquals(0, result.getResponse().getContentLength(),
                 "Returned content should be empty for an empty source file");
-        assertThat(result.getResponse().getErrorMessage()).isEqualTo("The file after transformation is empty. This could be caused by a corrupted source file.");
+        assertThat(result.getResponse().getErrorMessage()).isEqualTo(TransformerMessages.CORRUPTED_FILE_ERROR);
     }
 
     @Test
