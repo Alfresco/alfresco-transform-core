@@ -27,7 +27,7 @@ package org.alfresco.transform.common;
 public class TransformerMessages
 {
     // Exceptions
-    public static String CORRUPTED_FILE_ERROR = "The file after transformation is empty. This could be caused by a corrupted source file.";
+    public static final String CORRUPTED_FILE_ERROR = "The file after transformation is empty. This could be caused by a corrupted source file.";
 
     /**
      * Creates new instance of the class.
