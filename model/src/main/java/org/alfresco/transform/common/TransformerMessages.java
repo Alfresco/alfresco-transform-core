@@ -21,10 +21,17 @@
  */
 package org.alfresco.transform.common;
 
-public interface TransformerMessages
+/**
+ * Holds definition of constants related to the Transformation messages.
+ */
+public class TransformerMessages
 {
-
     // Exceptions
-    String CORRUPTED_FILE_ERROR = "The file after transformation is empty. This could be caused by a corrupted source file.";
+    public static String CORRUPTED_FILE_ERROR = "The file after transformation is empty. This could be caused by a corrupted source file.";
 
+    /**
+     * Creates new instance of the class.
+     */
+    private TransformerMessages()
+    {}
 }
