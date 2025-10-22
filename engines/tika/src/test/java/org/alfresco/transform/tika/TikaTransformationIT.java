@@ -178,12 +178,12 @@ public class TikaTransformationIT
         final String targetExtension = entry.getMiddle();
         String targetMimetype = extensionMimetype.get(targetExtension);
 
-        final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
+        final String description = format("Transform ({0}, {1} -> {2}, {3})",
                 sourceFile, sourceMimetype, targetMimetype, targetExtension);
 
         try
         {
-            final ResponseEntity<Resource> response = HttpClient.sendTRequest(ENGINE_URL, sourceFile, null,
+            HttpClient.sendTRequest(ENGINE_URL, sourceFile, null,
                     targetMimetype, targetExtension, ImmutableMap.of(
                             "targetEncoding", "UTF-8",
                             "sourceMimetype", sourceMimetype));
@@ -191,15 +191,15 @@ public class TikaTransformationIT
         }
         catch (HttpClientErrorException e)
         {
-            assertThat(e.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+            assertThat(e.getStatusCode()).as(description).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
         }
         catch (HttpServerErrorException e)
         {
-            assertThat(e.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+            assertThat(e.getStatusCode()).as(description).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         catch (Exception e)
         {
-            fail("Corrupted file should have thrown HttpClientErrorException or HttpServerErrorException, instead got " + e);
+            fail("Corrupted file should have thrown HttpClientErrorException or HttpServerErrorException", e);
         }
     }
 
