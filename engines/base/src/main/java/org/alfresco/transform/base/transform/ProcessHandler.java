@@ -164,11 +164,14 @@ abstract class ProcessHandler extends FragmentHandler
     @Override
     public void onSuccessfulTransform()
     {
+        // After transformation, throw an error if the length of the output file is zero.
+        // It happens when the source file is corrupted.
         long len = transformManager.getOutputLength();
         if (len == 0)
         {
             throw new TransformException(HttpStatus.UNPROCESSABLE_ENTITY, "The file after transformation is empty. This could be caused by a corrupted source file.");
         }
+
         sendTransformResponse(transformManager);
 
         LogEntry.setTargetSize(transformManager.getOutputLength());

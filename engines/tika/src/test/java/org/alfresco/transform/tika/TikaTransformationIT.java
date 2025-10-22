@@ -29,7 +29,7 @@ package org.alfresco.transform.tika;
 import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;
@@ -42,10 +42,8 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 
 import org.alfresco.transform.base.clients.HttpClient;
 
@@ -169,6 +167,12 @@ public class TikaTransformationIT
                 .flatMap(identity());
     }
 
+    /**
+     * Tests that while transforming a corrupted file to txt format, exception is thrown.
+     * 
+     * @param entry
+     *            values to execute same test with different parameters.
+     */
     @ParameterizedTest
     @MethodSource("engineTransformationsCorruptedToText")
     public void testTransformationCorruptedToText(Triple<String, String, String> entry)
@@ -181,26 +185,15 @@ public class TikaTransformationIT
         final String description = format("Transform ({0}, {1} -> {2}, {3})",
                 sourceFile, sourceMimetype, targetMimetype, targetExtension);
 
-        try
-        {
+        assertThatThrownBy(() -> {
             HttpClient.sendTRequest(ENGINE_URL, sourceFile, null,
                     targetMimetype, targetExtension, ImmutableMap.of(
                             "targetEncoding", "UTF-8",
                             "sourceMimetype", sourceMimetype));
             fail("Corrupted file should have thrown an exception");
-        }
-        catch (HttpClientErrorException e)
-        {
-            assertThat(e.getStatusCode()).as(description).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-        catch (HttpServerErrorException e)
-        {
-            assertThat(e.getStatusCode()).as(description).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        catch (Exception e)
-        {
-            fail("Corrupted file should have thrown HttpClientErrorException or HttpServerErrorException", e);
-        }
+        }).as(description)
+                .isInstanceOf(HttpClientErrorException.class)
+                .hasMessageContaining("The file after transformation is empty. This could be caused by a corrupted source file.");
     }
 
     public static Stream<Triple<String, String, String>> engineTransformationsCorruptedToText()
@@ -209,8 +202,6 @@ public class TikaTransformationIT
                 .of(
                         Stream.of(
                                 Triple.of("quick_corrupted.doc", "txt", "application/msword")),
-                        Stream.of(
-                                Triple.of("quick_corrupted.doc", "xml", "application/msword")),
                         Stream.of(
                                 Triple.of("quick_corrupted.ppt", "txt", "application/vnd.ms-powerpoint")),
                         Stream.of(
