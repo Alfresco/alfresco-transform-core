@@ -157,11 +157,6 @@ abstract class ProcessHandler extends FragmentHandler
     public void transform(CustomTransformer customTransformer) throws Exception
     {
         customTransformer.transform(sourceMimetype, inputStream, targetMimetype, outputStream, transformOptions, transformManager);
-        long len = transformManager.getOutputLength();
-        if (len == 0)
-        {
-            throw new TransformException(HttpStatus.INTERNAL_SERVER_ERROR, "Corrupted File. Cannot transform..");
-        }
     }
 
     protected abstract long getSourceSize();
@@ -169,6 +164,11 @@ abstract class ProcessHandler extends FragmentHandler
     @Override
     public void onSuccessfulTransform()
     {
+        long len = transformManager.getOutputLength();
+        if (len == 0)
+        {
+            throw new TransformException(HttpStatus.UNPROCESSABLE_ENTITY, "The file after transformation is empty. This could be caused by a corrupted source file.");
+        }
         sendTransformResponse(transformManager);
 
         LogEntry.setTargetSize(transformManager.getOutputLength());
