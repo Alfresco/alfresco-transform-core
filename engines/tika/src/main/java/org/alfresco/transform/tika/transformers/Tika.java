@@ -259,13 +259,15 @@ public class Tika
                 TransformerHandler transformerHandler;
                 transformerHandler = factory.newTransformerHandler();
                 transformerHandler.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");
-                transformerHandler.getTransformer().setOutputProperty(OutputKeys.VERSION, "1.1");
                 transformerHandler.setResult(new StreamResult(output));
                 handler = transformerHandler;
 
                 if (MIMETYPE_HTML.equals(targetMimetype))
                 {
+                    transformerHandler.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");
+                    transformerHandler.getTransformer().setOutputProperty(OutputKeys.VERSION, "1.1");
                     transformerHandler.getTransformer().setOutputProperty(OutputKeys.METHOD, HTML);
+                    transformerHandler.setResult(new StreamResult(output));
                     return new ExpandedTitleContentHandler(transformerHandler);
                 }
                 else if (MIMETYPE_XHTML.equals(targetMimetype) ||
