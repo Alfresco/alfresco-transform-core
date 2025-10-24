@@ -1,7 +1,8 @@
 # Image provides a container in which to run miscellaneous transformations for Alfresco Content Services.
 
 # More infos about this image: https://github.com/Alfresco/alfresco-docker-base-java
-FROM alfresco/alfresco-base-java:jre17-rockylinux9@sha256:f98833508b7be8c4b44a25450f9faac44cacfdc075f2295e02836b93fd05bb9c
+ARG JAVA_BASE_IMAGE=alfresco/alfresco-base-java:jre17-rockylinux9@sha256:f98833508b7be8c4b44a25450f9faac44cacfdc075f2295e02836b93fd05bb9c
+FROM ${JAVA_BASE_IMAGE}
 
 ENV JAVA_OPTS=""
 

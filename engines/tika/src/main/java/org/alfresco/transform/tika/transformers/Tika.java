@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
@@ -248,40 +249,37 @@ public class Tika
     {
         try
         {
-            ContentHandler handler;
             if (MIMETYPE_TEXT_PLAIN.equals(targetMimetype))
             {
-                handler = new BodyContentHandler(output);
+                return new BodyContentHandler(output);
+            }
+            if (MIMETYPE_TEXT_CSV.equals(targetMimetype))
+            {
+                return new CsvContentHandler(output);
+            }
+
+            SAXTransformerFactory factory = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
+            TransformerHandler transformerHandler = factory.newTransformerHandler();
+            Transformer transformer = transformerHandler.getTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+            if (MIMETYPE_HTML.equals(targetMimetype))
+            {
+                transformer.setOutputProperty(OutputKeys.VERSION, "1.1");
+                transformer.setOutputProperty(OutputKeys.METHOD, HTML);
+                transformerHandler.setResult(new StreamResult(output));
+                return new ExpandedTitleContentHandler(transformerHandler);
+            }
+            else if (MIMETYPE_XHTML.equals(targetMimetype) || MIMETYPE_XML.equals(targetMimetype))
+            {
+                transformer.setOutputProperty(OutputKeys.METHOD, XML);
+                transformerHandler.setResult(new StreamResult(output));
+                return transformerHandler;
             }
             else
             {
-                SAXTransformerFactory factory = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
-                TransformerHandler transformerHandler;
-                transformerHandler = factory.newTransformerHandler();
-                transformerHandler.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");
-                transformerHandler.setResult(new StreamResult(output));
-                handler = transformerHandler;
-
-                if (MIMETYPE_HTML.equals(targetMimetype))
-                {
-                    transformerHandler.getTransformer().setOutputProperty(OutputKeys.METHOD, HTML);
-                    return new ExpandedTitleContentHandler(transformerHandler);
-                }
-                else if (MIMETYPE_XHTML.equals(targetMimetype) ||
-                        MIMETYPE_XML.equals(targetMimetype))
-                {
-                    transformerHandler.getTransformer().setOutputProperty(OutputKeys.METHOD, XML);
-                }
-                else if (MIMETYPE_TEXT_CSV.equals(targetMimetype))
-                {
-                    handler = new CsvContentHandler(output);
-                }
-                else
-                {
-                    throw new IllegalArgumentException("Invalid target mimetype " + targetMimetype);
-                }
+                throw new IllegalArgumentException("Invalid target mimetype " + targetMimetype);
             }
-            return handler;
         }
         catch (TransformerConfigurationException e)
         {
