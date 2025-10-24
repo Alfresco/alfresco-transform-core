@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
@@ -259,18 +260,19 @@ public class Tika
 
             SAXTransformerFactory factory = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
             TransformerHandler transformerHandler = factory.newTransformerHandler();
-            transformerHandler.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");
+            Transformer transformer = transformerHandler.getTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
             if (MIMETYPE_HTML.equals(targetMimetype))
             {
-                transformerHandler.getTransformer().setOutputProperty(OutputKeys.VERSION, "1.1");
-                transformerHandler.getTransformer().setOutputProperty(OutputKeys.METHOD, HTML);
+                transformer.setOutputProperty(OutputKeys.VERSION, "1.1");
+                transformer.setOutputProperty(OutputKeys.METHOD, HTML);
                 transformerHandler.setResult(new StreamResult(output));
                 return new ExpandedTitleContentHandler(transformerHandler);
             }
             else if (MIMETYPE_XHTML.equals(targetMimetype) || MIMETYPE_XML.equals(targetMimetype))
             {
-                transformerHandler.getTransformer().setOutputProperty(OutputKeys.METHOD, XML);
+                transformer.setOutputProperty(OutputKeys.METHOD, XML);
                 transformerHandler.setResult(new StreamResult(output));
                 return transformerHandler;
             }
