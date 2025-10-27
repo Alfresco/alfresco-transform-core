@@ -3,8 +3,7 @@
 # LibreOffice is from The Document Foundation. See the license at https://www.libreoffice.org/download/license/ or in /libreoffice.txt.
 
 # More infos about this image: https://github.com/Alfresco/alfresco-docker-base-java
-ARG JAVA_BASE_IMAGE=alfresco/alfresco-base-java:jre17-rockylinux9@sha256:f98833508b7be8c4b44a25450f9faac44cacfdc075f2295e02836b93fd05bb9c
-FROM ${JAVA_BASE_IMAGE}
+FROM alfresco/alfresco-base-java:jre17-rockylinux9@sha256:f98833508b7be8c4b44a25450f9faac44cacfdc075f2295e02836b93fd05bb9c
 
 ARG LIBREOFFICE_VERSION=7.2.5
 
@@ -33,8 +32,7 @@ RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.proj
     else \
       LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1) && \
       dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}${LIBREOFFICE_ARM64_RPM_VERSION} && \
-      JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/') && \
-      update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64; \
+      update-alternatives --set java java-17-openjdk.aarch64; \
     fi && \
       yum clean all
 
