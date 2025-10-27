@@ -18,7 +18,8 @@ else
 fi
 
 if [ "${SKIP_DEPLOY}" = "true" ]; then
-  MAVEN_PHASE="verify"
+  MAVEN_PHASE="deploy"
+  PROFILE="internal"
 fi
 
 source "$(dirname "${BASH_SOURCE[0]}")/java_base_image_map.sh"
