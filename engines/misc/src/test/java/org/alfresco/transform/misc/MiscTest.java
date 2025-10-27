@@ -28,7 +28,6 @@ package org.alfresco.transform.misc;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -61,7 +60,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import org.alfresco.transform.base.AbstractBaseTest;
-import org.alfresco.transform.common.TransformerMessages;
 
 /**
  * Test Misc. Includes calling the 3rd party libraries.
@@ -366,7 +364,6 @@ public class MiscTest extends AbstractBaseTest
 
         assertEquals(0, result.getResponse().getContentLength(),
                 "Returned content should be empty for an empty source file");
-        assertThat(result.getResponse().getErrorMessage()).isEqualTo(TransformerMessages.CORRUPTED_FILE_ERROR);
     }
 
     @Test
@@ -477,22 +474,13 @@ public class MiscTest extends AbstractBaseTest
             requestBuilder.param("extractMapping", extractMapping);
         }
 
-        if (content.length > 0)
-        {
-            return mockMvc.perform(requestBuilder)
-                    .andExpect(status().isOk())
-                    .andExpect(header().string("Content-Disposition",
-                            "attachment; filename*=" +
-                                    (targetEncoding == null ? "UTF-8" : targetEncoding) +
-                                    "''transform." + targetExtension))
-                    .andReturn();
-        }
-        else
-        {
-            return mockMvc.perform(requestBuilder)
-                    .andExpect(status().isUnprocessableEntity())
-                    .andReturn();
-        }
+        return mockMvc.perform(requestBuilder)
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*=" +
+                                (targetEncoding == null ? "UTF-8" : targetEncoding) +
+                                "''transform." + targetExtension))
+                .andReturn();
     }
 
     private String clean(String text)
