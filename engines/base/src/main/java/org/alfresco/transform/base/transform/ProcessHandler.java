@@ -178,7 +178,7 @@ abstract class ProcessHandler extends FragmentHandler
     protected void validateOutputLength()
     {
 
-        long sourceLen = transformManager.getSourceFile().length();
+        long sourceLen = getSourceSize();
         long targetLen = transformManager.getOutputLength();
         if (sourceLen > 0 && targetLen <= 0)
         {
