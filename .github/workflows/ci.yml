@@ -277,6 +277,7 @@ jobs:
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
           SMOKE_TESTS: true
+          SKIP_DEPLOY: true
           JAVA_RUNTIME_VERSION: ${{ matrix.java }}
         run: bash _ci/test.sh aio-test
 
