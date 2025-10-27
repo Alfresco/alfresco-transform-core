@@ -175,7 +175,7 @@ abstract class ProcessHandler extends FragmentHandler
     /**
      * Checks whether the output file has zero length, although the input file has a non-zero length. This scenario happens when the source file is corrupted.
      */
-    protected void validateOutputLength()
+    private void validateOutputLength()
     {
         long sourceLen = getSourceSize();
         long targetLen = transformManager.getOutputLength();
