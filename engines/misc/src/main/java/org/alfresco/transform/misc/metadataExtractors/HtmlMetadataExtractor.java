@@ -26,17 +26,8 @@
  */
 package org.alfresco.transform.misc.metadataExtractors;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
 
-import javax.swing.text.ChangedCharSetException;
-import javax.swing.text.MutableAttributeSet;
-import javax.swing.text.html.HTML;
-import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.parser.ParserDelegator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -46,13 +37,23 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.text.ChangedCharSetException;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.parser.ParserDelegator;
 
-import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
 
 /**
  * Metadata extractor for HTML and XHTML.
  *
- * Configuration:   (see HtmlMetadataExtractor_metadata_extract.properties and misc_engine_config.json)
+ * Configuration: (see HtmlMetadataExtractor_metadata_extract.properties and misc_engine_config.json)
  *
  * <pre>
  *   <b>author:</b>                 --      cm:author
@@ -73,7 +74,7 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractorEmbedder
 
     private static final String KEY_AUTHOR = "author";
     private static final String KEY_TITLE = "title";
-    private static final String KEY_DESCRIPTION= "description";
+    private static final String KEY_DESCRIPTION = "description";
 
     public HtmlMetadataExtractor()
     {
@@ -105,8 +106,7 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractorEmbedder
         // so cannot use the input stream provided, as it will get closed.
         final File sourceFile = transformManager.createSourceFile();
 
-        HTMLEditorKit.ParserCallback callback = new HTMLEditorKit.ParserCallback()
-        {
+        HTMLEditorKit.ParserCallback callback = new HTMLEditorKit.ParserCallback() {
             StringBuffer title = null;
             boolean inHead = false;
 
@@ -177,8 +177,7 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractorEmbedder
             }
 
             public void handleError(String errorMsg, int pos)
-            {
-            }
+            {}
         };
 
         String charsetGuess = "UTF-8";

@@ -29,22 +29,25 @@ package org.alfresco.transform.pdfrenderer;
 import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static org.alfresco.transform.base.clients.HttpClient.sendTRequest;
-import static org.alfresco.transform.base.clients.FileInfo.testFile;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;
 
+import static org.alfresco.transform.base.clients.FileInfo.testFile;
+import static org.alfresco.transform.base.clients.HttpClient.sendTRequest;
+
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.alfresco.transform.base.clients.FileInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+
+import org.alfresco.transform.base.clients.FileInfo;
 
 /**
  * @author Cezar Leahu
@@ -55,18 +58,16 @@ public class PdfRendererTransformationIT
     private static final String ENGINE_URL = "http://localhost:8090";
 
     private static final Map<String, FileInfo> TEST_FILES = Stream.of(
-        testFile("application/pdf","pdf","quick.pdf"),
-        testFile("application/illustrator","ai","quickCS3.ai")  ,      
-        testFile("application/illustrator","ai","quickCS5.ai")
-    ).collect(toMap(FileInfo::getPath, identity()));
+            testFile("application/pdf", "pdf", "quick.pdf"),
+            testFile("application/illustrator", "ai", "quickCS3.ai"),
+            testFile("application/illustrator", "ai", "quickCS5.ai")).collect(toMap(FileInfo::getPath, identity()));
 
     public static Stream<String> engineTransformations()
     {
         return Stream.of(
-            "quick.pdf",
-            "quickCS3.ai",
-            "quickCS5.ai"
-        );
+                "quick.pdf",
+                "quickCS3.ai",
+                "quickCS5.ai");
     }
 
     @ParameterizedTest
@@ -76,13 +77,13 @@ public class PdfRendererTransformationIT
         final String sourceMimetype = TEST_FILES.get(sourceFile).getMimeType();
 
         final String descriptor = format("Transform ({0}, {1} -> {2}, {3})",
-            sourceFile, sourceMimetype, "image/png", "png");
+                sourceFile, sourceMimetype, "image/png", "png");
 
         try
         {
             final ResponseEntity<Resource> response = sendTRequest(ENGINE_URL, sourceFile, sourceMimetype,
-                "image/png", "png");
-            assertEquals(OK, response.getStatusCode(),descriptor);
+                    "image/png", "png");
+            assertEquals(OK, response.getStatusCode(), descriptor);
         }
         catch (Exception e)
         {

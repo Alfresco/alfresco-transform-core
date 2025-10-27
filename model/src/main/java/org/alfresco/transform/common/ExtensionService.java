@@ -54,11 +54,11 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_WORD_TEMPL
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENXML_WORD_TEMPLATE_MACRO;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OUTLOOK_MSG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PPT;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_VISIO;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_VISIO_2013;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORDPERFECT;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_XHTML;
 import static org.alfresco.transform.common.TransformerDebug.MIMETYPE_METADATA_EMBED;
 import static org.alfresco.transform.common.TransformerDebug.MIMETYPE_METADATA_EXTRACT;
@@ -66,66 +66,62 @@ import static org.alfresco.transform.common.TransformerDebug.MIMETYPE_METADATA_E
 import java.util.Map;
 
 /**
- * Provides mapping between mimtypes and file extensions, static and not configurable.
- * The correct extension is required for a small subset of transforms in pipelines which go through the
- * libreoffice transformer
+ * Provides mapping between mimtypes and file extensions, static and not configurable. The correct extension is required for a small subset of transforms in pipelines which go through the libreoffice transformer
  */
 public class ExtensionService
 {
-    private final static String MIMETYPE_TAB_SEPARATED_VALUES="text/tab-separated-values";
-    private final static String MIMETYPE_CALC_TEMPLATE="application/vnd.sun.xml.calc.template";
-    private final static String MIMETYPE_IMPRESS_TEMPLATE="application/vnd.sun.xml.impress.template";
-    private final static String MIMETYPE_WRITER_TEMPLATE="application/vnd.sun.xml.writer.template";
+    private final static String MIMETYPE_TAB_SEPARATED_VALUES = "text/tab-separated-values";
+    private final static String MIMETYPE_CALC_TEMPLATE = "application/vnd.sun.xml.calc.template";
+    private final static String MIMETYPE_IMPRESS_TEMPLATE = "application/vnd.sun.xml.impress.template";
+    private final static String MIMETYPE_WRITER_TEMPLATE = "application/vnd.sun.xml.writer.template";
 
-    private static final Map<String,String> mimetpeExtensions = Map.ofEntries(       
-            Map.entry(MIMETYPE_WORD,                                "doc"), 
-            Map.entry(MIMETYPE_OPENXML_WORDPROCESSING_MACRO,        "docm"),
-            Map.entry(MIMETYPE_OPENXML_WORDPROCESSING,              "docx"),
-            Map.entry(MIMETYPE_OPENXML_WORD_TEMPLATE_MACRO,         "dotm"),
-            Map.entry(MIMETYPE_OPENXML_WORD_TEMPLATE,               "dotx"),
-            Map.entry(MIMETYPE_OPENDOCUMENT_GRAPHICS,               "odg"),
-            Map.entry(MIMETYPE_OPENDOCUMENT_PRESENTATION,           "odp"),
-            Map.entry(MIMETYPE_OPENDOCUMENT_PRESENTATION_TEMPLATE,  "otp"),
-            Map.entry(MIMETYPE_OPENDOCUMENT_SPREADSHEET,            "ods"), 
-            Map.entry(MIMETYPE_OPENDOCUMENT_SPREADSHEET_TEMPLATE,   "ots"), 
-            Map.entry(MIMETYPE_OPENDOCUMENT_TEXT,                   "odt"), 
-            Map.entry(MIMETYPE_OPENDOCUMENT_TEXT_TEMPLATE,          "ott"),
+    private static final Map<String, String> mimetpeExtensions = Map.ofEntries(
+            Map.entry(MIMETYPE_WORD, "doc"),
+            Map.entry(MIMETYPE_OPENXML_WORDPROCESSING_MACRO, "docm"),
+            Map.entry(MIMETYPE_OPENXML_WORDPROCESSING, "docx"),
+            Map.entry(MIMETYPE_OPENXML_WORD_TEMPLATE_MACRO, "dotm"),
+            Map.entry(MIMETYPE_OPENXML_WORD_TEMPLATE, "dotx"),
+            Map.entry(MIMETYPE_OPENDOCUMENT_GRAPHICS, "odg"),
+            Map.entry(MIMETYPE_OPENDOCUMENT_PRESENTATION, "odp"),
+            Map.entry(MIMETYPE_OPENDOCUMENT_PRESENTATION_TEMPLATE, "otp"),
+            Map.entry(MIMETYPE_OPENDOCUMENT_SPREADSHEET, "ods"),
+            Map.entry(MIMETYPE_OPENDOCUMENT_SPREADSHEET_TEMPLATE, "ots"),
+            Map.entry(MIMETYPE_OPENDOCUMENT_TEXT, "odt"),
+            Map.entry(MIMETYPE_OPENDOCUMENT_TEXT_TEMPLATE, "ott"),
             Map.entry(MIMETYPE_OPENXML_PRESENTATION_TEMPLATE_MACRO, "potm"),
-            Map.entry(MIMETYPE_OPENXML_PRESENTATION_TEMPLATE,       "potx"),
-            Map.entry(MIMETYPE_OPENXML_PRESENTATION_ADDIN,          "ppam"),
-            Map.entry(MIMETYPE_PPT,                                 "ppt"), 
-            Map.entry(MIMETYPE_OPENXML_PRESENTATION_MACRO,          "pptm"),
-            Map.entry(MIMETYPE_OPENXML_PRESENTATION,                "pptx"),
-            Map.entry(MIMETYPE_OPENXML_PRESENTATION_SLIDE_MACRO,    "sldm"),
-            Map.entry(MIMETYPE_OPENXML_PRESENTATION_SLIDE,          "sldx"),
-            Map.entry(MIMETYPE_CALC_TEMPLATE,                       "stc"),
-            Map.entry(MIMETYPE_IMPRESS_TEMPLATE,                    "sti"),
-            Map.entry(MIMETYPE_WRITER_TEMPLATE,                     "stw"),
-            Map.entry(MIMETYPE_TAB_SEPARATED_VALUES,                "tsv"), 
-            Map.entry(MIMETYPE_OPENOFFICE1_CALC,                    "sxc"),
-            Map.entry(MIMETYPE_OPENOFFICE1_IMPRESS,                 "sxi"),
-            Map.entry(MIMETYPE_OPENOFFICE1_WRITER,                  "sxw"),
-            Map.entry(MIMETYPE_VISIO,                               "vsd"),
-            Map.entry(MIMETYPE_VISIO_2013,                          "vsdx"),
-            Map.entry(MIMETYPE_WORDPERFECT,                         "wp"),
-            Map.entry(MIMETYPE_EXCEL,                               "xls"), 
-            Map.entry(MIMETYPE_OPENXML_SPREADSHEET_BINARY_MACRO,    "xlsb"),
-            Map.entry(MIMETYPE_OPENXML_SPREADSHEET_MACRO,           "xlsm"),
-            Map.entry(MIMETYPE_OPENXML_SPREADSHEET,                 "xlsx"),
-            Map.entry(MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO,  "xltm"),
-            Map.entry(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW,      "ppsx"),
-            Map.entry(MIMETYPE_OUTLOOK_MSG,                         "msg"),
-            Map.entry(MIMETYPE_DITA,                                "dita"),
-            Map.entry(MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE,        "xltx"),
-            Map.entry(MIMETYPE_IMAGE_SVG,                           "svg"),
-            Map.entry(MIMETYPE_TEXT_PLAIN,                          "txt"),
-            Map.entry(MIMETYPE_XHTML,                               "xhtml"),
-            Map.entry(MIMETYPE_IMAGE_XWD,                           "xwd")
-    );
+            Map.entry(MIMETYPE_OPENXML_PRESENTATION_TEMPLATE, "potx"),
+            Map.entry(MIMETYPE_OPENXML_PRESENTATION_ADDIN, "ppam"),
+            Map.entry(MIMETYPE_PPT, "ppt"),
+            Map.entry(MIMETYPE_OPENXML_PRESENTATION_MACRO, "pptm"),
+            Map.entry(MIMETYPE_OPENXML_PRESENTATION, "pptx"),
+            Map.entry(MIMETYPE_OPENXML_PRESENTATION_SLIDE_MACRO, "sldm"),
+            Map.entry(MIMETYPE_OPENXML_PRESENTATION_SLIDE, "sldx"),
+            Map.entry(MIMETYPE_CALC_TEMPLATE, "stc"),
+            Map.entry(MIMETYPE_IMPRESS_TEMPLATE, "sti"),
+            Map.entry(MIMETYPE_WRITER_TEMPLATE, "stw"),
+            Map.entry(MIMETYPE_TAB_SEPARATED_VALUES, "tsv"),
+            Map.entry(MIMETYPE_OPENOFFICE1_CALC, "sxc"),
+            Map.entry(MIMETYPE_OPENOFFICE1_IMPRESS, "sxi"),
+            Map.entry(MIMETYPE_OPENOFFICE1_WRITER, "sxw"),
+            Map.entry(MIMETYPE_VISIO, "vsd"),
+            Map.entry(MIMETYPE_VISIO_2013, "vsdx"),
+            Map.entry(MIMETYPE_WORDPERFECT, "wp"),
+            Map.entry(MIMETYPE_EXCEL, "xls"),
+            Map.entry(MIMETYPE_OPENXML_SPREADSHEET_BINARY_MACRO, "xlsb"),
+            Map.entry(MIMETYPE_OPENXML_SPREADSHEET_MACRO, "xlsm"),
+            Map.entry(MIMETYPE_OPENXML_SPREADSHEET, "xlsx"),
+            Map.entry(MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE_MACRO, "xltm"),
+            Map.entry(MIMETYPE_OPENXML_PRESENTATION_SLIDESHOW, "ppsx"),
+            Map.entry(MIMETYPE_OUTLOOK_MSG, "msg"),
+            Map.entry(MIMETYPE_DITA, "dita"),
+            Map.entry(MIMETYPE_OPENXML_SPREADSHEET_TEMPLATE, "xltx"),
+            Map.entry(MIMETYPE_IMAGE_SVG, "svg"),
+            Map.entry(MIMETYPE_TEXT_PLAIN, "txt"),
+            Map.entry(MIMETYPE_XHTML, "xhtml"),
+            Map.entry(MIMETYPE_IMAGE_XWD, "xwd"));
 
     protected ExtensionService()
-    {
-    }
+    {}
 
     public static String getExtensionForTargetMimetype(String targetMimetype, String sourceMimetype)
     {

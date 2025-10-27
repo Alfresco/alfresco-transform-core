@@ -21,9 +21,9 @@
  */
 package org.alfresco.transform.config.reader;
 
-import org.alfresco.transform.config.TransformConfig;
-
 import java.io.IOException;
+
+import org.alfresco.transform.config.TransformConfig;
 
 public interface TransformConfigReader
 {

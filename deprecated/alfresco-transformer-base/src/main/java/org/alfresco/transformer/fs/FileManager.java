@@ -39,11 +39,8 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-
 import jakarta.servlet.http.HttpServletRequest;
 
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.logging.LogEntry;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -51,6 +48,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
+
+import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transformer.logging.LogEntry;
 
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
@@ -66,10 +66,11 @@ public class FileManager
      * Returns a File to be used to store the result of a transformation.
      *
      * @param request
-     * @param filename The targetFilename supplied in the request. Only the filename if a path is used as part of the
-     *                 temporary filename.
+     * @param filename
+     *            The targetFilename supplied in the request. Only the filename if a path is used as part of the temporary filename.
      * @return a temporary File.
-     * @throws TransformException if there was no target filename.
+     * @throws TransformException
+     *             if there was no target filename.
      */
     public static File createTargetFile(HttpServletRequest request, String filename)
     {
@@ -96,9 +97,11 @@ public class FileManager
     /**
      * Checks the filename is okay to uses in a temporary file name.
      *
-     * @param filename or path to be checked.
+     * @param filename
+     *            or path to be checked.
      * @return the filename part of the supplied filename if it was a path.
-     * @throws TransformException if there was no target filename.
+     * @throws TransformException
+     *             if there was no target filename.
      */
     private static String checkFilename(boolean source, String filename)
     {
@@ -117,7 +120,7 @@ public class FileManager
         try
         {
             Files.copy(multipartFile.getInputStream(), file.toPath(),
-                StandardCopyOption.REPLACE_EXISTING);
+                    StandardCopyOption.REPLACE_EXISTING);
         }
         catch (IOException e)
         {
@@ -149,13 +152,13 @@ public class FileManager
             else
             {
                 throw new TransformException(INTERNAL_SERVER_ERROR,
-                    "Could not read the target file: " + file.getPath());
+                        "Could not read the target file: " + file.getPath());
             }
         }
         catch (MalformedURLException e)
         {
             throw new TransformException(INTERNAL_SERVER_ERROR,
-                "The target filename was malformed: " + file.getPath(), e);
+                    "The target filename was malformed: " + file.getPath(), e);
         }
     }
 
@@ -167,10 +170,10 @@ public class FileManager
         {
             String[] strings = contentDisposition.split("; *");
             filename = Arrays.stream(strings)
-                             .filter(s -> s.startsWith(FILENAME))
-                             .findFirst()
-                             .map(s -> s.substring(FILENAME.length()))
-                             .orElse("");
+                    .filter(s -> s.startsWith(FILENAME))
+                    .findFirst()
+                    .map(s -> s.substring(FILENAME.length()))
+                    .orElse("");
         }
         return filename;
     }
@@ -178,8 +181,10 @@ public class FileManager
     /**
      * Returns the file name for the target file
      *
-     * @param fileName        Desired file name
-     * @param targetExtension File extension
+     * @param fileName
+     *            Desired file name
+     * @param targetExtension
+     *            File extension
      * @return Target file name
      */
     public static String createTargetFileName(final String fileName, final String targetExtension)
@@ -199,16 +204,18 @@ public class FileManager
         }
 
         return sourceFilename.substring(0, sourceFilename.length() - ext.length() - 1) +
-               '.' + targetExtension;
+                '.' + targetExtension;
     }
 
     /**
      * Returns a File that holds the source content for a transformation.
      *
      * @param request
-     * @param multipartFile from the request
+     * @param multipartFile
+     *            from the request
      * @return a temporary File.
-     * @throws TransformException if there was no source filename.
+     * @throws TransformException
+     *             if there was no source filename.
      */
     public static File createSourceFile(HttpServletRequest request, MultipartFile multipartFile)
     {
@@ -231,13 +238,12 @@ public class FileManager
         }
     }
 
-    public static ResponseEntity<Resource> createAttachment(String targetFilename, File
-        targetFile)
+    public static ResponseEntity<Resource> createAttachment(String targetFilename, File targetFile)
     {
         Resource targetResource = load(targetFile);
         targetFilename = UriUtils.encodePath(getFilename(targetFilename), "UTF-8");
         return ResponseEntity.ok().header(CONTENT_DISPOSITION,
-            "attachment; filename*=UTF-8''" + targetFilename).body(targetResource);
+                "attachment; filename*=UTF-8''" + targetFilename).body(targetResource);
     }
 
     /**
@@ -255,8 +261,9 @@ public class FileManager
             catch (IOException e)
             {
                 throw new RuntimeException(
-                    "Failed to created temp file: \n   prefix: " + prefix +
-                    "\n   suffix: " + suffix + "\n   directory: " + directory, e);
+                        "Failed to created temp file: \n   prefix: " + prefix +
+                                "\n   suffix: " + suffix + "\n   directory: " + directory,
+                        e);
             }
         }
 

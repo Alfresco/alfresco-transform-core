@@ -1,24 +1,19 @@
 package org.alfresco.transform.base;
 
-import org.junit.jupiter.api.Test;
-
-import org.springframework.core.io.ClassPathResource;
-
-import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-
-import java.net.URISyntaxException;
-
-import java.util.Objects;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
+import java.net.URISyntaxException;
+import java.util.Objects;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 
 public abstract class LivenessReadinessProbeTest
 {
@@ -34,12 +29,9 @@ public abstract class LivenessReadinessProbeTest
             env.start();
             var url = "http://localhost:" + env.getFirstMappedPort();
 
-            /*
-                Asserts that /ready probe hasn't died before sending a transformation request.
-                Each /ready request creates a valid transformation and increases the counter of
-                used transformations, hence the need to divide MAX_TRANSFORMS
-            */
-            for (int i = 0; i<MAX_TRANSFORMS/2; i++) {
+            /* Asserts that /ready probe hasn't died before sending a transformation request. Each /ready request creates a valid transformation and increases the counter of used transformations, hence the need to divide MAX_TRANSFORMS */
+            for (int i = 0; i < MAX_TRANSFORMS / 2; i++)
+            {
                 assertProbeIsOk(url);
                 sendTransformRequest(url, testData.sourceMimetype, testData.targetMimetype, testData.filename);
             }
@@ -56,13 +48,13 @@ public abstract class LivenessReadinessProbeTest
     private GenericContainer<?> createEnv(String image) throws URISyntaxException
     {
         System.out.println(image);
-        final GenericContainer<?> transformCore = new GenericContainer<>("alfresco/"+image+":latest");
+        final GenericContainer<?> transformCore = new GenericContainer<>("alfresco/" + image + ":latest");
 
         return transformCore.withEnv("livenessTransformEnabled", "true")
-            .withEnv("maxTransforms", MAX_TRANSFORMS.toString())
-            .withNetworkAliases(image)
-            .withExposedPorts(8090)
-            .waitingFor(Wait.forListeningPort());
+                .withEnv("maxTransforms", MAX_TRANSFORMS.toString())
+                .withNetworkAliases(image)
+                .withExposedPorts(8090)
+                .waitingFor(Wait.forListeningPort());
     }
 
     protected static class ImagesForTests
@@ -106,7 +98,7 @@ public abstract class LivenessReadinessProbeTest
 
     private static void assertProbeDied(String url)
     {
-        WebTestClient client = WebTestClient.bindToServer().baseUrl(url+"/ready").build();
+        WebTestClient client = WebTestClient.bindToServer().baseUrl(url + "/ready").build();
         client.get()
                 .exchange()
                 .expectStatus().isEqualTo(TOO_MANY_REQUESTS);
@@ -114,7 +106,7 @@ public abstract class LivenessReadinessProbeTest
 
     private static void assertProbeIsOk(String url)
     {
-        WebTestClient client = WebTestClient.bindToServer().baseUrl(url+"/ready").build();
+        WebTestClient client = WebTestClient.bindToServer().baseUrl(url + "/ready").build();
         client.get()
                 .exchange()
                 .expectStatus().isEqualTo(OK);

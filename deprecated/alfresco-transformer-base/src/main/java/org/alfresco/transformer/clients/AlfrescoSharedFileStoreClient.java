@@ -31,8 +31,6 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 import java.io.File;
 
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.model.FileRefResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -45,10 +43,13 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transformer.model.FileRefResponse;
+
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * Simple Rest client that call Alfresco Shared File Store
+ *             Simple Rest client that call Alfresco Shared File Store
  */
 @Deprecated
 public class AlfrescoSharedFileStoreClient
@@ -62,7 +63,8 @@ public class AlfrescoSharedFileStoreClient
     /**
      * Retrieves a file from Shared File Store using given file reference
      *
-     * @param fileRef File reference
+     * @param fileRef
+     *            File reference
      * @return ResponseEntity<Resource>
      */
     public ResponseEntity<Resource> retrieveFile(String fileRef)
@@ -70,7 +72,7 @@ public class AlfrescoSharedFileStoreClient
         try
         {
             return restTemplate.getForEntity(fileStoreUrl + "/" + fileRef,
-                org.springframework.core.io.Resource.class);
+                    org.springframework.core.io.Resource.class);
         }
         catch (HttpClientErrorException e)
         {
@@ -81,7 +83,8 @@ public class AlfrescoSharedFileStoreClient
     /**
      * Stores given file in Shared File Store
      *
-     * @param file File to be stored
+     * @param file
+     *            File to be stored
      * @return A FileRefResponse containing detail about file's reference
      */
     public FileRefResponse saveFile(File file)
@@ -94,9 +97,9 @@ public class AlfrescoSharedFileStoreClient
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MULTIPART_FORM_DATA);
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map,
-                headers);
+                    headers);
             ResponseEntity<FileRefResponse> responseEntity = restTemplate
-                .exchange(fileStoreUrl, POST, requestEntity, FileRefResponse.class);
+                    .exchange(fileStoreUrl, POST, requestEntity, FileRefResponse.class);
             return responseEntity.getBody();
         }
         catch (HttpClientErrorException e)

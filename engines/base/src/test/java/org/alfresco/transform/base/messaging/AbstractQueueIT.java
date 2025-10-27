@@ -30,25 +30,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import jakarta.jms.Queue;
 
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.core.JmsTemplate;
 
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+
 /**
- * Checks that a t-engine can respond to its message queue. This is really just checking that
- * ${queue.engineRequestQueue} has been configured. The transform request can (and does fail
- * because the shared file store does not exist).
+ * Checks that a t-engine can respond to its message queue. This is really just checking that ${queue.engineRequestQueue} has been configured. The transform request can (and does fail because the shared file store does not exist).
  *
- * @author Lucian Tuca
- * created on 15/01/2019
+ * @author Lucian Tuca created on 15/01/2019
  */
-@SpringBootTest(classes={org.alfresco.transform.base.Application.class},
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = {"activemq.url=nio://localhost:61616"})
+@SpringBootTest(classes = {org.alfresco.transform.base.Application.class},
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {"activemq.url=nio://localhost:61616"})
 public abstract class AbstractQueueIT
 {
     @Autowired

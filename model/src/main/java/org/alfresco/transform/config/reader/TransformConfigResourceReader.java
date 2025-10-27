@@ -26,27 +26,30 @@
  */
 package org.alfresco.transform.config.reader;
 
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transform.config.TransformConfig;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * Reads {@link TransformConfig} from json or yaml files. Typically used by {@code TransformEngine.getTransformConfig()}.
+ * 
  * <pre>
- *     transformConfigResourceReader.read("classpath:pdfrenderer_engine_config.json");
+ * transformConfigResourceReader.read("classpath:pdfrenderer_engine_config.json");
  * </pre>
  */
 @Component
 public class TransformConfigResourceReader
 {
-    @Autowired ResourceLoader resourceLoader;
+    @Autowired
+    ResourceLoader resourceLoader;
 
     public TransformConfig read(String resourcePath)
     {

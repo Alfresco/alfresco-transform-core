@@ -5,7 +5,7 @@ spring:
       max-file-size: 8192MB
       max-request-size: 8192MB
   activemq:
-    broker-url: ${ACTIVEMQ_URL:nio://localhost:61616}?jms.watchTopicAdvisories=false
+    broker-url: ${ACTIVEMQ_URL:nio://localhost:61616}${ACTIVEMQ_URL_PARAMS:?jms.watchTopicAdvisories=false}
     user: ${ACTIVEMQ_USER:admin}
     password: ${ACTIVEMQ_PASSWORD:admin}
     pool:
@@ -16,11 +16,15 @@ spring:
 
 activemq:
   url: ${ACTIVEMQ_URL:false}
+  url.params: ${ACTIVEMQ_URL_PARAMS:false}
 
 server:
   port: ${SERVER_PORT:8090}
   error:
     include-message: ALWAYS
+  tomcat:
+    max-part-count: 10000
+    max-part-header-size: 8192B
 
 # Historic values (AVOID) - Exist to help with transition to newer versions
 transformer-routes-path: ${TRANSFORMER_ROUTES_FILE_LOCATION:transformer-pipelines.json}

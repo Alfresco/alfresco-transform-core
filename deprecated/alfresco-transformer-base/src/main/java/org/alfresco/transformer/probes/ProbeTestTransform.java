@@ -26,13 +26,14 @@
  */
 package org.alfresco.transformer.probes;
 
-import static org.alfresco.transformer.fs.FileManager.SOURCE_FILE;
-import static org.alfresco.transformer.fs.FileManager.TARGET_FILE;
-import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTempFile;
 import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
+
+import static org.alfresco.transformer.fs.FileManager.SOURCE_FILE;
+import static org.alfresco.transformer.fs.FileManager.TARGET_FILE;
+import static org.alfresco.transformer.fs.FileManager.TempFileProvider.createTempFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,38 +42,33 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-
 import jakarta.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.AbstractTransformerController;
 import org.alfresco.transformer.logging.LogEntry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * Provides the logic performing test transformations by the live and ready probes.
+ *             Provides the logic performing test transformations by the live and ready probes.
  *
- * <p><b>K8s probes</b>: A readiness probe indicates if the pod should accept request. <b>It does not indicate that a pod is
- * ready after startup</b>. The liveness probe indicates when to kill the pod. <b>Both probes are called throughout the
- * lifetime of the pod</b> and a <b>liveness probes can take place before a readiness probe.</b> The k8s
- * <b>initialDelaySeconds field is not fully honoured</b> as it is multiplied by a random number, so is
- * actually a maximum initial delay in seconds, but could be 0. </p>
+ *             <p>
+ *             <b>K8s probes</b>: A readiness probe indicates if the pod should accept request. <b>It does not indicate that a pod is ready after startup</b>. The liveness probe indicates when to kill the pod. <b>Both probes are called throughout the lifetime of the pod</b> and a <b>liveness probes can take place before a readiness probe.</b> The k8s <b>initialDelaySeconds field is not fully honoured</b> as it is multiplied by a random number, so is actually a maximum initial delay in seconds, but could be 0.
+ *             </p>
  *
- * <p>Live and readiness probes might do test transforms. The first 6 requests result in a transformation
- * of a small test file. The average time is remembered, but excludes the first one which is normally longer. This is
- * used in future requests to discover if transformations are becoming slower. The request also returns a non 200 status
- * code resulting in the k8s pod being terminated, after a predefined number of transformations have been performed or
- * if any transformation takes a long time. These are controlled by environment variables:</p>
- * <ul>
- * <li>livenessPercent - The percentage slower the small test transform must be to indicate there is a problem.</li>
- * <li>livenessTransformPeriodSeconds - As liveness probes should be frequent, not every request should result in
- * a test transformation. This value defines the gap between transformations.</li>
- * <li>maxTransforms - the maximum number of transformation to be performed before a restart.</li>
- * <li>maxTransformSeconds - the maximum time for a transformation, including failed ones.</li>
- * </ul>
+ *             <p>
+ *             Live and readiness probes might do test transforms. The first 6 requests result in a transformation of a small test file. The average time is remembered, but excludes the first one which is normally longer. This is used in future requests to discover if transformations are becoming slower. The request also returns a non 200 status code resulting in the k8s pod being terminated, after a predefined number of transformations have been performed or if any transformation takes a long time. These are controlled by environment variables:
+ *             </p>
+ *             <ul>
+ *             <li>livenessPercent - The percentage slower the small test transform must be to indicate there is a problem.</li>
+ *             <li>livenessTransformPeriodSeconds - As liveness probes should be frequent, not every request should result in a test transformation. This value defines the gap between transformations.</li>
+ *             <li>maxTransforms - the maximum number of transformation to be performed before a restart.</li>
+ *             <li>maxTransformSeconds - the maximum time for a transformation, including failed ones.</li>
+ *             </ul>
  */
 @Deprecated
 public abstract class ProbeTestTransform
@@ -115,18 +111,23 @@ public abstract class ProbeTestTransform
     /**
      * See Probes.md for more info.
      *
-     * @param expectedLength                 was the length of the target file during testing
-     * @param plusOrMinus                    simply allows for some variation in the transformed size caused by new versions of dates
-     * @param livenessPercent                indicates that for this type of transform a variation up to 2 and a half times is not
-     *                                       unreasonable under load
-     * @param maxTransforms                  default values normally supplied by helm. Not identical so we can be sure which value is used.
-     * @param maxTransformSeconds            default values normally supplied by helm. Not identical so we can be sure which value is used.
-     * @param livenessTransformPeriodSeconds default values normally supplied by helm. Not identical so we can be sure which value is used.
+     * @param expectedLength
+     *            was the length of the target file during testing
+     * @param plusOrMinus
+     *            simply allows for some variation in the transformed size caused by new versions of dates
+     * @param livenessPercent
+     *            indicates that for this type of transform a variation up to 2 and a half times is not unreasonable under load
+     * @param maxTransforms
+     *            default values normally supplied by helm. Not identical so we can be sure which value is used.
+     * @param maxTransformSeconds
+     *            default values normally supplied by helm. Not identical so we can be sure which value is used.
+     * @param livenessTransformPeriodSeconds
+     *            default values normally supplied by helm. Not identical so we can be sure which value is used.
      */
     public ProbeTestTransform(AbstractTransformerController controller,
-        String sourceFilename, String targetFilename, long expectedLength, long plusOrMinus,
-        int livenessPercent, long maxTransforms, long maxTransformSeconds,
-        long livenessTransformPeriodSeconds)
+            String sourceFilename, String targetFilename, long expectedLength, long plusOrMinus,
+            int livenessPercent, long maxTransforms, long maxTransformSeconds,
+            long livenessTransformPeriodSeconds)
     {
         this.sourceFilename = sourceFilename;
         this.targetFilename = targetFilename;
@@ -137,7 +138,7 @@ public abstract class ProbeTestTransform
         maxTransformCount = getPositiveLongEnv("maxTransforms", maxTransforms);
         maxTransformTime = getPositiveLongEnv("maxTransformSeconds", maxTransformSeconds) * 1000;
         livenessTransformPeriod = getPositiveLongEnv("livenessTransformPeriodSeconds",
-            livenessTransformPeriodSeconds) * 1000;
+                livenessTransformPeriodSeconds) * 1000;
         livenessTransformEnabled = getBooleanEnvVar("livenessTransformEnabled", false);
     }
 
@@ -148,8 +149,7 @@ public abstract class ProbeTestTransform
             return Boolean.parseBoolean(System.getenv(name));
         }
         catch (Exception ignore)
-        {
-        }
+        {}
         return defaultValue;
     }
 
@@ -164,8 +164,7 @@ public abstract class ProbeTestTransform
                 l = Long.parseLong(env);
             }
             catch (NumberFormatException ignore)
-            {
-            }
+            {}
         }
         if (l <= 0)
         {
@@ -187,9 +186,9 @@ public abstract class ProbeTestTransform
         }
         return (isLiveProbe && livenessTransformPeriod > 0 &&
                 (transCount <= AVERAGE_OVER_TRANSFORMS || nextTransformTime < System.currentTimeMillis()))
-               || !initialised.get()
-               ? doTransform(request, isLiveProbe)
-               : doNothing(isLiveProbe);
+                || !initialised.get()
+                        ? doTransform(request, isLiveProbe)
+                        : doNothing(isLiveProbe);
     }
 
     private String doNothing(boolean isLiveProbe)
@@ -215,8 +214,7 @@ public abstract class ProbeTestTransform
             do
             {
                 nextTransformTime += livenessTransformPeriod;
-            }
-            while (nextTransformTime < start);
+            } while (nextTransformTime < start);
         }
 
         File sourceFile = getSourceFile(request, isLiveProbe);
@@ -233,9 +231,9 @@ public abstract class ProbeTestTransform
         if (time > maxTime)
         {
             throw new TransformException(INTERNAL_SERVER_ERROR,
-                getMessagePrefix(isLiveProbe) +
-                message + " which is more than " + livenessPercent +
-                "% slower than the normal value of " + normalTime + "ms");
+                    getMessagePrefix(isLiveProbe) +
+                            message + " which is more than " + livenessPercent +
+                            "% slower than the normal value of " + normalTime + "ms");
         }
 
         // We don't care if the ready or live probe works out if we are 'ready' to take requests.
@@ -251,15 +249,15 @@ public abstract class ProbeTestTransform
         if (die.get())
         {
             throw new TransformException(TOO_MANY_REQUESTS,
-                getMessagePrefix(isLiveProbe) + "Transformer requested to die. A transform took " +
-                "longer than " + (maxTransformTime / 1000) + " seconds");
+                    getMessagePrefix(isLiveProbe) + "Transformer requested to die. A transform took " +
+                            "longer than " + (maxTransformTime / 1000) + " seconds");
         }
 
         if (maxTransformCount > 0 && transformCount.get() > maxTransformCount)
         {
             throw new TransformException(TOO_MANY_REQUESTS,
-                getMessagePrefix(isLiveProbe) + "Transformer requested to die. It has performed " +
-                "more than " + maxTransformCount + " transformations");
+                    getMessagePrefix(isLiveProbe) + "Transformer requested to die. It has performed " +
+                            "more than " + maxTransformCount + " transformations");
         }
     }
 
@@ -311,11 +309,11 @@ public abstract class ProbeTestTransform
                 maxTime = (normalTime * (livenessPercent + 100)) / 100;
 
                 if ((!isLiveProbe && !readySent.getAndSet(
-                    true)) || transCount > AVERAGE_OVER_TRANSFORMS)
+                        true)) || transCount > AVERAGE_OVER_TRANSFORMS)
                 {
                     nextTransformTime = System.currentTimeMillis() + livenessTransformPeriod;
                     logger.trace("{} - {}ms+{}%={}ms", message, normalTime, livenessPercent,
-                        maxTime);
+                            maxTime);
                 }
             }
             else if (!isLiveProbe && !readySent.getAndSet(true))
@@ -333,15 +331,15 @@ public abstract class ProbeTestTransform
         if (!targetFile.exists() || !targetFile.isFile())
         {
             throw new TransformException(INTERNAL_SERVER_ERROR,
-                probeMessage + "Target File \"" + targetFile.getAbsolutePath() + "\" did not exist");
+                    probeMessage + "Target File \"" + targetFile.getAbsolutePath() + "\" did not exist");
         }
         long length = targetFile.length();
         if (length < minExpectedLength || length > maxExpectedLength)
         {
             throw new TransformException(INTERNAL_SERVER_ERROR,
-                probeMessage + "Target File \"" + targetFile.getAbsolutePath() +
-                "\" was the wrong size (" + length + "). Needed to be between " +
-                minExpectedLength + " and " + maxExpectedLength);
+                    probeMessage + "Target File \"" + targetFile.getAbsolutePath() +
+                            "\" was the wrong size (" + length + "). Needed to be between " +
+                            minExpectedLength + " and " + maxExpectedLength);
         }
         LogEntry.setTargetSize(length);
         LogEntry.setStatusCodeAndMessage(OK.value(), probeMessage + "Success - " + message);

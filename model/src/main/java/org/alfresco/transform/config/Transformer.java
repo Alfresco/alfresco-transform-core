@@ -21,37 +21,24 @@
  */
 package org.alfresco.transform.config;
 
-import org.alfresco.transform.registry.TransformServiceRegistry;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import org.alfresco.transform.registry.TransformServiceRegistry;
+
 /**
- * Represents a set of transformations supported by the Transform Service or Local Transform Service Registry that
- * share the same transform options. Each may be an actual transformer, a pipeline of multiple transformers or a list
- * of failover transforms. It is possible that more than one transformer may able to perform a transformation from one
- * mimetype to another. The actual selection of transformer is up to the Transform Service or Local Transform Service
- * Registry to decide. Clients may use
- * {@link TransformServiceRegistry#isSupported(String, long, String, java.util.Map, String)} to decide
- * if they should send a request to the service. As a result clients have a simple generic view of transformations which
- * allows new transformations to be added without the need to change client data structures other than to define new
- * name value pairs. For this to work the Transform Service defines unique names for each option.
+ * Represents a set of transformations supported by the Transform Service or Local Transform Service Registry that share the same transform options. Each may be an actual transformer, a pipeline of multiple transformers or a list of failover transforms. It is possible that more than one transformer may able to perform a transformation from one mimetype to another. The actual selection of transformer is up to the Transform Service or Local Transform Service Registry to decide. Clients may use {@link TransformServiceRegistry#isSupported(String, long, String, java.util.Map, String)} to decide if they should send a request to the service. As a result clients have a simple generic view of transformations which allows new transformations to be added without the need to change client data structures other than to define new name value pairs. For this to work the Transform Service defines unique names for each option.
  * <ul>
- *     <li>transformerName - is optional but if supplied should be unique. The client should infer nothing from the name
- *     as it is simply a label, but the Local Transform Service Registry will use the name in pipelines.</lI>
- *     <li>transformOptions - a grouping of individual transformer transformOptions. The group may be optional and may
- *     contain nested transformOptions.</li>
+ * <li>transformerName - is optional but if supplied should be unique. The client should infer nothing from the name as it is simply a label, but the Local Transform Service Registry will use the name in pipelines.</lI>
+ * <li>transformOptions - a grouping of individual transformer transformOptions. The group may be optional and may contain nested transformOptions.</li>
  * </ul>
  * For local transforms, this structure is extended when defining a pipeline transform and failover transform.
  * <ul>
- * <li>transformerPipeline - an array of pairs of transformer name and target extension for each transformer in the
- * pipeline. The last one should not have an extension as that is defined by the request and should be in the
- * supported list.</li>
- * <li>transformerFailover - an array of failover definitions used in case of a fail transformation to pass a document
- * to a sequence of transforms until one succeeds.</li>
+ * <li>transformerPipeline - an array of pairs of transformer name and target extension for each transformer in the pipeline. The last one should not have an extension as that is defined by the request and should be in the supported list.</li>
+ * <li>transformerFailover - an array of failover definitions used in case of a fail transformation to pass a document to a sequence of transforms until one succeeds.</li>
  * <li>coreVersion - indicates the version of the T-Engine's base. See {@link CoreVersionDecorator} for more detail.</li>
  * </ul>
  */
@@ -65,11 +52,10 @@ public class Transformer
     private List<String> transformerFailover = new ArrayList<>();
 
     public Transformer()
-    {
-    }
+    {}
 
     public Transformer(String transformerName, Set<String> transformOptions,
-        Set<SupportedSourceAndTarget> supportedSourceAndTargetList)
+            Set<SupportedSourceAndTarget> supportedSourceAndTargetList)
     {
         this.transformerName = transformerName;
         this.transformOptions = transformOptions;
@@ -77,16 +63,16 @@ public class Transformer
     }
 
     public Transformer(String transformerName, Set<String> transformOptions,
-        Set<SupportedSourceAndTarget> supportedSourceAndTargetList,
-        List<TransformStep> transformerPipeline)
+            Set<SupportedSourceAndTarget> supportedSourceAndTargetList,
+            List<TransformStep> transformerPipeline)
     {
         this(transformerName, transformOptions, supportedSourceAndTargetList);
         this.transformerPipeline = transformerPipeline;
     }
 
     public Transformer(String transformerName, Set<String> transformOptions,
-        Set<SupportedSourceAndTarget> supportedSourceAndTargetList,
-        List<TransformStep> transformerPipeline, List<String> transformerFailover)
+            Set<SupportedSourceAndTarget> supportedSourceAndTargetList,
+            List<TransformStep> transformerPipeline, List<String> transformerFailover)
     {
         this(transformerName, transformOptions, supportedSourceAndTargetList, transformerPipeline);
         this.transformerFailover = transformerFailover;
@@ -148,7 +134,7 @@ public class Transformer
     }
 
     public void setSupportedSourceAndTargetList(
-        Set<SupportedSourceAndTarget> supportedSourceAndTargetList)
+            Set<SupportedSourceAndTarget> supportedSourceAndTargetList)
     {
         this.supportedSourceAndTargetList = supportedSourceAndTargetList == null ? new HashSet<>() : supportedSourceAndTargetList;
     }
@@ -156,36 +142,38 @@ public class Transformer
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Transformer that = (Transformer) o;
         return Objects.equals(transformerName, that.transformerName) &&
-               Objects.equals(coreVersion, that.coreVersion) &&
-               Objects.equals(transformerPipeline, that.transformerPipeline) &&
-               Objects.equals(transformerFailover, that.transformerFailover) &&
-               Objects.equals(transformOptions, that.transformOptions) &&
-               Objects.equals(supportedSourceAndTargetList,
-                   that.supportedSourceAndTargetList);
+                Objects.equals(coreVersion, that.coreVersion) &&
+                Objects.equals(transformerPipeline, that.transformerPipeline) &&
+                Objects.equals(transformerFailover, that.transformerFailover) &&
+                Objects.equals(transformOptions, that.transformOptions) &&
+                Objects.equals(supportedSourceAndTargetList,
+                        that.supportedSourceAndTargetList);
     }
 
     @Override
     public int hashCode()
     {
         return Objects.hash(transformerName, coreVersion, transformerPipeline, transformerFailover, transformOptions,
-            supportedSourceAndTargetList);
+                supportedSourceAndTargetList);
     }
 
     @Override
     public String toString()
     {
         return "Transformer{" +
-               "transformerName='" + transformerName + '\'' +
-               ", coreVersion=" + coreVersion +
-               ", transformerPipeline=" + transformerPipeline +
-               ", transformerFailover=" + transformerFailover +
-               ", transformOptions=" + transformOptions +
-               ", supportedSourceAndTargetList=" + supportedSourceAndTargetList +
-               '}';
+                "transformerName='" + transformerName + '\'' +
+                ", coreVersion=" + coreVersion +
+                ", transformerPipeline=" + transformerPipeline +
+                ", transformerFailover=" + transformerFailover +
+                ", transformOptions=" + transformOptions +
+                ", supportedSourceAndTargetList=" + supportedSourceAndTargetList +
+                '}';
     }
 
     public static Builder builder()
@@ -197,7 +185,8 @@ public class Transformer
     {
         private final Transformer transformer = new Transformer();
 
-        private Builder() {}
+        private Builder()
+        {}
 
         public Transformer build()
         {
@@ -235,7 +224,7 @@ public class Transformer
         }
 
         public Builder withSupportedSourceAndTargetList(
-            final Set<SupportedSourceAndTarget> supportedSourceAndTargetList)
+                final Set<SupportedSourceAndTarget> supportedSourceAndTargetList)
         {
             transformer.supportedSourceAndTargetList = supportedSourceAndTargetList;
             return this;

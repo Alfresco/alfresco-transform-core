@@ -22,7 +22,9 @@
 package org.alfresco.transform.config;
 
 /**
- * Holds information about existing {@link SupportedSourceAndTarget} objects that should be removed.<p><br>
+ * Holds information about existing {@link SupportedSourceAndTarget} objects that should be removed.
+ * <p>
+ * <br>
  *
  * <pre>
  *   "removeSupported" : [
@@ -39,8 +41,9 @@ public class RemoveSupported extends TransformerAndTypes
     @Override
     public String toString()
     {
-        return "{"+super.toString()+"}";
+        return "{" + super.toString() + "}";
     }
+
     public static Builder builder()
     {
         return new Builder();

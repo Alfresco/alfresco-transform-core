@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2024 Alfresco Software Limited
+ * Copyright (C) 2005 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,27 +26,27 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.TIFF_TAG_XRESOLUTION;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.TIFF_TAG_YRESOLUTION;
+
 import static org.alfresco.transform.common.RequestParamMap.END_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.PDF_FORMAT;
 import static org.alfresco.transform.common.RequestParamMap.PDF_ORIENTATION;
 import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
-import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.TIFF_TAG_XRESOLUTION;
-import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.TIFF_TAG_YRESOLUTION;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.apache.commons.imaging.Imaging;
 import org.apache.commons.imaging.ImagingException;
 import org.apache.commons.imaging.common.ImageMetadata;
@@ -63,15 +63,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
+
 /**
- * Converts image files into PDF files. Transformer uses PDF Box to perform conversions.
- * During conversion image might be scaled down (keeping proportions) to match width or height of the PDF document.
- * If the image is smaller than PDF page size, the image will be placed in the top left-hand side of the PDF document page.
- * Transformer accepts bellow optional transform parameters:
- * - startPage - page number of image (for multi-page images) from which transformer should start conversion. Default: first page of the image.
- * - endPage - page number of image (for multi-page images) up to which transformation should be performed. Default: last page of the image.
- * - pdfFormat - output PDF file format. Available formats: DEFAULT, A0, A1, A2, A3, A4, A5, A6, LETTER, LEGAL. Default: original image size.
- * - pdfOrientation - output PDF file orientation. Available options: DEFAULT, PORTRAIT, LANDSCAPE. Default: original image orientation.
+ * Converts image files into PDF files. Transformer uses PDF Box to perform conversions. During conversion image might be scaled down (keeping proportions) to match width or height of the PDF document. If the image is smaller than PDF page size, the image will be placed in the top left-hand side of the PDF document page. Transformer accepts bellow optional transform parameters: - startPage - page number of image (for multi-page images) from which transformer should start conversion. Default: first page of the image. - endPage - page number of image (for multi-page images) up to which transformation should be performed. Default: last page of the image. - pdfFormat - output PDF file format. Available formats: DEFAULT, A0, A1, A2, A3, A4, A5, A6, LETTER, LEGAL. Default: original image size. - pdfOrientation - output PDF file orientation. Available options: DEFAULT, PORTRAIT, LANDSCAPE. Default: original image orientation.
  */
 @Component
 public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
@@ -86,6 +82,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
     private static final String DEFAULT_PDF_FORMAT_STRING = "DEFAULT"; // pdf format to use when no pdf format specified
     private static final String DEFAULT_PDF_ORIENTATION_STRING = "DEFAULT";
     private static final float PDFBOX_POINTS_PER_INCH = 72.0F;
+    private static final List<String> DENY_LIST = List.of("com.github.jaiimageio.impl.plugins.tiff.TIFFImageReader");
 
     @Override
     public String getTransformerName()
@@ -95,13 +92,13 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
 
     @Override
     public void transform(
-        String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-        File imageFile, File pdfFile, TransformManager transformManager
-    ) throws Exception {
+            String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+            File imageFile, File pdfFile, TransformManager transformManager) throws Exception
+    {
         try (
-            ImageInputStream imageInputStream = ImageIO.createImageInputStream(imageFile);
-            PDDocument pdfDocument = new PDDocument()
-        ) {
+                ImageInputStream imageInputStream = ImageIO.createImageInputStream(imageFile);
+                PDDocument pdfDocument = new PDDocument())
+        {
             final Integer startPage = parseOptionIfPresent(transformOptions, START_PAGE, Integer.class).orElse(null);
             final Integer endPage = parseOptionIfPresent(transformOptions, END_PAGE, Integer.class).orElse(null);
             final String pdfFormat = parseOptionIfPresent(transformOptions, PDF_FORMAT, String.class).orElse(DEFAULT_PDF_FORMAT_STRING);
@@ -135,14 +132,21 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         {
             throw new IOException(String.format(INVALID_IMAGE_ERROR_MESSAGE, imageName, mimetype));
         }
-        final ImageReader imageReader = imageReaders.next();
-        imageReader.setInput(imageInputStream);
-
-        return imageReader;
+        while (imageReaders.hasNext())
+        {
+            ImageReader reader = imageReaders.next();
+            // Only process if the reader class is not in the deny list
+            if (!DENY_LIST.contains(reader.getClass().getName()))
+            {
+                reader.setInput(imageInputStream);
+                return reader;
+            }
+        }
+        throw new IOException(String.format(INVALID_IMAGE_ERROR_MESSAGE, imageName, mimetype));
     }
 
     private void scaleAndDrawImage(final PDDocument pdfDocument, final BufferedImage bufferedImage, final String pdfFormat, final String pdfOrientation, final Map<String, Integer> resolution)
-        throws IOException
+            throws IOException
     {
         final PDImageXObject image = LosslessFactory.createFromImage(pdfDocument, bufferedImage);
 
@@ -150,10 +154,10 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         int imageHeight = image.getHeight();
         // if the image has a resolution which differs from pdfbox then adjust size in pixels according to pdfbox ppi
         if (resolution.get("X") > 0 && resolution.get("X") != PDFBOX_POINTS_PER_INCH &&
-            resolution.get("Y") > 0 && resolution.get("Y") != PDFBOX_POINTS_PER_INCH)
+                resolution.get("Y") > 0 && resolution.get("Y") != PDFBOX_POINTS_PER_INCH)
         {
-            imageWidth = (int)(((float)imageWidth / resolution.get("X")) * PDFBOX_POINTS_PER_INCH);
-            imageHeight = (int)(((float)imageHeight / resolution.get("Y")) * PDFBOX_POINTS_PER_INCH);
+            imageWidth = (int) (((float) imageWidth / resolution.get("X")) * PDFBOX_POINTS_PER_INCH);
+            imageHeight = (int) (((float) imageHeight / resolution.get("Y")) * PDFBOX_POINTS_PER_INCH);
         }
 
         final PDPage pdfPage = new PDPage(resolvePdfFormat(pdfFormat, pdfOrientation, imageWidth, imageHeight));

@@ -29,5 +29,4 @@ package org.alfresco.transform.aio;
 import org.alfresco.transform.misc.MiscMetadataExtractsIT;
 
 public class AIOMiscMetadataExtractsIT extends MiscMetadataExtractsIT
-{
-}
+{}

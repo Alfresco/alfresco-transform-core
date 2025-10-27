@@ -26,15 +26,42 @@
  */
 package org.alfresco.transform.base;
 
-import org.alfresco.transform.base.logging.LogEntry;
-import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.base.registry.TransformRegistry;
-import org.alfresco.transform.base.transform.TransformHandler;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.registry.TransformServiceRegistry;
+import static java.text.MessageFormat.format;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+
+import static org.alfresco.transform.base.html.OptionsHelper.getOptionNames;
+import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION;
+import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_ERROR;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_LIVE;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_LOG;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_READY;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_ROOT;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TEST;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_VERSION;
+import static org.alfresco.transform.common.RequestParamMap.FILE;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
+import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
+import static org.alfresco.transform.config.CoreVersionDecorator.setOrClearCoreVersion;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import jakarta.annotation.PostConstruct;
+import jakarta.jms.Destination;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,39 +84,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.jms.Destination;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static java.text.MessageFormat.format;
-import static org.alfresco.transform.base.html.OptionsHelper.getOptionNames;
-import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION;
-import static org.alfresco.transform.common.RequestParamMap.CONFIG_VERSION_DEFAULT;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_ERROR;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_LIVE;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_LOG;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_READY;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_ROOT;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TEST;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM_CONFIG;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_VERSION;
-import static org.alfresco.transform.common.RequestParamMap.FILE;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
-import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
-import static org.alfresco.transform.config.CoreVersionDecorator.setOrClearCoreVersion;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+import org.alfresco.transform.base.logging.LogEntry;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.base.registry.TransformRegistry;
+import org.alfresco.transform.base.transform.TransformHandler;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * Provides the main endpoints into the t-engine.
@@ -126,9 +128,9 @@ public class TransformController
             transformEngine = getTransformEngine();
             logger.info("TransformEngine: {}", transformEngine.getTransformEngineName());
             transformEngines.stream()
-                            .filter(transformEngineFromStream -> transformEngineFromStream != transformEngine)
-                            .sorted(Comparator.comparing(TransformEngine::getTransformEngineName))
-                            .map(sortedTransformEngine -> "  "+sortedTransformEngine.getTransformEngineName()).forEach(logger::info);
+                    .filter(transformEngineFromStream -> transformEngineFromStream != transformEngine)
+                    .sorted(Comparator.comparing(TransformEngine::getTransformEngineName))
+                    .map(sortedTransformEngine -> "  " + sortedTransformEngine.getTransformEngineName()).forEach(logger::info);
         }
     }
 
@@ -138,9 +140,9 @@ public class TransformController
         // CustomTransform code from many t-engines into a single t-engine. In this case, there should be a wrapper
         // TransformEngine (it has no TransformConfig of its own).
         return transformEngines.stream()
-                               .filter(transformEngineFromStream -> transformEngineFromStream.getTransformConfig() == null)
-                               .findFirst()
-                               .orElse(transformEngines.get(0));
+                .filter(transformEngineFromStream -> transformEngineFromStream.getTransformConfig() == null)
+                .findFirst()
+                .orElse(transformEngines.get(0));
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -285,8 +287,8 @@ public class TransformController
     @PostMapping(value = ENDPOINT_TRANSFORM, produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<TransformReply> transform(@RequestBody TransformRequest request,
-        @RequestParam(value = "timeout", required = false) Long timeout,
-        @RequestParam(value = "replyToQueue", required = false) Destination replyToQueue)
+            @RequestParam(value = "timeout", required = false) Long timeout,
+            @RequestParam(value = "replyToQueue", required = false) Destination replyToQueue)
     {
         TransformReply reply = transformHandler.handleMessageRequest(request, timeout, replyToQueue, getProbeTransform());
         return new ResponseEntity<>(reply, HttpStatus.valueOf(reply.getStatus()));
@@ -317,8 +319,7 @@ public class TransformController
         Map<String, String> requestParameters = new HashMap<>();
         sourceMimetype = overrideMimetypeFromExtension(origRequestParameters, SOURCE_MIMETYPE, sourceMimetype);
         targetMimetype = overrideMimetypeFromExtension(origRequestParameters, TARGET_MIMETYPE, targetMimetype);
-        origRequestParameters.forEach((name, value) ->
-        {
+        origRequestParameters.forEach((name, value) -> {
             if (!name.startsWith("value"))
             {
                 if (name.startsWith("name"))
@@ -338,7 +339,7 @@ public class TransformController
 
     private String overrideMimetypeFromExtension(Map<String, String> origRequestParameters, String name, String value)
     {
-        String override = origRequestParameters.remove("_"+ name);
+        String override = origRequestParameters.remove("_" + name);
         if (override != null && !override.isBlank())
         {
             value = override;
@@ -349,7 +350,7 @@ public class TransformController
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public void handleMissingParams(HttpServletResponse response, MissingServletRequestParameterException e)
-        throws IOException
+            throws IOException
     {
         final String message = format("Request parameter ''{0}'' is missing", e.getParameterName());
         logger.error(message, e);

@@ -26,10 +26,12 @@
  */
 package org.alfresco.transform.base.config;
 
-import org.alfresco.transform.base.html.TransformInterceptor;
-import org.alfresco.transform.base.registry.TransformConfigSource;
-import org.alfresco.transform.common.TransformerDebug;
-import org.alfresco.transform.messages.TransformRequestValidator;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.config.CoreFunction.standardizeCoreVersion;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -38,11 +40,10 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
-import static org.alfresco.transform.config.CoreFunction.standardizeCoreVersion;
+import org.alfresco.transform.base.html.TransformInterceptor;
+import org.alfresco.transform.base.registry.TransformConfigSource;
+import org.alfresco.transform.common.TransformerDebug;
+import org.alfresco.transform.messages.TransformRequestValidator;
 
 @Configuration
 @ComponentScan(

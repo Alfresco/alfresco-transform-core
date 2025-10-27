@@ -31,8 +31,7 @@ public abstract class AbstractTransformOption implements TransformOption
     private boolean required;
 
     public AbstractTransformOption()
-    {
-    }
+    {}
 
     public AbstractTransformOption(boolean required)
     {
@@ -54,8 +53,10 @@ public abstract class AbstractTransformOption implements TransformOption
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         AbstractTransformOption that = (AbstractTransformOption) o;
         return required == that.required;
     }
@@ -70,7 +71,7 @@ public abstract class AbstractTransformOption implements TransformOption
     public String toString()
     {
         return "AbstractTransformOption{" +
-               "required=" + required +
-               '}';
+                "required=" + required +
+                '}';
     }
 }

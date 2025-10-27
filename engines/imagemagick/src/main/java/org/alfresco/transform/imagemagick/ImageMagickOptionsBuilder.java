@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,15 +26,17 @@
  */
 package org.alfresco.transform.imagemagick;
 
-import com.google.common.collect.ImmutableList;
-import org.alfresco.transform.exceptions.TransformException;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
+import static org.alfresco.transform.base.util.Util.stringToBoolean;
+import static org.alfresco.transform.base.util.Util.stringToInteger;
 
 import java.util.List;
 import java.util.StringJoiner;
 
-import static org.alfresco.transform.base.util.Util.stringToBoolean;
-import static org.alfresco.transform.base.util.Util.stringToInteger;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import com.google.common.collect.ImmutableList;
+
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * ImageMagick options builder.
@@ -44,10 +46,8 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 public final class ImageMagickOptionsBuilder
 {
     private static final List<String> GRAVITY_VALUES = ImmutableList.of("North", "NorthEast",
-        "East", "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center");
+            "East", "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center");
 
-    private Integer startPage;
-    private Integer endPage;
     private Boolean alphaRemove;
     private Boolean autoOrient;
     private String cropGravity;
@@ -64,29 +64,8 @@ public final class ImageMagickOptionsBuilder
     private Boolean maintainAspectRatio;
     private String commandOptions;
 
-    private ImageMagickOptionsBuilder() {}
-
-    public ImageMagickOptionsBuilder withStartPage(final String startPage)
-    {
-        return withStartPage(stringToInteger(startPage));
-    }
-
-    public ImageMagickOptionsBuilder withStartPage(final Integer startPage)
-    {
-        this.startPage = startPage;
-        return this;
-    }
-
-    public ImageMagickOptionsBuilder withEndPage(final String endPage)
-    {
-        return withEndPage(stringToInteger(endPage));
-    }
-
-    public ImageMagickOptionsBuilder withEndPage(final Integer endPage)
-    {
-        this.endPage = endPage;
-        return this;
-    }
+    private ImageMagickOptionsBuilder()
+    {}
 
     public ImageMagickOptionsBuilder withAlphaRemove(final String alphaRemove)
     {
@@ -270,7 +249,7 @@ public final class ImageMagickOptionsBuilder
         }
 
         if (cropGravity != null || cropWidth != null || cropHeight != null || cropPercentage != null ||
-            cropXOffset != null || cropYOffset != null)
+                cropXOffset != null || cropYOffset != null)
         {
             if (cropGravity != null)
             {
@@ -349,8 +328,8 @@ public final class ImageMagickOptionsBuilder
         }
 
         return (commandOptions == null || "".equals(
-            commandOptions.trim()) ? "" : commandOptions + ' ') +
-               args.toString();
+                commandOptions.trim()) ? "" : commandOptions + ' ') +
+                args;
     }
 
     public static ImageMagickOptionsBuilder builder()

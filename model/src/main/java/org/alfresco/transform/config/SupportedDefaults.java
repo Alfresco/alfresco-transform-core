@@ -25,19 +25,20 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * Holds information to provide default {@code priority} and / or {@code maxSourceSizeBytes} defaults. In precedence
- * order from most specific to most general these are defined by combinations of {@code transformerName} and
- * {@code sourceMediaType}:<p><br>
+ * Holds information to provide default {@code priority} and / or {@code maxSourceSizeBytes} defaults. In precedence order from most specific to most general these are defined by combinations of {@code transformerName} and {@code sourceMediaType}:
+ * <p>
+ * <br>
  * <ul>
- *     <li><b>transformer and source media type default</b> {@code transformerName} + {@code sourceMediaType}</li>
- *     <li><b>transformer default</b> {@code transformerName}</li>
- *     <li><b>source media type default</b> {@code sourceMediaType}</li>
- *     <li><b>system wide default</b> none</li>
- * </ul><br>
+ * <li><b>transformer and source media type default</b> {@code transformerName} + {@code sourceMediaType}</li>
+ * <li><b>transformer default</b> {@code transformerName}</li>
+ * <li><b>source media type default</b> {@code sourceMediaType}</li>
+ * <li><b>system wide default</b> none</li>
+ * </ul>
+ * <br>
  *
- * Both {@code maxSourceSizeBytes} and {@code priority} may be specified in a {@code "supportedDefaults"} element, but
- * if only one is specified it is only that value that is being defaulted at the level specified by the combination of
- * {@code transformerName} and {@code sourceMediaType}.<p><br>
+ * Both {@code maxSourceSizeBytes} and {@code priority} may be specified in a {@code "supportedDefaults"} element, but if only one is specified it is only that value that is being defaulted at the level specified by the combination of {@code transformerName} and {@code sourceMediaType}.
+ * <p>
+ * <br>
  *
  * <pre>
  *   "supportedDefaults" : [
@@ -110,9 +111,11 @@ public class SupportedDefaults
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SupportedDefaults that = (SupportedDefaults)o;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        SupportedDefaults that = (SupportedDefaults) o;
         return Objects.equals(transformerName, that.transformerName) &&
                 Objects.equals(sourceMediaType, that.sourceMediaType) &&
                 Objects.equals(maxSourceSizeBytes, that.maxSourceSizeBytes) &&
@@ -129,10 +132,14 @@ public class SupportedDefaults
     public String toString()
     {
         StringJoiner sj = new StringJoiner(", ");
-        if (transformerName != null) sj.add("\"transformerName\": \""+transformerName+'"');
-        if (sourceMediaType != null) sj.add("\"sourceMediaType\": \""+sourceMediaType+'"');
-        if (maxSourceSizeBytes != null) sj.add("\"maxSourceSizeBytes\": \""+maxSourceSizeBytes+'"');
-        if (priority != null) sj.add("\"priority\": \""+priority+'"');
+        if (transformerName != null)
+            sj.add("\"transformerName\": \"" + transformerName + '"');
+        if (sourceMediaType != null)
+            sj.add("\"sourceMediaType\": \"" + sourceMediaType + '"');
+        if (maxSourceSizeBytes != null)
+            sj.add("\"maxSourceSizeBytes\": \"" + maxSourceSizeBytes + '"');
+        if (priority != null)
+            sj.add("\"priority\": \"" + priority + '"');
         return "{" + sj.toString() + "}";
     }
 

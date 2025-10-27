@@ -26,18 +26,10 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.fs.FileManager;
-import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_MULTIPART_ALTERNATIVE;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.Multipart;
-import jakarta.mail.Part;
-import jakarta.mail.Session;
-import jakarta.mail.internet.MimeMessage;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -50,18 +42,22 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Map;
 import java.util.Properties;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Multipart;
+import jakarta.mail.Part;
+import jakarta.mail.Session;
+import jakarta.mail.internet.MimeMessage;
 
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_MULTIPART_ALTERNATIVE;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.fs.FileManager;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 
 /**
- * Uses javax.mail.MimeMessage to generate plain text versions of RFC822 email
- * messages. Searches for all text content parts, and returns them. Any
- * attachments are ignored. TIKA Note - could be replaced with the Tika email
- * parser. Would require a recursing parser to be specified, but not the full
- * Auto one (we don't want attachments), just one containing text and html
- * related parsers.
+ * Uses javax.mail.MimeMessage to generate plain text versions of RFC822 email messages. Searches for all text content parts, and returns them. Any attachments are ignored. TIKA Note - could be replaced with the Tika email parser. Would require a recursing parser to be specified, but not the full Auto one (we don't want attachments), just one containing text and html related parsers.
  *
  * <p>
  * This code is based on a class of the same name originally implemented in alfresco-repository.
@@ -83,16 +79,16 @@ public class EMLTransformer implements CustomTransformerFileAdaptor
 
     @Override
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                          File sourceFile, File targetFile, TransformManager transformManager) throws Exception
+            File sourceFile, File targetFile, TransformManager transformManager) throws Exception
     {
         logger.debug("Performing RFC822 to text transform.");
         // Use try with resource
         try (InputStream contentInputStream = new BufferedInputStream(
-            new FileInputStream(sourceFile));
-             Writer bufferedFileWriter = new BufferedWriter(new FileWriter(targetFile)))
+                new FileInputStream(sourceFile));
+                Writer bufferedFileWriter = new BufferedWriter(new FileWriter(targetFile)))
         {
             MimeMessage mimeMessage = new MimeMessage(Session.getDefaultInstance(new Properties()),
-                contentInputStream);
+                    contentInputStream);
 
             final StringBuilder sb = new StringBuilder();
             Object content = mimeMessage.getContent();
@@ -111,16 +107,18 @@ public class EMLTransformer implements CustomTransformerFileAdaptor
     /**
      * Find "text" parts of message recursively and appends it to sb StringBuilder
      *
-     * @param multipart Multipart to process
-     * @param sb        StringBuilder
+     * @param multipart
+     *            Multipart to process
+     * @param sb
+     *            StringBuilder
      * @throws MessagingException
      * @throws IOException
      */
     private void processMultiPart(Multipart multipart, StringBuilder sb) throws MessagingException,
-        IOException
+            IOException
     {
         boolean isAlternativeMultipart = multipart.getContentType().contains(
-            MIMETYPE_MULTIPART_ALTERNATIVE);
+                MIMETYPE_MULTIPART_ALTERNATIVE);
         if (isAlternativeMultipart)
         {
             processAlternativeMultipart(multipart, sb);
@@ -150,8 +148,7 @@ public class EMLTransformer implements CustomTransformerFileAdaptor
      * @throws IOException
      * @throws MessagingException
      */
-    private void processAlternativeMultipart(Multipart multipart, StringBuilder sb) throws
-        IOException, MessagingException
+    private void processAlternativeMultipart(Multipart multipart, StringBuilder sb) throws IOException, MessagingException
     {
         Part partToUse = null;
         for (int i = 0, n = multipart.getCount(); i < n; i++)
@@ -181,8 +178,7 @@ public class EMLTransformer implements CustomTransformerFileAdaptor
     }
 
     /**
-     * Finds text on a given mail part. Accepted parts types are text/html and text/plain.
-     * Attachments are ignored
+     * Finds text on a given mail part. Accepted parts types are text/html and text/plain. Attachments are ignored
      *
      * @param part
      * @param sb
@@ -204,17 +200,17 @@ public class EMLTransformer implements CustomTransformerFileAdaptor
         {
             String mailPartContent = part.getContent().toString();
 
-            //create a temporary html file with same mail part content and encoding
+            // create a temporary html file with same mail part content and encoding
             File tempHtmlFile = FileManager.TempFileProvider.createTempFile("EMLTransformer_",
-                ".html");
+                    ".html");
             String encoding = getMailPartContentEncoding(part);
             try (OutputStreamWriter osWriter = new OutputStreamWriter(
-                new FileOutputStream(tempHtmlFile), encoding))
+                    new FileOutputStream(tempHtmlFile), encoding))
             {
                 osWriter.write(mailPartContent);
             }
 
-            //transform html file's content to plain text
+            // transform html file's content to plain text
             HtmlParserContentTransformer.EncodingAwareStringBean extractor = new HtmlParserContentTransformer.EncodingAwareStringBean();
             extractor.setCollapse(false);
             extractor.setLinks(false);
@@ -234,7 +230,7 @@ public class EMLTransformer implements CustomTransformerFileAdaptor
         if (startIndex > 0)
         {
             encoding = contentType.substring(startIndex + CHARSET.length() + 1)
-                                  .replaceAll("\"", "");
+                    .replaceAll("\"", "");
         }
         return encoding;
     }

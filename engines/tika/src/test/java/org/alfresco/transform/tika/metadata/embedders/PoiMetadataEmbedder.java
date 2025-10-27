@@ -26,7 +26,15 @@
  */
 package org.alfresco.transform.tika.metadata.embedders;
 
-import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EMBEDDER;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Collections;
+import java.util.Set;
+import java.util.StringJoiner;
+
 import org.apache.poi.ooxml.POIXMLProperties;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tika.embedder.Embedder;
@@ -39,18 +47,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Collections;
-import java.util.Set;
-import java.util.StringJoiner;
-
-import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EMBEDDER;
+import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddor;
 
 /**
- * Sample POI metadata embedder to demonstrate it is possible to add custom T-Engines that will add
- * metadata. This is not production code, so no supported mimetypes exist in the {@code tika_engine_config.json}.
+ * Sample POI metadata embedder to demonstrate it is possible to add custom T-Engines that will add metadata. This is not production code, so no supported mimetypes exist in the {@code tika_engine_config.json}.
  */
 @Component
 public class PoiMetadataEmbedder extends AbstractTikaMetadataExtractorEmbeddor
@@ -76,8 +76,7 @@ public class PoiMetadataEmbedder extends AbstractTikaMetadataExtractorEmbeddor
 
     private static class SamplePoiEmbedder implements Embedder
     {
-        private static final Set<MediaType> SUPPORTED_EMBED_TYPES =
-                Collections.singleton(MediaType.application("vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        private static final Set<MediaType> SUPPORTED_EMBED_TYPES = Collections.singleton(MediaType.application("vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
 
         @Override
         public Set<MediaType> getSupportedEmbedTypes(ParseContext parseContext)
@@ -115,19 +114,19 @@ public class PoiMetadataEmbedder extends AbstractTikaMetadataExtractorEmbeddor
                 }
                 switch (name)
                 {
-                    case "author":
-                        coreProp.setCreator(value);
-                        break;
-                    case "title":
-                        coreProp.setTitle(value);
-                        break;
-                    case "description":
-                        coreProp.setDescription(value);
-                        break;
-                    // There are other core values but this is sample code, so we will assume it is a custom value.
-                    default:
-                        custProp.addProperty(name, value);
-                        break;
+                case "author":
+                    coreProp.setCreator(value);
+                    break;
+                case "title":
+                    coreProp.setTitle(value);
+                    break;
+                case "description":
+                    coreProp.setDescription(value);
+                    break;
+                // There are other core values but this is sample code, so we will assume it is a custom value.
+                default:
+                    custProp.addProperty(name, value);
+                    break;
                 }
             }
             workbook.write(outputStream);

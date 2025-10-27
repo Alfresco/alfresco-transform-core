@@ -21,9 +21,9 @@
  */
 package org.alfresco.transform.registry;
 
-import org.alfresco.transform.config.CoreFunction;
-
 import java.util.Map;
+
+import org.alfresco.transform.config.CoreFunction;
 
 /**
  * Used by clients work out if a transformation is supported by a Transform Service.
@@ -31,23 +31,23 @@ import java.util.Map;
 public interface TransformServiceRegistry
 {
     /**
-     * Works out if the Transform Server should be able to transform content of a given source mimetype and size into a
-     * target mimetype given a list of actual transform option names and values (Strings) plus the data contained in the
-     * Transformer objects registered with this class.
+     * Works out if the Transform Server should be able to transform content of a given source mimetype and size into a target mimetype given a list of actual transform option names and values (Strings) plus the data contained in the Transformer objects registered with this class.
      *
-     * @param sourceMimetype    the mimetype of the source content
-     * @param sourceSizeInBytes the size in bytes of the source content. Ignored if negative.
-     * @param targetMimetype    the mimetype of the target
-     * @param actualOptions     the actual name value pairs available that could be passed to the Transform Service.
-     * @param transformName     (optional) name for the set of options and target mimetype. If supplied is used to cache
-     *                          results to avoid having to work out if a given transformation is supported a second time.
-     *                          The sourceMimetype and sourceSizeInBytes may still change. In the case of ACS this is the
-     *                          rendition name.
+     * @param sourceMimetype
+     *            the mimetype of the source content
+     * @param sourceSizeInBytes
+     *            the size in bytes of the source content. Ignored if negative.
+     * @param targetMimetype
+     *            the mimetype of the target
+     * @param actualOptions
+     *            the actual name value pairs available that could be passed to the Transform Service.
+     * @param transformName
+     *            (optional) name for the set of options and target mimetype. If supplied is used to cache results to avoid having to work out if a given transformation is supported a second time. The sourceMimetype and sourceSizeInBytes may still change. In the case of ACS this is the rendition name.
      * @return {@code}true{@code} if it is supported.
      */
     default boolean isSupported(final String sourceMimetype, final long sourceSizeInBytes,
-        final String targetMimetype, final Map<String, String> actualOptions,
-        final String transformName)
+            final String targetMimetype, final Map<String, String> actualOptions,
+            final String transformName)
     {
         long maxSize = findMaxSize(sourceMimetype, targetMimetype, actualOptions, transformName);
         return maxSize != 0 && (maxSize == -1L || maxSize >= sourceSizeInBytes);
@@ -56,44 +56,44 @@ public interface TransformServiceRegistry
     /**
      * Returns the maximun size (in bytes) of the source content that can be transformed.
      *
-     * @param sourceMimetype the mimetype of the source content
-     * @param targetMimetype the mimetype of the target
-     * @param actualOptions  the actual name value pairs available that could be passed to the Transform Service.
-     * @param transformName  (optional) name for the set of options and target mimetype. If supplied is used to cache
-     *                       results to avoid having to work out if a given transformation is supported a second time.
-     *                       The sourceMimetype and sourceSizeInBytes may still change. In the case of ACS this is the
-     *                       rendition name.
-     * @return the maximum size (in bytes) of the source content that can be transformed. If {@code -1} there is no
-     * limit, but if {@code 0} the transform is not supported.
+     * @param sourceMimetype
+     *            the mimetype of the source content
+     * @param targetMimetype
+     *            the mimetype of the target
+     * @param actualOptions
+     *            the actual name value pairs available that could be passed to the Transform Service.
+     * @param transformName
+     *            (optional) name for the set of options and target mimetype. If supplied is used to cache results to avoid having to work out if a given transformation is supported a second time. The sourceMimetype and sourceSizeInBytes may still change. In the case of ACS this is the rendition name.
+     * @return the maximum size (in bytes) of the source content that can be transformed. If {@code -1} there is no limit, but if {@code 0} the transform is not supported.
      */
     long findMaxSize(String sourceMimetype, String targetMimetype, Map<String, String> actualOptions,
-        String transformName);
+            String transformName);
 
     /**
-     * Works out the name of the transformer (might not map to an actual transformer) that will be used to transform
-     * content of a given source mimetype and size into a target mimetype given a list of actual transform option names
-     * and values (Strings) plus the data contained in the Transformer objects registered with this class.
+     * Works out the name of the transformer (might not map to an actual transformer) that will be used to transform content of a given source mimetype and size into a target mimetype given a list of actual transform option names and values (Strings) plus the data contained in the Transformer objects registered with this class.
      *
-     * @param sourceMimetype    the mimetype of the source content
-     * @param sourceSizeInBytes the size in bytes of the source content. Ignored if negative.
-     * @param targetMimetype    the mimetype of the target
-     * @param actualOptions     the actual name value pairs available that could be passed to the Transform Service.
-     * @param renditionName     (optional) name for the set of options and target mimetype. If supplied is used to cache
-     *                          results to avoid having to work out if a given transformation is supported a second time.
-     *                          The sourceMimetype and sourceSizeInBytes may still change. In the case of ACS this is the
-     *                          rendition name.
+     * @param sourceMimetype
+     *            the mimetype of the source content
+     * @param sourceSizeInBytes
+     *            the size in bytes of the source content. Ignored if negative.
+     * @param targetMimetype
+     *            the mimetype of the target
+     * @param actualOptions
+     *            the actual name value pairs available that could be passed to the Transform Service.
+     * @param renditionName
+     *            (optional) name for the set of options and target mimetype. If supplied is used to cache results to avoid having to work out if a given transformation is supported a second time. The sourceMimetype and sourceSizeInBytes may still change. In the case of ACS this is the rendition name.
      * @return the name of the transformer or {@code}null{@code} if not set or there is no supported transformer.
      */
     String findTransformerName(String sourceMimetype, long sourceSizeInBytes, String targetMimetype,
-        Map<String, String> actualOptions, String renditionName);
+            Map<String, String> actualOptions, String renditionName);
 
     /**
-     * Returns {@code true} if the {@code function} is supported by the named transformer. Not all transformers are
-     * able to support all functionality, as newer features may have been introduced into the core t-engine code since
-     * it was released. Normally used in conjunction with {@link #findTransformerName(String, long, String, Map, String)}
-     * rather than {@link #isSupported(String, long, String, Map, String)}.
-     * @param function to be checked.
-     * @param transformerName name of the transformer.
+     * Returns {@code true} if the {@code function} is supported by the named transformer. Not all transformers are able to support all functionality, as newer features may have been introduced into the core t-engine code since it was released. Normally used in conjunction with {@link #findTransformerName(String, long, String, Map, String)} rather than {@link #isSupported(String, long, String, Map, String)}.
+     * 
+     * @param function
+     *            to be checked.
+     * @param transformerName
+     *            name of the transformer.
      * @return {@code true} is supported, {@code false} otherwise.
      */
     default boolean isSupported(CoreFunction function, String transformerName)

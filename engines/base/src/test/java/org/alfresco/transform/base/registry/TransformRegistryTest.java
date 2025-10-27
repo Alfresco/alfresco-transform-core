@@ -26,16 +26,21 @@
  */
 package org.alfresco.transform.base.registry;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_EXCEL;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.alfresco.transform.base.fakes.AbstractFakeTransformEngine;
-import org.alfresco.transform.base.fakes.FakeTransformEngineWithAllInOne;
-import org.alfresco.transform.base.fakes.FakeTransformEngineWithOneCustomTransformer;
-import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
-import org.alfresco.transform.config.SupportedSourceAndTarget;
-import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.config.Transformer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,20 +48,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_EXCEL;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_WORD;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
+import org.alfresco.transform.base.fakes.AbstractFakeTransformEngine;
+import org.alfresco.transform.base.fakes.FakeTransformEngineWithAllInOne;
+import org.alfresco.transform.base.fakes.FakeTransformEngineWithOneCustomTransformer;
+import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
+import org.alfresco.transform.config.SupportedSourceAndTarget;
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.config.Transformer;
 
 @AutoConfigureMockMvc
-@SpringBootTest(classes={org.alfresco.transform.base.Application.class})
+@SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
 public class TransformRegistryTest
 {
     @Autowired
@@ -86,9 +87,9 @@ public class TransformRegistryTest
     private String getTransformerNames(TransformConfig transformConfig)
     {
         return transformConfig.getTransformers().stream()
-              .map(Transformer::getTransformerName)
-              .sorted()
-              .collect(Collectors.joining(", "));
+                .map(Transformer::getTransformerName)
+                .sorted()
+                .collect(Collectors.joining(", "));
     }
 
     @Test
@@ -101,7 +102,7 @@ public class TransformRegistryTest
     public void singleTransformEngine()
     {
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
-            new FakeTransformEngineWithOneCustomTransformer()));
+                new FakeTransformEngineWithOneCustomTransformer()));
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformRegistry.retrieveConfig();
 
@@ -112,34 +113,34 @@ public class TransformRegistryTest
     public void multipleTransformEngines()
     {
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
-            new FakeTransformEngineWithAllInOne(),
-            new FakeTransformEngineWithOneCustomTransformer(),
-            new FakeTransformEngineWithTwoCustomTransformers()));
+                new FakeTransformEngineWithAllInOne(),
+                new FakeTransformEngineWithOneCustomTransformer(),
+                new FakeTransformEngineWithTwoCustomTransformers()));
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformRegistry.retrieveConfig();
 
         assertEquals("Pdf2Jpg, Pdf2Png, TxT2Pdf, Txt2JpgViaPdf, Txt2PngViaPdf",
-            getTransformerNames(transformRegistry.getTransformConfig()));
+                getTransformerNames(transformRegistry.getTransformConfig()));
     }
 
     @Test
     public void uncombinedConfigFromEngine()
     {
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
-            new FakeTransformEngineWithAllInOne(),
-            new FakeTransformEngineWithTwoCustomTransformers()));
+                new FakeTransformEngineWithAllInOne(),
+                new FakeTransformEngineWithTwoCustomTransformers()));
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformRegistry.retrieveConfig();
 
         assertEquals("Pdf2Png, TxT2Pdf, Txt2JpgViaPdf, Txt2PngViaPdf",
-            getTransformerNames(transformRegistry.getTransformConfig()));
+                getTransformerNames(transformRegistry.getTransformConfig()));
 
         ReflectionTestUtils.setField(transformRegistry, "isTRouter", true);
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformRegistry.retrieveConfig();
 
         assertEquals("Pdf2Png, TxT2Pdf, Txt2PngViaPdf",
-            getTransformerNames(transformRegistry.getTransformConfig()));
+                getTransformerNames(transformRegistry.getTransformConfig()));
     }
 
     @Test
@@ -147,23 +148,23 @@ public class TransformRegistryTest
     {
         ReflectionTestUtils.setField(transformRegistry, "isTRouter", true);
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
-            new FakeTransformEngineWithAllInOne(),
-            new FakeTransformEngineWithTwoCustomTransformers()));
+                new FakeTransformEngineWithAllInOne(),
+                new FakeTransformEngineWithTwoCustomTransformers()));
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformRegistry.retrieveConfig();
 
         assertEquals("Pdf2Png, TxT2Pdf, Txt2PngViaPdf",
-            getTransformerNames(transformRegistry.getTransformConfig()));
+                getTransformerNames(transformRegistry.getTransformConfig()));
     }
 
     @Test
     public void singleTransformEngineWithAdditionalConfig()
     {
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
-            new FakeTransformEngineWithOneCustomTransformer()));
+                new FakeTransformEngineWithOneCustomTransformer()));
         ReflectionTestUtils.setField(transformConfigFiles, "files", ImmutableMap.of(
-            "a",   "config/addA2B.json",
-            "foo", "config/addB2C.json"));
+                "a", "config/addA2B.json",
+                "foo", "config/addB2C.json"));
 
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformConfigFromFiles.initFileConfig();
@@ -176,10 +177,10 @@ public class TransformRegistryTest
     public void singleTransformEngineWithHistoricAdditionalRoutes()
     {
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
-            new FakeTransformEngineWithOneCustomTransformer()));
+                new FakeTransformEngineWithOneCustomTransformer()));
         ReflectionTestUtils.setField(transformConfigFilesHistoric, "additional", ImmutableMap.of(
-            "a",   "config/addA2B.json",
-            "foo", "config/addB2C.json"));
+                "a", "config/addA2B.json",
+                "foo", "config/addB2C.json"));
 
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformConfigFromFiles.initFileConfig();
@@ -192,11 +193,11 @@ public class TransformRegistryTest
     public void singleTransformEngineWithHistoricTransformerRoutesExternalFile()
     {
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
-            new FakeTransformEngineWithOneCustomTransformer()));
+                new FakeTransformEngineWithOneCustomTransformer()));
         ReflectionTestUtils.setField(transformConfigFilesHistoric, "TRANSFORMER_ROUTES_FROM_CLASSPATH",
-            "config/removePdf2JpgAndAddA2Z.json"); // checking it is ignored
+                "config/removePdf2JpgAndAddA2Z.json"); // checking it is ignored
         ReflectionTestUtils.setField(transformConfigFilesHistoric, "transformerRoutesExternalFile",
-            "config/addA2B.json");
+                "config/addA2B.json");
 
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformConfigFromFiles.initFileConfig();
@@ -209,9 +210,9 @@ public class TransformRegistryTest
     public void singleTransformEngineWithHistoricTransformerRoutesOnClasspath()
     {
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
-            new FakeTransformEngineWithOneCustomTransformer()));
+                new FakeTransformEngineWithOneCustomTransformer()));
         ReflectionTestUtils.setField(transformConfigFilesHistoric, "TRANSFORMER_ROUTES_FROM_CLASSPATH",
-            "config/removePdf2JpgAndAddA2Z.json");
+                "config/removePdf2JpgAndAddA2Z.json");
 
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformConfigFromFiles.initFileConfig();
@@ -228,7 +229,7 @@ public class TransformRegistryTest
         assertFalse(transformRegistry.isReadyForTransformRequests());
 
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
-            new FakeTransformEngineWithOneCustomTransformer()));
+                new FakeTransformEngineWithOneCustomTransformer()));
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformRegistry.retrieveConfig();
 
@@ -239,33 +240,33 @@ public class TransformRegistryTest
     public void testCheckSourceSize()
     {
         ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
-            new AbstractFakeTransformEngine()
-            {
-                @Override public TransformConfig getTransformConfig()
-                {
-                    return TransformConfig.builder()
-                        .withTransformers(ImmutableList.of(
-                            Transformer.builder()
-                                .withTransformerName("transformerName")
-                                .withSupportedSourceAndTargetList(ImmutableSet.of(
-                                    SupportedSourceAndTarget.builder()
-                                        .withSourceMediaType(MIMETYPE_WORD)
-                                        .withTargetMediaType(MIMETYPE_PDF)
-                                        .build(),
-                                    SupportedSourceAndTarget.builder()
-                                        .withSourceMediaType(MIMETYPE_EXCEL)
-                                        .withTargetMediaType(MIMETYPE_PDF)
-                                        .withMaxSourceSizeBytes(12345L)
-                                        .build()))
-                                .build()))
-                    .build();
-                }
-            }));
+                new AbstractFakeTransformEngine() {
+                    @Override
+                    public TransformConfig getTransformConfig()
+                    {
+                        return TransformConfig.builder()
+                                .withTransformers(ImmutableList.of(
+                                        Transformer.builder()
+                                                .withTransformerName("transformerName")
+                                                .withSupportedSourceAndTargetList(ImmutableSet.of(
+                                                        SupportedSourceAndTarget.builder()
+                                                                .withSourceMediaType(MIMETYPE_WORD)
+                                                                .withTargetMediaType(MIMETYPE_PDF)
+                                                                .build(),
+                                                        SupportedSourceAndTarget.builder()
+                                                                .withSourceMediaType(MIMETYPE_EXCEL)
+                                                                .withTargetMediaType(MIMETYPE_PDF)
+                                                                .withMaxSourceSizeBytes(12345L)
+                                                                .build()))
+                                                .build()))
+                                .build();
+                    }
+                }));
         transformConfigFromTransformEngines.initTransformEngineConfig();
         transformRegistry.retrieveConfig();
 
-        assertTrue( transformRegistry.checkSourceSize("transformerName", MIMETYPE_WORD, Long.MAX_VALUE, MIMETYPE_PDF));
-        assertTrue( transformRegistry.checkSourceSize("transformerName", MIMETYPE_EXCEL, 12345L, MIMETYPE_PDF));
+        assertTrue(transformRegistry.checkSourceSize("transformerName", MIMETYPE_WORD, Long.MAX_VALUE, MIMETYPE_PDF));
+        assertTrue(transformRegistry.checkSourceSize("transformerName", MIMETYPE_EXCEL, 12345L, MIMETYPE_PDF));
         assertFalse(transformRegistry.checkSourceSize("transformerName", MIMETYPE_EXCEL, 12346L, MIMETYPE_PDF));
         assertFalse(transformRegistry.checkSourceSize("transformerName", "doesNotExist", 12345L, MIMETYPE_PDF));
         assertFalse(transformRegistry.checkSourceSize("doesNotExist", MIMETYPE_WORD, 12345L, MIMETYPE_PDF));

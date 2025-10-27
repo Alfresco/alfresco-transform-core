@@ -26,9 +26,18 @@
  */
 package org.alfresco.transform.base.http;
 
-import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
-import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
-import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
+
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
+import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,33 +48,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
 
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
-import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
-import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
-import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
+import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
+import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
+import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
 
 /**
  * Very basic requests to the TransformController using http.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes={org.alfresco.transform.base.Application.class})
+        classes = {org.alfresco.transform.base.Application.class})
 @ContextConfiguration(classes = {
-    FakeTransformEngineWithTwoCustomTransformers.class,
-    FakeTransformerTxT2Pdf.class,
-    FakeTransformerPdf2Png.class})
+        FakeTransformEngineWithTwoCustomTransformers.class,
+        FakeTransformerTxT2Pdf.class,
+        FakeTransformerPdf2Png.class})
 public class RestTest
 {
     @Autowired
     private TestRestTemplate restTemplate;
 
     private static final HttpHeaders HEADERS = new HttpHeaders();
-    static {
+    static
+    {
         HEADERS.setContentType(MULTIPART_FORM_DATA);
     }
 
@@ -92,7 +95,7 @@ public class RestTest
         parameters.add("file", new org.springframework.core.io.ClassPathResource("original.txt"));
 
         ResponseEntity<String> response = restTemplate.exchange(ENDPOINT_TRANSFORM, POST,
-            new HttpEntity<>(parameters, HEADERS), String.class, "");
+                new HttpEntity<>(parameters, HEADERS), String.class, "");
 
         assertTrue(response.getBody().contains("Direct Access Url not found."));
     }
@@ -106,7 +109,7 @@ public class RestTest
         parameters.add("file", new org.springframework.core.io.ClassPathResource("original.txt"));
 
         ResponseEntity<String> response = restTemplate.exchange(ENDPOINT_TRANSFORM, POST,
-            new HttpEntity<>(parameters, HEADERS), String.class, "");
+                new HttpEntity<>(parameters, HEADERS), String.class, "");
 
         assertEquals("Original Text -> TxT2Pdf()", response.getBody());
     }

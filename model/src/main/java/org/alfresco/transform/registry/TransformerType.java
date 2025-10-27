@@ -25,10 +25,7 @@ import org.alfresco.transform.config.Transformer;
 
 public enum TransformerType
 {
-    ENGINE_TRANSFORMER,
-    PIPELINE_TRANSFORMER,
-    FAILOVER_TRANSFORMER,
-    UNSUPPORTED_TRANSFORMER;
+    ENGINE_TRANSFORMER, PIPELINE_TRANSFORMER, FAILOVER_TRANSFORMER, UNSUPPORTED_TRANSFORMER;
 
     public static TransformerType valueOf(Transformer transformer)
     {
@@ -37,7 +34,7 @@ public enum TransformerType
             return null;
         }
         if ((transformer.getTransformerFailover() == null || transformer.getTransformerFailover().isEmpty()) &&
-            (transformer.getTransformerPipeline() == null || transformer.getTransformerPipeline().isEmpty()))
+                (transformer.getTransformerPipeline() == null || transformer.getTransformerPipeline().isEmpty()))
         {
             return ENGINE_TRANSFORMER;
         }

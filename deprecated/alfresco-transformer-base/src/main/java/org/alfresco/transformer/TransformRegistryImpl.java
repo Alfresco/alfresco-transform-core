@@ -26,33 +26,34 @@
 package org.alfresco.transformer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionOnSingleStepTransformers;
+
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import static org.alfresco.transform.config.CoreVersionDecorator.setCoreVersionOnSingleStepTransformers;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-
 import jakarta.annotation.PostConstruct;
 
-import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.registry.AbstractTransformRegistry;
-import org.alfresco.transform.registry.CombinedTransformConfig;
-import org.alfresco.transform.registry.TransformCache;
-import org.alfresco.transform.exceptions.TransformException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.ResourceLoader;
+
+import org.alfresco.transform.config.TransformConfig;
+import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.registry.AbstractTransformRegistry;
+import org.alfresco.transform.registry.CombinedTransformConfig;
+import org.alfresco.transform.registry.TransformCache;
 
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * Used by clients to work out if a transformation is supported based on the engine_config.json.
+ *             Used by clients to work out if a transformation is supported based on the engine_config.json.
  */
 @Deprecated
 public class TransformRegistryImpl extends AbstractTransformRegistry

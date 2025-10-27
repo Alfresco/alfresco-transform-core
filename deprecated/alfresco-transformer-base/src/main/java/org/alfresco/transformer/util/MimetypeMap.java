@@ -29,9 +29,8 @@ package org.alfresco.transformer.util;
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * Partially duplicated from *alfresco-data-model*.
+ *             Partially duplicated from *alfresco-data-model*.
  */
 @Deprecated
 public interface MimetypeMap extends org.alfresco.transform.common.Mimetype
-{
-}
+{}

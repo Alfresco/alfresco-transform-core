@@ -26,16 +26,28 @@
  */
 package org.alfresco.transform.base.transform;
 
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import static org.alfresco.transform.base.transform.StreamHandlerTest.read;
+import static org.alfresco.transform.common.Mimetype.*;
+import static org.alfresco.transform.common.RequestParamMap.*;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import jakarta.jms.Destination;
+
 import com.google.common.collect.ImmutableList;
-import org.alfresco.transform.base.fakes.FakeTransformEngineWithFragments;
-import org.alfresco.transform.base.fakes.FakeTransformerFragments;
-import org.alfresco.transform.base.messaging.TransformReplySender;
-import org.alfresco.transform.base.model.FileRefEntity;
-import org.alfresco.transform.base.model.FileRefResponse;
-import org.alfresco.transform.base.probes.ProbeTransform;
-import org.alfresco.transform.base.sfs.SharedFileStoreClient;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,31 +63,21 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import jakarta.jms.Destination;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import static org.alfresco.transform.base.transform.StreamHandlerTest.read;
-import static org.alfresco.transform.common.Mimetype.*;
-import static org.alfresco.transform.common.RequestParamMap.*;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.alfresco.transform.base.fakes.FakeTransformEngineWithFragments;
+import org.alfresco.transform.base.fakes.FakeTransformerFragments;
+import org.alfresco.transform.base.messaging.TransformReplySender;
+import org.alfresco.transform.base.model.FileRefEntity;
+import org.alfresco.transform.base.model.FileRefResponse;
+import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.base.sfs.SharedFileStoreClient;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
 
 @AutoConfigureMockMvc
-@SpringBootTest(classes={org.alfresco.transform.base.Application.class})
+@SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
 @ContextConfiguration(classes = {
-    FakeTransformEngineWithFragments.class,
-    FakeTransformerFragments.class})
+        FakeTransformEngineWithFragments.class,
+        FakeTransformerFragments.class})
 public class FragmentHandlerTest
 {
     @Autowired
@@ -99,34 +101,32 @@ public class FragmentHandlerTest
         String targetReference = UUID.randomUUID().toString();
 
         when(fakeSfsClient.retrieveFile(any()))
-            .thenReturn(new ResponseEntity<>(new ByteArrayResource(sourceText.getBytes(StandardCharsets.UTF_8)),
-                new HttpHeaders(), OK));
+                .thenReturn(new ResponseEntity<>(new ByteArrayResource(sourceText.getBytes(StandardCharsets.UTF_8)),
+                        new HttpHeaders(), OK));
 
         when(fakeSfsClient.saveFile(any()))
-            .thenAnswer(invocation ->
-        {
-            lines.add(read(invocation.getArgument(0)));
-            return new FileRefResponse(new FileRefEntity(targetReference));
-        });
+                .thenAnswer(invocation -> {
+                    lines.add(read(invocation.getArgument(0)));
+                    return new FileRefResponse(new FileRefEntity(targetReference));
+                });
 
-        doAnswer(invocation ->
-        {
+        doAnswer(invocation -> {
             replies.add(Pair.of(invocation.getArgument(0), invocation.getArgument(1)));
             return null;
         }).when(transformReplySender).send(any(), any());
 
         TransformRequest request = TransformRequest
-            .builder()
-            .withRequestId(UUID.randomUUID().toString())
-            .withSourceMediaType(MIMETYPE_PDF)
-            .withTargetMediaType(MIMETYPE_IMAGE_JPEG)
-            .withTargetExtension("jpeg")
-            .withSchema(1)
-            .withClientData("ACS")
-            .withSourceReference(sourceReference)
-            .withSourceSize(32L)
-            .withInternalContextForTransformEngineTests()
-            .build();
+                .builder()
+                .withRequestId(UUID.randomUUID().toString())
+                .withSourceMediaType(MIMETYPE_PDF)
+                .withTargetMediaType(MIMETYPE_IMAGE_JPEG)
+                .withTargetExtension("jpeg")
+                .withSchema(1)
+                .withClientData("ACS")
+                .withSourceReference(sourceReference)
+                .withSourceSize(32L)
+                .withInternalContextForTransformEngineTests()
+                .build();
         transformHandler.handleMessageRequest(request, Long.MAX_VALUE, null, probeTransform);
 
         TransformReply lastReply = replies.get(replies.size() - 1).getRight();
@@ -139,25 +139,26 @@ public class FragmentHandlerTest
         }
         else
         {
-            assertEquals("Transform failed - "+expectedError, errorDetails);
+            assertEquals("Transform failed - " + expectedError, errorDetails);
             assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), status);
         }
         assertEquals(expectedLines, lines);
     }
 
     @Test
-    public void testErrorIfHttp() {
+    public void testErrorIfHttp()
+    {
         String expectedError = "Fragments may only be sent via message queues. This an http request";
         await()
-            .atMost(10, TimeUnit.SECONDS)
-            .untilAsserted(() -> mockMvc.perform(
-                    MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
-                        .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
-                            "Start".getBytes(StandardCharsets.UTF_8)))
-                        .param(SOURCE_MIMETYPE, MIMETYPE_PDF)
-                        .param(TARGET_MIMETYPE, MIMETYPE_IMAGE_JPEG))
-                .andExpect(status().isInternalServerError())
-                .andExpect(status().reason(containsString(expectedError))));
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted(() -> mockMvc.perform(
+                        MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
+                                .file(new MockMultipartFile("file", null, MIMETYPE_TEXT_PLAIN,
+                                        "Start".getBytes(StandardCharsets.UTF_8)))
+                                .param(SOURCE_MIMETYPE, MIMETYPE_PDF)
+                                .param(TARGET_MIMETYPE, MIMETYPE_IMAGE_JPEG))
+                        .andExpect(status().isInternalServerError())
+                        .andExpect(status().reason(containsString(expectedError))));
     }
 
     @Test
@@ -176,21 +177,21 @@ public class FragmentHandlerTest
     public void testMultipleFragmentCallsWithFinished()
     {
         assertFragments("line1\nline2\nFinished", null,
-            ImmutableList.of("line1", "line2", "Finished"));
+                ImmutableList.of("line1", "line2", "Finished"));
     }
 
     @Test
     public void testMultipleFragmentsCallsWithoutFinish()
     {
         assertFragments("line1\nline2\nline3", null,
-            ImmutableList.of("line1", "line2", "line3"));
+                ImmutableList.of("line1", "line2", "line3"));
     }
 
     @Test
     public void testMultipleFragmentsCallsWithoutSendingLastFragment()
     {
         assertFragments("line1\nline2\nline3\nIgnored", null,
-            ImmutableList.of("line1", "line2", "line3"));
+                ImmutableList.of("line1", "line2", "line3"));
 
     }
 
@@ -204,14 +205,14 @@ public class FragmentHandlerTest
     public void testEndTooEarlyUsingFinished()
     {
         assertFragments("line1\nFinished\nline3", "Final fragment already sent",
-            ImmutableList.of("line1", "Finished"));
+                ImmutableList.of("line1", "Finished"));
     }
 
     @Test
     public void testEndTooEarlyUsingNull()
     {
         assertFragments("line1\nNull\nline3", "Final fragment already sent",
-            ImmutableList.of("line1"));
+                ImmutableList.of("line1"));
     }
 
     @Test
@@ -232,6 +233,6 @@ public class FragmentHandlerTest
     public void testNullAndFinished()
     {
         assertFragments("line1\nNull\nFinished", "Final fragment already sent",
-            ImmutableList.of("line1"));
+                ImmutableList.of("line1"));
     }
 }

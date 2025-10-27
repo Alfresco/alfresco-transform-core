@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>5.1.7-SNAPSHOT</version>
+    <version>5.2.4-A.1-SNAPSHOT</version>
     <name>Alfresco Transform Core</name>
     <packaging>pom</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.1</version>
+        <version>3.5.5</version>
     </parent>
 
     <properties>
@@ -21,24 +21,20 @@
         <acs-compatible.java.version>11</acs-compatible.java.version>
         <image.tag>latest</image.tag>
         <image.registry>quay.io</image.registry>
-        <dependency.pdfbox.version>2.0.30</dependency.pdfbox.version>
+        <dependency.pdfbox.version>3.0.5</dependency.pdfbox.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.20</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
-        <dependency.jackson.version>2.18.2</dependency.jackson.version>
-        <dependency.tika.version>2.9.2</dependency.tika.version>
-        <dependency.poi.version>5.2.5</dependency.poi.version>
-        <dependency.imaging.version>1.0.0-alpha5</dependency.imaging.version>
+        <dependency.jackson.version>2.19.2</dependency.jackson.version>
+        <dependency.tika.version>3.2.3</dependency.tika.version>
+        <dependency.poi.version>5.4.1</dependency.poi.version>
+        <dependency.commons-io.version>2.20.0</dependency.commons-io.version>
+        <dependency.imaging.version>1.0.0-alpha6</dependency.imaging.version>
         <dependency.snakeyaml.version>2.3</dependency.snakeyaml.version>
-        <!-- The override can be removed when logback version in spring-boot-starter-parent is updated and free of vulnerabilities -->
-        <logback.version>1.5.16</logback.version>
-        <!--The override can be removed when transitive (from tika) bouncycastle dependency is free of vulnerabilities-->
-        <dependency.bouncycastle.version.override>1.79</dependency.bouncycastle.version.override>
 
-        <spotless-plugin.version>2.43.0</spotless-plugin.version>
-        <!-- Do not match any files by default, but this can be overridden from the command line. -->
-        <spotless-include-list>NO_AUTOMATED_FORMATTING</spotless-include-list>
+        <spotless-plugin.version>2.45.0</spotless-plugin.version>
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
     </properties>
 
     <profiles>
@@ -137,15 +133,16 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- v1.10 has 0BSD license it must be consulted with Legal -->
             <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcmail-jdk18on</artifactId>
-                <version>${dependency.bouncycastle.version.override}</version>
+                <groupId>org.tukaani</groupId>
+                <artifactId>xz</artifactId>
+                <version>1.9</version>
             </dependency>
             <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk18on</artifactId>
-                <version>${dependency.bouncycastle.version.override}</version>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${dependency.commons-io.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.dom4j</groupId>
@@ -214,6 +211,12 @@
                 <artifactId>testcontainers</artifactId>
                 <version>1.20.4</version>
             </dependency>
+            <!-- Added as part of fixing vulnerability (PRODSEC-10503), Please remove it if no more needed -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -252,10 +255,6 @@
                 <configuration>
                   <skip>${parent.core.deploy.skip}</skip>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
             </plugin>
         </plugins>
 
@@ -374,11 +373,8 @@
                     <version>${spotless-plugin.version}</version>
                     <configuration>
                         <java>
-                            <includes>
-                                ${spotless-include-list}
-                            </includes>
                             <eclipse>
-                                <file>alfresco-formatter.xml</file>
+                                <file>https://raw.githubusercontent.com/Alfresco/alfresco-community-repo/refs/heads/master/alfresco-formatter.xml</file>
                             </eclipse>
                             <importOrder>
                                 <order>\#java|\#javax|\#jakarta,\#,\#org.alfresco,java|javax|jakarta,,org.alfresco</order>

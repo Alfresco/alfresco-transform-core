@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Model
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2025 Alfresco Software Limited
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -21,10 +21,14 @@
  */
 package org.alfresco.transform.registry;
 
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transform.config.TransformOption;
-import org.alfresco.transform.config.TransformOptionGroup;
-import org.alfresco.transform.config.TransformOptionValue;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
+import static java.util.Map.Entry;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
+import static org.alfresco.transform.common.RequestParamMap.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,23 +38,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptySet;
-import static java.util.Map.Entry;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
-import static org.alfresco.transform.common.RequestParamMap.TIMEOUT;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import org.alfresco.transform.config.TransformOption;
+import org.alfresco.transform.config.TransformOptionGroup;
+import org.alfresco.transform.config.TransformOptionValue;
+import org.alfresco.transform.exceptions.TransformException;
 
 class TransformRegistryHelper
 {
     private TransformRegistryHelper()
-    {
-    }
+    {}
 
     static Set<TransformOption> lookupTransformOptions(final Set<String> transformOptionNames,
-        final Map<String, Set<TransformOption>> transformOptions, final String readFrom,
-        final Consumer<String> logError)
+            final Map<String, Set<TransformOption>> transformOptions, final String readFrom,
+            final Consumer<String> logError)
     {
         if (transformOptionNames == null)
         {
@@ -64,22 +64,20 @@ class TransformRegistryHelper
             if (oneSetOfTransformOptions == null)
             {
                 logError.accept("transformOptions in " + readFrom + " with the name " + name +
-                                " does not exist. Ignored");
+                        " does not exist. Ignored");
                 continue;
             }
             options.add(new TransformOptionGroup(false, oneSetOfTransformOptions));
         }
 
-        return options.size() == 1 ?
-               ((TransformOptionGroup) options.iterator().next()).getTransformOptions() :
-               options;
+        return options.size() == 1 ? ((TransformOptionGroup) options.iterator().next()).getTransformOptions() : options;
     }
 
     // Returns transformers in increasing supported size order, where lower priority transformers for the same size have
     // been discarded.
     static List<SupportedTransform> retrieveTransformListBySize(final TransformCache data,
-        final String sourceMimetype, final String targetMimetype,
-        Map<String, String> actualOptions, String renditionName)
+            final String sourceMimetype, final String targetMimetype,
+            Map<String, String> actualOptions, String renditionName)
     {
         if (actualOptions == null)
         {
@@ -91,26 +89,27 @@ class TransformRegistryHelper
         }
 
         final List<SupportedTransform> cachedTransformList = renditionName == null
-            ? null
-            : data.retrieveCached(renditionName, sourceMimetype);
+                ? null
+                : data.retrieveCached(renditionName, sourceMimetype);
         if (cachedTransformList != null)
         {
             return cachedTransformList;
         }
 
-        // The transformOptions sometimes contains sourceEncoding and timeout, even though they should not be used
+        // The transformOptions sometimes contains sourceEncoding / timeout / file name, even though they should not be used
         // to select a transformer. Would like to change this, but cannot as we need to support all ACS repo versions.
-        if (actualOptions.containsKey(SOURCE_ENCODING) || actualOptions.containsKey(TIMEOUT))
+        if (actualOptions.containsKey(SOURCE_ENCODING) || actualOptions.containsKey(TIMEOUT) || actualOptions.containsKey(SOURCE_FILENAME))
         {
             actualOptions = new HashMap<>(actualOptions);
             actualOptions.remove(SOURCE_ENCODING);
             actualOptions.remove(TIMEOUT);
+            actualOptions.remove(SOURCE_FILENAME);
         }
 
         final List<SupportedTransform> builtTransformList = buildTransformList(data,
-            sourceMimetype,
-            targetMimetype,
-            actualOptions);
+                sourceMimetype,
+                targetMimetype,
+                actualOptions);
 
         if (renditionName != null)
         {
@@ -121,17 +120,17 @@ class TransformRegistryHelper
     }
 
     private static List<SupportedTransform> buildTransformList(
-        final TransformCache data, final String sourceMimetype, final String targetMimetype,
-        final Map<String, String> actualOptions)
+            final TransformCache data, final String sourceMimetype, final String targetMimetype,
+            final Map<String, String> actualOptions)
     {
         if (sourceMimetype == null)
         {
-          throw new TransformException(BAD_REQUEST, "Null value provided for sourceMimetype, please provide a value");
+            throw new TransformException(BAD_REQUEST, "Null value provided for sourceMimetype, please provide a value");
         }
 
         if (targetMimetype == null)
         {
-          throw new TransformException(BAD_REQUEST, "Null value provided for targetMimetype, please provide a value");
+            throw new TransformException(BAD_REQUEST, "Null value provided for targetMimetype, please provide a value");
         }
 
         final Map<String, List<SupportedTransform>> targetMap = data.retrieveTransforms(sourceMimetype);
@@ -141,7 +140,7 @@ class TransformRegistryHelper
         for (SupportedTransform supportedTransform : supportedTransformList)
         {
             final Map<String, Boolean> possibleTransformOptions = gatherPossibleTransformOptions(
-                supportedTransform.getTransformOptions(), actualOptions);
+                    supportedTransform.getTransformOptions(), actualOptions);
 
             if (optionsMatch(possibleTransformOptions, actualOptions))
             {
@@ -154,8 +153,8 @@ class TransformRegistryHelper
     // Add newTransform to the transformListBySize in increasing size order and discards
     // lower priority (numerically higher) transforms with a smaller or equal size.
     private static void addToSupportedTransformList(
-        final List<SupportedTransform> transformListBySize,
-        final SupportedTransform newTransform)
+            final List<SupportedTransform> transformListBySize,
+            final SupportedTransform newTransform)
     {
         if (transformListBySize.isEmpty())
         {
@@ -211,7 +210,7 @@ class TransformRegistryHelper
                 {
                     if (comparePriority < 0)
                     {
-                        if (i+1 < transformListBySize.size())
+                        if (i + 1 < transformListBySize.size())
                         {
                             // Look at the next element as size is higher but the priority is lower.
                             continue;
@@ -248,7 +247,7 @@ class TransformRegistryHelper
             // 1) the same priority but support a smaller size
             // 2) those with a lower priority and a smaller size
             if ((comparePriority == 0 && compareMaxSize >= 0) ||
-                (comparePriority > 0 && compareMaxSize >= 0))
+                    (comparePriority > 0 && compareMaxSize >= 0))
             {
                 transformListBySize.remove(i);
             }
@@ -260,32 +259,29 @@ class TransformRegistryHelper
     }
 
     private static Map<String, Boolean> gatherPossibleTransformOptions(
-        final TransformOptionGroup transformOptionGroup, final Map<String, String> actualOptions)
+            final TransformOptionGroup transformOptionGroup, final Map<String, String> actualOptions)
     {
         final Map<String, Boolean> possibleTransformOptions = new HashMap<>();
         addToPossibleTransformOptions(possibleTransformOptions, transformOptionGroup, true,
-            actualOptions);
+                actualOptions);
         return possibleTransformOptions;
     }
 
     /**
-     * Flatten out the transform options by adding them to the supplied possibleTransformOptions.</p>
+     * Flatten out the transform options by adding them to the supplied possibleTransformOptions.
+     * </p>
      *
-     * If possible discards options in the supplied transformOptionGroup if the group is optional and the actualOptions
-     * don't provide any of the options in the group. Or to put it another way:<p/>
+     * If possible discards options in the supplied transformOptionGroup if the group is optional and the actualOptions don't provide any of the options in the group. Or to put it another way:
+     * <p/>
      *
-     * It adds individual transform options from the transformOptionGroup to possibleTransformOptions if the group is
-     * required or if the actualOptions include individual options from the group. As a result it is possible that none
-     * of the group are added if it is optional. It is also possible to add individual transform options that are
-     * themselves required but not in the actualOptions. In this the optionsMatch method will return false.
+     * It adds individual transform options from the transformOptionGroup to possibleTransformOptions if the group is required or if the actualOptions include individual options from the group. As a result it is possible that none of the group are added if it is optional. It is also possible to add individual transform options that are themselves required but not in the actualOptions. In this the optionsMatch method will return false.
      *
-     * @return true if any options were added. Used by nested call parents to determine if an option was added from a
-     * nested sub group.
+     * @return true if any options were added. Used by nested call parents to determine if an option was added from a nested sub group.
      */
     static boolean addToPossibleTransformOptions(
-        final Map<String, Boolean> possibleTransformOptions,
-        final TransformOptionGroup transformOptionGroup, final Boolean parentGroupRequired,
-        final Map<String, String> actualOptions)
+            final Map<String, Boolean> possibleTransformOptions,
+            final TransformOptionGroup transformOptionGroup, final Boolean parentGroupRequired,
+            final Map<String, String> actualOptions)
     {
         boolean added = false;
         boolean required = false;
@@ -302,8 +298,8 @@ class TransformRegistryHelper
                 if (transformOption instanceof TransformOptionGroup)
                 {
                     added = addToPossibleTransformOptions(possibleTransformOptions,
-                        (TransformOptionGroup) transformOption, transformOptionGroupRequired,
-                        actualOptions);
+                            (TransformOptionGroup) transformOption, transformOptionGroupRequired,
+                            actualOptions);
                     required |= added;
                 }
                 else
@@ -340,15 +336,15 @@ class TransformRegistryHelper
     }
 
     static boolean optionsMatch(final Map<String, Boolean> transformOptions,
-        final Map<String, String> actualOptions)
+            final Map<String, String> actualOptions)
     {
         // Check all required transformOptions are supplied
         final boolean supported = transformOptions
-            .entrySet()
-            .stream()
-            .filter(Entry::getValue)// filter by the required status
-            .map(Entry::getKey)// map to the option name
-            .allMatch(actualOptions::containsKey);
+                .entrySet()
+                .stream()
+                .filter(Entry::getValue)// filter by the required status
+                .map(Entry::getKey)// map to the option name
+                .allMatch(actualOptions::containsKey);
 
         if (!supported)
         {
@@ -357,8 +353,8 @@ class TransformRegistryHelper
 
         // Check there are no extra unused actualOptions
         return actualOptions
-            .keySet()
-            .stream()
-            .allMatch(transformOptions::containsKey);
+                .keySet()
+                .stream()
+                .allMatch(transformOptions::containsKey);
     }
 }

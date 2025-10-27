@@ -27,6 +27,7 @@
 package org.alfresco.transformer.logging;
 
 import static java.lang.Math.max;
+
 import static org.springframework.http.HttpStatus.OK;
 
 import java.text.SimpleDateFormat;
@@ -42,10 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * Provides setter and getter methods to allow the current Thread to set various log properties and for these
- * values to be retrieved. The {@link #complete()} method should be called at the end of a request to flush the
- * current entry to an internal log Collection of the latest entries. The {@link #getLog()} method is used to obtain
- * access to this collection.
+ *             Provides setter and getter methods to allow the current Thread to set various log properties and for these values to be retrieved. The {@link #complete()} method should be called at the end of a request to flush the current entry to an internal log Collection of the latest entries. The {@link #getLog()} method is used to obtain access to this collection.
  */
 @Deprecated
 public final class LogEntry
@@ -204,8 +202,9 @@ public final class LogEntry
         if (logEntry.statusCode == OK.value())
         {
             logEntry.durationStreamOut = System.currentTimeMillis() - logEntry.start -
-                                         logEntry.durationStreamIn - max(logEntry.durationTransform,
-                0) - max(logEntry.durationDelay, 0);
+                    logEntry.durationStreamIn - max(logEntry.durationTransform,
+                            0)
+                    - max(logEntry.durationDelay, 0);
         }
         currentLogEntry.remove();
 
@@ -233,18 +232,20 @@ public final class LogEntry
     public String getDuration()
     {
         long duration = durationStreamIn + max(durationTransform, 0) + max(durationDelay, 0) + max(
-            durationStreamOut, 0);
+                durationStreamOut, 0);
         return duration <= 5
-               ? ""
-               : time(duration) +
-                 " (" +
-                 (time(durationStreamIn) + ' ' +
-                  time(durationTransform) + ' ' +
-                  (durationDelay > 0
-                   ? time(durationDelay) + ' ' + (durationStreamOut < 0 ? "-" : time(
-                      durationStreamOut))
-                   : time(durationStreamOut))).trim() +
-                 ")";
+                ? ""
+                : time(duration) +
+                        " (" +
+                        (time(durationStreamIn) + ' ' +
+                                time(durationTransform) + ' ' +
+                                (durationDelay > 0
+                                        ? time(durationDelay) + ' ' + (durationStreamOut < 0 ? "-"
+                                                : time(
+                                                        durationStreamOut))
+                                        : time(durationStreamOut))).trim()
+                        +
+                        ")";
     }
 
     public String getSource()
@@ -279,17 +280,19 @@ public final class LogEntry
 
     private String time(long ms)
     {
-        return ms == -1 ? "" : size(ms, "1ms",
-            new String[]{"ms", "s", "min", "hr"},
-            new long[]{1000, 60 * 1000, 60 * 60 * 1000, Long.MAX_VALUE});
+        return ms == -1 ? ""
+                : size(ms, "1ms",
+                        new String[]{"ms", "s", "min", "hr"},
+                        new long[]{1000, 60 * 1000, 60 * 60 * 1000, Long.MAX_VALUE});
     }
 
     private String size(long size)
     {
         // TODO fix numeric overflow in TB expression
-        return size == -1 ? "" : size(size, "1 byte",
-            new String[]{"bytes", " KB", " MB", " GB", " TB"},
-            new long[]{1024, 1024 * 1024, 1024 * 1024 * 1024, 1024 * 1024 * 1024 * 1024, Long.MAX_VALUE});
+        return size == -1 ? ""
+                : size(size, "1 byte",
+                        new String[]{"bytes", " KB", " MB", " GB", " TB"},
+                        new long[]{1024, 1024 * 1024, 1024 * 1024 * 1024, 1024 * 1024 * 1024 * 1024, Long.MAX_VALUE});
     }
 
     private String size(long size, String singleValue, String[] units, long[] dividers)

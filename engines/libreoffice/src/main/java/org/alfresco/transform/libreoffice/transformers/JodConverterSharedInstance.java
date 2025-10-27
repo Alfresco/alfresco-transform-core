@@ -33,7 +33,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
@@ -46,8 +45,7 @@ import org.slf4j.LoggerFactory;
 ///////// THIS FILE WAS A COPY OF THE CODE IN alfresco-repository /////////////
 
 /**
- * Makes use of the JodConverter library and an installed
- * OpenOffice application to perform OpenOffice-driven conversions.
+ * Makes use of the JodConverter library and an installed OpenOffice application to perform OpenOffice-driven conversions.
  *
  * @author Neil McErlean
  */
@@ -68,7 +66,7 @@ public class JodConverterSharedInstance implements JodConverter
     //
     // Numeric parameters have to be handled as Strings, as that is what Spring gives us for missing values
     // e.g. if jodconverter.maxTasksPerProcess is not specified in the properties file, the value
-    //      "${jodconverter.maxTasksPerProcess}" will be injected.
+    // "${jodconverter.maxTasksPerProcess}" will be injected.
 
     private Integer maxTasksPerProcess;
     private String url;
@@ -163,7 +161,7 @@ public class JodConverterSharedInstance implements JodConverter
             if (!tmp.isDirectory())
             {
                 throw new RuntimeException(
-                    "OpenOffice template profile directory " + templateProfileDir + " does not exist.");
+                        "OpenOffice template profile directory " + templateProfileDir + " does not exist.");
             }
             this.templateProfileDir = tmp;
         }
@@ -216,10 +214,10 @@ public class JodConverterSharedInstance implements JodConverter
             // value in it.
 
             // jodconverter.officeHome=/opt/libreoffice5.4/
-            //                 ooo.exe=/opt/libreoffice5.4/program/soffice.bin
+            // ooo.exe=/opt/libreoffice5.4/program/soffice.bin
 
             // jodconverter.officeHome=C:/noscan/installs/521~1.1/LIBREO~1/App/libreoffice
-            //                 ooo.exe=C:/noscan/installs/COMMUN~1.0-E/LIBREO~1/App/libreoffice/program/soffice.exe
+            // ooo.exe=C:/noscan/installs/COMMUN~1.0-E/LIBREO~1/App/libreoffice/program/soffice.exe
 
             File oooExe = new File(deprecatedOooExe);
             File parent = oooExe.getParentFile();
@@ -238,11 +236,11 @@ public class JodConverterSharedInstance implements JodConverter
     // So that Community systems <= Alfresco 6.0.1-ea keep working on upgrade, we may need to use the deprecated
     // ooo.enabled setting if true rather than the jodconverter.enabled setting as oooDirect was replaced by
     // jodconverter after this release.
-    //     If ooo.enabled is true the JodConverter will be enabled.
-    //     If ooo.enabled is false or unset the jodconverter.enabled value is used.
-    //     Community set properties via alfresco-global.properties.
-    //     Enterprise may do the same but may also reset jodconverter.enabled them via the Admin console.
-    //     In the case of Enterprise it is very unlikely that ooo.enabled will be set to true.
+    // If ooo.enabled is true the JodConverter will be enabled.
+    // If ooo.enabled is false or unset the jodconverter.enabled value is used.
+    // Community set properties via alfresco-global.properties.
+    // Enterprise may do the same but may also reset jodconverter.enabled them via the Admin console.
+    // In the case of Enterprise it is very unlikely that ooo.enabled will be set to true.
     private boolean isEnabled()
     {
         return (deprecatedOooEnabled != null && deprecatedOooEnabled) || (enabled != null && enabled);
@@ -254,8 +252,8 @@ public class JodConverterSharedInstance implements JodConverter
     private int[] getPortNumbers()
     {
         return (enabled == null || !enabled) && deprecatedOooEnabled != null && deprecatedOooEnabled
-               ? deprecatedOooPortNumbers
-               : portNumbers;
+                ? deprecatedOooPortNumbers
+                : portNumbers;
     }
 
     private Long parseStringForLong(String string)
@@ -271,19 +269,17 @@ public class JodConverterSharedInstance implements JodConverter
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.alfresco.repo.content.JodConverter#isAvailable()
-     */
+    /* (non-Javadoc)
+     * 
+     * @see org.alfresco.repo.content.JodConverter#isAvailable() */
     public boolean isAvailable()
     {
         return isAvailable && (officeManager != null || (url != null && !url.isEmpty()));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-     */
+    /* (non-Javadoc)
+     * 
+     * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet() */
     @PostConstruct
     public void afterPropertiesSet()
     {
@@ -295,7 +291,7 @@ public class JodConverterSharedInstance implements JodConverter
         if (logger.isDebugEnabled())
         {
             logger.debug(
-                "JodConverter settings (null settings will be replaced by jodconverter defaults):");
+                    "JodConverter settings (null settings will be replaced by jodconverter defaults):");
             logger.debug("  officeHome = {}", officeHome);
             logger.debug("  enabled = {}", isEnabled());
             logger.debug("  portNumbers = {}", getString(portNumbers));
@@ -361,22 +357,23 @@ public class JodConverterSharedInstance implements JodConverter
             catch (IllegalStateException e)
             {
                 logger.error("Unable to pre-initialise JodConverter library. " +
-                             "The following error is shown for informational purposes only.", e);
+                        "The following error is shown for informational purposes only.", e);
                 return;
             }
             catch (OfficeException e)
             {
                 logger.error("Unable to start JodConverter library. " +
-                             "The following error is shown for informational purposes only.", e);
+                        "The following error is shown for informational purposes only.", e);
 
                 // We need to let it continue (comment-out return statement) even if an error occurs. See MNT-13706 and associated issues.
-                //return;
+                // return;
             }
             catch (Exception e)
             {
                 logger.error(
-                    "Unexpected error in configuring or starting the JodConverter library." +
-                    "The following error is shown for informational purposes only.", e);
+                        "Unexpected error in configuring or starting the JodConverter library." +
+                                "The following error is shown for informational purposes only.",
+                        e);
                 return;
             }
         }
@@ -424,13 +421,13 @@ public class JodConverterSharedInstance implements JodConverter
     }
 
     private List<File> findSofficePrograms(File searchRoot, List<File> results,
-        int maxRecursionDepth)
+            int maxRecursionDepth)
     {
         return this.findSofficePrograms(searchRoot, results, 0, maxRecursionDepth);
     }
 
     private List<File> findSofficePrograms(File searchRoot, List<File> results,
-        int currentRecursionDepth, int maxRecursionDepth)
+            int currentRecursionDepth, int maxRecursionDepth)
     {
         if (currentRecursionDepth >= maxRecursionDepth)
         {
@@ -461,7 +458,8 @@ public class JodConverterSharedInstance implements JodConverter
     /**
      * Logs some information on the specified file, including name and r/w/x permissions.
      *
-     * @param f the file to log.
+     * @param f
+     *            the file to log.
      */
     private void logFileInfo(File f)
     {
@@ -475,11 +473,11 @@ public class JodConverterSharedInstance implements JodConverter
         if (f.exists() && f.canRead())
         {
             msg.append("(")
-               .append(f.isDirectory() ? "d" : "-")
-               .append(f.canRead() ? "r" : "-")
-               .append(f.canWrite() ? "w" : "-")
-               .append(f.canExecute() ? "x" : "-")
-               .append(")");
+                    .append(f.isDirectory() ? "d" : "-")
+                    .append(f.canRead() ? "r" : "-")
+                    .append(f.canWrite() ? "w" : "-")
+                    .append(f.canExecute() ? "x" : "-")
+                    .append(")");
         }
         else
         {
@@ -488,10 +486,9 @@ public class JodConverterSharedInstance implements JodConverter
         logger.debug(msg.toString());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.springframework.beans.factory.DisposableBean#destroy()
-     */
+    /* (non-Javadoc)
+     * 
+     * @see org.springframework.beans.factory.DisposableBean#destroy() */
     @PreDestroy
     public void destroy()
     {
@@ -510,8 +507,8 @@ public class JodConverterSharedInstance implements JodConverter
     }
 
     /* (non-Javadoc)
-     * @see org.alfresco.repo.content.JodConverterWorker#getOfficeManager()
-     */
+     * 
+     * @see org.alfresco.repo.content.JodConverterWorker#getOfficeManager() */
     @Override
     public OfficeManager getOfficeManager()
     {

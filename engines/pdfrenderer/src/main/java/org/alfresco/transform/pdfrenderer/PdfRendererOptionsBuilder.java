@@ -44,7 +44,8 @@ public final class PdfRendererOptionsBuilder
     private Boolean allowPdfEnlargement;
     private Boolean maintainPdfAspectRatio;
 
-    private PdfRendererOptionsBuilder() {}
+    private PdfRendererOptionsBuilder()
+    {}
 
     public PdfRendererOptionsBuilder withPage(final String page)
     {

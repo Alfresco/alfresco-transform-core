@@ -26,5 +26,4 @@ package org.alfresco.transform.client.model;
  */
 @Deprecated
 public interface Mimetype extends org.alfresco.transform.common.Mimetype
-{
-}
+{}

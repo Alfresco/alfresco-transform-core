@@ -32,5 +32,4 @@ import org.alfresco.transform.imagemagick.ImageMagickTest;
  * Test ImageMagick functionality in All-In-One.
  */
 public class AIOImageMagickTest extends ImageMagickTest
-{
-}
+{}

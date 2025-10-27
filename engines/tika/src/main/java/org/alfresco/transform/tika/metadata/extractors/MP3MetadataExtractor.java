@@ -26,6 +26,9 @@
  */
 package org.alfresco.transform.tika.metadata.extractors;
 
+import java.io.Serializable;
+import java.util.Map;
+
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.metadata.XMPDM;
@@ -35,13 +38,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
-import java.util.Map;
-
 /**
  * MP3 file metadata extractor.
  *
- * Configuration:   (see MP3MetadataExtractor_metadata_extract.properties and tika_engine_config.json)
+ * Configuration: (see MP3MetadataExtractor_metadata_extract.properties and tika_engine_config.json)
  *
  * <pre>
  *   <b>songTitle:</b>              --      cm:title
@@ -56,8 +56,7 @@ import java.util.Map;
  *   <b>lyrics:</b>                 --
  * </pre>
  *
- * Note - XMPDM metadata keys are also emitted, in common with
- *  the other Tika powered extracters
+ * Note - XMPDM metadata keys are also emitted, in common with the other Tika powered extracters
  *
  * Uses Apache Tika
  *
@@ -91,14 +90,14 @@ public class MP3MetadataExtractor extends TikaAudioMetadataExtractor
 
     @Override
     protected Map<String, Serializable> extractSpecific(Metadata metadata,
-                                                        Map<String, Serializable> properties, Map<String,String> headers)
+            Map<String, Serializable> properties, Map<String, String> headers)
     {
         // Do the normal Audio mappings
         super.extractSpecific(metadata, properties, headers);
 
         // Now do the compatibility ones
         // We only need these for people who had pre-existing mapping
-        //  properties from before the proper audio model was added
+        // properties from before the proper audio model was added
         putRawValue(KEY_ALBUM_TITLE, metadata.get(XMPDM.ALBUM), properties);
         putRawValue(KEY_SONG_TITLE, metadata.get(TikaCoreProperties.TITLE), properties);
         putRawValue(KEY_ARTIST, metadata.get(XMPDM.ARTIST), properties);

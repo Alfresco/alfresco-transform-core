@@ -30,13 +30,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-public class ExifToolParserTest {
+public class ExifToolParserTest
+{
 
     ExifToolParser exifToolParser = new ExifToolParser();
-    
+
     @Test
-    public void testFindSeparator() {
-        
+    public void testFindSeparator()
+    {
+
         String testCommand = "env FOO=${OUTPUT} exiftool -args -G1 " + ExifToolParser.SEPARATOR_SETTING
                 + " \"|||\" ${INPUT}";
         String expected = "|||";
@@ -50,7 +52,7 @@ public class ExifToolParserTest {
         assertEquals(expected, actual);
 
         expected = "Test something bonkers 112!£$%^£$^";
-        testCommand = ExifToolParser.SEPARATOR_SETTING + " \""+expected+"\"";
+        testCommand = ExifToolParser.SEPARATOR_SETTING + " \"" + expected + "\"";
         actual = exifToolParser.findSeparator(testCommand);
         assertEquals(expected, actual);
 

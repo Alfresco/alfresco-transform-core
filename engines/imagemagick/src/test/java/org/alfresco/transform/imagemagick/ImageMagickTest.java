@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -26,39 +26,6 @@
  */
 package org.alfresco.transform.imagemagick;
 
-import org.alfresco.transform.base.AbstractBaseTest;
-import org.alfresco.transform.base.executors.RuntimeExec;
-import org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
-import org.alfresco.transform.base.model.FileRefEntity;
-import org.alfresco.transform.base.model.FileRefResponse;
-import org.alfresco.transform.client.model.TransformReply;
-import org.alfresco.transform.client.model.TransformRequest;
-import org.alfresco.transform.imagemagick.transformers.ImageMagickTransformer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -79,6 +46,41 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.util.StringUtils.getFilenameExtension;
 
+import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.UUID;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import org.alfresco.transform.base.AbstractBaseTest;
+import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
+import org.alfresco.transform.base.model.FileRefEntity;
+import org.alfresco.transform.base.model.FileRefResponse;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.imagemagick.transformers.ImageMagickCommandExecutor;
+
 /**
  * Test ImageMagick with mocked external command.
  */
@@ -87,7 +89,7 @@ public class ImageMagickTest extends AbstractBaseTest
     private static String PREFIX_IMAGE = "image/";
 
     @Autowired
-    private ImageMagickTransformer imageMagickTransformer;
+    private ImageMagickCommandExecutor imageMagickCommandExecutor;
 
     @Mock
     protected ExecutionResult mockExecutionResult;
@@ -109,7 +111,7 @@ public class ImageMagickTest extends AbstractBaseTest
     @BeforeEach
     public void before() throws IOException
     {
-        setMockExternalCommandsOnTransformer(imageMagickTransformer, mockTransformCommand, mockCheckCommand);
+        setMockExternalCommandsOnTransformer(imageMagickCommandExecutor, mockTransformCommand, mockCheckCommand);
         mockTransformCommand("jpg", "png", "image/jpeg", true);
     }
 
@@ -123,20 +125,20 @@ public class ImageMagickTest extends AbstractBaseTest
     protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
     {
         final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
-            .param("targetMimetype", targetMimetype)
-            .param("sourceMimetype", sourceMimetype);
+                .param("targetMimetype", targetMimetype)
+                .param("sourceMimetype", sourceMimetype);
         return builder;
     }
 
     @Override
     public void mockTransformCommand(String sourceExtension,
-        String targetExtension, String sourceMimetype,
-        boolean readTargetFileBytes) throws IOException
+            String targetExtension, String sourceMimetype,
+            boolean readTargetFileBytes) throws IOException
     {
         this.sourceExtension = sourceExtension;
         this.targetExtension = targetExtension;
         this.sourceMimetype = sourceMimetype;
-        this.targetMimetype = PREFIX_IMAGE + ("jpg".equals(targetExtension) ? "jpeg" :  targetExtension);
+        this.targetMimetype = PREFIX_IMAGE + ("jpg".equals(targetExtension) ? "jpeg" : targetExtension);
 
         expectedOptions = null;
         expectedSourceSuffix = null;
@@ -145,55 +147,55 @@ public class ImageMagickTest extends AbstractBaseTest
         sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
 
         when(mockTransformCommand.execute(any(), anyLong())).thenAnswer(
-            (Answer<RuntimeExec.ExecutionResult>) invocation -> {
-                Map<String, String> actualProperties = invocation.getArgument(0);
-                assertEquals(3, actualProperties.size(), "There should be 3 properties");
+                (Answer<RuntimeExec.ExecutionResult>) invocation -> {
+                    Map<String, String> actualProperties = invocation.getArgument(0);
+                    assertEquals(3, actualProperties.size(), "There should be 3 properties");
 
-                String actualOptions = actualProperties.get("options");
-                String actualSource = actualProperties.get("source");
-                String actualTarget = actualProperties.get("target");
-                String actualTargetExtension = getFilenameExtension(actualTarget);
+                    String actualOptions = actualProperties.get("options");
+                    String actualSource = actualProperties.get("source");
+                    String actualTarget = actualProperties.get("target");
+                    String actualTargetExtension = getFilenameExtension(actualTarget);
 
-                assertNotNull(actualSource);
-                assertNotNull(actualTarget);
-                if (expectedSourceSuffix != null)
-                {
-                    assertTrue(actualSource.endsWith(expectedSourceSuffix), 
-                        "The source file \"" + actualSource + "\" should have ended in \"" + expectedSourceSuffix + "\"");
-                    actualSource = actualSource.substring(0, actualSource.length() - expectedSourceSuffix.length());
-                }
+                    assertNotNull(actualSource);
+                    assertNotNull(actualTarget);
+                    if (expectedSourceSuffix != null)
+                    {
+                        assertTrue(actualSource.endsWith(expectedSourceSuffix),
+                                "The source file \"" + actualSource + "\" should have ended in \"" + expectedSourceSuffix + "\"");
+                        actualSource = actualSource.substring(0, actualSource.length() - expectedSourceSuffix.length());
+                    }
 
-                assertNotNull(actualOptions);
-                if (expectedOptions != null)
-                {
-                    assertEquals(expectedOptions, actualOptions,"expectedOptions");
-                }
+                    assertNotNull(actualOptions);
+                    if (expectedOptions != null)
+                    {
+                        assertEquals(expectedOptions, actualOptions, "expectedOptions");
+                    }
 
-                Long actualTimeout = invocation.getArgument(1);
-                assertNotNull(actualTimeout);
-                if (expectedTimeout != null)
-                {
-                    assertEquals(expectedTimeout, actualTimeout,"expectedTimeout");
-                }
+                    Long actualTimeout = invocation.getArgument(1);
+                    assertNotNull(actualTimeout);
+                    if (expectedTimeout != null)
+                    {
+                        assertEquals(expectedTimeout, actualTimeout, "expectedTimeout");
+                    }
 
-                // Copy a test file into the target file location if it exists
-                int i = actualTarget.lastIndexOf('_');
-                if (i >= 0)
-                {
-                    String testFilename = actualTarget.substring(i + 1);
-                    File testFile = getTestFile(testFilename, false);
-                    File targetFile = new File(actualTarget);
-                    generateTargetFileFromResourceFile(actualTargetExtension, testFile,
-                        targetFile);
-                }
+                    // Copy a test file into the target file location if it exists
+                    int i = actualTarget.lastIndexOf('_');
+                    if (i >= 0)
+                    {
+                        String testFilename = actualTarget.substring(i + 1);
+                        File testFile = getTestFile(testFilename, false);
+                        File targetFile = new File(actualTarget);
+                        generateTargetFileFromResourceFile(actualTargetExtension, testFile,
+                                targetFile);
+                    }
 
-                // Check the supplied source file has not been changed.
-                byte[] actualSourceFileBytes = Files.readAllBytes(new File(actualSource).toPath());
-                assertTrue(Arrays.equals(sourceFileBytes, actualSourceFileBytes),
-                        "Source file is not the same");
+                    // Check the supplied source file has not been changed.
+                    byte[] actualSourceFileBytes = Files.readAllBytes(new File(actualSource).toPath());
+                    assertTrue(Arrays.equals(sourceFileBytes, actualSourceFileBytes),
+                            "Source file is not the same");
 
-                return mockExecutionResult;
-            });
+                    return mockExecutionResult;
+                });
 
         when(mockExecutionResult.getExitValue()).thenReturn(0);
         when(mockExecutionResult.getStdErr()).thenReturn("STDERROR");
@@ -206,31 +208,31 @@ public class ImageMagickTest extends AbstractBaseTest
     {
         expectedOptions = "-auto-orient " + "-gravity " + value + " +repage";
         mockMvc
-            .perform(MockMvcRequestBuilders
-                .multipart(ENDPOINT_TRANSFORM)
-                .file(sourceFile)
-                .param("targetExtension", targetExtension)
-                .param("targetMimetype", targetMimetype)
-                .param("sourceMimetype", sourceMimetype)
-                .param("cropGravity", value))
-            .andExpect(status().isOk())
-            .andExpect(content().bytes(expectedTargetFileBytes))
-            .andExpect(header().string("Content-Disposition",
-                "attachment; filename*=UTF-8''transform." + targetExtension));
+                .perform(MockMvcRequestBuilders
+                        .multipart(ENDPOINT_TRANSFORM)
+                        .file(sourceFile)
+                        .param("targetExtension", targetExtension)
+                        .param("targetMimetype", targetMimetype)
+                        .param("sourceMimetype", sourceMimetype)
+                        .param("cropGravity", value))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Test
     public void cropGravityBadTest() throws Exception
     {
         mockMvc
-            .perform(MockMvcRequestBuilders
-                .multipart(ENDPOINT_TRANSFORM)
-                .file(sourceFile)
-                .param("targetExtension", targetExtension)
-                .param("targetMimetype", targetMimetype)
-                .param("sourceMimetype", sourceMimetype)
-                .param("cropGravity", "badValue"))
-            .andExpect(status().is(BAD_REQUEST.value()));
+                .perform(MockMvcRequestBuilders
+                        .multipart(ENDPOINT_TRANSFORM)
+                        .file(sourceFile)
+                        .param("targetExtension", targetExtension)
+                        .param("targetMimetype", targetMimetype)
+                        .param("sourceMimetype", sourceMimetype)
+                        .param("cropGravity", "badValue"))
+                .andExpect(status().is(BAD_REQUEST.value()));
     }
 
     @Test
@@ -239,36 +241,36 @@ public class ImageMagickTest extends AbstractBaseTest
         expectedOptions = "-alpha remove -gravity SouthEast -crop 123x456%+90+12 +repage -thumbnail 321x654%!";
         expectedSourceSuffix = "[2-3]";
         mockMvc
-            .perform(MockMvcRequestBuilders
-                .multipart(ENDPOINT_TRANSFORM)
-                .file(sourceFile)
-                .param("targetExtension", targetExtension)
-                .param("targetMimetype", targetMimetype)
-                .param("sourceMimetype", sourceMimetype)
+                .perform(MockMvcRequestBuilders
+                        .multipart(ENDPOINT_TRANSFORM)
+                        .file(sourceFile)
+                        .param("targetExtension", targetExtension)
+                        .param("targetMimetype", targetMimetype)
+                        .param("sourceMimetype", sourceMimetype)
 
-                .param("startPage", "2")
-                .param("endPage", "3")
+                        .param("startPage", "2")
+                        .param("endPage", "3")
 
-                .param("alphaRemove", "true")
-                .param("autoOrient", "false")
+                        .param("alphaRemove", "true")
+                        .param("autoOrient", "false")
 
-                .param("cropGravity", "SouthEast")
-                .param("cropWidth", "123")
-                .param("cropHeight", "456")
-                .param("cropPercentage", "true")
-                .param("cropXOffset", "90")
-                .param("cropYOffset", "12")
+                        .param("cropGravity", "SouthEast")
+                        .param("cropWidth", "123")
+                        .param("cropHeight", "456")
+                        .param("cropPercentage", "true")
+                        .param("cropXOffset", "90")
+                        .param("cropYOffset", "12")
 
-                .param("thumbnail", "true")
-                .param("resizeWidth", "321")
-                .param("resizeHeight", "654")
-                .param("resizePercentage", "true")
-                .param("allowEnlargement", "true")
-                .param("maintainAspectRatio", "false"))
-            .andExpect(status().isOk())
-            .andExpect(content().bytes(expectedTargetFileBytes))
-            .andExpect(header().string("Content-Disposition",
-                "attachment; filename*=UTF-8''transform." + targetExtension));
+                        .param("thumbnail", "true")
+                        .param("resizeWidth", "321")
+                        .param("resizeHeight", "654")
+                        .param("resizePercentage", "true")
+                        .param("allowEnlargement", "true")
+                        .param("maintainAspectRatio", "false"))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Test
@@ -277,58 +279,57 @@ public class ImageMagickTest extends AbstractBaseTest
         expectedOptions = "-auto-orient -gravity SouthEast -crop 123x456+90+12 +repage -resize 321x654>";
         expectedSourceSuffix = "[2-3]";
         mockMvc
-            .perform(MockMvcRequestBuilders
-                .multipart(ENDPOINT_TRANSFORM)
-                .file(sourceFile)
-                .param("targetExtension", targetExtension)
-                .param("targetMimetype", targetMimetype)
-                .param("sourceMimetype", sourceMimetype)
-                
-                .param("startPage", "2")
-                .param("endPage", "3")
+                .perform(MockMvcRequestBuilders
+                        .multipart(ENDPOINT_TRANSFORM)
+                        .file(sourceFile)
+                        .param("targetExtension", targetExtension)
+                        .param("targetMimetype", targetMimetype)
+                        .param("sourceMimetype", sourceMimetype)
 
-                .param("alphaRemove", "false")
-                .param("autoOrient", "true")
+                        .param("startPage", "2")
+                        .param("endPage", "3")
 
-                .param("cropGravity", "SouthEast")
-                .param("cropWidth", "123")
-                .param("cropHeight", "456")
-                .param("cropPercentage", "false")
-                .param("cropXOffset", "90")
-                .param("cropYOffset", "12")
+                        .param("alphaRemove", "false")
+                        .param("autoOrient", "true")
 
-                .param("thumbnail", "false")
-                .param("resizeWidth", "321")
-                .param("resizeHeight", "654")
-                .param("resizePercentage", "false")
-                .param("allowEnlargement", "false")
-                .param("maintainAspectRatio", "true"))
-            .andExpect(status().isOk())
-            .andExpect(content().bytes(expectedTargetFileBytes))
-            .andExpect(header().string("Content-Disposition",
-                "attachment; filename*=UTF-8''transform." + targetExtension));
+                        .param("cropGravity", "SouthEast")
+                        .param("cropWidth", "123")
+                        .param("cropHeight", "456")
+                        .param("cropPercentage", "false")
+                        .param("cropXOffset", "90")
+                        .param("cropYOffset", "12")
+
+                        .param("thumbnail", "false")
+                        .param("resizeWidth", "321")
+                        .param("resizeHeight", "654")
+                        .param("resizePercentage", "false")
+                        .param("allowEnlargement", "false")
+                        .param("maintainAspectRatio", "true"))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Test
-    public void deprecatedCommandOptionsTest() throws Exception
+    public void deprecatedCommandOptionsIsSkippedByDefaultTest() throws Exception
     {
-        // Example of why the commandOptions parameter is a bad idea.
-        expectedOptions = "( horrible command / ); -auto-orient -resize 321x654";
+        expectedOptions = "-auto-orient -resize 321x654";
         mockMvc
-            .perform(MockMvcRequestBuilders
-                .multipart(ENDPOINT_TRANSFORM)
-                .file(sourceFile)
-                .param("targetExtension", targetExtension)
-                .param("targetMimetype", targetMimetype)
-                .param("sourceMimetype", sourceMimetype)
-                .param("thumbnail", "false")
-                .param("resizeWidth", "321")
-                .param("resizeHeight", "654")
-                .param("commandOptions", "( horrible command / );"))
-            .andExpect(status().isOk())
-            .andExpect(content().bytes(expectedTargetFileBytes))
-            .andExpect(header().string("Content-Disposition",
-                "attachment; filename*=UTF-8''transform." + targetExtension));
+                .perform(MockMvcRequestBuilders
+                        .multipart(ENDPOINT_TRANSFORM)
+                        .file(sourceFile)
+                        .param("targetExtension", targetExtension)
+                        .param("targetMimetype", targetMimetype)
+                        .param("sourceMimetype", sourceMimetype)
+                        .param("thumbnail", "false")
+                        .param("resizeWidth", "321")
+                        .param("resizeHeight", "654")
+                        .param("commandOptions", "( horrible command / );"))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(expectedTargetFileBytes))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename*=UTF-8''transform." + targetExtension));
     }
 
     @Override
@@ -346,9 +347,9 @@ public class ImageMagickTest extends AbstractBaseTest
         when(mockExecutionResult.getExitValue()).thenReturn(1);
 
         mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", "xxx"))
-               .andExpect(status().is(BAD_REQUEST.value()))
-               .andExpect(status()
-                              .reason(containsString("Transformer exit code was not 0: \nSTDERR")));
+                .andExpect(status().is(BAD_REQUEST.value()))
+                .andExpect(status()
+                        .reason(containsString("Transformer exit code was not 0: \nSTDERR")));
     }
 
     @Test
@@ -365,11 +366,11 @@ public class ImageMagickTest extends AbstractBaseTest
         HttpHeaders headers = new HttpHeaders();
         headers.set(CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
         ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
-            sourceFile), headers, OK);
+                sourceFile), headers, OK);
 
         when(sharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
         when(sharedFileStoreClient.saveFile(any()))
-            .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
+                .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
         when(mockExecutionResult.getExitValue()).thenReturn(0);
 
         // Update the Transformation Request with any specific params before sending it
@@ -378,16 +379,16 @@ public class ImageMagickTest extends AbstractBaseTest
         // Serialize and call the transformer
         String tr = objectMapper.writeValueAsString(transformRequest);
         String transformationReplyAsString = mockMvc
-            .perform(MockMvcRequestBuilders
-                .post(ENDPOINT_TRANSFORM)
-                .header(ACCEPT, APPLICATION_JSON_VALUE)
-                .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .content(tr))
-            .andExpect(status().is(CREATED.value()))
-            .andReturn().getResponse().getContentAsString();
+                .perform(MockMvcRequestBuilders
+                        .post(ENDPOINT_TRANSFORM)
+                        .header(ACCEPT, APPLICATION_JSON_VALUE)
+                        .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                        .content(tr))
+                .andExpect(status().is(CREATED.value()))
+                .andReturn().getResponse().getContentAsString();
 
         TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,
-            TransformReply.class);
+                TransformReply.class);
 
         // Assert the reply
         assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
@@ -398,7 +399,7 @@ public class ImageMagickTest extends AbstractBaseTest
     @Test
     public void testOverridingExecutorPaths()
     {
-        //System test property values can me modified in the pom.xml
+        // System test property values can me modified in the pom.xml
         assertEquals(EXE, System.getProperty("IMAGEMAGICK_EXE"));
         assertEquals(DYN, System.getProperty("IMAGEMAGICK_DYN"));
         assertEquals(ROOT, System.getProperty("IMAGEMAGICK_ROOT"));

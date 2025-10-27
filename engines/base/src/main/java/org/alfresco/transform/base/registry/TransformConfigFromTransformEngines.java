@@ -26,14 +26,15 @@
  */
 package org.alfresco.transform.base.registry;
 
-import org.alfresco.transform.base.TransformEngine;
-import org.alfresco.transform.config.TransformConfig;
+import java.util.List;
+import jakarta.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import java.util.List;
+import org.alfresco.transform.base.TransformEngine;
+import org.alfresco.transform.config.TransformConfig;
 
 /**
  * Makes {@link TransformConfig} from {@link TransformEngine}s available to the {@link TransformRegistry}.
@@ -54,21 +55,21 @@ public class TransformConfigFromTransformEngines
         if (transformEngines != null)
         {
             transformEngines.stream()
-                .forEach(transformEngine -> {
-                    TransformConfig transformConfig = transformEngine.getTransformConfig();
-                    if (transformConfig != null) // if not a wrapping TransformEngine like all-in-one
-                    {
-                        String engineName = transformEngine.getTransformEngineName();
-                        transformConfigSources.add(
-                            new AbstractTransformConfigSource(engineName, engineName, isTRouter ? null : "---")
-                            {
-                                 @Override public TransformConfig getTransformConfig()
-                                {
-                                    return transformEngine.getTransformConfig();
-                                }
-                            });
-                    }
-                });
+                    .forEach(transformEngine -> {
+                        TransformConfig transformConfig = transformEngine.getTransformConfig();
+                        if (transformConfig != null) // if not a wrapping TransformEngine like all-in-one
+                        {
+                            String engineName = transformEngine.getTransformEngineName();
+                            transformConfigSources.add(
+                                    new AbstractTransformConfigSource(engineName, engineName, isTRouter ? null : "---") {
+                                        @Override
+                                        public TransformConfig getTransformConfig()
+                                        {
+                                            return transformEngine.getTransformConfig();
+                                        }
+                                    });
+                        }
+                    });
         }
     }
 }

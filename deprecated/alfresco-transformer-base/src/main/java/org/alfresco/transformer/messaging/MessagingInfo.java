@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * Prints JMS status information at application startup.
+ *             Prints JMS status information at application startup.
  *
  * @author Cezar Leahu
  */
@@ -49,16 +49,23 @@ public class MessagingInfo
     @Value("${activemq.url:}")
     private String activemqUrl;
 
+    @Value("${spring.activemq.broker-url}")
+    private String activemqBrokerUrl;
+
+    @Value("${activemq.url.params}")
+    private String activemqUrlParams;
+
     @PostConstruct
     public void init()
     {
         // For backwards-compatibility, we continue to rely on setting ACTIVEMQ_URL environment variable (see application.yaml)
         // The MessagingConfig class uses on ConditionalOnProperty (ie. activemq.url is set and not false)
 
-        // Note: as per application.yaml the broker url is appended with "?jms.watchTopicAdvisories=false". If this needs to be fully
-        // overridden then it would require explicitly setting both "spring.activemq.broker-url" *and* "activemq.url" (latter to non-false value).
+        // Note: as per application.yaml the broker url is appended with ACTIVEMQ_URL_PARAMS with default value "?jms.watchTopicAdvisories=false".
+        // If this needs to be fully overridden then it would require explicitly setting both "spring.activemq.broker-url"
+        // *and* "activemq.url" (latter to non-false value). ACTIVEMQ_URL_PARAMS value will be ignored in that case.
 
-        if ((activemqUrl != null) && (! activemqUrl.equals("false")))
+        if (isSet(activemqUrl))
         {
             logger.info("JMS client is ENABLED - ACTIVEMQ_URL ='{}'", activemqUrl);
         }
@@ -66,5 +73,19 @@ public class MessagingInfo
         {
             logger.info("JMS client is DISABLED - ACTIVEMQ_URL is not set");
         }
+        if (isSet(activemqUrlParams))
+        {
+            logger.info("ACTIVEMQ_URL_PARAMS ='{}'", activemqUrlParams);
+        }
+        else
+        {
+            logger.info("ACTIVEMQ_URL_PARAMS is not set");
+        }
+        logger.info("spring.activemq.broker-url='{}'", activemqBrokerUrl);
+    }
+
+    private boolean isSet(String value)
+    {
+        return !"false".equals(value);
     }
 }

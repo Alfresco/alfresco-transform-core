@@ -21,9 +21,10 @@
  */
 package org.alfresco.transform.messages;
 
-import org.alfresco.transform.client.model.TransformRequest;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+
+import org.alfresco.transform.client.model.TransformRequest;
 
 /**
  * TransformRequestValidator
@@ -58,36 +59,36 @@ public class TransformRequestValidator implements Validator
             if (sourceSize == null || sourceSize <= 0)
             {
                 errors.rejectValue("sourceSize", null,
-                    "sourceSize cannot be null or have its value smaller than 0");
+                        "sourceSize cannot be null or have its value smaller than 0");
             }
             String sourceMediaType = request.getSourceMediaType();
             if (sourceMediaType == null || sourceMediaType.isEmpty())
             {
                 errors.rejectValue("sourceMediaType", null,
-                    "sourceMediaType cannot be null or empty");
+                        "sourceMediaType cannot be null or empty");
             }
             String targetMediaType = request.getTargetMediaType();
             if (targetMediaType == null || targetMediaType.isEmpty())
             {
                 errors.rejectValue("targetMediaType", null,
-                    "targetMediaType cannot be null or empty");
+                        "targetMediaType cannot be null or empty");
             }
             String targetExtension = request.getTargetExtension();
             if (targetExtension == null || targetExtension.isEmpty())
             {
                 errors.rejectValue("targetExtension", null,
-                    "targetExtension cannot be null or empty");
+                        "targetExtension cannot be null or empty");
             }
             String clientData = request.getClientData();
             if (clientData == null || clientData.isEmpty())
             {
                 errors.rejectValue("clientData", String.valueOf(request.getSchema()),
-                    "clientData cannot be null or empty");
+                        "clientData cannot be null or empty");
             }
             if (request.getSchema() < 0)
             {
                 errors.rejectValue("schema", String.valueOf(request.getSchema()),
-                    "schema cannot be less than 0");
+                        "schema cannot be less than 0");
             }
         }
     }

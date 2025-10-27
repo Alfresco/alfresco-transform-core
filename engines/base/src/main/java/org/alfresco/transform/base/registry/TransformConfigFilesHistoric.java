@@ -26,18 +26,18 @@
  */
 package org.alfresco.transform.base.registry;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+import static org.alfresco.transform.base.registry.TransformConfigFromFiles.retrieveResource;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.alfresco.transform.base.registry.TransformConfigFromFiles.retrieveResource;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 /**
  * Similar to {@link TransformConfigFiles} but uses the names historically used by the t-router.
@@ -50,8 +50,9 @@ public class TransformConfigFilesHistoric
     // environment variables like TRANSFORMER_ROUTES_ADDITIONAL_<engineName>.
     private final Map<String, String> additional = new HashMap<>();
 
-    //Used by ConfigurationProperties annotation
-    public Map<String, String> getAdditional() {
+    // Used by ConfigurationProperties annotation
+    public Map<String, String> getAdditional()
+    {
         return additional;
     }
 

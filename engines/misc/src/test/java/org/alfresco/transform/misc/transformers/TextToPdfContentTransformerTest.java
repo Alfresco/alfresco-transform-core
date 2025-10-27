@@ -26,14 +26,15 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import static org.alfresco.transform.common.RequestParamMap.PAGE_LIMIT;
-import static org.alfresco.transform.common.RequestParamMap.PDF_FONT;
-import static org.alfresco.transform.common.RequestParamMap.PDF_FONT_SIZE;
-import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static org.alfresco.transform.common.RequestParamMap.PAGE_LIMIT;
+import static org.alfresco.transform.common.RequestParamMap.PDF_FONT;
+import static org.alfresco.transform.common.RequestParamMap.PDF_FONT_SIZE;
+import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -47,11 +48,12 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;;
+import org.junit.jupiter.api.Test;
 
 public class TextToPdfContentTransformerTest
 {
@@ -95,7 +97,7 @@ public class TextToPdfContentTransformerTest
     public void test1UTF16BigEndianBomBigEndianChars() throws Exception
     {
         // 1. BOM indicates BE (fe then ff) + chars appear to be BE (as first byte read tends to be a zero)
-        //    Expected with UTF-16. Some systems use BE and other like Windows and Mac used LE
+        // Expected with UTF-16. Some systems use BE and other like Windows and Mac used LE
         String expectedByteOrder = "fe ff 00 31 00 20 00 49";
         transformTextAndCheck("UTF-16", true, true, expectedByteOrder);
         transformTextAndCheck("UTF-16", true, true, expectedByteOrder);
@@ -107,7 +109,7 @@ public class TextToPdfContentTransformerTest
     public void test2UTF16LittleEndianBomLittleEndianChars() throws Exception
     {
         // 2. BOM indicates LE (ff then fe) + chars appear to be LE (as second byte read tends to be a zero)
-        //    Expected with UTF-16. Some systems use BE and other like Windows and Mac used LE
+        // Expected with UTF-16. Some systems use BE and other like Windows and Mac used LE
         transformTextAndCheck("UTF-16", false, true, "ff fe 31 00 20 00 49 00");
     }
 
@@ -115,7 +117,7 @@ public class TextToPdfContentTransformerTest
     public void test3UTF16NoBomBigEndianChars() throws Exception
     {
         // 3. No BOM + chars appear to be BE (as first byte read tends to be a zero)
-        //    Expected with UTF-16BE
+        // Expected with UTF-16BE
         transformTextAndCheck("UTF-16", true, null, "00 31 00 20 00 49");
     }
 
@@ -123,7 +125,7 @@ public class TextToPdfContentTransformerTest
     public void test4UTF16NoBomLittleEndianChars() throws Exception
     {
         // 4. No BOM + chars appear to be LE (as second byte read tends to be a zero)
-        //    Expected with UTF-16LE
+        // Expected with UTF-16LE
         transformTextAndCheck("UTF-16", false, null, "31 00 20 00 49 00");
     }
 
@@ -131,7 +133,7 @@ public class TextToPdfContentTransformerTest
     public void test5UTF16BigEndianBomLittleEndianChars() throws Exception
     {
         // 5. BOM indicates BE (fe then ff) + chars appear to be LE (as second byte read tends to be a zero)
-        //    SOMETHING IS WRONG, BUT USE LE!!!!
+        // SOMETHING IS WRONG, BUT USE LE!!!!
         transformTextAndCheck("UTF-16", false, false, "fe ff 31 00 20 00 49 00");
     }
 
@@ -139,7 +141,7 @@ public class TextToPdfContentTransformerTest
     public void test6UTF16LittleEndianBomBigEndianChars() throws Exception
     {
         // 6. BOM indicates LE (ff then fe) + chars appear to be BE (as first byte read tends to be a zero)
-        //    SOMETHING IS WRONG, BUT USE BE!!!!
+        // SOMETHING IS WRONG, BUT USE BE!!!!
         transformTextAndCheck("UTF-16", true, false, "ff fe 00 31 00 20 00 49");
     }
 
@@ -170,13 +172,13 @@ public class TextToPdfContentTransformerTest
         writeToFile(sourceFile, TEXT_WITHOUT_A_BREVE, encoding, null, null);
 
         Map<String, String> parameters = new HashMap<>();
-        parameters.put(PDF_FONT, PDType1Font.TIMES_BOLD.getName());
+        parameters.put(PDF_FONT, Standard14Fonts.FontName.TIMES_BOLD.getName());
         parameters.put(PDF_FONT_SIZE, "30");
 
         TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITHOUT_A_BREVE, String.valueOf(-1), true,
                 parameters, false);
 
-        assertEquals(result.getUsedFont(), PDType1Font.TIMES_BOLD.getName());
+        assertEquals(result.getUsedFont(), Standard14Fonts.FontName.TIMES_BOLD.getName());
         assertNull(result.getErrorMessage());
     }
 
@@ -199,13 +201,12 @@ public class TextToPdfContentTransformerTest
         TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITHOUT_A_BREVE, String.valueOf(-1), true,
                 parameters, false);
 
-        assertEquals(result.getUsedFont(), PDType1Font.TIMES_ROMAN.getName());
+        assertEquals(result.getUsedFont(), Standard14Fonts.FontName.TIMES_ROMAN.getName());
         assertNull(result.getErrorMessage());
     }
 
     /**
-     * Test if a different font can be chosen to perform the transformation with breve character. This test
-     * transformation should fail as Times-Bold font doesn't handle the breve character
+     * Test if a different font can be chosen to perform the transformation with breve character. This test transformation should fail as Times-Bold font doesn't handle the breve character
      *
      * @throws Exception
      */
@@ -218,27 +219,28 @@ public class TextToPdfContentTransformerTest
         writeToFile(sourceFile, TEXT_WITH_A_BREVE, encoding, null, null);
 
         Map<String, String> parameters = new HashMap<>();
-        parameters.put(PDF_FONT, PDType1Font.TIMES_BOLD.getName());
+        parameters.put(PDF_FONT, Standard14Fonts.FontName.TIMES_BOLD.getName());
 
         TransformCheckResult result = transformTextAndCheck(sourceFile, encoding, TEXT_WITH_A_BREVE, String.valueOf(-1), true,
                 parameters, true);
 
-        assertEquals(result.getUsedFont(), PDType1Font.TIMES_BOLD.getName());
+        assertEquals(result.getUsedFont(), Standard14Fonts.FontName.TIMES_BOLD.getName());
         assertNotNull(result.getErrorMessage());
-        assertTrue(result.getErrorMessage().contains(PDType1Font.TIMES_BOLD.getName()));
+        assertTrue(result.getErrorMessage().contains(Standard14Fonts.FontName.TIMES_BOLD.getName()));
     }
 
     /**
-     * @param encoding to be used to read the source file
-     * @param bigEndian indicates that the file should contain big endian characters, so typically the first byte of
-     *                 each char is a zero when using English.
-     * @param validBom if not null, the BOM is included. If true it is the one matching bigEndian. If false it is the
-     *                 opposite byte order, which really is an error, but we try to recover from it.
-     * @param expectedByteOrder The first few bytes of the source file so we can check the test data has been
-     *                 correctly created.
+     * @param encoding
+     *            to be used to read the source file
+     * @param bigEndian
+     *            indicates that the file should contain big endian characters, so typically the first byte of each char is a zero when using English.
+     * @param validBom
+     *            if not null, the BOM is included. If true it is the one matching bigEndian. If false it is the opposite byte order, which really is an error, but we try to recover from it.
+     * @param expectedByteOrder
+     *            The first few bytes of the source file so we can check the test data has been correctly created.
      */
     protected TransformCheckResult transformTextAndCheck(String encoding, Boolean bigEndian, Boolean validBom,
-                                         String expectedByteOrder) throws Exception
+            String expectedByteOrder) throws Exception
     {
         return transformTextAndCheckImpl(-1, encoding, bigEndian, validBom, expectedByteOrder);
     }
@@ -249,7 +251,7 @@ public class TextToPdfContentTransformerTest
     }
 
     private TransformCheckResult transformTextAndCheckImpl(int pageLimit, String encoding, Boolean bigEndian, Boolean validBom,
-                                           String expectedByteOrder) throws Exception
+            String expectedByteOrder) throws Exception
     {
         StringBuilder sb = new StringBuilder();
         String checkText = createTestText(pageLimit, sb);
@@ -286,13 +288,13 @@ public class TextToPdfContentTransformerTest
     }
 
     private TransformCheckResult transformTextAndCheck(File sourceFile, String encoding, String checkText,
-        String pageLimit) throws Exception
+            String pageLimit) throws Exception
     {
         return transformTextAndCheck(sourceFile, encoding, checkText, pageLimit, true, null, false);
     }
 
     private TransformCheckResult transformTextAndCheck(File sourceFile, String encoding, String checkText,
-        String pageLimit, boolean clean, Map<String, String> extraParameters, boolean shouldFail) throws Exception
+            String pageLimit, boolean clean, Map<String, String> extraParameters, boolean shouldFail) throws Exception
     {
         TransformCheckResult result = new TransformCheckResult();
 
@@ -325,7 +327,7 @@ public class TextToPdfContentTransformerTest
         if (!failed)
         {
             // Read back in the PDF and check it
-            PDDocument doc = PDDocument.load(targetFile);
+            PDDocument doc = Loader.loadPDF(targetFile);
             PDFTextStripper textStripper = new PDFTextStripper();
             StringWriter textWriter = new StringWriter();
             textStripper.writeText(doc, textWriter);
@@ -384,7 +386,7 @@ public class TextToPdfContentTransformerTest
             boolean firstRead = true;
             byte[] bytes = new byte[8192];
             try (InputStream is = new BufferedInputStream(new FileInputStream(file));
-                 OutputStream os = new BufferedOutputStream(new FileOutputStream(originalFile)))
+                    OutputStream os = new BufferedOutputStream(new FileOutputStream(originalFile)))
             {
                 int l;
                 int off;
@@ -398,7 +400,7 @@ public class TextToPdfContentTransformerTest
                     if (firstRead)
                     {
                         firstRead = false;
-                        boolean actualEndianBytes = bytes[0] == (byte)0xfe; // if true [1] would also be 0xff
+                        boolean actualEndianBytes = bytes[0] == (byte) 0xfe; // if true [1] would also be 0xff
                         switchBytes = actualEndianBytes != bigEndian;
                         if (validBom == null)
                         {
@@ -419,14 +421,14 @@ public class TextToPdfContentTransformerTest
                         if (switchBytes)
                         {
                             // Reverse the byte order of characters including the BOM.
-                            for (int i=0; i<l; i+=2)
+                            for (int i = 0; i < l; i += 2)
                             {
                                 byte aByte = bytes[i];
-                                bytes[i] = bytes[i+1];
-                                bytes[i+1] = aByte;
+                                bytes[i] = bytes[i + 1];
+                                bytes[i + 1] = aByte;
                             }
                         }
-                        os.write(bytes, off, len-off);
+                        os.write(bytes, off, len - off);
                     }
                 } while (l != -1);
             }
@@ -456,11 +458,11 @@ public class TextToPdfContentTransformerTest
         hexString = hexString.replaceAll(" *", "");
         int len = hexString.length() / 2;
         byte[] bytes = new byte[len];
-        for (int j=0, i=0; i<len; i++)
+        for (int j = 0, i = 0; i < len; i++)
         {
             int firstDigit = Character.digit(hexString.charAt(j++), 16);
             int secondDigit = Character.digit(hexString.charAt(j++), 16);
-            bytes[i] = (byte)((firstDigit << 4) + secondDigit);
+            bytes[i] = (byte) ((firstDigit << 4) + secondDigit);
         }
         return bytes;
     }
@@ -469,7 +471,7 @@ public class TextToPdfContentTransformerTest
     {
         StringBuffer sb = new StringBuffer();
         int len = bytes.length;
-        for (int i=0; i<len; i++)
+        for (int i = 0; i < len; i++)
         {
             if (sb.length() > 0)
             {

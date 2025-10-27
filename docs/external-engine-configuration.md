@@ -12,6 +12,7 @@ The following externalized T-engines properties are available:
 | ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
 | ACTIVEMQ_USER | ActiveMQ User. | admin |
 | ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
+| ACTIVEMQ_URL_PARAMS | ActiveMQ connection options. | ?jms.watchTopicAdvisories=false |
 | FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
 | PDFBOX_NOTEXTRACTBOOKMARKS_DEFAULT | The default behaviour for notExtractBookmarksText when this request param is omitted from a request. | false |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for receiving async requests. | org.alfresco.transform.engine.tika.acs |
@@ -25,6 +26,7 @@ The following externalized T-engines properties are available:
 | ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
 | ACTIVEMQ_USER | ActiveMQ User. | admin |
 | ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
+| ACTIVEMQ_URL_PARAMS | ActiveMQ connection options. | ?jms.watchTopicAdvisories=false |
 | FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.alfresco-pdf-renderer.acs |
 | PDFRENDERER_EXE | Path to Pdf-renderer EXE. | /usr/bin/alfresco-pdf-renderer |
@@ -37,9 +39,11 @@ The following externalized T-engines properties are available:
 | ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
 | ACTIVEMQ_USER | ActiveMQ User. | admin |
 | ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
+| ACTIVEMQ_URL_PARAMS | ActiveMQ connection options. | ?jms.watchTopicAdvisories=false |
 | FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.misc.acs |
 | MISC_PDFBOX_DEFAULT_FONT | Default font used by PdfBox | NotoSans-Regular |
+| MISC_HTML_COLLAPSE | Html Collasping Option for HTML to TXT transformation | true | 
 
 ## Libreoffice
 | Property | Description | Default value |
@@ -49,6 +53,7 @@ The following externalized T-engines properties are available:
 | ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
 | ACTIVEMQ_USER | ActiveMQ User. | admin |
 | ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
+| ACTIVEMQ_URL_PARAMS | ActiveMQ connection options. | ?jms.watchTopicAdvisories=false |
 | FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.libreoffice.acs |
 | LIBREOFFICE_HOME | Path to LibreOffice_Home.  | /opt/libreoffice7.2 |
@@ -59,20 +64,22 @@ The following externalized T-engines properties are available:
 | LIBREOFFICE_IS_ENABLED | Enables Libreoffice executioner. | true |
 
 ## Imagemagick
-| Property | Description | Default value |
-|----------|-------------|---------------|
-| SERVER_PORT | T-Engine Port | 8090 |
-| HOSTNAME | T-Engine Name. | t-engine |
-| ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
-| ACTIVEMQ_USER | ActiveMQ User. | admin |
-| ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
-| FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
-| TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.imagemagick.acs |
-| IMAGEMAGICK_ROOT | Path to Imagemagick Root. | /usr/lib64/ImageMagick-7.0.10 |
-| IMAGEMAGICK_DYN | Path to Imagemagick DYLD. | /usr/lib64/ImageMagick-7.0.10/lib |
-| IMAGEMAGICK_EXE | Path to Imagemagick EXE. | /usr/bin/convert |
-| IMAGEMAGICK_CODERS | Path to Imagemagick custom coders. |  |
-| IMAGEMAGICK_CONFIG | Path to Imagemagick custom config. |  |
+| Property | Description                                                           | Default value |
+|----------|-----------------------------------------------------------------------|---------------|
+| SERVER_PORT | T-Engine Port                                                         | 8090 |
+| HOSTNAME | T-Engine Name.                                                        | t-engine |
+| ACTIVEMQ_URL | ActiveMQ URL.                                                         | nio://localhost:61616 |
+| ACTIVEMQ_USER | ActiveMQ User.                                                        | admin |
+| ACTIVEMQ_PASSWORD | ActiveMQ Password.                                                    | admin |
+| ACTIVEMQ_URL_PARAMS | ActiveMQ connection options.                                          | ?jms.watchTopicAdvisories=false |
+| FILE_STORE_URL | T-Engine Port.                                                        | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
+| TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests.                               | org.alfresco.transform.engine.imagemagick.acs |
+| IMAGEMAGICK_ROOT | Path to Imagemagick Root.                                             | /usr/lib64/ImageMagick-7.0.10 |
+| IMAGEMAGICK_DYN | Path to Imagemagick DYLD.                                             | /usr/lib64/ImageMagick-7.0.10/lib |
+| IMAGEMAGICK_EXE | Path to Imagemagick EXE.                                              | /usr/bin/convert |
+| IMAGEMAGICK_CODERS | Path to Imagemagick custom coders.                                    |  |
+| IMAGEMAGICK_CONFIG | Path to Imagemagick custom config.                                    |  |
+| IMAGEMAGICK_COMMAND_OPTIONS_ENABLED | If set to true, enables usage of deprecated commandOptions parameter. |  |
 
 ## Core-aio
 | Property | Description | Default value |
@@ -82,6 +89,7 @@ The following externalized T-engines properties are available:
 | ACTIVEMQ_URL | ActiveMQ URL. | nio://localhost:61616 |
 | ACTIVEMQ_USER | ActiveMQ User. | admin |
 | ACTIVEMQ_PASSWORD | ActiveMQ Password. | admin |
+| ACTIVEMQ_URL_PARAMS | ActiveMQ connection options. | ?jms.watchTopicAdvisories=false |
 | FILE_STORE_URL | T-Engine Port. | http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file |
 | PDFBOX_NOTEXTRACTBOOKMARKS_DEFAULT | The default behaviour for notExtractBookmarksText when this request param is omitted from a request. | false |
 | TRANSFORM_ENGINE_REQUEST_QUEUE | T-Engine queue used for async requests. | org.alfresco.transform.engine.aio.acs |
@@ -98,4 +106,6 @@ The following externalized T-engines properties are available:
 | IMAGEMAGICK_EXE | Path to Imagemagick EXE. | /usr/bin/convert |
 | IMAGEMAGICK_CODERS | Path to Imagemagick custom coders. |  |
 | IMAGEMAGICK_CONFIG | Path to Imagemagick custom config. |  |
+| IMAGEMAGICK_COMMAND_OPTIONS_ENABLED | If set to true, enables usage of deprecated commandOptions parameter. |  |
 | MISC_PDFBOX_DEFAULT_FONT | Default font used by PdfBox | NotoSans-Regular |
+| MISC_HTML_COLLAPSE | Html Collapsing Option for HTML to TXT transformation explicitly for Misc Engine | true |

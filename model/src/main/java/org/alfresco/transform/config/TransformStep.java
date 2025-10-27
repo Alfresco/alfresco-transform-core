@@ -24,8 +24,7 @@ package org.alfresco.transform.config;
 import java.util.Objects;
 
 /**
- * Represents a single transform step in a transform pipeline. The last step in the pipeline does not specify the
- * target type as that is based on the supported types and what has been requested.
+ * Represents a single transform step in a transform pipeline. The last step in the pipeline does not specify the target type as that is based on the supported types and what has been requested.
  */
 public class TransformStep
 {
@@ -33,8 +32,7 @@ public class TransformStep
     private String targetMediaType;
 
     public TransformStep()
-    {
-    }
+    {}
 
     public TransformStep(String transformerName, String targetMediaType)
     {
@@ -65,11 +63,13 @@ public class TransformStep
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         TransformStep that = (TransformStep) o;
         return Objects.equals(transformerName, that.transformerName) &&
-               Objects.equals(targetMediaType, that.targetMediaType);
+                Objects.equals(targetMediaType, that.targetMediaType);
     }
 
     @Override
@@ -82,8 +82,8 @@ public class TransformStep
     public String toString()
     {
         return "TransformStep{" +
-               "transformerName='" + transformerName + '\'' +
-               ", targetMediaType='" + targetMediaType + '\'' +
-               '}';
+                "transformerName='" + transformerName + '\'' +
+                ", targetMediaType='" + targetMediaType + '\'' +
+                '}';
     }
 }

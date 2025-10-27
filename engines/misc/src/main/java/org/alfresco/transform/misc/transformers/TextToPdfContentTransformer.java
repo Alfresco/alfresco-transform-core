@@ -44,12 +44,11 @@ import java.io.PushbackInputStream;
 import java.io.Reader;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import jakarta.annotation.PostConstruct;
 
-import org.alfresco.transform.base.TransformManager;
-import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.util.autodetect.FontFileFinder;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -60,13 +59,15 @@ import org.apache.pdfbox.pdmodel.font.FontMapping;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.tools.TextToPDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 
 /**
  * <p>
@@ -118,7 +119,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         catch (Throwable e)
         {
             throw new RuntimeException(
-                "Unable to set Standard Font for PDF generation: " + fontName, e);
+                    "Unable to set Standard Font for PDF generation: " + fontName, e);
         }
     }
 
@@ -131,7 +132,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         catch (Throwable e)
         {
             throw new RuntimeException(
-                "Unable to set Font Size for PDF generation: " + fontSize);
+                    "Unable to set Font Size for PDF generation: " + fontSize);
         }
     }
 
@@ -147,9 +148,8 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
     }
 
     @Override
-    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String,
-                          String> transformOptions,
-                          final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
+    public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> transformOptions,
+            final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
     {
         String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
         String stringPageLimit = transformOptions.get(PAGE_LIMIT);
@@ -180,11 +180,11 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
 
         PDDocument pdf = null;
         try (InputStream is = new FileInputStream(sourceFile);
-             Reader ir = new BufferedReader(buildReader(is, sourceEncoding));
-             OutputStream os = new BufferedOutputStream(new FileOutputStream(targetFile)))
+                Reader ir = new BufferedReader(buildReader(is, sourceEncoding));
+                OutputStream os = new BufferedOutputStream(new FileOutputStream(targetFile)))
         {
-            //TransformationOptionLimits limits = getLimits(reader, writer, options);
-            //TransformationOptionPair pageLimits = limits.getPagesPair();
+            // TransformationOptionLimits limits = getLimits(reader, writer, options);
+            // TransformationOptionPair pageLimits = limits.getPagesPair();
             pdf = transformer.createPDFFromText(ir, pageLimit, pdfFont, fontSize);
             pdf.save(os);
         }
@@ -192,7 +192,14 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         {
             if (pdf != null)
             {
-                try { pdf.close(); } catch (Throwable e) {e.printStackTrace(); }
+                try
+                {
+                    pdf.close();
+                }
+                catch (Throwable e)
+                {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -210,7 +217,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
             catch (Exception e)
             {
                 logger.warn("JVM doesn't understand encoding '" + encoding +
-                            "' when transforming text to pdf");
+                        "' when transforming text to pdf");
             }
             if (charset != null)
             {
@@ -246,46 +253,29 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
 
     private static class PagedTextToPDF extends TextToPDF
     {
-        // REPO-1066: duplicating the following lines from org.apache.pdfbox.tools.TextToPDF because they made them private
-        // before the upgrade to pdfbox 2.0.8, in pdfbox 1.8, this piece of code was public in org.apache.pdfbox.pdmodel.font.PDType1Font
+        private static final PDType1Font DEFAULT_FONT = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+        private static final Map<String, PDType1Font> STANDARD_14 = Standard14Fonts.getNames().stream()
+                .collect(Collectors.toMap(name -> name, name -> new PDType1Font(Standard14Fonts.getMappedFontName(name))));
+
+        private String fontName = null;
+        private String defaultFont = null;
+
+        PagedTextToPDF()
+        {
+            super();
+            setFont(DEFAULT_FONT);
+        }
+
         static PDType1Font getStandardFont(String name)
         {
             return STANDARD_14.get(name);
         }
 
-        private static final Map<String, PDType1Font> STANDARD_14 = new HashMap<>();
-
-        static
-        {
-            STANDARD_14.put(PDType1Font.TIMES_ROMAN.getBaseFont(), PDType1Font.TIMES_ROMAN);
-            STANDARD_14.put(PDType1Font.TIMES_BOLD.getBaseFont(), PDType1Font.TIMES_BOLD);
-            STANDARD_14.put(PDType1Font.TIMES_ITALIC.getBaseFont(), PDType1Font.TIMES_ITALIC);
-            STANDARD_14.put(PDType1Font.TIMES_BOLD_ITALIC.getBaseFont(),
-                PDType1Font.TIMES_BOLD_ITALIC);
-            STANDARD_14.put(PDType1Font.HELVETICA.getBaseFont(), PDType1Font.HELVETICA);
-            STANDARD_14.put(PDType1Font.HELVETICA_BOLD.getBaseFont(), PDType1Font.HELVETICA_BOLD);
-            STANDARD_14.put(PDType1Font.HELVETICA_OBLIQUE.getBaseFont(),
-                PDType1Font.HELVETICA_OBLIQUE);
-            STANDARD_14.put(PDType1Font.HELVETICA_BOLD_OBLIQUE.getBaseFont(),
-                PDType1Font.HELVETICA_BOLD_OBLIQUE);
-            STANDARD_14.put(PDType1Font.COURIER.getBaseFont(), PDType1Font.COURIER);
-            STANDARD_14.put(PDType1Font.COURIER_BOLD.getBaseFont(), PDType1Font.COURIER_BOLD);
-            STANDARD_14.put(PDType1Font.COURIER_OBLIQUE.getBaseFont(), PDType1Font.COURIER_OBLIQUE);
-            STANDARD_14.put(PDType1Font.COURIER_BOLD_OBLIQUE.getBaseFont(),
-                PDType1Font.COURIER_BOLD_OBLIQUE);
-            STANDARD_14.put(PDType1Font.SYMBOL.getBaseFont(), PDType1Font.SYMBOL);
-            STANDARD_14.put(PDType1Font.ZAPF_DINGBATS.getBaseFont(), PDType1Font.ZAPF_DINGBATS);
-        }
-        //duplicating until here
-
-        private String fontName = null;
-        private String defaultFont = null;
-
         // The following code is based on the code in TextToPDF with the addition of
         // checks for page limits.
         // The calling code must close the PDDocument once finished with it.
         public PDDocument createPDFFromText(Reader text, int pageLimit, String pdfFontName, Integer pdfFontSize)
-            throws IOException
+                throws IOException
         {
             PDDocument doc = null;
             int pageCount = 0;
@@ -303,7 +293,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                 final int margin = 40;
                 float height = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000;
 
-                //calculate font height and increase by 5 percent.
+                // calculate font height and increase by 5 percent.
                 height = height * fontSize * 1.05f;
 
                 BufferedReader data = (text instanceof BufferedReader) ? (BufferedReader) text : new BufferedReader(text);
@@ -316,8 +306,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                 // There is a special case of creating a PDF document from an empty string.
                 boolean textIsEmpty = true;
 
-                outer:
-                while ((nextLine = data.readLine()) != null)
+                outer: while ((nextLine = data.readLine()) != null)
                 {
                     // The input text is nonEmpty. New pages will be created and added
                     // to the PDF document as they are needed, depending on the length of
@@ -338,13 +327,11 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                             if (lineIndex < lineWords.length)
                             {
                                 String lineWithNextWord = nextLineToDraw.toString() + lineWords[lineIndex];
-                                lengthIfUsingNextWord =
-                                    (font.getStringWidth(
+                                lengthIfUsingNextWord = (font.getStringWidth(
                                         lineWithNextWord) / 1000) * fontSize;
                             }
-                        }
-                        while (lineIndex < lineWords.length &&
-                               lengthIfUsingNextWord < maxStringLength);
+                        } while (lineIndex < lineWords.length &&
+                                lengthIfUsingNextWord < maxStringLength);
                         if (y < margin)
                         {
                             int test = pageCount + 1;
@@ -366,16 +353,16 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
                             contentStream.setFont(font, fontSize);
                             contentStream.beginText();
                             y = page.getMediaBox().getHeight() - margin + height;
-                            contentStream.moveTextPositionByAmount(margin, y);
+                            contentStream.newLineAtOffset(margin, y);
                         }
 
                         if (contentStream == null)
                         {
                             throw new IOException("Error:Expected non-null content stream.");
                         }
-                        contentStream.moveTextPositionByAmount(0, -height);
+                        contentStream.newLineAtOffset(0, -height);
                         y -= height;
-                        contentStream.drawString(nextLineToDraw.toString());
+                        contentStream.showText(nextLineToDraw.toString());
                     }
                 }
 
@@ -418,11 +405,11 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
         /**
          * Gets the font that will be used in document transformation using the following approaches:
          * <ol>
-         *     <li>Standard font map
-         *     <li>Font Mappers
-         *     <li>File system fonts
-         *     <li>Transformer default font
-         *     <li>PdfBox default font
+         * <li>Standard font map
+         * <li>Font Mappers
+         * <li>File system fonts
+         * <li>Transformer default font
+         * <li>PdfBox default font
          * </ol>
          *
          * @param doc
@@ -615,8 +602,7 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
      */
     private InputStream handleUTF8BOM(InputStream is)
     {
-        return new PushbackInputStream(is, UTF8_READ_AHEAD_BYTES)
-        {
+        return new PushbackInputStream(is, UTF8_READ_AHEAD_BYTES) {
             boolean bomRead;
 
             @Override
@@ -664,17 +650,11 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
     }
 
     /**
-     * Handles the situation where there is a BOM even though the encoding indicates that normally there should not be
-     * one for UTF-16BE and UTF-16LE. For extra flexibility includes UTF-16 too which optionally has the BOM. Rather
-     * than look at the BOM we look at the number of zero bytes in the first few character. XML files even when not in
-     * European languages tend to have more even zero bytes when big-endian encoded and more odd zero bytes when
-     * little-endian. Think of: <?xml version="1.0"?> The normal Java decoder does not have this flexibility but other
-     * transformers do.
+     * Handles the situation where there is a BOM even though the encoding indicates that normally there should not be one for UTF-16BE and UTF-16LE. For extra flexibility includes UTF-16 too which optionally has the BOM. Rather than look at the BOM we look at the number of zero bytes in the first few character. XML files even when not in European languages tend to have more even zero bytes when big-endian encoded and more odd zero bytes when little-endian. Think of: <?xml version="1.0"?> The normal Java decoder does not have this flexibility but other transformers do.
      */
     private InputStream handleUTF16BOM(InputStream is)
     {
-        return new PushbackInputStream(is, UTF16_READ_AHEAD_BYTES)
-        {
+        return new PushbackInputStream(is, UTF16_READ_AHEAD_BYTES) {
             boolean bomRead;
             boolean switchByteOrder;
             boolean evenByte = true;

@@ -27,21 +27,22 @@ package org.alfresco.transformer.executors;
  * #L%
  */
 
-import org.alfresco.transform.exceptions.TransformException;
-
-import java.io.File;
-import java.util.Map;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_METADATA_EMBED;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_METADATA_EXTRACT;
 import static org.alfresco.transformer.util.RequestParamMap.TRANSFORM_NAME_PARAMETER;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import java.io.File;
+import java.util.Map;
+
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
  *
- * Basic interface for executing transforms and metadata extract or embed actions.
+ *             Basic interface for executing transforms and metadata extract or embed actions.
  *
  * @author adavis
  */
@@ -55,14 +56,15 @@ public interface Transformer
     String getTransformerId();
 
     default void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
-                           File sourceFile, File targetFile) throws TransformException {
+            File sourceFile, File targetFile) throws TransformException
+    {
         final String transformName = transformOptions.remove(TRANSFORM_NAME_PARAMETER);
         transformExtractOrEmbed(transformName, sourceMimetype, targetMimetype, transformOptions, sourceFile, targetFile);
     }
 
     default void transformExtractOrEmbed(String transformName, String sourceMimetype, String targetMimetype,
-                                         Map<String, String> transformOptions,
-                                         File sourceFile, File targetFile) throws TransformException
+            Map<String, String> transformOptions,
+            File sourceFile, File targetFile) throws TransformException
     {
         try
         {
@@ -109,25 +111,20 @@ public interface Transformer
     }
 
     default void transform(String transformName, String sourceMimetype, String targetMimetype,
-                           Map<String, String> transformOptions,
-                           File sourceFile, File targetFile) throws Exception
-    {
-    }
+            Map<String, String> transformOptions,
+            File sourceFile, File targetFile) throws Exception
+    {}
 
     default void extractMetadata(String transformName, String sourceMimetype, String targetMimetype,
-                                 Map<String, String> transformOptions,
-                                 File sourceFile, File targetFile) throws Exception
-    {
-    }
+            Map<String, String> transformOptions,
+            File sourceFile, File targetFile) throws Exception
+    {}
 
     /**
-     * @deprecated The content repository has no non test embed metadata implementations.
-     *             This code exists in case there are custom implementations, that need to be converted to T-Engines.
-     *             It is simply a copy and paste from the content repository and has received limited testing.
+     * @deprecated The content repository has no non test embed metadata implementations. This code exists in case there are custom implementations, that need to be converted to T-Engines. It is simply a copy and paste from the content repository and has received limited testing.
      */
     default void embedMetadata(String transformName, String sourceMimetype, String targetMimetype,
-                               Map<String, String> transformOptions,
-                               File sourceFile, File targetFile) throws Exception
-    {
-    }
+            Map<String, String> transformOptions,
+            File sourceFile, File targetFile) throws Exception
+    {}
 }
