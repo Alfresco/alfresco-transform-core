@@ -23,6 +23,8 @@ ENV JAVA_BASE_IMAGE=${JAVA_BASE_IMAGE}
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
 # Print JAVA_BASE_IMAGE and extract JAVA_VERSION
+RUN echo "=== JAVA ALTERNATIVES ===" && alternatives --display java
+
 RUN echo "JAVA_BASE_IMAGE is: ${JAVA_BASE_IMAGE}" && \
     JAVA_VERSION=$(echo "${JAVA_BASE_IMAGE}" | sed -E 's/.*jre([0-9]+).*/\1/') && \
     echo "Extracted JAVA_VERSION: ${JAVA_VERSION}" && \
