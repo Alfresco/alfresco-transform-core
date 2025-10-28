@@ -33,7 +33,6 @@ RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.proj
     else \
       LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1) && \
       dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}${LIBREOFFICE_ARM64_RPM_VERSION} && \
-      JAVA_VERSION=$(dnf list installed | grep -oP 'java-\K[0-9]+(?=-openjdk)') && \
       update-alternatives --set java java-17-openjdk.aarch64; \
     fi && \
       yum clean all
