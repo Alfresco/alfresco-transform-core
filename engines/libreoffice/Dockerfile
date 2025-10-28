@@ -21,28 +21,32 @@ ARG USERID=33003
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
-RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
-    yum install -y cairo cups-libs libSM libGLU procps && \
-    if [ "$(uname -m)" = "x86_64" ]; then \
-        test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
-        ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
-        curl -s -S $LIBREOFFICE_RPM_URL      -o libreoffice-dist-linux.gz && \
-        tar xzf libreoffice-dist-linux.gz && \
-        yum localinstall -y LibreOffice*/RPMS/*.rpm && \
-        rm -rf libreoffice-dist-*linux.gz LibreOffice_*_Linux_x86-64_rpm; \
-    else \
+# Link the jar file
+RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar
+
+# Install required packages
+RUN yum install -y cairo cups-libs libSM libGLU procps
+
+# Install LibreOffice for x86_64
+RUN if [ "$(uname -m)" = "x86_64" ]; then \
+      test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
+      ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
+      curl -s -S $LIBREOFFICE_RPM_URL -o libreoffice-dist-linux.gz && \
+      tar xzf libreoffice-dist-linux.gz && \
+      yum localinstall -y LibreOffice*/RPMS/*.rpm && \
+      rm -rf libreoffice-dist-*linux.gz LibreOffice_*_Linux_x86-64_rpm; \
+    fi
+
+# Install LibreOffice for ARM64 and set Java alternative
+RUN if [ "$(uname -m)" != "x86_64" ]; then \
       LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1) && \
       dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}${LIBREOFFICE_ARM64_RPM_VERSION} && \
-      echo "Available Java alternatives:" && \
-      update-alternatives --list java 2>&1 && \
-      if update-alternatives --list java | grep -q "java-17-openjdk"; then \
-        echo "java-25-openjdk.aarch64 exists, setting as default."; \
-        update-alternatives --set java java-17-openjdk.aarch64; \
-      else \
-        echo "java-25-openjdk.aarch64 not found!"; \
-      fi && \
-    fi && \
-      yum clean all
+      JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/') && \
+      update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64; \
+    fi
+
+# Clean up yum cache
+RUN yum clean all
 
 ADD target/generated-resources/licenses              /licenses
 ADD target/generated-resources/licenses.xml          /licenses/

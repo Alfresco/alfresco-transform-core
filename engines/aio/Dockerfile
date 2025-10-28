@@ -35,47 +35,64 @@ ARG USERID=33017
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 
-#removing perl-ExtUtils-MakeMaker cascades to remove exiftools
-RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
-    yum install -y $IMAGEMAGICK_DEP_RPM_URL && \
-    if [ "$(uname -m)" = "x86_64" ]; then \
+# Link the jar file
+RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar
+
+# Install ImageMagick dependencies
+RUN yum install -y $IMAGEMAGICK_DEP_RPM_URL
+
+# Install ImageMagick (architecture-specific)
+RUN if [ "$(uname -m)" = "x86_64" ]; then \
       yum install -y ${IMAGEMAGICK_RPM_URL}-el9.rpm ${IMAGEMAGICK_RPM_URL}-libs-el9.rpm; \
     else \
       yum install -y ${IMAGEMAGICK_RPM_URL}-el9-aarch64.rpm ${IMAGEMAGICK_RPM_URL}-libs-el9-aarch64.rpm; \
-    fi && \
-    yum install -y cairo cups-libs libSM libGLU procps && \
-    if [ "$(uname -m)" = "x86_64" ]; then \
+    fi
+
+# Install additional libraries
+RUN yum install -y cairo cups-libs libSM libGLU procps
+
+# Install LibreOffice (architecture-specific)
+RUN if [ "$(uname -m)" = "x86_64" ]; then \
       test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
       ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
-      curl -s -S $LIBREOFFICE_RPM_URL      -o libreoffice-dist-linux.gz && \
+      curl -s -S $LIBREOFFICE_RPM_URL -o libreoffice-dist-linux.gz && \
       tar xzf libreoffice-dist-linux.gz && \
       yum localinstall -y LibreOffice*/RPMS/*.rpm && \
       rm -rf libreoffice-dist-*linux.gz LibreOffice_*_Linux_x86-64_rpm; \
-    else \
+    fi
+
+RUN if [ "$(uname -m)" != "x86_64" ]; then \
       LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1) && \
       dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}${LIBREOFFICE_ARM64_RPM_VERSION} && \
-      echo "Available Java alternatives:" && \
-      update-alternatives --list java 2>&1 && \
-      JAVA_VERSION=$(dnf list installed | grep -oP 'java-\K[0-9]+(?=-openjdk)') && \
-      JAVA_PATH=$(update-alternatives --list java | grep "java-${JAVA_VERSION}-openjdk") && \
-      update-alternatives --set java "$JAVA_PATH"; \
-    fi && \
-    if [ "$(uname -m)" = "x86_64" ]; then \
+      JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/') && \
+      update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64; \
+    fi
+
+# Download Alfresco PDF Renderer (architecture-specific)
+RUN if [ "$(uname -m)" = "x86_64" ]; then \
       curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz; \
     else \
       curl -s -S $ALFRESCO_PDF_RENDERER_ARM64_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz; \
-    fi && \
-    tar xf alfresco-pdf-renderer-linux.tgz -C /usr/bin && \
-    rm -f alfresco-pdf-renderer-linux.tgz && \
-    curl -s -S $EXIFTOOL_URL -o ${EXIFTOOL_FOLDER}.tgz && \
-    tar xzf ${EXIFTOOL_FOLDER}.tgz && \
-    yum -y install perl perl-ExtUtils-MakeMaker make && \
+    fi
+
+# Extract and clean up Alfresco PDF Renderer
+RUN tar xf alfresco-pdf-renderer-linux.tgz -C /usr/bin && \
+    rm -f alfresco-pdf-renderer-linux.tgz
+
+# Download and extract ExifTool
+RUN curl -s -S $EXIFTOOL_URL -o ${EXIFTOOL_FOLDER}.tgz && \
+    tar xzf ${EXIFTOOL_FOLDER}.tgz
+
+# Install ExifTool
+RUN yum -y install perl perl-ExtUtils-MakeMaker make && \
     (cd ./${EXIFTOOL_FOLDER} && \
     perl Makefile.PL && \
     make && \
     make test && \
-    make install) && \
-    yum -y autoremove make &&  \
+    make install)
+
+# Remove build tools and clean up
+RUN yum -y autoremove make && \
     rm -rf ${EXIFTOOL_FOLDER} ${EXIFTOOL_FOLDER}.tgz && \
     yum clean all
 
