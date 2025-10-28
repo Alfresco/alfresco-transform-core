@@ -64,10 +64,13 @@ RUN if [ "$(uname -m)" = "x86_64" ]; then \
 
 RUN set -x
 RUN printenv JAVA_BASE_IMAGE
+RUN echo "JAVA_BASE_IMAGE is here: $(printenv JAVA_BASE_IMAGE)"
 RUN JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/') && \
     echo $JAVA_VERSION > /tmp/java_version && \
-    export JAVA_VERSION=$(cat /tmp/java_version)
+    export JAVA_VERSION=$(cat /tmp/java_version) \
+ENV JAVA_VERSION=${JAVA_VERSION}
 RUN printenv JAVA_VERSION
+RUN echo "JAVA_VERSION is here: $(printenv JAVA_VERSION)"
 RUN update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64
 RUN printenv LIBREOFFICE_ARM64_RPM_URL LIBREOFFICE_ARM64_RPM_VERSION
 RUN LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1) && \

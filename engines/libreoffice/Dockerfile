@@ -22,11 +22,12 @@ ENV JAVA_BASE_IMAGE=${JAVA_BASE_IMAGE}
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
-RUN printenv JAVA_BASE_IMAGE
+RUN echo "JAVA_BASE_IMAGE is here: $(printenv JAVA_BASE_IMAGE)"
 RUN JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/') && \
     echo $JAVA_VERSION > /tmp/java_version && \
     export JAVA_VERSION=$(cat /tmp/java_version)
-RUN printenv JAVA_VERSION
+ENV JAVA_VERSION=${JAVA_VERSION}
+RUN echo "JAVA_VERSION is here : $(printenv JAVA_VERSION)"
 RUN update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64
 RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     yum install -y cairo cups-libs libSM libGLU procps && \
