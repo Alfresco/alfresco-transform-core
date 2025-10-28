@@ -18,12 +18,13 @@ ARG GROUPNAME=Alfresco
 ARG GROUPID=1000
 ARG LIBREUSERNAME=libreoffice
 ARG USERID=33003
-ENV JAVA_BASE_IMAGE=${JAVA_BASE_IMAGE}
+
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
 # Print JAVA_BASE_IMAGE and extract JAVA_VERSION
-RUN echo "=== JAVA ALTERNATIVES ===" && alternatives --display java
+RUN alternatives --list | grep java
+RUN if command -v alternatives >/dev/null; then alternatives --display java; else echo "alternatives utility not found"; fi
 
 RUN echo "JAVA_BASE_IMAGE is: ${JAVA_BASE_IMAGE}" && \
     JAVA_VERSION=$(echo "${JAVA_BASE_IMAGE}" | sed -E 's/.*jre([0-9]+).*/\1/') && \
