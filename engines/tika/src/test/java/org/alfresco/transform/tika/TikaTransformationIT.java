@@ -187,7 +187,7 @@ public class TikaTransformationIT
         final String description = format("Transform ({0}, {1} -> {2}, {3})",
                 sourceFile, sourceMimetype, targetMimetype, targetExtension);
 
-        Throwable expectedException = catchThrowable(() -> {
+        HttpClientErrorException expectedException = catchThrowableOfType(HttpClientErrorException.class, () -> {
             HttpClient.sendTRequest(ENGINE_URL, sourceFile, null,
                     targetMimetype, targetExtension, ImmutableMap.of(
                             "targetEncoding", "UTF-8",
@@ -196,13 +196,9 @@ public class TikaTransformationIT
         });
 
         assertThat(expectedException).as(description)
-                .isInstanceOf(HttpClientErrorException.class);
-
-        assertThat(((HttpClientErrorException) expectedException).getStatusCode())
+                .hasMessageContaining(TransformerMessages.CORRUPTED_FILE_ERROR)
+                .extracting(HttpClientErrorException::getStatusCode)
                 .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
-
-        assertThat(expectedException.getMessage())
-                .contains(TransformerMessages.CORRUPTED_FILE_ERROR);
     }
 
     private static Stream<Triple<String, String, String>> engineTransformationsCorruptedToText()
