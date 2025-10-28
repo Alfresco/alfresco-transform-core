@@ -56,7 +56,7 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
       dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}${LIBREOFFICE_ARM64_RPM_VERSION} && \
       JAVA_VERSION=$(dnf list installed | grep -oP 'java-\K[0-9]+(?=-openjdk)') && \
       JAVA_PATH=$(update-alternatives --list java | grep "java-${JAVA_VERSION}-openjdk") && \
-      pdate-alternatives --set java "$JAVA_PATH" && \
+      update-alternatives --set java "$JAVA_PATH"; \
     fi && \
     if [ "$(uname -m)" = "x86_64" ]; then \
       curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz; \
