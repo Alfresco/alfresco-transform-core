@@ -22,33 +22,11 @@ ENV JAVA_BASE_IMAGE=${JAVA_BASE_IMAGE}
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
-# Define the base image as an ARG and use it for FROM
-
 # Print JAVA_BASE_IMAGE and extract JAVA_VERSION
 RUN echo "JAVA_BASE_IMAGE is: ${JAVA_BASE_IMAGE}" && \
     JAVA_VERSION=$(echo "${JAVA_BASE_IMAGE}" | sed -E 's/.*jre([0-9]+).*/\1/') && \
     echo "Extracted JAVA_VERSION: ${JAVA_VERSION}" && \
-    echo "${JAVA_VERSION}" > /tmp/java_version
-
-# Set JAVA_VERSION as ARG and ENV for subsequent use
-ARG JAVA_VERSION
-ENV JAVA_VERSION=${JAVA_VERSION}
-
-RUN set -x \
-    && JAVA_VERSION=$(cat /tmp/java_version) \
-    && if [ -z "$JAVA_VERSION" ]; then \
-        echo "JAVA_VERSION is not set"; \
-        exit 1; \
-    else \
-        echo "JAVA_VERSION is: $JAVA_VERSION"; \
-    fi \
-    && if ! update-alternatives --list java | grep -q "java-${JAVA_VERSION}-openjdk.aarch64"; then \
-        echo "Java alternative not found for java-${JAVA_VERSION}-openjdk.aarch64"; \
-        update-alternatives --list java; \
-        exit 1; \
-    fi \
-    && update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64
-
+    echo "${JAVA_VERSION}" > /tmp/java_version \
 
 RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     yum install -y cairo cups-libs libSM libGLU procps && \
