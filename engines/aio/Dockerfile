@@ -33,6 +33,7 @@ ARG GROUPID=1000
 ARG AIOUSERNAME=transform-all-in-one
 ARG USERID=33017
 ENV JAVA_BASE_IMAGE=${JAVA_BASE_IMAGE}
+ARG JAVA_VERSION
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 
@@ -41,6 +42,30 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
 
 # Install ImageMagick dependencies
 RUN yum install -y $IMAGEMAGICK_DEP_RPM_URL
+
+# Define the base image as an ARG and use it for FROM
+ARG JAVA_BASE_IMAGE=alfresco/alfresco-base-java:jre17-rockylinux9@sha256:f98833508b7be8c4b44a25450f9faac44cacfdc075f2295e02836b93fd05bb9c
+FROM ${JAVA_BASE_IMAGE}
+
+# Extract JAVA_VERSION from JAVA_BASE_IMAGE and set as ARG
+ARG JAVA_VERSION
+
+# If JAVA_VERSION is not provided, extract from JAVA_BASE_IMAGE
+RUN if [ -z "$JAVA_VERSION" ]; then \
+      JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/'); \
+      echo "Extracted JAVA_VERSION: $JAVA_VERSION"; \
+      echo "JAVA_VERSION=$JAVA_VERSION" >> /etc/environment; \
+    else \
+      echo "JAVA_VERSION provided as ARG: $JAVA_VERSION"; \
+      echo "JAVA_VERSION=$JAVA_VERSION" >> /etc/environment; \
+    fi
+
+# Set JAVA_VERSION as ENV so it's available in subsequent RUN commands
+ENV JAVA_VERSION=${JAVA_VERSION}
+
+# Example usage of JAVA_VERSION in a subsequent RUN
+RUN echo "Using JAVA_VERSION: $JAVA_VERSION" && \
+    update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64
 
 # Install ImageMagick (architecture-specific)
 RUN if [ "$(uname -m)" = "x86_64" ]; then \

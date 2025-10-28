@@ -19,18 +19,34 @@ ARG GROUPID=1000
 ARG LIBREUSERNAME=libreoffice
 ARG USERID=33003
 ENV JAVA_BASE_IMAGE=${JAVA_BASE_IMAGE}
+ARG JAVA_VERSION
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
-RUN echo "JAVA_BASE_IMAGE is here: $(printenv JAVA_BASE_IMAGE)"
-RUN echo "JAVA_BASE_IMAGE is: $JAVA_BASE_IMAGE"
-RUN JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/') && \
-    echo $JAVA_VERSION > /tmp/java_version && \
-    export JAVA_VERSION=$(cat /tmp/java_version)
+# Define the base image as an ARG and use it for FROM
+ARG JAVA_BASE_IMAGE=alfresco/alfresco-base-java:jre17-rockylinux9@sha256:f98833508b7be8c4b44a25450f9faac44cacfdc075f2295e02836b93fd05bb9c
+FROM ${JAVA_BASE_IMAGE}
+
+# Extract JAVA_VERSION from JAVA_BASE_IMAGE and set as ARG
+ARG JAVA_VERSION
+
+# If JAVA_VERSION is not provided, extract from JAVA_BASE_IMAGE
+RUN if [ -z "$JAVA_VERSION" ]; then \
+      JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/'); \
+      echo "Extracted JAVA_VERSION: $JAVA_VERSION"; \
+      echo "JAVA_VERSION=$JAVA_VERSION" >> /etc/environment; \
+    else \
+      echo "JAVA_VERSION provided as ARG: $JAVA_VERSION"; \
+      echo "JAVA_VERSION=$JAVA_VERSION" >> /etc/environment; \
+    fi
+
+# Set JAVA_VERSION as ENV so it's available in subsequent RUN commands
 ENV JAVA_VERSION=${JAVA_VERSION}
-RUN echo "JAVA_VERSION is here: JAVA_VERSION"
-RUN echo "JAVA_VERSION is here : $(printenv JAVA_VERSION)"
-RUN update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64
+
+# Example usage of JAVA_VERSION in a subsequent RUN
+RUN echo "Using JAVA_VERSION: $JAVA_VERSION" && \
+    update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64
+
 RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     yum install -y cairo cups-libs libSM libGLU procps && \
     if [ "$(uname -m)" = "x86_64" ]; then \
