@@ -61,7 +61,7 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
     else \
       LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1) && \
       dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}${LIBREOFFICE_ARM64_RPM_VERSION} && \
-      JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/') && \
+      JAVA_VERSION=$(echo "${JAVA_BASE_IMAGE}" | sed -E 's/.*jre([0-9]+).*/\1/') && \
       update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64; \
     fi && \
     if [ "$(uname -m)" = "x86_64" ]; then \
