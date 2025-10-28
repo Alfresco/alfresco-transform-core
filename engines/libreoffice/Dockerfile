@@ -34,16 +34,20 @@ RUN echo "JAVA_BASE_IMAGE is: ${JAVA_BASE_IMAGE}" && \
 ARG JAVA_VERSION
 ENV JAVA_VERSION=${JAVA_VERSION}
 
-RUN JAVA_VERSION=$(cat /tmp/java_version) && \
-    if [ -z "$JAVA_VERSION" ]; then \
+RUN set -x \
+    && JAVA_VERSION=$(cat /tmp/java_version) \
+    && if [ -z "$JAVA_VERSION" ]; then \
         echo "JAVA_VERSION is not set"; \
         exit 1; \
-    fi && \
-    if ! update-alternatives --list java | grep -q "java-${JAVA_VERSION}-openjdk.aarch64"; then \
-        echo "Java alternative not found"; \
+    else \
+        echo "JAVA_VERSION is: $JAVA_VERSION"; \
+    fi \
+    && if ! update-alternatives --list java | grep -q "java-${JAVA_VERSION}-openjdk.aarch64"; then \
+        echo "Java alternative not found for java-${JAVA_VERSION}-openjdk.aarch64"; \
+        update-alternatives --list java; \
         exit 1; \
-    fi && \
-    update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64; \
+    fi \
+    && update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64
 
 
 RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
