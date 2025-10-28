@@ -32,7 +32,6 @@ ARG GROUPNAME=Alfresco
 ARG GROUPID=1000
 ARG AIOUSERNAME=transform-all-in-one
 ARG USERID=33017
-ENV JAVA_BASE_IMAGE=${JAVA_BASE_IMAGE}
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 
