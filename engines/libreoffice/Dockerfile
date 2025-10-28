@@ -23,12 +23,12 @@ ARG USERID=33003
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
 # Print JAVA_BASE_IMAGE and extract JAVA_VERSION
-RUN update-alternatives --get-selections
-RUN alternatives --list | grep java
-RUN alternatives --display javac
-RUN alternatives --display jar
-RUN alternatives --display java_sdk
-RUN if command -v alternatives >/dev/null; then alternatives --display java; else echo "alternatives utility not found"; fi
+RUN yum install -y alternatives || true
+RUN alternatives --display java || true
+RUN alternatives --list || true
+RUN alternatives --display javac || true
+RUN alternatives --display java_sdk || true
+RUN echo "alternatives utility not found"
 
 RUN echo "JAVA_BASE_IMAGE is: ${JAVA_BASE_IMAGE}" && \
     JAVA_VERSION=$(echo "${JAVA_BASE_IMAGE}" | sed -E 's/.*jre([0-9]+).*/\1/') && \
