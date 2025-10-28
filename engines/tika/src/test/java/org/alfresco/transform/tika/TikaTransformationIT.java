@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2021 Alfresco Software Limited
+ * Copyright (C) 2005 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -29,6 +29,7 @@ package org.alfresco.transform.tika;
 import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;
@@ -41,9 +42,12 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 
 import org.alfresco.transform.base.clients.HttpClient;
+import org.alfresco.transform.common.TransformerMessages;
 
 /**
  * @author Cezar Leahu
@@ -163,5 +167,53 @@ public class TikaTransformationIT
                         allTargets("quick.csv", "text/csv"),
                         allTargets("quick.tar.gz", "application/x-gzip"))
                 .flatMap(identity());
+    }
+
+    /**
+     * Tests that while transforming a corrupted file to txt format, exception is thrown.
+     * 
+     * @param entry
+     *            values to execute same test with different parameters.
+     */
+    @ParameterizedTest
+    @MethodSource("engineTransformationsCorruptedToText")
+    public void testTransformationCorruptedToText(Triple<String, String, String> entry)
+    {
+        final String sourceFile = entry.getLeft();
+        final String sourceMimetype = entry.getRight();
+        final String targetExtension = entry.getMiddle();
+        String targetMimetype = extensionMimetype.get(targetExtension);
+
+        final String description = format("Transform ({0}, {1} -> {2}, {3})",
+                sourceFile, sourceMimetype, targetMimetype, targetExtension);
+
+        HttpClientErrorException expectedException = catchThrowableOfType(HttpClientErrorException.class, () -> {
+            HttpClient.sendTRequest(ENGINE_URL, sourceFile, null,
+                    targetMimetype, targetExtension, ImmutableMap.of(
+                            "targetEncoding", "UTF-8",
+                            "sourceMimetype", sourceMimetype));
+            fail("Corrupted file should have thrown an exception");
+        });
+
+        assertThat(expectedException).as(description)
+                .hasMessageContaining(TransformerMessages.CORRUPTED_FILE_ERROR)
+                .extracting(HttpClientErrorException::getStatusCode)
+                .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    private static Stream<Triple<String, String, String>> engineTransformationsCorruptedToText()
+    {
+        return Stream
+                .of(
+                        textTargets("quick_corrupted.doc", "application/msword"),
+                        textTargets("quick_corrupted.ppt", "application/vnd.ms-powerpoint"),
+                        textTargets("quick_corrupted.pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"))
+                .flatMap(identity());
+    }
+
+    private static Stream<Triple<String, String, String>> textTargets(final String sourceFile,
+            final String sourceMimetype)
+    {
+        return Stream.of(Triple.of(sourceFile, "txt", sourceMimetype));
     }
 }

@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 import jakarta.jms.Destination;
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import org.alfresco.transform.base.CustomTransformer;
@@ -51,6 +52,7 @@ import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.base.registry.CustomTransformers;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.common.TransformerDebug;
+import org.alfresco.transform.common.TransformerMessages;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.registry.TransformServiceRegistry;
 
@@ -163,10 +165,25 @@ abstract class ProcessHandler extends FragmentHandler
     @Override
     public void onSuccessfulTransform()
     {
+        validateOutputLength();
         sendTransformResponse(transformManager);
 
         LogEntry.setTargetSize(transformManager.getOutputLength());
         LogEntry.setStatusCodeAndMessage(OK, "Success");
+    }
+
+    /**
+     * Checks whether the output file has zero length, although the input file has a non-zero length. This scenario happens when the source file is corrupted.
+     */
+    private void validateOutputLength()
+    {
+        long sourceLen = getSourceSize();
+        long targetLen = transformManager.getOutputLength();
+        if (sourceLen > 0 && targetLen <= 0)
+        {
+            transformerDebug.logFailure(reference, TransformerMessages.CORRUPTED_FILE_ERROR);
+            throw new TransformException(HttpStatus.UNPROCESSABLE_ENTITY, TransformerMessages.CORRUPTED_FILE_ERROR);
+        }
     }
 
     protected void sendTransformResponse(TransformManagerImpl transformManager)
