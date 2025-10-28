@@ -19,20 +19,7 @@ ARG GROUPID=1000
 ARG LIBREUSERNAME=libreoffice
 ARG USERID=33003
 
-
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
-
-# Print JAVA_BASE_IMAGE and extract JAVA_VERSION
-RUN alternatives --display java || true
-RUN alternatives --list || true
-RUN alternatives --display javac || true
-RUN alternatives --display java_sdk || true
-RUN echo "alternatives utility not found"
-
-RUN echo "JAVA_BASE_IMAGE is: ${JAVA_BASE_IMAGE}" && \
-    JAVA_VERSION=$(echo "${JAVA_BASE_IMAGE}" | sed -E 's/.*jre([0-9]+).*/\1/') && \
-    echo "Extracted JAVA_VERSION: ${JAVA_VERSION}" && \
-    echo "${JAVA_VERSION}" > /tmp/java_version \
 
 RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     yum install -y cairo cups-libs libSM libGLU procps && \
@@ -46,8 +33,7 @@ RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.proj
     else \
       LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1) && \
       dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}${LIBREOFFICE_ARM64_RPM_VERSION} && \
-      JAVA_VERSION=$(echo "${JAVA_BASE_IMAGE}" | sed -E 's/.*jre([0-9]+).*/\1/') && \
-      update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64; \
+      update-alternatives --set java java-17-openjdk.aarch64; \
     fi && \
       yum clean all
 
