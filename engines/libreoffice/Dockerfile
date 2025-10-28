@@ -24,6 +24,10 @@ COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dis
 
 # Print JAVA_BASE_IMAGE and extract JAVA_VERSION
 RUN alternatives --list | grep java
+RUN alternatives --display javac
+RUN alternatives --display jar
+RUN alternatives --display java_sdk
+RUN update-alternatives --get-selections | grep java
 RUN if command -v alternatives >/dev/null; then alternatives --display java; else echo "alternatives utility not found"; fi
 
 RUN echo "JAVA_BASE_IMAGE is: ${JAVA_BASE_IMAGE}" && \
