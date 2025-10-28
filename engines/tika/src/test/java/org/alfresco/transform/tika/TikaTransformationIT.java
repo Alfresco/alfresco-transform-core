@@ -198,8 +198,8 @@ public class TikaTransformationIT
         assertThat(expectedException).as(description)
                 .isInstanceOf(HttpClientErrorException.class);
 
-        assertThat(((HttpClientErrorException) expectedException).getStatusCode().value())
-                .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY.value());
+        assertThat(((HttpClientErrorException) expectedException).getStatusCode())
+                .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
 
         assertThat(expectedException.getMessage())
                 .contains(TransformerMessages.CORRUPTED_FILE_ERROR);
