@@ -241,8 +241,6 @@ jobs:
   e2e_javaruntime_tests:
     name: "E2E AIO Smoke Tests ( Java: ${{ matrix.java }}"
     runs-on: ubuntu-latest
-    needs:
-      - pre_commit
     strategy:
       fail-fast: false
       matrix:
