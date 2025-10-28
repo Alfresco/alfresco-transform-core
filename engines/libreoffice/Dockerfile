@@ -18,6 +18,7 @@ ARG GROUPNAME=Alfresco
 ARG GROUPID=1000
 ARG LIBREUSERNAME=libreoffice
 ARG USERID=33003
+ENV JAVA_BASE_IMAGE=${JAVA_BASE_IMAGE}
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 

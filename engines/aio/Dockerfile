@@ -32,6 +32,7 @@ ARG GROUPNAME=Alfresco
 ARG GROUPID=1000
 ARG AIOUSERNAME=transform-all-in-one
 ARG USERID=33017
+ENV JAVA_BASE_IMAGE=${JAVA_BASE_IMAGE}
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 
@@ -66,7 +67,6 @@ RUN printenv LIBREOFFICE_ARM64_RPM_URL LIBREOFFICE_ARM64_RPM_VERSION
 RUN LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1) && \
     echo $LIBREOFFICE_ARM64_RPM_VERSION > /tmp/libreoffice_version && \
     export LIBREOFFICE_ARM64_RPM_VERSION=$(cat /tmp/libreoffice_version)
-RUN printenv LIBREOFFICE_ARM64_RPM_URL LIBREOFFICE_ARM64_RPM_VERSION
 RUN dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}${LIBREOFFICE_ARM64_RPM_VERSION}
 RUN printenv JAVA_BASE_IMAGE
 RUN JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/') && \
