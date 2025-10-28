@@ -19,13 +19,10 @@ ARG GROUPID=1000
 ARG LIBREUSERNAME=libreoffice
 ARG USERID=33003
 ENV JAVA_BASE_IMAGE=${JAVA_BASE_IMAGE}
-ARG JAVA_VERSION
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
 # Define the base image as an ARG and use it for FROM
-ARG JAVA_BASE_IMAGE=alfresco/alfresco-base-java:jre17-rockylinux9@sha256:f98833508b7be8c4b44a25450f9faac44cacfdc075f2295e02836b93fd05bb9c
-FROM ${JAVA_BASE_IMAGE}
 
 # Print JAVA_BASE_IMAGE and extract JAVA_VERSION
 RUN echo "JAVA_BASE_IMAGE is: ${JAVA_BASE_IMAGE}" && \
@@ -37,10 +34,17 @@ RUN echo "JAVA_BASE_IMAGE is: ${JAVA_BASE_IMAGE}" && \
 ARG JAVA_VERSION
 ENV JAVA_VERSION=${JAVA_VERSION}
 
-# Print JAVA_VERSION and use in later RUN commands
 RUN JAVA_VERSION=$(cat /tmp/java_version) && \
-    echo "JAVA_VERSION is: ${JAVA_VERSION}" && \
-    update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64
+    if [ -z "$JAVA_VERSION" ]; then \
+        echo "JAVA_VERSION is not set"; \
+        exit 1; \
+    fi && \
+    if ! update-alternatives --list java | grep -q "java-${JAVA_VERSION}-openjdk.aarch64"; then \
+        echo "Java alternative not found"; \
+        exit 1; \
+    fi && \
+    update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64 \
+
 
 RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     yum install -y cairo cups-libs libSM libGLU procps && \
