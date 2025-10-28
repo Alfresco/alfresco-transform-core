@@ -63,7 +63,7 @@ RUN JAVA_VERSION=$(cat /tmp/java_version) && \
         echo "Java alternative not found"; \
         exit 1; \
     fi && \
-    update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64 \
+    update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64; \
 
 # Install ImageMagick (architecture-specific)
 RUN if [ "$(uname -m)" = "x86_64" ]; then \

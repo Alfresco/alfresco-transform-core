@@ -43,7 +43,7 @@ RUN JAVA_VERSION=$(cat /tmp/java_version) && \
         echo "Java alternative not found"; \
         exit 1; \
     fi && \
-    update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64 \
+    update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64; \
 
 
 RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
