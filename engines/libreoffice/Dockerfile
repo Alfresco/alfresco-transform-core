@@ -22,44 +22,28 @@ ENV JAVA_BASE_IMAGE=${JAVA_BASE_IMAGE}
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
-# Link the jar file
-RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar
-
-# Install required packages
-RUN yum install -y cairo cups-libs libSM libGLU procps
-
-# Install LibreOffice for x86_64
-RUN if [ "$(uname -m)" = "x86_64" ]; then \
-      test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
-      ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
-      curl -s -S $LIBREOFFICE_RPM_URL -o libreoffice-dist-linux.gz && \
-      tar xzf libreoffice-dist-linux.gz && \
-      yum localinstall -y LibreOffice*/RPMS/*.rpm && \
-      rm -rf libreoffice-dist-*linux.gz LibreOffice_*_Linux_x86-64_rpm; \
-    fi
-
-# Install LibreOffice for ARM64 and set Java alternative
-RUN uname -m
-RUN if [ "$(uname -m)" != "x86_64" ]; then echo "ARM64 detected"; fi
-RUN if [ "$(uname -m)" != "x86_64" ]; then \
-  LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1); \
-  echo $LIBREOFFICE_ARM64_RPM_VERSION > /tmp/libreoffice_version; \
-  cat /tmp/libreoffice_version; \
-fi
-RUN if [ "$(uname -m)" != "x86_64" ]; then \
-  dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}$(cat /tmp/libreoffice_version); \
-fi
 RUN printenv JAVA_BASE_IMAGE
-RUN JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/'); \
-    echo $JAVA_VERSION > /tmp/java_version; \
-    cat /tmp/java_version
-RUN printenv JAVA_VERSION || cat /tmp/java_version
-RUN if [ "$(uname -m)" != "x86_64" ]; then \
-  update-alternatives --set java java-$(cat /tmp/java_version)-openjdk.aarch64; \
-fi
-
-# Clean up yum cache
-RUN yum clean all
+RUN JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/') && \
+    echo $JAVA_VERSION > /tmp/java_version && \
+    export JAVA_VERSION=$(cat /tmp/java_version)
+RUN printenv JAVA_VERSION
+RUN update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64
+RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
+    yum install -y cairo cups-libs libSM libGLU procps && \
+    if [ "$(uname -m)" = "x86_64" ]; then \
+        test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
+        ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
+        curl -s -S $LIBREOFFICE_RPM_URL      -o libreoffice-dist-linux.gz && \
+        tar xzf libreoffice-dist-linux.gz && \
+        yum localinstall -y LibreOffice*/RPMS/*.rpm && \
+        rm -rf libreoffice-dist-*linux.gz LibreOffice_*_Linux_x86-64_rpm; \
+    else \
+      LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1) && \
+      dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}${LIBREOFFICE_ARM64_RPM_VERSION} && \
+      JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/') && \
+      update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64; \
+    fi && \
+      yum clean all
 
 ADD target/generated-resources/licenses              /licenses
 ADD target/generated-resources/licenses.xml          /licenses/
