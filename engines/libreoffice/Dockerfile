@@ -23,7 +23,7 @@ ARG USERID=33003
 COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
 
 # Print JAVA_BASE_IMAGE and extract JAVA_VERSION
-RUN update-alternatives --get-selections | grep java
+RUN update-alternatives --get-selections
 RUN alternatives --list | grep java
 RUN alternatives --display javac
 RUN alternatives --display jar
