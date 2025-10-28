@@ -29,7 +29,7 @@ package org.alfresco.transform.tika;
 import static java.text.MessageFormat.format;
 import static java.util.function.Function.identity;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.HttpStatus.OK;
@@ -187,17 +187,22 @@ public class TikaTransformationIT
         final String description = format("Transform ({0}, {1} -> {2}, {3})",
                 sourceFile, sourceMimetype, targetMimetype, targetExtension);
 
-        assertThatThrownBy(() -> {
+        Throwable expectedException = catchThrowable(() -> {
             HttpClient.sendTRequest(ENGINE_URL, sourceFile, null,
                     targetMimetype, targetExtension, ImmutableMap.of(
                             "targetEncoding", "UTF-8",
                             "sourceMimetype", sourceMimetype));
             fail("Corrupted file should have thrown an exception");
-        }).as(description)
-                .isInstanceOf(HttpClientErrorException.class)
-                .hasMessageContaining(String.valueOf(HttpStatus.UNPROCESSABLE_ENTITY.value()))
-                .hasMessageContaining(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
-                .hasMessageContaining(TransformerMessages.CORRUPTED_FILE_ERROR);
+        });
+
+        assertThat(expectedException).as(description)
+                .isInstanceOf(HttpClientErrorException.class);
+
+        assertThat(((HttpClientErrorException) expectedException).getStatusCode().value())
+                .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY.value());
+
+        assertThat(expectedException.getMessage())
+                .contains(TransformerMessages.CORRUPTED_FILE_ERROR);
     }
 
     private static Stream<Triple<String, String, String>> engineTransformationsCorruptedToText()
