@@ -38,14 +38,24 @@ RUN if [ "$(uname -m)" = "x86_64" ]; then \
     fi
 
 # Install LibreOffice for ARM64 and set Java alternative
+RUN uname -m
+RUN if [ "$(uname -m)" != "x86_64" ]; then echo "ARM64 detected"; fi
 RUN if [ "$(uname -m)" != "x86_64" ]; then \
-      LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1) && \
-      dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}${LIBREOFFICE_ARM64_RPM_VERSION} && \
-      printenv JAVA_BASE_IMAGE && \
-      JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/') && \
-      printenv JAVA_VERSION && \
-      update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64; \
-    fi
+  LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1); \
+  echo $LIBREOFFICE_ARM64_RPM_VERSION > /tmp/libreoffice_version; \
+  cat /tmp/libreoffice_version; \
+fi
+RUN if [ "$(uname -m)" != "x86_64" ]; then \
+  dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}$(cat /tmp/libreoffice_version); \
+fi
+RUN printenv JAVA_BASE_IMAGE
+RUN JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/'); \
+    echo $JAVA_VERSION > /tmp/java_version; \
+    cat /tmp/java_version
+RUN printenv JAVA_VERSION || cat /tmp/java_version
+RUN if [ "$(uname -m)" != "x86_64" ]; then \
+  update-alternatives --set java java-$(cat /tmp/java_version)-openjdk.aarch64; \
+fi
 
 # Clean up yum cache
 RUN yum clean all

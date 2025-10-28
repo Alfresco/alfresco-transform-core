@@ -61,16 +61,19 @@ RUN if [ "$(uname -m)" = "x86_64" ]; then \
       rm -rf libreoffice-dist-*linux.gz LibreOffice_*_Linux_x86-64_rpm; \
     fi
 
-RUN if [ "$(uname -m)" != "x86_64" ]; then \
-      printenv LIBREOFFICE_ARM64_RPM_URL LIBREOFFICE_ARM64_RPM_VERSION && \
-      LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1) && \
-      printenv LIBREOFFICE_ARM64_RPM_URL LIBREOFFICE_ARM64_RPM_VERSION && \
-      dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}${LIBREOFFICE_ARM64_RPM_VERSION} && \
-      printenv JAVA_BASE_IMAGE && \
-      JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/') && \
-      printenv JAVA_VERSION && \
-      update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64; \
-    fi
+RUN set -x
+RUN printenv LIBREOFFICE_ARM64_RPM_URL LIBREOFFICE_ARM64_RPM_VERSION
+RUN LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1) && \
+    echo $LIBREOFFICE_ARM64_RPM_VERSION > /tmp/libreoffice_version && \
+    export LIBREOFFICE_ARM64_RPM_VERSION=$(cat /tmp/libreoffice_version)
+RUN printenv LIBREOFFICE_ARM64_RPM_URL LIBREOFFICE_ARM64_RPM_VERSION
+RUN dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}${LIBREOFFICE_ARM64_RPM_VERSION}
+RUN printenv JAVA_BASE_IMAGE
+RUN JAVA_VERSION=$(echo "$JAVA_BASE_IMAGE" | sed -E 's/.*jre([0-9]+).*/\1/') && \
+    echo $JAVA_VERSION > /tmp/java_version && \
+    export JAVA_VERSION=$(cat /tmp/java_version)
+RUN printenv JAVA_VERSION
+RUN update-alternatives --set java java-${JAVA_VERSION}-openjdk.aarch64
 
 # Download Alfresco PDF Renderer (architecture-specific)
 RUN if [ "$(uname -m)" = "x86_64" ]; then \
