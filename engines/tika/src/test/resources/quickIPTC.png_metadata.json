@@ -59,7 +59,7 @@
   "{http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/}CiAdrRegion" : "Oxon",
   "{http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/}CiAdrPcode" : "OX132EN",
   "{http://ns.useplus.org/ldf/xmp/1.0/}LicensorPostalCode" : "OX136XN",
-  "{http://ns.adobe.com/photoshop/1.0/}UrgencyÂ " : "5 (normal urgency)",
+  "{http://ns.adobe.com/photoshop/1.0/}Urgency" : "5 (normal urgency)",
   "{http://ns.useplus.org/ldf/xmp/1.0/}LicensorID" : "id87515454",
   "{http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/}CiEmailWork" : "DiegoS@alfrescodev.onmicrosoft.com",
   "{http://iptc.org/std/Iptc4xmpExt/2008-02-29/}LocationShownCountryName" : "England",
