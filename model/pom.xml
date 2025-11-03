@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-transform-core</artifactId>
-        <version>5.2.4-A.2-SNAPSHOT</version>
+        <version>5.2.3-A.3-SNAPSHOT</version>
     </parent>
 
     <properties>
