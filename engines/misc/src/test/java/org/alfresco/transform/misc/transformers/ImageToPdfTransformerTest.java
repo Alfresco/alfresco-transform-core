@@ -299,6 +299,7 @@ class ImageToPdfTransformerTest
     {
         return Stream.of(
                 Arguments.of(ImageFile.of("MNT-24205.tiff", MIMETYPE_IMAGE_TIFF), 612.0f, 792.0f),
+                Arguments.of(ImageFile.of("459x594-1.tiff", MIMETYPE_IMAGE_TIFF), 459.0f, 594.0f),
                 Arguments.of(ImageFile.of("459x594-50.tif", MIMETYPE_IMAGE_TIFF), 660.0f, 855.0f),
                 Arguments.of(ImageFile.of("459x594-72.tif", MIMETYPE_IMAGE_TIFF), 459.0f, 594.0f),
                 Arguments.of(ImageFile.of("459x594-300.tif", MIMETYPE_IMAGE_TIFF), 110.0f, 142.0f),
@@ -349,31 +350,6 @@ class ImageToPdfTransformerTest
         catch (Exception e)
         {
             Assertions.fail("Exception occurred: " + e.getMessage());
-        }
-    }
-
-    @Test
-    void testTransformTiffToPdf_with1PixelImage() throws Exception
-    {
-        File source = loadFile("459x594-1.tiff");
-        TransformOptions transformOptions = TransformOptions.of("DEFAULT");
-
-        // Check original image dimensions
-        ImageMetadata metadata = Imaging.getMetadata(source);
-        TiffImageMetadata tiff = (TiffImageMetadata) metadata;
-        TiffField xResField = tiff.findField(TIFF_TAG_XRESOLUTION);
-        TiffField yResField = tiff.findField(TIFF_TAG_YRESOLUTION);
-        assertEquals(1.0, xResField.getDoubleValue(), 0.0001);
-        assertEquals(1.0, yResField.getDoubleValue(), 0.0001);
-
-        // when
-        transformer.transform(MIMETYPE_IMAGE_TIFF, MIMETYPE_PDF, transformOptions.toMap(), source, targetFile, transformManager);
-
-        try (PDDocument actualPdfDocument = Loader.loadPDF(targetFile))
-        {
-            assertNotNull(actualPdfDocument);
-            assertEquals(459, actualPdfDocument.getPage(0).getMediaBox().getWidth(), "Pdf width");
-            assertEquals(594, actualPdfDocument.getPage(0).getMediaBox().getHeight(), "Pdf height");
         }
     }
     // ----------------------------------------------- Helper methods and classes -----------------------------------------------
