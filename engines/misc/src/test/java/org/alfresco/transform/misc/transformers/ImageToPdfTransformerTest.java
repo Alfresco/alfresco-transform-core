@@ -26,6 +26,8 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.TIFF_TAG_XRESOLUTION;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.TIFF_TAG_YRESOLUTION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -57,6 +59,10 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
+import org.apache.commons.imaging.Imaging;
+import org.apache.commons.imaging.common.ImageMetadata;
+import org.apache.commons.imaging.formats.tiff.TiffField;
+import org.apache.commons.imaging.formats.tiff.TiffImageMetadata;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
@@ -343,6 +349,31 @@ class ImageToPdfTransformerTest
         catch (Exception e)
         {
             Assertions.fail("Exception occurred: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void testTransformTiffToPdf_with1PixelImage() throws Exception
+    {
+        File source = loadFile("459x594-1.tiff");
+        TransformOptions transformOptions = TransformOptions.of("DEFAULT");
+
+        // Check original image dimensions
+        ImageMetadata metadata = Imaging.getMetadata(source);
+        TiffImageMetadata tiff = (TiffImageMetadata) metadata;
+        TiffField xResField = tiff.findField(TIFF_TAG_XRESOLUTION);
+        TiffField yResField = tiff.findField(TIFF_TAG_YRESOLUTION);
+        assertEquals(1.0, xResField.getDoubleValue(), 0.0001);
+        assertEquals(1.0, yResField.getDoubleValue(), 0.0001);
+
+        // when
+        transformer.transform(MIMETYPE_IMAGE_TIFF, MIMETYPE_PDF, transformOptions.toMap(), source, targetFile, transformManager);
+
+        try (PDDocument actualPdfDocument = Loader.loadPDF(targetFile))
+        {
+            assertNotNull(actualPdfDocument);
+            assertEquals(459, actualPdfDocument.getPage(0).getMediaBox().getWidth(), "Pdf width");
+            assertEquals(594, actualPdfDocument.getPage(0).getMediaBox().getHeight(), "Pdf height");
         }
     }
     // ----------------------------------------------- Helper methods and classes -----------------------------------------------
