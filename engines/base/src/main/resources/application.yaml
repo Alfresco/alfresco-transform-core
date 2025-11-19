@@ -46,7 +46,7 @@ transform:
         timeout: 10 # seconds
   endpoint:
     test:
-      enable: false
+      enable: true
 
 jms-listener:
   concurrency: ${JMS_LISTENER_CONCURRENCY:1-10}
