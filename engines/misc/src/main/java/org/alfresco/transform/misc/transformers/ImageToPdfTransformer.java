@@ -82,6 +82,8 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
     private static final String DEFAULT_PDF_FORMAT_STRING = "DEFAULT"; // pdf format to use when no pdf format specified
     private static final String DEFAULT_PDF_ORIENTATION_STRING = "DEFAULT";
     private static final float PDFBOX_POINTS_PER_INCH = 72.0F;
+    private static final int MIN_REASONABLE_DPI = 30;
+    private static final int MAX_REASONABLE_DPI = 600;
     private static final List<String> DENY_LIST = List.of("com.github.jaiimageio.impl.plugins.tiff.TIFFImageReader");
 
     @Override
@@ -145,6 +147,16 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         throw new IOException(String.format(INVALID_IMAGE_ERROR_MESSAGE, imageName, mimetype));
     }
 
+    // return effective dpi or default pdfbox ppi if dpi is null or out of reasonable range
+    private int effectiveDpi(Integer dpi)
+    {
+        if (dpi == null || dpi < MIN_REASONABLE_DPI || dpi > MAX_REASONABLE_DPI)
+        {
+            return (int) PDFBOX_POINTS_PER_INCH;
+        }
+        return dpi;
+    }
+
     private void scaleAndDrawImage(final PDDocument pdfDocument, final BufferedImage bufferedImage, final String pdfFormat, final String pdfOrientation, final Map<String, Integer> resolution)
             throws IOException
     {
@@ -156,8 +168,10 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         if (resolution.get("X") > 0 && resolution.get("X") != PDFBOX_POINTS_PER_INCH &&
                 resolution.get("Y") > 0 && resolution.get("Y") != PDFBOX_POINTS_PER_INCH)
         {
-            imageWidth = (int) (((float) imageWidth / resolution.get("X")) * PDFBOX_POINTS_PER_INCH);
-            imageHeight = (int) (((float) imageHeight / resolution.get("Y")) * PDFBOX_POINTS_PER_INCH);
+            final int xRes = effectiveDpi(resolution.get("X"));
+            final int yRes = effectiveDpi(resolution.get("Y"));
+            imageWidth = (int) (((float) imageWidth / xRes) * PDFBOX_POINTS_PER_INCH);
+            imageHeight = (int) (((float) imageHeight / yRes) * PDFBOX_POINTS_PER_INCH);
         }
 
         final PDPage pdfPage = new PDPage(resolvePdfFormat(pdfFormat, pdfOrientation, imageWidth, imageHeight));

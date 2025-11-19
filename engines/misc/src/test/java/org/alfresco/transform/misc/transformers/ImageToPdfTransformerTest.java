@@ -293,6 +293,7 @@ class ImageToPdfTransformerTest
     {
         return Stream.of(
                 Arguments.of(ImageFile.of("MNT-24205.tiff", MIMETYPE_IMAGE_TIFF), 612.0f, 792.0f),
+                Arguments.of(ImageFile.of("459x594-1.tiff", MIMETYPE_IMAGE_TIFF), 459.0f, 594.0f),
                 Arguments.of(ImageFile.of("459x594-50.tif", MIMETYPE_IMAGE_TIFF), 660.0f, 855.0f),
                 Arguments.of(ImageFile.of("459x594-72.tif", MIMETYPE_IMAGE_TIFF), 459.0f, 594.0f),
                 Arguments.of(ImageFile.of("459x594-300.tif", MIMETYPE_IMAGE_TIFF), 110.0f, 142.0f),
