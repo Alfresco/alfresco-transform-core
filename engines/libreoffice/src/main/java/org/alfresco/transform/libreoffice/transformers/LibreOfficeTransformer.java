@@ -137,18 +137,8 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
             File sourceFile, File targetFile, TransformManager transformManager)
     {
-        File sanitizedSourceFile = sanitizeSourceFile(sourceMimetype, targetMimetype, sourceFile);
-        try
-        {
-            call(sanitizedSourceFile, targetFile);
-        }
-        finally
-        {
-            if (sanitizedSourceFile != null && !sanitizedSourceFile.equals(sourceFile))
-            {
-                sanitizedSourceFile.delete();
-            }
-        }
+        sanitizeSourceFile(sourceMimetype, targetMimetype, sourceFile);
+        call(sourceFile, targetFile);
     }
 
     private File sanitizeSourceFile(String sourceMimetype, String targetMimetype, File sourceFile)
@@ -169,21 +159,14 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
 
                 if (styleRemoved || externalRemoved)
                 {
-                    File sanitizedFile = null;
                     try
                     {
-                        sanitizedFile = File.createTempFile("sanitized-", ".html");
-                        FileUtils.writeStringToFile(sanitizedFile, doc.html(), StandardCharsets.UTF_8);
-                        // Responsibility for deleting the temp file is transferred to the caller.
-                        return sanitizedFile;
+                        FileUtils.writeStringToFile(sourceFile, doc.html(), StandardCharsets.UTF_8);
                     }
-                    catch (Exception ex)
+                    catch (IOException ex)
                     {
-                        if (sanitizedFile != null && sanitizedFile.exists())
-                        {
-                            sanitizedFile.delete();
-                        }
-                        throw ex;
+                        logger.error("Error writing sanitized HTML back to file: {}", ex.getMessage());
+                        throw new TransformException(INTERNAL_SERVER_ERROR, "Error writing sanitized HTML back to file", ex);
                     }
                 }
             }
