@@ -137,8 +137,8 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
             File sourceFile, File targetFile, TransformManager transformManager)
     {
-        sanitizeSourceFile(sourceMimetype, targetMimetype, sourceFile);
-        call(sourceFile, targetFile);
+        File sanitized = sanitizeSourceFile(sourceMimetype, targetMimetype, sourceFile);
+        call(sanitized, targetFile);
     }
 
     private File sanitizeSourceFile(String sourceMimetype, String targetMimetype, File sourceFile)
@@ -161,7 +161,9 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
                 {
                     try
                     {
-                        FileUtils.writeStringToFile(sourceFile, doc.html(), StandardCharsets.UTF_8);
+                        File sanitizedFile = File.createTempFile("sanitized-", ".html");
+                        FileUtils.writeStringToFile(sanitizedFile, doc.html(), StandardCharsets.UTF_8);
+                        return sanitizedFile; // Return new file
                     }
                     catch (IOException ex)
                     {
