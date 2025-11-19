@@ -44,6 +44,9 @@ transform:
       retry:
         attempts: 10
         timeout: 10 # seconds
+  endpoint:
+    test:
+      enable: false
 
 jms-listener:
   concurrency: ${JMS_LISTENER_CONCURRENCY:1-10}

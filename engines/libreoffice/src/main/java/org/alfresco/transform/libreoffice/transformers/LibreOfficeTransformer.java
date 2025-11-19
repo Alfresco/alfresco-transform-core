@@ -32,11 +32,13 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import jakarta.annotation.PostConstruct;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.star.task.ErrorCodeIOException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -44,6 +46,9 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.artofsolving.jodconverter.OfficeDocumentConverter;
 import org.artofsolving.jodconverter.office.OfficeException;
 import org.artofsolving.jodconverter.office.OfficeManager;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -133,7 +138,43 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
             File sourceFile, File targetFile, TransformManager transformManager)
     {
-        call(sourceFile, targetFile);
+        File sanitizedSourceFile = sanitizeSourceFile(sourceMimetype, targetMimetype, sourceFile);
+        try
+        {
+            call(sanitizedSourceFile, targetFile);
+        }
+        finally
+        {
+            if (sanitizedSourceFile != null && !sanitizedSourceFile.equals(sourceFile))
+            {
+                sanitizedSourceFile.delete();
+            }
+        }
+    }
+
+    private File sanitizeSourceFile(String sourceMimetype, String targetMimetype, File sourceFile)
+    {
+        if ("text/html".equalsIgnoreCase(sourceMimetype) && "application/pdf".equalsIgnoreCase(targetMimetype))
+        {
+            try
+            {
+                String html = FileUtils.readFileToString(sourceFile, StandardCharsets.UTF_8);
+                Document doc = Jsoup.parse(html);
+
+                if (!doc.select("link[href], img[src], script[src], iframe[src]").isEmpty())
+                {
+                    Elements remove = doc.select("link[href], img[src], script[src], iframe[src]").remove();
+                    File sanitizedFile = File.createTempFile("sanitized-", ".html");
+                    FileUtils.writeStringToFile(sanitizedFile, doc.html(), StandardCharsets.UTF_8);
+                    return sanitizedFile;
+                }
+            }
+            catch (Exception e)
+            {
+                logger.debug("Error sanitizing HTML file: {}", e.getMessage());
+            }
+        }
+        return sourceFile;
     }
 
     @Override

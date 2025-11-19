@@ -29,6 +29,7 @@ package org.alfresco.transform.base;
 import static java.text.MessageFormat.format;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -116,6 +117,9 @@ public class TransformController
     private String coreVersion;
     @Value("${container.behind-ingres}")
     private boolean behindIngres;
+
+    @Value("${transform.endpoint.test.enable}")
+    private boolean enableTestEndpoint;
 
     TransformEngine transformEngine;
     private final AtomicReference<ProbeTransform> probeTransform = new AtomicReference<>();
@@ -314,6 +318,11 @@ public class TransformController
             @RequestParam(value = TARGET_MIMETYPE, required = false) String targetMimetype,
             @RequestParam Map<String, String> origRequestParameters)
     {
+
+        if (!enableTestEndpoint)
+        {
+            throw new TransformException(SERVICE_UNAVAILABLE, "Test endpoint is disabled");
+        }
         // Remaps request parameters from test.html and hands them off to the normal transform endpoint.
         // There are name<i> and value<i> parameters which allow dynamic names and values to be used.
         Map<String, String> requestParameters = new HashMap<>();

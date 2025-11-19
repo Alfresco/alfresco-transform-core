@@ -72,7 +72,7 @@
         {"sourceMediaType": "application/vnd.oasis.opendocument.text",                                                                                   "targetMediaType": "text/html" },
         {"sourceMediaType": "application/vnd.oasis.opendocument.text",                                                                                   "targetMediaType": "application/msword" },
         {"sourceMediaType": "application/vnd.oasis.opendocument.text",                                                                                   "targetMediaType": "application/rtf" },
-        {"sourceMediaType": "application/vnd.oasis.opendocument.text",                                                                                   "targetMediaType": "application/pdf" },
+        {"sourceMediaType": "application/vnd.oasis.opendocument.text",                                                 "priority": 150,                   "targetMediaType": "application/pdf" },
 
 
         {"sourceMediaType": "application/vnd.oasis.opendocument.text-template",                                                                          "targetMediaType": "text/html" },
