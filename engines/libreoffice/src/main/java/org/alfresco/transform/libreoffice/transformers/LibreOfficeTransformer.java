@@ -48,7 +48,6 @@ import org.artofsolving.jodconverter.office.OfficeException;
 import org.artofsolving.jodconverter.office.OfficeManager;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -161,12 +160,31 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
                 String html = FileUtils.readFileToString(sourceFile, StandardCharsets.UTF_8);
                 Document doc = Jsoup.parse(html);
 
-                if (!doc.select("link[href], img[src], script[src], iframe[src]").isEmpty())
+                // Remove inline styles with url() references
+                boolean styleRemoved = !doc.select("[style*='url(']").removeAttr("style").isEmpty();
+
+                // Remove all external resource references
+                boolean externalRemoved = !doc.select("link[href], img[src], img[srcset], script[src], iframe[src], video[src], video[poster], source[src], audio[src], object[data], embed[src], base[href]")
+                        .remove().isEmpty();
+
+                if (styleRemoved || externalRemoved)
                 {
-                    Elements remove = doc.select("link[href], img[src], script[src], iframe[src]").remove();
-                    File sanitizedFile = File.createTempFile("sanitized-", ".html");
-                    FileUtils.writeStringToFile(sanitizedFile, doc.html(), StandardCharsets.UTF_8);
-                    return sanitizedFile;
+                    File sanitizedFile = null;
+                    try
+                    {
+                        sanitizedFile = File.createTempFile("sanitized-", ".html");
+                        FileUtils.writeStringToFile(sanitizedFile, doc.html(), StandardCharsets.UTF_8);
+                        // Responsibility for deleting the temp file is transferred to the caller.
+                        return sanitizedFile;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (sanitizedFile != null && sanitizedFile.exists())
+                        {
+                            sanitizedFile.delete();
+                        }
+                        throw ex;
+                    }
                 }
             }
             catch (Exception e)
