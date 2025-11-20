@@ -62,6 +62,7 @@ import org.alfresco.transform.exceptions.TransformException;
  * JavaExecutor implementation for running LibreOffice transformations. It loads the transformation logic in the same JVM (check the {@link JodConverter} implementation).
  */
 @Component
+@SuppressWarnings({"PMD.GodClass"})
 public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFileAdaptor
 {
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeTransformer.class);
@@ -172,9 +173,16 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
                     }
                 }
             }
+            catch (TransformException e)
+            {
+                throw e;
+            }
             catch (Exception e)
             {
-                logger.debug("Error sanitizing HTML file: {}", e.getMessage());
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Error sanitizing HTML file: {}", e.getMessage());
+                }
             }
         }
         return sourceFile;
