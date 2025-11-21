@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2023 Alfresco Software Limited
+ * Copyright (C) 2005 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -32,11 +32,13 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import jakarta.annotation.PostConstruct;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.star.task.ErrorCodeIOException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -44,6 +46,8 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.artofsolving.jodconverter.OfficeDocumentConverter;
 import org.artofsolving.jodconverter.office.OfficeException;
 import org.artofsolving.jodconverter.office.OfficeManager;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +62,7 @@ import org.alfresco.transform.exceptions.TransformException;
  * JavaExecutor implementation for running LibreOffice transformations. It loads the transformation logic in the same JVM (check the {@link JodConverter} implementation).
  */
 @Component
+@SuppressWarnings({"PMD.GodClass"})
 public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFileAdaptor
 {
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeTransformer.class);
@@ -133,7 +138,54 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
             File sourceFile, File targetFile, TransformManager transformManager)
     {
-        call(sourceFile, targetFile);
+        File sanitized = sanitizeSourceFile(sourceMimetype, targetMimetype, sourceFile);
+        call(sanitized, targetFile);
+    }
+
+    private File sanitizeSourceFile(String sourceMimetype, String targetMimetype, File sourceFile)
+    {
+        if ("text/html".equalsIgnoreCase(sourceMimetype) && "application/pdf".equalsIgnoreCase(targetMimetype))
+        {
+            try
+            {
+                String html = FileUtils.readFileToString(sourceFile, StandardCharsets.UTF_8);
+                Document doc = Jsoup.parse(html);
+
+                // Remove inline styles with url() references
+                boolean styleRemoved = !doc.select("[style*='url(']").removeAttr("style").isEmpty();
+
+                // Remove all external resource references
+                boolean externalRemoved = !doc.select("link[href], img[src], img[srcset], script[src], iframe[src], video[src], video[poster], source[src], audio[src], object[data], embed[src], base[href]")
+                        .remove().isEmpty();
+
+                if (styleRemoved || externalRemoved)
+                {
+                    try
+                    {
+                        File sanitizedFile = File.createTempFile("sanitized-", ".html");
+                        FileUtils.writeStringToFile(sanitizedFile, doc.html(), StandardCharsets.UTF_8);
+                        return sanitizedFile; // Return new file
+                    }
+                    catch (IOException ex)
+                    {
+                        logger.error("Error writing sanitized HTML back to file: {}", ex.getMessage());
+                        throw new TransformException(INTERNAL_SERVER_ERROR, "Error writing sanitized HTML back to file", ex);
+                    }
+                }
+            }
+            catch (TransformException e)
+            {
+                throw e;
+            }
+            catch (Exception e)
+            {
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Error sanitizing HTML file: {}", e.getMessage());
+                }
+            }
+        }
+        return sourceFile;
     }
 
     @Override
