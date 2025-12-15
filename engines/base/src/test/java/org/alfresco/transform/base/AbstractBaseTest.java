@@ -60,10 +60,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+//import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+//import org.springframework.boot.test.mock.mockito.MockBean;
+//import org.springframework.boot.test.mock.mockito.SpyBean;
+//import org.springframework.test.context.bean.override.mockito.MockBean;
+//import org.springframework.test.context.bean.override.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -81,12 +85,13 @@ import org.alfresco.transform.base.transform.TransformHandler;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.registry.TransformServiceRegistry;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 
 /**
  * Super class for unit testing.
  */
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
-@AutoConfigureMockMvc
+//@AutoConfigureMockMvc
 public abstract class AbstractBaseTest
 {
     // Added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test
@@ -105,10 +110,10 @@ public abstract class AbstractBaseTest
     @Autowired
     protected ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     protected SharedFileStoreClient sharedFileStoreClient;
 
-    @SpyBean
+    @MockitoSpyBean
     protected TransformServiceRegistry transformRegistry;
 
     protected String sourceExtension;
@@ -227,7 +232,7 @@ public abstract class AbstractBaseTest
         return testFileUrl == null ? null : testFile;
     }
 
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
+    protected MockMultipartHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
     {
         if (sourceFile == null)
         {
@@ -239,9 +244,11 @@ public abstract class AbstractBaseTest
         }
     }
 
-    private MockHttpServletRequestBuilder mockMvcRequestWithoutMockMultipartFile(String url, String... params)
+    private MockMultipartHttpServletRequestBuilder mockMvcRequestWithoutMockMultipartFile(String url, String... params)
     {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(url);
+//        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(url);
+
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(url);
 
         if (params.length % 2 != 0)
         {
@@ -255,10 +262,10 @@ public abstract class AbstractBaseTest
         return builder;
     }
 
-    private MockHttpServletRequestBuilder mockMvcRequestWithMockMultipartFile(String url, MockMultipartFile sourceFile,
+    private MockMultipartHttpServletRequestBuilder mockMvcRequestWithMockMultipartFile(String url, MockMultipartFile sourceFile,
             String... params)
     {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM).file(sourceFile);
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM).file(sourceFile);
 
         if (params.length % 2 != 0)
         {

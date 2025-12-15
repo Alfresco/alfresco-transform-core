@@ -16,9 +16,10 @@ import com.google.common.collect.ImmutableMap;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+//import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+//import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -27,7 +28,7 @@ import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransfo
 import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
 import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
 
-@AutoConfigureMockMvc
+//@AutoConfigureMockMvc
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class}, properties = {"transform.engine.config.cron=*/1 * * * * *"})
 @ContextConfiguration(classes = {
         FakeTransformEngineWithTwoCustomTransformers.class,
@@ -36,7 +37,7 @@ import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class TransformRegistryRefreshTest
 {
-    @SpyBean(proxyTargetAware = false)
+    @MockitoSpyBean
     private TransformRegistry transformRegistry;
     @Autowired
     private TransformConfigFromFiles transformConfigFromFiles;
