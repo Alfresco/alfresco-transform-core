@@ -48,6 +48,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.util.HtmlUtils;
 
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
 import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
@@ -84,7 +85,7 @@ public class RestTest
         ResponseEntity<String> response = restTemplate.exchange(ENDPOINT_TRANSFORM, POST,
                 new HttpEntity<>(parameters, HEADERS), String.class, "");
 
-        assertTrue(response.getBody().contains("Required request part 'file' is not present"));
+        assertTrue(HtmlUtils.htmlUnescape(response.getBody()).contains("Required request part 'file' is not present"));
     }
 
     @Test
