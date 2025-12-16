@@ -85,6 +85,7 @@ import org.mockito.stubbing.Answer;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
@@ -112,7 +113,7 @@ import org.alfresco.transform.config.TransformConfig;
  *
  * Also see {@link TransformControllerAllInOneTest}.
  */
-// @AutoConfigureMockMvc
+ @AutoConfigureMockMvc
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
 @ContextConfiguration(classes = {
         FakeTransformEngineWithTwoCustomTransformers.class,
