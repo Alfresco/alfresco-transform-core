@@ -62,12 +62,13 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import org.alfresco.transform.base.executors.CommandExecutor;
@@ -80,7 +81,6 @@ import org.alfresco.transform.base.transform.TransformHandler;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.registry.TransformServiceRegistry;
-import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 
 /**
  * Super class for unit testing.
@@ -241,7 +241,7 @@ public abstract class AbstractBaseTest
 
     private MockMultipartHttpServletRequestBuilder mockMvcRequestWithoutMockMultipartFile(String url, String... params)
     {
-//        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(url);
+        // MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(url);
 
         MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(url);
 

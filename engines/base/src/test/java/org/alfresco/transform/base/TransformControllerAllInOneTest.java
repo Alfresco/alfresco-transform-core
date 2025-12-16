@@ -78,7 +78,6 @@ import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
  *
  * Repeats a set of tests from {@link TransformControllerTest}, which tests the single TransformEngine case.
  */
-//@AutoConfigureMockMvc
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
 @ContextConfiguration(classes = {
         FakeTransformEngineWithAllInOne.class,
