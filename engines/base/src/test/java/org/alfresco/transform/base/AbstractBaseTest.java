@@ -60,19 +60,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.boot.test.mock.mockito.MockBean;
-//import org.springframework.boot.test.mock.mockito.SpyBean;
-//import org.springframework.test.context.bean.override.mockito.MockBean;
-//import org.springframework.test.context.bean.override.mockito.SpyBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import org.alfresco.transform.base.executors.CommandExecutor;
@@ -91,7 +86,7 @@ import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequ
  * Super class for unit testing.
  */
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
-//@AutoConfigureMockMvc
+@AutoConfigureMockMvc
 public abstract class AbstractBaseTest
 {
     // Added as part of ATS-702 to allow test resources to be read from the imported jar files to prevent test
