@@ -40,8 +40,9 @@ import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -61,6 +62,7 @@ import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
         FakeTransformEngineWithTwoCustomTransformers.class,
         FakeTransformerTxT2Pdf.class,
         FakeTransformerPdf2Png.class})
+@AutoConfigureTestRestTemplate
 public class RestTest
 {
     @Autowired
