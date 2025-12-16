@@ -52,18 +52,19 @@ import org.springframework.jms.support.converter.MessageConversionException;
 import org.alfresco.transform.base.TransformController;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
 public class QueueTransformServiceTest
 {
-    @Mock
+    @MockitoBean
     private TransformController transformController;
-    @Mock
+    @MockitoBean
     private TransformMessageConverter transformMessageConverter;
-    @Mock
+    @MockitoBean
     private TransformReplySender transformReplySender;
 
-    @InjectMocks
+    @MockitoBean
     private QueueTransformService queueTransformService;
 
     @Test
