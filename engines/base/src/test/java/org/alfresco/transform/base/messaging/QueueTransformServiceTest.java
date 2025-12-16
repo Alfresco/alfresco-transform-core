@@ -44,6 +44,10 @@ import jakarta.jms.Message;
 import org.apache.activemq.command.ActiveMQObjectMessage;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -53,6 +57,7 @@ import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
+@ExtendWith(MockitoExtension.class)
 public class QueueTransformServiceTest
 {
     @MockitoBean
@@ -62,7 +67,7 @@ public class QueueTransformServiceTest
     @MockitoBean
     private TransformReplySender transformReplySender;
 
-    @MockitoBean
+    @InjectMocks
     private QueueTransformService queueTransformService;
 
     @Test
@@ -142,6 +147,7 @@ public class QueueTransformServiceTest
     public void testConvertMessageThrowsJMSExceptionThenReplyWithInternalServerError()
             throws JMSException
     {
+        Mockito.reset(transformController);
         ActiveMQObjectMessage msg = new ActiveMQObjectMessage();
         msg.setCorrelationId("1234");
         ActiveMQQueue destination = new ActiveMQQueue();
