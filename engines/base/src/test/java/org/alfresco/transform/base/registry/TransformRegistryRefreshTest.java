@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2022 Alfresco Software, Ltd.  All rights reserved.
+ * Copyright 2015-2025 Alfresco Software, Ltd.  All rights reserved.
  *
  * License rights for this program may be obtained from Alfresco Software, Ltd.
  * pursuant to a written agreement and any use of this program without such an
@@ -20,7 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
@@ -36,7 +35,7 @@ import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class TransformRegistryRefreshTest
 {
-    @MockitoSpyBean
+    @Autowired
     private TransformRegistry transformRegistry;
     @Autowired
     private TransformConfigFromFiles transformConfigFromFiles;
