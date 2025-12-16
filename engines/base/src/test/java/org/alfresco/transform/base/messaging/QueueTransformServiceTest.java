@@ -44,15 +44,13 @@ import jakarta.jms.Message;
 import org.apache.activemq.command.ActiveMQObjectMessage;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.support.converter.MessageConversionException;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.alfresco.transform.base.TransformController;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
 public class QueueTransformServiceTest
