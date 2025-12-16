@@ -113,7 +113,7 @@ import org.alfresco.transform.config.TransformConfig;
  *
  * Also see {@link TransformControllerAllInOneTest}.
  */
- @AutoConfigureMockMvc
+@AutoConfigureMockMvc
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
 @ContextConfiguration(classes = {
         FakeTransformEngineWithTwoCustomTransformers.class,
