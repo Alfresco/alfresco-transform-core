@@ -59,6 +59,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -70,6 +71,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import org.alfresco.transform.base.executors.CommandExecutor;
 import org.alfresco.transform.base.executors.RuntimeExec;
@@ -105,10 +107,10 @@ public abstract class AbstractBaseTest
     @Autowired
     protected ObjectMapper objectMapper;
 
-    @MockitoBean
+    @Autowired
     protected SharedFileStoreClient sharedFileStoreClient;
 
-    @MockitoSpyBean
+    @Autowired
     protected TransformServiceRegistry transformRegistry;
 
     protected String sourceExtension;

@@ -69,6 +69,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -80,10 +81,12 @@ import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.imagemagick.transformers.ImageMagickCommandExecutor;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
 /**
  * Test ImageMagick with mocked external command.
  */
+@AutoConfigureMockMvc
 public class ImageMagickTest extends AbstractBaseTest
 {
     private static String PREFIX_IMAGE = "image/";
@@ -91,11 +94,11 @@ public class ImageMagickTest extends AbstractBaseTest
     @Autowired
     private ImageMagickCommandExecutor imageMagickCommandExecutor;
 
-    @Mock
+    @MockitoBean
     protected ExecutionResult mockExecutionResult;
-    @Mock
+    @MockitoBean
     protected RuntimeExec mockTransformCommand;
-    @Mock
+    @MockitoBean
     protected RuntimeExec mockCheckCommand;
     @Value("${transform.core.imagemagick.exe}")
     protected String EXE;
