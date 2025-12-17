@@ -63,6 +63,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -103,7 +104,7 @@ public abstract class AbstractBaseTest
     @Autowired
     protected ObjectMapper objectMapper;
 
-    @Autowired
+    @MockitoBean
     protected SharedFileStoreClient sharedFileStoreClient;
 
     @Autowired

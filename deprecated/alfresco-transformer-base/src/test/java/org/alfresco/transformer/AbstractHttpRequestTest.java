@@ -36,7 +36,8 @@ import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -49,6 +50,7 @@ import org.springframework.util.LinkedMultiValueMap;
  *             Super class for testing controllers with a server. Includes tests for the AbstractTransformerController itself. Note: Currently uses json rather than HTML as json is returned by this spring boot test harness.
  */
 @Deprecated
+@AutoConfigureTestRestTemplate
 public abstract class AbstractHttpRequestTest
 {
     @LocalServerPort

@@ -57,7 +57,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 
 import org.alfresco.transform.base.AbstractBaseTest;
 
@@ -84,9 +84,9 @@ public class MiscTest extends AbstractBaseTest
     }
 
     @Override
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
+    protected MockMultipartHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
     {
-        final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
+        final MockMultipartHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
                 .param("sourceEncoding", sourceEncoding)
                 .param("targetMimetype", targetMimetype)
                 .param("sourceMimetype", sourceMimetype)
@@ -451,7 +451,7 @@ public class MiscTest extends AbstractBaseTest
         final MockMultipartFile sourceFile = new MockMultipartFile("file",
                 "test_file." + sourceExtension, sourceMimetype, content);
 
-        final MockHttpServletRequestBuilder requestBuilder = super.mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile)
+        final MockMultipartHttpServletRequestBuilder requestBuilder = super.mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile)
                 .param(TARGET_MIMETYPE, targetMimetype)
                 .param(SOURCE_MIMETYPE, sourceMimetype);
 

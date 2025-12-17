@@ -59,7 +59,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,6 +67,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -87,11 +87,11 @@ public class PdfRendererTest extends AbstractBaseTest
 {
     @Autowired
     private PdfRendererTransformer pdfRendererTransformer;
-    @Mock
+    @MockitoBean
     private ExecutionResult mockExecutionResult;
-    @Mock
+    @MockitoBean
     protected RuntimeExec mockTransformCommand;
-    @Mock
+    @MockitoBean
     protected RuntimeExec mockCheckCommand;
     @Value("${transform.core.pdfrenderer.exe}")
     protected String execPath;

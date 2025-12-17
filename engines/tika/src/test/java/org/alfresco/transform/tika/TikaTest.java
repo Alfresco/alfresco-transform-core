@@ -90,14 +90,14 @@ import org.apache.poi.ooxml.POIXMLProperties;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import org.alfresco.transform.base.AbstractBaseTest;
@@ -120,10 +120,10 @@ public class TikaTest extends AbstractBaseTest
             "The quick brown fox jumps over the lazy dogs";
     private static final String EXPECTED_CSV_CONTENT_CONTAINS = "\"The\",\"quick\",\"brown\",\"fox\"";
 
-    @Mock
+    @MockitoBean
     private RuntimeExec.ExecutionResult mockExecutionResult;
 
-    @Mock
+    @MockitoBean
     private RuntimeExec mockTransformCommand;
 
     private String targetEncoding = "UTF-8";
@@ -170,7 +170,7 @@ public class TikaTest extends AbstractBaseTest
         this.targetMimetype = targetMimetype;
 
         System.out.println("Test " + transform + " " + sourceExtension + " to " + targetExtension);
-        MockHttpServletRequestBuilder requestBuilder = includeContents == null
+        MockMultipartHttpServletRequestBuilder requestBuilder = includeContents == null
                 ? mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile,
                         "targetExtension", this.targetExtension)
                 : mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile,
@@ -187,7 +187,7 @@ public class TikaTest extends AbstractBaseTest
 
     @Override
     // Add extra required parameters to the request.
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
+    protected MockMultipartHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
     {
         return super.mockMvcRequest(url, sourceFile, params)
                 .param("targetEncoding", targetEncoding)
@@ -384,7 +384,7 @@ public class TikaTest extends AbstractBaseTest
                 "\"{http://www.alfresco.org/model/content/1.0}description\":[\"desc1\",\"desc2\"]," +
                 "\"{http://www.alfresco.org/model/content/1.0}created\":\"created1\"}";
 
-        MockHttpServletRequestBuilder requestBuilder = super.mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile,
+        MockMultipartHttpServletRequestBuilder requestBuilder = super.mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile,
                 "targetExtension", XLSX,
                 "metadata", metadata,
                 "targetMimetype", MIMETYPE_METADATA_EMBED,

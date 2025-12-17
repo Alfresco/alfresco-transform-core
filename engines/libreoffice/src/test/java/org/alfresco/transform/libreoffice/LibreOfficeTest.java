@@ -59,17 +59,15 @@ import org.artofsolving.jodconverter.office.OfficeException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import org.alfresco.transform.base.AbstractBaseTest;
@@ -88,14 +86,14 @@ public class LibreOfficeTest extends AbstractBaseTest
 {
     protected static String targetMimetype = MIMETYPE_PDF;
 
-    @Autowired
+    @MockitoBean
     private LibreOfficeTransformer libreOfficeTransformer;
-    @Autowired
+    @MockitoBean
     private CustomTransformers customTransformers;
 
-    @Spy
+    @MockitoBean
     private LibreOfficeTransformer spyLibreOfficeTransformer;
-    @Mock
+    @MockitoBean
     protected ExecutionResult mockExecutionResult;
 
     @Value("${transform.core.libreoffice.path}")
@@ -162,9 +160,9 @@ public class LibreOfficeTest extends AbstractBaseTest
     }
 
     @Override
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
+    protected MockMultipartHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
     {
-        final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
+        final MockMultipartHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
                 .param("targetMimetype", targetMimetype)
                 .param("sourceMimetype", sourceMimetype);
         return builder;
