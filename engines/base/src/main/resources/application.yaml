@@ -36,6 +36,9 @@ logging:
 filestore-url: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
 
 transform:
+  endpoint:
+    test:
+      enable: true
   core:
     version: @project.version@
   engine:

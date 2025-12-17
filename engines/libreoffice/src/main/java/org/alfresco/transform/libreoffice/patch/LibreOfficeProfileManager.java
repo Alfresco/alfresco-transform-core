@@ -54,7 +54,7 @@ public class LibreOfficeProfileManager
 
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeProfileManager.class);
     private static final String PROBE_RESOURCE = "/probe.doc";
-    private static final String PATCH_RESOURCE = "/disable-external-link-patch.txt";
+    private static final String PATCH_RESOURCE = "/libreoffice_registry_patch.json";
     private static final String REGISTRY_FILE = "registrymodifications.xcu";
     private static final String USER_PROFILE_DIR = "user";
 
@@ -152,16 +152,6 @@ public class LibreOfficeProfileManager
         FileUtils.writeStringToFile(registry, registryContent, StandardCharsets.UTF_8);
     }
 
-    // private String readPatchFromResource() throws Exception
-    // {
-    // InputStream inputStream = getClass().getResourceAsStream(PATCH_RESOURCE);
-    // if (inputStream == null)
-    // {
-    // throw new IllegalStateException("disable-external-link-patch.txt resource not found!");
-    // }
-    // return IOUtils.toString(inputStream, StandardCharsets.UTF_8).trim();
-    // }
-
     private File findLibreOfficeUserProfile(File dir)
     {
         File userDir = findDirectChild(dir, USER_PROFILE_DIR);
@@ -209,7 +199,7 @@ public class LibreOfficeProfileManager
 
     private List<PatchItem> readPatchItemsFromJson() throws Exception
     {
-        InputStream inputStream = getClass().getResourceAsStream("/libreoffice_registry_patch.json");
+        InputStream inputStream = getClass().getResourceAsStream(PATCH_RESOURCE);
         if (inputStream == null)
         {
             throw new IllegalStateException("libreoffice_registry_patch.json not found!");

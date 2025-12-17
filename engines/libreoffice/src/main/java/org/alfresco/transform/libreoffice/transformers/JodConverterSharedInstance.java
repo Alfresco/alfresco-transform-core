@@ -168,16 +168,6 @@ public class JodConverterSharedInstance implements JodConverter
                 throw new RuntimeException(
                         "OpenOffice template profile directory " + templateProfileDir + " does not exist.");
             }
-
-            // //making sure 'user' subdir exists
-            // Optional<File> userFile = Arrays.stream(requireNonNull(tmp.listFiles()))
-            // .filter(File::isDirectory)
-            // .filter(f->f.getName().equals("user"))
-            // .findAny();
-            // if(userFile.isEmpty()) {
-            // File userDir = new File(tmp, "user");
-            // }
-
             this.templateProfileDir = tmp;
         }
     }
