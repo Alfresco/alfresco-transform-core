@@ -36,11 +36,14 @@ import java.util.StringTokenizer;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
+import org.apache.commons.lang3.StringUtils;
 import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
 import org.artofsolving.jodconverter.office.OfficeException;
 import org.artofsolving.jodconverter.office.OfficeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.alfresco.transform.libreoffice.patch.LibreOfficeProfileManager;
 
 ///////// THIS FILE WAS A COPY OF THE CODE IN alfresco-repository /////////////
 
@@ -75,12 +78,14 @@ public class JodConverterSharedInstance implements JodConverter
     private Long taskExecutionTimeout;
     private Long taskQueueTimeout;
     private File templateProfileDir;
+    private File workDir;
     private Boolean enabled;
     private Long connectTimeout;
 
     private String deprecatedOooExe;
     private Boolean deprecatedOooEnabled;
     private int[] deprecatedOooPortNumbers;
+    private boolean disableExternalLinks;
 
     void setMaxTasksPerProcess(String maxTasksPerProcess)
     {
@@ -163,7 +168,35 @@ public class JodConverterSharedInstance implements JodConverter
                 throw new RuntimeException(
                         "OpenOffice template profile directory " + templateProfileDir + " does not exist.");
             }
+
+            // //making sure 'user' subdir exists
+            // Optional<File> userFile = Arrays.stream(requireNonNull(tmp.listFiles()))
+            // .filter(File::isDirectory)
+            // .filter(f->f.getName().equals("user"))
+            // .findAny();
+            // if(userFile.isEmpty()) {
+            // File userDir = new File(tmp, "user");
+            // }
+
             this.templateProfileDir = tmp;
+        }
+    }
+
+    void setWorkDir(String workDir)
+    {
+        if (StringUtils.isBlank(workDir))
+        {
+            this.workDir = null;
+        }
+        else
+        {
+            File tmp = new File(workDir);
+            if (!tmp.isDirectory())
+            {
+                throw new RuntimeException(
+                        "OpenOffice work directory " + workDir + " does not exist.");
+            }
+            this.workDir = tmp;
         }
     }
 
@@ -270,7 +303,7 @@ public class JodConverterSharedInstance implements JodConverter
     }
 
     /* (non-Javadoc)
-     * 
+     *
      * @see org.alfresco.repo.content.JodConverter#isAvailable() */
     public boolean isAvailable()
     {
@@ -278,7 +311,7 @@ public class JodConverterSharedInstance implements JodConverter
     }
 
     /* (non-Javadoc)
-     * 
+     *
      * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet() */
     @PostConstruct
     public void afterPropertiesSet()
@@ -346,13 +379,26 @@ public class JodConverterSharedInstance implements JodConverter
                 {
                     defaultOfficeMgrConfig.setTemplateProfileDir(templateProfileDir);
                 }
+                if (workDir != null)
+                {
+                    defaultOfficeMgrConfig.setWorkDir(workDir);
+                }
                 if (connectTimeout != null)
                 {
                     defaultOfficeMgrConfig.setConnectTimeout(connectTimeout);
                 }
+
                 // Try to configure and start the JodConverter library.
                 officeManager = defaultOfficeMgrConfig.buildOfficeManager();
                 officeManager.start();
+
+                LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(
+                        workDir,
+                        templateProfileDir,
+                        officeManager,
+                        disableExternalLinks);
+                profileManager.setupTemplateUserProfileWithProbeTransformation();
+
             }
             catch (IllegalStateException e)
             {
@@ -487,7 +533,7 @@ public class JodConverterSharedInstance implements JodConverter
     }
 
     /* (non-Javadoc)
-     * 
+     *
      * @see org.springframework.beans.factory.DisposableBean#destroy() */
     @PreDestroy
     public void destroy()
@@ -507,11 +553,17 @@ public class JodConverterSharedInstance implements JodConverter
     }
 
     /* (non-Javadoc)
-     * 
+     *
      * @see org.alfresco.repo.content.JodConverterWorker#getOfficeManager() */
     @Override
     public OfficeManager getOfficeManager()
     {
         return officeManager;
     }
+
+    public void setDisableExternalLinks(boolean disableExternalLinks)
+    {
+        this.disableExternalLinks = disableExternalLinks;
+    }
+
 }

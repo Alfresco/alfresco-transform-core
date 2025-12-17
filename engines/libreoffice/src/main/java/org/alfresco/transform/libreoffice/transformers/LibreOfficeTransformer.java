@@ -76,6 +76,12 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
     private String templateProfileDir;
     @Value("${transform.core.libreoffice.isEnabled}")
     private String isEnabled;
+    @Value("${transform.core.libreoffice.workdir}")
+    private String workdir;
+    @Value("${transform.core.libreoffice.disableExternalLinks}")
+    private boolean disableExternalLinks;
+    @Value("${transform.core.libreoffice.enableTemplateProfile}")
+    private boolean enableTemplateProfile;
 
     private JodConverter jodconverter;
 
@@ -118,8 +124,13 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
         sharedInstance.setTaskQueueTimeout(timeout);
         sharedInstance.setConnectTimeout(timeout);
         sharedInstance.setPortNumbers(portNumbers);
-        sharedInstance.setTemplateProfileDir(templateProfileDir);
         sharedInstance.setEnabled(isEnabled);
+        if (enableTemplateProfile)
+        {
+            sharedInstance.setTemplateProfileDir(templateProfileDir);
+            sharedInstance.setWorkDir(workdir);
+            sharedInstance.setDisableExternalLinks(disableExternalLinks);
+        }
         sharedInstance.afterPropertiesSet();
     }
 

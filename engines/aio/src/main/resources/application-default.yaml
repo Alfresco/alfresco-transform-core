@@ -10,8 +10,11 @@ transform:
         maxTasksPerProcess: ${LIBREOFFICE_MAX_TASKS_PER_PROCESS:200}
         timeout: ${LIBREOFFICE_TIMEOUT:1200000}
         portNumbers: ${LIBREOFFICE_PORT_NUMBERS:8100}
-        templateProfileDir: ${LIBREOFFICE_TEMPLATE_PROFILE_DIR:}
         isEnabled: ${LIBREOFFICE_IS_ENABLED:true}
+        enableTemplateProfile: false
+        templateProfileDir: ${LIBREOFFICE_TEMPLATE_PROFILE_DIR:/opt/libreoffice-profile/templateProfileDir}
+        workdir: ${LIBREOFFICE_WORK_PROFILE_DIR:/opt/libreoffice-profile/workDir}
+        disableExternalLinks: true
     imagemagick:
         root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.1.2}
         dyn: ${IMAGEMAGICK_DYN:/usr/lib64/ImageMagick-7.1.2/lib}

@@ -1,0 +1,12 @@
+{
+  "items": [
+    {
+      "oor:path": "/org.openoffice.Office.Common/Security/Scripting",
+      "prop": {
+        "oor:name": "BlockUntrustedRefererLinks",
+        "oor:op": "fuse"
+      },
+      "value": true
+    }
+  ]
+}
