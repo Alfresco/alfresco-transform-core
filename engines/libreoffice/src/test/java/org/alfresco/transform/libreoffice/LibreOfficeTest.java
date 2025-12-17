@@ -59,6 +59,7 @@ import org.artofsolving.jodconverter.office.OfficeException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.core.io.FileSystemResource;
@@ -90,10 +91,10 @@ public class LibreOfficeTest extends AbstractBaseTest
 
     @MockitoBean
     private LibreOfficeTransformer libreOfficeTransformer;
-    @MockitoBean
+    @Autowired
     private CustomTransformers customTransformers;
 
-    @MockitoBean
+    @Autowired
     private LibreOfficeTransformer spyLibreOfficeTransformer;
     @MockitoBean
     protected ExecutionResult mockExecutionResult;
