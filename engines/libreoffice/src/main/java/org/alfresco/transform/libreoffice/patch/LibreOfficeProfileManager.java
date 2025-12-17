@@ -72,13 +72,8 @@ public class LibreOfficeProfileManager
         this.disableExternalLinks = disableExternalLinks;
     }
 
-    public void setupTemplateUserProfileWithProbeTransformation() throws Exception
+    public void setupTemplateUserProfile() throws Exception
     {
-        if (workDir == null || templateProfileDir == null)
-        {
-            return;
-        }
-
         OfficeDocumentConverter converter = new OfficeDocumentConverter(officeManager);
         convertProbeDocument(converter);
         copyUserProfile();
@@ -157,15 +152,15 @@ public class LibreOfficeProfileManager
         FileUtils.writeStringToFile(registry, registryContent, StandardCharsets.UTF_8);
     }
 
-    private String readPatchFromResource() throws Exception
-    {
-        InputStream inputStream = getClass().getResourceAsStream(PATCH_RESOURCE);
-        if (inputStream == null)
-        {
-            throw new IllegalStateException("disable-external-link-patch.txt resource not found!");
-        }
-        return IOUtils.toString(inputStream, StandardCharsets.UTF_8).trim();
-    }
+    // private String readPatchFromResource() throws Exception
+    // {
+    // InputStream inputStream = getClass().getResourceAsStream(PATCH_RESOURCE);
+    // if (inputStream == null)
+    // {
+    // throw new IllegalStateException("disable-external-link-patch.txt resource not found!");
+    // }
+    // return IOUtils.toString(inputStream, StandardCharsets.UTF_8).trim();
+    // }
 
     private File findLibreOfficeUserProfile(File dir)
     {
@@ -214,10 +209,10 @@ public class LibreOfficeProfileManager
 
     private List<PatchItem> readPatchItemsFromJson() throws Exception
     {
-        InputStream inputStream = getClass().getResourceAsStream("/disable-external-link-patch.json");
+        InputStream inputStream = getClass().getResourceAsStream("/libreoffice_registry_patch.json");
         if (inputStream == null)
         {
-            throw new IllegalStateException("disable-external-link-patch.json not found!");
+            throw new IllegalStateException("libreoffice_registry_patch.json not found!");
         }
 
         String jsonContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
@@ -237,7 +232,7 @@ public class LibreOfficeProfileManager
             JsonNode prop = item.get("prop");
             String name = prop.get("oor:name").asText();
             String op = prop.get("oor:op").asText();
-            String value = prop.get("value").asText();
+            boolean value = item.get("value").asBoolean();
 
             patchItems.add(new PatchItem(path, name, op, value));
         }
@@ -263,9 +258,9 @@ public class LibreOfficeProfileManager
         String path;
         String propName;
         String op;
-        String value;
+        boolean value;
 
-        PatchItem(String path, String propName, String op, String value)
+        PatchItem(String path, String propName, String op, boolean value)
         {
             this.path = path;
             this.propName = propName;

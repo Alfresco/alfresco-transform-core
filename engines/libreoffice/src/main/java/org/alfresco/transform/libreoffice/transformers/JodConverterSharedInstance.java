@@ -392,12 +392,15 @@ public class JodConverterSharedInstance implements JodConverter
                 officeManager = defaultOfficeMgrConfig.buildOfficeManager();
                 officeManager.start();
 
-                LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(
-                        workDir,
-                        templateProfileDir,
-                        officeManager,
-                        disableExternalLinks);
-                profileManager.setupTemplateUserProfileWithProbeTransformation();
+                if (workDir != null && templateProfileDir != null)
+                {
+                    LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(
+                            workDir,
+                            templateProfileDir,
+                            officeManager,
+                            disableExternalLinks);
+                    profileManager.setupTemplateUserProfile();
+                }
 
             }
             catch (IllegalStateException e)
