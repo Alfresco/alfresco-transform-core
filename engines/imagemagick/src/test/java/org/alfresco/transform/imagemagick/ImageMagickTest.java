@@ -60,10 +60,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -81,7 +81,6 @@ import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.imagemagick.transformers.ImageMagickCommandExecutor;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
 /**
  * Test ImageMagick with mocked external command.
