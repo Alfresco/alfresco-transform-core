@@ -316,7 +316,7 @@
                                 </excludes>
                                 <failOnMissingHeader>true</failOnMissingHeader>
                                 <licenseName>community</licenseName>
-                                <licenseResolver>file:C:/Users/sabhattacharya/Alfresco/license</licenseResolver>
+                                <licenseResolver>file:${project.parent.basedir}/license</licenseResolver>
                             </configuration>
                         </execution>
                     </executions>
