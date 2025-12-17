@@ -60,6 +60,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -82,6 +83,7 @@ import org.alfresco.transform.libreoffice.transformers.LibreOfficeTransformer;
 /**
  * Test LibreOffice with mocked external command.
  */
+@AutoConfigureMockMvc
 public class LibreOfficeTest extends AbstractBaseTest
 {
     protected static String targetMimetype = MIMETYPE_PDF;
