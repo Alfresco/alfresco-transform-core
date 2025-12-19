@@ -3,12 +3,12 @@ queue:
 transform:
   core:
     libreoffice:
-      path: ${LIBREOFFICE_HOME:C:\Users\sabhattacharya\Alfresco\LibreOffice25}
+      path: ${LIBREOFFICE_HOME:/opt/libreoffice7.2}
       maxTasksPerProcess: ${LIBREOFFICE_MAX_TASKS_PER_PROCESS:200}
       timeout: ${LIBREOFFICE_TIMEOUT:1200000}
       portNumbers: ${LIBREOFFICE_PORT_NUMBERS:8100}
       isEnabled: ${LIBREOFFICE_IS_ENABLED:true}
       enableTemplateProfile: false
-      templateProfileDir: ${LIBREOFFICE_TEMPLATE_PROFILE_DIR:C:\Users\sabhattacharya\Alfresco\libreoffice-profile\templateProfileDir}
-      workdir: ${LIBREOFFICE_WORK_PROFILE_DIR:C:\Users\sabhattacharya\Alfresco\libreoffice-profile\workDir}
+      templateProfileDir: ${LIBREOFFICE_TEMPLATE_PROFILE_DIR:/opt/libreoffice-profile/templateProfileDir}
+      workdir: ${LIBREOFFICE_WORK_PROFILE_DIR:/opt/libreoffice-profile/workDir}
       disableExternalLinks: true
