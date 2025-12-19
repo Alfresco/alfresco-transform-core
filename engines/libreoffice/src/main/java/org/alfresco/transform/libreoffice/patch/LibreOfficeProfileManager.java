@@ -39,6 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.artofsolving.jodconverter.OfficeDocumentConverter;
+import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
 import org.artofsolving.jodconverter.office.OfficeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,21 +61,36 @@ public class LibreOfficeProfileManager
 
     private final File workDir;
     private final File templateProfileDir;
-    private final OfficeManager officeManager;
+    private final OfficeManager tempOfficeManager;
     private final boolean disableExternalLinks;
+    private static LibreOfficeProfileManager instance;
 
-    public LibreOfficeProfileManager(File workDir, File templateProfileDir,
-            OfficeManager officeManager, boolean disableExternalLinks)
+    private LibreOfficeProfileManager(File workDir, File templateProfileDir,
+            DefaultOfficeManagerConfiguration officeManagerConfiguration,
+            boolean disableExternalLinks)
     {
         this.workDir = workDir;
         this.templateProfileDir = templateProfileDir;
-        this.officeManager = officeManager;
+        this.tempOfficeManager = officeManagerConfiguration.buildOfficeManager();
         this.disableExternalLinks = disableExternalLinks;
+        this.tempOfficeManager.start();
     }
 
-    public void setupTemplateUserProfile() throws Exception
+    public static void initializeTemplateUserProfile(File workDir, File templateProfileDir,
+            DefaultOfficeManagerConfiguration officeManagerConfiguration,
+            boolean disableExternalLinks) throws Exception
     {
-        OfficeDocumentConverter converter = new OfficeDocumentConverter(officeManager);
+        if (instance == null)
+        {
+            instance = new LibreOfficeProfileManager(workDir, templateProfileDir,
+                    officeManagerConfiguration, disableExternalLinks);
+        }
+        instance.execute();
+    }
+
+    private void execute() throws Exception
+    {
+        OfficeDocumentConverter converter = new OfficeDocumentConverter(tempOfficeManager);
         convertProbeDocument(converter);
         copyUserProfile();
 
@@ -82,6 +98,13 @@ public class LibreOfficeProfileManager
         {
             patchLibreOfficeRegistry();
         }
+        if (tempOfficeManager.isRunning())
+        {
+            tempOfficeManager.stop();
+        }
+
+        // delete everything in workDir to ensure a fresh start next time
+        FileUtils.cleanDirectory(workDir);
     }
 
     /**
@@ -105,7 +128,7 @@ public class LibreOfficeProfileManager
 
     private void copyUserProfile() throws Exception
     {
-        File officeUserProfile = findLibreOfficeUserProfile(workDir);
+        File officeUserProfile = findLibreOfficeDirectory(workDir, USER_PROFILE_DIR);
         if (officeUserProfile != null)
         {
             File destination = new File(templateProfileDir, officeUserProfile.getName());
@@ -118,48 +141,55 @@ public class LibreOfficeProfileManager
      * 
      * @throws Exception
      */
-    private void patchLibreOfficeRegistry() throws Exception
+    private void patchLibreOfficeRegistry()
     {
-        File userProfileDir = findLibreOfficeUserProfile(templateProfileDir);
-        if (userProfileDir == null)
+        try
         {
-            throw new IllegalStateException("Cannot find LO user profile to patch");
-        }
+            File userProfileDir = findLibreOfficeDirectory(templateProfileDir, USER_PROFILE_DIR);
+            if (userProfileDir == null)
+            {
+                throw new IllegalStateException("Cannot find LO user profile to patch");
+            }
 
-        File registry = new File(userProfileDir, REGISTRY_FILE);
-        if (!registry.exists())
+            File registry = new File(userProfileDir, REGISTRY_FILE);
+            if (!registry.exists())
+            {
+                throw new IllegalStateException(REGISTRY_FILE + " not found!");
+            }
+
+            String registryContent = FileUtils.readFileToString(registry, StandardCharsets.UTF_8);
+            List<PatchItem> patchItems = readPatchItemsFromJson();
+
+            // Remove existing matching items
+            for (PatchItem item : patchItems)
+            {
+                String pattern = String.format(
+                        "<item oor:path=\"%s\"><prop oor:name=\"%s\"[^>]*>.*?</prop></item>",
+                        Pattern.quote(item.path),
+                        Pattern.quote(item.propName));
+                registryContent = registryContent.replaceAll(pattern, "");
+            }
+
+            // Insert the new patch before closing tag
+            String patch = generatePatchXml(patchItems);
+            registryContent = registryContent.replace("</oor:items>", "  " + patch + "\n</oor:items>");
+
+            FileUtils.writeStringToFile(registry, registryContent, StandardCharsets.UTF_8);
+        }
+        catch (Exception e)
         {
-            throw new IllegalStateException(REGISTRY_FILE + " not found!");
+            logger.error("Error patching LibreOffice registry to disable external link updates", e);
         }
-
-        String registryContent = FileUtils.readFileToString(registry, StandardCharsets.UTF_8);
-        List<PatchItem> patchItems = readPatchItemsFromJson();
-
-        // Remove existing matching items
-        for (PatchItem item : patchItems)
-        {
-            String pattern = String.format(
-                    "<item oor:path=\"%s\"><prop oor:name=\"%s\"[^>]*>.*?</prop></item>",
-                    Pattern.quote(item.path),
-                    Pattern.quote(item.propName));
-            registryContent = registryContent.replaceAll(pattern, "");
-        }
-
-        // Insert the new patch before closing tag
-        String patch = generatePatchXml(patchItems);
-        registryContent = registryContent.replace("</oor:items>", "  " + patch + "\n</oor:items>");
-
-        FileUtils.writeStringToFile(registry, registryContent, StandardCharsets.UTF_8);
     }
 
-    private File findLibreOfficeUserProfile(File dir)
+    private File findLibreOfficeDirectory(File parentDir, String searchDir)
     {
-        File userDir = findDirectChild(dir, USER_PROFILE_DIR);
+        File userDir = findDirectChild(parentDir, searchDir);
         if (userDir != null)
         {
             return userDir;
         }
-        return findUserInJodConverterDirs(dir);
+        return findUserInJodConverterDirs(parentDir);
     }
 
     private File findDirectChild(File dir, String name)
@@ -188,7 +218,7 @@ public class LibreOfficeProfileManager
 
         for (File d : jodDirs)
         {
-            File user = new File(d, "user");
+            File user = new File(d, USER_PROFILE_DIR);
             if (user.exists())
             {
                 return user;

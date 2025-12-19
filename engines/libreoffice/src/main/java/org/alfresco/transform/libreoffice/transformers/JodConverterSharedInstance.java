@@ -168,6 +168,20 @@ public class JodConverterSharedInstance implements JodConverter
                 throw new RuntimeException(
                         "OpenOffice template profile directory " + templateProfileDir + " does not exist.");
             }
+            else
+            {
+                // check if it contains user subdir and create a sub dir if not
+                File userDir = new File(tmp, "user");
+                if (!userDir.exists() || !userDir.isDirectory())
+                {
+                    File newUserDir = new File(tmp, "user");
+                    if (!newUserDir.mkdir())
+                    {
+                        throw new RuntimeException(
+                                "Could not create user subdirectory in template profile directory " + templateProfileDir);
+                    }
+                }
+            }
             this.templateProfileDir = tmp;
         }
     }
@@ -378,19 +392,18 @@ public class JodConverterSharedInstance implements JodConverter
                     defaultOfficeMgrConfig.setConnectTimeout(connectTimeout);
                 }
 
+                if (workDir != null && templateProfileDir != null)
+                {
+                    LibreOfficeProfileManager.initializeTemplateUserProfile(
+                            workDir,
+                            templateProfileDir,
+                            defaultOfficeMgrConfig,
+                            disableExternalLinks);
+                }
+
                 // Try to configure and start the JodConverter library.
                 officeManager = defaultOfficeMgrConfig.buildOfficeManager();
                 officeManager.start();
-
-                if (workDir != null && templateProfileDir != null)
-                {
-                    LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(
-                            workDir,
-                            templateProfileDir,
-                            officeManager,
-                            disableExternalLinks);
-                    profileManager.setupTemplateUserProfile();
-                }
 
             }
             catch (IllegalStateException e)
