@@ -28,9 +28,11 @@
 package org.alfresco.transform.libreoffice.patch;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -78,7 +80,7 @@ public class LibreOfficeProfileManager
 
     public static void initializeTemplateUserProfile(File workDir, File templateProfileDir,
             DefaultOfficeManagerConfiguration officeManagerConfiguration,
-            boolean disableExternalLinks) throws Exception
+            boolean disableExternalLinks)
     {
         if (instance == null)
         {
@@ -88,7 +90,7 @@ public class LibreOfficeProfileManager
         instance.execute();
     }
 
-    private void execute() throws Exception
+    private void execute()
     {
         OfficeDocumentConverter converter = new OfficeDocumentConverter(tempOfficeManager);
         convertProbeDocument(converter);
@@ -104,7 +106,14 @@ public class LibreOfficeProfileManager
         }
 
         // delete everything in workDir to ensure a fresh start next time
-        FileUtils.cleanDirectory(workDir);
+        try
+        {
+            FileUtils.cleanDirectory(workDir);
+        }
+        catch (IOException e)
+        {
+            logger.error("Error cleaning work directory after LibreOffice profile initialization", e);
+        }
     }
 
     /**
@@ -113,33 +122,45 @@ public class LibreOfficeProfileManager
      * @param converter
      * @throws Exception
      */
-    private void convertProbeDocument(OfficeDocumentConverter converter) throws Exception
+    private void convertProbeDocument(OfficeDocumentConverter converter)
     {
-        InputStream probeInput = getClass().getResourceAsStream(PROBE_RESOURCE);
-        if (probeInput == null)
-        {
-            throw new IllegalStateException("probe.docx resource not found!");
-        }
 
-        File tempProbeFile = new File(workDir, "probe.doc");
-        FileUtils.copyInputStreamToFile(probeInput, tempProbeFile);
-        converter.convert(tempProbeFile, new File(workDir, "probeoutput.pdf"));
+        try (InputStream probeInput = getClass().getResourceAsStream(PROBE_RESOURCE))
+        {
+            if (probeInput == null)
+            {
+                throw new IllegalStateException("probe.docx resource not found!");
+            }
+
+            File tempProbeFile = new File(workDir, "probe.doc");
+            FileUtils.copyInputStreamToFile(probeInput, tempProbeFile);
+            converter.convert(tempProbeFile, new File(workDir, "probeoutput.pdf"));
+        }
+        catch (Exception e)
+        {
+            logger.error("Error during test document conversion", e);
+        }
     }
 
-    private void copyUserProfile() throws Exception
+    private void copyUserProfile()
     {
-        File officeUserProfile = findLibreOfficeDirectory(workDir, USER_PROFILE_DIR);
-        if (officeUserProfile != null)
+        try
         {
-            File destination = new File(templateProfileDir, officeUserProfile.getName());
-            FileUtils.copyDirectory(officeUserProfile, destination);
+            File officeUserProfile = findLibreOfficeDirectory(workDir, USER_PROFILE_DIR);
+            if (officeUserProfile != null)
+            {
+                File destination = new File(templateProfileDir, officeUserProfile.getName());
+                FileUtils.copyDirectory(officeUserProfile, destination);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error copying LibreOffice user profile", e);
         }
     }
 
     /**
-     * Patches the LibreOffice user profile to disable external link updates.
-     * 
-     * @throws Exception
+     * Patches the LibreOffice registrymodifications.xcu file to disable external link updates
      */
     private void patchLibreOfficeRegistry()
     {
@@ -227,37 +248,44 @@ public class LibreOfficeProfileManager
         return null;
     }
 
-    private List<PatchItem> readPatchItemsFromJson() throws Exception
+    private List<PatchItem> readPatchItemsFromJson()
     {
-        InputStream inputStream = getClass().getResourceAsStream(PATCH_RESOURCE);
-        if (inputStream == null)
+        try (InputStream inputStream = getClass().getResourceAsStream(PATCH_RESOURCE))
         {
-            throw new IllegalStateException("libreoffice_registry_patch.json not found!");
+            if (inputStream == null)
+            {
+                throw new IllegalStateException("libreoffice_registry_patch.json not found!");
+            }
+
+            String jsonContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(jsonContent);
+
+            JsonNode items = root.get("items");
+            if (items == null || !items.isArray() || items.size() == 0)
+            {
+                throw new IllegalStateException("JSON 'items' array is missing or empty!");
+            }
+
+            List<PatchItem> patchItems = new ArrayList<>();
+            for (JsonNode item : items)
+            {
+                String path = item.get("oor:path").asText();
+                JsonNode prop = item.get("prop");
+                String name = prop.get("oor:name").asText();
+                String op = prop.get("oor:op").asText();
+                boolean value = item.get("value").asBoolean();
+
+                patchItems.add(new PatchItem(path, name, op, value));
+            }
+            return patchItems;
+        }
+        catch (Exception e)
+        {
+            logger.error("Error reading patch items from JSON", e);
         }
 
-        String jsonContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(jsonContent);
-
-        JsonNode items = root.get("items");
-        if (items == null || !items.isArray() || items.size() == 0)
-        {
-            throw new IllegalStateException("JSON 'items' array is missing or empty!");
-        }
-
-        List<PatchItem> patchItems = new ArrayList<>();
-        for (JsonNode item : items)
-        {
-            String path = item.get("oor:path").asText();
-            JsonNode prop = item.get("prop");
-            String name = prop.get("oor:name").asText();
-            String op = prop.get("oor:op").asText();
-            boolean value = item.get("value").asBoolean();
-
-            patchItems.add(new PatchItem(path, name, op, value));
-        }
-
-        return patchItems;
+        return Collections.emptyList();
     }
 
     private String generatePatchXml(List<PatchItem> items)
@@ -265,10 +293,15 @@ public class LibreOfficeProfileManager
         StringBuilder xml = new StringBuilder();
         for (PatchItem item : items)
         {
-            xml.append("<item oor:path=\"").append(item.path).append("\">");
-            xml.append("<prop oor:name=\"").append(item.propName).append("\" oor:op=\"").append(item.op).append("\">");
-            xml.append("<value>").append(item.value).append("</value>");
-            xml.append("</prop></item>");
+            xml.append("<item oor:path=\"")
+                    .append(item.path)
+                    .append("\"><prop oor:name=\"")
+                    .append(item.propName)
+                    .append("\" oor:op=\"")
+                    .append(item.op)
+                    .append("\"><value>")
+                    .append(item.value)
+                    .append("</value></prop></item>");
         }
         return xml.toString();
     }
