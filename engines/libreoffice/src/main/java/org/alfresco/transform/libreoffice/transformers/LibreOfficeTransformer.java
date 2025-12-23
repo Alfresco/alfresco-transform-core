@@ -53,6 +53,7 @@ import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.executors.JavaExecutor;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.libreoffice.patch.LibreOfficeProfileManagerV2;
 
 /**
  * JavaExecutor implementation for running LibreOffice transformations. It loads the transformation logic in the same JVM (check the {@link JodConverter} implementation).
@@ -76,12 +77,15 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
     private String templateProfileDir;
     @Value("${transform.core.libreoffice.isEnabled}")
     private String isEnabled;
-    @Value("${transform.core.libreoffice.workdir}")
-    private String workdir;
-    @Value("${transform.core.libreoffice.disableExternalLinks}")
-    private boolean disableExternalLinks;
-    @Value("${transform.core.libreoffice.enableTemplateProfile}")
-    private boolean enableTemplateProfile;
+    // @Value("${transform.core.libreoffice.workdir}")
+    // private String workdir;
+    // @Value("${transform.core.libreoffice.disableExternalLinks}")
+    // private boolean disableExternalLinks;
+    // @Value("${transform.core.libreoffice.enableTemplateProfile}")
+    // private boolean enableTemplateProfile;
+
+    @Value("${transform.core.libreoffice.security.blockUntrustedRefererLinks}")
+    private boolean blockUntrustedRefererLinks;
 
     private JodConverter jodconverter;
 
@@ -116,6 +120,9 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
             throw new IllegalArgumentException("LibreOfficeTransformer LIBREOFFICE_IS_ENABLED variable must be set to true/false");
         }
 
+        LibreOfficeProfileManagerV2 lib = new LibreOfficeProfileManagerV2(templateProfileDir, blockUntrustedRefererLinks);
+        String tempDir = lib.getTemplateProfileDir();
+
         JodConverterSharedInstance sharedInstance = new JodConverterSharedInstance();
         jodconverter = sharedInstance;
         sharedInstance.setOfficeHome(path);
@@ -125,12 +132,7 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
         sharedInstance.setConnectTimeout(timeout);
         sharedInstance.setPortNumbers(portNumbers);
         sharedInstance.setEnabled(isEnabled);
-        if (enableTemplateProfile)
-        {
-            sharedInstance.setTemplateProfileDir(templateProfileDir);
-            sharedInstance.setWorkDir(workdir);
-            sharedInstance.setDisableExternalLinks(disableExternalLinks);
-        }
+        sharedInstance.setTemplateProfileDir(tempDir);
         sharedInstance.afterPropertiesSet();
     }
 

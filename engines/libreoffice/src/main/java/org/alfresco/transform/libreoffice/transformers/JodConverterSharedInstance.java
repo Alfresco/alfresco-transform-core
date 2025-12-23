@@ -36,14 +36,11 @@ import java.util.StringTokenizer;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
-import org.apache.commons.lang3.StringUtils;
 import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
 import org.artofsolving.jodconverter.office.OfficeException;
 import org.artofsolving.jodconverter.office.OfficeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.alfresco.transform.libreoffice.patch.LibreOfficeProfileManager;
 
 ///////// THIS FILE WAS A COPY OF THE CODE IN alfresco-repository /////////////
 
@@ -78,14 +75,12 @@ public class JodConverterSharedInstance implements JodConverter
     private Long taskExecutionTimeout;
     private Long taskQueueTimeout;
     private File templateProfileDir;
-    private File workDir;
     private Boolean enabled;
     private Long connectTimeout;
 
     private String deprecatedOooExe;
     private Boolean deprecatedOooEnabled;
     private int[] deprecatedOooPortNumbers;
-    private boolean disableExternalLinks;
 
     void setMaxTasksPerProcess(String maxTasksPerProcess)
     {
@@ -168,39 +163,7 @@ public class JodConverterSharedInstance implements JodConverter
                 throw new RuntimeException(
                         "OpenOffice template profile directory " + templateProfileDir + " does not exist.");
             }
-            else
-            {
-                // check if it contains user subdir and create a sub dir if not
-                File userDir = new File(tmp, "user");
-                if (!userDir.exists() || !userDir.isDirectory())
-                {
-                    File newUserDir = new File(tmp, "user");
-                    if (!newUserDir.mkdir())
-                    {
-                        throw new RuntimeException(
-                                "Could not create user subdirectory in template profile directory " + templateProfileDir);
-                    }
-                }
-            }
             this.templateProfileDir = tmp;
-        }
-    }
-
-    void setWorkDir(String workDir)
-    {
-        if (StringUtils.isBlank(workDir))
-        {
-            this.workDir = null;
-        }
-        else
-        {
-            File tmp = new File(workDir);
-            if (!tmp.isDirectory())
-            {
-                throw new RuntimeException(
-                        "OpenOffice work directory " + workDir + " does not exist.");
-            }
-            this.workDir = tmp;
         }
     }
 
@@ -383,28 +346,13 @@ public class JodConverterSharedInstance implements JodConverter
                 {
                     defaultOfficeMgrConfig.setTemplateProfileDir(templateProfileDir);
                 }
-                if (workDir != null)
-                {
-                    defaultOfficeMgrConfig.setWorkDir(workDir);
-                }
                 if (connectTimeout != null)
                 {
                     defaultOfficeMgrConfig.setConnectTimeout(connectTimeout);
                 }
-
-                if (workDir != null && templateProfileDir != null)
-                {
-                    LibreOfficeProfileManager.initializeTemplateUserProfile(
-                            workDir,
-                            templateProfileDir,
-                            defaultOfficeMgrConfig,
-                            disableExternalLinks);
-                }
-
                 // Try to configure and start the JodConverter library.
                 officeManager = defaultOfficeMgrConfig.buildOfficeManager();
                 officeManager.start();
-
             }
             catch (IllegalStateException e)
             {
@@ -566,10 +514,4 @@ public class JodConverterSharedInstance implements JodConverter
     {
         return officeManager;
     }
-
-    public void setDisableExternalLinks(boolean disableExternalLinks)
-    {
-        this.disableExternalLinks = disableExternalLinks;
-    }
-
 }
