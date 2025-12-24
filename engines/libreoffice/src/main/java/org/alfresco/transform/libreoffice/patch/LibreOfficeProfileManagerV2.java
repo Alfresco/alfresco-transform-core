@@ -40,19 +40,17 @@ public class LibreOfficeProfileManagerV2
 {
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeProfileManagerV2.class);
 
-    private final String TEMP_PROFILE_DIR_NAME = "libreoffice-tempProfileDir";
     private final String USER_DIR_NAME = "user";
     private final String REGISTRY_FILE_NAME = "registrymodifications.xcu";
     private final String LOCAL_TEMP_REGISTRY_FILE = "templateRegistrymodifications.xcu";
+    private final String DEFAULT_TEMP_PROFILE = "libreoffice/templateProfile";
 
     private final String userTemplateDir;
     private String systemTempUserDir = "";
-    private final boolean blockUntrustedRefererLinks;
 
-    public LibreOfficeProfileManagerV2(String templateProfileDir, boolean blockUntrustedRefererLinks)
+    public LibreOfficeProfileManagerV2(String templateProfileDir)
     {
         this.userTemplateDir = templateProfileDir;
-        this.blockUntrustedRefererLinks = blockUntrustedRefererLinks;
     }
 
     public String getTemplateProfileDir()
@@ -75,7 +73,7 @@ public class LibreOfficeProfileManagerV2
 
     private void execute()
     {
-        if (StringUtils.isBlank(userTemplateDir))
+        if (StringUtils.isNotBlank(userTemplateDir))
         {
             validateAndCreateRegistryTemplate();
         }
@@ -87,23 +85,31 @@ public class LibreOfficeProfileManagerV2
 
     private void validateAndCreateRegistryTemplate()
     {
-        if (blockUntrustedRefererLinks)
+        if (userTemplateDir.contains("classpath"))
         {
-            try (InputStream regStream = getClass().getClassLoader().getResourceAsStream(LOCAL_TEMP_REGISTRY_FILE))
+            String[] split = userTemplateDir.split(":");
+            if (split.length == 2)
             {
-                if (regStream == null)
+                String classpathTemplateProfileDir = split[1];
+                if (DEFAULT_TEMP_PROFILE.equals(classpathTemplateProfileDir))
                 {
-                    logger.error("Local temporary registry file not found: {}", LOCAL_TEMP_REGISTRY_FILE);
-                    return;
+                    try (InputStream regStream = getClass().getClassLoader().getResourceAsStream(LOCAL_TEMP_REGISTRY_FILE))
+                    {
+                        if (regStream == null)
+                        {
+                            logger.error("Local temporary registry file not found: {}", LOCAL_TEMP_REGISTRY_FILE);
+                            return;
+                        }
+                        Path tempProfilePath = Files.createTempDirectory(DEFAULT_TEMP_PROFILE);
+                        File registryFile = getRegistryFile(tempProfilePath);
+                        Files.copy(regStream, registryFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                        this.systemTempUserDir = tempProfilePath.toString();
+                    }
+                    catch (Exception e)
+                    {
+                        logger.error("Error creating temporary directory for LibreOffice profile", e);
+                    }
                 }
-                Path tempProfilePath = Files.createTempDirectory(TEMP_PROFILE_DIR_NAME);
-                File registryFile = getRegistryFile(tempProfilePath);
-                Files.copy(regStream, registryFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                this.systemTempUserDir = tempProfilePath.toString();
-            }
-            catch (Exception e)
-            {
-                logger.error("Error creating temporary directory for LibreOffice profile", e);
             }
         }
     }

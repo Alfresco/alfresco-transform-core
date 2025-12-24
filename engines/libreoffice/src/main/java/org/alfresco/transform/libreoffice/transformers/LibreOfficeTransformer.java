@@ -83,9 +83,9 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
     // private boolean disableExternalLinks;
     // @Value("${transform.core.libreoffice.enableTemplateProfile}")
     // private boolean enableTemplateProfile;
-
-    @Value("${transform.core.libreoffice.security.blockUntrustedRefererLinks}")
-    private boolean blockUntrustedRefererLinks;
+    //
+    // @Value("${transform.core.libreoffice.security.blockUntrustedRefererLinks}")
+    // private boolean blockUntrustedRefererLinks;
 
     private JodConverter jodconverter;
 
@@ -120,7 +120,7 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
             throw new IllegalArgumentException("LibreOfficeTransformer LIBREOFFICE_IS_ENABLED variable must be set to true/false");
         }
 
-        LibreOfficeProfileManagerV2 lib = new LibreOfficeProfileManagerV2(templateProfileDir, blockUntrustedRefererLinks);
+        LibreOfficeProfileManagerV2 lib = new LibreOfficeProfileManagerV2(templateProfileDir);
         String tempDir = lib.getTemplateProfileDir();
 
         JodConverterSharedInstance sharedInstance = new JodConverterSharedInstance();

@@ -7,8 +7,9 @@ OUTPUT_FILE="src/main/resources/templateRegistrymodifications.xcu"
 echo "Generating registry modifications..."
 
 # More flexible extraction that handles indentation
-BLOCK_UNTRUSTED=$(awk '/blockUntrustedRefererLinks:/ {print $2}' "$PROPS_FILE")
-echo "blockUntrustedRefererLinks: $BLOCK_UNTRUSTED"
+# Extract the default value from ${VAR:default} pattern
+TEMPLATE_PROFILE=$(awk '/templateProfileDir:/ {print $2}' "$PROPS_FILE" | sed 's/.*:\(.*\)}/\1/')
+echo "templateProfileDir: $TEMPLATE_PROFILE"
 
 
 # Start XML file
@@ -20,7 +21,7 @@ cat > "$OUTPUT_FILE" << EOF
 EOF
 
 # Item 1
-if [ "$BLOCK_UNTRUSTED" = "true" ]; then
+if [ "$TEMPLATE_PROFILE" = "libreoffice/templateProfile" ]; then
   cat >> "$OUTPUT_FILE" << EOF
   <item oor:path="/org.openoffice.Office.Common/Security/Scripting">
     <prop oor:name="BlockUntrustedRefererLinks" oor:op="fuse">
