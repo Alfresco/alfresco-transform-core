@@ -120,8 +120,8 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
             throw new IllegalArgumentException("LibreOfficeTransformer LIBREOFFICE_IS_ENABLED variable must be set to true/false");
         }
 
-        LibreOfficeProfileManagerV2 lib = new LibreOfficeProfileManagerV2(templateProfileDir);
-        String tempDir = lib.getTemplateProfileDir();
+        LibreOfficeProfileManagerV2 profileManager = new LibreOfficeProfileManagerV2(templateProfileDir);
+        String effectiveTemplateProfileDir = profileManager.getEffectiveTemplateProfileDir();
 
         JodConverterSharedInstance sharedInstance = new JodConverterSharedInstance();
         jodconverter = sharedInstance;
@@ -132,7 +132,7 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
         sharedInstance.setConnectTimeout(timeout);
         sharedInstance.setPortNumbers(portNumbers);
         sharedInstance.setEnabled(isEnabled);
-        sharedInstance.setTemplateProfileDir(tempDir);
+        sharedInstance.setTemplateProfileDir(effectiveTemplateProfileDir);
         sharedInstance.afterPropertiesSet();
     }
 

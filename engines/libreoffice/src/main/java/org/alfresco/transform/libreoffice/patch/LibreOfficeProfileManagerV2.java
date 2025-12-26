@@ -36,6 +36,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Manages LibreOffice user profile templates for transformations.
+ * 
+ * @author Sayan Bhattacharya
+ */
 public class LibreOfficeProfileManagerV2
 {
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeProfileManagerV2.class);
@@ -43,37 +48,20 @@ public class LibreOfficeProfileManagerV2
     private final String USER_DIR_NAME = "user";
     private final String REGISTRY_FILE_NAME = "registrymodifications.xcu";
     private final String LOCAL_TEMP_REGISTRY_FILE = "templateRegistrymodifications.xcu";
-    private final String DEFAULT_TEMP_PROFILE = "libreoffice/templateProfile";
+    private final String DEFAULT_LO_TEMPLATE_PROFILE = "libreoffice_templateProfile";
+    private final String DEFAULT_ALFRESCO = "default_alfresco";
 
-    private final String userTemplateDir;
-    private String systemTempUserDir = "";
+    private final String configuredTemplateProfileDir;
+    private String tempDefaultTemplateDir;
 
-    public LibreOfficeProfileManagerV2(String templateProfileDir)
+    public LibreOfficeProfileManagerV2(String configuredTemplateProfileDir)
     {
-        this.userTemplateDir = templateProfileDir;
+        this.configuredTemplateProfileDir = configuredTemplateProfileDir;
     }
 
-    public String getTemplateProfileDir()
+    public String getEffectiveTemplateProfileDir()
     {
-        execute();
-
-        if (StringUtils.isNotBlank(userTemplateDir))
-        {
-            return userTemplateDir;
-        }
-        else if (StringUtils.isNotBlank(systemTempUserDir))
-        {
-            return systemTempUserDir;
-        }
-        else
-        {
-            return "";
-        }
-    }
-
-    private void execute()
-    {
-        if (StringUtils.isNotBlank(userTemplateDir))
+        if (isDefaultAlfrescoClasspath(configuredTemplateProfileDir))
         {
             validateAndCreateRegistryTemplate();
         }
@@ -81,37 +69,37 @@ public class LibreOfficeProfileManagerV2
         {
             checkUserProvidedRegistry();
         }
+
+        return StringUtils.isBlank(tempDefaultTemplateDir) ? configuredTemplateProfileDir : tempDefaultTemplateDir;
+    }
+
+    private boolean isDefaultAlfrescoClasspath(String templateDir)
+    {
+        return DEFAULT_ALFRESCO.equals(templateDir);
     }
 
     private void validateAndCreateRegistryTemplate()
     {
-        if (userTemplateDir.contains("classpath"))
+        try (InputStream regStream = loadRegistryStream())
         {
-            String[] split = userTemplateDir.split(":");
-            if (split.length == 2)
+            if (regStream == null)
             {
-                String classpathTemplateProfileDir = split[1];
-                if (DEFAULT_TEMP_PROFILE.equals(classpathTemplateProfileDir))
-                {
-                    try (InputStream regStream = getClass().getClassLoader().getResourceAsStream(LOCAL_TEMP_REGISTRY_FILE))
-                    {
-                        if (regStream == null)
-                        {
-                            logger.error("Local temporary registry file not found: {}", LOCAL_TEMP_REGISTRY_FILE);
-                            return;
-                        }
-                        Path tempProfilePath = Files.createTempDirectory(DEFAULT_TEMP_PROFILE);
-                        File registryFile = getRegistryFile(tempProfilePath);
-                        Files.copy(regStream, registryFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                        this.systemTempUserDir = tempProfilePath.toString();
-                    }
-                    catch (Exception e)
-                    {
-                        logger.error("Error creating temporary directory for LibreOffice profile", e);
-                    }
-                }
+                logger.error("Local temporary registry file not found: {}", LOCAL_TEMP_REGISTRY_FILE);
+                return;
             }
+            Path tempProfilePath = Files.createTempDirectory(DEFAULT_LO_TEMPLATE_PROFILE);
+            Files.copy(regStream, getRegistryFile(tempProfilePath).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            this.tempDefaultTemplateDir = tempProfilePath.toString();
         }
+        catch (Exception e)
+        {
+            logger.error("Error creating temporary directory for LibreOffice profile", e);
+        }
+    }
+
+    private InputStream loadRegistryStream()
+    {
+        return getClass().getClassLoader().getResourceAsStream(LOCAL_TEMP_REGISTRY_FILE);
     }
 
     private File getRegistryFile(Path tempProfilePath)
@@ -130,10 +118,10 @@ public class LibreOfficeProfileManagerV2
 
     private void checkUserProvidedRegistry()
     {
-        File tempDir = new File(userTemplateDir);
+        File tempDir = new File(configuredTemplateProfileDir);
         if (!tempDir.exists() || !tempDir.isDirectory())
         {
-            logger.warn("The provided template profile directory does not exist or is not a directory: {}", userTemplateDir);
+            logger.warn("The provided template profile directory does not exist or is not a directory: {}", configuredTemplateProfileDir);
             return;
         }
         File userDir = new File(tempDir, USER_DIR_NAME);
