@@ -53,7 +53,7 @@ import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.executors.JavaExecutor;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transform.libreoffice.patch.LibreOfficeProfileManagerV2;
+import org.alfresco.transform.libreoffice.patch.LibreOfficeProfileManager;
 
 /**
  * JavaExecutor implementation for running LibreOffice transformations. It loads the transformation logic in the same JVM (check the {@link JodConverter} implementation).
@@ -120,7 +120,7 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
             throw new IllegalArgumentException("LibreOfficeTransformer LIBREOFFICE_IS_ENABLED variable must be set to true/false");
         }
 
-        LibreOfficeProfileManagerV2 profileManager = new LibreOfficeProfileManagerV2(templateProfileDir);
+        LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(templateProfileDir);
         String effectiveTemplateProfileDir = profileManager.getEffectiveTemplateProfileDir();
 
         JodConverterSharedInstance sharedInstance = new JodConverterSharedInstance();

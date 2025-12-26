@@ -28,297 +28,118 @@
 package org.alfresco.transform.libreoffice.patch;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.regex.Pattern;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.artofsolving.jodconverter.OfficeDocumentConverter;
-import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
-import org.artofsolving.jodconverter.office.OfficeManager;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Manages LibreOffice template user profile and work directory, including apply patches to disable external link updates.
+ * Manages LibreOffice user profile templates for transformations.
  * 
  * @author Sayan Bhattacharya
  */
-
 public class LibreOfficeProfileManager
 {
-
     private static final Logger logger = LoggerFactory.getLogger(LibreOfficeProfileManager.class);
-    private static final String PROBE_RESOURCE = "/probe.doc";
-    private static final String PATCH_RESOURCE = "/libreoffice_registry_patch.json";
-    private static final String REGISTRY_FILE = "registrymodifications.xcu";
-    private static final String USER_PROFILE_DIR = "user";
 
-    private final File workDir;
-    private final File templateProfileDir;
-    private final OfficeManager tempOfficeManager;
-    private final boolean disableExternalLinks;
-    private static LibreOfficeProfileManager instance;
+    private final String USER_DIR_NAME = "user";
+    private final String REGISTRY_FILE_NAME = "registrymodifications.xcu";
+    private final String LOCAL_TEMP_REGISTRY_FILE = "templateRegistrymodifications.xcu";
+    private final String DEFAULT_LO_TEMPLATE_PROFILE = "libreoffice_templateProfile";
+    private final String DEFAULT_ALFRESCO = "default_alfresco";
 
-    private LibreOfficeProfileManager(File workDir, File templateProfileDir,
-            DefaultOfficeManagerConfiguration officeManagerConfiguration,
-            boolean disableExternalLinks)
+    private final String configuredTemplateProfileDir;
+    private String tempDefaultTemplateDir;
+
+    public LibreOfficeProfileManager(String configuredTemplateProfileDir)
     {
-        this.workDir = workDir;
-        this.templateProfileDir = templateProfileDir;
-        this.tempOfficeManager = officeManagerConfiguration.buildOfficeManager();
-        this.disableExternalLinks = disableExternalLinks;
-        this.tempOfficeManager.start();
+        this.configuredTemplateProfileDir = configuredTemplateProfileDir;
     }
 
-    public static void initializeTemplateUserProfile(File workDir, File templateProfileDir,
-            DefaultOfficeManagerConfiguration officeManagerConfiguration,
-            boolean disableExternalLinks)
+    public String getEffectiveTemplateProfileDir()
     {
-        if (instance == null)
+        if (isDefaultAlfrescoClasspath(configuredTemplateProfileDir))
         {
-            instance = new LibreOfficeProfileManager(workDir, templateProfileDir,
-                    officeManagerConfiguration, disableExternalLinks);
+            validateAndCreateRegistryTemplate();
         }
-        instance.execute();
+        else
+        {
+            checkUserProvidedRegistry();
+        }
+
+        return StringUtils.isBlank(tempDefaultTemplateDir) ? configuredTemplateProfileDir : tempDefaultTemplateDir;
     }
 
-    private void execute()
+    private boolean isDefaultAlfrescoClasspath(String templateDir)
     {
-        OfficeDocumentConverter converter = new OfficeDocumentConverter(tempOfficeManager);
-        convertProbeDocument(converter);
-        copyUserProfile();
-
-        if (disableExternalLinks)
-        {
-            patchLibreOfficeRegistry();
-        }
-        if (tempOfficeManager.isRunning())
-        {
-            tempOfficeManager.stop();
-        }
-
-        // delete everything in workDir to ensure a fresh start next time
-        try
-        {
-            FileUtils.cleanDirectory(workDir);
-        }
-        catch (IOException e)
-        {
-            logger.error("Error cleaning work directory after LibreOffice profile initialization", e);
-        }
+        return DEFAULT_ALFRESCO.equals(templateDir);
     }
 
-    /**
-     * Performs a probe document conversion to ensure the user profile is created
-     * 
-     * @param converter
-     * @throws Exception
-     */
-    private void convertProbeDocument(OfficeDocumentConverter converter)
+    private void validateAndCreateRegistryTemplate()
     {
-
-        try (InputStream probeInput = getClass().getResourceAsStream(PROBE_RESOURCE))
+        try (InputStream regStream = loadRegistryStream())
         {
-            if (probeInput == null)
+            if (regStream == null)
             {
-                throw new IllegalStateException("probe.docx resource not found!");
+                logger.error("Local temporary registry file not found: {}", LOCAL_TEMP_REGISTRY_FILE);
+                return;
             }
-
-            File tempProbeFile = new File(workDir, "probe.doc");
-            FileUtils.copyInputStreamToFile(probeInput, tempProbeFile);
-            converter.convert(tempProbeFile, new File(workDir, "probeoutput.pdf"));
+            Path tempProfilePath = Files.createTempDirectory(DEFAULT_LO_TEMPLATE_PROFILE);
+            Files.copy(regStream, getRegistryFile(tempProfilePath).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            this.tempDefaultTemplateDir = tempProfilePath.toString();
         }
         catch (Exception e)
         {
-            logger.error("Error during test document conversion", e);
+            logger.error("Error creating temporary directory for LibreOffice profile", e);
         }
     }
 
-    private void copyUserProfile()
+    private InputStream loadRegistryStream()
     {
-        try
-        {
-            File officeUserProfile = findLibreOfficeDirectory(workDir, USER_PROFILE_DIR);
-            if (officeUserProfile != null)
-            {
-                File destination = new File(templateProfileDir, officeUserProfile.getName());
-                FileUtils.copyDirectory(officeUserProfile, destination);
-            }
-        }
-        catch (Exception e)
-        {
-            logger.error("Error copying LibreOffice user profile", e);
-        }
+        return getClass().getClassLoader().getResourceAsStream(LOCAL_TEMP_REGISTRY_FILE);
     }
 
-    /**
-     * Patches the LibreOffice registrymodifications.xcu file to disable external link updates
-     */
-    private void patchLibreOfficeRegistry()
+    private File getRegistryFile(Path tempProfilePath)
     {
-        try
+        File userDir = new File(tempProfilePath.toFile(), USER_DIR_NAME);
+        if (!userDir.exists())
         {
-            File userProfileDir = findLibreOfficeDirectory(templateProfileDir, USER_PROFILE_DIR);
-            if (userProfileDir == null)
+            boolean dirCreated = userDir.mkdirs();
+            if (!dirCreated)
             {
-                throw new IllegalStateException("Cannot find LO user profile to patch");
+                throw new RuntimeException("Failed to create user directory: " + userDir.getAbsolutePath());
             }
-
-            File registry = new File(userProfileDir, REGISTRY_FILE);
-            if (!registry.exists())
-            {
-                throw new IllegalStateException(REGISTRY_FILE + " not found!");
-            }
-
-            String registryContent = FileUtils.readFileToString(registry, StandardCharsets.UTF_8);
-            List<PatchItem> patchItems = readPatchItemsFromJson();
-
-            // Remove existing matching items
-            for (PatchItem item : patchItems)
-            {
-                String pattern = String.format(
-                        "<item oor:path=\"%s\"><prop oor:name=\"%s\"[^>]*>.*?</prop></item>",
-                        Pattern.quote(item.path),
-                        Pattern.quote(item.propName));
-                registryContent = registryContent.replaceAll(pattern, "");
-            }
-
-            // Insert the new patch before closing tag
-            String patch = generatePatchXml(patchItems);
-            registryContent = registryContent.replace("</oor:items>", "  " + patch + "\n</oor:items>");
-
-            FileUtils.writeStringToFile(registry, registryContent, StandardCharsets.UTF_8);
         }
-        catch (Exception e)
-        {
-            logger.error("Error patching LibreOffice registry to disable external link updates", e);
-        }
+        return new File(userDir, REGISTRY_FILE_NAME);
     }
 
-    private File findLibreOfficeDirectory(File parentDir, String searchDir)
+    private void checkUserProvidedRegistry()
     {
-        File userDir = findDirectChild(parentDir, searchDir);
-        if (userDir != null)
+        File tempDir = new File(configuredTemplateProfileDir);
+        if (!tempDir.exists() || !tempDir.isDirectory())
         {
-            return userDir;
+            logger.warn("The provided template profile directory does not exist or is not a directory: {}", configuredTemplateProfileDir);
+            return;
         }
-        return findUserInJodConverterDirs(parentDir);
-    }
-
-    private File findDirectChild(File dir, String name)
-    {
-        File[] children = dir.listFiles(File::isDirectory);
-        if (children != null)
+        File userDir = new File(tempDir, USER_DIR_NAME);
+        if (!userDir.exists())
         {
-            for (File child : children)
-            {
-                if (name.equals(child.getName()))
-                {
-                    return child;
-                }
-            }
+            logger.warn("The user directory does not exist in the provided template profile directory: {}", userDir.getAbsolutePath());
+            return;
         }
-        return null;
-    }
-
-    private File findUserInJodConverterDirs(File dir)
-    {
-        File[] jodDirs = dir.listFiles(f -> f.isDirectory() && f.getName().startsWith(".jodconverter_"));
-        if (jodDirs == null)
+        File registryFile = new File(userDir, REGISTRY_FILE_NAME);
+        if (!registryFile.exists())
         {
-            return null;
+            logger.warn("The registrymodifications.xcu file does not exist in the provided template profile directory: {}", registryFile.getAbsolutePath());
         }
-
-        for (File d : jodDirs)
+        else
         {
-            File user = new File(d, USER_PROFILE_DIR);
-            if (user.exists())
-            {
-                return user;
-            }
-        }
-        return null;
-    }
+            // TODO: read registryModifications.xcu and check for blocking referer links setting
 
-    private List<PatchItem> readPatchItemsFromJson()
-    {
-        try (InputStream inputStream = getClass().getResourceAsStream(PATCH_RESOURCE))
-        {
-            if (inputStream == null)
-            {
-                throw new IllegalStateException("libreoffice_registry_patch.json not found!");
-            }
-
-            String jsonContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(jsonContent);
-
-            JsonNode items = root.get("items");
-            if (items == null || !items.isArray() || items.size() == 0)
-            {
-                throw new IllegalStateException("JSON 'items' array is missing or empty!");
-            }
-
-            List<PatchItem> patchItems = new ArrayList<>();
-            for (JsonNode item : items)
-            {
-                String path = item.get("oor:path").asText();
-                JsonNode prop = item.get("prop");
-                String name = prop.get("oor:name").asText();
-                String op = prop.get("oor:op").asText();
-                boolean value = item.get("value").asBoolean();
-
-                patchItems.add(new PatchItem(path, name, op, value));
-            }
-            return patchItems;
-        }
-        catch (Exception e)
-        {
-            logger.error("Error reading patch items from JSON", e);
-        }
-
-        return Collections.emptyList();
-    }
-
-    private String generatePatchXml(List<PatchItem> items)
-    {
-        StringBuilder xml = new StringBuilder();
-        for (PatchItem item : items)
-        {
-            xml.append("<item oor:path=\"")
-                    .append(item.path)
-                    .append("\"><prop oor:name=\"")
-                    .append(item.propName)
-                    .append("\" oor:op=\"")
-                    .append(item.op)
-                    .append("\"><value>")
-                    .append(item.value)
-                    .append("</value></prop></item>");
-        }
-        return xml.toString();
-    }
-
-    private class PatchItem
-    {
-        String path;
-        String propName;
-        String op;
-        boolean value;
-
-        PatchItem(String path, String propName, String op, boolean value)
-        {
-            this.path = path;
-            this.propName = propName;
-            this.op = op;
-            this.value = value;
         }
     }
+
 }
