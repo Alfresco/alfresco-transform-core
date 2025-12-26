@@ -21,7 +21,7 @@ cat > "$OUTPUT_FILE" << EOF
 EOF
 
 # Item 1
-if [ "$TEMPLATE_PROFILE" = "libreoffice/templateProfile" ]; then
+if [ "$TEMPLATE_PROFILE" = "default_alfresco" ]; then
   cat >> "$OUTPUT_FILE" << EOF
   <item oor:path="/org.openoffice.Office.Common/Security/Scripting">
     <prop oor:name="BlockUntrustedRefererLinks" oor:op="fuse">
