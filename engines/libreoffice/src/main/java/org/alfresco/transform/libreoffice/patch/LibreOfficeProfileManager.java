@@ -43,13 +43,13 @@ import org.slf4j.LoggerFactory;
  */
 public class LibreOfficeProfileManager
 {
-    private static final Logger logger = LoggerFactory.getLogger(LibreOfficeProfileManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LibreOfficeProfileManager.class);
 
-    private final String USER_DIR_NAME = "user";
-    private final String REGISTRY_FILE_NAME = "registrymodifications.xcu";
-    private final String LOCAL_TEMP_REGISTRY_FILE = "templateRegistrymodifications.xcu";
-    private final String DEFAULT_LO_TEMPLATE_PROFILE = "libreoffice_templateProfile";
-    private final String DEFAULT_ALFRESCO = "default_alfresco";
+    private static final String userDirName = "user";
+    private static final String registryFileName = "registrymodifications.xcu";
+    private static final String localTempRegistryFile = "templateRegistrymodifications.xcu";
+    private static final String defaultLOTemplateProfile = "libreoffice_templateProfile";
+    private static final String defaultAlfresco = "default_alfresco";
 
     private final String configuredTemplateProfileDir;
     private String tempDefaultTemplateDir;
@@ -75,7 +75,7 @@ public class LibreOfficeProfileManager
 
     private boolean isDefaultAlfrescoClasspath(String templateDir)
     {
-        return DEFAULT_ALFRESCO.equals(templateDir);
+        return defaultAlfresco.equals(templateDir);
     }
 
     private void validateAndCreateRegistryTemplate()
@@ -84,27 +84,27 @@ public class LibreOfficeProfileManager
         {
             if (regStream == null)
             {
-                logger.error("Local temporary registry file not found: {}", LOCAL_TEMP_REGISTRY_FILE);
+                LOGGER.error("Local temporary registry file not found: {}", localTempRegistryFile);
                 return;
             }
-            Path tempProfilePath = Files.createTempDirectory(DEFAULT_LO_TEMPLATE_PROFILE);
+            Path tempProfilePath = Files.createTempDirectory(defaultLOTemplateProfile);
             Files.copy(regStream, getRegistryFile(tempProfilePath).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             this.tempDefaultTemplateDir = tempProfilePath.toString();
         }
         catch (Exception e)
         {
-            logger.error("Error creating temporary directory for LibreOffice profile", e);
+            LOGGER.error("Error creating temporary directory for LibreOffice profile", e);
         }
     }
 
     private InputStream loadRegistryStream()
     {
-        return getClass().getClassLoader().getResourceAsStream(LOCAL_TEMP_REGISTRY_FILE);
+        return getClass().getClassLoader().getResourceAsStream(localTempRegistryFile);
     }
 
     private File getRegistryFile(Path tempProfilePath)
     {
-        File userDir = new File(tempProfilePath.toFile(), USER_DIR_NAME);
+        File userDir = new File(tempProfilePath.toFile(), userDirName);
         if (!userDir.exists())
         {
             boolean dirCreated = userDir.mkdirs();
@@ -113,7 +113,7 @@ public class LibreOfficeProfileManager
                 throw new RuntimeException("Failed to create user directory: " + userDir.getAbsolutePath());
             }
         }
-        return new File(userDir, REGISTRY_FILE_NAME);
+        return new File(userDir, registryFileName);
     }
 
     private void checkUserProvidedRegistry()
@@ -121,19 +121,19 @@ public class LibreOfficeProfileManager
         File tempDir = new File(configuredTemplateProfileDir);
         if (!tempDir.exists() || !tempDir.isDirectory())
         {
-            logger.warn("The provided template profile directory does not exist or is not a directory: {}", configuredTemplateProfileDir);
+            LOGGER.warn("The provided template profile directory does not exist or is not a directory: {}", configuredTemplateProfileDir);
             return;
         }
-        File userDir = new File(tempDir, USER_DIR_NAME);
+        File userDir = new File(tempDir, userDirName);
         if (!userDir.exists())
         {
-            logger.warn("The user directory does not exist in the provided template profile directory: {}", userDir.getAbsolutePath());
+            LOGGER.warn("The user directory does not exist in the provided template profile directory: {}", userDir.getAbsolutePath());
             return;
         }
-        File registryFile = new File(userDir, REGISTRY_FILE_NAME);
+        File registryFile = new File(userDir, registryFileName);
         if (!registryFile.exists())
         {
-            logger.warn("The registrymodifications.xcu file does not exist in the provided template profile directory: {}", registryFile.getAbsolutePath());
+            LOGGER.warn("The registrymodifications.xcu file does not exist in the provided template profile directory: {}", registryFile.getAbsolutePath());
         }
         else
         {

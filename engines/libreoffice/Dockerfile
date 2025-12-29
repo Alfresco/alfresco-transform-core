@@ -46,11 +46,6 @@ RUN groupadd -g ${GROUPID} ${GROUPNAME} && \
     useradd -u ${USERID} -G ${GROUPNAME} ${LIBREUSERNAME} && \
     chgrp -R ${GROUPNAME} /usr/bin/${env.project_artifactId}.jar
 
-RUN mkdir -p /opt/libreoffice-profile/workDir && \
-    mkdir -p /opt/libreoffice-profile/templateProfileDir/user && \
-    chown -R ${USERID}:${GROUPID} /opt/libreoffice-profile && \
-    chmod -R 775 /opt/libreoffice-profile
-
 EXPOSE 8090
 
 USER ${LIBREUSERNAME}
