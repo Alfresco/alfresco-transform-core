@@ -8,7 +8,7 @@ echo "Generating registry modifications..."
 
 # More flexible extraction that handles indentation
 # Extract the default value from ${VAR:default} pattern
-TEMPLATE_PROFILE=$(awk '/templateProfileDir:/ {print $2}' "$PROPS_FILE" | sed 's/.*:\(.*\)}/\1/')
+TEMPLATE_PROFILE=$(awk '/templateProfileDir:/ {print $2}' "$PROPS_FILE" | sed 's/.*:\(.*\)}/\1/'  | tr -d '\r')
 echo "templateProfileDir: $TEMPLATE_PROFILE"
 
 
@@ -35,5 +35,3 @@ fi
 cat >> "$OUTPUT_FILE" << EOF
 </oor:items>
 EOF
-
-
