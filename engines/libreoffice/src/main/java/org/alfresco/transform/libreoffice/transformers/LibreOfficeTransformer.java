@@ -77,15 +77,6 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
     private String templateProfileDir;
     @Value("${transform.core.libreoffice.isEnabled}")
     private String isEnabled;
-    // @Value("${transform.core.libreoffice.workdir}")
-    // private String workdir;
-    // @Value("${transform.core.libreoffice.disableExternalLinks}")
-    // private boolean disableExternalLinks;
-    // @Value("${transform.core.libreoffice.enableTemplateProfile}")
-    // private boolean enableTemplateProfile;
-    //
-    // @Value("${transform.core.libreoffice.security.blockUntrustedRefererLinks}")
-    // private boolean blockUntrustedRefererLinks;
 
     private JodConverter jodconverter;
 
