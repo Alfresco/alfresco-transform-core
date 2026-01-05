@@ -28,13 +28,15 @@
 package org.alfresco.transform.libreoffice.patch;
 
 import java.io.File;
-import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ResourceUtils;
 
 /**
  * Manages LibreOffice user profile templates for transformations.
@@ -45,51 +47,38 @@ public class LibreOfficeProfileManager
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(LibreOfficeProfileManager.class);
 
-    private static final String userDirName = "user";
-    private static final String registryFileName = "registrymodifications.xcu";
-    private static final String localTempRegistryFile = "templateRegistrymodifications.xcu";
-    private static final String defaultLOTemplateProfile = "libreoffice_templateProfile";
-    private static final String defaultAlfresco = "default_alfresco";
+    private static final String USER_DIR_NAME = "user";
+    private static final String REGISTRY_FILE_NAME = "registrymodifications.xcu";
+    private static final String DEFAULT_LO_TEMPLATE_PROFILE = "libreoffice_templateProfile";
 
-    private final String configuredTemplateProfileDir;
-    private String tempDefaultTemplateDir;
+    private String classPathRegistryFile;
 
-    public LibreOfficeProfileManager(String configuredTemplateProfileDir)
+    public String getEffectiveTemplateProfileDir(String templateProfileDir)
     {
-        this.configuredTemplateProfileDir = configuredTemplateProfileDir;
-    }
-
-    public String getEffectiveTemplateProfileDir()
-    {
-        if (isDefaultAlfrescoClasspath(configuredTemplateProfileDir))
+        if (StringUtils.startsWith(templateProfileDir, "classpath:"))
         {
-            validateAndCreateRegistryTemplate();
+            createTemplateProfileDir(templateProfileDir);
+        }
+        else if (StringUtils.isNotBlank(templateProfileDir))
+        {
+            checkUserProvidedRegistry(templateProfileDir);
         }
         else
         {
-            checkUserProvidedRegistry();
+            LOGGER.warn("No template profile directory provided, using default settings.");
         }
 
-        return StringUtils.isBlank(tempDefaultTemplateDir) ? configuredTemplateProfileDir : tempDefaultTemplateDir;
+        return StringUtils.isBlank(classPathRegistryFile) ? templateProfileDir : classPathRegistryFile;
     }
 
-    private boolean isDefaultAlfrescoClasspath(String templateDir)
+    private void createTemplateProfileDir(String classpathTemplateDir)
     {
-        return defaultAlfresco.equals(templateDir);
-    }
-
-    private void validateAndCreateRegistryTemplate()
-    {
-        try (InputStream regStream = loadRegistryStream())
+        try
         {
-            if (regStream == null)
-            {
-                LOGGER.error("Local temporary registry file not found: {}", localTempRegistryFile);
-                return;
-            }
-            Path tempProfilePath = Files.createTempDirectory(defaultLOTemplateProfile);
-            Files.copy(regStream, getRegistryFile(tempProfilePath).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            this.tempDefaultTemplateDir = tempProfilePath.toString();
+            File resourceDir = ResourceUtils.getFile(classpathTemplateDir);
+            Path tempDir = Files.createTempDirectory(DEFAULT_LO_TEMPLATE_PROFILE);
+            FileUtils.copyDirectory(resourceDir, tempDir.toFile());
+            this.classPathRegistryFile = tempDir.toString();
         }
         catch (Exception e)
         {
@@ -97,48 +86,58 @@ public class LibreOfficeProfileManager
         }
     }
 
-    private InputStream loadRegistryStream()
+    private void checkUserProvidedRegistry(String templateProfileDir)
     {
-        return getClass().getClassLoader().getResourceAsStream(localTempRegistryFile);
-    }
-
-    private File getRegistryFile(Path tempProfilePath)
-    {
-        File userDir = new File(tempProfilePath.toFile(), userDirName);
-        if (!userDir.exists())
+        File templateDir = new File(templateProfileDir);
+        if (!templateDir.exists() || !templateDir.isDirectory())
         {
-            boolean dirCreated = userDir.mkdirs();
-            if (!dirCreated)
-            {
-                throw new RuntimeException("Failed to create user directory: " + userDir.getAbsolutePath());
-            }
-        }
-        return new File(userDir, registryFileName);
-    }
-
-    private void checkUserProvidedRegistry()
-    {
-        File tempDir = new File(configuredTemplateProfileDir);
-        if (!tempDir.exists() || !tempDir.isDirectory())
-        {
-            LOGGER.warn("The provided template profile directory does not exist or is not a directory: {}", configuredTemplateProfileDir);
+            LOGGER.warn("The provided template profile directory does not exist or is not a directory: {}", templateProfileDir);
             return;
         }
-        File userDir = new File(tempDir, userDirName);
+        File userDir = new File(templateDir, USER_DIR_NAME);
         if (!userDir.exists())
         {
             LOGGER.warn("The user directory does not exist in the provided template profile directory: {}", userDir.getAbsolutePath());
             return;
         }
-        File registryFile = new File(userDir, registryFileName);
+        File registryFile = new File(userDir, REGISTRY_FILE_NAME);
         if (!registryFile.exists())
         {
             LOGGER.warn("The registrymodifications.xcu file does not exist in the provided template profile directory: {}", registryFile.getAbsolutePath());
         }
         else
         {
-            // TODO: read registryModifications.xcu and check for blocking referer links setting
+            checkBlockUntrustedRefererLinks(registryFile);
+        }
+    }
 
+    private void checkBlockUntrustedRefererLinks(File registryFile)
+    {
+        try
+        {
+            String content = Files.readString(registryFile.toPath(), StandardCharsets.UTF_8);
+
+            boolean hasBlockUntrustedProperty = content.contains("oor:path=\"/org.openoffice.Office.Common/Security/Scripting\"")
+                    && content.contains("oor:name=\"BlockUntrustedRefererLinks\"");
+
+            if (hasBlockUntrustedProperty)
+            {
+                boolean isEnabled = content.contains("<prop oor:name=\"BlockUntrustedRefererLinks\"")
+                        && content.contains("<value>true</value>");
+
+                if (!isEnabled)
+                {
+                    LOGGER.warn("BlockUntrustedRefererLinks is present but not set to 'true' in the registry file: {}", registryFile.getAbsolutePath());
+                }
+            }
+            else
+            {
+                LOGGER.warn("BlockUntrustedRefererLinks property not found in the registry file: {}", registryFile.getAbsolutePath());
+            }
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("Error reading registry file: {}", registryFile.getAbsolutePath(), e);
         }
     }
 

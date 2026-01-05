@@ -111,8 +111,8 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
             throw new IllegalArgumentException("LibreOfficeTransformer LIBREOFFICE_IS_ENABLED variable must be set to true/false");
         }
 
-        LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(templateProfileDir);
-        String effectiveTemplateProfileDir = profileManager.getEffectiveTemplateProfileDir();
+        LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager();
+        String effectiveTemplateProfileDir = profileManager.getEffectiveTemplateProfileDir(templateProfileDir);
 
         JodConverterSharedInstance sharedInstance = new JodConverterSharedInstance();
         jodconverter = sharedInstance;
