@@ -28,15 +28,18 @@
 package org.alfresco.transform.libreoffice.patch;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.ResourceUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * Manages LibreOffice user profile templates for transformations.
@@ -75,10 +78,37 @@ public class LibreOfficeProfileManager
     {
         try
         {
-            File resourceDir = ResourceUtils.getFile(classpathTemplateDir);
+
+            String baseDir = classpathTemplateDir.replace("classpath:", ""); // root folder on classpath
+
             Path tempDir = Files.createTempDirectory(DEFAULT_LO_TEMPLATE_PROFILE);
-            FileUtils.copyDirectory(resourceDir, tempDir.toFile());
+            ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            Resource[] resources = resolver.getResources(classpathTemplateDir + "/**");
+
+            for (Resource resource : resources)
+            {
+
+                // skip directories or empty resources
+                if (!resource.isReadable() || resource.contentLength() == 0)
+                {
+                    continue;
+                }
+
+                // get the path relative to the base folder
+                String url = resource.getURL().toString();
+                String relative = url.substring(url.indexOf(baseDir) + baseDir.length() + 1);
+
+                Path target = tempDir.resolve(relative);
+                Files.createDirectories(target.getParent());
+
+                try (InputStream in = resource.getInputStream())
+                {
+                    Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+
             this.classPathRegistryFile = tempDir.toString();
+
         }
         catch (Exception e)
         {
