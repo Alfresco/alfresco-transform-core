@@ -34,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,7 @@ public class LibreOfficeProfileManager
     {
         if (StringUtils.startsWith(templateProfileDir, "classpath:"))
         {
-            createTemplateProfileDir(templateProfileDir);
+            createDefaultTemplateProfileDir(templateProfileDir);
         }
         else if (StringUtils.isNotBlank(templateProfileDir))
         {
@@ -74,45 +75,85 @@ public class LibreOfficeProfileManager
         return StringUtils.isBlank(classPathRegistryFile) ? templateProfileDir : classPathRegistryFile;
     }
 
-    private void createTemplateProfileDir(String classpathTemplateDir)
+    private void createDefaultTemplateProfileDir(String classpathTemplateDir)
     {
         try
         {
-
-            String baseDir = classpathTemplateDir.replace("classpath:", ""); // root folder on classpath
+            String baseDir = classpathTemplateDir.replace("classpath:", "");
+            Resource[] resources = loadResources(classpathTemplateDir);
+            if (ArrayUtils.isEmpty(resources))
+            {
+                return;
+            }
 
             Path tempDir = Files.createTempDirectory(DEFAULT_LO_TEMPLATE_PROFILE);
-            ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resolver.getResources(classpathTemplateDir + "/**");
-
             for (Resource resource : resources)
             {
-
-                // skip directories or empty resources
+                // skip non-readable or empty resources
                 if (!resource.isReadable() || resource.contentLength() == 0)
                 {
                     continue;
                 }
 
-                // get the path relative to the base folder
-                String url = resource.getURL().toString();
-                String relative = url.substring(url.indexOf(baseDir) + baseDir.length() + 1);
+                String relative = resolveRelativePath(resource, baseDir);
+                if (StringUtils.isBlank(relative))
+                    continue;
 
-                Path target = tempDir.resolve(relative);
-                Files.createDirectories(target.getParent());
-
-                try (InputStream in = resource.getInputStream())
-                {
-                    Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
-                }
+                copyResource(resource, tempDir.resolve(relative));
             }
-
             this.classPathRegistryFile = tempDir.toString();
-
         }
         catch (Exception e)
         {
-            LOGGER.error("Error creating temporary directory for LibreOffice profile", e);
+            LOGGER.warn("Error creating temporary directory for LibreOffice profile. {}", e.getMessage());
+        }
+    }
+
+    private Resource[] loadResources(String classpathTemplateDir) throws Exception
+    {
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource[] resources;
+        try
+        {
+            resources = resolver.getResources(classpathTemplateDir + "/**");
+        }
+        catch (Exception e)
+        {
+            LOGGER.warn("No resources found for classpath: {}.\n {}", classpathTemplateDir, e.getMessage());
+            return new Resource[0];
+        }
+        if (ArrayUtils.isEmpty(resources))
+        {
+            LOGGER.warn("No resources found for classpath: {}", classpathTemplateDir);
+        }
+        return resources;
+    }
+
+    private String resolveRelativePath(Resource resource, String baseDir) throws Exception
+    {
+        String url = resource.getURL().toString();
+        if (!url.contains(baseDir))
+        {
+            LOGGER.warn("Base directory '{}' not found in resource URL '{}'. Skipping.", baseDir, url);
+            return null;
+        }
+        int baseIndex = url.indexOf(baseDir);
+        String relative = url.substring(baseIndex + baseDir.length() + 1);
+        if (relative.isEmpty())
+        {
+            LOGGER.warn("Relative path is empty for resource URL '{}'. Skipping.", url);
+            return null;
+        }
+        return relative;
+    }
+
+    private void copyResource(Resource resource, Path target) throws Exception
+    {
+        Files.createDirectories(target.getParent());
+        try (InputStream in = resource.getInputStream())
+        {
+            LOGGER.info("Creating temporary libreoffice profile file");
+            Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
         }
     }
 
