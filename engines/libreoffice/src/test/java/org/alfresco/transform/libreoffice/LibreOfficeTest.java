@@ -68,6 +68,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -89,7 +90,7 @@ public class LibreOfficeTest extends AbstractBaseTest
 {
     protected static String targetMimetype = MIMETYPE_PDF;
 
-    @MockitoBean
+    @MockitoSpyBean
     private LibreOfficeTransformer libreOfficeTransformer;
     @Autowired
     private CustomTransformers customTransformers;
