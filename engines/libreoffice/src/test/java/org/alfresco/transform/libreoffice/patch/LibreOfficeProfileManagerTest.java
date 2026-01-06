@@ -54,10 +54,6 @@ class LibreOfficeProfileManagerTest
         profileManager = new LibreOfficeProfileManager();
     }
 
-    // =====================================================
-    // Tests for getEffectiveTemplateProfileDir method
-    // =====================================================
-
     @Test
     void testGetEffectiveTemplateProfileDir_WithNullInput()
     {
@@ -236,10 +232,6 @@ class LibreOfficeProfileManagerTest
         }
     }
 
-    // =====================================================
-    // Tests for edge cases in registry content
-    // =====================================================
-
     @Test
     void testCheckUserProvidedRegistry_WithEmptyRegistryFile() throws IOException
     {
@@ -313,10 +305,6 @@ class LibreOfficeProfileManagerTest
         }
     }
 
-    // =====================================================
-    // Tests for registry file read errors
-    // =====================================================
-
     @Test
     void testCheckUserProvidedRegistry_WithUnreadableRegistryFile() throws IOException
     {
@@ -341,10 +329,6 @@ class LibreOfficeProfileManagerTest
         }
     }
 
-    // =====================================================
-    // Tests for multiple variations of registry paths
-    // =====================================================
-
     @Test
     void testGetEffectiveTemplateProfileDir_WithMultiplePathFormats()
     {
@@ -362,10 +346,6 @@ class LibreOfficeProfileManagerTest
             assertEquals(path, result);
         }
     }
-
-    // =====================================================
-    // Helper methods
-    // =====================================================
 
     /**
      * Builds registry content with configurable BlockUntrustedRefererLinks property
