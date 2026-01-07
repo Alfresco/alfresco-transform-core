@@ -28,6 +28,7 @@
 package org.alfresco.transform.libreoffice.patch;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -97,8 +98,9 @@ public class LibreOfficeProfileManager
 
                 String relative = resolveRelativePath(resource, baseDir);
                 if (StringUtils.isBlank(relative))
+                {
                     continue;
-
+                }
                 copyResource(resource, tempDir.resolve(relative));
             }
             this.classPathRegistryFile = tempDir.toString();
@@ -109,7 +111,7 @@ public class LibreOfficeProfileManager
         }
     }
 
-    private Resource[] loadResources(String classpathTemplateDir) throws Exception
+    private Resource[] loadResources(String classpathTemplateDir)
     {
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         Resource[] resources;
@@ -129,32 +131,49 @@ public class LibreOfficeProfileManager
         return resources;
     }
 
-    private String resolveRelativePath(Resource resource, String baseDir) throws Exception
+    private String resolveRelativePath(Resource resource, String baseDir)
     {
-        String url = resource.getURL().toString();
-        if (!url.contains(baseDir))
+        try
         {
-            LOGGER.warn("Base directory '{}' not found in resource URL '{}'. Skipping.", baseDir, url);
+            String url = resource.getURL().toString();
+            if (!url.contains(baseDir))
+            {
+                LOGGER.warn("Base directory '{}' not found in resource URL '{}'. Skipping.", baseDir, url);
+                return null;
+            }
+            int baseIndex = url.indexOf(baseDir);
+            String relative = url.substring(baseIndex + baseDir.length() + 1);
+
+            if (relative.isEmpty())
+            {
+                LOGGER.warn("Relative path is empty for resource URL '{}'. Skipping.", url);
+                return null;
+            }
+            return relative;
+        }
+        catch (Exception e)
+        {
+            LOGGER.warn("Error resolving URL for resource: {}. {}", resource, e.getMessage());
             return null;
         }
-        int baseIndex = url.indexOf(baseDir);
-        String relative = url.substring(baseIndex + baseDir.length() + 1);
-        if (relative.isEmpty())
-        {
-            LOGGER.warn("Relative path is empty for resource URL '{}'. Skipping.", url);
-            return null;
-        }
-        return relative;
     }
 
-    private void copyResource(Resource resource, Path target) throws Exception
+    private void copyResource(Resource resource, Path target)
     {
-        Files.createDirectories(target.getParent());
-        try (InputStream in = resource.getInputStream())
+        try
         {
-            LOGGER.info("Creating temporary libreoffice profile file");
-            Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
+            Files.createDirectories(target.getParent());
+            try (InputStream in = resource.getInputStream())
+            {
+                LOGGER.info("Creating temporary libreoffice profile file");
+                Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
+            }
         }
+        catch (IOException e)
+        {
+            LOGGER.error("Error copying resource to temporary file: {}", e.getMessage());
+        }
+
     }
 
     private void checkUserProvidedRegistry(String templateProfileDir)

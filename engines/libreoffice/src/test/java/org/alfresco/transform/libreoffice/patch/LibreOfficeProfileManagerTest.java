@@ -359,16 +359,16 @@ class LibreOfficeProfileManagerTest
     private String buildRegistryContent(boolean includeProperty, boolean isEnabled)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        sb.append("<oor:items xmlns:oor=\"http://openoffice.org/2001/registry\">\n");
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+                .append("<oor:items xmlns:oor=\"http://openoffice.org/2001/registry\">\n");
 
         if (includeProperty)
         {
-            sb.append("<item oor:path=\"/org.openoffice.Office.Common/Security/Scripting\">\n");
-            sb.append("<prop oor:name=\"BlockUntrustedRefererLinks\">\n");
-            sb.append("<value>").append(isEnabled ? "true" : "false").append("</value>\n");
-            sb.append("</prop>\n");
-            sb.append("</item>\n");
+            sb.append("<item oor:path=\"/org.openoffice.Office.Common/Security/Scripting\">\n")
+                    .append("<prop oor:name=\"BlockUntrustedRefererLinks\">\n")
+                    .append("<value>").append(isEnabled ? "true" : "false").append("</value>\n")
+                    .append("</prop>\n")
+                    .append("</item>\n");
         }
 
         sb.append("</oor:items>");
