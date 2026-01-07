@@ -35,6 +35,8 @@
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
         <commons-lang3.version>3.18.0</commons-lang3.version>
+        <spring-boot-starter-aop.version>3.5.8</spring-boot-starter-aop.version>
+        <spring-retry.version>2.0.12</spring-retry.version>
     </properties>
 
     <profiles>
@@ -214,12 +216,12 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-aop</artifactId>
-                <version>3.5.8</version>
+                <version>${spring-boot-starter-aop.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.retry</groupId>
                 <artifactId>spring-retry</artifactId>
-                <version>2.0.12</version>
+                <version>${spring-retry.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -265,7 +267,6 @@
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-restclient-test</artifactId>
@@ -280,12 +281,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
-            <version>3.5.8</version>
+            <version>${spring-boot-starter-aop.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.retry</groupId>
             <artifactId>spring-retry</artifactId>
-            <version>2.0.12</version>
+            <version>${spring-retry.version}</version>
          </dependency>
     </dependencies>
 
