@@ -257,7 +257,7 @@ public abstract class AbstractBaseTest
     private MockMultipartHttpServletRequestBuilder mockMvcRequestWithMockMultipartFile(String url, MockMultipartFile sourceFile,
             String... params)
     {
-        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM).file(sourceFile);
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(url).file(sourceFile);
 
         if (params.length % 2 != 0)
         {
