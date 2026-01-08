@@ -37,6 +37,7 @@ import java.nio.file.StandardCopyOption;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -56,35 +57,40 @@ public class LibreOfficeProfileManager
     private static final String REGISTRY_FILE_NAME = "registrymodifications.xcu";
     private static final String DEFAULT_LO_TEMPLATE_PROFILE = "libreoffice_templateProfile";
 
-    private String classPathRegistryFile;
+    private final String templateProfileDir;
 
-    public String getEffectiveTemplateProfileDir(String templateProfileDir)
+    public LibreOfficeProfileManager(String templateProfileDir)
     {
-        if (StringUtils.startsWith(templateProfileDir, "classpath:"))
+        this.templateProfileDir = templateProfileDir;
+    }
+
+    public String getEffectiveTemplateProfileDir()
+    {
+        if (Strings.CS.equals(templateProfileDir, "alfresco_default"))
         {
-            createDefaultTemplateProfileDir(templateProfileDir);
+            return createDefaultTemplateProfileDirFromResource();
         }
         else if (StringUtils.isNotBlank(templateProfileDir))
         {
             checkUserProvidedRegistry(templateProfileDir);
+            return templateProfileDir;
         }
         else
         {
             LOGGER.warn("No template profile directory provided, using default settings.");
+            return templateProfileDir;
         }
-
-        return StringUtils.isBlank(classPathRegistryFile) ? templateProfileDir : classPathRegistryFile;
     }
 
-    private void createDefaultTemplateProfileDir(String classpathTemplateDir)
+    private String createDefaultTemplateProfileDirFromResource()
     {
         try
         {
-            String baseDir = classpathTemplateDir.replace("classpath:", "");
-            Resource[] resources = loadResources(classpathTemplateDir);
+            String baseDir = "templateProfileDir";
+            Resource[] resources = loadResources("classpath:" + baseDir);
             if (ArrayUtils.isEmpty(resources))
             {
-                return;
+                return null;
             }
 
             Path tempDir = Files.createTempDirectory(DEFAULT_LO_TEMPLATE_PROFILE);
@@ -103,11 +109,12 @@ public class LibreOfficeProfileManager
                 }
                 copyResource(resource, tempDir.resolve(relative));
             }
-            this.classPathRegistryFile = tempDir.toString();
+            return tempDir.toString();
         }
-        catch (Exception e)
+        catch (IOException e)
         {
             LOGGER.warn("Error creating temporary directory for LibreOffice profile. {}", e.getMessage());
+            return null;
         }
     }
 
@@ -206,6 +213,7 @@ public class LibreOfficeProfileManager
         try
         {
             String content = Files.readString(registryFile.toPath(), StandardCharsets.UTF_8);
+            content = content.replaceAll("\\s+", ""); // remove whitespace for easier searching
 
             boolean hasBlockUntrustedProperty = content.contains("oor:path=\"/org.openoffice.Office.Common/Security/Scripting\"")
                     && content.contains("oor:name=\"BlockUntrustedRefererLinks\"");
@@ -213,7 +221,7 @@ public class LibreOfficeProfileManager
             if (hasBlockUntrustedProperty)
             {
                 boolean isEnabled = content.contains("<prop oor:name=\"BlockUntrustedRefererLinks\"")
-                        && content.contains("<value>true</value>");
+                        && content.contains("<prop oor:name=\"BlockUntrustedRefererLinks\" oor:op=\"fuse\"><value>falvcdesxazse</value>");
 
                 if (!isEnabled)
                 {
