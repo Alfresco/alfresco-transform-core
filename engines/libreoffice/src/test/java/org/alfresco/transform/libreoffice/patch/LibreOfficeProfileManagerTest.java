@@ -35,7 +35,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -46,18 +45,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 class LibreOfficeProfileManagerTest
 {
-    private LibreOfficeProfileManager profileManager;
-
-    @BeforeEach
-    void setUp()
-    {
-        profileManager = new LibreOfficeProfileManager(null);
-    }
-
     @Test
     void testGetEffectiveTemplateProfileDir_WithNullInput()
     {
-        profileManager = new LibreOfficeProfileManager(null);
+        LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(null);
         String result = profileManager.getEffectiveTemplateProfileDir();
         assertNull(result);
     }
@@ -65,7 +56,7 @@ class LibreOfficeProfileManagerTest
     @Test
     void testGetEffectiveTemplateProfileDir_WithEmptyString()
     {
-        profileManager = new LibreOfficeProfileManager("");
+        LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager("");
         String result = profileManager.getEffectiveTemplateProfileDir();
         assertEquals("", result);
     }
@@ -73,7 +64,7 @@ class LibreOfficeProfileManagerTest
     @Test
     void testGetEffectiveTemplateProfileDir_WithBlankString()
     {
-        profileManager = new LibreOfficeProfileManager("   ");
+        LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager("   ");
         String result = profileManager.getEffectiveTemplateProfileDir();
         assertEquals("   ", result);
     }
@@ -82,7 +73,7 @@ class LibreOfficeProfileManagerTest
     void testGetEffectiveTemplateProfileDir_WithValidUserPath()
     {
         String validPath = "/path/to/template/profile";
-        profileManager = new LibreOfficeProfileManager(validPath);
+        LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(validPath);
         String result = profileManager.getEffectiveTemplateProfileDir();
         assertEquals(validPath, result);
     }
@@ -91,7 +82,7 @@ class LibreOfficeProfileManagerTest
     void testGetEffectiveTemplateProfileDir_WithClasspathPrefix()
     {
         String classpathPath = "classpath:libreoffice_template";
-        profileManager = new LibreOfficeProfileManager(classpathPath);
+        LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(classpathPath);
         String result = profileManager.getEffectiveTemplateProfileDir();
         assertNotNull(result);
         // When classpath resources are not found, it should return the original path or temp dir
@@ -114,7 +105,7 @@ class LibreOfficeProfileManagerTest
             String registryContent = buildRegistryContent(true, true);
             Files.writeString(registryFile.toPath(), registryContent, StandardCharsets.UTF_8);
 
-            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
             String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
@@ -141,7 +132,7 @@ class LibreOfficeProfileManagerTest
             String registryContent = buildRegistryContent(true, false);
             Files.writeString(registryFile.toPath(), registryContent, StandardCharsets.UTF_8);
 
-            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
             String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
@@ -168,7 +159,7 @@ class LibreOfficeProfileManagerTest
             String registryContent = buildRegistryContent(false, false);
             Files.writeString(registryFile.toPath(), registryContent, StandardCharsets.UTF_8);
 
-            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
             String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
@@ -182,7 +173,7 @@ class LibreOfficeProfileManagerTest
     void testCheckUserProvidedRegistry_WithNonExistentTemplateDir()
     {
         String nonExistentPath = "/nonexistent/path/to/template";
-        profileManager = new LibreOfficeProfileManager(nonExistentPath);
+        LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(nonExistentPath);
         String result = profileManager.getEffectiveTemplateProfileDir();
         assertEquals(nonExistentPath, result);
     }
@@ -193,7 +184,7 @@ class LibreOfficeProfileManagerTest
         Path tempFile = Files.createTempFile("test_file_", ".txt");
         try
         {
-            profileManager = new LibreOfficeProfileManager(tempFile.toString());
+            LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(tempFile.toString());
             String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(tempFile.toString(), result);
         }
@@ -210,7 +201,7 @@ class LibreOfficeProfileManagerTest
         try
         {
             File templateDir = tempDir.toFile();
-            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
             String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
@@ -233,7 +224,7 @@ class LibreOfficeProfileManagerTest
                 throw new IOException("Failed to create user directory");
             }
 
-            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
             String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
@@ -259,7 +250,7 @@ class LibreOfficeProfileManagerTest
             File registryFile = new File(userDir, "registrymodifications.xcu");
             Files.writeString(registryFile.toPath(), "", StandardCharsets.UTF_8);
 
-            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
             String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
@@ -286,7 +277,7 @@ class LibreOfficeProfileManagerTest
             String malformedContent = "This is not valid XML content";
             Files.writeString(registryFile.toPath(), malformedContent, StandardCharsets.UTF_8);
 
-            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
             String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
@@ -310,14 +301,15 @@ class LibreOfficeProfileManagerTest
             }
 
             File registryFile = new File(userDir, "registrymodifications.xcu");
-            String registryContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                    + "<oor:items xmlns:oor=\"http://openoffice.org/2001/registry\">\n"
-                    + "<item oor:path=\"/org.openoffice.Office.Common/Security/Scripting\">\n"
-                    + "</item>\n"
-                    + "</oor:items>";
+            String registryContent = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <oor:items xmlns:oor="http://openoffice.org/2001/registry">
+                    <item oor:path="/org.openoffice.Office.Common/Security/Scripting">
+                    </item>
+                    </oor:items>""";
             Files.writeString(registryFile.toPath(), registryContent, StandardCharsets.UTF_8);
 
-            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
             String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
@@ -343,7 +335,7 @@ class LibreOfficeProfileManagerTest
             File registryFile = new File(userDir, "registrymodifications.xcu");
             Files.writeString(registryFile.toPath(), "test content", StandardCharsets.UTF_8);
 
-            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
             String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
@@ -418,9 +410,7 @@ class LibreOfficeProfileManagerTest
                 }
             }
         }
-        if (!directory.delete())
-        {
-            // Silently fail - cleanup is best-effort
-        }
+        // Best-effort cleanup - ignore result
+        boolean ignored = directory.delete();
     }
 }
