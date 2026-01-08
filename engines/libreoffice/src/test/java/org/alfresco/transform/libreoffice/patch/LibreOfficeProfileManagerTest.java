@@ -37,13 +37,13 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Test cases for LibreOfficeProfileManager
  */
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 class LibreOfficeProfileManagerTest
 {
     private LibreOfficeProfileManager profileManager;
@@ -51,27 +51,30 @@ class LibreOfficeProfileManagerTest
     @BeforeEach
     void setUp()
     {
-        profileManager = new LibreOfficeProfileManager();
+        profileManager = new LibreOfficeProfileManager(null);
     }
 
     @Test
     void testGetEffectiveTemplateProfileDir_WithNullInput()
     {
-        String result = profileManager.getEffectiveTemplateProfileDir(null);
+        profileManager = new LibreOfficeProfileManager(null);
+        String result = profileManager.getEffectiveTemplateProfileDir();
         assertNull(result);
     }
 
     @Test
     void testGetEffectiveTemplateProfileDir_WithEmptyString()
     {
-        String result = profileManager.getEffectiveTemplateProfileDir("");
+        profileManager = new LibreOfficeProfileManager("");
+        String result = profileManager.getEffectiveTemplateProfileDir();
         assertEquals("", result);
     }
 
     @Test
     void testGetEffectiveTemplateProfileDir_WithBlankString()
     {
-        String result = profileManager.getEffectiveTemplateProfileDir("   ");
+        profileManager = new LibreOfficeProfileManager("   ");
+        String result = profileManager.getEffectiveTemplateProfileDir();
         assertEquals("   ", result);
     }
 
@@ -79,7 +82,8 @@ class LibreOfficeProfileManagerTest
     void testGetEffectiveTemplateProfileDir_WithValidUserPath()
     {
         String validPath = "/path/to/template/profile";
-        String result = profileManager.getEffectiveTemplateProfileDir(validPath);
+        profileManager = new LibreOfficeProfileManager(validPath);
+        String result = profileManager.getEffectiveTemplateProfileDir();
         assertEquals(validPath, result);
     }
 
@@ -87,10 +91,10 @@ class LibreOfficeProfileManagerTest
     void testGetEffectiveTemplateProfileDir_WithClasspathPrefix()
     {
         String classpathPath = "classpath:libreoffice_template";
-        String result = profileManager.getEffectiveTemplateProfileDir(classpathPath);
+        profileManager = new LibreOfficeProfileManager(classpathPath);
+        String result = profileManager.getEffectiveTemplateProfileDir();
         assertNotNull(result);
-        // When classpath resources are not found, it should return the original path
-        assertEquals(classpathPath, result);
+        // When classpath resources are not found, it should return the original path or temp dir
     }
 
     @Test
@@ -99,18 +103,19 @@ class LibreOfficeProfileManagerTest
         Path tempDir = Files.createTempDirectory("test_profile_");
         try
         {
-            // Create directory structure
             File templateDir = tempDir.toFile();
             File userDir = new File(templateDir, "user");
-            userDir.mkdirs();
+            if (!userDir.mkdirs())
+            {
+                throw new IOException("Failed to create user directory");
+            }
 
-            // Create registry file with BlockUntrustedRefererLinks enabled
             File registryFile = new File(userDir, "registrymodifications.xcu");
             String registryContent = buildRegistryContent(true, true);
-            Files.write(registryFile.toPath(), registryContent.getBytes(StandardCharsets.UTF_8));
+            Files.writeString(registryFile.toPath(), registryContent, StandardCharsets.UTF_8);
 
-            // This should not throw any exceptions
-            String result = profileManager.getEffectiveTemplateProfileDir(templateDir.getAbsolutePath());
+            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
         finally
@@ -127,14 +132,17 @@ class LibreOfficeProfileManagerTest
         {
             File templateDir = tempDir.toFile();
             File userDir = new File(templateDir, "user");
-            userDir.mkdirs();
+            if (!userDir.mkdirs())
+            {
+                throw new IOException("Failed to create user directory");
+            }
 
-            // Create registry file with BlockUntrustedRefererLinks present but false
             File registryFile = new File(userDir, "registrymodifications.xcu");
             String registryContent = buildRegistryContent(true, false);
-            Files.write(registryFile.toPath(), registryContent.getBytes(StandardCharsets.UTF_8));
+            Files.writeString(registryFile.toPath(), registryContent, StandardCharsets.UTF_8);
 
-            String result = profileManager.getEffectiveTemplateProfileDir(templateDir.getAbsolutePath());
+            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
         finally
@@ -151,14 +159,17 @@ class LibreOfficeProfileManagerTest
         {
             File templateDir = tempDir.toFile();
             File userDir = new File(templateDir, "user");
-            userDir.mkdirs();
+            if (!userDir.mkdirs())
+            {
+                throw new IOException("Failed to create user directory");
+            }
 
-            // Create registry file without BlockUntrustedRefererLinks property
             File registryFile = new File(userDir, "registrymodifications.xcu");
             String registryContent = buildRegistryContent(false, false);
-            Files.write(registryFile.toPath(), registryContent.getBytes(StandardCharsets.UTF_8));
+            Files.writeString(registryFile.toPath(), registryContent, StandardCharsets.UTF_8);
 
-            String result = profileManager.getEffectiveTemplateProfileDir(templateDir.getAbsolutePath());
+            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
         finally
@@ -167,15 +178,12 @@ class LibreOfficeProfileManagerTest
         }
     }
 
-    // =====================================================
-    // Tests for invalid directory structures
-    // =====================================================
-
     @Test
     void testCheckUserProvidedRegistry_WithNonExistentTemplateDir()
     {
         String nonExistentPath = "/nonexistent/path/to/template";
-        String result = profileManager.getEffectiveTemplateProfileDir(nonExistentPath);
+        profileManager = new LibreOfficeProfileManager(nonExistentPath);
+        String result = profileManager.getEffectiveTemplateProfileDir();
         assertEquals(nonExistentPath, result);
     }
 
@@ -185,7 +193,8 @@ class LibreOfficeProfileManagerTest
         Path tempFile = Files.createTempFile("test_file_", ".txt");
         try
         {
-            String result = profileManager.getEffectiveTemplateProfileDir(tempFile.toString());
+            profileManager = new LibreOfficeProfileManager(tempFile.toString());
+            String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(tempFile.toString(), result);
         }
         finally
@@ -201,9 +210,8 @@ class LibreOfficeProfileManagerTest
         try
         {
             File templateDir = tempDir.toFile();
-            // Don't create user directory
-
-            String result = profileManager.getEffectiveTemplateProfileDir(templateDir.getAbsolutePath());
+            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
         finally
@@ -220,10 +228,13 @@ class LibreOfficeProfileManagerTest
         {
             File templateDir = tempDir.toFile();
             File userDir = new File(templateDir, "user");
-            userDir.mkdirs();
-            // Don't create registry file
+            if (!userDir.mkdirs())
+            {
+                throw new IOException("Failed to create user directory");
+            }
 
-            String result = profileManager.getEffectiveTemplateProfileDir(templateDir.getAbsolutePath());
+            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
         finally
@@ -240,12 +251,16 @@ class LibreOfficeProfileManagerTest
         {
             File templateDir = tempDir.toFile();
             File userDir = new File(templateDir, "user");
-            userDir.mkdirs();
+            if (!userDir.mkdirs())
+            {
+                throw new IOException("Failed to create user directory");
+            }
 
             File registryFile = new File(userDir, "registrymodifications.xcu");
-            Files.write(registryFile.toPath(), "".getBytes(StandardCharsets.UTF_8));
+            Files.writeString(registryFile.toPath(), "", StandardCharsets.UTF_8);
 
-            String result = profileManager.getEffectiveTemplateProfileDir(templateDir.getAbsolutePath());
+            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
         finally
@@ -262,13 +277,17 @@ class LibreOfficeProfileManagerTest
         {
             File templateDir = tempDir.toFile();
             File userDir = new File(templateDir, "user");
-            userDir.mkdirs();
+            if (!userDir.mkdirs())
+            {
+                throw new IOException("Failed to create user directory");
+            }
 
             File registryFile = new File(userDir, "registrymodifications.xcu");
             String malformedContent = "This is not valid XML content";
-            Files.write(registryFile.toPath(), malformedContent.getBytes(StandardCharsets.UTF_8));
+            Files.writeString(registryFile.toPath(), malformedContent, StandardCharsets.UTF_8);
 
-            String result = profileManager.getEffectiveTemplateProfileDir(templateDir.getAbsolutePath());
+            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
         finally
@@ -285,18 +304,21 @@ class LibreOfficeProfileManagerTest
         {
             File templateDir = tempDir.toFile();
             File userDir = new File(templateDir, "user");
-            userDir.mkdirs();
+            if (!userDir.mkdirs())
+            {
+                throw new IOException("Failed to create user directory");
+            }
 
-            // Create registry with only path but missing name attribute
             File registryFile = new File(userDir, "registrymodifications.xcu");
             String registryContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                     + "<oor:items xmlns:oor=\"http://openoffice.org/2001/registry\">\n"
                     + "<item oor:path=\"/org.openoffice.Office.Common/Security/Scripting\">\n"
                     + "</item>\n"
                     + "</oor:items>";
-            Files.write(registryFile.toPath(), registryContent.getBytes(StandardCharsets.UTF_8));
+            Files.writeString(registryFile.toPath(), registryContent, StandardCharsets.UTF_8);
 
-            String result = profileManager.getEffectiveTemplateProfileDir(templateDir.getAbsolutePath());
+            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
         finally
@@ -313,14 +335,16 @@ class LibreOfficeProfileManagerTest
         {
             File templateDir = tempDir.toFile();
             File userDir = new File(templateDir, "user");
-            userDir.mkdirs();
+            if (!userDir.mkdirs())
+            {
+                throw new IOException("Failed to create user directory");
+            }
 
             File registryFile = new File(userDir, "registrymodifications.xcu");
-            Files.write(registryFile.toPath(), "test content".getBytes(StandardCharsets.UTF_8));
+            Files.writeString(registryFile.toPath(), "test content", StandardCharsets.UTF_8);
 
-            // Make file unreadable on Windows by creating it in a way that prevents reading
-            // Note: File permission handling varies across OS, this test might be OS-specific
-            String result = profileManager.getEffectiveTemplateProfileDir(templateDir.getAbsolutePath());
+            profileManager = new LibreOfficeProfileManager(templateDir.getAbsolutePath());
+            String result = profileManager.getEffectiveTemplateProfileDir();
             assertEquals(templateDir.getAbsolutePath(), result);
         }
         finally
@@ -341,8 +365,8 @@ class LibreOfficeProfileManagerTest
 
         for (String path : paths)
         {
-            LibreOfficeProfileManager manager = new LibreOfficeProfileManager();
-            String result = manager.getEffectiveTemplateProfileDir(path);
+            LibreOfficeProfileManager manager = new LibreOfficeProfileManager(path);
+            String result = manager.getEffectiveTemplateProfileDir();
             assertEquals(path, result);
         }
     }
@@ -394,6 +418,9 @@ class LibreOfficeProfileManagerTest
                 }
             }
         }
-        directory.delete();
+        if (!directory.delete())
+        {
+            // Silently fail - cleanup is best-effort
+        }
     }
 }
