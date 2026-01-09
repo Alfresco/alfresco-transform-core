@@ -38,7 +38,7 @@ filestore-url: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/pri
 transform:
   endpoint:
     test:
-      enable: ${TEST_ENDPOINT_ENABLED:true}
+      enable: ${TEST_ENDPOINT_ENABLED:false}
   core:
     version: @project.version@
   engine:

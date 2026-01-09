@@ -37,7 +37,6 @@ import java.nio.file.StandardCopyOption;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -56,6 +55,7 @@ public class LibreOfficeProfileManager
     private static final String USER_DIR_NAME = "user";
     private static final String REGISTRY_FILE_NAME = "registrymodifications.xcu";
     private static final String DEFAULT_LO_TEMPLATE_PROFILE = "libreoffice_templateProfile";
+    private static final String DEFAULT_TEMPLATE_MARKER = "alfresco_default";
 
     private final String templateProfileDir;
 
@@ -66,7 +66,7 @@ public class LibreOfficeProfileManager
 
     public String getEffectiveTemplateProfileDir()
     {
-        if (Strings.CS.equals(templateProfileDir, "alfresco_default"))
+        if (DEFAULT_TEMPLATE_MARKER.equalsIgnoreCase(templateProfileDir))
         {
             return createDefaultTemplateProfileDirFromResource();
         }
@@ -221,7 +221,7 @@ public class LibreOfficeProfileManager
             if (hasBlockUntrustedProperty)
             {
                 boolean isEnabled = content.contains("<prop oor:name=\"BlockUntrustedRefererLinks\"")
-                        && content.contains("<prop oor:name=\"BlockUntrustedRefererLinks\" oor:op=\"fuse\"><value>falvcdesxazse</value>");
+                        && content.contains("<prop oor:name=\"BlockUntrustedRefererLinks\" oor:op=\"fuse\"><value>false</value>");
 
                 if (!isEnabled)
                 {
