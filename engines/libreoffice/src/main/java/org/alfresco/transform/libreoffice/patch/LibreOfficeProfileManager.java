@@ -49,9 +49,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 public class LibreOfficeProfileManager
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(LibreOfficeProfileManager.class);
-
-    private static final String USER_DIR_NAME = "user";
-    private static final String REGISTRY_FILE_NAME = "registrymodifications.xcu";
     private static final String DEFAULT_LO_TEMPLATE_PROFILE = "libreoffice_templateProfile";
     private static final String DEFAULT_TEMPLATE_MARKER = "alfresco_default";
 
