@@ -52,6 +52,7 @@ public abstract class LivenessReadinessProbeTest
 
         return transformCore.withEnv("livenessTransformEnabled", "true")
                 .withEnv("maxTransforms", MAX_TRANSFORMS.toString())
+                .withEnv("TRANSFORM_ENDPOINT_TEST_ENABLE", "true")
                 .withNetworkAliases(image)
                 .withExposedPorts(8090)
                 .waitingFor(Wait.forListeningPort());
