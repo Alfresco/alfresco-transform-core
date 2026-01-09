@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2022 - 2022 Alfresco Software Limited
+ * Copyright (C) 2022 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -79,6 +79,7 @@ import ch.qos.logback.core.AppenderBase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.codehaus.plexus.util.FileUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.stubbing.Answer;
@@ -137,6 +138,12 @@ public class TransformControllerTest
     static void resetProbeForTesting(TransformController transformController)
     {
         AbstractBaseTest.resetProbeForTesting(transformController.getProbeTransform());
+    }
+
+    @BeforeEach
+    void setUp()
+    {
+        ReflectionTestUtils.setField(transformController, "enableTestEndpoint", true);
     }
 
     @Test
