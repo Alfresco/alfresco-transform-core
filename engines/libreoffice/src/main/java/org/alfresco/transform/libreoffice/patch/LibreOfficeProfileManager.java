@@ -27,10 +27,8 @@
 
 package org.alfresco.transform.libreoffice.patch;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -72,7 +70,8 @@ public class LibreOfficeProfileManager
         }
         else if (StringUtils.isNotBlank(templateProfileDir))
         {
-            checkUserProvidedRegistry(templateProfileDir);
+            LOGGER.warn("Template profile directory found. Make sure that BlockUntrustedRefererLinks security settings is set to true in the registrymodifications.xcu file of Libreoffice profile.");
+
             return templateProfileDir;
         }
         else
@@ -181,62 +180,6 @@ public class LibreOfficeProfileManager
             LOGGER.error("Error copying resource to temporary file: {}", e.getMessage());
         }
 
-    }
-
-    private void checkUserProvidedRegistry(String templateProfileDir)
-    {
-        File templateDir = new File(templateProfileDir);
-        if (!templateDir.exists() || !templateDir.isDirectory())
-        {
-            LOGGER.warn("The provided template profile directory does not exist or is not a directory: {}", templateProfileDir);
-            return;
-        }
-        File userDir = new File(templateDir, USER_DIR_NAME);
-        if (!userDir.exists())
-        {
-            LOGGER.warn("The user directory does not exist in the provided template profile directory: {}", userDir.getAbsolutePath());
-            return;
-        }
-        File registryFile = new File(userDir, REGISTRY_FILE_NAME);
-        if (!registryFile.exists())
-        {
-            LOGGER.warn("The registrymodifications.xcu file does not exist in the provided template profile directory: {}", registryFile.getAbsolutePath());
-        }
-        else
-        {
-            checkBlockUntrustedRefererLinks(registryFile);
-        }
-    }
-
-    private void checkBlockUntrustedRefererLinks(File registryFile)
-    {
-        try
-        {
-            String content = Files.readString(registryFile.toPath(), StandardCharsets.UTF_8);
-            content = content.replaceAll("\\s+", ""); // remove whitespace for easier searching
-
-            boolean hasBlockUntrustedProperty = content.contains("oor:path=\"/org.openoffice.Office.Common/Security/Scripting\"")
-                    && content.contains("oor:name=\"BlockUntrustedRefererLinks\"");
-
-            if (hasBlockUntrustedProperty)
-            {
-                boolean isEnabled = content.contains("<prop oor:name=\"BlockUntrustedRefererLinks\"")
-                        && content.contains("<prop oor:name=\"BlockUntrustedRefererLinks\" oor:op=\"fuse\"><value>false</value>");
-
-                if (!isEnabled)
-                {
-                    LOGGER.warn("BlockUntrustedRefererLinks is present but not set to 'true' in the registry file: {}", registryFile.getAbsolutePath());
-                }
-            }
-            else
-            {
-                LOGGER.warn("BlockUntrustedRefererLinks property not found in the registry file: {}", registryFile.getAbsolutePath());
-            }
-        }
-        catch (Exception e)
-        {
-            LOGGER.error("Error reading registry file: {}", registryFile.getAbsolutePath(), e);
-        }
     }
 
 }
