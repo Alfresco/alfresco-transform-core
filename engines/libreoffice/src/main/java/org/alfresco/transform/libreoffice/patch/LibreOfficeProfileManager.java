@@ -65,7 +65,7 @@ public class LibreOfficeProfileManager
         {
             return createDefaultTemplateProfileDirFromResource();
         }
-        if (StringUtils.isNotBlank(templateProfileDir))
+        else if (StringUtils.isNotBlank(templateProfileDir))
         {
             LOGGER.warn("Template profile directory found. Make sure that the BlockUntrustedRefererLinks security setting is set to true in the registrymodifications.xcu file of the LibreOffice profile.");
         }
