@@ -67,7 +67,7 @@ public class LibreOfficeProfileManager
         }
         else if (StringUtils.isNotBlank(templateProfileDir))
         {
-            LOGGER.warn("Template profile directory found. Make sure that BlockUntrustedRefererLinks security settings is set to true in the registrymodifications.xcu file of Libreoffice profile.");
+LOGGER.warn("Template profile directory found. Make sure that the BlockUntrustedRefererLinks security setting is set to true in the registrymodifications.xcu file of the LibreOffice profile.");
 
             return templateProfileDir;
         }
