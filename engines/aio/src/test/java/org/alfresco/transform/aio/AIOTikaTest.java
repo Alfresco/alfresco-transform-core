@@ -34,10 +34,12 @@ import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.transform.tika.TikaTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
 /**
  * Test Tika functionality in All-In-One.
  */
+@AutoConfigureMockMvc
 public class AIOTikaTest extends TikaTest
 {
     @Test

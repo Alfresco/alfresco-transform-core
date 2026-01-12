@@ -90,6 +90,7 @@ import org.apache.poi.ooxml.POIXMLProperties;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -110,6 +111,7 @@ import org.alfresco.transform.client.model.TransformRequest;
 /**
  * Test Tika.
  */
+@AutoConfigureMockMvc
 public class TikaTest extends AbstractBaseTest
 {
     private static final String EXPECTED_XHTML_CONTENT_CONTAINS = "<p>The quick brown fox jumps over the lazy dog</p>";
