@@ -65,18 +65,16 @@ public class LibreOfficeProfileManager
         {
             return createDefaultTemplateProfileDirFromResource();
         }
-        else if (StringUtils.isNotBlank(templateProfileDir))
+        if (StringUtils.isNotBlank(templateProfileDir))
         {
             LOGGER.warn("Template profile directory found. Make sure that the BlockUntrustedRefererLinks security setting is set to true in the registrymodifications.xcu file of the LibreOffice profile.");
-
-            return templateProfileDir;
         }
         else
         {
             LOGGER.warn("No template profile directory provided, using default settings. Untrusted referer links are allowed. " +
                     "It is recommended to set the template profile directory to `{}` to prevent Blind SSRF risks.", DEFAULT_TEMPLATE_MARKER);
-            return templateProfileDir;
         }
+        return templateProfileDir;
     }
 
     private String createDefaultTemplateProfileDirFromResource()
