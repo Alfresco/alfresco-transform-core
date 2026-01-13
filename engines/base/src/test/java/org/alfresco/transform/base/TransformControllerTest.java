@@ -79,6 +79,7 @@ import ch.qos.logback.core.AppenderBase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.codehaus.plexus.util.FileUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.stubbing.Answer;
@@ -137,6 +138,12 @@ public class TransformControllerTest
     static void resetProbeForTesting(TransformController transformController)
     {
         AbstractBaseTest.resetProbeForTesting(transformController.getProbeTransform());
+    }
+
+    @BeforeEach
+    void setUp()
+    {
+        ReflectionTestUtils.setField(transformController, "enableTestEndpoint", true);
     }
 
     @Test

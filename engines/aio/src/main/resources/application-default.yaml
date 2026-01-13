@@ -10,7 +10,7 @@ transform:
         maxTasksPerProcess: ${LIBREOFFICE_MAX_TASKS_PER_PROCESS:200}
         timeout: ${LIBREOFFICE_TIMEOUT:1200000}
         portNumbers: ${LIBREOFFICE_PORT_NUMBERS:8100}
-        templateProfileDir: ${LIBREOFFICE_TEMPLATE_PROFILE_DIR:}
+        templateProfileDir: ${LIBREOFFICE_TEMPLATE_PROFILE_DIR:alfresco_default}
         isEnabled: ${LIBREOFFICE_IS_ENABLED:true}
     imagemagick:
         root: ${IMAGEMAGICK_ROOT:/usr/lib64/ImageMagick-7.1.2}
