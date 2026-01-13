@@ -270,7 +270,7 @@ public class JodConverterSharedInstance implements JodConverter
     }
 
     /* (non-Javadoc)
-     * 
+     *
      * @see org.alfresco.repo.content.JodConverter#isAvailable() */
     public boolean isAvailable()
     {
@@ -278,7 +278,7 @@ public class JodConverterSharedInstance implements JodConverter
     }
 
     /* (non-Javadoc)
-     * 
+     *
      * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet() */
     @PostConstruct
     public void afterPropertiesSet()
@@ -487,7 +487,7 @@ public class JodConverterSharedInstance implements JodConverter
     }
 
     /* (non-Javadoc)
-     * 
+     *
      * @see org.springframework.beans.factory.DisposableBean#destroy() */
     @PreDestroy
     public void destroy()
@@ -507,7 +507,7 @@ public class JodConverterSharedInstance implements JodConverter
     }
 
     /* (non-Javadoc)
-     * 
+     *
      * @see org.alfresco.repo.content.JodConverterWorker#getOfficeManager() */
     @Override
     public OfficeManager getOfficeManager()

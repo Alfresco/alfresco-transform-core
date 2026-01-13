@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2023 Alfresco Software Limited
+ * Copyright (C) 2005 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -53,6 +53,7 @@ import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.executors.JavaExecutor;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.libreoffice.patch.LibreOfficeProfileManager;
 
 /**
  * JavaExecutor implementation for running LibreOffice transformations. It loads the transformation logic in the same JVM (check the {@link JodConverter} implementation).
@@ -110,6 +111,9 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
             throw new IllegalArgumentException("LibreOfficeTransformer LIBREOFFICE_IS_ENABLED variable must be set to true/false");
         }
 
+        LibreOfficeProfileManager profileManager = new LibreOfficeProfileManager(templateProfileDir);
+        String effectiveTemplateProfileDir = profileManager.getEffectiveTemplateProfileDir();
+
         JodConverterSharedInstance sharedInstance = new JodConverterSharedInstance();
         jodconverter = sharedInstance;
         sharedInstance.setOfficeHome(path);
@@ -118,8 +122,8 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
         sharedInstance.setTaskQueueTimeout(timeout);
         sharedInstance.setConnectTimeout(timeout);
         sharedInstance.setPortNumbers(portNumbers);
-        sharedInstance.setTemplateProfileDir(templateProfileDir);
         sharedInstance.setEnabled(isEnabled);
+        sharedInstance.setTemplateProfileDir(effectiveTemplateProfileDir);
         sharedInstance.afterPropertiesSet();
     }
 
