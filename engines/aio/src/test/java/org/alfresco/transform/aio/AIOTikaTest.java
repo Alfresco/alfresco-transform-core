@@ -32,9 +32,9 @@ import static org.alfresco.transform.base.html.OptionsHelper.getOptionNames;
 
 import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
 import org.alfresco.transform.tika.TikaTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
 /**
  * Test Tika functionality in All-In-One.
