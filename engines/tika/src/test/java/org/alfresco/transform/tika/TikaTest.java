@@ -29,7 +29,7 @@ package org.alfresco.transform.tika;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -90,12 +90,12 @@ import org.apache.poi.ooxml.POIXMLProperties;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -120,10 +120,10 @@ public class TikaTest extends AbstractBaseTest
             "The quick brown fox jumps over the lazy dogs";
     private static final String EXPECTED_CSV_CONTENT_CONTAINS = "\"The\",\"quick\",\"brown\",\"fox\"";
 
-    @MockitoBean
+    @Mock
     private RuntimeExec.ExecutionResult mockExecutionResult;
 
-    @MockitoBean
+    @Mock
     private RuntimeExec mockTransformCommand;
 
     private String targetEncoding = "UTF-8";
@@ -156,9 +156,9 @@ public class TikaTest extends AbstractBaseTest
         expectedTargetFileBytes = readTargetFileBytes ? readTestFile(targetExtension) : null;
         sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
 
-        when(mockExecutionResult.getExitValue()).thenReturn(0);
-        when(mockExecutionResult.getStdErr()).thenReturn("STDERROR");
-        when(mockExecutionResult.getStdOut()).thenReturn("STDOUT");
+        lenient().when(mockExecutionResult.getExitValue()).thenReturn(0);
+        lenient().when(mockExecutionResult.getStdErr()).thenReturn("STDERROR");
+        lenient().when(mockExecutionResult.getStdOut()).thenReturn("STDOUT");
     }
 
     private void transform(String transform, String sourceExtension, String targetExtension,
@@ -447,10 +447,10 @@ public class TikaTest extends AbstractBaseTest
         ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
                 sourceFile), headers, OK);
 
-        when(sharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
-        when(sharedFileStoreClient.saveFile(any()))
+        lenient().when(sharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
+        lenient().when(sharedFileStoreClient.saveFile(any()))
                 .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
-        when(mockExecutionResult.getExitValue()).thenReturn(0);
+        lenient().when(mockExecutionResult.getExitValue()).thenReturn(0);
 
         // Update the Transformation Request with any specific params before sending it
         updateTransformRequestWithSpecificOptions(transformRequest);
