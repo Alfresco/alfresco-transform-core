@@ -329,6 +329,7 @@ public abstract class AbstractBaseTest
     @Test
     public void noExtensionSourceFilenameTest() throws Exception
     {
+        options.clear();
         sourceFile = new MockMultipartFile("file", "../quick", sourceMimetype, sourceFileBytes);
 
         mockMvc.perform(
