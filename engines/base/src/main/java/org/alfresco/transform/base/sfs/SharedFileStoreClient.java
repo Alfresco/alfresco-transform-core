@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2023 Alfresco Software Limited
+ * Copyright (C) 2005 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -142,8 +142,11 @@ public class SharedFileStoreClient
         {
             logger.debug("                  Deleting intermediate file {}", fileReference);
 
-            client.delete().uri(fileReference)
-                    .exchange().block();
+            client.delete()
+                    .uri(fileReference)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
         }
         catch (Exception e)
         {

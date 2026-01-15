@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -59,17 +59,18 @@ import org.artofsolving.jodconverter.office.OfficeException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import org.alfresco.transform.base.AbstractBaseTest;
@@ -84,18 +85,19 @@ import org.alfresco.transform.libreoffice.transformers.LibreOfficeTransformer;
 /**
  * Test LibreOffice with mocked external command.
  */
+@AutoConfigureMockMvc
 public class LibreOfficeTest extends AbstractBaseTest
 {
     protected static String targetMimetype = MIMETYPE_PDF;
 
-    @Autowired
+    @MockitoSpyBean
     private LibreOfficeTransformer libreOfficeTransformer;
     @Autowired
     private CustomTransformers customTransformers;
 
-    @Spy
+    @Autowired
     private LibreOfficeTransformer spyLibreOfficeTransformer;
-    @Mock
+    @MockitoBean
     protected ExecutionResult mockExecutionResult;
 
     @Value("${transform.core.libreoffice.path}")
@@ -162,9 +164,9 @@ public class LibreOfficeTest extends AbstractBaseTest
     }
 
     @Override
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
+    protected MockMultipartHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
     {
-        final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
+        final MockMultipartHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
                 .param("targetMimetype", targetMimetype)
                 .param("sourceMimetype", sourceMimetype);
         return builder;

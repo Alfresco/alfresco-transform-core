@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2025 Alfresco Software Limited
+ * Copyright (C) 2005 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -171,7 +171,7 @@ public class TikaTransformationIT
 
     /**
      * Tests that while transforming a corrupted file to txt format, exception is thrown.
-     * 
+     *
      * @param entry
      *            values to execute same test with different parameters.
      */
@@ -198,7 +198,7 @@ public class TikaTransformationIT
         assertThat(expectedException).as(description)
                 .hasMessageContaining(TransformerMessages.CORRUPTED_FILE_ERROR)
                 .extracting(HttpClientErrorException::getStatusCode)
-                .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+                .isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT);
     }
 
     private static Stream<Triple<String, String, String>> engineTransformationsCorruptedToText()

@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>5.3.1-A.1-SNAPSHOT</version>
+    <version>5.3.1-A.2-SNAPSHOT</version>
     <name>Alfresco Transform Core</name>
     <packaging>pom</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.7</version>
+        <version>4.0.0</version>
     </parent>
 
     <properties>
@@ -35,6 +35,8 @@
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
         <commons-lang3.version>3.18.0</commons-lang3.version>
+        <spring-boot-starter-aop.version>3.5.8</spring-boot-starter-aop.version>
+        <spring-retry.version>2.0.12</spring-retry.version>
     </properties>
 
     <profiles>
@@ -213,6 +215,16 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <!-- Changes to pom.xml with Spring Boot 4.0 -->
+        <!-- The required test dependencies is modularized -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <distributionManagement>
         <snapshotRepository>

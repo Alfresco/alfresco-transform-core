@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -58,17 +58,17 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import org.alfresco.transform.base.executors.CommandExecutor;
@@ -86,6 +86,7 @@ import org.alfresco.transform.registry.TransformServiceRegistry;
  * Super class for unit testing.
  */
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
+@ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
 @AutoConfigureMockMvc
 public abstract class AbstractBaseTest
 {
@@ -105,10 +106,10 @@ public abstract class AbstractBaseTest
     @Autowired
     protected ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     protected SharedFileStoreClient sharedFileStoreClient;
 
-    @SpyBean
+    @Autowired
     protected TransformServiceRegistry transformRegistry;
 
     protected String sourceExtension;
@@ -227,7 +228,7 @@ public abstract class AbstractBaseTest
         return testFileUrl == null ? null : testFile;
     }
 
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
+    protected MockMultipartHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
     {
         if (sourceFile == null)
         {
@@ -239,9 +240,9 @@ public abstract class AbstractBaseTest
         }
     }
 
-    private MockHttpServletRequestBuilder mockMvcRequestWithoutMockMultipartFile(String url, String... params)
+    private MockMultipartHttpServletRequestBuilder mockMvcRequestWithoutMockMultipartFile(String url, String... params)
     {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(url);
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(url);
 
         if (params.length % 2 != 0)
         {
@@ -255,10 +256,10 @@ public abstract class AbstractBaseTest
         return builder;
     }
 
-    private MockHttpServletRequestBuilder mockMvcRequestWithMockMultipartFile(String url, MockMultipartFile sourceFile,
+    private MockMultipartHttpServletRequestBuilder mockMvcRequestWithMockMultipartFile(String url, MockMultipartFile sourceFile,
             String... params)
     {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM).file(sourceFile);
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(url).file(sourceFile);
 
         if (params.length % 2 != 0)
         {
@@ -330,6 +331,7 @@ public abstract class AbstractBaseTest
     @Test
     public void noExtensionSourceFilenameTest() throws Exception
     {
+        options.clear();
         sourceFile = new MockMultipartFile("file", "../quick", sourceMimetype, sourceFileBytes);
 
         mockMvc.perform(
