@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -447,8 +448,8 @@ public class TikaTest extends AbstractBaseTest
         ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
                 sourceFile), headers, OK);
 
-        lenient().when(sharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
-        lenient().when(sharedFileStoreClient.saveFile(any()))
+        when(sharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
+        when(sharedFileStoreClient.saveFile(any()))
                 .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
         lenient().when(mockExecutionResult.getExitValue()).thenReturn(0);
 
