@@ -34,7 +34,7 @@ import static org.alfresco.transform.common.RequestParamMap.PDF_FORMAT;
 import static org.alfresco.transform.common.RequestParamMap.PDF_ORIENTATION;
 import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -71,6 +71,7 @@ import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
  * Converts image files into PDF files. Transformer uses PDF Box to perform conversions. During conversion image might be scaled down (keeping proportions) to match width or height of the PDF document. If the image is smaller than PDF page size, the image will be placed in the top left-hand side of the PDF document page. Transformer accepts bellow optional transform parameters: - startPage - page number of image (for multi-page images) from which transformer should start conversion. Default: first page of the image. - endPage - page number of image (for multi-page images) up to which transformation should be performed. Default: last page of the image. - pdfFormat - output PDF file format. Available formats: DEFAULT, A0, A1, A2, A3, A4, A5, A6, LETTER, LEGAL. Default: original image size. - pdfOrientation - output PDF file orientation. Available options: DEFAULT, PORTRAIT, LANDSCAPE. Default: original image orientation.
  */
 @Component
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
 {
     private static final Logger log = LoggerFactory.getLogger(ImageToPdfTransformer.class);
@@ -161,7 +162,6 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
     private void scaleAndDrawImage(final PDDocument pdfDocument, final BufferedImage bufferedImage, final String pdfFormat, final String pdfOrientation, final Map<String, Integer> resolution)
             throws IOException
     {
-
         BufferedImage improvedImage = null;
         if (BufferedImage.TYPE_BYTE_GRAY == bufferedImage.getType())
         {
@@ -181,8 +181,8 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         {
             final int xRes = effectiveDpi(resolution.get("X"));
             final int yRes = effectiveDpi(resolution.get("Y"));
-            imageWidth = (int) (((float) imageWidth / xRes) * PDFBOX_POINTS_PER_INCH);
-            imageHeight = (int) (((float) imageHeight / yRes) * PDFBOX_POINTS_PER_INCH);
+            imageWidth = (int) ((float) imageWidth / xRes * PDFBOX_POINTS_PER_INCH);
+            imageHeight = (int) ((float) imageHeight / yRes * PDFBOX_POINTS_PER_INCH);
         }
 
         final PDPage pdfPage = new PDPage(resolvePdfFormat(pdfFormat, pdfOrientation, imageWidth, imageHeight));
