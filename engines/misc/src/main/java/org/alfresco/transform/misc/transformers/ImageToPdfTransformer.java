@@ -34,7 +34,7 @@ import static org.alfresco.transform.common.RequestParamMap.PDF_FORMAT;
 import static org.alfresco.transform.common.RequestParamMap.PDF_ORIENTATION;
 import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
