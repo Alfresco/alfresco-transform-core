@@ -34,6 +34,7 @@ import static org.alfresco.transform.common.RequestParamMap.PDF_FORMAT;
 import static org.alfresco.transform.common.RequestParamMap.PDF_ORIENTATION;
 import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -160,7 +161,17 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
     private void scaleAndDrawImage(final PDDocument pdfDocument, final BufferedImage bufferedImage, final String pdfFormat, final String pdfOrientation, final Map<String, Integer> resolution)
             throws IOException
     {
-        final PDImageXObject image = LosslessFactory.createFromImage(pdfDocument, bufferedImage);
+
+        BufferedImage improvedImage = null;
+        if (BufferedImage.TYPE_BYTE_GRAY == bufferedImage.getType())
+        {
+            improvedImage = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+            Graphics2D graphics = improvedImage.createGraphics();
+            graphics.drawImage(bufferedImage, 0, 0, null);
+            graphics.dispose();
+        }
+
+        PDImageXObject image = LosslessFactory.createFromImage(pdfDocument, improvedImage != null ? improvedImage : bufferedImage);
 
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
