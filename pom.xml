@@ -35,7 +35,6 @@
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
         <commons-lang3.version>3.18.0</commons-lang3.version>
-        <spring-boot-starter-aspectj.version>4.0.2</spring-boot-starter-aspectj.version>
         <spring-retry.version>2.0.12</spring-retry.version>
     </properties>
 
@@ -215,20 +214,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-        <!-- Changes to pom.xml with Spring Boot 4.0 -->
-        <!-- The required test dependencies is modularized -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-restclient</artifactId>
-        </dependency>
-    </dependencies>
 
     <distributionManagement>
         <snapshotRepository>
