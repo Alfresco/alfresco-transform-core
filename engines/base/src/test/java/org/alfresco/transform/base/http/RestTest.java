@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -40,13 +40,15 @@ import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.util.HtmlUtils;
 
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
 import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
@@ -61,6 +63,7 @@ import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
         FakeTransformEngineWithTwoCustomTransformers.class,
         FakeTransformerTxT2Pdf.class,
         FakeTransformerPdf2Png.class})
+@AutoConfigureTestRestTemplate
 public class RestTest
 {
     @Autowired
@@ -82,7 +85,7 @@ public class RestTest
         ResponseEntity<String> response = restTemplate.exchange(ENDPOINT_TRANSFORM, POST,
                 new HttpEntity<>(parameters, HEADERS), String.class, "");
 
-        assertTrue(response.getBody().contains("Required request part 'file' is not present"));
+        assertTrue(HtmlUtils.htmlUnescape(response.getBody()).contains("Required request part 'file' is not present"));
     }
 
     @Test

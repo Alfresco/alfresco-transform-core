@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2025 Alfresco Software Limited
+ * Copyright (C) 2005 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -60,16 +60,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import org.alfresco.transform.base.AbstractBaseTest;
@@ -84,6 +85,7 @@ import org.alfresco.transform.imagemagick.transformers.ImageMagickCommandExecuto
 /**
  * Test ImageMagick with mocked external command.
  */
+@AutoConfigureMockMvc
 public class ImageMagickTest extends AbstractBaseTest
 {
     private static String PREFIX_IMAGE = "image/";
@@ -91,11 +93,11 @@ public class ImageMagickTest extends AbstractBaseTest
     @Autowired
     private ImageMagickCommandExecutor imageMagickCommandExecutor;
 
-    @Mock
+    @MockitoBean
     protected ExecutionResult mockExecutionResult;
-    @Mock
+    @MockitoBean
     protected RuntimeExec mockTransformCommand;
-    @Mock
+    @MockitoBean
     protected RuntimeExec mockCheckCommand;
     @Value("${transform.core.imagemagick.exe}")
     protected String EXE;
@@ -122,9 +124,9 @@ public class ImageMagickTest extends AbstractBaseTest
     }
 
     @Override
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
+    protected MockMultipartHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
     {
-        final MockHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
+        final MockMultipartHttpServletRequestBuilder builder = super.mockMvcRequest(url, sourceFile, params)
                 .param("targetMimetype", targetMimetype)
                 .param("sourceMimetype", sourceMimetype);
         return builder;
