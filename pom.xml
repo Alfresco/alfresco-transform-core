@@ -26,7 +26,7 @@
         <env.project_version>${project.version}</env.project_version>
         <dependency.jackson.version>2.19.2</dependency.jackson.version>
         <dependency.tika.version>3.2.3</dependency.tika.version>
-        <dependency.poi.version>5.4.1</dependency.poi.version>
+        <dependency.poi.version>5.5.1</dependency.poi.version>
         <dependency.commons-io.version>2.20.0</dependency.commons-io.version>
         <dependency.imaging.version>1.0.0-alpha6</dependency.imaging.version>
         <dependency.snakeyaml.version>2.3</dependency.snakeyaml.version>
