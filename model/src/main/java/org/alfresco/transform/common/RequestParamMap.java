@@ -67,6 +67,7 @@ public interface RequestParamMap
     String PAGE_LIMIT = "pageLimit";
     String PDF_FORMAT = "pdfFormat";
     String PDF_ORIENTATION = "pdfOrientation";
+    String IMPROVE_GRAYSCALE = "improveGrayscale";
     String PDF_FONT = "pdfFont";
     String PDF_FONT_SIZE = "pdfFontSize";
 
