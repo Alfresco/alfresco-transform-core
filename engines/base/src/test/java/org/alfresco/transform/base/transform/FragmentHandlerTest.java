@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2022 - 2023 Alfresco Software Limited
+ * Copyright (C) 2022 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -51,15 +51,15 @@ import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -85,11 +85,11 @@ public class FragmentHandlerTest
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     protected SharedFileStoreClient fakeSfsClient;
-    @MockBean
+    @MockitoBean
     private TransformReplySender transformReplySender;
-    @MockBean
+    @MockitoBean
     private ProbeTransform probeTransform;
 
     private void assertFragments(String sourceText, String expectedError, List<String> expectedLines)

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2023 Alfresco Software Limited
+ * Copyright (C) 2005 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -44,23 +44,27 @@ import jakarta.jms.Message;
 import org.apache.activemq.command.ActiveMQObjectMessage;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.support.converter.MessageConversionException;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.alfresco.transform.base.TransformController;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
+@ExtendWith(MockitoExtension.class)
 public class QueueTransformServiceTest
 {
-    @Mock
+    @MockitoBean
     private TransformController transformController;
-    @Mock
+    @MockitoBean
     private TransformMessageConverter transformMessageConverter;
-    @Mock
+    @MockitoBean
     private TransformReplySender transformReplySender;
 
     @InjectMocks
@@ -143,6 +147,7 @@ public class QueueTransformServiceTest
     public void testConvertMessageThrowsJMSExceptionThenReplyWithInternalServerError()
             throws JMSException
     {
+        Mockito.reset(transformController);
         ActiveMQObjectMessage msg = new ActiveMQObjectMessage();
         msg.setCorrelationId("1234");
         ActiveMQQueue destination = new ActiveMQQueue();

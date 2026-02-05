@@ -7,9 +7,9 @@ ARG JAVA_BASE_IMAGE=alfresco/alfresco-base-java:jre17-rockylinux9@sha256:f988335
 FROM ${JAVA_BASE_IMAGE}
 
 # For other ImageMagick versions please look at https://github.com/Alfresco/imagemagick-build tags
-ARG IMAGEMAGICK_VERSION=7.1.2-6
+ARG IMAGEMAGICK_VERSION=7.1.2-13-ci-1
 
-ENV IMAGEMAGICK_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}-ci-1/imagemagick-distribution-${IMAGEMAGICK_VERSION}-ci-1
+ENV IMAGEMAGICK_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/org/imagemagick/imagemagick-distribution/${IMAGEMAGICK_VERSION}/imagemagick-distribution-${IMAGEMAGICK_VERSION}
 ENV IMAGEMAGICK_DEP_RPM_URL=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
 ENV JAVA_OPTS=""
 

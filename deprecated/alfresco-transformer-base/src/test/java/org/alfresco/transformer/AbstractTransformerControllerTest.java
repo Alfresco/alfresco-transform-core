@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -67,13 +67,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import org.alfresco.transform.client.model.InternalContext;
@@ -107,10 +107,10 @@ public abstract class AbstractTransformerControllerTest
     @Autowired
     protected ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     protected AlfrescoSharedFileStoreClient alfrescoSharedFileStoreClient;
 
-    @SpyBean
+    @MockitoSpyBean
     protected TransformServiceRegistry transformRegistry;
 
     @Value("${transform.core.version}")
@@ -222,7 +222,7 @@ public abstract class AbstractTransformerControllerTest
         return testFileUrl == null ? null : testFile;
     }
 
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
+    protected MockMultipartHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
     {
         if (sourceFile == null)
         {
@@ -234,10 +234,10 @@ public abstract class AbstractTransformerControllerTest
         }
     }
 
-    private MockHttpServletRequestBuilder mockMvcRequestWithoutMockMultipartFile(String url,
+    private MockMultipartHttpServletRequestBuilder mockMvcRequestWithoutMockMultipartFile(String url,
             String... params)
     {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM);
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM);
 
         if (params.length % 2 != 0)
         {
@@ -251,10 +251,10 @@ public abstract class AbstractTransformerControllerTest
         return builder;
     }
 
-    private MockHttpServletRequestBuilder mockMvcRequestWithMockMultipartFile(String url, MockMultipartFile sourceFile,
+    private MockMultipartHttpServletRequestBuilder mockMvcRequestWithMockMultipartFile(String url, MockMultipartFile sourceFile,
             String... params)
     {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM).file(
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM).file(
                 sourceFile);
 
         if (params.length % 2 != 0)

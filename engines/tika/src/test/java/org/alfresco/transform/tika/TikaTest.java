@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2025 Alfresco Software Limited
+ * Copyright (C) 2005 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -29,6 +29,7 @@ package org.alfresco.transform.tika;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
@@ -97,7 +98,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import org.alfresco.transform.base.AbstractBaseTest;
@@ -156,9 +157,9 @@ public class TikaTest extends AbstractBaseTest
         expectedTargetFileBytes = readTargetFileBytes ? readTestFile(targetExtension) : null;
         sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
 
-        when(mockExecutionResult.getExitValue()).thenReturn(0);
-        when(mockExecutionResult.getStdErr()).thenReturn("STDERROR");
-        when(mockExecutionResult.getStdOut()).thenReturn("STDOUT");
+        lenient().when(mockExecutionResult.getExitValue()).thenReturn(0);
+        lenient().when(mockExecutionResult.getStdErr()).thenReturn("STDERROR");
+        lenient().when(mockExecutionResult.getStdOut()).thenReturn("STDOUT");
     }
 
     private void transform(String transform, String sourceExtension, String targetExtension,
@@ -170,7 +171,7 @@ public class TikaTest extends AbstractBaseTest
         this.targetMimetype = targetMimetype;
 
         System.out.println("Test " + transform + " " + sourceExtension + " to " + targetExtension);
-        MockHttpServletRequestBuilder requestBuilder = includeContents == null
+        MockMultipartHttpServletRequestBuilder requestBuilder = includeContents == null
                 ? mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile,
                         "targetExtension", this.targetExtension)
                 : mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile,
@@ -187,7 +188,7 @@ public class TikaTest extends AbstractBaseTest
 
     @Override
     // Add extra required parameters to the request.
-    protected MockHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
+    protected MockMultipartHttpServletRequestBuilder mockMvcRequest(String url, MockMultipartFile sourceFile, String... params)
     {
         return super.mockMvcRequest(url, sourceFile, params)
                 .param("targetEncoding", targetEncoding)
@@ -384,7 +385,7 @@ public class TikaTest extends AbstractBaseTest
                 "\"{http://www.alfresco.org/model/content/1.0}description\":[\"desc1\",\"desc2\"]," +
                 "\"{http://www.alfresco.org/model/content/1.0}created\":\"created1\"}";
 
-        MockHttpServletRequestBuilder requestBuilder = super.mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile,
+        MockMultipartHttpServletRequestBuilder requestBuilder = super.mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile,
                 "targetExtension", XLSX,
                 "metadata", metadata,
                 "targetMimetype", MIMETYPE_METADATA_EMBED,
@@ -450,7 +451,7 @@ public class TikaTest extends AbstractBaseTest
         when(sharedFileStoreClient.retrieveFile(sourceFileRef)).thenReturn(response);
         when(sharedFileStoreClient.saveFile(any()))
                 .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
-        when(mockExecutionResult.getExitValue()).thenReturn(0);
+        lenient().when(mockExecutionResult.getExitValue()).thenReturn(0);
 
         // Update the Transformation Request with any specific params before sending it
         updateTransformRequestWithSpecificOptions(transformRequest);
