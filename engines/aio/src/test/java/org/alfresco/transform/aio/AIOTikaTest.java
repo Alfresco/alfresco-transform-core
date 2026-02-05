@@ -76,7 +76,8 @@ public class AIOTikaTest extends TikaTest
                 "width",
                 "pdfFont",
                 "pdfFontSize",
-                "collapseHtml"),
+                "collapseHtml",
+                "improveGrayscale"),
                 getOptionNames(controller.transformConfig(0).getBody().getTransformOptions()));
     }
 }
