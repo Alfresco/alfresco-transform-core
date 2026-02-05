@@ -43,6 +43,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -66,6 +67,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
+import org.alfresco.transform.common.RequestParamMap;
 
 /**
  * Converts image files into PDF files. Transformer uses PDF Box to perform conversions. During conversion image might be scaled down (keeping proportions) to match width or height of the PDF document. If the image is smaller than PDF page size, the image will be placed in the top left-hand side of the PDF document page. Transformer accepts bellow optional transform parameters: - startPage - page number of image (for multi-page images) from which transformer should start conversion. Default: first page of the image. - endPage - page number of image (for multi-page images) up to which transformation should be performed. Default: last page of the image. - pdfFormat - output PDF file format. Available formats: DEFAULT, A0, A1, A2, A3, A4, A5, A6, LETTER, LEGAL. Default: original image size. - pdfOrientation - output PDF file orientation. Available options: DEFAULT, PORTRAIT, LANDSCAPE. Default: original image orientation.
@@ -83,10 +85,12 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
     private static final String INVALID_IMAGE_ERROR_MESSAGE = "Image file (%s) format (%s) not supported by ImageIO.";
     private static final String DEFAULT_PDF_FORMAT_STRING = "DEFAULT"; // pdf format to use when no pdf format specified
     private static final String DEFAULT_PDF_ORIENTATION_STRING = "DEFAULT";
+    private static final Boolean DEFAULT_IMPROVE_GRAYSCALE_FLAG = true;
     private static final float PDFBOX_POINTS_PER_INCH = 72.0F;
     private static final int MIN_REASONABLE_DPI = 30;
     private static final int MAX_REASONABLE_DPI = 600;
     private static final List<String> DENY_LIST = List.of("com.github.jaiimageio.impl.plugins.tiff.TIFFImageReader");
+    private static final Set<Integer> GRAYSCALE_TYPES = Set.of(BufferedImage.TYPE_BYTE_GRAY, BufferedImage.TYPE_USHORT_GRAY);
 
     @Override
     public String getTransformerName()
@@ -107,6 +111,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
             final Integer endPage = parseOptionIfPresent(transformOptions, END_PAGE, Integer.class).orElse(null);
             final String pdfFormat = parseOptionIfPresent(transformOptions, PDF_FORMAT, String.class).orElse(DEFAULT_PDF_FORMAT_STRING);
             final String pdfOrientation = parseOptionIfPresent(transformOptions, PDF_ORIENTATION, String.class).orElse(DEFAULT_PDF_ORIENTATION_STRING);
+            final Boolean improveGrayscale = parseOptionIfPresent(transformOptions, RequestParamMap.IMPROVE_GRAYSCALE, Boolean.class).orElse(DEFAULT_IMPROVE_GRAYSCALE_FLAG);
             verifyOptions(startPage, endPage);
 
             final Map<String, Integer> resolution = determineImageResolution(imageFile);
@@ -122,7 +127,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
                     break;
                 }
 
-                scaleAndDrawImage(pdfDocument, imageReader.read(i), pdfFormat, pdfOrientation, resolution);
+                scaleAndDrawImage(pdfDocument, imageReader.read(i), pdfFormat, pdfOrientation, improveGrayscale, resolution);
             }
 
             pdfDocument.save(pdfFile);
@@ -159,19 +164,12 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         return dpi;
     }
 
-    private void scaleAndDrawImage(final PDDocument pdfDocument, final BufferedImage bufferedImage, final String pdfFormat, final String pdfOrientation, final Map<String, Integer> resolution)
+    private void scaleAndDrawImage(final PDDocument pdfDocument, final BufferedImage bufferedImage, final String pdfFormat, final String pdfOrientation, boolean improveGrayscale, final Map<String, Integer> resolution)
             throws IOException
     {
-        BufferedImage improvedImage = null;
-        if (BufferedImage.TYPE_BYTE_GRAY == bufferedImage.getType())
-        {
-            improvedImage = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
-            Graphics2D graphics = improvedImage.createGraphics();
-            graphics.drawImage(bufferedImage, 0, 0, null);
-            graphics.dispose();
-        }
 
-        PDImageXObject image = LosslessFactory.createFromImage(pdfDocument, improvedImage != null ? improvedImage : bufferedImage);
+        BufferedImage processedImage = convertGrayscaleImageIfNeeded(bufferedImage, improveGrayscale);
+        PDImageXObject image = LosslessFactory.createFromImage(pdfDocument, processedImage);
 
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
@@ -197,6 +195,23 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
             final float y = pageSize.getHeight() - image.getHeight() * ratio;
             // drawing starts from bottom left corner
             pdfPageContent.drawImage(image, 0, y, image.getWidth() * ratio, image.getHeight() * ratio);
+        }
+    }
+
+    private BufferedImage convertGrayscaleImageIfNeeded(BufferedImage originalImage, boolean improveGrayscale)
+    {
+        if (!improveGrayscale || !GRAYSCALE_TYPES.contains(originalImage.getType()))
+        {
+            return originalImage;
+        }
+        else
+        {
+
+            BufferedImage improvedImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+            Graphics2D graphics = improvedImage.createGraphics();
+            graphics.drawImage(originalImage, 0, 0, null);
+            graphics.dispose();
+            return improvedImage;
         }
     }
 
@@ -277,6 +292,17 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
                     return Optional.of(targetType.cast(Integer.parseInt(option)));
                 }
                 catch (NumberFormatException e)
+                {
+                    throw new IllegalArgumentException(String.format(INVALID_OPTION_ERROR_MESSAGE, parameter, option));
+                }
+            }
+            else if (targetType == Boolean.class)
+            {
+                try
+                {
+                    return Optional.of(targetType.cast(Boolean.parseBoolean(option)));
+                }
+                catch (Exception e)
                 {
                     throw new IllegalArgumentException(String.format(INVALID_OPTION_ERROR_MESSAGE, parameter, option));
                 }
