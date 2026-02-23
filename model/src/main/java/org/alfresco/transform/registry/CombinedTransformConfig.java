@@ -270,7 +270,9 @@ public class CombinedTransformConfig
     private void applyDeferredOverrides(AbstractTransformRegistry registry)
     {
         if (deferredOverrides.isEmpty())
+        {
             return;
+        }
 
         Map<String, Set<OverrideSupported>> leftOverBySource = new HashMap<>();
         for (DeferredOverride deferredOverride : deferredOverrides)
