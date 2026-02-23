@@ -419,10 +419,6 @@ public class OverrideTransformConfigTests
                 // OverrideSupported values with missing fields are defaults, so no test values here
                 .build();
 
-        String expectedWarnMessage = "Unable to process \"overrideSupported\": [" +
-                "{\"transformerName\": \"1\", \"sourceMediaType\": \"mimetype/c\", \"targetMediaType\": \"mimetype/d\"}, " +
-                "{\"transformerName\": \"bad\", \"sourceMediaType\": \"mimetype/a\", \"targetMediaType\": \"mimetype/d\"}]. " +
-                "Read from readFromB";
         ImmutableSet<SupportedSourceAndTarget> expectedSupported = ImmutableSet.of(
                 supported_X2Y_200,
                 supported_A2B__40);
@@ -431,7 +427,12 @@ public class OverrideTransformConfigTests
                 "{\"sourceMediaType\": \"mimetype/x\", \"targetMediaType\": \"mimetype/y\", \"maxSourceSizeBytes\": \"200\"}" +
                 "]";
 
-        addTransformConfig(secondConfig, expectedWarnMessage, expectedSupported, expectedToString);
+        config.addTransformConfig(secondConfig, READ_FROM_B, BASE_URL_B, registry);
+        config.combineTransformerConfig(registry);
+
+        Set<SupportedSourceAndTarget> supportedSourceAndTargetList = config.buildTransformConfig().getTransformers().get(0).getSupportedSourceAndTargetList();
+        assertEquals(supportedSourceAndTargetList, expectedSupported);
+        assertEquals(expectedToString, supportedSourceAndTargetList.toString());
     }
 
     private void addTransformConfig_A2B_X2Y_100_23()
