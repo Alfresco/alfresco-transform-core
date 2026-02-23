@@ -71,6 +71,32 @@ public class CombinedTransformConfig
     private final Map<String, Set<TransformOption>> combinedTransformOptions = new HashMap<>();
     private List<Origin<Transformer>> combinedTransformers = new ArrayList<>();
     private final Defaults defaults = new Defaults();
+    private final List<DeferredOverride> deferredOverrides = new ArrayList<>();
+
+    /**
+     * Holds override information for deferred processing after wildcard generation. This is necessary because pipeline transformers have empty supportedSourceAndTargetList until addWildcardSupportedSourceAndTarget() is called.
+     */
+    private static class DeferredOverride
+    {
+        private final OverrideSupported overrideSupported;
+        private final String readFrom;
+
+        public DeferredOverride(OverrideSupported overrideSupported, String readFrom)
+        {
+            this.overrideSupported = overrideSupported;
+            this.readFrom = readFrom;
+        }
+
+        public OverrideSupported getOverrideSupported()
+        {
+            return overrideSupported;
+        }
+
+        public String getReadFrom()
+        {
+            return readFrom;
+        }
+    }
 
     public static void combineAndRegister(TransformConfig transformConfig, String readFrom, String baseUrl,
             AbstractTransformRegistry registry)
@@ -86,6 +112,7 @@ public class CombinedTransformConfig
         combinedTransformOptions.clear();
         combinedTransformers.clear();
         defaults.clear();
+        deferredOverrides.clear();
     }
 
     public void addTransformConfig(List<Origin<TransformConfig>> transformConfigList, AbstractTransformRegistry registry)
@@ -101,7 +128,7 @@ public class CombinedTransformConfig
 
         removeSupported(transformConfig.getRemoveSupported(), readFrom, registry);
         addSupported(transformConfig.getAddSupported(), readFrom, registry);
-        overrideSupported(transformConfig.getOverrideSupported(), readFrom, registry);
+        storeOverridesForDeferredProcessing(transformConfig.getOverrideSupported(), readFrom);
 
         // Add transform options and transformers from the new transformConfig
         transformConfig.getTransformOptions().forEach(combinedTransformOptions::put);
@@ -218,23 +245,74 @@ public class CombinedTransformConfig
                         }));
     }
 
-    private void overrideSupported(Set<OverrideSupported> overrideSupportedSet, String readFrom, AbstractTransformRegistry registry)
+    /**
+     * Store overrides for deferred processing. Overrides are applied AFTER wildcard generation in the combineTransformerConfig() method, ensuring that pipeline transformers have their supportedSourceAndTargetList populated before overrides are applied.
+     *
+     * @param overrideSupportedSet
+     *            the set of overrides to store
+     * @param readFrom
+     *            where the overrides were read from
+     */
+    private void storeOverridesForDeferredProcessing(Set<OverrideSupported> overrideSupportedSet, String readFrom)
     {
-        processSupported(overrideSupportedSet, readFrom, registry, "overrideSupported",
-                (leftOver, overrideSupported) -> combinedTransformers.stream().map(Origin::get).filter(transformer -> transformer.getTransformerName().equals(overrideSupported.getTransformerName())).forEach(transformerWithName -> {
-                    Set<SupportedSourceAndTarget> supportedSourceAndTargetList = transformerWithName.getSupportedSourceAndTargetList();
-                    SupportedSourceAndTarget existingSupported = getExistingSupported(
-                            supportedSourceAndTargetList,
-                            overrideSupported.getSourceMediaType(), overrideSupported.getTargetMediaType());
+        if (overrideSupportedSet != null && !overrideSupportedSet.isEmpty())
+        {
+            overrideSupportedSet.forEach(override -> deferredOverrides.add(new DeferredOverride(override, readFrom)));
+        }
+    }
+
+    /**
+     * Apply all stored overrides AFTER wildcard generation. This ensures that pipeline and failover transformers have their supportedSourceAndTargetList populated before overrides are applied.
+     *
+     * @param registry
+     *            used for logging
+     */
+    private void applyDeferredOverrides(AbstractTransformRegistry registry)
+    {
+        if (deferredOverrides.isEmpty())
+            return;
+
+        Map<String, Set<OverrideSupported>> leftOverBySource = new HashMap<>();
+        for (DeferredOverride deferredOverride : deferredOverrides)
+        {
+            OverrideSupported override = deferredOverride.getOverrideSupported();
+            String readFrom = deferredOverride.getReadFrom();
+            boolean found = false;
+
+            for (Origin<Transformer> transformerOrigin : combinedTransformers)
+            {
+                Transformer transformer = transformerOrigin.get();
+                if (transformer.getTransformerName().equals(override.getTransformerName()))
+                {
+                    Set<SupportedSourceAndTarget> supportedList = transformer.getSupportedSourceAndTargetList();
+                    SupportedSourceAndTarget existingSupported = getExistingSupported(supportedList, override.getSourceMediaType(), override.getTargetMediaType());
                     if (existingSupported != null)
                     {
-                        supportedSourceAndTargetList.remove(existingSupported);
-                        existingSupported.setMaxSourceSizeBytes(overrideSupported.getMaxSourceSizeBytes());
-                        existingSupported.setPriority(overrideSupported.getPriority());
-                        supportedSourceAndTargetList.add(existingSupported);
-                        leftOver.remove(overrideSupported);
+                        supportedList.remove(existingSupported);
+                        existingSupported.setMaxSourceSizeBytes(override.getMaxSourceSizeBytes());
+                        existingSupported.setPriority(override.getPriority());
+                        supportedList.add(existingSupported);
+                        found = true;
+                        break;
                     }
-                }));
+                }
+            }
+            if (!found)
+            {
+                leftOverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
+            }
+        }
+        // Warn about overrides that didn't match anything
+        leftOverBySource.forEach((readFrom, leftOvers) -> {
+            if (!leftOvers.isEmpty())
+            {
+                StringJoiner sj = new StringJoiner(", ",
+                        "Unable to process \"overrideSupported\": [", "]. Read from " + readFrom);
+                leftOvers.forEach(override -> sj.add(override.toString()));
+                registry.logWarn(sj.toString());
+            }
+        });
+        deferredOverrides.clear();
     }
 
     private SupportedSourceAndTarget getExistingSupported(Set<SupportedSourceAndTarget> supportedSourceAndTargetList,
@@ -250,8 +328,10 @@ public class CombinedTransformConfig
     {
         removeInvalidTransformers(registry);
         sortTransformers(registry);
-        applyDefaults();
         addWildcardSupportedSourceAndTarget(registry);
+        applyDefaults();
+        // Apply deferred overrides AFTER wildcard generation to ensure pipeline transformers have their supportedSourceAndTargetList populated
+        applyDeferredOverrides(registry);
         removePipelinesWithUnsupportedTransforms(registry);
         setCoreVersionOnCombinedMultiStepTransformers();
     }
