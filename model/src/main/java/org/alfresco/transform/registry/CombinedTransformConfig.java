@@ -666,8 +666,7 @@ public class CombinedTransformConfig
     }
 
     /**
-     * Earlier, Applies priority and size defaults. Must be called before {@link #addWildcardSupportedSourceAndTarget(AbstractTransformRegistry)} as it uses the priority value.
-     * Now the logic has changed as part of MNT-25426 Called after {@link #addWildcardSupportedSourceAndTarget(AbstractTransformRegistry)} so that wildcard-generated entries for pipeline and failover transformers also receive defaults.
+     * Earlier, Applies priority and size defaults. Must be called before {@link #addWildcardSupportedSourceAndTarget(AbstractTransformRegistry)} as it uses the priority value. Now the logic has changed as part of MNT-25426 Called after {@link #addWildcardSupportedSourceAndTarget(AbstractTransformRegistry)} so that wildcard-generated entries for pipeline and failover transformers also receive defaults.
      */
     private void applyDefaults()
     {
