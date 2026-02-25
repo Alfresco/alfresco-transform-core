@@ -666,25 +666,31 @@ public class CombinedTransformConfig
     }
 
     /**
-     * Applies priority and size defaults. Must be called before {@link #addWildcardSupportedSourceAndTarget(AbstractTransformRegistry)} as it uses the priority value.
+     * Earlier, Applies priority and size defaults. Must be called before {@link #addWildcardSupportedSourceAndTarget(AbstractTransformRegistry)} as it uses the priority value.
+     * Now the logic has changed as part of MNT-25426 Called after {@link #addWildcardSupportedSourceAndTarget(AbstractTransformRegistry)} so that wildcard-generated entries for pipeline and failover transformers also receive defaults.
      */
     private void applyDefaults()
     {
+        Set<String> supportedDefaultNames = defaults.getSupportedDefaults().stream().map(SupportedDefaults::getTransformerName).collect(Collectors.toSet());
         combinedTransformers.stream()
                 .map(Origin::get)
                 .forEach(transformer -> {
                     transformer.setSupportedSourceAndTargetList(
-                            transformer.getSupportedSourceAndTargetList().stream().map(supportedSourceAndTarget -> {
+                            transformer.getSupportedSourceAndTargetList().stream().peek(supportedSourceAndTarget -> {
                                 Integer priority = supportedSourceAndTarget.getPriority();
                                 Long maxSourceSizeBytes = supportedSourceAndTarget.getMaxSourceSizeBytes();
+                                String transformerName = transformer.getTransformerName();
+                                String sourceMediaType = supportedSourceAndTarget.getSourceMediaType();
                                 if (defaults.valuesUnset(priority, maxSourceSizeBytes))
                                 {
-                                    String transformerName = transformer.getTransformerName();
-                                    String sourceMediaType = supportedSourceAndTarget.getSourceMediaType();
                                     supportedSourceAndTarget.setPriority(defaults.getPriority(transformerName, sourceMediaType, priority));
                                     supportedSourceAndTarget.setMaxSourceSizeBytes(defaults.getMaxSourceSizeBytes(transformerName, sourceMediaType, maxSourceSizeBytes));
                                 }
-                                return supportedSourceAndTarget;
+                                if (supportedDefaultNames.contains(transformerName))
+                                {
+                                    supportedSourceAndTarget.setPriority(defaults.getPriority(transformerName, sourceMediaType, null));
+                                    supportedSourceAndTarget.setMaxSourceSizeBytes(defaults.getMaxSourceSizeBytes(transformerName, sourceMediaType, null));
+                                }
                             }).collect(toSet()));
                 });
 
