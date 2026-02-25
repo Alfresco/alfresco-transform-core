@@ -666,11 +666,13 @@ public class CombinedTransformConfig
     }
 
     /**
-     * Earlier, Applies priority and size defaults. Must be called before {@link #addWildcardSupportedSourceAndTarget(AbstractTransformRegistry)} as it uses the priority value. Now the logic has changed as part of MNT-25426 Called after {@link #addWildcardSupportedSourceAndTarget(AbstractTransformRegistry)} so that wildcard-generated entries for pipeline and failover transformers also receive defaults.
+     * Applies priority and size defaults to supported source/target entries.
+     *
+     * Previously, this method was called before {@link #addWildcardSupportedSourceAndTarget(AbstractTransformRegistry)} because it relied on the priority value. As of MNT-25426, it is now called after wildcard generation, ensuring that pipeline transformers also receive the correct defaults.
      */
     private void applyDefaults()
     {
-        Set<String> supportedDefaultNames = defaults.getSupportedDefaults().stream().map(SupportedDefaults::getTransformerName).collect(Collectors.toSet());
+        Set<String> supportedDefaultNames = defaults.getSupportedDefaults().stream().map(SupportedDefaults::getTransformerName).collect(toSet());
         combinedTransformers.stream()
                 .map(Origin::get)
                 .forEach(transformer -> {
