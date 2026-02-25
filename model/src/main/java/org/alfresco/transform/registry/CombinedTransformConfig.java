@@ -73,31 +73,6 @@ public class CombinedTransformConfig
     private final Defaults defaults = new Defaults();
     private final List<DeferredOverride> deferredOverrides = new ArrayList<>();
 
-    /**
-     * Holds override information for deferred processing after wildcard generation. This is necessary because pipeline transformers have empty supportedSourceAndTargetList until addWildcardSupportedSourceAndTarget() is called.
-     */
-    private static class DeferredOverride
-    {
-        private final OverrideSupported overrideSupported;
-        private final String readFrom;
-
-        public DeferredOverride(OverrideSupported overrideSupported, String readFrom)
-        {
-            this.overrideSupported = overrideSupported;
-            this.readFrom = readFrom;
-        }
-
-        public OverrideSupported getOverrideSupported()
-        {
-            return overrideSupported;
-        }
-
-        public String getReadFrom()
-        {
-            return readFrom;
-        }
-    }
-
     public static void combineAndRegister(TransformConfig transformConfig, String readFrom, String baseUrl,
             AbstractTransformRegistry registry)
     {
@@ -269,52 +244,7 @@ public class CombinedTransformConfig
      */
     private void applyDeferredOverrides(AbstractTransformRegistry registry)
     {
-        if (deferredOverrides.isEmpty())
-        {
-            return;
-        }
-
-        Map<String, Set<OverrideSupported>> leftOverBySource = new HashMap<>();
-        for (DeferredOverride deferredOverride : deferredOverrides)
-        {
-            OverrideSupported override = deferredOverride.getOverrideSupported();
-            String readFrom = deferredOverride.getReadFrom();
-            boolean found = false;
-
-            for (Origin<Transformer> transformerOrigin : combinedTransformers)
-            {
-                Transformer transformer = transformerOrigin.get();
-                if (transformer.getTransformerName().equals(override.getTransformerName()))
-                {
-                    Set<SupportedSourceAndTarget> supportedList = transformer.getSupportedSourceAndTargetList();
-                    SupportedSourceAndTarget existingSupported = getExistingSupported(supportedList, override.getSourceMediaType(), override.getTargetMediaType());
-                    if (existingSupported != null)
-                    {
-                        supportedList.remove(existingSupported);
-                        existingSupported.setMaxSourceSizeBytes(override.getMaxSourceSizeBytes());
-                        existingSupported.setPriority(override.getPriority());
-                        supportedList.add(existingSupported);
-                        found = true;
-                        break;
-                    }
-                }
-            }
-            if (!found)
-            {
-                leftOverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
-            }
-        }
-        // Warn about overrides that didn't match anything
-        leftOverBySource.forEach((readFrom, leftOvers) -> {
-            if (!leftOvers.isEmpty())
-            {
-                StringJoiner sj = new StringJoiner(", ",
-                        "Unable to process \"overrideSupported\": [", "]. Read from " + readFrom);
-                leftOvers.forEach(override -> sj.add(override.toString()));
-                registry.logWarn(sj.toString());
-            }
-        });
-        deferredOverrides.clear();
+        DeferredOverride.applyDeferredOverrides(deferredOverrides, combinedTransformers, registry);
     }
 
     private SupportedSourceAndTarget getExistingSupported(Set<SupportedSourceAndTarget> supportedSourceAndTargetList,
