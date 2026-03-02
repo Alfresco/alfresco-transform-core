@@ -656,7 +656,7 @@ public class CombinedTransformConfig
         Set<String> supportedDefaultNames = defaults.getSupportedDefaults()
                 .stream()
                 .map(SupportedDefaults::getTransformerName)
-                .collect(Collectors.toSet());
+                .collect(toSet());
         combinedTransformers.stream()
                 .map(Origin::get)
                 .forEach(transformer -> {
