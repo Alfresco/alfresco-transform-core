@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Function;
@@ -256,31 +257,36 @@ public class CombinedTransformConfig
         {
             OverrideSupported override = deferredOverride.getOverrideSupported();
             String readFrom = deferredOverride.getReadFrom();
-            boolean found = false;
 
-            for (Origin<Transformer> transformerOrigin : combinedTransformers)
+            List<Transformer> matchedTransformers = combinedTransformers.stream()
+                    .map(Origin::get)
+                    .filter(transformer -> transformer.getTransformerName().equals(override.getTransformerName()))
+                    .collect(Collectors.toList());
+            if (matchedTransformers.isEmpty())
             {
-                Transformer transformer = transformerOrigin.get();
-                if (transformer.getTransformerName().equals(override.getTransformerName()))
-                {
-                    Set<SupportedSourceAndTarget> supportedList = transformer.getSupportedSourceAndTargetList();
-                    SupportedSourceAndTarget existingSupported = supportedList.stream()
-                            .filter(supported -> supported.getSourceMediaType().equals(override.getSourceMediaType()) &&
-                                    supported.getTargetMediaType().equals(override.getTargetMediaType()))
-                            .findFirst()
-                            .orElse(null);
-                    if (existingSupported != null)
-                    {
-                        supportedList.remove(existingSupported);
-                        existingSupported.setMaxSourceSizeBytes(override.getMaxSourceSizeBytes());
-                        existingSupported.setPriority(override.getPriority());
-                        supportedList.add(existingSupported);
-                        found = true;
-                        break;
-                    }
-                }
+                leftOverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
+                continue;
             }
-            if (!found)
+            if (matchedTransformers.size() > 1)
+            {
+                throw new IllegalStateException("Multiple transformers found for " + readFrom + " with name: " + override.getTransformerName() + ". This should not be possible as removeInvalidTransformers should have removed duplicates.");
+            }
+
+            Set<SupportedSourceAndTarget> supportedList = matchedTransformers.get(0).getSupportedSourceAndTargetList();
+            Optional<SupportedSourceAndTarget> existingSupportedOpt = supportedList.stream()
+                    .filter(supported -> supported.getSourceMediaType().equals(override.getSourceMediaType()) &&
+                            supported.getTargetMediaType().equals(override.getTargetMediaType()))
+                    .findFirst();
+
+            if (existingSupportedOpt.isPresent())
+            {
+                SupportedSourceAndTarget existingSupported = existingSupportedOpt.get();
+                supportedList.remove(existingSupported);
+                existingSupported.setMaxSourceSizeBytes(override.getMaxSourceSizeBytes());
+                existingSupported.setPriority(override.getPriority());
+                supportedList.add(existingSupported);
+            }
+            else
             {
                 leftOverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
             }
@@ -313,7 +319,6 @@ public class CombinedTransformConfig
         sortTransformers(registry);
         addWildcardSupportedSourceAndTarget(registry);
         applyDefaults();
-        // Apply deferred overrides AFTER wildcard generation to ensure pipeline transformers have their supportedSourceAndTargetList populated
         applyDeferredOverrides(registry);
         removePipelinesWithUnsupportedTransforms(registry);
         setCoreVersionOnCombinedMultiStepTransformers();
@@ -653,7 +658,7 @@ public class CombinedTransformConfig
      */
     private void applyDefaults()
     {
-        Set<String> supportedDefaultNames = defaults.getSupportedDefaults()
+        Set<String> supportedDefaultTransformerNames = defaults.getSupportedDefaults()
                 .stream()
                 .map(SupportedDefaults::getTransformerName)
                 .collect(toSet());
@@ -672,7 +677,7 @@ public class CombinedTransformConfig
                                             supportedSourceAndTarget.setPriority(defaults.getPriority(transformerName, sourceMediaType, priority));
                                             supportedSourceAndTarget.setMaxSourceSizeBytes(defaults.getMaxSourceSizeBytes(transformerName, sourceMediaType, maxSourceSizeBytes));
                                         }
-                                        if (supportedDefaultNames.contains(transformerName))
+                                        if (supportedDefaultTransformerNames.contains(transformerName))
                                         {
                                             supportedSourceAndTarget.setPriority(defaults.getPriority(transformerName, sourceMediaType, null));
                                             supportedSourceAndTarget.setMaxSourceSizeBytes(defaults.getMaxSourceSizeBytes(transformerName, sourceMediaType, null));
@@ -938,5 +943,10 @@ public class CombinedTransformConfig
     public Map<String, Origin<Transformer>> getTransformerByNameMap()
     {
         return combinedTransformers.stream().collect(Collectors.toMap(origin -> origin.get().getTransformerName(), origin -> origin));
+    }
+
+    List<DeferredOverride> getDeferredOverrides()
+    {
+        return deferredOverrides;
     }
 }
