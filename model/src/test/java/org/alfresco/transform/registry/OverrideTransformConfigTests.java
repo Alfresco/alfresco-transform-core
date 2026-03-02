@@ -38,8 +38,8 @@ import org.alfresco.transform.config.RemoveSupported;
 import org.alfresco.transform.config.SupportedDefaults;
 import org.alfresco.transform.config.SupportedSourceAndTarget;
 import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.config.Transformer;
 import org.alfresco.transform.config.TransformStep;
+import org.alfresco.transform.config.Transformer;
 
 /**
  * Tests the json elements: {@code removeTransformers}, {@code addSupported}, {@code removeSupported}, {@code overrideSupported} and {@code supportedDefaults}.
@@ -445,7 +445,8 @@ public class OverrideTransformConfigTests
     }
 
     @Test
-    public void testDeferredOverrideForPipelineTransformer() {
+    public void testDeferredOverrideForPipelineTransformer()
+    {
         // Add step transformers first
         Transformer step1 = Transformer.builder()
                 .withTransformerName("step1")
@@ -453,8 +454,7 @@ public class OverrideTransformConfigTests
                         SupportedSourceAndTarget.builder()
                                 .withSourceMediaType("mimetype/document")
                                 .withTargetMediaType("mimetype/pdf")
-                                .build()
-                ))
+                                .build()))
                 .build();
 
         Transformer step2 = Transformer.builder()
@@ -463,8 +463,7 @@ public class OverrideTransformConfigTests
                         SupportedSourceAndTarget.builder()
                                 .withSourceMediaType("mimetype/pdf")
                                 .withTargetMediaType("mimetype/image")
-                                .build()
-                ))
+                                .build()))
                 .build();
 
         // Add pipeline transformer
@@ -472,8 +471,7 @@ public class OverrideTransformConfigTests
                 .withTransformerName("pipeline1")
                 .withTransformerPipeline(List.of(
                         new TransformStep("step1", "mimetype/pdf"),
-                        new TransformStep("step2", null)
-                ))
+                        new TransformStep("step2", null)))
                 .build();
 
         TransformConfig pipelineConfig = TransformConfig.builder()
@@ -508,11 +506,9 @@ public class OverrideTransformConfigTests
                 .orElseThrow()
                 .getSupportedSourceAndTargetList();
 
-        boolean found = supportedList.stream().anyMatch(s ->
-                "mimetype/document".equals(s.getSourceMediaType()) &&
-                        "mimetype/image".equals(s.getTargetMediaType()) &&
-                        s.getPriority() == 40
-        );
+        boolean found = supportedList.stream().anyMatch(s -> "mimetype/document".equals(s.getSourceMediaType()) &&
+                "mimetype/image".equals(s.getTargetMediaType()) &&
+                s.getPriority() == 40);
         assertTrue(found, "Deferred override for pipeline transformer should be applied after wildcard generation");
     }
 

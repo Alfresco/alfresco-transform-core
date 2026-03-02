@@ -35,6 +35,8 @@ import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.util.CollectionUtils;
+
 import org.alfresco.transform.config.AddSupported;
 import org.alfresco.transform.config.OverrideSupported;
 import org.alfresco.transform.config.RemoveSupported;
@@ -46,7 +48,6 @@ import org.alfresco.transform.config.TransformStep;
 import org.alfresco.transform.config.Transformer;
 import org.alfresco.transform.config.TransformerAndTypes;
 import org.alfresco.transform.config.Types;
-import org.springframework.util.CollectionUtils;
 
 /**
  * This class combines one or more T-Engine config and local files and registers them as if they were all in one file. Transform options are shared between all sources.
