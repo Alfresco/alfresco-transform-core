@@ -252,7 +252,7 @@ public class CombinedTransformConfig
             return;
         }
 
-        Map<String, Set<OverrideSupported>> leftOverBySource = new HashMap<>();
+        Map<String, Set<OverrideSupported>> leftoverBySource = new HashMap<>();
         for (DeferredOverride deferredOverride : deferredOverrides)
         {
             OverrideSupported override = deferredOverride.getOverrideSupported();
@@ -264,7 +264,7 @@ public class CombinedTransformConfig
                     .collect(Collectors.toList());
             if (matchedTransformers.isEmpty())
             {
-                leftOverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
+                leftoverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
                 continue;
             }
             if (matchedTransformers.size() > 1)
@@ -288,19 +288,11 @@ public class CombinedTransformConfig
             }
             else
             {
-                leftOverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
+                leftoverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
             }
         }
         // Warn about overrides that didn't match anything
-        leftOverBySource.forEach((readFrom, leftOvers) -> {
-            if (!leftOvers.isEmpty())
-            {
-                StringJoiner sj = new StringJoiner(", ",
-                        "Unable to process \"overrideSupported\": [", "]. Read from " + readFrom);
-                leftOvers.forEach(override -> sj.add(override.toString()));
-                registry.logWarn(sj.toString());
-            }
-        });
+        leftoverBySource.forEach((readFrom, leftOvers) -> logWarn(leftOvers, readFrom, registry, "overrideSupported"));
         deferredOverrides.clear();
     }
 
@@ -652,6 +644,31 @@ public class CombinedTransformConfig
     }
 
     /**
+     * Applies priority and size defaults to a SupportedSourceAndTarget entry.
+     */
+    private SupportedSourceAndTarget applyDefaultsToSupportedSourceAndTarget(
+            SupportedSourceAndTarget supportedSourceAndTarget,
+            String transformerName,
+            Set<String> supportedDefaultTransformerNames,
+            Defaults defaults)
+    {
+        Integer priority = supportedSourceAndTarget.getPriority();
+        Long maxSourceSizeBytes = supportedSourceAndTarget.getMaxSourceSizeBytes();
+        String sourceMediaType = supportedSourceAndTarget.getSourceMediaType();
+        if (defaults.valuesUnset(priority, maxSourceSizeBytes))
+        {
+            supportedSourceAndTarget.setPriority(defaults.getPriority(transformerName, sourceMediaType, priority));
+            supportedSourceAndTarget.setMaxSourceSizeBytes(defaults.getMaxSourceSizeBytes(transformerName, sourceMediaType, maxSourceSizeBytes));
+        }
+        if (supportedDefaultTransformerNames.contains(transformerName))
+        {
+            supportedSourceAndTarget.setPriority(defaults.getPriority(transformerName, sourceMediaType, null));
+            supportedSourceAndTarget.setMaxSourceSizeBytes(defaults.getMaxSourceSizeBytes(transformerName, sourceMediaType, null));
+        }
+        return supportedSourceAndTarget;
+    }
+
+    /**
      * Applies priority and size defaults to supported source/target entries.
      *
      * Previously, this method was called before {@link #addWildcardSupportedSourceAndTarget(AbstractTransformRegistry)} because it relied on the priority value. As of MNT-25426, it is now called after wildcard generation, ensuring that pipeline transformers also receive the correct defaults.
@@ -662,28 +679,15 @@ public class CombinedTransformConfig
                 .stream()
                 .map(SupportedDefaults::getTransformerName)
                 .collect(toSet());
+
         combinedTransformers.stream()
                 .map(Origin::get)
                 .forEach(transformer -> {
                     transformer.setSupportedSourceAndTargetList(
-                            transformer.getSupportedSourceAndTargetList().stream()
-                                    .map(supportedSourceAndTarget -> {
-                                        Integer priority = supportedSourceAndTarget.getPriority();
-                                        Long maxSourceSizeBytes = supportedSourceAndTarget.getMaxSourceSizeBytes();
-                                        String transformerName = transformer.getTransformerName();
-                                        String sourceMediaType = supportedSourceAndTarget.getSourceMediaType();
-                                        if (defaults.valuesUnset(priority, maxSourceSizeBytes))
-                                        {
-                                            supportedSourceAndTarget.setPriority(defaults.getPriority(transformerName, sourceMediaType, priority));
-                                            supportedSourceAndTarget.setMaxSourceSizeBytes(defaults.getMaxSourceSizeBytes(transformerName, sourceMediaType, maxSourceSizeBytes));
-                                        }
-                                        if (supportedDefaultTransformerNames.contains(transformerName))
-                                        {
-                                            supportedSourceAndTarget.setPriority(defaults.getPriority(transformerName, sourceMediaType, null));
-                                            supportedSourceAndTarget.setMaxSourceSizeBytes(defaults.getMaxSourceSizeBytes(transformerName, sourceMediaType, null));
-                                        }
-                                        return supportedSourceAndTarget;
-                                    }).collect(toSet()));
+                            transformer.getSupportedSourceAndTargetList()
+                                    .stream()
+                                    .map(supportedSourceAndTarget -> applyDefaultsToSupportedSourceAndTarget(supportedSourceAndTarget, transformer.getTransformerName(), supportedDefaultTransformerNames, defaults))
+                                    .collect(toSet()));
                 });
         defaults.clear();
     }

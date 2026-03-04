@@ -26,7 +26,7 @@ import org.alfresco.transform.config.OverrideSupported;
 /**
  * Holds override information for deferred processing after wildcard generation.
  */
-public class DeferredOverride
+class DeferredOverride
 {
     private final OverrideSupported overrideSupported;
     private final String readFrom;

@@ -440,7 +440,7 @@ public class OverrideTransformConfigTests
         assertEquals(expectedWarnMessage, registry.warnMessages.get(0));
 
         Set<SupportedSourceAndTarget> supportedSourceAndTargetList = config.buildTransformConfig().getTransformers().get(0).getSupportedSourceAndTargetList();
-        assertEquals(supportedSourceAndTargetList, expectedSupported);
+        assertEquals(expectedSupported, supportedSourceAndTargetList);
         assertEquals(expectedToString, supportedSourceAndTargetList.toString());
     }
 
