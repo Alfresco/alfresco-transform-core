@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>5.4.1-A.1-SNAPSHOT</version>
+    <version>5.4.0-SNAPSHOT</version>
     <name>Alfresco Transform Core</name>
     <packaging>pom</packaging>
 
@@ -212,6 +212,16 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang3.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcutil-jdk18on</artifactId>
+                <version>1.80</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>1.80</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -311,7 +321,7 @@
                                 </excludes>
                                 <failOnMissingHeader>true</failOnMissingHeader>
                                 <licenseName>community</licenseName>
-                                <licenseResolver>file:${project.parent.basedir}/license</licenseResolver>
+                                <licenseResolver>file:C:/Users/bansari/acs_repos/alfresco-transform-core/license</licenseResolver>
                             </configuration>
                         </execution>
                     </executions>
