@@ -24,13 +24,17 @@ package org.alfresco.transform.config.reader;
 import java.io.IOException;
 
 import org.springframework.core.io.Resource;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.alfresco.transform.config.TransformConfig;
 
 public class TransformConfigReaderJson implements TransformConfigReader
 {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .build();
 
     private final Resource resource;
 
