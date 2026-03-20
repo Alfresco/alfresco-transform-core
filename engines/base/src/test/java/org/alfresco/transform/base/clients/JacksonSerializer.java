@@ -14,6 +14,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import tools.jackson.core.StreamReadFeature;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -27,6 +29,7 @@ public class JacksonSerializer
     {
         MAPPER = JsonMapper.builder()
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
                 .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(Include.NON_NULL))
                 .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(Include.NON_NULL))
                 .build();
