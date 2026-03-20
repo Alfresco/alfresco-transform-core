@@ -43,9 +43,9 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 
 /**
@@ -147,7 +147,7 @@ public abstract class AbstractMetadataExtractor
             Map<String, Serializable> rawProperties = mapSystemToRaw(systemProperties);
             return rawProperties;
         }
-        catch (JsonProcessingException e)
+        catch (JacksonException e)
         {
             throw new IllegalArgumentException("Failed to read metadata from request", e);
         }
@@ -486,7 +486,7 @@ public abstract class AbstractMetadataExtractor
                 TypeReference<HashMap<String, Set<String>>> typeRef = new TypeReference<>() {};
                 return jsonObjectMapper.readValue(extractMappingOption, typeRef);
             }
-            catch (JsonProcessingException e)
+            catch (JacksonException e)
             {
                 throw new IllegalArgumentException("Failed to read " + EXTRACT_MAPPING + " from request", e);
             }

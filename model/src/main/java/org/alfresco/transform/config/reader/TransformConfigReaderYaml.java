@@ -23,15 +23,15 @@ package org.alfresco.transform.config.reader;
 
 import java.io.IOException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 import org.springframework.core.io.Resource;
 
 import org.alfresco.transform.config.TransformConfig;
 
 public class TransformConfigReaderYaml implements TransformConfigReader
 {
-    private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
+    private static final ObjectMapper MAPPER = new YAMLMapper();
 
     private final Resource resource;
 

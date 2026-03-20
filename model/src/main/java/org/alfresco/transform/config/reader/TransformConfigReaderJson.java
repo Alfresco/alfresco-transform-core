@@ -23,7 +23,7 @@ package org.alfresco.transform.config.reader;
 
 import java.io.IOException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.springframework.core.io.Resource;
 
 import org.alfresco.transform.config.TransformConfig;

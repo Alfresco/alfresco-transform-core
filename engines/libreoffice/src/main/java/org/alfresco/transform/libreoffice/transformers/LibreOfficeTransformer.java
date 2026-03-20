@@ -35,7 +35,8 @@ import java.io.Serializable;
 import java.util.Map;
 import jakarta.annotation.PostConstruct;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.sun.star.task.ErrorCodeIOException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -248,7 +249,7 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
         {
             jsonObjectMapper.writeValue(targetFile, results);
         }
-        catch (IOException e)
+        catch (JacksonException e)
         {
             throw new TransformException(INTERNAL_SERVER_ERROR, "Failed to write metadata to targetFile", e);
         }
