@@ -55,12 +55,12 @@ import org.alfresco.transform.client.model.TransformRequest;
 @Service
 public class TransformMessageConverter implements MessageConverter
 {
-    private static final JacksonJsonMessageConverter CONVERTER;
+    private static final JacksonJsonMessageConverter converter;
     private static final JavaType TRANSFORM_REQUEST_TYPE = TypeFactory.createDefaultInstance().constructType(TransformRequest.class);
 
     static
     {
-        CONVERTER = new JacksonJsonMessageConverter() {
+        converter = new JacksonJsonMessageConverter() {
             @Override
             @NonNull protected JavaType getJavaTypeForMessage(final Message message) throws JMSException
             {
@@ -71,9 +71,9 @@ public class TransformMessageConverter implements MessageConverter
                 return super.getJavaTypeForMessage(message);
             }
         };
-        CONVERTER.setTargetType(MessageType.BYTES);
-        CONVERTER.setTypeIdPropertyName("_type");
-        CONVERTER.setTypeIdMappings(ImmutableMap.of(
+        converter.setTargetType(MessageType.BYTES);
+        converter.setTypeIdPropertyName("_type");
+        converter.setTypeIdMappings(ImmutableMap.of(
                 TransformRequest.class.getName(), TransformRequest.class,
                 TransformReply.class.getName(), TransformReply.class));
     }
@@ -83,12 +83,12 @@ public class TransformMessageConverter implements MessageConverter
             @NonNull final Object object,
             @NonNull final Session session) throws JMSException, MessageConversionException
     {
-        return CONVERTER.toMessage(object, session);
+        return converter.toMessage(object, session);
     }
 
     @Override
     @NonNull public Object fromMessage(@NonNull final Message message) throws JMSException
     {
-        return CONVERTER.fromMessage(message);
+        return converter.fromMessage(message);
     }
 }

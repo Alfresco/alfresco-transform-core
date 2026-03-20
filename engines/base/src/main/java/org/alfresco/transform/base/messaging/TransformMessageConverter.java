@@ -38,6 +38,7 @@ import org.springframework.jms.support.converter.JacksonJsonMessageConverter;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import org.alfresco.transform.client.model.TransformReply;
@@ -58,7 +59,7 @@ public class TransformMessageConverter implements MessageConverter
     {
         converter = new JacksonJsonMessageConverter() {
             @Override
-            protected JavaType getJavaTypeForMessage(final Message message) throws JMSException
+            @NonNull protected JavaType getJavaTypeForMessage(final Message message) throws JMSException
             {
                 if (message.getStringProperty("_type") == null)
                 {
@@ -75,15 +76,15 @@ public class TransformMessageConverter implements MessageConverter
     }
 
     @Override
-    public Message toMessage(
-            final Object object,
-            final Session session) throws JMSException, MessageConversionException
+    @NonNull public Message toMessage(
+            @NonNull final Object object,
+            @NonNull final Session session) throws JMSException, MessageConversionException
     {
         return converter.toMessage(object, session);
     }
 
     @Override
-    public Object fromMessage(final Message message) throws JMSException
+    @NonNull public Object fromMessage(@NonNull final Message message) throws JMSException
     {
         return converter.fromMessage(message);
     }
