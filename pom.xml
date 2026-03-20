@@ -25,6 +25,7 @@
         <dependency.alfresco-jodconverter-core.version>3.0.1.20</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
         <dependency.jackson.version>3.1.0</dependency.jackson.version>
+        <dependency.jackson2.version>2.19.2</dependency.jackson2.version>
         <dependency.tika.version>3.2.3</dependency.tika.version>
         <dependency.poi.version>5.4.1</dependency.poi.version>
         <dependency.commons-io.version>2.20.0</dependency.commons-io.version>
@@ -170,6 +171,13 @@
                 <groupId>tools.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
                 <version>${dependency.jackson.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${dependency.jackson2.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
