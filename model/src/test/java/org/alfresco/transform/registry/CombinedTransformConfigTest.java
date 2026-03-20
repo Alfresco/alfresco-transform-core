@@ -37,7 +37,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.alfresco.transform.config.OverrideSupported;
 import org.alfresco.transform.config.SupportedSourceAndTarget;
@@ -207,7 +209,9 @@ public class CombinedTransformConfigTest
 
     private final FakeTransformRegistry registry = new FakeTransformRegistry();
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .build();
 
     private TransformConfig readTransformConfigFromResource(String filename) throws IOException
     {
