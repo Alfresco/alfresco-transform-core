@@ -56,7 +56,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 
-import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -65,6 +64,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import tools.jackson.databind.ObjectMapper;
 
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithAllInOne;
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithOneCustomTransformer;

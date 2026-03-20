@@ -23,9 +23,9 @@ package org.alfresco.transform.config.reader;
 
 import java.io.IOException;
 
+import org.springframework.core.io.Resource;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.YAMLMapper;
-import org.springframework.core.io.Resource;
 
 import org.alfresco.transform.config.TransformConfig;
 

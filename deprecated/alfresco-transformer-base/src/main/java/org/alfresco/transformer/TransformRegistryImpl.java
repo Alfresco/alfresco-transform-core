@@ -36,13 +36,13 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import jakarta.annotation.PostConstruct;
 
-import tools.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import tools.jackson.databind.ObjectMapper;
 
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.exceptions.TransformException;

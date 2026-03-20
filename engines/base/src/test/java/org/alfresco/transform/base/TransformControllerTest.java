@@ -76,7 +76,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import tools.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -96,6 +95,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import tools.jackson.databind.ObjectMapper;
 
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithTwoCustomTransformers;
 import org.alfresco.transform.base.fakes.FakeTransformerPdf2Png;
