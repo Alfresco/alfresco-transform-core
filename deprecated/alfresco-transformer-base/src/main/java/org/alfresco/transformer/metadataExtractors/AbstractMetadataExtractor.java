@@ -47,6 +47,8 @@ import org.slf4j.Logger;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * @deprecated will be removed in a future release. Replaced by alfresco-base-t-engine.
@@ -100,7 +102,9 @@ public abstract class AbstractMetadataExtractor
             "sys:carryAspectProperties",
             "sys:stringTaggingSeparators");
 
-    private static final ObjectMapper jsonObjectMapper = new ObjectMapper();
+        private static final ObjectMapper jsonObjectMapper = JsonMapper.builder()
+                .enable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .build();
 
     protected final Logger logger;
     private Map<String, Set<String>> defaultExtractMapping;
