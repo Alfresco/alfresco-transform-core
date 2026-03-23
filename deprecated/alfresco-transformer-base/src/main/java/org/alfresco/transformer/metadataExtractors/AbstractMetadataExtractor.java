@@ -102,8 +102,8 @@ public abstract class AbstractMetadataExtractor
             "sys:carryAspectProperties",
             "sys:stringTaggingSeparators");
 
-        private static final ObjectMapper jsonObjectMapper = JsonMapper.builder()
-                .enable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+    private static final ObjectMapper jsonObjectMapper = JsonMapper.builder()
+            .enable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
             .build();
 
     protected final Logger logger;
