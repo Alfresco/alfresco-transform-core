@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -40,7 +39,6 @@ import org.alfresco.transform.messages.TransformStack;
 // This class is in the package org.alfresco.transform.messages in HxP because that is more readable, but in
 // org.alfresco.transform.client.model in Alfresco for backward compatibility.
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class InternalContext implements Serializable
 {
     @JsonProperty("multiStep")
