@@ -42,10 +42,10 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import org.alfresco.transform.base.clients.FileInfo;
 

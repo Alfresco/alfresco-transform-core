@@ -14,10 +14,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public class JacksonSerializer
 {
@@ -25,10 +25,12 @@ public class JacksonSerializer
 
     static
     {
-        MAPPER = new ObjectMapper();
-        MAPPER.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
-        MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        MAPPER.setSerializationInclusion(Include.NON_NULL);
+        MAPPER = JsonMapper.builder()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+                .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(Include.NON_NULL))
+                .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(Include.NON_NULL))
+                .build();
     }
 
     public static <T> byte[] serialize(T value) throws Exception

@@ -23,15 +23,18 @@ package org.alfresco.transform.config.reader;
 
 import java.io.IOException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.springframework.core.io.Resource;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 import org.alfresco.transform.config.TransformConfig;
 
 public class TransformConfigReaderYaml implements TransformConfigReader
 {
-    private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
+    private static final ObjectMapper MAPPER = YAMLMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .build();
 
     private final Resource resource;
 

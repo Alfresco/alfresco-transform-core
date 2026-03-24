@@ -31,15 +31,15 @@ import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.Session;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.ImmutableMap;
-import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
+import org.springframework.jms.support.converter.JacksonJsonMessageConverter;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.type.TypeFactory;
 
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
@@ -52,12 +52,12 @@ import org.alfresco.transform.client.model.TransformRequest;
 @Service
 public class TransformMessageConverter implements MessageConverter
 {
-    private static final MappingJackson2MessageConverter converter;
-    private static final JavaType TRANSFORM_REQUEST_TYPE = TypeFactory.defaultInstance().constructType(TransformRequest.class);
+    private static final JacksonJsonMessageConverter converter;
+    private static final JavaType TRANSFORM_REQUEST_TYPE = TypeFactory.createDefaultInstance().constructType(TransformRequest.class);
 
     static
     {
-        converter = new MappingJackson2MessageConverter() {
+        converter = new JacksonJsonMessageConverter() {
             @Override
             @NonNull protected JavaType getJavaTypeForMessage(final Message message) throws JMSException
             {
