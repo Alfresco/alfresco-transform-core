@@ -30,23 +30,40 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.alfresco.transform.common.ExtensionService;
 import org.alfresco.transform.messages.TransformStack;
 
 // This class is in the package org.alfresco.transform.messages in HxP because that is more readable, but in
 // org.alfresco.transform.client.model in Alfresco for backward compatibility.
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class TransformRequest implements Serializable
 {
+    @JsonProperty("requestId")
     private String requestId;
+    @JsonProperty("sourceReference")
     private String sourceReference;
+    @JsonProperty("sourceMediaType")
     private String sourceMediaType;
+    @JsonProperty("sourceSize")
     private Long sourceSize;
+    @JsonProperty("sourceExtension")
     private String sourceExtension;
+    @JsonProperty("targetMediaType")
     private String targetMediaType;
+    @JsonProperty("targetExtension")
     private String targetExtension;
+    @JsonProperty("clientData")
     private String clientData;
+    @JsonProperty("schema")
     private int schema;
+    @JsonProperty("transformRequestOptions")
     private Map<String, String> transformRequestOptions = new HashMap<>();
+    @JsonProperty("internalContext")
     private InternalContext internalContext;
 
     // regions [Accessors]
