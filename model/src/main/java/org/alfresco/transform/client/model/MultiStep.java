@@ -25,10 +25,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Holds required contextual information for a multi-step transform.
  *
@@ -36,15 +32,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 // This class is in the package org.alfresco.transform.messages in HxP because that is more readable, but in
 // org.alfresco.transform.client.model in Alfresco for backward compatibility.
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class MultiStep implements Serializable
 {
-    @JsonProperty("initialRequestId")
     private String initialRequestId;
-    @JsonProperty("initialSourceMediaType")
     private String initialSourceMediaType;
-    @JsonProperty("transformsToBeDone")
     private List<String> transformsToBeDone = new ArrayList<>();
 
     // regions [Accessors]
