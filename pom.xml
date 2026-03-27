@@ -28,7 +28,7 @@
         <dependency.jackson.annotations.version>2.21</dependency.jackson.annotations.version>
         <dependency.jackson.version>3.1.0</dependency.jackson.version>
         <dependency.tika.version>3.2.3</dependency.tika.version>
-        <dependency.poi.version>5.4.1</dependency.poi.version>
+        <dependency.poi.version>5.5.1</dependency.poi.version>
         <dependency.commons-io.version>2.20.0</dependency.commons-io.version>
         <dependency.imaging.version>1.0.0-alpha6</dependency.imaging.version>
         <dependency.snakeyaml.version>2.3</dependency.snakeyaml.version>
