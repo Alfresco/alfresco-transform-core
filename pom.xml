@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>5.4.2-A.1-SNAPSHOT</version>
+    <version>5.4.1-A.3-SNAPSHOT</version>
     <name>Alfresco Transform Core</name>
     <packaging>pom</packaging>
 
@@ -24,7 +24,9 @@
         <dependency.pdfbox.version>3.0.5</dependency.pdfbox.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.20</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
-        <dependency.jackson.version>2.19.2</dependency.jackson.version>
+        <dependency.jackson2.version>2.21.2</dependency.jackson2.version>
+        <dependency.jackson.annotations.version>2.21</dependency.jackson.annotations.version>
+        <dependency.jackson.version>3.1.0</dependency.jackson.version>
         <dependency.tika.version>3.2.3</dependency.tika.version>
         <dependency.poi.version>5.4.1</dependency.poi.version>
         <dependency.commons-io.version>2.20.0</dependency.commons-io.version>
@@ -167,11 +169,23 @@
             </dependency>
             <!-- Jackson -->
             <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
+                <groupId>tools.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
                 <version>${dependency.jackson.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${dependency.jackson2.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${dependency.jackson.annotations.version}</version>
             </dependency>
             <!-- Google Guava -->
             <dependency>
