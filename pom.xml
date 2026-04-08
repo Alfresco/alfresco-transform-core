@@ -226,6 +226,14 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang3.version}</version>
             </dependency>
+
+            <!-- temporary security fix AAE-44148 -->
+            <dependency>
+                <groupId>tools.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>3.1.1</version>
+            </dependency>
+            <!-- temporary security fix AAE-44148 -->
         </dependencies>
     </dependencyManagement>
 
