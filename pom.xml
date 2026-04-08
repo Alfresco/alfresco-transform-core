@@ -226,6 +226,14 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang3.version}</version>
             </dependency>
+
+            <!-- temporary security fix AAE-43877 -->
+            <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>4.0.3</version>
+            </dependency>
+            <!-- temporary security fix AAE-36687 -->
         </dependencies>
     </dependencyManagement>
 
