@@ -58,6 +58,7 @@ public class OverrideTransformConfigTests
             .withSourceMediaType("mimetype/a")
             .withTargetMediaType("mimetype/b")
             .withPriority(40)
+            .withMaxSourceSizeBytes(-1L)
             .build();
 
     private final SupportedSourceAndTarget supported_C2D = SupportedSourceAndTarget.builder()
@@ -83,6 +84,7 @@ public class OverrideTransformConfigTests
             .withSourceMediaType("mimetype/x")
             .withTargetMediaType("mimetype/y")
             .withMaxSourceSizeBytes(200L)
+            .withPriority(23)
             .build();
 
     private final TransformConfig transformConfig_A2B_X2Y_100_23 = TransformConfig.builder()
@@ -427,8 +429,8 @@ public class OverrideTransformConfigTests
                 supported_X2Y_200,
                 supported_A2B__40);
         String expectedToString = "[" +
-                "{\"sourceMediaType\": \"mimetype/a\", \"targetMediaType\": \"mimetype/b\", \"priority\": \"40\"}, " +
-                "{\"sourceMediaType\": \"mimetype/x\", \"targetMediaType\": \"mimetype/y\", \"maxSourceSizeBytes\": \"200\"}" +
+                "{\"sourceMediaType\": \"mimetype/a\", \"targetMediaType\": \"mimetype/b\", \"maxSourceSizeBytes\": \"-1\", \"priority\": \"40\"}, " +
+                "{\"sourceMediaType\": \"mimetype/x\", \"targetMediaType\": \"mimetype/y\", \"maxSourceSizeBytes\": \"200\", \"priority\": \"23\"}" +
                 "]";
 
         addTransformConfig(secondConfig, expectedWarnMessage, expectedSupported, expectedToString);
