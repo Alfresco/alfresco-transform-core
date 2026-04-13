@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
@@ -38,7 +37,6 @@ import org.alfresco.transform.config.RemoveSupported;
 import org.alfresco.transform.config.SupportedDefaults;
 import org.alfresco.transform.config.SupportedSourceAndTarget;
 import org.alfresco.transform.config.TransformConfig;
-import org.alfresco.transform.config.TransformStep;
 import org.alfresco.transform.config.Transformer;
 
 /**
@@ -433,83 +431,7 @@ public class OverrideTransformConfigTests
                 "{\"sourceMediaType\": \"mimetype/x\", \"targetMediaType\": \"mimetype/y\", \"maxSourceSizeBytes\": \"200\"}" +
                 "]";
 
-        config.addTransformConfig(secondConfig, READ_FROM_B, BASE_URL_B, registry);
-        config.combineTransformerConfig(registry);
-
-        assertEquals(1, registry.warnMessages.size());
-        assertEquals(expectedWarnMessage, registry.warnMessages.get(0));
-
-        Set<SupportedSourceAndTarget> supportedSourceAndTargetList = config.buildTransformConfig().getTransformers().get(0).getSupportedSourceAndTargetList();
-        assertEquals(expectedSupported, supportedSourceAndTargetList);
-        assertEquals(expectedToString, supportedSourceAndTargetList.toString());
-    }
-
-    @Test
-    public void testDeferredOverrideForPipelineTransformer()
-    {
-        // Add step transformers first
-        Transformer step1 = Transformer.builder()
-                .withTransformerName("step1")
-                .withSupportedSourceAndTargetList(Set.of(
-                        SupportedSourceAndTarget.builder()
-                                .withSourceMediaType("mimetype/document")
-                                .withTargetMediaType("mimetype/pdf")
-                                .build()))
-                .build();
-
-        Transformer step2 = Transformer.builder()
-                .withTransformerName("step2")
-                .withSupportedSourceAndTargetList(Set.of(
-                        SupportedSourceAndTarget.builder()
-                                .withSourceMediaType("mimetype/pdf")
-                                .withTargetMediaType("mimetype/image")
-                                .build()))
-                .build();
-
-        // Add pipeline transformer
-        Transformer pipelineTransformer = Transformer.builder()
-                .withTransformerName("pipeline1")
-                .withTransformerPipeline(List.of(
-                        new TransformStep("step1", "mimetype/pdf"),
-                        new TransformStep("step2", null)))
-                .build();
-
-        TransformConfig pipelineConfig = TransformConfig.builder()
-                .withTransformers(List.of(step1, step2, pipelineTransformer))
-                .build();
-
-        config.addTransformConfig(pipelineConfig, READ_FROM_A, BASE_URL_A, registry);
-
-        // Add override for pipeline transformer
-        OverrideSupported override = OverrideSupported.builder()
-                .withTransformerName("pipeline1")
-                .withSourceMediaType("mimetype/document")
-                .withTargetMediaType("mimetype/image")
-                .withPriority(40)
-                .build();
-
-        TransformConfig overrideConfig = TransformConfig.builder()
-                .withOverrideSupported(Set.of(override))
-                .build();
-
-        config.addTransformConfig(overrideConfig, READ_FROM_B, BASE_URL_B, registry);
-
-        // Combine configs
-        config.combineTransformerConfig(registry);
-
-        // Assert override applied
-        List<Transformer> transformers = config.buildTransformConfig().getTransformers();
-        assertTrue(!transformers.isEmpty(), "Pipeline transformer should exist after valid setup");
-        Set<SupportedSourceAndTarget> supportedList = transformers.stream()
-                .filter(t -> "pipeline1".equals(t.getTransformerName()))
-                .findFirst()
-                .orElseThrow()
-                .getSupportedSourceAndTargetList();
-
-        boolean found = supportedList.stream().anyMatch(s -> "mimetype/document".equals(s.getSourceMediaType()) &&
-                "mimetype/image".equals(s.getTargetMediaType()) &&
-                s.getPriority() == 40);
-        assertTrue(found, "Deferred override for pipeline transformer should be applied after wildcard generation");
+        addTransformConfig(secondConfig, expectedWarnMessage, expectedSupported, expectedToString);
     }
 
     private void addTransformConfig_A2B_X2Y_100_23()
