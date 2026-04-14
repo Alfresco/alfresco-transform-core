@@ -226,8 +226,10 @@ public class CombinedTransformConfig
     /**
      * Store overrides for deferred processing. Overrides are applied AFTER wildcard generation in the combineTransformerConfig() method, ensuring that pipeline transformers have their supportedSourceAndTargetList populated before overrides are applied.
      *
-     * @param overrideSupportedSet the set of overrides to store
-     * @param readFrom             where the overrides were read from
+     * @param overrideSupportedSet
+     *            the set of overrides to store
+     * @param readFrom
+     *            where the overrides were read from
      */
     private void storeOverridesForDeferredProcessing(Set<OverrideSupported> overrideSupportedSet, String readFrom) {
         if (!CollectionUtils.isEmpty(overrideSupportedSet)) {
@@ -238,7 +240,8 @@ public class CombinedTransformConfig
     /**
      * Apply all stored overrides AFTER wildcard generation. This ensures that pipeline and failover transformers have their supportedSourceAndTargetList populated before overrides are applied.
      *
-     * @param registry used for logging
+     * @param registry
+     *            used for logging
      */
     private void applyDeferredOverrides(AbstractTransformRegistry registry) {
         if (CollectionUtils.isEmpty(deferredOverrides)) {
