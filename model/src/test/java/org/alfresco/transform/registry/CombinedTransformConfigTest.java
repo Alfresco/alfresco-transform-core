@@ -39,6 +39,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.Test;
 
+import org.alfresco.transform.config.OverrideSupported;
 import org.alfresco.transform.config.SupportedSourceAndTarget;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.config.TransformStep;
@@ -298,6 +299,25 @@ public class CombinedTransformConfigTest
 
         assertEquals(0, config.buildTransformConfig().getTransformers().size());
         assertEquals(0, config.buildTransformConfig().getTransformOptions().size());
+    }
+
+    @Test
+    public void testClearAlsoRemovesDeferredOverrides() {
+        // Add a config with an overrideSupported entry to populate deferredOverrides
+        TransformConfig overrideConfig = TransformConfig.builder()
+                .withOverrideSupported(ImmutableSet.of(
+                        OverrideSupported.builder()
+                                .withTransformerName("pipeline1")
+                                .withSourceMediaType("mimetype/a")
+                                .withTargetMediaType("mimetype/b")
+                                .withPriority(99)
+                                .build()))
+                .build();
+        config.addTransformConfig(overrideConfig, READ_FROM_B, BASE_URL_B, registry);
+
+        assertEquals(1, config.getDeferredOverrides().size());
+        config.clear();
+        assertEquals(0, config.getDeferredOverrides().size());
     }
 
     @Test
