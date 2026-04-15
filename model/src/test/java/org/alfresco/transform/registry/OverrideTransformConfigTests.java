@@ -447,7 +447,8 @@ public class OverrideTransformConfigTests
     }
 
     @Test
-    public void testDeferredOverrideForPipelineTransformer() {
+    public void testDeferredOverrideForPipelineTransformer()
+    {
         // Add step transformers first
         Transformer step1 = Transformer.builder()
                 .withTransformerName("step1")

@@ -302,7 +302,8 @@ public class CombinedTransformConfigTest
     }
 
     @Test
-    public void testClearAlsoRemovesDeferredOverrides() {
+    public void testClearAlsoRemovesDeferredOverrides()
+    {
         // Add a config with an overrideSupported entry to populate deferredOverrides
         TransformConfig overrideConfig = TransformConfig.builder()
                 .withOverrideSupported(ImmutableSet.of(

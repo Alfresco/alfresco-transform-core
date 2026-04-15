@@ -231,8 +231,10 @@ public class CombinedTransformConfig
      * @param readFrom
      *            where the overrides were read from
      */
-    private void storeOverridesForDeferredProcessing(Set<OverrideSupported> overrideSupportedSet, String readFrom) {
-        if (!CollectionUtils.isEmpty(overrideSupportedSet)) {
+    private void storeOverridesForDeferredProcessing(Set<OverrideSupported> overrideSupportedSet, String readFrom)
+    {
+        if (!CollectionUtils.isEmpty(overrideSupportedSet))
+        {
             overrideSupportedSet.forEach(override -> deferredOverrides.add(new DeferredOverride(override, readFrom)));
         }
     }
@@ -243,13 +245,16 @@ public class CombinedTransformConfig
      * @param registry
      *            used for logging
      */
-    private void applyDeferredOverrides(AbstractTransformRegistry registry) {
-        if (CollectionUtils.isEmpty(deferredOverrides)) {
+    private void applyDeferredOverrides(AbstractTransformRegistry registry)
+    {
+        if (CollectionUtils.isEmpty(deferredOverrides))
+        {
             return;
         }
 
         Map<String, Set<OverrideSupported>> leftoverBySource = new HashMap<>();
-        for (DeferredOverride deferredOverride : deferredOverrides) {
+        for (DeferredOverride deferredOverride : deferredOverrides)
+        {
             OverrideSupported override = deferredOverride.getOverrideSupported();
             String readFrom = deferredOverride.getReadFrom();
 
@@ -257,11 +262,13 @@ public class CombinedTransformConfig
                     .map(Origin::get)
                     .filter(transformer -> transformer.getTransformerName().equals(override.getTransformerName()))
                     .collect(Collectors.toList());
-            if (matchedTransformers.isEmpty()) {
+            if (matchedTransformers.isEmpty())
+            {
                 leftoverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
                 continue;
             }
-            if (matchedTransformers.size() > 1) {
+            if (matchedTransformers.size() > 1)
+            {
                 throw new IllegalStateException("Multiple transformers found for " + readFrom + " with name: " + override.getTransformerName() + ". This should not be possible as removeInvalidTransformers should have removed duplicates.");
             }
 
@@ -271,17 +278,22 @@ public class CombinedTransformConfig
                             supported.getTargetMediaType().equals(override.getTargetMediaType()))
                     .findFirst();
 
-            if (existingSupportedOpt.isPresent()) {
+            if (existingSupportedOpt.isPresent())
+            {
                 SupportedSourceAndTarget existingSupported = existingSupportedOpt.get();
                 supportedList.remove(existingSupported);
-                if (override.getMaxSourceSizeBytes() != null) {
+                if (override.getMaxSourceSizeBytes() != null)
+                {
                     existingSupported.setMaxSourceSizeBytes(override.getMaxSourceSizeBytes());
                 }
-                if (override.getPriority() != null) {
+                if (override.getPriority() != null)
+                {
                     existingSupported.setPriority(override.getPriority());
                 }
                 supportedList.add(existingSupported);
-            } else {
+            }
+            else
+            {
                 leftoverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
             }
         }
@@ -644,15 +656,18 @@ public class CombinedTransformConfig
             SupportedSourceAndTarget supportedSourceAndTarget,
             String transformerName,
             Set<String> supportedDefaultTransformerNames,
-            Defaults defaults) {
+            Defaults defaults)
+    {
         Integer priority = supportedSourceAndTarget.getPriority();
         Long maxSourceSizeBytes = supportedSourceAndTarget.getMaxSourceSizeBytes();
         String sourceMediaType = supportedSourceAndTarget.getSourceMediaType();
-        if (defaults.valuesUnset(priority, maxSourceSizeBytes)) {
+        if (defaults.valuesUnset(priority, maxSourceSizeBytes))
+        {
             supportedSourceAndTarget.setPriority(defaults.getPriority(transformerName, sourceMediaType, priority));
             supportedSourceAndTarget.setMaxSourceSizeBytes(defaults.getMaxSourceSizeBytes(transformerName, sourceMediaType, maxSourceSizeBytes));
         }
-        if (supportedDefaultTransformerNames.contains(transformerName)) {
+        if (supportedDefaultTransformerNames.contains(transformerName))
+        {
             supportedSourceAndTarget.setPriority(defaults.getPriority(transformerName, sourceMediaType, null));
             supportedSourceAndTarget.setMaxSourceSizeBytes(defaults.getMaxSourceSizeBytes(transformerName, sourceMediaType, null));
         }
@@ -664,7 +679,8 @@ public class CombinedTransformConfig
      * <p>
      * Previously, this method was called before {@link #addWildcardSupportedSourceAndTarget(AbstractTransformRegistry)} because it relied on the priority value. As of MNT-25426, it is now called after wildcard generation, ensuring that pipeline transformers also receive the correct defaults.
      */
-    private void applyDefaults() {
+    private void applyDefaults()
+    {
         Set<String> supportedDefaultTransformerNames = defaults.getSupportedDefaults()
                 .stream()
                 .map(SupportedDefaults::getTransformerName)
@@ -939,7 +955,8 @@ public class CombinedTransformConfig
         return combinedTransformers.stream().collect(Collectors.toMap(origin -> origin.get().getTransformerName(), origin -> origin));
     }
 
-    List<DeferredOverride> getDeferredOverrides() {
+    List<DeferredOverride> getDeferredOverrides()
+    {
         return deferredOverrides;
     }
 }
