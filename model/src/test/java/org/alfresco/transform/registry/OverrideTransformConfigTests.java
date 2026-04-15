@@ -403,13 +403,13 @@ public class OverrideTransformConfigTests
                                 .withSourceMediaType("mimetype/c")
                                 .withTargetMediaType("mimetype/d")
                                 .build(),
-                        OverrideSupported.builder() // size default -> 200 and priority default -> 100
+                        OverrideSupported.builder() // size: default and priority: default -> 40
                                 .withTransformerName("1")
                                 .withSourceMediaType("mimetype/a")
                                 .withTargetMediaType("mimetype/b")
                                 .withPriority(40)
                                 .build(),
-                        OverrideSupported.builder() // size 100 -> 200 and change priority to default
+                        OverrideSupported.builder() // size: 100 -> 200 and change priority to default
                                 .withTransformerName("1")
                                 .withSourceMediaType("mimetype/x")
                                 .withTargetMediaType("mimetype/y")
