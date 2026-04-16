@@ -56,7 +56,8 @@ public class OverrideTransformConfigTests
             .withTargetMediaType("mimetype/b")
             .build();
 
-    private final SupportedSourceAndTarget supported_A2B__40 = SupportedSourceAndTarget.builder()
+    // Override result: priority overridden to 40; maxSourceSizeBytes not in override, retained as -1 (unlimited default from original)
+    private final SupportedSourceAndTarget supported_A2B_default_40 = SupportedSourceAndTarget.builder()
             .withSourceMediaType("mimetype/a")
             .withTargetMediaType("mimetype/b")
             .withPriority(40)
@@ -82,7 +83,8 @@ public class OverrideTransformConfigTests
             .withPriority(23)
             .build();
 
-    private final SupportedSourceAndTarget supported_X2Y_200 = SupportedSourceAndTarget.builder()
+    // Override result: maxSourceSizeBytes overridden to 200; priority not in override, retained as 23 from original entry
+    private final SupportedSourceAndTarget supported_X2Y_200_23 = SupportedSourceAndTarget.builder()
             .withSourceMediaType("mimetype/x")
             .withTargetMediaType("mimetype/y")
             .withMaxSourceSizeBytes(200L)
@@ -403,13 +405,13 @@ public class OverrideTransformConfigTests
                                 .withSourceMediaType("mimetype/c")
                                 .withTargetMediaType("mimetype/d")
                                 .build(),
-                        OverrideSupported.builder() // size: default and priority: default -> 40
+                        OverrideSupported.builder() // priority: Default -> 40, maxSourceSizeBytes: not in override, retained as -1 (unlimited default)
                                 .withTransformerName("1")
                                 .withSourceMediaType("mimetype/a")
                                 .withTargetMediaType("mimetype/b")
                                 .withPriority(40)
                                 .build(),
-                        OverrideSupported.builder() // size: 100 -> 200 and change priority to default
+                        OverrideSupported.builder() // maxSourceSizeBytes: 100 -> 200, priority: not in override, retained as 23 from original entry
                                 .withTransformerName("1")
                                 .withSourceMediaType("mimetype/x")
                                 .withTargetMediaType("mimetype/y")
@@ -420,7 +422,7 @@ public class OverrideTransformConfigTests
                                 .withSourceMediaType("mimetype/a")
                                 .withTargetMediaType("mimetype/d")
                                 .build()))
-                // OverrideSupported values with missing fields are defaults, so no test values here
+                // overrideSupported uses patch semantics: fields not specified in the override are retained from the existing entry
                 .build();
 
         String expectedWarnMessage = "Unable to process \"overrideSupported\": [" +
@@ -428,8 +430,8 @@ public class OverrideTransformConfigTests
                 "{\"transformerName\": \"bad\", \"sourceMediaType\": \"mimetype/a\", \"targetMediaType\": \"mimetype/d\"}]. " +
                 "Read from readFromB";
         ImmutableSet<SupportedSourceAndTarget> expectedSupported = ImmutableSet.of(
-                supported_X2Y_200,
-                supported_A2B__40);
+                supported_X2Y_200_23,
+                supported_A2B_default_40);
         String expectedToString = "[" +
                 "{\"sourceMediaType\": \"mimetype/a\", \"targetMediaType\": \"mimetype/b\", \"maxSourceSizeBytes\": \"-1\", \"priority\": \"40\"}, " +
                 "{\"sourceMediaType\": \"mimetype/x\", \"targetMediaType\": \"mimetype/y\", \"maxSourceSizeBytes\": \"200\", \"priority\": \"23\"}" +
