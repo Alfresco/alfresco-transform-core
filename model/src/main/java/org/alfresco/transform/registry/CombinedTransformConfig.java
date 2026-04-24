@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Model
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2026 Alfresco Software Limited
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -258,48 +258,98 @@ public class CombinedTransformConfig
             OverrideSupported override = deferredOverride.getOverrideSupported();
             String readFrom = deferredOverride.getReadFrom();
 
-            List<Transformer> matchedTransformers = combinedTransformers.stream()
+            // --- Guard: validate exactly one transformer matches the override name ---
+            List<Transformer> directMatches = combinedTransformers.stream()
                     .map(Origin::get)
                     .filter(transformer -> transformer.getTransformerName().equals(override.getTransformerName()))
                     .collect(Collectors.toList());
-            if (matchedTransformers.isEmpty())
+
+            if (directMatches.isEmpty())
             {
                 leftoverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
                 continue;
             }
-            if (matchedTransformers.size() > 1)
+            if (directMatches.size() > 1)
             {
                 throw new IllegalStateException("Multiple transformers found for " + readFrom + " with name: " + override.getTransformerName() + ". This should not be possible as removeInvalidTransformers should have removed duplicates.");
             }
 
-            Set<SupportedSourceAndTarget> supportedList = matchedTransformers.get(0).getSupportedSourceAndTargetList();
-            Optional<SupportedSourceAndTarget> existingSupportedOpt = supportedList.stream()
-                    .filter(supported -> supported.getSourceMediaType().equals(override.getSourceMediaType()) &&
-                            supported.getTargetMediaType().equals(override.getTargetMediaType()))
-                    .findFirst();
+            // --- Apply to the directly-named transformer (exact source + target match) ---
+            applyOverrideToDirectTransformer(override, directMatches.get(0), leftoverBySource, readFrom);
 
-            if (existingSupportedOpt.isPresent())
-            {
-                SupportedSourceAndTarget existingSupported = existingSupportedOpt.get();
-                supportedList.remove(existingSupported);
-                if (override.getMaxSourceSizeBytes() != null)
-                {
-                    existingSupported.setMaxSourceSizeBytes(override.getMaxSourceSizeBytes());
-                }
-                if (override.getPriority() != null)
-                {
-                    existingSupported.setPriority(override.getPriority());
-                }
-                supportedList.add(existingSupported);
-            }
-            else
-            {
-                leftoverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
-            }
+            // --- Propagate to any pipeline whose first step is the overridden transformer ---
+            propagateOverrideToPipelineParents(override);
         }
-        // Warn about overrides that didn't match anything
+
+        // --- Warn about overrides that didn't match anything ---
         leftoverBySource.forEach((readFrom, leftOvers) -> logWarn(leftOvers, readFrom, registry, "overrideSupported"));
         deferredOverrides.clear();
+    }
+
+    /**
+     * Applies the override to the entry on the directly-named transformer that matches the override's source and target media types exactly.
+     */
+    private void applyOverrideToDirectTransformer(OverrideSupported override, Transformer transformer,
+            Map<String, Set<OverrideSupported>> leftoverBySource, String readFrom)
+    {
+        Set<SupportedSourceAndTarget> supportedList = transformer.getSupportedSourceAndTargetList();
+        Optional<SupportedSourceAndTarget> existingSupportedOpt = supportedList.stream()
+                .filter(supported -> supported.getSourceMediaType().equals(override.getSourceMediaType()) &&
+                        supported.getTargetMediaType().equals(override.getTargetMediaType()))
+                .findFirst();
+
+        if (existingSupportedOpt.isPresent())
+        {
+            applyOverrideValuesToEntry(override, existingSupportedOpt.get(), supportedList);
+        }
+        else
+        {
+            leftoverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
+        }
+    }
+
+    /**
+     * Propagates the override to every pipeline transformer whose first step is the overridden transformer. Matches on source media type only — the synthesised pipeline target differs from the step's own target, so exact source+target matching would miss these entries.
+     */
+    private void propagateOverrideToPipelineParents(OverrideSupported override)
+    {
+        for (Origin<Transformer> origin : combinedTransformers)
+        {
+            Transformer pipeline = origin.get();
+            List<TransformStep> steps = pipeline.getTransformerPipeline();
+            if (steps == null || steps.isEmpty())
+            {
+                continue;
+            }
+            if (!override.getTransformerName().equals(steps.get(0).getTransformerName()))
+            {
+                continue;
+            }
+
+            Set<SupportedSourceAndTarget> supportedList = pipeline.getSupportedSourceAndTargetList();
+            supportedList.stream()
+                    .filter(supported -> override.getSourceMediaType().equals(supported.getSourceMediaType()))
+                    .collect(Collectors.toList())
+                    .forEach(existingSupported -> applyOverrideValuesToEntry(override, existingSupported, supportedList));
+        }
+    }
+
+    /**
+     * Writes non-null fields from the override into the entry. Null fields are skipped to preserve values already set by applyDefaults().
+     */
+    private void applyOverrideValuesToEntry(OverrideSupported override, SupportedSourceAndTarget existingSupported,
+            Set<SupportedSourceAndTarget> supportedList)
+    {
+        supportedList.remove(existingSupported);
+        if (override.getMaxSourceSizeBytes() != null)
+        {
+            existingSupported.setMaxSourceSizeBytes(override.getMaxSourceSizeBytes());
+        }
+        if (override.getPriority() != null)
+        {
+            existingSupported.setPriority(override.getPriority());
+        }
+        supportedList.add(existingSupported);
     }
 
     private SupportedSourceAndTarget getExistingSupported(Set<SupportedSourceAndTarget> supportedSourceAndTargetList,
@@ -556,7 +606,7 @@ public class CombinedTransformConfig
 
     /**
      * Sort transformers so there are no forward references, if that is possible. Logs warning message for those that have missing step transformers and removes them.
-     * 
+     *
      * @param registry
      *            used to log messages
      */
@@ -702,7 +752,7 @@ public class CombinedTransformConfig
      * When no supported source and target mimetypes have been defined in a failover or pipeline transformer this method adds all possible values that make sense. <lu>
      * <li>Failover - all the supported values from the step transformers</li>
      * <li>Pipeline - builds up supported source and target values. The list of source types and max sizes will come from the initial step transformer that have a target mimetype that matches the first intermediate mimetype. We then step through all intermediate transformers checking the next intermediate type is supported. When we get to the last step transformer, it provides all the target mimetypes based on the previous intermediate mimetype. Any combinations supported by the first transformer are excluded.</li> </lu>
-     * 
+     *
      * @param registry
      *            used to log messages
      */
@@ -866,7 +916,7 @@ public class CombinedTransformConfig
 
     /**
      * Removes pipeline transformers if the step transformers cannot be chained together via the intermediary types to produce the set of claimed source and target mimetypes.
-     * 
+     *
      * @param registry
      *            used to log messages
      */
