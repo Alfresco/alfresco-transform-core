@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Model
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2026 Alfresco Software Limited
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -514,6 +514,66 @@ public class OverrideTransformConfigTests
                 "mimetype/image".equals(s.getTargetMediaType()) &&
                 s.getPriority() == 40);
         assertTrue(found, "Deferred override for pipeline transformer should be applied after wildcard generation");
+    }
+
+    /**
+     * An override on a leaf transformer's source media type must propagate to pipeline entries that were synthesised from that transformer as step 0.
+     */
+    @Test
+    public void testOverridePropagatedToPipelineParents()
+    {
+        // step "1": a->b (priority=50, size=1000); pipeline "3": 1(->b), 2(->c) => synthesised a->c
+        final Transformer step1 = Transformer.builder().withTransformerName("1")
+                .withSupportedSourceAndTargetList(new HashSet<>(Set.of(
+                        SupportedSourceAndTarget.builder()
+                                .withSourceMediaType("mimetype/a").withTargetMediaType("mimetype/b")
+                                .withPriority(50).withMaxSourceSizeBytes(1000L).build())))
+                .build();
+        final Transformer step2 = Transformer.builder().withTransformerName("2")
+                .withSupportedSourceAndTargetList(new HashSet<>(Set.of(
+                        SupportedSourceAndTarget.builder()
+                                .withSourceMediaType("mimetype/b").withTargetMediaType("mimetype/c").build())))
+                .build();
+        final Transformer pipeline3 = Transformer.builder().withTransformerName("3")
+                .withTransformerPipeline(List.of(
+                        new TransformStep("1", "mimetype/b"),
+                        new TransformStep("2", null)))
+                .build();
+
+        config.addTransformConfig(TransformConfig.builder()
+                .withTransformers(ImmutableList.of(step1, step2, pipeline3)).build(),
+                READ_FROM_A, BASE_URL_A, registry);
+        config.addTransformConfig(TransformConfig.builder()
+                .withOverrideSupported(ImmutableSet.of(OverrideSupported.builder()
+                        .withTransformerName("1")
+                        .withSourceMediaType("mimetype/a").withTargetMediaType("mimetype/b")
+                        .withPriority(10).withMaxSourceSizeBytes(500L).build()))
+                .build(),
+                READ_FROM_B, BASE_URL_B, registry);
+        config.combineTransformerConfig(registry);
+
+        assertEquals(0, registry.errorMessages.size());
+
+        List<Transformer> transformers = config.buildTransformConfig().getTransformers();
+
+        SupportedSourceAndTarget direct = getEntry(transformers, "1", "mimetype/a", "mimetype/b");
+        assertEquals(10, direct.getPriority());
+        assertEquals(500L, direct.getMaxSourceSizeBytes());
+
+        SupportedSourceAndTarget pipeline = getEntry(transformers, "3", "mimetype/a", "mimetype/c");
+        assertEquals(10, pipeline.getPriority());
+        assertEquals(500L, pipeline.getMaxSourceSizeBytes());
+    }
+
+    private SupportedSourceAndTarget getEntry(List<Transformer> transformers,
+            String transformerName, String src, String tgt)
+    {
+        return transformers.stream()
+                .filter(t -> transformerName.equals(t.getTransformerName()))
+                .findFirst().orElseThrow()
+                .getSupportedSourceAndTargetList().stream()
+                .filter(e -> src.equals(e.getSourceMediaType()) && tgt.equals(e.getTargetMediaType()))
+                .findFirst().orElseThrow();
     }
 
     private void addTransformConfig_A2B_X2Y_100_23()
