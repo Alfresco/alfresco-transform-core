@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Function;
@@ -275,7 +274,11 @@ public class CombinedTransformConfig
             }
 
             // --- Apply to the directly-named transformer (exact source + target match) ---
-            applyOverrideToDirectTransformer(override, directMatches.get(0), leftoverBySource, readFrom);
+            boolean applied = applyOverrideToDirectTransformer(override, directMatches.get(0));
+            if (!applied)
+            {
+                leftoverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
+            }
 
             // --- Propagate to any pipeline whose first step is the overridden transformer ---
             propagateOverrideToPipelineParents(override);
@@ -288,24 +291,26 @@ public class CombinedTransformConfig
 
     /**
      * Applies the override to the entry on the directly-named transformer that matches the override's source and target media types exactly.
+     *
+     * @return {@code true} if a matching entry was found and updated; {@code false} if no match was found (caller should treat the override as unresolved)
      */
-    private void applyOverrideToDirectTransformer(OverrideSupported override, Transformer transformer,
-            Map<String, Set<OverrideSupported>> leftoverBySource, String readFrom)
+    private boolean applyOverrideToDirectTransformer(OverrideSupported override, Transformer transformer)
     {
-        Set<SupportedSourceAndTarget> supportedList = transformer.getSupportedSourceAndTargetList();
-        Optional<SupportedSourceAndTarget> existingSupportedOpt = supportedList.stream()
-                .filter(supported -> supported.getSourceMediaType().equals(override.getSourceMediaType()) &&
-                        supported.getTargetMediaType().equals(override.getTargetMediaType()))
-                .findFirst();
-
-        if (existingSupportedOpt.isPresent())
+        Set<SupportedSourceAndTarget> existing = transformer.getSupportedSourceAndTargetList();
+        boolean hasMatchingSourceAndTarget = existing.stream()
+                .anyMatch(entry -> entry.getSourceMediaType().equals(override.getSourceMediaType()) &&
+                        entry.getTargetMediaType().equals(override.getTargetMediaType()));
+        if (hasMatchingSourceAndTarget)
         {
-            applyOverrideValuesToEntry(override, existingSupportedOpt.get(), supportedList);
+            transformer.setSupportedSourceAndTargetList(
+                    existing.stream()
+                            .map(entry -> entry.getSourceMediaType().equals(override.getSourceMediaType()) &&
+                                    entry.getTargetMediaType().equals(override.getTargetMediaType())
+                                            ? withOverrideApplied(override, entry)
+                                            : entry)
+                            .collect(toSet()));
         }
-        else
-        {
-            leftoverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
-        }
+        return hasMatchingSourceAndTarget;
     }
 
     /**
@@ -326,30 +331,26 @@ public class CombinedTransformConfig
                 continue;
             }
 
-            Set<SupportedSourceAndTarget> supportedList = pipeline.getSupportedSourceAndTargetList();
-            supportedList.stream()
-                    .filter(supported -> override.getSourceMediaType().equals(supported.getSourceMediaType()))
-                    .collect(Collectors.toList())
-                    .forEach(existingSupported -> applyOverrideValuesToEntry(override, existingSupported, supportedList));
+            pipeline.setSupportedSourceAndTargetList(
+                    pipeline.getSupportedSourceAndTargetList().stream()
+                            .map(entry -> override.getSourceMediaType().equals(entry.getSourceMediaType())
+                                    ? withOverrideApplied(override, entry)
+                                    : entry)
+                            .collect(toSet()));
         }
     }
 
     /**
-     * Writes non-null fields from the override into the entry. Null fields are skipped to preserve values already set by applyDefaults().
+     * Returns a new {@link SupportedSourceAndTarget} copied from {@code existing} with non-null override fields applied. Null override fields are left unchanged to preserve values already set by applyDefaults().
      */
-    private void applyOverrideValuesToEntry(OverrideSupported override, SupportedSourceAndTarget existingSupported,
-            Set<SupportedSourceAndTarget> supportedList)
+    private SupportedSourceAndTarget withOverrideApplied(OverrideSupported override, SupportedSourceAndTarget existing)
     {
-        supportedList.remove(existingSupported);
-        if (override.getMaxSourceSizeBytes() != null)
-        {
-            existingSupported.setMaxSourceSizeBytes(override.getMaxSourceSizeBytes());
-        }
-        if (override.getPriority() != null)
-        {
-            existingSupported.setPriority(override.getPriority());
-        }
-        supportedList.add(existingSupported);
+        return SupportedSourceAndTarget.builder()
+                .withSourceMediaType(existing.getSourceMediaType())
+                .withTargetMediaType(existing.getTargetMediaType())
+                .withMaxSourceSizeBytes(override.getMaxSourceSizeBytes() != null ? override.getMaxSourceSizeBytes() : existing.getMaxSourceSizeBytes())
+                .withPriority(override.getPriority() != null ? override.getPriority() : existing.getPriority())
+                .build();
     }
 
     private SupportedSourceAndTarget getExistingSupported(Set<SupportedSourceAndTarget> supportedSourceAndTargetList,
