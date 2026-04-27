@@ -302,8 +302,8 @@ public class CombinedTransformConfig
         Set<SupportedSourceAndTarget> existing = transformer.getSupportedSourceAndTargetList();
 
         List<SupportedSourceAndTarget> entriesToOverride = existing.stream()
-                .filter(entry -> entry.getSourceMediaType().equals(override.getSourceMediaType()) &&
-                        entry.getTargetMediaType().equals(override.getTargetMediaType()))
+                .filter(entry -> Objects.equals(override.getSourceMediaType(), entry.getSourceMediaType()) &&
+                        Objects.equals(override.getTargetMediaType(), entry.getTargetMediaType()))
                 .collect(Collectors.toList());
 
         replaceEntriesWithOverrides(existing, entriesToOverride, override);
@@ -324,7 +324,7 @@ public class CombinedTransformConfig
             {
                 continue;
             }
-            if (!override.getTransformerName().equals(steps.get(0).getTransformerName()) ||
+            if (!Objects.equals(override.getTransformerName(), steps.get(0).getTransformerName()) ||
                     !Objects.equals(override.getTargetMediaType(), steps.get(0).getTargetMediaType()))
             {
                 continue;
@@ -333,7 +333,7 @@ public class CombinedTransformConfig
             Set<SupportedSourceAndTarget> supportedList = pipeline.getSupportedSourceAndTargetList();
 
             List<SupportedSourceAndTarget> entriesToOverride = supportedList.stream()
-                    .filter(entry -> override.getSourceMediaType().equals(entry.getSourceMediaType()))
+                    .filter(entry -> Objects.equals(override.getSourceMediaType(), entry.getSourceMediaType()))
                     .collect(Collectors.toList());
 
             replaceEntriesWithOverrides(supportedList, entriesToOverride, override);
