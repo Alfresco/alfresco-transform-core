@@ -451,181 +451,46 @@ public class OverrideTransformConfigTests
     @Test
     public void testDeferredOverrideForPipelineTransformer()
     {
-        // Add step transformers first
-        Transformer step1 = Transformer.builder()
-                .withTransformerName("step1")
-                .withSupportedSourceAndTargetList(Set.of(
-                        SupportedSourceAndTarget.builder()
-                                .withSourceMediaType("mimetype/document")
-                                .withTargetMediaType("mimetype/pdf")
-                                .build()))
-                .build();
-
-        Transformer step2 = Transformer.builder()
-                .withTransformerName("step2")
-                .withSupportedSourceAndTargetList(Set.of(
-                        SupportedSourceAndTarget.builder()
-                                .withSourceMediaType("mimetype/pdf")
-                                .withTargetMediaType("mimetype/image")
-                                .build()))
-                .build();
-
-        // Add pipeline transformer
-        Transformer pipelineTransformer = Transformer.builder()
-                .withTransformerName("pipeline1")
-                .withTransformerPipeline(List.of(
+        addEngineConfig(
+                stepTransformer("step1", "mimetype/document", "mimetype/pdf"),
+                stepTransformer("step2", "mimetype/pdf", "mimetype/image"),
+                pipelineTransformer("pipeline1",
                         new TransformStep("step1", "mimetype/pdf"),
-                        new TransformStep("step2", null)))
-                .build();
-
-        TransformConfig pipelineConfig = TransformConfig.builder()
-                .withTransformers(List.of(step1, step2, pipelineTransformer))
-                .build();
-
-        config.addTransformConfig(pipelineConfig, READ_FROM_A, BASE_URL_A, registry);
-
-        // Add override for pipeline transformer
-        OverrideSupported override = OverrideSupported.builder()
+                        new TransformStep("step2", null)));
+        addOverrideConfig(OverrideSupported.builder()
                 .withTransformerName("pipeline1")
-                .withSourceMediaType("mimetype/document")
-                .withTargetMediaType("mimetype/image")
-                .withPriority(40)
-                .build();
-
-        TransformConfig overrideConfig = TransformConfig.builder()
-                .withOverrideSupported(Set.of(override))
-                .build();
-
-        config.addTransformConfig(overrideConfig, READ_FROM_B, BASE_URL_B, registry);
-
-        // Combine configs
+                .withSourceMediaType("mimetype/document").withTargetMediaType("mimetype/image")
+                .withPriority(40).build());
         config.combineTransformerConfig(registry);
 
-        // Assert override applied
-        List<Transformer> transformers = config.buildTransformConfig().getTransformers();
-        assertTrue(!transformers.isEmpty(), "Pipeline transformer should exist after valid setup");
-        Set<SupportedSourceAndTarget> supportedList = transformers.stream()
-                .filter(t -> "pipeline1".equals(t.getTransformerName()))
-                .findFirst()
-                .orElseThrow()
-                .getSupportedSourceAndTargetList();
-
-        boolean found = supportedList.stream().anyMatch(s -> "mimetype/document".equals(s.getSourceMediaType()) &&
-                "mimetype/image".equals(s.getTargetMediaType()) &&
-                s.getPriority() == 40);
-        assertTrue(found, "Deferred override for pipeline transformer should be applied after wildcard generation");
-    }
-
-    /**
-     * An override on a leaf transformer's source media type must propagate to pipeline entries that were synthesised from that transformer as step 0.
-     */
-    @Test
-    public void testOverridePropagatedToPipelineParents()
-    {
-        // step "1": a->b (priority=50, size=1000); pipeline "3": 1(->b), 2(->c) => synthesised a->c
-        final Transformer step1 = Transformer.builder().withTransformerName("1")
-                .withSupportedSourceAndTargetList(new HashSet<>(Set.of(
-                        SupportedSourceAndTarget.builder()
-                                .withSourceMediaType("mimetype/a").withTargetMediaType("mimetype/b")
-                                .withPriority(50).withMaxSourceSizeBytes(1000L).build())))
-                .build();
-        final Transformer step2 = Transformer.builder().withTransformerName("2")
-                .withSupportedSourceAndTargetList(new HashSet<>(Set.of(
-                        SupportedSourceAndTarget.builder()
-                                .withSourceMediaType("mimetype/b").withTargetMediaType("mimetype/c").build())))
-                .build();
-        final Transformer pipeline3 = Transformer.builder().withTransformerName("3")
-                .withTransformerPipeline(List.of(
-                        new TransformStep("1", "mimetype/b"),
-                        new TransformStep("2", null)))
-                .build();
-
-        config.addTransformConfig(TransformConfig.builder()
-                .withTransformers(ImmutableList.of(step1, step2, pipeline3)).build(),
-                READ_FROM_A, BASE_URL_A, registry);
-        config.addTransformConfig(TransformConfig.builder()
-                .withOverrideSupported(ImmutableSet.of(OverrideSupported.builder()
-                        .withTransformerName("1")
-                        .withSourceMediaType("mimetype/a").withTargetMediaType("mimetype/b")
-                        .withPriority(10).withMaxSourceSizeBytes(500L).build()))
-                .build(),
-                READ_FROM_B, BASE_URL_B, registry);
-        config.combineTransformerConfig(registry);
-
-        assertEquals(0, registry.errorMessages.size());
-
-        List<Transformer> transformers = config.buildTransformConfig().getTransformers();
-
-        SupportedSourceAndTarget direct = getEntry(transformers, "1", "mimetype/a", "mimetype/b");
-        assertEquals(10, direct.getPriority());
-        assertEquals(500L, direct.getMaxSourceSizeBytes());
-
-        SupportedSourceAndTarget pipeline = getEntry(transformers, "3", "mimetype/a", "mimetype/c");
-        assertEquals(10, pipeline.getPriority());
-        assertEquals(500L, pipeline.getMaxSourceSizeBytes());
+        assertEquals(40, getEntry(getTransformers(), "pipeline1", "mimetype/document", "mimetype/image").getPriority());
     }
 
     /**
      * An override on a leaf transformer must propagate to ALL pipeline transformers that use it as their first step, not just the first one found.
      */
     @Test
-    public void testOverridePropagatedToMultiplePipelineParents()
+    public void testOverridePropagatedToPipelineParents()
     {
         // step "1": a->b; used as step 0 by both pipeline "4" (a->c) and pipeline "5" (a->d)
-        final Transformer step1 = Transformer.builder().withTransformerName("1")
-                .withSupportedSourceAndTargetList(new HashSet<>(Set.of(
-                        SupportedSourceAndTarget.builder()
-                                .withSourceMediaType("mimetype/a").withTargetMediaType("mimetype/b")
-                                .withPriority(50).withMaxSourceSizeBytes(1000L).build())))
-                .build();
-        final Transformer step2 = Transformer.builder().withTransformerName("2")
-                .withSupportedSourceAndTargetList(new HashSet<>(Set.of(
-                        SupportedSourceAndTarget.builder()
-                                .withSourceMediaType("mimetype/b").withTargetMediaType("mimetype/c").build())))
-                .build();
-        final Transformer step3 = Transformer.builder().withTransformerName("3")
-                .withSupportedSourceAndTargetList(new HashSet<>(Set.of(
-                        SupportedSourceAndTarget.builder()
-                                .withSourceMediaType("mimetype/b").withTargetMediaType("mimetype/d").build())))
-                .build();
-        final Transformer pipeline4 = Transformer.builder().withTransformerName("4")
-                .withTransformerPipeline(List.of(
-                        new TransformStep("1", "mimetype/b"),
-                        new TransformStep("2", null)))
-                .build();
-        final Transformer pipeline5 = Transformer.builder().withTransformerName("5")
-                .withTransformerPipeline(List.of(
-                        new TransformStep("1", "mimetype/b"),
-                        new TransformStep("3", null)))
-                .build();
-
-        config.addTransformConfig(TransformConfig.builder()
-                .withTransformers(ImmutableList.of(step1, step2, step3, pipeline4, pipeline5)).build(),
-                READ_FROM_A, BASE_URL_A, registry);
-        config.addTransformConfig(TransformConfig.builder()
-                .withOverrideSupported(ImmutableSet.of(OverrideSupported.builder()
-                        .withTransformerName("1")
-                        .withSourceMediaType("mimetype/a").withTargetMediaType("mimetype/b")
-                        .withPriority(10).withMaxSourceSizeBytes(500L).build()))
-                .build(),
-                READ_FROM_B, BASE_URL_B, registry);
+        addEngineConfig(
+                stepTransformer("1", "mimetype/a", "mimetype/b", 50, 1000L),
+                stepTransformer("2", "mimetype/b", "mimetype/c"),
+                stepTransformer("3", "mimetype/b", "mimetype/d"),
+                pipelineTransformer("4", new TransformStep("1", "mimetype/b"), new TransformStep("2", null)),
+                pipelineTransformer("5", new TransformStep("1", "mimetype/b"), new TransformStep("3", null)));
+        addOverrideConfig(OverrideSupported.builder()
+                .withTransformerName("1")
+                .withSourceMediaType("mimetype/a").withTargetMediaType("mimetype/b")
+                .withPriority(10).withMaxSourceSizeBytes(500L).build());
         config.combineTransformerConfig(registry);
 
         assertEquals(0, registry.warnMessages.size());
 
-        List<Transformer> transformers = config.buildTransformConfig().getTransformers();
-
-        SupportedSourceAndTarget direct = getEntry(transformers, "1", "mimetype/a", "mimetype/b");
-        assertEquals(10, direct.getPriority());
-        assertEquals(500L, direct.getMaxSourceSizeBytes());
-
-        SupportedSourceAndTarget p4 = getEntry(transformers, "4", "mimetype/a", "mimetype/c");
-        assertEquals(10, p4.getPriority());
-        assertEquals(500L, p4.getMaxSourceSizeBytes());
-
-        SupportedSourceAndTarget p5 = getEntry(transformers, "5", "mimetype/a", "mimetype/d");
-        assertEquals(10, p5.getPriority());
-        assertEquals(500L, p5.getMaxSourceSizeBytes());
+        List<Transformer> transformers = getTransformers();
+        assertEntry(transformers, "1", "mimetype/a", "mimetype/b", 10, 500L);
+        assertEntry(transformers, "4", "mimetype/a", "mimetype/c", 10, 500L);
+        assertEntry(transformers, "5", "mimetype/a", "mimetype/d", 10, 500L);
     }
 
     /**
@@ -634,53 +499,24 @@ public class OverrideTransformConfigTests
     @Test
     public void testOverrideWithNoMatchingSourceProducesWarning()
     {
-        // step "1": a->b (priority=50, size=1000); override targets source "mimetype/x" which does not exist on "1"
-        final Transformer step1 = Transformer.builder().withTransformerName("1")
-                .withSupportedSourceAndTargetList(new HashSet<>(Set.of(
-                        SupportedSourceAndTarget.builder()
-                                .withSourceMediaType("mimetype/a").withTargetMediaType("mimetype/b")
-                                .withPriority(50).withMaxSourceSizeBytes(1000L).build())))
-                .build();
-        final Transformer step2 = Transformer.builder().withTransformerName("2")
-                .withSupportedSourceAndTargetList(new HashSet<>(Set.of(
-                        SupportedSourceAndTarget.builder()
-                                .withSourceMediaType("mimetype/b").withTargetMediaType("mimetype/c").build())))
-                .build();
-        final Transformer pipeline3 = Transformer.builder().withTransformerName("3")
-                .withTransformerPipeline(List.of(
-                        new TransformStep("1", "mimetype/b"),
-                        new TransformStep("2", null)))
-                .build();
-
-        config.addTransformConfig(TransformConfig.builder()
-                .withTransformers(ImmutableList.of(step1, step2, pipeline3)).build(),
-                READ_FROM_A, BASE_URL_A, registry);
-        config.addTransformConfig(TransformConfig.builder()
-                .withOverrideSupported(ImmutableSet.of(OverrideSupported.builder()
-                        .withTransformerName("1")
-                        .withSourceMediaType("mimetype/x").withTargetMediaType("mimetype/b") // "mimetype/x" does not exist on "1"
-                        .withPriority(10).build()))
-                .build(),
-                READ_FROM_B, BASE_URL_B, registry);
+        addEngineConfig(
+                stepTransformer("1", "mimetype/a", "mimetype/b", 50, 1000L),
+                stepTransformer("2", "mimetype/b", "mimetype/c"),
+                pipelineTransformer("3", new TransformStep("1", "mimetype/b"), new TransformStep("2", null)));
+        addOverrideConfig(OverrideSupported.builder()
+                .withTransformerName("1")
+                .withSourceMediaType("mimetype/x").withTargetMediaType("mimetype/b") // "mimetype/x" does not exist on "1"
+                .withPriority(10).build());
         config.combineTransformerConfig(registry);
 
-        String expectedWarnMessage = "Unable to process \"overrideSupported\": [" +
-                "{\"transformerName\": \"1\", \"sourceMediaType\": \"mimetype/x\", \"targetMediaType\": \"mimetype/b\", \"priority\": \"10\"}]. " +
-                "Read from readFromB";
         assertEquals(1, registry.warnMessages.size());
-        assertEquals(expectedWarnMessage, registry.warnMessages.get(0));
+        assertEquals("Unable to process \"overrideSupported\": [" +
+                "{\"transformerName\": \"1\", \"sourceMediaType\": \"mimetype/x\", \"targetMediaType\": \"mimetype/b\", \"priority\": \"10\"}]. " +
+                "Read from readFromB", registry.warnMessages.get(0));
 
-        List<Transformer> transformers = config.buildTransformConfig().getTransformers();
-
-        // direct entry unchanged
-        SupportedSourceAndTarget direct = getEntry(transformers, "1", "mimetype/a", "mimetype/b");
-        assertEquals(50, direct.getPriority());
-        assertEquals(1000L, direct.getMaxSourceSizeBytes());
-
-        // synthesised pipeline entry also unchanged
-        SupportedSourceAndTarget pipeline = getEntry(transformers, "3", "mimetype/a", "mimetype/c");
-        assertEquals(50, pipeline.getPriority());
-        assertEquals(1000L, pipeline.getMaxSourceSizeBytes());
+        List<Transformer> transformers = getTransformers();
+        assertEntry(transformers, "1", "mimetype/a", "mimetype/b", 50, 1000L);
+        assertEntry(transformers, "3", "mimetype/a", "mimetype/c", 50, 1000L);
     }
 
     /**
@@ -689,32 +525,163 @@ public class OverrideTransformConfigTests
     @Test
     public void testOverrideOnStandaloneTransformerHasNoPipelineImpact()
     {
-        // "1" is standalone — no pipeline uses it as a step
-        final Transformer standalone = Transformer.builder().withTransformerName("1")
-                .withSupportedSourceAndTargetList(new HashSet<>(Set.of(
-                        SupportedSourceAndTarget.builder()
-                                .withSourceMediaType("mimetype/a").withTargetMediaType("mimetype/b")
-                                .withPriority(50).withMaxSourceSizeBytes(1000L).build())))
-                .build();
-
-        config.addTransformConfig(TransformConfig.builder()
-                .withTransformers(ImmutableList.of(standalone)).build(),
-                READ_FROM_A, BASE_URL_A, registry);
-        config.addTransformConfig(TransformConfig.builder()
-                .withOverrideSupported(ImmutableSet.of(OverrideSupported.builder()
-                        .withTransformerName("1")
-                        .withSourceMediaType("mimetype/a").withTargetMediaType("mimetype/b")
-                        .withPriority(10).build())) // size not in override → retained
-                .build(),
-                READ_FROM_B, BASE_URL_B, registry);
+        addEngineConfig(stepTransformer("1", "mimetype/a", "mimetype/b", 50, 1000L));
+        addOverrideConfig(OverrideSupported.builder()
+                .withTransformerName("1")
+                .withSourceMediaType("mimetype/a").withTargetMediaType("mimetype/b")
+                .withPriority(10).build()); // size not in override → retained
         config.combineTransformerConfig(registry);
 
         assertEquals(0, registry.warnMessages.size());
+        assertEntry(getTransformers(), "1", "mimetype/a", "mimetype/b", 10, 1000L);
+    }
 
-        SupportedSourceAndTarget direct = getEntry(
-                config.buildTransformConfig().getTransformers(), "1", "mimetype/a", "mimetype/b");
-        assertEquals(10, direct.getPriority());
-        assertEquals(1000L, direct.getMaxSourceSizeBytes()); // size not in override → retained
+    /**
+     * When a wildcard-generated pipeline has multiple synthesised final targets (because the second step supports several output formats), an override on step 0 must propagate its constraint to every one of those entries — not just the first one found.
+     *
+     * <p>
+     * Mirrors the "33 entries" scenario: appleIWorks (pages→jpeg) is the first step of a pipeline whose second step can produce png, gif, and pdf from jpeg. Capping pages→jpeg at 786432 bytes must also cap pages→png, pages→gif, and pages→pdf, because the size constraint lives at step 0 regardless of the final output format.
+     */
+    @Test
+    public void testOverridePropagatesMaxSizeToAllWildcardTargetsWithinSinglePipeline()
+    {
+        // step "2" produces three final outputs (b→c, b→d, b→e) from the intermediate
+        addEngineConfig(
+                stepTransformer("1", "mimetype/a", "mimetype/b", 50, 1000L),
+                stepTransformerMultiTarget("2", "mimetype/b", "mimetype/c", "mimetype/d", "mimetype/e"),
+                pipelineTransformer("3", new TransformStep("1", "mimetype/b"), new TransformStep("2", null)));
+        addOverrideConfig(OverrideSupported.builder()
+                .withTransformerName("1")
+                .withSourceMediaType("mimetype/a").withTargetMediaType("mimetype/b")
+                .withMaxSourceSizeBytes(786432L).build());
+        config.combineTransformerConfig(registry);
+
+        assertEquals(0, registry.warnMessages.size());
+        assertEquals(0, registry.errorMessages.size());
+
+        List<Transformer> transformers = getTransformers();
+        assertEquals(786432L, getEntry(transformers, "1", "mimetype/a", "mimetype/b").getMaxSourceSizeBytes());
+        assertEquals(786432L, getEntry(transformers, "3", "mimetype/a", "mimetype/c").getMaxSourceSizeBytes(),
+                "pipeline a→c must inherit the maxSourceSizeBytes cap");
+        assertEquals(786432L, getEntry(transformers, "3", "mimetype/a", "mimetype/d").getMaxSourceSizeBytes(),
+                "pipeline a→d must inherit the maxSourceSizeBytes cap");
+        assertEquals(786432L, getEntry(transformers, "3", "mimetype/a", "mimetype/e").getMaxSourceSizeBytes(),
+                "pipeline a→e must inherit the maxSourceSizeBytes cap");
+        assertEquals(3, getTransformerByName(transformers, "3").getSupportedSourceAndTargetList().size());
+    }
+
+    /**
+     * An override on a transformer that participates in a pipeline but is NOT the first step must apply only to the direct entry on that transformer. The synthesised pipeline entries must remain unchanged because their source-size constraint comes from step 0, not a later step.
+     */
+    @Test
+    public void testOverrideOnNonFirstStepDoesNotPropagateToParentPipeline()
+    {
+        // step "2" has two entries (b→c and b→d) — the override targets b→c only
+        final Transformer step2 = Transformer.builder().withTransformerName("2")
+                .withSupportedSourceAndTargetList(new HashSet<>(Set.of(
+                        SupportedSourceAndTarget.builder()
+                                .withSourceMediaType("mimetype/b").withTargetMediaType("mimetype/c")
+                                .withPriority(50).withMaxSourceSizeBytes(1000L).build(),
+                        SupportedSourceAndTarget.builder()
+                                .withSourceMediaType("mimetype/b").withTargetMediaType("mimetype/d")
+                                .withPriority(50).withMaxSourceSizeBytes(1000L).build())))
+                .build();
+        addEngineConfig(
+                stepTransformer("1", "mimetype/a", "mimetype/b", 50, 1000L),
+                step2,
+                pipelineTransformer("3", new TransformStep("1", "mimetype/b"), new TransformStep("2", null)));
+        // Override targets step "2" which is NOT the first step of pipeline "3"
+        addOverrideConfig(OverrideSupported.builder()
+                .withTransformerName("2")
+                .withSourceMediaType("mimetype/b").withTargetMediaType("mimetype/c")
+                .withMaxSourceSizeBytes(500L).build());
+        config.combineTransformerConfig(registry);
+
+        assertEquals(0, registry.warnMessages.size());
+        assertEquals(0, registry.errorMessages.size());
+
+        List<Transformer> transformers = getTransformers();
+        assertEquals(500L, getEntry(transformers, "2", "mimetype/b", "mimetype/c").getMaxSourceSizeBytes());
+        // Pipeline entries inherit from step1 (first step) — override on step2 must not touch them
+        assertEquals(1000L, getEntry(transformers, "3", "mimetype/a", "mimetype/c").getMaxSourceSizeBytes(),
+                "pipeline a→c must not be affected by an override on a non-first step");
+        assertEquals(1000L, getEntry(transformers, "3", "mimetype/a", "mimetype/d").getMaxSourceSizeBytes(),
+                "pipeline a→d must not be affected by an override on a non-first step");
+    }
+
+    // ---- Transformer factory helpers ----
+
+    private static Transformer stepTransformer(String name, String src, String tgt)
+    {
+        return Transformer.builder().withTransformerName(name)
+                .withSupportedSourceAndTargetList(new HashSet<>(Set.of(
+                        SupportedSourceAndTarget.builder()
+                                .withSourceMediaType(src).withTargetMediaType(tgt).build())))
+                .build();
+    }
+
+    private static Transformer stepTransformer(String name, String src, String tgt, int priority, long maxSourceSizeBytes)
+    {
+        return Transformer.builder().withTransformerName(name)
+                .withSupportedSourceAndTargetList(new HashSet<>(Set.of(
+                        SupportedSourceAndTarget.builder()
+                                .withSourceMediaType(src).withTargetMediaType(tgt)
+                                .withPriority(priority).withMaxSourceSizeBytes(maxSourceSizeBytes).build())))
+                .build();
+    }
+
+    private static Transformer stepTransformerMultiTarget(String name, String src, String... targets)
+    {
+        Set<SupportedSourceAndTarget> entries = new HashSet<>();
+        for (String tgt : targets)
+        {
+            entries.add(SupportedSourceAndTarget.builder()
+                    .withSourceMediaType(src).withTargetMediaType(tgt).build());
+        }
+        return Transformer.builder().withTransformerName(name)
+                .withSupportedSourceAndTargetList(entries).build();
+    }
+
+    private static Transformer pipelineTransformer(String name, TransformStep... steps)
+    {
+        return Transformer.builder().withTransformerName(name)
+                .withTransformerPipeline(List.of(steps)).build();
+    }
+
+    // ---- Config registration helpers ----
+
+    private void addEngineConfig(Transformer... transformers)
+    {
+        config.addTransformConfig(TransformConfig.builder()
+                .withTransformers(ImmutableList.copyOf(transformers)).build(),
+                READ_FROM_A, BASE_URL_A, registry);
+    }
+
+    private void addOverrideConfig(OverrideSupported... overrides)
+    {
+        config.addTransformConfig(TransformConfig.builder()
+                .withOverrideSupported(ImmutableSet.copyOf(overrides)).build(),
+                READ_FROM_B, BASE_URL_B, registry);
+    }
+
+    private List<Transformer> getTransformers()
+    {
+        return config.buildTransformConfig().getTransformers();
+    }
+
+    // ---- Assertion helpers ----
+
+    private void assertEntry(List<Transformer> transformers, String name, String src, String tgt,
+            int expectedPriority, long expectedMaxSize)
+    {
+        SupportedSourceAndTarget entry = getEntry(transformers, name, src, tgt);
+        assertEquals(expectedPriority, entry.getPriority());
+        assertEquals(expectedMaxSize, entry.getMaxSourceSizeBytes());
+    }
+
+    private static Transformer getTransformerByName(List<Transformer> transformers, String name)
+    {
+        return transformers.stream().filter(t -> name.equals(t.getTransformerName())).findFirst().orElseThrow();
     }
 
     private SupportedSourceAndTarget getEntry(List<Transformer> transformers,
