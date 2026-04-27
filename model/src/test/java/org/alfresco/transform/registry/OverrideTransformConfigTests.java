@@ -538,9 +538,6 @@ public class OverrideTransformConfigTests
 
     /**
      * When a wildcard-generated pipeline has multiple synthesised final targets (because the second step supports several output formats), an override on step 0 must propagate its constraint to every one of those entries — not just the first one found.
-     *
-     * <p>
-     * Mirrors the "33 entries" scenario: appleIWorks (pages→jpeg) is the first step of a pipeline whose second step can produce png, gif, and pdf from jpeg. Capping pages→jpeg at 786432 bytes must also cap pages→png, pages→gif, and pages→pdf, because the size constraint lives at step 0 regardless of the final output format.
      */
     @Test
     public void testOverridePropagatesMaxSizeToAllWildcardTargetsWithinSinglePipeline()
@@ -610,7 +607,6 @@ public class OverrideTransformConfigTests
     }
 
     // ---- Transformer factory helpers ----
-
     private static Transformer stepTransformer(String name, String src, String tgt)
     {
         return Transformer.builder().withTransformerName(name)
@@ -649,7 +645,6 @@ public class OverrideTransformConfigTests
     }
 
     // ---- Config registration helpers ----
-
     private void addEngineConfig(Transformer... transformers)
     {
         config.addTransformConfig(TransformConfig.builder()
@@ -670,7 +665,6 @@ public class OverrideTransformConfigTests
     }
 
     // ---- Assertion helpers ----
-
     private void assertEntry(List<Transformer> transformers, String name, String src, String tgt,
             int expectedPriority, long expectedMaxSize)
     {
