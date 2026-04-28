@@ -146,7 +146,9 @@ public class ProbeTransform
             return Boolean.parseBoolean(envReader.apply(name));
         }
         catch (Exception ignore)
-        {}
+        {
+            logger.warn("Probe: {} environment variable value is not a valid boolean, using default {}", name, defaultValue);
+        }
         return defaultValue;
     }
 
@@ -165,7 +167,9 @@ public class ProbeTransform
                 }
             }
             catch (NumberFormatException ignore)
-            {}
+            {
+                logger.warn("Probe: {} environment variable value is not a valid number, using default {}", name, defaultValue);
+            }
         }
         logger.trace("Probe: {}={}", name, defaultValue);
         return defaultValue;
@@ -182,7 +186,9 @@ public class ProbeTransform
                 l = Long.parseLong(env);
             }
             catch (NumberFormatException ignore)
-            {}
+            {
+                logger.warn("Probe: {} environment variable value is not a valid number, using default {}", name, defaultValue);
+            }
         }
         if (l <= 0)
         {
