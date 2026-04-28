@@ -235,7 +235,7 @@ public class CombinedTransformConfig
     {
         if (!CollectionUtils.isEmpty(overrideSupportedSet))
         {
-            overrideSupportedSet.forEach(override -> deferredOverrides.add(new DeferredOverride(override, readFrom)));
+            overrideSupportedSet.forEach(overrideSupported -> deferredOverrides.add(new DeferredOverride(overrideSupported, readFrom)));
         }
     }
 
@@ -255,35 +255,35 @@ public class CombinedTransformConfig
         Map<String, Set<OverrideSupported>> leftoverBySource = new HashMap<>();
         for (DeferredOverride deferredOverride : deferredOverrides)
         {
-            OverrideSupported override = deferredOverride.getOverrideSupported();
+            OverrideSupported overrideSupported = deferredOverride.getOverrideSupported();
             String readFrom = deferredOverride.getReadFrom();
 
             // --- Guard: validate exactly one transformer matches the override name ---
             List<Transformer> directMatches = combinedTransformers.stream()
                     .map(Origin::get)
-                    .filter(transformer -> transformer.getTransformerName().equals(override.getTransformerName()))
+                    .filter(transformer -> transformer.getTransformerName().equals(overrideSupported.getTransformerName()))
                     .collect(Collectors.toList());
 
             if (directMatches.isEmpty())
             {
-                leftoverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
+                leftoverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(overrideSupported);
                 continue;
             }
             if (directMatches.size() > 1)
             {
-                throw new IllegalStateException("Multiple transformers found for " + readFrom + " with name: " + override.getTransformerName() + ". This should not be possible as removeInvalidTransformers should have removed duplicates.");
+                throw new IllegalStateException("Multiple transformers found for " + readFrom + " with name: " + overrideSupported.getTransformerName() + ". This should not be possible as removeInvalidTransformers should have removed duplicates.");
             }
 
             // --- Apply to the directly-named transformer (exact source + target match) ---
-            boolean applied = applyOverrideToDirectTransformer(override, directMatches.get(0));
+            boolean applied = applyOverrideToDirectTransformer(directMatches.get(0), overrideSupported);
             if (applied)
             {
                 // --- Propagate to any pipeline whose first step is the overridden transformer ---
-                propagateOverrideToPipelineParents(override);
+                propagateOverrideToPipelineParents(overrideSupported);
             }
             else
             {
-                leftoverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(override);
+                leftoverBySource.computeIfAbsent(readFrom, k -> new HashSet<>()).add(overrideSupported);
             }
         }
 
@@ -297,75 +297,70 @@ public class CombinedTransformConfig
      *
      * @return {@code true} if a matching entry was found and updated; {@code false} if no match was found (caller should treat the override as unresolved)
      */
-    private boolean applyOverrideToDirectTransformer(OverrideSupported override, Transformer transformer)
+    private boolean applyOverrideToDirectTransformer(Transformer transformer, OverrideSupported overrideSupported)
     {
-        Set<SupportedSourceAndTarget> existing = transformer.getSupportedSourceAndTargetList();
+        Set<SupportedSourceAndTarget> existingEntries = transformer.getSupportedSourceAndTargetList();
 
-        List<SupportedSourceAndTarget> entriesToOverride = existing.stream()
-                .filter(entry -> Objects.equals(override.getSourceMediaType(), entry.getSourceMediaType()) &&
-                        Objects.equals(override.getTargetMediaType(), entry.getTargetMediaType()))
+        List<SupportedSourceAndTarget> entriesToOverride = existingEntries.stream()
+                .filter(entry -> Objects.equals(overrideSupported.getSourceMediaType(), entry.getSourceMediaType()) &&
+                        Objects.equals(overrideSupported.getTargetMediaType(), entry.getTargetMediaType()))
                 .collect(Collectors.toList());
 
-        replaceEntriesWithOverrides(existing, entriesToOverride, override);
-
-        return !CollectionUtils.isEmpty(entriesToOverride);
+        return replaceEntriesWithOverrides(existingEntries, entriesToOverride, overrideSupported);
     }
 
     /**
      * Propagates the override to every pipeline transformer whose first step is the overridden transformer. Matches on both source media type and the step's target media type (the intermediate type) to avoid incorrectly updating pipelines that share the same first-step transformer name but use a different intermediate type. The synthesised pipeline entry target is the final pipeline output, not the intermediate, so only the source and the step's own target are used for matching.
      */
-    private void propagateOverrideToPipelineParents(OverrideSupported override)
+    private void propagateOverrideToPipelineParents(OverrideSupported overrideSupported)
     {
-        for (Origin<Transformer> origin : combinedTransformers)
+        List<Transformer> pipelineParents = combinedTransformers.stream()
+                .map(Origin::get)
+                .filter(pipeline -> !CollectionUtils.isEmpty(pipeline.getTransformerPipeline()))
+                .filter(pipeline -> Objects.equals(overrideSupported.getTransformerName(), pipeline.getTransformerPipeline().get(0).getTransformerName()) &&
+                        Objects.equals(overrideSupported.getTargetMediaType(), pipeline.getTransformerPipeline().get(0).getTargetMediaType()))
+                .collect(Collectors.toList());
+
+        for (Transformer pipeline : pipelineParents)
         {
-            Transformer pipeline = origin.get();
-            List<TransformStep> steps = pipeline.getTransformerPipeline();
-            if (steps == null || steps.isEmpty())
-            {
-                continue;
-            }
-            if (!Objects.equals(override.getTransformerName(), steps.get(0).getTransformerName()) ||
-                    !Objects.equals(override.getTargetMediaType(), steps.get(0).getTargetMediaType()))
-            {
-                continue;
-            }
-
             Set<SupportedSourceAndTarget> supportedList = pipeline.getSupportedSourceAndTargetList();
-
             List<SupportedSourceAndTarget> entriesToOverride = supportedList.stream()
-                    .filter(entry -> Objects.equals(override.getSourceMediaType(), entry.getSourceMediaType()))
+                    .filter(entry -> Objects.equals(overrideSupported.getSourceMediaType(), entry.getSourceMediaType()))
                     .collect(Collectors.toList());
-
-            replaceEntriesWithOverrides(supportedList, entriesToOverride, override);
+            replaceEntriesWithOverrides(supportedList, entriesToOverride, overrideSupported);
         }
     }
 
     /**
      * Replaces entries in the supportedList with their overridden versions if entriesToOverride is not empty.
+     *
+     * @return {@code true} if entries were replaced; {@code false} if entriesToOverride was empty
      */
-    private void replaceEntriesWithOverrides(Set<SupportedSourceAndTarget> supportedList,
+    private boolean replaceEntriesWithOverrides(Set<SupportedSourceAndTarget> supportedList,
             List<SupportedSourceAndTarget> entriesToOverride,
-            OverrideSupported override)
+            OverrideSupported overrideSupported)
     {
-        if (!CollectionUtils.isEmpty(entriesToOverride))
+        if (CollectionUtils.isEmpty(entriesToOverride))
         {
-            supportedList.removeAll(entriesToOverride);
-            supportedList.addAll(entriesToOverride.stream()
-                    .map(entry -> withOverrideApplied(override, entry))
-                    .collect(toSet()));
+            return false;
         }
+        supportedList.removeAll(entriesToOverride);
+        supportedList.addAll(entriesToOverride.stream()
+                .map(entry -> applyOverride(entry, overrideSupported))
+                .collect(toSet()));
+        return true;
     }
 
     /**
      * Returns a new {@link SupportedSourceAndTarget} copied from {@code existing} with non-null override fields applied. Null override fields are left unchanged to preserve values already set by applyDefaults().
      */
-    private SupportedSourceAndTarget withOverrideApplied(OverrideSupported override, SupportedSourceAndTarget existing)
+    private SupportedSourceAndTarget applyOverride(SupportedSourceAndTarget supportedEntry, OverrideSupported overrideSupported)
     {
         return SupportedSourceAndTarget.builder()
-                .withSourceMediaType(existing.getSourceMediaType())
-                .withTargetMediaType(existing.getTargetMediaType())
-                .withMaxSourceSizeBytes(override.getMaxSourceSizeBytes() != null ? override.getMaxSourceSizeBytes() : existing.getMaxSourceSizeBytes())
-                .withPriority(override.getPriority() != null ? override.getPriority() : existing.getPriority())
+                .withSourceMediaType(supportedEntry.getSourceMediaType())
+                .withTargetMediaType(supportedEntry.getTargetMediaType())
+                .withMaxSourceSizeBytes(overrideSupported.getMaxSourceSizeBytes() != null ? overrideSupported.getMaxSourceSizeBytes() : supportedEntry.getMaxSourceSizeBytes())
+                .withPriority(overrideSupported.getPriority() != null ? overrideSupported.getPriority() : supportedEntry.getPriority())
                 .build();
     }
 
