@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Transform Core
  * %%
- * Copyright (C) 2005 - 2022 Alfresco Software Limited
+ * Copyright (C) 2005 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * -
@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.UnaryOperator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,6 +116,14 @@ public class ProbeTransform
             long expectedLength, long plusOrMinus, int livenessPercent, long maxTransforms, long maxTransformSeconds,
             long livenessTransformPeriodSeconds)
     {
+        this(sourceFilename, sourceMimetype, targetMimetype, transformOptions, expectedLength, plusOrMinus,
+                livenessPercent, maxTransforms, maxTransformSeconds, livenessTransformPeriodSeconds, System::getenv);
+    }
+
+    ProbeTransform(String sourceFilename, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
+            long expectedLength, long plusOrMinus, int livenessPercent, long maxTransforms, long maxTransformSeconds,
+            long livenessTransformPeriodSeconds, UnaryOperator<String> envReader)
+    {
         this.sourceFilename = sourceFilename;
         this.sourceMimetype = sourceMimetype;
         this.targetMimetype = targetMimetype;
@@ -122,29 +131,54 @@ public class ProbeTransform
         minExpectedLength = Math.max(0, expectedLength - plusOrMinus);
         maxExpectedLength = expectedLength + plusOrMinus;
 
-        this.livenessPercent = (int) getPositiveLongEnv("livenessPercent", livenessPercent);
-        maxTransformCount = getPositiveLongEnv("maxTransforms", maxTransforms);
-        maxTransformTime = getPositiveLongEnv("maxTransformSeconds", maxTransformSeconds) * 1000;
+        this.livenessPercent = (int) getPositiveLongEnv("livenessPercent", livenessPercent, envReader);
+        maxTransformCount = getNonNegativeLongEnv("maxTransforms", maxTransforms, envReader);
+        maxTransformTime = getNonNegativeLongEnv("maxTransformSeconds", maxTransformSeconds, envReader) * 1000;
         livenessTransformPeriod = getPositiveLongEnv("livenessTransformPeriodSeconds",
-                livenessTransformPeriodSeconds) * 1000;
-        livenessTransformEnabled = getBooleanEnvVar("livenessTransformEnabled", false);
+                livenessTransformPeriodSeconds, envReader) * 1000;
+        livenessTransformEnabled = getBooleanEnvVar("livenessTransformEnabled", false, envReader);
     }
 
-    private boolean getBooleanEnvVar(final String name, final boolean defaultValue)
+    private boolean getBooleanEnvVar(final String name, final boolean defaultValue, UnaryOperator<String> envReader)
     {
         try
         {
-            return Boolean.parseBoolean(System.getenv(name));
+            return Boolean.parseBoolean(envReader.apply(name));
         }
         catch (Exception ignore)
-        {}
+        {
+            logger.warn("Probe: {} environment variable value is not a valid boolean, using default {}", name, defaultValue);
+        }
         return defaultValue;
     }
 
-    private long getPositiveLongEnv(String name, long defaultValue)
+    private long getNonNegativeLongEnv(String name, long defaultValue, UnaryOperator<String> envReader)
+    {
+        String env = envReader.apply(name);
+        if (env != null)
+        {
+            try
+            {
+                long l = Long.parseLong(env);
+                if (l >= 0)
+                {
+                    logger.trace("Probe: {}={}", name, l);
+                    return l;
+                }
+            }
+            catch (NumberFormatException ignore)
+            {
+                logger.warn("Probe: {} environment variable value is not a valid number, using default {}", name, defaultValue);
+            }
+        }
+        logger.trace("Probe: {}={}", name, defaultValue);
+        return defaultValue;
+    }
+
+    private long getPositiveLongEnv(String name, long defaultValue, UnaryOperator<String> envReader)
     {
         long l = -1;
-        String env = System.getenv(name);
+        String env = envReader.apply(name);
         if (env != null)
         {
             try
@@ -152,7 +186,9 @@ public class ProbeTransform
                 l = Long.parseLong(env);
             }
             catch (NumberFormatException ignore)
-            {}
+            {
+                logger.warn("Probe: {} environment variable value is not a valid number, using default {}", name, defaultValue);
+            }
         }
         if (l <= 0)
         {
