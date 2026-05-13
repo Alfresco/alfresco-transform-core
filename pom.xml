@@ -16,7 +16,7 @@
 
     <properties>
         <revision>5.4.2-A.100-SNAPSHOT</revision>
-        <project.parent.basedir>${project.basedir}</project.parent.basedir>
+        <project.parent.basedir>${project.basedir}/../..</project.parent.basedir>
 
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
