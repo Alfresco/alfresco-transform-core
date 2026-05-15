@@ -25,7 +25,7 @@
         <image.registry>quay.io</image.registry>
         <dependency.pdfbox.version>3.0.5</dependency.pdfbox.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.20</dependency.alfresco-jodconverter-core.version>
-        <env.project_version>${project.version}</env.project_version>
+        <env.project_version>${revision}</env.project_version>
         <dependency.jackson2.version>2.21.2</dependency.jackson2.version>
         <dependency.jackson.annotations.version>2.21</dependency.jackson.annotations.version>
         <dependency.jackson.version>3.1.1</dependency.jackson.version>
@@ -284,7 +284,7 @@
                     <artifactId>maven-release-plugin</artifactId>
                     <version>3.1.1</version>
                     <configuration>
-                        <tagNameFormat>@{project.version}</tagNameFormat>
+                        <tagNameFormat>@{revision}</tagNameFormat>
                     </configuration>
                 </plugin>
                 <plugin>
