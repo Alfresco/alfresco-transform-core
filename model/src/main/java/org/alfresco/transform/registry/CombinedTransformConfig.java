@@ -253,6 +253,8 @@ public class CombinedTransformConfig
         }
 
         Map<String, Set<OverrideSupported>> leftoverBySource = new HashMap<>();
+        Set<String> explicitDefaultKeys = buildExplicitDefaultKeys();
+        Set<String> directOverrideKeys = buildDirectOverrideKeys();
         for (DeferredOverride deferredOverride : deferredOverrides)
         {
             OverrideSupported overrideSupported = deferredOverride.getOverrideSupported();
@@ -279,7 +281,7 @@ public class CombinedTransformConfig
             if (applied)
             {
                 // Propagate to any pipeline whose first step is the overridden transformer.
-                applyStepOverrideAndPreserveDefaultsToPipelineParents(overrideSupported);
+                applyStepOverrideAndPreserveDefaultsToPipelineParents(overrideSupported, explicitDefaultKeys, directOverrideKeys);
             }
             else
             {
@@ -290,7 +292,6 @@ public class CombinedTransformConfig
         // --- Warn about overrides that didn't match anything ---
         leftoverBySource.forEach((readFrom, leftOvers) -> logWarn(leftOvers, readFrom, registry, "overrideSupported"));
         deferredOverrides.clear();
-        defaults.clear();
     }
 
     /**
@@ -311,11 +312,9 @@ public class CombinedTransformConfig
     /**
      * Propagates a step-transformer override to pipeline parents whose first step matches by transformer name and intermediate target. Skips entries that have a direct {@code overrideSupported} (which takes priority) or an explicit {@code supportedDefaults} entry (which must not be overwritten by propagation).
      */
-    private void applyStepOverrideAndPreserveDefaultsToPipelineParents(OverrideSupported overrideSupported)
+    private void applyStepOverrideAndPreserveDefaultsToPipelineParents(
+            OverrideSupported overrideSupported, Set<String> explicitDefaultKeys, Set<String> directOverrideKeys)
     {
-        Set<String> explicitDefaultKeys = buildExplicitDefaultKeys();
-        Set<String> directOverrideKeys = buildDirectOverrideKeys();
-
         List<Transformer> pipelineParents = combinedTransformers.stream()
                 .map(Origin::get)
                 .filter(pipeline -> !CollectionUtils.isEmpty(pipeline.getTransformerPipeline()))
@@ -340,8 +339,8 @@ public class CombinedTransformConfig
     private Set<String> buildExplicitDefaultKeys()
     {
         return defaults.getSupportedDefaults().stream()
-                .filter(sd -> sd.getTransformerName() != null && sd.getSourceMediaType() != null)
-                .map(sd -> sd.getTransformerName() + "|" + sd.getSourceMediaType())
+                .filter(supportedDefault -> supportedDefault.getTransformerName() != null && supportedDefault.getSourceMediaType() != null)
+                .map(supportedDefault -> supportedDefault.getTransformerName() + "|" + supportedDefault.getSourceMediaType())
                 .collect(toSet());
     }
 
@@ -349,9 +348,12 @@ public class CombinedTransformConfig
     private Set<String> buildDirectOverrideKeys()
     {
         return deferredOverrides.stream()
-                .map(d -> d.getOverrideSupported().getTransformerName() + "|"
-                        + d.getOverrideSupported().getSourceMediaType() + "|"
-                        + d.getOverrideSupported().getTargetMediaType())
+                .map(DeferredOverride::getOverrideSupported)
+                .filter(overrideSupported -> overrideSupported != null
+                        && overrideSupported.getTransformerName() != null
+                        && overrideSupported.getSourceMediaType() != null
+                        && overrideSupported.getTargetMediaType() != null)
+                .map(overrideSupported -> overrideSupported.getTransformerName() + "|" + overrideSupported.getSourceMediaType() + "|" + overrideSupported.getTargetMediaType())
                 .collect(toSet());
     }
 
@@ -402,6 +404,7 @@ public class CombinedTransformConfig
         addWildcardSupportedSourceAndTarget(registry);
         applyDefaults();
         applyDeferredOverrides(registry);
+        defaults.clear();
         removePipelinesWithUnsupportedTransforms(registry);
         setCoreVersionOnCombinedMultiStepTransformers();
     }
