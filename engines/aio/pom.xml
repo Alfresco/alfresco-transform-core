@@ -20,12 +20,12 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-base-t-engine</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-base-t-engine</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
@@ -66,12 +66,12 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transform-misc</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transform-misc</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
@@ -79,12 +79,12 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transform-tika</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transform-tika</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
@@ -92,12 +92,12 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transform-pdf-renderer</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transform-pdf-renderer</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
@@ -105,12 +105,12 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transform-libreoffice</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transform-libreoffice</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
@@ -118,12 +118,12 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transform-imagemagick</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-transform-imagemagick</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
@@ -420,7 +420,7 @@
                             <images>
                                 <!-- QuayIO image -->
                                 <image>
-                                    <name>${image.name}:${project.version}</name>
+                                    <name>${image.name}:${revision}</name>
                                     <registry>${image.registry}</registry>
                                     <build>
                                         <buildx>
@@ -440,7 +440,7 @@
                                 </image>
                                 <!-- DockerHub image -->
                                  <image>
-                                    <name>${image.name}:${project.version}</name>
+                                    <name>${image.name}:${revision}</name>
                                     <build>
                                         <buildx>
                                             <platforms>

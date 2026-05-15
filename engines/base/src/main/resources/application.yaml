@@ -40,7 +40,7 @@ transform:
     test:
       enable: ${TEST_ENDPOINT_ENABLED:false}
   core:
-    version: @project.version@
+    version: @revision@
   engine:
     config:
       cron: 0 0 * * * *  # once an hour on the hour
