@@ -327,9 +327,10 @@ public class CombinedTransformConfig
             Set<SupportedSourceAndTarget> supportedList = pipeline.getSupportedSourceAndTargetList();
             List<SupportedSourceAndTarget> entriesToOverride = supportedList.stream()
                     .filter(entry -> Objects.equals(overrideSupported.getSourceMediaType(), entry.getSourceMediaType()))
-                    // Skip if a direct override or explicit supportedDefaults already covers this entry.
-                    .filter(entry -> !directOverrideKeys.contains(pipeline.getTransformerName() + "|" + entry.getSourceMediaType() + "|" + entry.getTargetMediaType()) &&
-                            !explicitDefaultKeys.contains(pipeline.getTransformerName() + "|" + entry.getSourceMediaType()))
+                    // Skip entries that have their own direct overrideSupported — that override takes priority.
+                    .filter(entry -> !isProtectedByDirectOverride(pipeline, entry, directOverrideKeys))
+                    // Skip entries whose source is pinned by a level-0 supportedDefaults — that default must not be overwritten.
+                    .filter(entry -> !isProtectedByExplicitDefault(pipeline, entry, explicitDefaultKeys))
                     .collect(Collectors.toList());
             replaceEntriesWithOverrides(supportedList, entriesToOverride, overrideSupported);
         }
@@ -340,7 +341,7 @@ public class CombinedTransformConfig
     {
         return defaults.getSupportedDefaults().stream()
                 .filter(supportedDefault -> supportedDefault.getTransformerName() != null && supportedDefault.getSourceMediaType() != null)
-                .map(supportedDefault -> supportedDefault.getTransformerName() + "|" + supportedDefault.getSourceMediaType())
+                .map(supportedDefault -> explicitDefaultKey(supportedDefault.getTransformerName(), supportedDefault.getSourceMediaType()))
                 .collect(toSet());
     }
 
@@ -353,8 +354,36 @@ public class CombinedTransformConfig
                         && overrideSupported.getTransformerName() != null
                         && overrideSupported.getSourceMediaType() != null
                         && overrideSupported.getTargetMediaType() != null)
-                .map(overrideSupported -> overrideSupported.getTransformerName() + "|" + overrideSupported.getSourceMediaType() + "|" + overrideSupported.getTargetMediaType())
+                .map(overrideSupported -> directOverrideKey(overrideSupported.getTransformerName(), overrideSupported.getSourceMediaType(), overrideSupported.getTargetMediaType()))
                 .collect(toSet());
+    }
+
+    /**
+     * Builds a lookup key for {@code buildExplicitDefaultKeys} and {@code isProtectedByExplicitDefault}. Identifies that a level-0 {@code supportedDefaults} entry pins all target entries for the given transformer + source.
+     */
+    private static String explicitDefaultKey(String transformerName, String sourceMediaType)
+    {
+        return String.join("|", transformerName, sourceMediaType);
+    }
+
+    /**
+     * Builds a lookup key for {@code buildDirectOverrideKeys} and {@code isProtectedByDirectOverride}. Identifies that an explicit {@code overrideSupported} entry directly targets this exact transformer + source + target combination.
+     */
+    private static String directOverrideKey(String transformerName, String sourceMediaType, String targetMediaType)
+    {
+        return String.join("|", transformerName, sourceMediaType, targetMediaType);
+    }
+
+    /** Returns {@code true} when this exact pipeline entry (transformer + source + target) has its own direct {@code overrideSupported}, meaning leaf-propagation must not overwrite it. */
+    private static boolean isProtectedByDirectOverride(Transformer pipeline, SupportedSourceAndTarget entry, Set<String> directOverrideKeys)
+    {
+        return directOverrideKeys.contains(directOverrideKey(pipeline.getTransformerName(), entry.getSourceMediaType(), entry.getTargetMediaType()));
+    }
+
+    /** Returns {@code true} when a level-0 {@code supportedDefaults} entry explicitly pins the given pipeline + source, meaning leaf-propagation must not overwrite any target entry for that source. */
+    private static boolean isProtectedByExplicitDefault(Transformer pipeline, SupportedSourceAndTarget entry, Set<String> explicitDefaultKeys)
+    {
+        return explicitDefaultKeys.contains(explicitDefaultKey(pipeline.getTransformerName(), entry.getSourceMediaType()));
     }
 
     /**
