@@ -6,11 +6,8 @@
 ARG JAVA_BASE_IMAGE=alfresco/alfresco-base-java:jre17-rockylinux9@sha256:f98833508b7be8c4b44a25450f9faac44cacfdc075f2295e02836b93fd05bb9c
 FROM ${JAVA_BASE_IMAGE}
 
-ARG LIBREOFFICE_VERSION=7.2.5
+ARG LIBREOFFICE_VERSION=26.2.3
 
-ENV LIBREOFFICE_RPM_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/org/libreoffice/libreoffice-dist/${LIBREOFFICE_VERSION}/libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz
-ENV LIBREOFFICE_ARM64_RPM_URL=https://dl.rockylinux.org/pub/rocky/9/devel/aarch64/os/Packages/l/
-ENV LIBREOFFICE_ARM64_RPM_VERSION=libreoffice-7.1.8.1
 ENV JAVA_OPTS=""
 
 # Set default user information
@@ -19,23 +16,19 @@ ARG GROUPID=1000
 ARG LIBREUSERNAME=libreoffice
 ARG USERID=33003
 
-COPY target/${env.project_artifactId}-${env.project_version}.jar libreoffice-dist-*-linux.gz /
+COPY target/${env.project_artifactId}-${env.project_version}.jar /
 
 RUN ln /${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     yum install -y cairo cups-libs libSM libGLU procps && \
-    if [ "$(uname -m)" = "x86_64" ]; then \
-        test -f libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz && \
-        ln -s libreoffice-dist-${LIBREOFFICE_VERSION}-linux.gz libreoffice-dist-linux.gz || \
-        curl -s -S $LIBREOFFICE_RPM_URL      -o libreoffice-dist-linux.gz && \
-        tar xzf libreoffice-dist-linux.gz && \
-        yum localinstall -y LibreOffice*/RPMS/*.rpm && \
-        rm -rf libreoffice-dist-*linux.gz LibreOffice_*_Linux_x86-64_rpm; \
-    else \
-      LIBREOFFICE_ARM64_RPM_VERSION=$(curl -s $LIBREOFFICE_ARM64_RPM_URL | grep -o "${LIBREOFFICE_ARM64_RPM_VERSION}.*" | cut -d '"' -f 1 | sort | tail -n1) && \
-      dnf --enablerepo=devel install -y ${LIBREOFFICE_ARM64_RPM_URL}${LIBREOFFICE_ARM64_RPM_VERSION} && \
-      update-alternatives --set java java-17-openjdk.aarch64; \
-    fi && \
-      yum clean all
+    ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then LO_ARCH="x86-64"; else LO_ARCH="aarch64"; fi && \
+    curl -s -S -L "https://download.documentfoundation.org/libreoffice/stable/${LIBREOFFICE_VERSION}/rpm/${ARCH}/LibreOffice_${LIBREOFFICE_VERSION}_Linux_${LO_ARCH}_rpm.tar.gz" \
+      -o libreoffice-dist-linux.tar.gz && \
+    tar xzf libreoffice-dist-linux.tar.gz && \
+    find LibreOffice*/RPMS -name "*.rpm" ! -name "*kde*" ! -name "*gnome*" \
+      | xargs yum localinstall -y && \
+    rm -rf libreoffice-dist-linux.tar.gz LibreOffice_*_Linux_* && \
+    yum clean all
 
 ADD target/generated-resources/licenses              /licenses
 ADD target/generated-resources/licenses.xml          /licenses/
