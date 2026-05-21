@@ -253,6 +253,8 @@ public class CombinedTransformConfig
         }
 
         Map<String, Set<OverrideSupported>> leftoverBySource = new HashMap<>();
+        Set<String> explicitDefaultKeys = buildExplicitDefaultKeys();
+        Set<String> directOverrideKeys = buildDirectOverrideKeys();
         for (DeferredOverride deferredOverride : deferredOverrides)
         {
             OverrideSupported overrideSupported = deferredOverride.getOverrideSupported();
@@ -278,8 +280,8 @@ public class CombinedTransformConfig
             boolean applied = applyOverrideToDirectTransformer(directMatches.get(0), overrideSupported);
             if (applied)
             {
-                // --- Propagate to any pipeline whose first step is the overridden transformer ---
-                propagateOverrideToPipelineParents(overrideSupported);
+                // Propagate to any pipeline whose first step is the overridden transformer.
+                applyStepOverrideAndPreserveDefaultsToPipelineParents(overrideSupported, explicitDefaultKeys, directOverrideKeys);
             }
             else
             {
@@ -293,9 +295,7 @@ public class CombinedTransformConfig
     }
 
     /**
-     * Applies the override to the entry on the directly-named transformer that matches the override's source and target media types exactly.
-     *
-     * @return {@code true} if a matching entry was found and updated; {@code false} if no match was found (caller should treat the override as unresolved)
+     * Applies the override to the matching entry on the directly-named transformer. Returns {@code true} if a match was found and updated, {@code false} otherwise.
      */
     private boolean applyOverrideToDirectTransformer(Transformer transformer, OverrideSupported overrideSupported)
     {
@@ -310,9 +310,10 @@ public class CombinedTransformConfig
     }
 
     /**
-     * Propagates the override to every pipeline transformer whose first step is the overridden transformer. Matches on both source media type and the step's target media type (the intermediate type) to avoid incorrectly updating pipelines that share the same first-step transformer name but use a different intermediate type. The synthesised pipeline entry target is the final pipeline output, not the intermediate, so only the source and the step's own target are used for matching.
+     * Propagates a step-transformer override to pipeline parents whose first step matches by transformer name and intermediate target. Skips entries that have a direct {@code overrideSupported} (which takes priority) or an explicit {@code supportedDefaults} entry (which must not be overwritten by propagation).
      */
-    private void propagateOverrideToPipelineParents(OverrideSupported overrideSupported)
+    private void applyStepOverrideAndPreserveDefaultsToPipelineParents(
+            OverrideSupported overrideSupported, Set<String> explicitDefaultKeys, Set<String> directOverrideKeys)
     {
         List<Transformer> pipelineParents = combinedTransformers.stream()
                 .map(Origin::get)
@@ -326,15 +327,67 @@ public class CombinedTransformConfig
             Set<SupportedSourceAndTarget> supportedList = pipeline.getSupportedSourceAndTargetList();
             List<SupportedSourceAndTarget> entriesToOverride = supportedList.stream()
                     .filter(entry -> Objects.equals(overrideSupported.getSourceMediaType(), entry.getSourceMediaType()))
+                    // Skip entries that have their own direct overrideSupported — that override takes priority.
+                    .filter(entry -> !isProtectedByDirectOverride(pipeline, entry, directOverrideKeys))
+                    // Skip entries whose source is pinned by a level-0 supportedDefaults — that default must not be overwritten.
+                    .filter(entry -> !isProtectedByExplicitDefault(pipeline, entry, explicitDefaultKeys))
                     .collect(Collectors.toList());
             replaceEntriesWithOverrides(supportedList, entriesToOverride, overrideSupported);
         }
     }
 
+    /** Keys ({@code "transformerName|sourceMediaType"}) for {@code supportedDefaults} entries. */
+    private Set<String> buildExplicitDefaultKeys()
+    {
+        return defaults.getSupportedDefaults().stream()
+                .filter(supportedDefault -> supportedDefault.getTransformerName() != null && supportedDefault.getSourceMediaType() != null)
+                .map(supportedDefault -> explicitDefaultKey(supportedDefault.getTransformerName(), supportedDefault.getSourceMediaType()))
+                .collect(toSet());
+    }
+
+    /** Keys ({@code "transformerName|sourceMediaType|targetMediaType"}) for all pending direct {@code overrideSupported} entries. */
+    private Set<String> buildDirectOverrideKeys()
+    {
+        return deferredOverrides.stream()
+                .map(DeferredOverride::getOverrideSupported)
+                .filter(overrideSupported -> overrideSupported != null
+                        && overrideSupported.getTransformerName() != null
+                        && overrideSupported.getSourceMediaType() != null
+                        && overrideSupported.getTargetMediaType() != null)
+                .map(overrideSupported -> directOverrideKey(overrideSupported.getTransformerName(), overrideSupported.getSourceMediaType(), overrideSupported.getTargetMediaType()))
+                .collect(toSet());
+    }
+
     /**
-     * Replaces entries in the supportedList with their overridden versions if entriesToOverride is not empty.
-     *
-     * @return {@code true} if entries were replaced; {@code false} if entriesToOverride was empty
+     * Builds a lookup key for {@code buildExplicitDefaultKeys} and {@code isProtectedByExplicitDefault}. Identifies that a level-0 {@code supportedDefaults} entry pins all target entries for the given transformer + source.
+     */
+    private static String explicitDefaultKey(String transformerName, String sourceMediaType)
+    {
+        return String.join("|", transformerName, sourceMediaType);
+    }
+
+    /**
+     * Builds a lookup key for {@code buildDirectOverrideKeys} and {@code isProtectedByDirectOverride}. Identifies that an explicit {@code overrideSupported} entry directly targets this exact transformer + source + target combination.
+     */
+    private static String directOverrideKey(String transformerName, String sourceMediaType, String targetMediaType)
+    {
+        return String.join("|", transformerName, sourceMediaType, targetMediaType);
+    }
+
+    /** Returns {@code true} when this exact pipeline entry (transformer + source + target) has its own direct {@code overrideSupported}, meaning leaf-propagation must not overwrite it. */
+    private static boolean isProtectedByDirectOverride(Transformer pipeline, SupportedSourceAndTarget entry, Set<String> directOverrideKeys)
+    {
+        return directOverrideKeys.contains(directOverrideKey(pipeline.getTransformerName(), entry.getSourceMediaType(), entry.getTargetMediaType()));
+    }
+
+    /** Returns {@code true} when a level-0 {@code supportedDefaults} entry explicitly pins the given pipeline + source, meaning leaf-propagation must not overwrite any target entry for that source. */
+    private static boolean isProtectedByExplicitDefault(Transformer pipeline, SupportedSourceAndTarget entry, Set<String> explicitDefaultKeys)
+    {
+        return explicitDefaultKeys.contains(explicitDefaultKey(pipeline.getTransformerName(), entry.getSourceMediaType()));
+    }
+
+    /**
+     * Replaces the given entries with overridden versions. Returns {@code true} if any replacements were made.
      */
     private boolean replaceEntriesWithOverrides(Set<SupportedSourceAndTarget> supportedList,
             List<SupportedSourceAndTarget> entriesToOverride,
@@ -352,7 +405,7 @@ public class CombinedTransformConfig
     }
 
     /**
-     * Returns a new {@link SupportedSourceAndTarget} copied from {@code existing} with non-null override fields applied. Null override fields are left unchanged to preserve values already set by applyDefaults().
+     * Returns a copy of {@code existing} with non-null fields from {@code overrideSupported} applied.
      */
     private SupportedSourceAndTarget applyOverride(SupportedSourceAndTarget supportedEntry, OverrideSupported overrideSupported)
     {
@@ -380,6 +433,7 @@ public class CombinedTransformConfig
         addWildcardSupportedSourceAndTarget(registry);
         applyDefaults();
         applyDeferredOverrides(registry);
+        defaults.clear();
         removePipelinesWithUnsupportedTransforms(registry);
         setCoreVersionOnCombinedMultiStepTransformers();
     }
@@ -757,7 +811,8 @@ public class CombinedTransformConfig
                                     .map(supportedSourceAndTarget -> applyDefaultsToSupportedSourceAndTarget(supportedSourceAndTarget, transformer.getTransformerName(), supportedDefaultTransformerNames, defaults))
                                     .collect(toSet()));
                 });
-        defaults.clear();
+        // defaults.clear() is intentionally deferred to combineTransformerConfig(), after applyDeferredOverrides(),
+        // so that applyStepOverrideAndPreserveDefaultsToPipelineParents() can still read the defaults to detect explicit entries.
     }
 
     /**
