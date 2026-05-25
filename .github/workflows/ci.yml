@@ -207,7 +207,7 @@ jobs:
             testProfile: tika
           - testName: All in One Transformer
             buildProfile: full-build
-            testProfile: aio-test
+            testProfile: full-build,aio-test
     steps:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
