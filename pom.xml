@@ -339,6 +339,26 @@
                                 <includedLicenses>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/includedLicenses.txt</includedLicenses>
                                 <licenseMergesUrl>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/licenseMerges.txt</licenseMergesUrl>
                                 <overrideUrl>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/override-THIRD-PARTY.properties</overrideUrl>
+                                <licenseUrlReplacements>
+                                    <!-- www.gnu.org is unreachable over IPv6 (GitHub Actions) and blocked over IPv4 on some networks.
+                                         Remap all GNU license URLs to SPDX mirror on GitHub -->
+                                    <licenseUrlReplacement>
+                                        <regexp>\Qhttps://www.gnu.org/licenses/old-licenses/lgpl-2.1.html\E</regexp>
+                                        <replacement>https://raw.githubusercontent.com/spdx/license-list-data/main/text/LGPL-2.1-only.txt</replacement>
+                                    </licenseUrlReplacement>
+                                    <licenseUrlReplacement>
+                                        <regexp>\Qhttps://www.gnu.org/software/classpath/license.html\E</regexp>
+                                        <replacement>https://raw.githubusercontent.com/spdx/license-list-data/main/text/GPL-2.0-only.txt</replacement>
+                                    </licenseUrlReplacement>
+                                    <licenseUrlReplacement>
+                                        <regexp>https?://www\.gnu\.org/licenses/lgpl\.txt</regexp>
+                                        <replacement>https://raw.githubusercontent.com/spdx/license-list-data/main/text/LGPL-3.0-only.txt</replacement>
+                                    </licenseUrlReplacement>
+                                    <licenseUrlReplacement>
+                                        <regexp>https?://www\.gnu\.org/licenses/gpl\.txt</regexp>
+                                        <replacement>https://raw.githubusercontent.com/spdx/license-list-data/main/text/GPL-3.0-only.txt</replacement>
+                                    </licenseUrlReplacement>
+                                </licenseUrlReplacements>
                             </configuration>
                         </execution>
                         <execution>
