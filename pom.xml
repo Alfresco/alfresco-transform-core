@@ -347,8 +347,9 @@
                                         <replacement>https://raw.githubusercontent.com/spdx/license-list-data/main/text/LGPL-2.1-only.txt</replacement>
                                     </licenseUrlReplacement>
                                     <licenseUrlReplacement>
+                                        <!-- OpenJDK LICENSE is the canonical combined GPL-2.0+CPE text. -->
                                         <regexp>\Qhttps://www.gnu.org/software/classpath/license.html\E</regexp>
-                                        <replacement>https://raw.githubusercontent.com/spdx/license-list-data/main/text/GPL-2.0-only.txt</replacement>
+                                        <replacement>https://raw.githubusercontent.com/openjdk/jdk/master/LICENSE</replacement>
                                     </licenseUrlReplacement>
                                     <licenseUrlReplacement>
                                         <regexp>https?://www\.gnu\.org/licenses/lgpl\.txt</regexp>
