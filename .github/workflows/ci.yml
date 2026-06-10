@@ -38,7 +38,7 @@ jobs:
   pre_commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v9.3.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v18.7.1
 
   test_run_check:
     name: "Test run check"
@@ -64,12 +64,12 @@ jobs:
       - test_run_check
     if: needs.test_run_check.outputs.tests == 'true'
     steps:
-      - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
+      - uses: actions/checkout@v6
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.7.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.7.1
       - name: "Clean-up SNAPSHOT artifacts"
         run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
-      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v9.3.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v18.7.1
         continue-on-error: true
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
@@ -82,21 +82,21 @@ jobs:
       - test_run_check
     if: needs.test_run_check.outputs.tests == 'true' && github.actor != 'dependabot[bot]'
     steps:
-      - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
+      - uses: actions/checkout@v6
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.7.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.7.1
       - name: "Login to Docker Hub"
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-download-file@v9.3.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-download-file@v18.7.1
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           repository: "Alfresco/veracode-baseline-archive"
@@ -117,7 +117,7 @@ jobs:
           zip -d to-scan/alfresco-transform*.jar "BOOT-INF/lib/bcmail-jdk18on-*.jar" "BOOT-INF/lib/bcprov-jdk18on-*.jar" "BOOT-INF/lib/aspectjweaver*.jar"
           zip -r to-scan.zip to-scan
       - name: "Run SAST Scan"
-        uses: veracode/Veracode-pipeline-scan-action@v1.0.16
+        uses: veracode/Veracode-pipeline-scan-action@v1.0.22
         with:
           vid: ${{ secrets.VERACODE_API_ID }}
           vkey: ${{ secrets.VERACODE_API_KEY }}
@@ -136,7 +136,7 @@ jobs:
         run: zip readable_output.zip results.json
       - name: Upload Artifact
         if: success() || failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Veracode Pipeline-Scan Results (Human Readable)
           path: readable_output.zip
@@ -148,10 +148,10 @@ jobs:
       - test_run_check
     if: needs.test_run_check.outputs.tests == 'true' && github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v9.3.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
-      - uses: Alfresco/ya-pmd-scan@v4.1.0
+      - uses: actions/checkout@v6
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.7.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.7.1
+      - uses: Alfresco/ya-pmd-scan@v4.4.1
         with:
           classpath-build-command: "mvn -ntp package -DskipTests"
 
@@ -163,16 +163,16 @@ jobs:
       - test_run_check
     if: needs.test_run_check.outputs.tests == 'true'
     steps:
-      - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
+      - uses: actions/checkout@v6
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.7.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.7.1
       - name: "Login to Docker Hub"
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
@@ -222,16 +222,16 @@ jobs:
             buildProfile: full-build
             testProfile: aio-test
     steps:
-      - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
+      - uses: actions/checkout@v6
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.7.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.7.1
       - name: "Login to Docker Hub"
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
@@ -263,16 +263,16 @@ jobs:
       matrix:
         java: [ '21', '25' ]
     steps:
-      - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
+      - uses: actions/checkout@v6
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.7.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.7.1
       - name: "Login to Docker Hub"
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
@@ -306,23 +306,23 @@ jobs:
       github.event_name != 'pull_request' &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'SP/') || startsWith(github.ref_name, 'HF/'))
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v9.3.1
-      - uses: actions/checkout@v4
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.7.1
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.7.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.7.1
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
         with:
           platforms: linux/amd64,linux/arm64
       - name: "Login to Docker Hub"
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
@@ -333,7 +333,7 @@ jobs:
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
         run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v9.3.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v18.7.1
         with:
           username: ${{ env.GIT_USERNAME }}
           email: ${{ env.GIT_EMAIL }}
