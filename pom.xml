@@ -218,10 +218,15 @@
                 <artifactId>commons-codec</artifactId>
                 <version>1.17.2</version>
             </dependency>
-            <!-- temporary security fix CVE-2026-5598 / CVE-2026-0636 -->
+            <!-- temporary security fix CVE-2026-5598 / CVE-2026-0636 / CVE-2026-5588 -->
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk18on</artifactId>
+                <version>${dependency.bcprov.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk18on</artifactId>
                 <version>${dependency.bcprov.version}</version>
             </dependency>
             <dependency>

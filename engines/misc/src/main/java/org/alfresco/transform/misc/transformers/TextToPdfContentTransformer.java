@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
 import static org.alfresco.transform.common.RequestParamMap.PAGE_LIMIT;
 import static org.alfresco.transform.common.RequestParamMap.PDF_FONT;
 import static org.alfresco.transform.common.RequestParamMap.PDF_FONT_SIZE;
@@ -149,8 +150,10 @@ public class TextToPdfContentTransformer implements CustomTransformerFileAdaptor
 
     @Override
     public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> transformOptions,
-            final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
+            File sourceFile, File targetFile, TransformManager transformManager) throws Exception
     {
+        sourceFile = assertWithinTempDir(sourceFile);
+        targetFile = assertWithinTempDir(targetFile);
         String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
         String stringPageLimit = transformOptions.get(PAGE_LIMIT);
         int pageLimit = -1;

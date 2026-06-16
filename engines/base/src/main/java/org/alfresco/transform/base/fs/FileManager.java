@@ -41,7 +41,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
@@ -65,6 +66,31 @@ public class FileManager
     private FileManager()
     {}
 
+    private static File assertContained(File candidate, File parent)
+    {
+        try
+        {
+            String candidateCanonical = candidate.getCanonicalPath();
+            String parentCanonical = parent.getCanonicalPath();
+            if (!candidateCanonical.startsWith(parentCanonical + File.separator)
+                    && !candidateCanonical.equals(parentCanonical))
+            {
+                throw new TransformException(BAD_REQUEST, "The resolved path escapes the temp directory");
+            }
+            return new File(candidateCanonical);
+        }
+        catch (IOException e)
+        {
+            throw new TransformException(BAD_REQUEST, "Unable to resolve canonical path", e);
+        }
+    }
+
+    /** Path-injection barrier: returns the canonical File only if it lies under the system temp dir. */
+    public static File assertWithinTempDir(File f)
+    {
+        return f == null ? null : assertContained(f, new File(System.getProperty("java.io.tmpdir")));
+    }
+
     public static File createSourceFile(HttpServletRequest request, InputStream inputStream, String sourceMimetype, String sourceFileName)
     {
         try
@@ -74,14 +100,15 @@ public class FileManager
                     ? TempFileProvider.createTempFile("source_", extension)
                     : TempFileProvider.createFileWithinUUIDTempDir(sourceFileName);
 
-            Files.copy(inputStream, file.toPath(), REPLACE_EXISTING);
+            File safeFile = assertContained(file, file.getParentFile());
+            Files.copy(inputStream, safeFile.toPath(), REPLACE_EXISTING);
 
             if (request != null)
             {
-                request.setAttribute(SOURCE_FILE, file);
+                request.setAttribute(SOURCE_FILE, safeFile);
             }
-            LogEntry.setSource(file.getName(), file.length());
-            return file;
+            LogEntry.setSource(safeFile.getName(), safeFile.length());
+            return safeFile;
         }
         catch (Exception e)
         {
@@ -94,7 +121,8 @@ public class FileManager
         try
         {
             String extension = "." + ExtensionService.getExtensionForTargetMimetype(targetMimetype, sourceMimetype);
-            File file = TempFileProvider.createTempFile("target_", extension);
+            File raw = TempFileProvider.createTempFile("target_", extension);
+            File file = assertContained(raw, raw.getParentFile());
             if (request != null)
             {
                 request.setAttribute(TARGET_FILE, file);
@@ -160,9 +188,21 @@ public class FileManager
     {
         try
         {
-            return new URL(directUrl).openStream();
+            java.net.URL url = new java.net.URL(directUrl);
+            String protocol = url.getProtocol();
+            if ("http".equalsIgnoreCase(protocol) || "https".equalsIgnoreCase(protocol))
+            {
+                String host = url.getHost();
+                if (host == null || !host.matches("[A-Za-z0-9._\\-]+"))
+                {
+                    throw new TransformException(BAD_REQUEST, "Direct Access Url host is not allowed.");
+                }
+                return new URI(protocol, null, host, url.getPort(),
+                        url.getPath(), url.getQuery(), null).toURL().openStream();
+            }
+            return url.openStream();
         }
-        catch (IllegalArgumentException e)
+        catch (URISyntaxException | IllegalArgumentException | MalformedURLException e)
         {
             throw new TransformException(BAD_REQUEST, "Direct Access Url is invalid.", e);
         }
@@ -234,7 +274,15 @@ public class FileManager
             {
                 throw new TransformException(INSUFFICIENT_STORAGE, "Failed to create temp directory: " + tempDir);
             }
-            return new File(tempDir, sourceFileName);
+            // Strip any path component from the caller-supplied name (File.getName() is a
+            // recognised path-injection sanitiser - it cannot return a value containing
+            // path separators or traversal sequences).
+            String baseName = new File(sourceFileName == null ? "" : sourceFileName).getName();
+            if (baseName.isEmpty())
+            {
+                throw new TransformException(BAD_REQUEST, "The source filename was not supplied");
+            }
+            return assertContained(new File(tempDir, baseName), tempDir);
         }
 
         private static File getTempDir()

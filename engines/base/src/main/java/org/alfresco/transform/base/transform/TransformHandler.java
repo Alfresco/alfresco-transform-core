@@ -32,6 +32,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
+import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
 import static org.alfresco.transform.base.fs.FileManager.createAttachment;
 import static org.alfresco.transform.base.fs.FileManager.createTargetFile;
 import static org.alfresco.transform.base.fs.FileManager.getDirectAccessUrlInputStream;
@@ -378,6 +379,7 @@ public class TransformHandler
 
     private OutputStream getOutputStreamFromFile(File targetFile) throws IOException
     {
+        targetFile = assertWithinTempDir(targetFile);
         return new BufferedOutputStream(new FileOutputStream(targetFile));
     }
 
