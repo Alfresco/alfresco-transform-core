@@ -285,9 +285,9 @@ public class FileManager
                 throw new TransformException(INSUFFICIENT_STORAGE, "Failed to create temp directory: " + tempDir);
             }
             String baseName = new File(sourceFileName == null ? "" : sourceFileName).getName();
-            if (baseName.isEmpty())
+            if (baseName.isEmpty() || ".".equals(baseName) || "..".equals(baseName))
             {
-                throw new TransformException(BAD_REQUEST, "The source filename was not supplied");
+                throw new TransformException(BAD_REQUEST, "The source filename is invalid");
             }
             return assertContained(new File(tempDir, baseName), tempDir);
         }
