@@ -29,6 +29,8 @@ package org.alfresco.transform.libreoffice.transformers;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
+import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -137,6 +139,8 @@ public class LibreOfficeTransformer implements JavaExecutor, CustomTransformerFi
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
             File sourceFile, File targetFile, TransformManager transformManager)
     {
+        sourceFile = assertWithinTempDir(sourceFile);
+        targetFile = assertWithinTempDir(targetFile);
         call(sourceFile, targetFile);
     }
 

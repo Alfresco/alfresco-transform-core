@@ -26,6 +26,8 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,8 +70,10 @@ public class OOXMLThumbnailContentTransformer implements CustomTransformerFileAd
 
     @Override
     public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> parameters,
-            final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
+            File sourceFile, File targetFile, TransformManager transformManager) throws Exception
     {
+        sourceFile = assertWithinTempDir(sourceFile);
+        targetFile = assertWithinTempDir(targetFile);
         if (logger.isDebugEnabled())
         {
             logger.debug("Performing OOXML to jpeg transform with sourceMimetype=" + sourceMimetype

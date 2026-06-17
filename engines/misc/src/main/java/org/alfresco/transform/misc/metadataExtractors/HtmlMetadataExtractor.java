@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.misc.metadataExtractors;
 
+import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
 import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
 
 import java.io.File;
@@ -104,7 +105,7 @@ public class HtmlMetadataExtractor extends AbstractMetadataExtractorEmbedder
 
         // This Extractor retries if the encoding needs to be changed, so we need to reread the source,
         // so cannot use the input stream provided, as it will get closed.
-        final File sourceFile = transformManager.createSourceFile();
+        final File sourceFile = assertWithinTempDir(transformManager.createSourceFile());
 
         HTMLEditorKit.ParserCallback callback = new HTMLEditorKit.ParserCallback() {
             StringBuffer title = null;

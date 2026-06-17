@@ -34,6 +34,9 @@ env:
   GIT_PASSWORD: ${{ secrets.BOT_GITHUB_TOKEN }}
   GITHUB_ACTIONS_DEPLOY_TIMEOUT: 120
 
+permissions:
+  contents: read
+
 jobs:
   pre_commit:
     runs-on: ubuntu-latest

@@ -30,6 +30,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import static org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
+import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
 
 import java.io.File;
 import java.util.Map;
@@ -48,6 +49,7 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
     @Override
     public void run(Map<String, String> properties, File targetFile, Long timeout)
     {
+        targetFile = assertWithinTempDir(targetFile);
         timeout = timeout != null && timeout > 0 ? timeout : 0;
         final ExecutionResult result = transformCommand.execute(properties, timeout);
 

@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_MULTIPART_ALTERNATIVE;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
@@ -81,6 +82,8 @@ public class EMLTransformer implements CustomTransformerFileAdaptor
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
             File sourceFile, File targetFile, TransformManager transformManager) throws Exception
     {
+        sourceFile = assertWithinTempDir(sourceFile);
+        targetFile = assertWithinTempDir(targetFile);
         logger.debug("Performing RFC822 to text transform.");
         // Use try with resource
         try (InputStream contentInputStream = new BufferedInputStream(
