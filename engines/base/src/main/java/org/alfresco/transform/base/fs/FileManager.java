@@ -58,6 +58,7 @@ import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.common.ExtensionService;
 import org.alfresco.transform.exceptions.TransformException;
 
+@SuppressWarnings("PMD.GodClass")
 public class FileManager
 {
     public static final String SOURCE_FILE = "sourceFile";
@@ -66,7 +67,7 @@ public class FileManager
     private FileManager()
     {}
 
-    private static File assertContained(File candidate, File parent)
+    static File assertContained(File candidate, File parent)
     {
         try
         {
@@ -85,12 +86,10 @@ public class FileManager
         }
     }
 
-    /** Path-injection barrier: returns the canonical File only if it lies under the system temp dir. */
     public static File assertWithinTempDir(File f)
     {
         return f == null ? null : assertContained(f, new File(System.getProperty("java.io.tmpdir")));
     }
-
     public static File createSourceFile(HttpServletRequest request, InputStream inputStream, String sourceMimetype, String sourceFileName)
     {
         try
@@ -200,7 +199,12 @@ public class FileManager
                 return new URI(protocol, null, host, url.getPort(),
                         url.getPath(), url.getQuery(), null).toURL().openStream();
             }
-            return url.openStream();
+            if ("file".equalsIgnoreCase(protocol))
+            {
+                File f = assertWithinTempDir(new File(url.toURI()));
+                return new java.io.FileInputStream(f);
+            }
+            throw new TransformException(BAD_REQUEST, "Direct Access Url protocol is not allowed.");
         }
         catch (URISyntaxException | IllegalArgumentException | MalformedURLException e)
         {
@@ -274,9 +278,6 @@ public class FileManager
             {
                 throw new TransformException(INSUFFICIENT_STORAGE, "Failed to create temp directory: " + tempDir);
             }
-            // Strip any path component from the caller-supplied name (File.getName() is a
-            // recognised path-injection sanitiser - it cannot return a value containing
-            // path separators or traversal sequences).
             String baseName = new File(sourceFileName == null ? "" : sourceFileName).getName();
             if (baseName.isEmpty())
             {
