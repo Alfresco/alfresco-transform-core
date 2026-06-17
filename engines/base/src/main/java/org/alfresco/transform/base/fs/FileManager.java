@@ -207,7 +207,7 @@ public class FileManager
             if ("file".equalsIgnoreCase(protocol))
             {
                 File f = assertWithinTempDir(new File(url.toURI()));
-                return new java.io.FileInputStream(f);
+                return Files.newInputStream(f.toPath());
             }
             throw new TransformException(BAD_REQUEST, "Direct Access Url protocol is not allowed.");
         }
