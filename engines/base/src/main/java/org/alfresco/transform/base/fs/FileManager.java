@@ -43,6 +43,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
@@ -192,7 +193,7 @@ public class FileManager
     {
         try
         {
-            java.net.URL url = new java.net.URL(directUrl);
+            URL url = new URL(directUrl);
             String protocol = url.getProtocol();
             if ("http".equalsIgnoreCase(protocol) || "https".equalsIgnoreCase(protocol))
             {
@@ -206,8 +207,8 @@ public class FileManager
             }
             if ("file".equalsIgnoreCase(protocol))
             {
-                File f = assertWithinTempDir(new File(url.toURI()));
-                return Files.newInputStream(f.toPath());
+                File localFile = assertWithinTempDir(new File(url.toURI()));
+                return Files.newInputStream(localFile.toPath());
             }
             throw new TransformException(BAD_REQUEST, "Direct Access Url protocol is not allowed.");
         }
