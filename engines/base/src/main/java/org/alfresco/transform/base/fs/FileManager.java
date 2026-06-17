@@ -73,8 +73,8 @@ public class FileManager
         {
             String candidateCanonical = candidate.getCanonicalPath();
             String parentCanonical = parent.getCanonicalPath();
-            if (!candidateCanonical.startsWith(parentCanonical + File.separator)
-                    && !candidateCanonical.equals(parentCanonical))
+            if (!candidateCanonical.equals(parentCanonical)
+                    && !candidateCanonical.startsWith(parentCanonical + File.separator))
             {
                 throw new TransformException(BAD_REQUEST, "The resolved path escapes the temp directory");
             }
@@ -86,10 +86,15 @@ public class FileManager
         }
     }
 
-    public static File assertWithinTempDir(File f)
+    public static File assertWithinTempDir(File file)
     {
-        return f == null ? null : assertContained(f, new File(System.getProperty("java.io.tmpdir")));
+        if (file == null)
+        {
+            return null;
+        }
+        return assertContained(file, new File(System.getProperty("java.io.tmpdir")));
     }
+
     public static File createSourceFile(HttpServletRequest request, InputStream inputStream, String sourceMimetype, String sourceFileName)
     {
         try
