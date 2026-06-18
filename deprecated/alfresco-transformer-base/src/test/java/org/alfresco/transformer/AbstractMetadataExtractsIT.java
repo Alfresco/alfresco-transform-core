@@ -120,6 +120,10 @@ public abstract class AbstractMetadataExtractsIT
 
     private Map<String, Serializable> readExpectedMetadata(String filename, File actualMetadataFile) throws IOException
     {
+        if (filename.contains("..") || filename.contains("/") || filename.contains("\\"))
+        {
+            throw new IllegalArgumentException("Invalid expected metadata filename: " + filename);
+        }
         try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(filename))
         {
             if (inputStream == null)
