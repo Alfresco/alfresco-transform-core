@@ -725,11 +725,7 @@ public class RuntimeExec
             throw new IllegalArgumentException("Command property '" + key + "' must not be blank");
         }
 
-        if (value.indexOf('"') >= 0 || value.indexOf('\'') >= 0 || value.indexOf('`') >= 0)
-        {
-            throw new IllegalArgumentException(
-                    "Command property '" + key + "' contains an illegal character");
-        }
+        // Allow quotes/backticks in paths; this class executes via Runtime.exec(String[]) (no shell parsing)
 
         File file = new File(value);
         if (!file.isAbsolute())
