@@ -666,11 +666,11 @@ public class RuntimeExec
             for (Map.Entry<String, String> entry : execProperties.entrySet())
             {
                 String key = entry.getKey();
-                String value = entry.getValue();
-                // ignore null
-                if (value == null)
+                String value = entry.getValue() == null ? "" : entry.getValue();
+                if (value.contains("\n") || value.contains("\r") || value.contains("\0"))
                 {
-                    value = "";
+                    throw new IllegalArgumentException(
+                            "Command property '" + key + "' contains an illegal character");
                 }
                 // progressively replace the property in the command
                 key = (VAR_OPEN + key + VAR_CLOSE);

@@ -100,7 +100,8 @@ public abstract class AbstractMetadataExtractsIT
 
             String metadataFilename = sourceFile + "_metadata.json";
             Map<String, Serializable> actualMetadata = readMetadata(response.getBody().getInputStream());
-            File actualMetadataFile = new File(metadataFilename);
+            File actualMetadataFile = new File(System.getProperty("java.io.tmpdir"),
+                    new File(metadataFilename).getName());
             jsonObjectMapper.writerWithDefaultPrettyPrinter().writeValue(actualMetadataFile, actualMetadata);
 
             Map<String, Serializable> expectedMetadata = readExpectedMetadata(metadataFilename, actualMetadataFile);
