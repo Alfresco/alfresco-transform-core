@@ -43,7 +43,6 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
@@ -98,6 +97,14 @@ public class FileManager
 
     public static File createSourceFile(HttpServletRequest request, InputStream inputStream, String sourceMimetype, String sourceFileName)
     {
+        if (!StringUtils.isEmpty(sourceFileName))
+        {
+            String baseName = new File(sourceFileName).getName();
+            if (baseName.isEmpty() || ".".equals(baseName) || "..".equals(baseName))
+            {
+                throw new TransformException(BAD_REQUEST, "The source filename is invalid");
+            }
+        }
         try
         {
             String extension = "." + getExtensionForMimetype(sourceMimetype);
@@ -193,21 +200,21 @@ public class FileManager
     {
         try
         {
-            URL url = new URL(directUrl);
-            String protocol = url.getProtocol();
+            // Parse without re-encoding so pre-signed URL query strings are forwarded verbatim.
+            URI uri = new URI(directUrl);
+            String protocol = uri.getScheme();
             if ("http".equalsIgnoreCase(protocol) || "https".equalsIgnoreCase(protocol))
             {
-                String host = url.getHost();
+                String host = uri.getHost();
                 if (host == null || !host.matches("[A-Za-z0-9._\\-]+"))
                 {
                     throw new TransformException(BAD_REQUEST, "Direct Access Url host is not allowed.");
                 }
-                return new URI(protocol, null, host, url.getPort(),
-                        url.getPath(), url.getQuery(), null).toURL().openStream();
+                return uri.toURL().openStream();
             }
             if ("file".equalsIgnoreCase(protocol))
             {
-                File localFile = assertWithinTempDir(new File(url.toURI()));
+                File localFile = assertWithinTempDir(new File(uri));
                 return Files.newInputStream(localFile.toPath());
             }
             throw new TransformException(BAD_REQUEST, "Direct Access Url protocol is not allowed.");
@@ -285,10 +292,6 @@ public class FileManager
                 throw new TransformException(INSUFFICIENT_STORAGE, "Failed to create temp directory: " + tempDir);
             }
             String baseName = new File(sourceFileName == null ? "" : sourceFileName).getName();
-            if (baseName.isEmpty() || ".".equals(baseName) || "..".equals(baseName))
-            {
-                throw new TransformException(BAD_REQUEST, "The source filename is invalid");
-            }
             return assertContained(new File(tempDir, baseName), tempDir);
         }
 
