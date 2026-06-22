@@ -192,9 +192,7 @@ public class FileManager
     {
         try
         {
-            // Parse without re-encoding so pre-signed URL query strings (e.g. S3/Azure) are
-            // forwarded verbatim. The 7-arg URI constructor would percent-encode the query,
-            // turning '%' into '%25' and invalidating any pre-computed signature (ACS-12053).
+            // Parse without re-encoding so pre-signed URL query strings are forwarded verbatim.
             URI uri = new URI(directUrl);
             String protocol = uri.getScheme();
             if ("http".equalsIgnoreCase(protocol) || "https".equalsIgnoreCase(protocol))
