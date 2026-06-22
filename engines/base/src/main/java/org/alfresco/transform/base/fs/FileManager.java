@@ -97,6 +97,14 @@ public class FileManager
 
     public static File createSourceFile(HttpServletRequest request, InputStream inputStream, String sourceMimetype, String sourceFileName)
     {
+        if (!StringUtils.isEmpty(sourceFileName))
+        {
+            String baseName = new File(sourceFileName).getName();
+            if (baseName.isEmpty() || ".".equals(baseName) || "..".equals(baseName))
+            {
+                throw new TransformException(BAD_REQUEST, "The source filename is invalid");
+            }
+        }
         try
         {
             String extension = "." + getExtensionForMimetype(sourceMimetype);
@@ -284,10 +292,6 @@ public class FileManager
                 throw new TransformException(INSUFFICIENT_STORAGE, "Failed to create temp directory: " + tempDir);
             }
             String baseName = new File(sourceFileName == null ? "" : sourceFileName).getName();
-            if (baseName.isEmpty() || ".".equals(baseName) || "..".equals(baseName))
-            {
-                throw new TransformException(BAD_REQUEST, "The source filename is invalid");
-            }
             return assertContained(new File(tempDir, baseName), tempDir);
         }
 
