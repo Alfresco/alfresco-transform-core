@@ -41,8 +41,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.UUID;
@@ -193,26 +191,9 @@ public class FileManager
     {
         try
         {
-            URL url = new URL(directUrl);
-            String protocol = url.getProtocol();
-            if ("http".equalsIgnoreCase(protocol) || "https".equalsIgnoreCase(protocol))
-            {
-                String host = url.getHost();
-                if (host == null || !host.matches("[A-Za-z0-9._\\-]+"))
-                {
-                    throw new TransformException(BAD_REQUEST, "Direct Access Url host is not allowed.");
-                }
-                return new URI(protocol, null, host, url.getPort(),
-                        url.getPath(), url.getQuery(), null).toURL().openStream();
-            }
-            if ("file".equalsIgnoreCase(protocol))
-            {
-                File localFile = assertWithinTempDir(new File(url.toURI()));
-                return Files.newInputStream(localFile.toPath());
-            }
-            throw new TransformException(BAD_REQUEST, "Direct Access Url protocol is not allowed.");
+            return new URL(directUrl).openStream();
         }
-        catch (URISyntaxException | IllegalArgumentException | MalformedURLException e)
+        catch (IllegalArgumentException e)
         {
             throw new TransformException(BAD_REQUEST, "Direct Access Url is invalid.", e);
         }
@@ -284,12 +265,7 @@ public class FileManager
             {
                 throw new TransformException(INSUFFICIENT_STORAGE, "Failed to create temp directory: " + tempDir);
             }
-            String baseName = new File(sourceFileName == null ? "" : sourceFileName).getName();
-            if (baseName.isEmpty() || ".".equals(baseName) || "..".equals(baseName))
-            {
-                throw new TransformException(BAD_REQUEST, "The source filename is invalid");
-            }
-            return assertContained(new File(tempDir, baseName), tempDir);
+            return new File(tempDir, sourceFileName);
         }
 
         private static File getTempDir()
