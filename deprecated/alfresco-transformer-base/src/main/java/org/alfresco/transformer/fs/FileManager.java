@@ -107,8 +107,8 @@ public class FileManager
      */
     private static String checkFilename(boolean source, String filename)
     {
-        filename = filename == null ? "" : new File(filename).getName();
-        if (filename.isEmpty())
+        filename = getFilename(filename);
+        if (filename == null || filename.isEmpty())
         {
             String sourceOrTarget = source ? "source" : "target";
             HttpStatus statusCode = source ? BAD_REQUEST : INTERNAL_SERVER_ERROR;
