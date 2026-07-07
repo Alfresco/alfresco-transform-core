@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.6</version>
+        <version>4.0.7</version>
     </parent>
 
     <properties>
@@ -40,7 +40,6 @@
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
         <commons-lang3.version>3.18.0</commons-lang3.version>
-        <logback.version>1.5.33</logback.version>
         <spring-retry.version>2.0.12</spring-retry.version>
     </properties>
 
