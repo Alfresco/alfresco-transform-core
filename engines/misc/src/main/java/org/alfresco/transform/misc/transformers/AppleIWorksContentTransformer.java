@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 
 import java.io.BufferedInputStream;
@@ -83,6 +84,8 @@ public class AppleIWorksContentTransformer implements CustomTransformerFileAdapt
     public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
             File sourceFile, File targetFile, TransformManager transformManager)
     {
+        sourceFile = assertWithinTempDir(sourceFile);
+        targetFile = assertWithinTempDir(targetFile);
         logger.debug("Performing IWorks to jpeg transform with sourceMimetype={} targetMimetype={}",
                 sourceMimetype, targetMimetype);
 

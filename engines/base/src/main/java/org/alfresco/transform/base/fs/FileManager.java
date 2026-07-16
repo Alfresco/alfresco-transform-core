@@ -57,6 +57,7 @@ import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.common.ExtensionService;
 import org.alfresco.transform.exceptions.TransformException;
 
+@SuppressWarnings("PMD.GodClass")
 public class FileManager
 {
     public static final String SOURCE_FILE = "sourceFile";
@@ -64,6 +65,34 @@ public class FileManager
 
     private FileManager()
     {}
+
+    static File assertContained(File candidate, File parent)
+    {
+        try
+        {
+            String candidateCanonical = candidate.getCanonicalPath();
+            String parentCanonical = parent.getCanonicalPath();
+            if (!candidateCanonical.equals(parentCanonical)
+                    && !candidateCanonical.startsWith(parentCanonical + File.separator))
+            {
+                throw new TransformException(BAD_REQUEST, "The resolved path escapes the temp directory");
+            }
+            return new File(candidateCanonical);
+        }
+        catch (IOException e)
+        {
+            throw new TransformException(BAD_REQUEST, "Unable to resolve canonical path", e);
+        }
+    }
+
+    public static File assertWithinTempDir(File file)
+    {
+        if (file == null)
+        {
+            return null;
+        }
+        return assertContained(file, new File(System.getProperty("java.io.tmpdir")));
+    }
 
     public static File createSourceFile(HttpServletRequest request, InputStream inputStream, String sourceMimetype, String sourceFileName)
     {
@@ -74,14 +103,15 @@ public class FileManager
                     ? TempFileProvider.createTempFile("source_", extension)
                     : TempFileProvider.createFileWithinUUIDTempDir(sourceFileName);
 
-            Files.copy(inputStream, file.toPath(), REPLACE_EXISTING);
+            File safeFile = assertContained(file, file.getParentFile());
+            Files.copy(inputStream, safeFile.toPath(), REPLACE_EXISTING);
 
             if (request != null)
             {
-                request.setAttribute(SOURCE_FILE, file);
+                request.setAttribute(SOURCE_FILE, safeFile);
             }
-            LogEntry.setSource(file.getName(), file.length());
-            return file;
+            LogEntry.setSource(safeFile.getName(), safeFile.length());
+            return safeFile;
         }
         catch (Exception e)
         {
@@ -94,7 +124,8 @@ public class FileManager
         try
         {
             String extension = "." + ExtensionService.getExtensionForTargetMimetype(targetMimetype, sourceMimetype);
-            File file = TempFileProvider.createTempFile("target_", extension);
+            File raw = TempFileProvider.createTempFile("target_", extension);
+            File file = assertContained(raw, raw.getParentFile());
             if (request != null)
             {
                 request.setAttribute(TARGET_FILE, file);

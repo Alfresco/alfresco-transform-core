@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -101,7 +102,8 @@ public abstract class AbstractMetadataExtractsIT
 
             String metadataFilename = sourceFile + "_metadata.json";
             Map<String, Serializable> actualMetadata = readMetadata(response.getBody().getInputStream());
-            File actualMetadataFile = new File(metadataFilename);
+            File actualMetadataFile = Files.createTempFile(
+                    "actual-" + new File(sourceFile).getName() + "-", ".json").toFile();
             jsonObjectMapper.writerWithDefaultPrettyPrinter().writeValue(actualMetadataFile, actualMetadata);
 
             Map<String, Serializable> expectedMetadata = readExpectedMetadata(metadataFilename, actualMetadataFile);
@@ -118,6 +120,10 @@ public abstract class AbstractMetadataExtractsIT
 
     private Map<String, Serializable> readExpectedMetadata(String filename, File actualMetadataFile) throws IOException
     {
+        if (filename.contains("..") || filename.contains("/") || filename.contains("\\"))
+        {
+            throw new IllegalArgumentException("Invalid expected metadata filename: " + filename);
+        }
         try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(filename))
         {
             if (inputStream == null)

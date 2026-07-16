@@ -666,12 +666,8 @@ public class RuntimeExec
             for (Map.Entry<String, String> entry : execProperties.entrySet())
             {
                 String key = entry.getKey();
-                String value = entry.getValue();
-                // ignore null
-                if (value == null)
-                {
-                    value = "";
-                }
+                String value = entry.getValue() == null ? "" : entry.getValue();
+                validateCommandPropertyValue(key, value);
                 // progressively replace the property in the command
                 key = (VAR_OPEN + key + VAR_CLOSE);
                 int index = sb.indexOf(key);
@@ -702,6 +698,55 @@ public class RuntimeExec
         }
         // done
         return adjustedCommandElements.toArray(new String[0]);
+    }
+
+    private void validateCommandPropertyValue(String key, String value)
+    {
+        if (value.contains("\n") || value.contains("\r") || value.contains("\0"))
+        {
+            throw new IllegalArgumentException(
+                    "Command property '" + key + "' contains an illegal character");
+        }
+
+        if ("source".equals(key) || "target".equals(key))
+        {
+            validatePathProperty(key, value);
+        }
+        else if ("sourceMimetype".equals(key) || "targetMimetype".equals(key))
+        {
+            validateMimetypeProperty(key, value);
+        }
+    }
+
+    private void validatePathProperty(String key, String value)
+    {
+        if (value.isBlank())
+        {
+            throw new IllegalArgumentException("Command property '" + key + "' must not be blank");
+        }
+
+        // Allow quotes/backticks in paths; this class executes via Runtime.exec(String[]) (no shell parsing)
+
+        File file = new File(value);
+        if (!file.isAbsolute())
+        {
+            throw new IllegalArgumentException(
+                    "Command property '" + key + "' must be an absolute path");
+        }
+    }
+
+    private void validateMimetypeProperty(String key, String value)
+    {
+        if (value.isBlank())
+        {
+            throw new IllegalArgumentException("Command property '" + key + "' must not be blank");
+        }
+
+        if (!value.matches("^[a-zA-Z0-9!#$&^_.+-]+/[a-zA-Z0-9!#$&^_.+-]+$"))
+        {
+            throw new IllegalArgumentException(
+                    "Command property '" + key + "' is not a valid mimetype");
+        }
     }
 
     /**

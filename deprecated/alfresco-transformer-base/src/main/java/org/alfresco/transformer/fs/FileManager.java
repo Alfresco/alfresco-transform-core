@@ -83,12 +83,14 @@ public class FileManager
     {
         filename = checkFilename(false, filename);
         LogEntry.setTarget(filename);
-        return TempFileProvider.createTempFile("target_", "_" + filename);
+        File created = TempFileProvider.createTempFile("target_", "_" + filename);
+        return assertInsideTempDir(created);
     }
 
     public static void deleteFile(final File file) throws Exception
     {
-        if (!file.delete())
+        final File safeFile = assertInsideTempDir(file);
+        if (!safeFile.delete())
         {
             throw new Exception("Failed to delete file");
         }
@@ -115,11 +117,32 @@ public class FileManager
         return filename;
     }
 
-    private static void save(MultipartFile multipartFile, File file)
+    private static File assertInsideTempDir(File candidate)
     {
         try
         {
-            Files.copy(multipartFile.getInputStream(), file.toPath(),
+            File tempRoot = TempFileProvider.getTempDir();
+            String candidateCanonical = candidate.getCanonicalPath();
+            String parentCanonical = tempRoot.getCanonicalPath();
+            if (!candidateCanonical.startsWith(parentCanonical + File.separator)
+                    && !candidateCanonical.equals(parentCanonical))
+            {
+                throw new TransformException(INTERNAL_SERVER_ERROR, "Resolved file escapes the temp directory");
+            }
+            return new File(candidateCanonical);
+        }
+        catch (IOException e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR, "Unable to resolve canonical path", e);
+        }
+    }
+
+    private static void save(MultipartFile multipartFile, File file)
+    {
+        final File safeFile = assertInsideTempDir(file);
+        try
+        {
+            Files.copy(multipartFile.getInputStream(), safeFile.toPath(),
                     StandardCopyOption.REPLACE_EXISTING);
         }
         catch (IOException e)
@@ -130,9 +153,10 @@ public class FileManager
 
     public static void save(Resource body, File file)
     {
+        final File safeFile = assertInsideTempDir(file);
         try
         {
-            Files.copy(body.getInputStream(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(body.getInputStream(), safeFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
         catch (IOException e)
         {
@@ -142,9 +166,10 @@ public class FileManager
 
     private static Resource load(File file)
     {
+        final File safeFile = assertInsideTempDir(file);
         try
         {
-            Resource resource = new UrlResource(file.toURI());
+            Resource resource = new UrlResource(safeFile.toURI());
             if (resource.exists() || resource.isReadable())
             {
                 return resource;
@@ -222,7 +247,7 @@ public class FileManager
         String filename = multipartFile.getOriginalFilename();
         long size = multipartFile.getSize();
         filename = checkFilename(true, filename);
-        File file = TempFileProvider.createTempFile("source_", "_" + filename);
+        File file = assertInsideTempDir(TempFileProvider.createTempFile("source_", "_" + filename));
         request.setAttribute(SOURCE_FILE, file);
         save(multipartFile, file);
         LogEntry.setSource(filename, size);

@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>5.4.3-A.6-SNAPSHOT</version>
+    <version>5.4.4-A.12-SNAPSHOT</version>
     <name>Alfresco Transform Core</name>
     <packaging>pom</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.6</version>
+        <version>4.0.7</version>
     </parent>
 
     <properties>
@@ -24,10 +24,17 @@
         <dependency.pdfbox.version>3.0.5</dependency.pdfbox.version>
         <dependency.alfresco-jodconverter-core.version>3.0.1.20</dependency.alfresco-jodconverter-core.version>
         <env.project_version>${project.version}</env.project_version>
+<<<<<<< HEAD
         <dependency.jackson2.version>2.21.2</dependency.jackson2.version>
         <dependency.jackson.annotations.version>2.21</dependency.jackson.annotations.version>
         <dependency.jackson.version>3.1.1</dependency.jackson.version>
         <dependency.tika.version>3.3.1</dependency.tika.version>
+=======
+        <dependency.jackson2.version>2.22.0</dependency.jackson2.version>
+        <dependency.jackson.annotations.version>2.22</dependency.jackson.annotations.version>
+        <dependency.jackson.version>3.2.0</dependency.jackson.version>
+        <dependency.tika.version>3.2.3</dependency.tika.version>
+>>>>>>> origin/master
         <dependency.poi.version>5.4.1</dependency.poi.version>
         <dependency.bcprov.version>1.84</dependency.bcprov.version>
         <dependency.commons-io.version>2.20.0</dependency.commons-io.version>
@@ -218,10 +225,15 @@
                 <artifactId>commons-codec</artifactId>
                 <version>1.17.2</version>
             </dependency>
-            <!-- temporary security fix CVE-2026-5598 / CVE-2026-0636 -->
+            <!-- temporary security fix CVE-2026-5598 / CVE-2026-0636 / CVE-2026-5588 -->
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk18on</artifactId>
+                <version>${dependency.bcprov.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk18on</artifactId>
                 <version>${dependency.bcprov.version}</version>
             </dependency>
             <dependency>
@@ -339,6 +351,27 @@
                                 <includedLicenses>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/includedLicenses.txt</includedLicenses>
                                 <licenseMergesUrl>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/licenseMerges.txt</licenseMergesUrl>
                                 <overrideUrl>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/override-THIRD-PARTY.properties</overrideUrl>
+                                <licenseUrlReplacements>
+                                    <!-- www.gnu.org is unreachable over IPv6 (GitHub Actions) and blocked over IPv4 on some networks.
+                                         Remap all GNU license URLs to stable GitHub mirrors. Classpath/license.html is pinned to an OpenJDK commit SHA.
+                                         All other GNU URLs use the SPDX license-list-data mirror. -->
+                                    <licenseUrlReplacement>
+                                        <regexp>https?://www\.gnu\.org/licenses/old-licenses/lgpl-2\.1\.html</regexp>
+                                        <replacement>https://raw.githubusercontent.com/spdx/license-list-data/main/text/LGPL-2.1-only.txt</replacement>
+                                    </licenseUrlReplacement>
+                                    <licenseUrlReplacement>
+                                        <regexp>https?://www\.gnu\.org/software/classpath/license\.html</regexp>
+                                        <replacement>https://raw.githubusercontent.com/openjdk/jdk/d3f2498ed72089301a49ddf0bc7bd2df54368033/LICENSE</replacement>
+                                    </licenseUrlReplacement>
+                                    <licenseUrlReplacement>
+                                        <regexp>https?://www\.gnu\.org/licenses/lgpl\.txt</regexp>
+                                        <replacement>https://raw.githubusercontent.com/spdx/license-list-data/main/text/LGPL-3.0-only.txt</replacement>
+                                    </licenseUrlReplacement>
+                                    <licenseUrlReplacement>
+                                        <regexp>https?://www\.gnu\.org/licenses/gpl\.txt</regexp>
+                                        <replacement>https://raw.githubusercontent.com/spdx/license-list-data/main/text/GPL-3.0-only.txt</replacement>
+                                    </licenseUrlReplacement>
+                                </licenseUrlReplacements>
                             </configuration>
                         </execution>
                         <execution>

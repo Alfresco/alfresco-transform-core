@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_ENCODING;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_ENCODING;
 
@@ -79,8 +80,10 @@ public class StringExtractingContentTransformer implements CustomTransformerFile
      */
     @Override
     public void transform(final String sourceMimetype, final String targetMimetype, final Map<String, String> transformOptions,
-            final File sourceFile, final File targetFile, TransformManager transformManager) throws Exception
+            File sourceFile, File targetFile, TransformManager transformManager) throws Exception
     {
+        sourceFile = assertWithinTempDir(sourceFile);
+        targetFile = assertWithinTempDir(targetFile);
         String sourceEncoding = transformOptions.get(SOURCE_ENCODING);
         String targetEncoding = transformOptions.get(TARGET_ENCODING);
 
