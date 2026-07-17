@@ -27,7 +27,7 @@
         <dependency.jackson2.version>2.22.0</dependency.jackson2.version>
         <dependency.jackson.annotations.version>2.22</dependency.jackson.annotations.version>
         <dependency.jackson.version>3.2.0</dependency.jackson.version>
-        <dependency.tika.version>3.2.3</dependency.tika.version>
+        <dependency.tika.version>3.3.1</dependency.tika.version>
         <dependency.poi.version>5.4.1</dependency.poi.version>
         <dependency.bcprov.version>1.84</dependency.bcprov.version>
         <dependency.commons-io.version>2.20.0</dependency.commons-io.version>
