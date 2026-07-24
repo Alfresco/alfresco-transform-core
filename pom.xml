@@ -216,7 +216,7 @@
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.17.2</version>
+                <version>1.22.0</version>
             </dependency>
             <!-- temporary security fix CVE-2026-5598 / CVE-2026-0636 / CVE-2026-5588 -->
             <dependency>
