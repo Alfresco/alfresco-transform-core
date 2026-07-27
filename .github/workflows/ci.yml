@@ -31,8 +31,12 @@ env:
   QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
   GIT_USERNAME: ${{ secrets.BOT_GITHUB_USERNAME }}
   GIT_EMAIL: ${{ secrets.BOT_GITHUB_EMAIL }}
-  GIT_PASSWORD: ${{ secrets.BOT_GITHUB_TOKEN }}
   GITHUB_ACTIONS_DEPLOY_TIMEOUT: 120
+  # Both variables are required to be set before the release process starts.
+  # As the release is triggered by a commit message with "[release]" keyword on a release branch,
+  # setting these variables to new values can be done in the same commit and will indicate the release and the dev versions in it.
+  RELEASE_VERSION: "5.4.5-A.1" # The version of the release (tag).
+  DEVELOPMENT_VERSION: "5.4.5-A.2-SNAPSHOT" # The version that will be set in pom files after the release (next dev version)
 
 permissions:
   contents: read
@@ -66,7 +70,7 @@ jobs:
       - test_run_check
     if: needs.test_run_check.outputs.tests == 'true' && github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v9.3.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
       - uses: Alfresco/ya-pmd-scan@v4.1.0
@@ -81,7 +85,7 @@ jobs:
       - test_run_check
     if: needs.test_run_check.outputs.tests == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
       - name: "Login to Docker Hub"
@@ -140,7 +144,7 @@ jobs:
             buildProfile: full-build
             testProfile: aio-test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
       - name: "Login to Docker Hub"
@@ -181,7 +185,7 @@ jobs:
       matrix:
         java: [ '21', '25' ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
       - name: "Login to Docker Hub"
@@ -224,16 +228,25 @@ jobs:
       github.event_name != 'pull_request' &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'SP/') || startsWith(github.ref_name, 'HF/'))
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v9.3.1
-      - uses: actions/checkout@v4
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          persist-credentials: false
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
+          client-id: ${{ vars.GH_APP_ENGINEERING_CONTRIB_CLIENT_ID }}
+          private-key: ${{ secrets.GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY }}
+          permission-contents: write
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.18.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.18.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.18.0
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
           platforms: linux/amd64,linux/arm64
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
       - name: "Login to Docker Hub"
         uses: docker/login-action@v3
         with:
@@ -251,7 +264,7 @@ jobs:
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
         run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v9.3.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v18.18.0
         with:
           username: ${{ env.GIT_USERNAME }}
           email: ${{ env.GIT_EMAIL }}
@@ -260,4 +273,9 @@ jobs:
         run: bash _ci/cache_artifacts.sh
       - name: "Release"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: bash _ci/release.sh
+        uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@v18.18.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          release-version: ${{ env.RELEASE_VERSION }}
+          development-version: ${{ env.DEVELOPMENT_VERSION }}
+          maven-args: "-DskipTests -Dmaven.javadoc.skip=true -DadditionalOption=-Xdoclint:none -Dmaven.wagon.http.pool=false"
