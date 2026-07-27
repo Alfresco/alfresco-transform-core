@@ -22,10 +22,14 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
+          owner: Alfresco
           client-id: ${{ vars.GH_APP_ENGINEERING_CONTRIB_CLIENT_ID }}
           private-key: ${{ secrets.GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
+          repositories: |
+            alfresco-transform-core
+            alfresco-pdf-renderer
 
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -35,20 +39,28 @@ jobs:
       - name: Check for new PDF Renderer version
         id: check
         env:
-          GH_TOKEN: ${{ github.token }}
+
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           set -euo pipefail
-          LATEST=$(gh api --paginate repos/Alfresco/alfresco-pdf-renderer/tags --jq '.[].name' \
+          TAGS=$(gh api --paginate repos/Alfresco/alfresco-pdf-renderer/tags --jq '.[].name')
+          LATEST=$(printf '%s\n' "${TAGS}" \
             | grep -E '^[0-9]+\.[0-9]+\.[0-9]+-[0-9]+$' \
             | sort -V \
-            | tail -n1)
+            | tail -n1 || true)
 
           if [ -z "${LATEST}" ]; then
             echo "::error::Could not determine the latest alfresco-pdf-renderer release tag"
             exit 1
           fi
 
-          CURRENT=$(grep -oP '^ARG PDF_RENDERER_VERSION=\K.*' engines/pdfrenderer/Dockerfile)
+          CURRENT_PDF=$(grep -oP '^ARG PDF_RENDERER_VERSION=\K.*' engines/pdfrenderer/Dockerfile)
+          CURRENT_AIO=$(grep -oP '^ARG PDF_RENDERER_VERSION=\K.*' engines/aio/Dockerfile)
+          if [ "${CURRENT_PDF}" != "${CURRENT_AIO}" ]; then
+            echo "::error::PDF_RENDERER_VERSION differs between Dockerfiles (pdfrenderer=${CURRENT_PDF}, aio=${CURRENT_AIO}); please reconcile them first"
+            exit 1
+          fi
+          CURRENT="${CURRENT_PDF}"
 
           echo "Latest alfresco-pdf-renderer release: ${LATEST}"
           echo "Current version in Dockerfiles:       ${CURRENT}"
