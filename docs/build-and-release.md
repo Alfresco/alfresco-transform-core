@@ -52,9 +52,9 @@ branch.
     RELEASE_VERSION: "5.4.5-A.1"                 # the version of the release (git tag)
     DEVELOPMENT_VERSION: "5.4.5-A.2-SNAPSHOT"    # the version set in the POMs after the release
     ```
-    > These replace the previous `mvn versions:set` step. The `maven-release-slim` action sets
-    > `RELEASE_VERSION` in every `pom.xml`, deploys the artifacts, creates the verified tag, then
-    > sets `DEVELOPMENT_VERSION` for the next iteration - all as verified commits.
+    > The `maven-release-slim` action sets `RELEASE_VERSION` in every `pom.xml`, deploys the
+    > artifacts, creates the verified tag, then sets `DEVELOPMENT_VERSION` for the next iteration
+    > - all as verified commits.
 3. Create a new commit with the `[release]` tag in its message. The version changes from step (2)
 can be included in this same commit - e.g.
      ```bash
