@@ -24,6 +24,7 @@ jobs:
           private-key: ${{ secrets.GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
+          permission-members: read
           repositories: |
             alfresco-transform-core
             alfresco-pdf-renderer
@@ -36,52 +37,17 @@ jobs:
       - name: Check for new PDF Renderer version
         id: check
         env:
-
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          set -euo pipefail
-          TAGS=$(gh api --paginate repos/Alfresco/alfresco-pdf-renderer/tags --jq '.[].name')
-          LATEST=$(printf '%s\n' "${TAGS}" \
-            | grep -E '^[0-9]+\.[0-9]+\.[0-9]+-[0-9]+$' \
-            | sort -V \
-            | tail -n1 || true)
-
-          if [ -z "${LATEST}" ]; then
-            echo "::error::Could not determine the latest alfresco-pdf-renderer release tag"
-            exit 1
-          fi
-
-          CURRENT_PDF=$(grep -oP '^ARG PDF_RENDERER_VERSION=\K.*' engines/pdfrenderer/Dockerfile)
-          CURRENT_AIO=$(grep -oP '^ARG PDF_RENDERER_VERSION=\K.*' engines/aio/Dockerfile)
-          if [ "${CURRENT_PDF}" != "${CURRENT_AIO}" ]; then
-            echo "::error::PDF_RENDERER_VERSION differs between Dockerfiles (pdfrenderer=${CURRENT_PDF}, aio=${CURRENT_AIO}); please reconcile them first"
-            exit 1
-          fi
-          CURRENT="${CURRENT_PDF}"
-
-          echo "Latest alfresco-pdf-renderer release: ${LATEST}"
-          echo "Current version in Dockerfiles:       ${CURRENT}"
-
-          echo "latest=${LATEST}" >> "$GITHUB_OUTPUT"
-          if [ "${LATEST}" = "${CURRENT}" ]; then
-            echo "Already up to date; nothing to do."
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
+        run: bash _ci/update-pdf-renderer/check-version.sh
 
       - name: Update Dockerfiles
         if: steps.check.outputs.changed == 'true'
         env:
           LATEST: ${{ steps.check.outputs.latest }}
-        run: |
-          set -euo pipefail
-          sed -i "s/^ARG PDF_RENDERER_VERSION=.*/ARG PDF_RENDERER_VERSION=${LATEST}/" \
-            engines/pdfrenderer/Dockerfile \
-            engines/aio/Dockerfile
-          git --no-pager diff engines/pdfrenderer/Dockerfile engines/aio/Dockerfile
+        run: bash _ci/update-pdf-renderer/update-dockerfiles.sh
 
       - name: Create Pull Request
+        id: cpr
         if: steps.check.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
@@ -104,3 +70,14 @@ jobs:
           add-paths: |
             engines/pdfrenderer/Dockerfile
             engines/aio/Dockerfile
+          reviewers: ${{ github.event_name == 'workflow_dispatch' && github.actor || '' }}
+          team-reviewers: ${{ github.event_name == 'schedule' && '<team_name_will_be_updated_here>' || '' }}
+
+      - name: Close stale pull requests
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+          LATEST: ${{ steps.check.outputs.latest }}
+          NEW_PR: ${{ steps.cpr.outputs.pull-request-number }}
+        run: bash _ci/update-pdf-renderer/close-stale-prs.sh
