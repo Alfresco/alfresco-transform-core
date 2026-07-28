@@ -2,9 +2,9 @@ name: Update PDF Renderer Version
 on:
   schedule:
     # Every Monday at 02:00 UTC:
-    #   - 2h after the alfresco-pdf-renderer Sunday-midnight release/tag
-    #   - 3h before this repo's own Monday 05:00 UTC scheduled CI
-    - cron: "0 2 * * Mon"
+    #   - after the alfresco-pdf-renderer weekly release/tag (Sunday 00:00 UTC, release.yml)
+    #   - 3h before this repo's own Monday 05:00 UTC scheduled CI (ci.yml: '0 5 * * 1')
+    - cron: '0 2 * * 1'
   workflow_dispatch:
 
 permissions:
