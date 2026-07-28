@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-# Closes any open PRs previously opened by this workflow for older versions,
-# leaving only the current version's PR open.
-# Requires: GH_TOKEN, GH_REPO, LATEST, NEW_PR.
+# Closes every other open PR previously opened by this workflow, leaving only
+# the PR just created/updated in this run open.
 set -euo pipefail
 
-CURRENT_BRANCH="auto/update-pdf-renderer-${LATEST}"
+CURRENT_BRANCH="${NEW_PR_BRANCH}"
 gh pr list --state open --limit 100 \
   --json number,headRefName \
   --jq '.[] | select(.headRefName | startswith("auto/update-pdf-renderer-")) | [.number, .headRefName] | @tsv' \
