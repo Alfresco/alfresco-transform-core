@@ -5,6 +5,9 @@ on:
     #   - 2h after the alfresco-pdf-renderer Sunday-midnight release/tag
     #   - 3h before this repo's own Monday 05:00 UTC scheduled CI
     - cron: "0 2 * * Mon"
+  push: # temporary, for testing
+    branches:
+      - feature/ACS-12260**
   workflow_dispatch:
 
 permissions:
@@ -70,7 +73,9 @@ jobs:
           add-paths: |
             engines/pdfrenderer/Dockerfile
             engines/aio/Dockerfile
-          reviewers: ${{ github.event_name == 'workflow_dispatch' && github.actor || '' }}
+          # TEMP(test): original line — restore before merging
+          # reviewers: ${{ github.event_name == 'workflow_dispatch' && github.actor || '' }}
+          reviewers: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && github.actor || '' }}
           team-reviewers: ${{ github.event_name == 'schedule' && '<team_name_will_be_updated_here>' || '' }}
 
       - name: Close stale pull requests
