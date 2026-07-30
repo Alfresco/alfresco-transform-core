@@ -89,12 +89,12 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
       - name: "Login to Docker Hub"
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
@@ -148,12 +148,12 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
       - name: "Login to Docker Hub"
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
@@ -189,12 +189,12 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
       - name: "Login to Docker Hub"
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
@@ -242,18 +242,18 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.18.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.18.0
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
         with:
           platforms: linux/amd64,linux/arm64
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
       - name: "Login to Docker Hub"
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
