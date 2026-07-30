@@ -70,7 +70,7 @@ jobs:
             engines/pdfrenderer/Dockerfile
             engines/aio/Dockerfile
           reviewers: ${{ github.event_name == 'workflow_dispatch' && github.actor || '' }}
-          team-reviewers: ${{ github.event_name == 'schedule' && '<team_name_will_be_updated_here>' || '' }}
+          team-reviewers: ${{ github.event_name == 'schedule' && 'alfresco-dependency-maintainers' || '' }}
 
       - name: Close stale pull requests
         if: steps.check.outputs.changed == 'true'
