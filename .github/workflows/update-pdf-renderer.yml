@@ -46,12 +46,11 @@ jobs:
         run: bash _ci/update-pdf-renderer/update-dockerfiles.sh
 
       - name: Create Pull Request
-        id: cpr
         if: steps.check.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: ${{ steps.app-token.outputs.token }}
-          branch: auto/update-pdf-renderer-${{ steps.check.outputs.latest }}-${{ github.run_number }}
+          branch: auto/update-pdf-renderer
           delete-branch: true
           commit-message: "Update PDF Renderer version to ${{ steps.check.outputs.latest }}"
           title: "Update PDF Renderer to ${{ steps.check.outputs.latest }}"
@@ -71,13 +70,3 @@ jobs:
             engines/aio/Dockerfile
           reviewers: ${{ github.event_name == 'workflow_dispatch' && github.actor || '' }}
           team-reviewers: ${{ github.event_name == 'schedule' && 'alfresco-dependency-maintainers' || '' }}
-
-      - name: Close stale pull requests
-        if: steps.check.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          GH_REPO: ${{ github.repository }}
-          LATEST: ${{ steps.check.outputs.latest }}
-          NEW_PR: ${{ steps.cpr.outputs.pull-request-number }}
-          NEW_PR_BRANCH: ${{ steps.cpr.outputs.pull-request-branch }}
-        run: bash _ci/update-pdf-renderer/close-stale-prs.sh
