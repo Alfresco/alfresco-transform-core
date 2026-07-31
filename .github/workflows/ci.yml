@@ -106,7 +106,7 @@ jobs:
           echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
-        run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
+        run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
       - name: "Build"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
@@ -179,7 +179,7 @@ jobs:
           echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
-        run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
+        run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
       - name: "Build local docker image"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
@@ -234,7 +234,7 @@ jobs:
           echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
-        run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
+        run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
       - name: "Build local docker image"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
@@ -306,7 +306,7 @@ jobs:
           echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
-        run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
+        run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
       - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v18.18.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
