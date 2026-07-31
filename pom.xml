@@ -40,7 +40,7 @@
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
         <commons-lang3.version>3.18.0</commons-lang3.version>
-        <spring-retry.version>2.0.12</spring-retry.version>
+        <spring-retry.version>2.0.13</spring-retry.version>
     </properties>
 
     <profiles>
