@@ -1,0 +1,72 @@
+name: Update PDF Renderer Version
+on:
+  schedule:
+    # Every Monday at 02:00 UTC:
+    #   - after the alfresco-pdf-renderer weekly release/tag (Sunday 00:00 UTC, release.yml)
+    #   - 3h before this repo's own Monday 05:00 UTC scheduled CI (ci.yml: '0 5 * * 1')
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update-pdf-renderer:
+    name: Update PDF Renderer Version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          owner: Alfresco
+          client-id: ${{ vars.GH_APP_ENGINEERING_CONTRIB_CLIENT_ID }}
+          private-key: ${{ secrets.GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+          repositories: |
+            alfresco-transform-core
+            alfresco-pdf-renderer
+
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Check for new PDF Renderer version
+        id: check
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: bash _ci/update-pdf-renderer/check-version.sh
+
+      - name: Update Dockerfiles
+        if: steps.check.outputs.changed == 'true'
+        env:
+          LATEST: ${{ steps.check.outputs.latest }}
+        run: bash _ci/update-pdf-renderer/update-dockerfiles.sh
+
+      - name: Create Pull Request
+        if: steps.check.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: auto/update-pdf-renderer
+          delete-branch: true
+          commit-message: "Update PDF Renderer version to ${{ steps.check.outputs.latest }}"
+          title: "Update PDF Renderer to ${{ steps.check.outputs.latest }}"
+          body: |
+            Automated update of the `alfresco-pdf-renderer` version.
+
+            Bumps `ARG PDF_RENDERER_VERSION` to **${{ steps.check.outputs.latest }}** in:
+            - `engines/pdfrenderer/Dockerfile`
+            - `engines/aio/Dockerfile`
+
+            Opened automatically by the scheduled `update-pdf-renderer` workflow.
+            Releases: https://github.com/Alfresco/alfresco-pdf-renderer/releases
+
+            CI on this PR validates the new version before it is merged to `master`.
+          add-paths: |
+            engines/pdfrenderer/Dockerfile
+            engines/aio/Dockerfile
+          reviewers: ${{ github.event_name == 'workflow_dispatch' && github.actor || '' }}
+          team-reviewers: ${{ github.event_name == 'schedule' && 'alfresco-dependency-maintainers' || '' }}
