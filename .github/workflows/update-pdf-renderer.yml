@@ -24,6 +24,7 @@ jobs:
           private-key: ${{ secrets.GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
+          permission-members: read
           repositories: |
             alfresco-transform-core
             alfresco-pdf-renderer
