@@ -5,7 +5,7 @@ PS4="\[\e[35m\]+ \[\e[m\]"
 set -vex
 pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 
-mvn -B -U -Dmaven.wagon.http.pool=false \
+mvn -B -U \
     clean install \
     -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true \
     -DskipTests \

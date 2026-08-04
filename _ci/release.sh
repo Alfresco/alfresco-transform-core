@@ -9,7 +9,7 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 git checkout -B "${BRANCH_NAME}"
 
 # Run the release plugin - with "[skip ci]" in the release commit message
-mvn -B -Dmaven.wagon.http.pool=false \
+mvn -B \
     -Prelease \
     "-Darguments=-Prelease -DskipTests -Dmaven.javadoc.skip -Dadditionalparam=-Xdoclint:none" \
     release:clean release:prepare release:perform \

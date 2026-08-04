@@ -103,14 +103,14 @@ jobs:
         run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" | xargs -r -l rm -rf
       - name: "Build"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
+        run: mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Pbase
       - name: "Cache LibreOffice"
         run: bash _ci/cache_artifacts.sh
       - name: "Run tests and deploy snapshots (master only)"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
           MAVEN_PHASE: ${{ (github.event_name != 'pull_request' && github.ref_name == 'master') && 'deploy' || 'verify' }}
-        run: mvn -B -U clean $MAVEN_PHASE -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
+        run: mvn -B -U clean $MAVEN_PHASE -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Pbase
 
   all_tests_matrix:
     name: ${{ matrix.testName }}
