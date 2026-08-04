@@ -74,7 +74,7 @@ jobs:
           classpath-build-command: "mvn -ntp package -DskipTests"
 
   build_and_test:
-    name: "Core & Base Snapshot deployment"
+    name: "Core & Base"
     runs-on: ubuntu-latest
     needs:
       - pre_commit
@@ -106,9 +106,11 @@ jobs:
         run: mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
       - name: "Cache LibreOffice"
         run: bash _ci/cache_artifacts.sh
-      - name: "Run tests"
+      - name: "Run tests and deploy snapshots (master only)"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: mvn -B -U clean deploy -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
+        env:
+          MAVEN_PHASE: ${{ (github.event_name != 'pull_request' && github.ref_name == 'master') && 'deploy' || 'verify' }}
+        run: mvn -B -U clean $MAVEN_PHASE -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Pbase
 
   all_tests_matrix:
     name: ${{ matrix.testName }}
