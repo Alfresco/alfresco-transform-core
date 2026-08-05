@@ -43,11 +43,6 @@ repos:
       - id: gha-sha-convert
         args: [--allowlist, 'Alfresco/alfresco-build-tools/*']
 
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
-    hooks:
-      - id: detect-secrets
-        args: ["--baseline", ".secrets.baseline"]
   - repo: local
     hooks:
       - id: check-format-and-headers

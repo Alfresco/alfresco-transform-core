@@ -16,8 +16,8 @@ shared `model` library.
   (`acs-compatible.java.version`) for ACS compatibility.
 - **Spring Boot** (inherited from `spring-boot-starter-parent`).
 - **Maven** multi-module build. **Docker** images per engine.
-- Code style enforced via **Spotless** and license-header checks; secrets scanned with
-  **detect-secrets**; hooks run through **pre-commit**.
+- Code style enforced via **Spotless** and license-header checks; hooks run through
+  **pre-commit**.
 
 ## Repository layout
 
