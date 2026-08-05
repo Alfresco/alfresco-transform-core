@@ -40,7 +40,7 @@ jobs:
   pre_commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v18.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v18.21.2
 
   test_run_check:
     name: "Test run check"
@@ -66,8 +66,8 @@ jobs:
     if: needs.test_run_check.outputs.tests == 'true' && github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v9.3.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.21.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.2
       - uses: Alfresco/ya-pmd-scan@e817ecd9292844800451c42f07cdebdb14268cfa # v4.1.0
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
@@ -88,8 +88,8 @@ jobs:
     if: needs.test_run_check.outputs.tests == 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.21.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.2
       - name: "Login to Docker Hub"
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
@@ -161,8 +161,8 @@ jobs:
             testProfile: aio-test
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.21.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.2
       - name: "Login to Docker Hub"
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
@@ -216,8 +216,8 @@ jobs:
         java: [ '21', '25' ]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v9.3.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.3.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.21.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.2
       - name: "Login to Docker Hub"
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
@@ -278,12 +278,12 @@ jobs:
           client-id: ${{ vars.GH_APP_ENGINEERING_CONTRIB_CLIENT_ID }}
           private-key: ${{ secrets.GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY }}
           permission-contents: write
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.18.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.21.2
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           token: ${{ steps.app-token.outputs.token }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.18.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.18.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.21.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.2
       - name: Set up QEMU
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
         with:
@@ -307,7 +307,7 @@ jobs:
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
         run: find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v18.18.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v18.21.2
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
@@ -316,7 +316,7 @@ jobs:
         run: bash _ci/cache_artifacts.sh
       - name: "Release"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@v18.18.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@v18.21.2
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
