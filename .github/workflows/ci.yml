@@ -129,7 +129,7 @@ jobs:
           QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: mvn -B -U clean $MAVEN_PHASE -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Pbase
+        run: mvn -B -U clean "$MAVEN_PHASE" -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Pbase
 
   all_tests_matrix:
     name: ${{ matrix.testName }}
