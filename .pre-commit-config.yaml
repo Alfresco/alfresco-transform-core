@@ -1,9 +1,48 @@
 repos:
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
     hooks:
-      - id: detect-secrets
-        args: ["--baseline", ".secrets.baseline"]
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+        # Spring Boot configs use Maven resource-filtering tokens (e.g. @project.version@);
+        # '@' is a reserved YAML indicator, so strict PyYAML parsing cannot read them.
+        exclude: '^engines/(aio/src/main/resources/application-default|base/src/main/resources/application)\.yaml$'
+      - id: check-json
+      - id: check-xml
+      - id: check-merge-conflict
+      # The mutating whitespace hooks (end-of-file-fixer, trailing-whitespace,
+      # mixed-line-ending, fix-byte-order-marker) are intentionally deferred:
+      # enabling them requires a one-off normalization of ~200 existing files.
+      # Add them in a dedicated cleanup change so this config stays green:
+      #   - id: fix-byte-order-marker
+      #   - id: mixed-line-ending
+      #     args: ['--fix=lf']
+      #   - id: end-of-file-fixer
+      #   - id: trailing-whitespace
+
+  - repo: https://github.com/sirosen/check-jsonschema
+    rev: 0.37.1
+    hooks:
+      - id: check-dependabot
+      - id: check-github-actions
+      - id: check-github-workflows
+
+  # markdownlint is intentionally omitted for now: the existing docs violate ~20
+  # default rules (line length, heading spacing, etc.). Enable it in a dedicated
+  # docs-normalization change (add a .markdownlint config + fix the docs) so the
+  # pre-commit CI gate stays green.
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+
+  - repo: https://github.com/hyland/github-actions-ensure-sha-pinned-actions
+    rev: v1.2.0
+    hooks:
+      - id: gha-sha-convert
+        args: [--allowlist, 'Alfresco/alfresco-build-tools/*']
+
   - repo: local
     hooks:
       - id: check-format-and-headers
