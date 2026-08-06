@@ -24,7 +24,7 @@ fi
 source "$(dirname "${BASH_SOURCE[0]}")/java_base_image_map.sh"
 
 # Do not deploy snapshots for alfresco-transform-core, alfresco-transformer-base and alfresco-base-t-engine
-mvn -B -U -Dmaven.wagon.http.pool=false \
+mvn -B -U \
     clean ${MAVEN_PHASE} \
     -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true \
     -Dparent.core.deploy.skip=true -Dtransformer.base.deploy.skip=true \
