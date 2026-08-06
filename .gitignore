@@ -41,3 +41,6 @@ alf_data
 /src/main/resources/alfresco/extension/custom-log4j.properties
 
 libreoffice-dist-*-linux.gz
+
+# Claude Code local artifacts
+.claude

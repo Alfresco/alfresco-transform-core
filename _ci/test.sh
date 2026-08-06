@@ -31,7 +31,7 @@ mvn -B -U \
     "-P${PROFILE},docker-it-setup,${1}" \
     ${ADDITIONAL_MAVEN_OPTS}
 
-docker ps -a -q | xargs -r -l docker stop ; docker ps -a -q | xargs -r -l docker rm
+docker ps -a -q | xargs -r -l docker stop ; docker ps -a -q | xargs -r -l docker rm || true
 
 popd
 set +vex

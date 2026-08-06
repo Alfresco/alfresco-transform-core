@@ -1,3 +1,5 @@
+# Documentation for all configuration options:
+# https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
 version: 2
 registries:
   maven-alfresco-internal:
@@ -6,62 +8,52 @@ registries:
     username: ${{secrets.NEXUS_USERNAME}}
     password: ${{secrets.NEXUS_PASSWORD}}
 updates:
-- package-ecosystem: maven
-  directory: "/"
-  schedule:
-    interval: daily
-    time: "22:00"
-    timezone: Europe/London
-  open-pull-requests-limit: 99
-  registries:
-  - maven-alfresco-internal
-- package-ecosystem: docker
-  directory: "engines/aio"
-  schedule:
-    interval: daily
-    time: "22:00"
-    timezone: Europe/London
-  open-pull-requests-limit: 99
-- package-ecosystem: docker
-  directory: "engines/libreoffice"
-  schedule:
-    interval: daily
-    time: "22:00"
-    timezone: Europe/London
-  open-pull-requests-limit: 99
-- package-ecosystem: docker
-  directory: "engines/imagemagick"
-  schedule:
-    interval: daily
-    time: "22:00"
-    timezone: Europe/London
-  open-pull-requests-limit: 99
-- package-ecosystem: docker
-  directory: "engines/misc"
-  schedule:
-    interval: daily
-    time: "22:00"
-    timezone: Europe/London
-  open-pull-requests-limit: 99
-- package-ecosystem: docker
-  directory: "engines/tika"
-  schedule:
-    interval: daily
-    time: "22:00"
-    timezone: Europe/London
-  open-pull-requests-limit: 99
-- package-ecosystem: docker
-  directory: "engines/pdfrenderer"
-  schedule:
-    interval: daily
-    time: "22:00"
-    timezone: Europe/London
-  open-pull-requests-limit: 99
-- package-ecosystem: github-actions
-  directory: "/"
-  schedule:
-    interval: monthly
-  groups:
-    github-actions:
-      patterns:
-      - "*"
+  - package-ecosystem: "github-actions"
+    directories:
+      - "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "github_actions"
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "maven"
+    directories:
+      - "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 99
+    registries:
+      - maven-alfresco-internal
+    labels:
+      - "dependencies"
+      - "java"
+    cooldown:
+      default-days: 7
+    groups:
+      maven:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "docker"
+    directories:
+      # Each T-Engine ships its own Dockerfile; the glob collapses the siblings.
+      - "engines/*"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 99
+    labels:
+      - "dependencies"
+      - "docker"
+    cooldown:
+      default-days: 7
+    groups:
+      docker:
+        patterns:
+          - "*"
