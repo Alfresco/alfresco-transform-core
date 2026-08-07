@@ -39,5 +39,3 @@ MD048: false
 # pipe spacing and leading-only pipes; enforcing a single style is pure churn.
 MD055: false
 MD060: false
-
-
