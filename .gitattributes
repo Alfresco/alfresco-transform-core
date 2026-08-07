@@ -7,6 +7,9 @@
 *.bat   text eol=crlf
 *.cmd   text eol=crlf
 
+# Byte-exact test fixtures: never normalize (mirrors the pre-commit excludes).
+**/src/test/resources/** -text
+
 # Binary assets / test fixtures — never normalize or diff as text.
 *.key   binary
 *.z     binary
