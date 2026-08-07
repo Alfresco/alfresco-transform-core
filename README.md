@@ -17,7 +17,7 @@ have moved. See the [alfresco-transform-model README](https://github.com/Alfresc
   [README](https://github.com/Alfresco/alfresco-transform-core/blob/master/engines/base/README.md)
 * `engines/<name>` - multiple T-Engines, which extend the `engines/base`; each one builds a SpringBoot jar
   and a [Docker image](https://github.com/Alfresco/alfresco-transform-core#docker)
-* `deprecated/alfresco-base-t-engine` - The original t-engine base, which may still be used,
+* `deprecated/alfresco-transformer-base` - The original t-engine base, which may still be used,
   but has been replaced by the simpler `engines/base`.
 
 ### Documentation
