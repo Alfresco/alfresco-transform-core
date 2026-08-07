@@ -30,7 +30,7 @@ GitHub Actions CI builds differ by branch:
     > * alfresco/alfresco-transform-misc
     > * alfresco/alfresco-transform-core-aio
   * if the commit message contains the `[release]` tag, the builds will also
-  include the _Release_ stage;
+    include the _Release_ stage;
 * `ATS-*` / `ACS-*` branches:
   * regular builds which include only the _Build_ and _Tests_ stages;
 
