@@ -45,8 +45,8 @@ src/main/java/org/alfresco/transformer/Application.java
         <tr><td><div style="text-align:right">abc:height</div></td><td><input type="text" name="height" value="" /></td></tr>
         <tr><td><div style="text-align:right">timeout</div></td><td><input type="text" name="timeout" value="" /></td></tr>
         <tr><td></td><td><input type="submit" value="Transform" /></td></tr>
-	  </table>
-	</form>
+   </table>
+ </form>
   </div>
   <div>
     <a href="/log">Log entries</a>
@@ -114,6 +114,7 @@ public class TransformerNameController extends TransformController
 
 * *TransformerName*Executer.java - *JavaExecutor* and *CommandExecutor* sub classes need to extract values from
   *transformOptions* and use them in a call to an external process or as parameters to a library call.
+
 ~~~
 ...
 public class TransformerNameExecutor extends AbstractCommandExecutor
@@ -157,30 +158,32 @@ public class Application
 ~~~
 
 Transform requests are handled by the *TransformController*, but are either:
- * POST requests (a direct http request from a client) where the transform options are passed as parameters, the source is supplied as a multipart file and
+
+* POST requests (a direct http request from a client) where the transform options are passed as parameters, the source is supplied as a multipart file and
    the response is a file download.
- * POST request (a request via a message queue) where the transform options are supplied as JSON and the response is also JSON.
+* POST request (a request via a message queue) where the transform options are supplied as JSON and the response is also JSON.
    The source and target content is read from a location accessible to both the client and the transfomer.
 
 **Example JSON request body**
+
 ```javascript
 var transformRequest = {
-	"requestId": "1",
-	"sourceReference": "2f9ed237-c734-4366-8c8b-6001819169a4",
-	"sourceMediaType": "application/pdf",
-	"sourceSize": 123456,
-	"sourceExtension": "pdf",
-	"targetMediaType": "text/plain",
-	"targetExtension": "txt",
-	"clientType": "ACS",
-	"clientData": "Yo No Soy Marinero, Soy Capitan, Soy Capitan!",
-	"schema": 1,
-	"transformRequestOptions": {
-		"targetMimetype": "text/plain",
-		"targetEncoding": "UTF-8",
-		"abc:width": "120",
-		"abc:height": "200"
-	}
+ "requestId": "1",
+ "sourceReference": "2f9ed237-c734-4366-8c8b-6001819169a4",
+ "sourceMediaType": "application/pdf",
+ "sourceSize": 123456,
+ "sourceExtension": "pdf",
+ "targetMediaType": "text/plain",
+ "targetExtension": "txt",
+ "clientType": "ACS",
+ "clientData": "Yo No Soy Marinero, Soy Capitan, Soy Capitan!",
+ "schema": 1,
+ "transformRequestOptions": {
+  "targetMimetype": "text/plain",
+  "targetEncoding": "UTF-8",
+  "abc:width": "120",
+  "abc:height": "200"
+ }
 }
 ```
 
@@ -237,4 +240,3 @@ The build plan is available in [GitHub Actions CI](https://github.com/Alfresco/a
 
 Please use [this guide](https://github.com/Alfresco/alfresco-repository/blob/master/CONTRIBUTING.md)
 to make a contribution to the project.
-

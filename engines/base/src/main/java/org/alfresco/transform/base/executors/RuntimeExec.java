@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * Use the {@link #setProcessDirectory(String) processDirectory} property to change the default location from which the command executes. The process's environment can be configured using the {@link #setProcessProperties(Map) processProperties} property.
  * <p>
  * Commands may use placeholders, e.g.
- * 
+ *
  * <pre>
  * <code>
  *    find
@@ -65,27 +65,27 @@ import org.slf4j.LoggerFactory;
  *    ${filename}
  * </code>
  * </pre>
- * 
+ *
  * The <b>filename</b> property will be substituted for any supplied value prior to each execution of the command. Currently, no checks are made to get or check the properties contained within the command string. It is up to the client code to dynamically extract the properties required if the required properties are not known up front.
  * <p>
  * Sometimes, a variable may contain several arguments. . In this case, the arguments need to be tokenized using a standard <tt>StringTokenizer</tt>. To force tokenization of a value, use:
- * 
+ *
  * <pre>
  * <code>
  *    SPLIT:${userArgs}
  * </code>
  * </pre>
- * 
+ *
  * You should not use this just to split up arguments that are known to require tokenization up front. The <b>SPLIT:</b> directive works for the entire argument and will not do anything if it is not at the beginning of the argument. Do not use <b>SPLIT:</b> to break up arguments that are fixed, so avoid doing this:
- * 
+ *
  * <pre>
  * <code>
  *    SPLIT:ls -lih
  * </code>
  * </pre>
- * 
+ *
  * Instead, break the command up explicitly:
- * 
+ *
  * <pre>
  * <code>
  *    ls

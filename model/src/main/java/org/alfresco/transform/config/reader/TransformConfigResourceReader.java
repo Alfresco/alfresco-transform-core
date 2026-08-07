@@ -40,7 +40,7 @@ import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * Reads {@link TransformConfig} from json or yaml files. Typically used by {@code TransformEngine.getTransformConfig()}.
- * 
+ *
  * <pre>
  * transformConfigResourceReader.read("classpath:pdfrenderer_engine_config.json");
  * </pre>

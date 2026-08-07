@@ -35,7 +35,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Test cases for LibreOfficeProfileManager
- * 
+ *
  * @author Sayan Bhattacharya
  */
 @RunWith(MockitoJUnitRunner.class)

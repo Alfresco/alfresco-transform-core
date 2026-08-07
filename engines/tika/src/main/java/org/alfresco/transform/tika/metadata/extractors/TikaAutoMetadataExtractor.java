@@ -117,7 +117,7 @@ public class TikaAutoMetadataExtractor extends AbstractTikaMetadataExtractorEmbe
 
     /**
      * Exif metadata for size also returns the string "pixels" after the number value , this function will stop at the first non digit character found in the text
-     * 
+     *
      * @param sizeText
      *            string text
      * @return the size value

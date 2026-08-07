@@ -1,0 +1,20 @@
+# Normalize line endings: Git stores text as LF and checks out LF on every platform.
+# Enforcing eol=lf keeps the working tree consistent and makes tools that honour
+# git attributes (e.g. Spotless) emit LF, so the mixed-line-ending hook stays stable.
+* text=auto eol=lf
+
+# Windows batch files must stay CRLF.
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# Binary assets / test fixtures — never normalize or diff as text.
+*.key   binary
+*.z     binary
+*.gz    binary
+*.jar   binary
+*.vsd   binary
+*.vdx   binary
+*.xbm   binary
+*.xpm   binary
+
+

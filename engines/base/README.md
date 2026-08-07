@@ -1,7 +1,7 @@
 # Common base code for T-Engines
 
 This project provides a common base for T-Engines and supersedes the
-[original base](https://github.com/Alfresco/alfresco-transform-core/blob/master/deprecated/alfresco-transformer-base). 
+[original base](https://github.com/Alfresco/alfresco-transform-core/blob/master/deprecated/alfresco-transformer-base).
 
 This project provides a base Spring Boot application (as a jar) to which transform
 specific code may be added. It includes actions such as communication between
@@ -17,7 +17,7 @@ For more details on build a custom T-Engine and T-Config, please refer to the do
 A T-Engine project which extends this base is expected to provide the following:
 
 * An implementation of the [TransformEngine](https://github.com/Alfresco/alfresco-transform-core/blob/master/engines/base/src/main/java/org/alfresco/transform/base/TransformEngine.java)
-  interface to describe the T-Engine. 
+  interface to describe the T-Engine.
 * Implementations of the [CustomTransformer](engines/base/src/main/java/org/alfresco/transform/base/CustomTransformer.java)
   interface with the actual transform code.
 * An `application-default.yaml` file to define a unique name for the message queue to the T-Engine.
@@ -29,7 +29,6 @@ that they will be discovered by the base T-Engine.
 The `TransformEngine.getTransformConfig()` method typically reads a `json` file.
 The names in the config should match the names returned by the `CustomTransformer`
 implementations.
-
 
 **Example TransformEngine**
 

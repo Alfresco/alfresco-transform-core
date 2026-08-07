@@ -68,7 +68,7 @@ import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
 
 /**
  * The parent of all Metadata Extractors which use Apache Tika under the hood. This handles all the common parts of processing the files, and the common mappings.
- * 
+ *
  * <pre>
  *   <b>author:</b>                 --      cm:author
  *   <b>title:</b>                  --      cm:title

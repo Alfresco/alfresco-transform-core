@@ -48,7 +48,7 @@ import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddo
  * Configuration: (see OfficeMetadataExtractor_metadata_extract.properties and tika_engine_config.json)
  *
  * This extractor uses the POI library to extract the following:
- * 
+ *
  * <pre>
  *   <b>author:</b>             --      cm:author
  *   <b>title:</b>              --      cm:title

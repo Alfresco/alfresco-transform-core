@@ -48,7 +48,7 @@ import org.alfresco.transform.tika.metadata.AbstractTikaMetadataExtractorEmbeddo
  *   <b>created:</b>                --      cm:created
  *   <b>Any custom property:</b>    --      [not mapped]
  * </pre>
- * 
+ *
  * @author Nick Burch
  * @author Neil McErlean
  * @author Dmitry Velichkevich

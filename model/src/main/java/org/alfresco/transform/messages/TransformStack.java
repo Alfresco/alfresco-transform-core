@@ -53,7 +53,7 @@ import org.alfresco.transform.common.TransformerDebug;
  * <li>When there are no steps left in a level the level is removed</li>
  *
  * Each level is represented by a String with a pipeline or failover flag @{code 'P'|'F'} followed by a step counter and start time used in debug, a retry count and a sequence of transform steps. Each step is made up of three parts:
- * 
+ *
  * @{code<transformerName>|<sourceMimetype>|<targetMimetype> . All fields are separated by a @code{'\u23D0'} character. The last step in the sequence is the current transform being performed. The top level transform is a pipeline of one step. Although the source and target mimetypes are always the same for failover transforms, they use the same structure.
  */
 public class TransformStack

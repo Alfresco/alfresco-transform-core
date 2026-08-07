@@ -89,7 +89,7 @@ public interface TransformServiceRegistry
 
     /**
      * Returns {@code true} if the {@code function} is supported by the named transformer. Not all transformers are able to support all functionality, as newer features may have been introduced into the core t-engine code since it was released. Normally used in conjunction with {@link #findTransformerName(String, long, String, Map, String)} rather than {@link #isSupported(String, long, String, Map, String)}.
-     * 
+     *
      * @param function
      *            to be checked.
      * @param transformerName
