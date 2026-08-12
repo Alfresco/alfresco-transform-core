@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.alfresco</groupId>
     <artifactId>alfresco-transform-core</artifactId>
-    <version>5.4.5-A.4-SNAPSHOT</version>
+    <version>5.4.4-A.2-SNAPSHOT</version>
     <name>Alfresco Transform Core</name>
     <packaging>pom</packaging>
 
@@ -40,7 +40,8 @@
 
         <parent.core.deploy.skip>false</parent.core.deploy.skip>
         <commons-lang3.version>3.18.0</commons-lang3.version>
-        <spring-retry.version>2.0.12</spring-retry.version>
+        <spring-retry.version>2.0.13</spring-retry.version>
+        <log4j2.version>2.26.1</log4j2.version> <!-- security fix CVE-2026-49844, can be removed once Spring Boot manages log4j2 >= 2.26.1 -->
     </properties>
 
     <profiles>
