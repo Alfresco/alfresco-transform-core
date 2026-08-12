@@ -420,6 +420,7 @@
                             <images>
                                 <!-- QuayIO image -->
                                 <image>
+                                    <alias>aio</alias>
                                     <name>${image.name}:${project.version}</name>
                                     <registry>${image.registry}</registry>
                                     <build>
@@ -440,6 +441,7 @@
                                 </image>
                                 <!-- DockerHub image -->
                                  <image>
+                                    <alias>aio</alias>
                                     <name>${image.name}:${project.version}</name>
                                     <build>
                                         <buildx>

@@ -6,7 +6,10 @@ The `ci.yml` config file can be found in the `.github/workflows` directory of th
 ## Stages and Jobs
 
 1. **Build**: Java build with unit and integration tests.
-2. **Release**: Release with artifact deployment to Nexus, DockerHub and Quay.io.
+2. **Release**: Deploys the Maven artifacts to Nexus and creates the verified release
+   commits and Git tag.
+3. **Push Docker Images**: Builds and pushes the multi-arch T-Engine Docker images to
+   DockerHub and Quay.io.
 
 > The _Release_ stage uses the
 > [`maven-release-slim`](https://github.com/Alfresco/alfresco-build-tools/tree/master/.github/actions/maven-release-slim)
@@ -14,6 +17,12 @@ The `ci.yml` config file can be found in the `.github/workflows` directory of th
 > **verified (signed) commits and tags**, and deploys artifacts with `mvn deploy` (no
 > `maven-release-plugin`). The release and next development versions are provided explicitly
 > (see the _Release process steps_ below), which avoids the SemVer auto-increment issue.
+>
+> Docker images are **not** built during the _Release_ stage (`-Ddocker.skip=true`). The
+> slow multi-arch image build/push is handled by the separate _Push Docker Images_ stage,
+> which runs one parallel job per T-Engine. Each job checks out the freshly created release
+> tag and pushes the images while skipping the (already completed) Maven artifact deploy
+> (`-Dmaven.deploy.skip=true`).
 
 ## Branches
 
