@@ -43,7 +43,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * Manages LibreOffice user profile templates for transformations.
- * 
+ *
  * @author Sayan Bhattacharya
  */
 public class LibreOfficeProfileManager

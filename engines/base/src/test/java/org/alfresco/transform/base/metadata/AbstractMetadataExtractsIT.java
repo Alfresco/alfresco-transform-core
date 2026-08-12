@@ -58,17 +58,17 @@ import org.alfresco.transform.base.clients.FileInfo;
  * <li>Provide expected json files (&lt;sourceFilename>"_metadata.json") as resources on the classpath.</li>
  * <li>Override the method {@code testTransformation(FileInfo testFileInfo)} such that it calls the super method as a {@code @ParameterizedTest} for example:</li>
  * </ul>
- * 
+ *
  * <pre>
  * &#64;ParameterizedTest
- * 
+ *
  * &#64;MethodSource("engineTransformations")
- * 
+ *
  * &#64;Override
 
  * public void testTransformation(FileInfo testFileInfo)
- * 
- * { 
+ *
+ * {
  *      super.testTransformation(FileInfo testFileInfo)
  * }
  * </pre>

@@ -37,7 +37,7 @@ All lines start with a reference, which starts with the client’s request
 number (`163`, `164` if known) and then a nested pipeline or failover
 structure. The first request extracts metadata and the second creates a
 thumbnail rendition (called `doclib`). The second request is handled by a
-pipeline called `officeToImageViaPdf` which uses `libreoffice` to transform 
+pipeline called `officeToImageViaPdf` which uses `libreoffice` to transform
 to `pdf` and then another pipeline to convert to `png`. The last step
 (`164.2.2`) in the process resizes the `png` using a number of transform
 options.

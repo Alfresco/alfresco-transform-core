@@ -8,6 +8,7 @@ t-config may reference elements from other components or modify elements
 from earlier t-config.
 
 Current configuration files are:
+
 * [Pdf-Renderer T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/engines/pdfrenderer/src/main/resources/pdfrenderer_engine_config.json).
 * [ImageMagick T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/engines/imagemagick/src/main/resources/imagemagick_engine_config.json).
 * [Libreoffice T-Engine configuration](https://github.com/Alfresco/alfresco-transform-core/blob/master/engines/libreoffice/src/main/resources/libreoffice_engine_config.json).
@@ -83,7 +84,7 @@ of these.
 The following example begins with the `helloWorld` Transformer, which takes a
 text file containing a name and produces an HTML file with `Hello <name>`
 message in the body. This is then transformed back into a text file. This
-example contains just one pipeline transformer, but many may be defined 
+example contains just one pipeline transformer, but many may be defined
 in the same file.
 
 ~~~json
@@ -115,7 +116,7 @@ in the same file.
   it remains undefined after all t-config has been combined. Generally
   it is better for a t-engine rather than the t-router to define pipeline
   transformers as this limits the number of places that have to be changed.
-  Normally it is obvious which t-engine should contain the definition. 
+  Normally it is obvious which t-engine should contain the definition.
 * **supportedSourceAndTargetList** The supported source and target Media
   Types, which refer to the Media Types this pipeline transformer can
   transform from and to, additionally you can set the `priority` and the
@@ -155,12 +156,12 @@ that is slower but handles all cases.
   references to transformer that have not been defined yet. Generally it
   is better for the t-engine rather than the t-router to define failover
   transformers as this limits the number of places that have to be changed.
-  Normally it is obvious which t-engine should contain the definition. 
+  Normally it is obvious which t-engine should contain the definition.
 * **supportedSourceAndTargetList** The supported source and target Media
   Types, which refer to the Media Types this failover transformer can
   transform from and to, additionally you can set the `priority` and the
   `maxSourceSizeBytes`. Unlike pipelines, it must not be blank.
-* **transformOptions** A list of references to options required by the 
+* **transformOptions** A list of references to options required by the
   pipeline transformer.
 
 ## Overriding transforms
@@ -277,7 +278,7 @@ Being able to change the defaults is particularly useful once a T-Engine
 has been developed as it allows a system administrator to handle
 limitations that are only found later. The `system wide defaults` are
 generally not used but are included for completeness. The following
-example says that the `"Office"` transformer by default should only handle 
+example says that the `"Office"` transformer by default should only handle
 zip files up to 18 Mb and by default the maximum size of a `.doc` file to be
 transformed is 4 Mb. The third example defaults the priority, possibly
 allowing another transformer that has specified a priority of say `50` to

@@ -120,7 +120,7 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractorEmbeddor
     /**
      * Converts a date or date time strings into Iso8601 format
      * <p>
-     * 
+     *
      * @param dateStrings
      * @return dateStrings in Iso8601 format
      * @see #iptcToIso8601DateString
@@ -151,7 +151,7 @@ public class IPTCMetadataExtractor extends AbstractTikaMetadataExtractorEmbeddor
      * <li>"2001:02:01 16:15+00:00" will convert to "2001-02-01T16:15+00:00"</li>
      * <li>"2021-06-11 05:36-01:00" will convert to "2021-06-11T05:36-01:00"</li>
      * </ul>
-     * 
+     *
      * @param dateStr
      * @return dateStr in Iso8601 format
      */

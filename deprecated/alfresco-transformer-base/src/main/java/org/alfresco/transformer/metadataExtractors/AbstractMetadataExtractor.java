@@ -76,7 +76,7 @@ import org.slf4j.Logger;
  *             If a transform specifies that it can convert from {@code "<MIMETYPE>"} to {@code "alfresco-metadata-embed"}, it is indicating that it can embed metadata in {@code <MIMETYPE>}.
  *
  *             The transform results in a new version of supplied source file that contains the metadata supplied in the transform options.
- * 
+ *
  * @author Jesper Steen Møller
  * @author Derek Hulley
  * @author adavis
@@ -197,7 +197,7 @@ public abstract class AbstractMetadataExtractor
      * Based on AbstractMappingMetadataExtracter#getDefaultMapping.
      *
      * This method provides a <i>mapping</i> of where to store the values extracted from the documents. The list of properties need <b>not</b> include all metadata values extracted from the document. This mapping should be defined in a file based on the class name: {@code "<classname>_metadata_extract.properties"}
-     * 
+     *
      * @return Returns a static mapping. It may not be null.
      */
     private Map<String, Set<String>> buildExtractMapping()
@@ -250,7 +250,7 @@ public abstract class AbstractMetadataExtractor
      * This method provides a <i>mapping</i> of model properties that should be embedded in the content. The list of properties need <b>not</b> include all properties. This mapping should be defined in a file based on the class name: {@code "<classname>_metadata_embed.properties"}
      * <p>
      * If no {@code "<classname>_metadata_embed.properties"} file is found, a reverse of the {@code "<classname>_metadata_extract.properties"} will be assumed. A last win approach will be used for handling duplicates.
-     * 
+     *
      * @return Returns a static mapping. It may not be null.
      */
     private Map<String, Set<String>> buildEmbedMapping()

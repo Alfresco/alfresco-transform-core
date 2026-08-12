@@ -46,7 +46,7 @@ public interface TransformManager
 
     /**
      * Allows a {@link CustomTransformer} to use a local source {@code File} rather than the supplied {@code InputStream}. The file will be deleted once the request is completed. To avoid creating extra files, if a File has already been created by the base t-engine, it is returned. If possible this method should be avoided as it is better not to leave content on disk.
-     * 
+     *
      * @throws IllegalStateException
      *             if this method has already been called.
      */
@@ -54,7 +54,7 @@ public interface TransformManager
 
     /**
      * Allows a {@link CustomTransformer} to use a local target {@code File} rather than the supplied {@code OutputStream}. The file will be deleted once the request is completed. To avoid creating extra files, if a File has already been created by the base t-engine, it is returned. If possible this method should be avoided as it is better not to leave content on disk.
-     * 
+     *
      * @throws IllegalStateException
      *             if this method has already been called. A call to {@link #respondWithFragment(Integer, boolean)} allows the method to be called again.
      */
@@ -62,7 +62,7 @@ public interface TransformManager
 
     /**
      * Allows a single transform request to have multiple transform responses. For example, images from a video at different time offsets or different pages of a document. Following a call to this method a transform response is made with the data sent to the current {@code OutputStream}. If this method has been called, there will not be another response when {@link CustomTransformer#transform(String, InputStream, String, OutputStream, Map, TransformManager)} returns and any data written to the final {@code OutputStream} will be ignored.
-     * 
+     *
      * @param index
      *            returned with the response, so that the fragment may be distinguished from other responses. Renditions use the index as an offset into elements. A {@code null} value indicates that there is no more output and any data sent to the current {@code outputStream} will be ignored.
      * @param finished

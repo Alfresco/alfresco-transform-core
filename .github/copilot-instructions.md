@@ -38,9 +38,11 @@ and one per engine (e.g. `imagemagick`, `libreoffice`, `misc`, `pdf-renderer`, `
 ## Build & test
 
 - Full local build with per-engine Docker images and integration setup:
+
   ```bash
   mvn clean install -Plocal,docker-it-setup
   ```
+
 - Base libraries only: `mvn clean install -Pbase`.
 - A single engine locally, mirroring CI: `bash _ci/build.sh <buildProfile>` then
   `bash _ci/test.sh <testProfile>` (see the matrix in `.github/workflows/ci.yml`).
@@ -69,4 +71,3 @@ A T-Engine is a Spring Boot app (`org.alfresco.transform.base.Application`):
 - Root `pom.xml` for versions, profiles and module wiring.
 - `README.md` for a high-level overview and artifact/Docker details.
 - `docs/` for transform config, transformer selection, probes and the release process.
-

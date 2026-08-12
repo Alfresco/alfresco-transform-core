@@ -10,15 +10,25 @@ repos:
       - id: check-json
       - id: check-xml
       - id: check-merge-conflict
-      # The mutating whitespace hooks (end-of-file-fixer, trailing-whitespace,
-      # mixed-line-ending, fix-byte-order-marker) are intentionally deferred:
-      # enabling them requires a one-off normalization of ~200 existing files.
-      # Add them in a dedicated cleanup change so this config stays green:
-      #   - id: fix-byte-order-marker
-      #   - id: mixed-line-ending
-      #     args: ['--fix=lf']
-      #   - id: end-of-file-fixer
-      #   - id: trailing-whitespace
+      # The mutating whitespace hooks are scoped to exclude test-resource fixtures
+      # and binary assets: those files must stay byte-exact (metadata-extraction
+      # tests compare their exact content) and pre-commit can misdetect some binaries
+      # (e.g. *.key) as text. Line endings are additionally governed by .gitattributes.
+      - id: fix-byte-order-marker
+        exclude: &fixtures-and-binaries >-
+          (?x)^(
+            .*/src/test/resources/.*
+            |.*/licenses/3rd-party/.*
+            |engines/libreoffice/src/main/resources/templateProfileDir/.*
+            |.*\.(key|z|xbm|xpm|vdx|vsd|bin|gz|jar)
+          )$
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+        exclude: *fixtures-and-binaries
+      - id: end-of-file-fixer
+        exclude: *fixtures-and-binaries
+      - id: trailing-whitespace
+        exclude: *fixtures-and-binaries
 
   - repo: https://github.com/sirosen/check-jsonschema
     rev: 0.37.1
@@ -27,10 +37,17 @@ repos:
       - id: check-github-actions
       - id: check-github-workflows
 
-  # markdownlint is intentionally omitted for now: the existing docs violate ~20
-  # default rules (line length, heading spacing, etc.). Enable it in a dedicated
-  # docs-normalization change (add a .markdownlint config + fix the docs) so the
-  # pre-commit CI gate stays green.
+  # markdownlint is configured via .markdownlint.yaml at the repo root, which relaxes
+  # rules that conflict with the existing docs style (line length, table pipe style,
+  # …). The --fix flag auto-corrects the mechanical issues (blank lines, bare URLs).
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.47.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+        # Test-resource markdown files are fixtures (transform inputs) and must stay
+        # byte-exact, so they are excluded from linting/fixing.
+        exclude: '.*/src/test/resources/.*'
 
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.12

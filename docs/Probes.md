@@ -1,12 +1,12 @@
 # Transformer k8s liveness and readiness probes
 
->**Note:** The transform-specific liveness probes are currently disabled by default in the 
-Alfresco Docker Transformers **2.0.0-RC3** release. They can be enabled through the 
+>**Note:** The transform-specific liveness probes are currently disabled by default in the
+Alfresco Docker Transformers **2.0.0-RC3** release. They can be enabled through the
 "**livenessTransformEnabled**" environment variable.
 >
 > The T-Engine liveness probes will be reevaluated/changed/improved as part of the ATS-138 story.
 >
-> Without the transform-specific liveness probees, calls to the "/live" endpoint of the 
+> Without the transform-specific liveness probees, calls to the "/live" endpoint of the
 T-Engines only check if the JVM is alive.
 
 The transformer's liveness and readiness probes perform small test transformations to check that a pod has fully started up and that it is still healthy.
@@ -17,6 +17,7 @@ The liveness probe gathers the average time of 5 test transformation after start
 Environment variables
 
 ### Configuration
+
 The actions of the probes are controlled by environment variables
 
     livenessPercent - The percentage slower the small test transform must be to indicate there is a problem. Generally
@@ -44,7 +45,6 @@ The rate and frequency of the probes are controlled by standard k8s fields. See 
         transforms.
     failureThreshold - set to 1 in the case of the liveness probe, so that any failure terminates the pod sright away.
         In the case of readiness probe this is left as the default 3, to give the pod a chance to start.
-
 
 ## Helm chart use of these variables and fields
 

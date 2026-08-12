@@ -1,9 +1,11 @@
 # alfresco-transform-model
+
 Alfresco Transform Model - Contains the data model of json configuration files
 and messages sent between clients, T-Engines and T-Router. It also contains code to
 work out which transform should be used for a combination of configuration files.
 
 ## Upgrade to 3.0.0
+
 When upgrading to 3.0.0, you will find that a number of classes in the alfresco-transform-model
 have moved. Hopefully they are now located in more logical packages. Most classes will not have been
 used in existing t-engines (based on the deprecated alfresco-transform-base), other than possibly for

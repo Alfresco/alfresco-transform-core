@@ -1,0 +1,41 @@
+# markdownlint configuration
+# https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+#
+# The mechanical rules (blank lines around headings/lists/fences, hard tabs, bare
+# URLs, multiple blank lines, list marker style, …) are left enabled and auto-fixed
+# via the `--fix` flag in .pre-commit-config.yaml. The rules below are disabled
+# because they are stylistic choices that conflict with the existing docs and would
+# require large prose/structure rewrites rather than mechanical fixes.
+default: true
+
+# MD013 line-length: docs intentionally use long prose/URLs; wrapping is a style choice.
+MD013: false
+
+# MD040 fenced-code-language: many existing code fences omit a language hint.
+MD040: false
+
+# MD041 first-line-heading: some docs start with badges/HTML rather than an H1.
+MD041: false
+
+# MD033 no-inline-html: docs use inline HTML (e.g. tables, anchors) where needed.
+MD033: false
+
+# MD024 no-duplicate-heading: repeated section names (e.g. "Example") are intentional.
+MD024: false
+
+# MD036 no-emphasis-as-heading: emphasised captions are used deliberately.
+MD036: false
+
+# MD001 heading-increment: some docs skip heading levels for layout reasons.
+MD001: false
+
+# MD046 code-block-style: docs mix indented and fenced code blocks.
+MD046: false
+
+# MD048 code-fence-style: docs mix tilde and backtick fences.
+MD048: false
+
+# MD055 table-pipe-style / MD060 table-column-style: existing wide tables use varied
+# pipe spacing and leading-only pipes; enforcing a single style is pure churn.
+MD055: false
+MD060: false
