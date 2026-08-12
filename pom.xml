@@ -42,6 +42,7 @@
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <spring-retry.version>2.0.13</spring-retry.version>
         <log4j2.version>2.26.1</log4j2.version> <!-- security fix CVE-2026-49844, can be removed once Spring Boot manages log4j2 >= 2.26.1 -->
+        <dependency.jsoup.version>1.23.1</dependency.jsoup.version> <!-- security fix CVE-2026-71497, can be removed once tika-parser-code-module manages jsoup >= 1.23.1 -->
     </properties>
 
     <profiles>
@@ -269,6 +270,12 @@
                 <version>4.0.3</version>
             </dependency>
             <!-- temporary security fix AAE-36687 -->
+            <!-- security fix CVE-2026-71497 (GHSA-pmhh-3w7g-xqp8), transitive via tika-parser-code-module -->
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${dependency.jsoup.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
