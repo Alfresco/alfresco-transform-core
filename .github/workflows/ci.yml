@@ -383,4 +383,4 @@ jobs:
           mvn -B -U -ntp clean deploy
           -P release,${{ matrix.buildProfile }}
           -DskipTests -Dmaven.javadoc.skip=true -DadditionalOption=-Xdoclint:none
-          -Dmaven.deploy.skip=true -Dparent.core.deploy.skip=true ${{ matrix.dockerArgs }}
+          -Dmaven.deploy.skip=true -Dparent.core.deploy.skip=true -Dtransformer.base.deploy.skip=true ${{ matrix.dockerArgs }}
