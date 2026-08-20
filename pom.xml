@@ -34,7 +34,7 @@
         <dependency.imaging.version>1.0.0-alpha6</dependency.imaging.version>
         <dependency.snakeyaml.version>2.3</dependency.snakeyaml.version>
         <dependency.tomcat.embed.version>11.0.22</dependency.tomcat.embed.version>
-        <dependency.activemq-client.version>6.2.5</dependency.activemq-client.version>
+        <dependency.activemq-client.version>6.2.7</dependency.activemq-client.version>
 
         <spotless-plugin.version>2.45.0</spotless-plugin.version>
 
@@ -43,6 +43,7 @@
         <spring-retry.version>2.0.13</spring-retry.version>
         <log4j2.version>2.26.1</log4j2.version> <!-- security fix CVE-2026-49844, can be removed once Spring Boot manages log4j2 >= 2.26.1 -->
         <dependency.jsoup.version>1.23.1</dependency.jsoup.version> <!-- security fix CVE-2026-71497, can be removed once tika-parser-code-module manages jsoup >= 1.23.1 -->
+        <httpcore5.version>5.4.3</httpcore5.version> <!-- security fix CVE-2026-54399, can be removed once Spring Boot BOM manages httpcore5 >= 5.4.3 -->
     </properties>
 
     <profiles>
