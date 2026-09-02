@@ -3,9 +3,9 @@ queue:
 transform:
   core:
     imagemagick:
-      root: ${IMAGEMAGICK_ROOT:/usr}
-      dyn: ${IMAGEMAGICK_DYN:/usr/lib64}
-      exe: ${IMAGEMAGICK_EXE:/usr/bin/gm}
+      root: ${IMAGEMAGICK_ROOT:/usr/local}
+      dyn: ${IMAGEMAGICK_DYN:/usr/local/lib}
+      exe: ${IMAGEMAGICK_EXE:/usr/local/bin/gm}
       coders: ${IMAGEMAGICK_CODERS:}
       config: ${IMAGEMAGICK_CONFIG:}
       commandOptions:
