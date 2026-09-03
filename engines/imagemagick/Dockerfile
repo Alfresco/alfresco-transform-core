@@ -110,9 +110,9 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
     make install && \
     ldconfig && \
     /usr/local/bin/gm version && \
-    /usr/local/bin/gm convert -list format | grep -qi 'jp2' && \
-    /usr/local/bin/gm convert -list format | grep -qi 'psd' && \
-    /usr/local/bin/gm convert -list format | grep -qi 'xwd' && \
+    /usr/local/bin/gm convert -list format | grep -qiE '^ *JP2.*rw' && \
+    /usr/local/bin/gm convert -list format | grep -qiE '^ *PSD.*rw' && \
+    /usr/local/bin/gm convert -list format | grep -qiE '^ *XWD.*rw' && \
     cd /tmp && rm -rf GraphicsMagick-${GRAPHICSMAGICK_VERSION} GraphicsMagick-${GRAPHICSMAGICK_VERSION}.tar.xz jasper-version-${JASPER_VERSION} jasper-build jasper.tar.gz && \
     dnf clean all && rm -rf /var/cache/dnf
 
