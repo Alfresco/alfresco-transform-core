@@ -15,7 +15,7 @@ ARG USERID=33006
 COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
 
 RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
-    yum clean all
+    dnf clean all
 
 ADD target/generated-resources/licenses              /licenses
 ADD target/generated-resources/licenses.xml          /licenses/

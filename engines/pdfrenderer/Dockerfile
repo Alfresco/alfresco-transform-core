@@ -27,7 +27,7 @@ RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${
     fi && \
     tar xf alfresco-pdf-renderer-linux.tgz -C /usr/bin && \
 	rm -f alfresco-pdf-renderer-linux.tgz && \
-    yum clean all
+    dnf clean all
 
 ADD target/generated-resources/licenses              /licenses
 ADD target/generated-resources/licenses.xml          /licenses/
