@@ -69,7 +69,16 @@ public class ImageMagickTransformEngine implements TransformEngine
     @Override
     public ProbeTransform getProbeTransform()
     {
+        // The probe's target temp file is created as "probe_target_<n>_probe.jpg"
+        // (ProbeTransform#getTargetFile), so the encoder is chosen from the .jpg extension and
+        // the probe really performs JPEG -> JPEG, despite the declared target media type.
+        //
+        // Recalibrated for GraphicsMagick: ImageMagick re-encodes a JPEG source at the source's
+        // own quality (probe.jpg is quality 100), giving ~25383 bytes, whereas GraphicsMagick
+        // defaults to quality 75, giving a deterministic 7913 bytes for the same command.
+        // plusOrMinus stays at the 1024 used by the other binary engines (cf. pdfrenderer's
+        // 7455 +/- 1024), which leaves ample headroom for GraphicsMagick version drift.
         return new ProbeTransform("probe.jpg", MIMETYPE_IMAGE_JPEG, MIMETYPE_IMAGE_PNG, Collections.emptyMap(),
-                25383, 1024, 150, 1024, 60 * 15 + 1, 60 * 15);
+                7913, 1024, 150, 1024, 60 * 15 + 1, 60 * 15);
     }
 }
