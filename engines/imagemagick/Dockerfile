@@ -1,30 +1,4 @@
 # Image provides a container in which to run GraphicsMagick transformations for Alfresco Content Services.
-#
-# PRODMAN-916 / ACS-12649 PoC: this engine has been switched from the custom (capability-reduced)
-# ImageMagick build to GraphicsMagick, built here FROM SOURCE with a full delegate set, including:
-#   * JP2 / JPEG-2000 support via JasPer. jasper-devel is NOT packaged for RHEL/Rocky 9 (JasPer was
-#     dropped from RHEL 9 / EPEL 9), so JasPer is also built from source here. GraphicsMagick 1.3.48
-#     targets the modern JasPer API (jas_init_library, JasPer 3.0.0+) and links cleanly against 4.x.
-#
-#   * PSD / PDD (Adobe Photoshop) support via --enable-broken-coders PLUS a small source patch
-#     applied below. GraphicsMagick moved its PSD coder into the "broken coders" set in 1.3.24
-#     (2016) after a run of AFL fuzzing bugs, and has not maintained it since. In 1.3.47 two
-#     internal macros gained a parameter (VerifyColormapIndex 2->3 args,
-#     MagickFreeResourceLimitedMemory 1->2 args) but coders/psd.c was never updated, so on
-#     1.3.47+ --enable-broken-coders alone FAILS TO COMPILE. Upstream CI never builds this file
-#     because the flag is off by default, so the breakage is still unreported/unfixed at HEAD.
-#     The sed patch below fixes the 8 stale call sites; 1.3.46 (the last release whose psd.c
-#     matched its own macros) was used to confirm the coder logic itself still works.
-#
-# !! SECURITY CAVEAT - PSD is enabled via --enable-broken-coders. GraphicsMagick deliberately
-# !! classifies this coder as broken and security-sensitive: it was disabled after AFL-fuzzing
-# !! defects, it carries CVE-2014-1947 (stack overflow in WritePSDImage, CVSS 7.8), it has NO
-# !! upstream test coverage, and no mainstream distro ships it enabled. It parses untrusted
-# !! user uploads. Enabling it restores the PSD/PDD conversion capability the ATS config
-# !! declares; it does NOT provide complete or hardened Photoshop compatibility.
-#
-# WMF is disabled (--without-wmf) as libwmf is not available on the el9 base.
-#
 # GraphicsMagick is from the GraphicsMagick Group. See http://www.graphicsmagick.org/ .
 # JasPer is from Michael D. Adams / the JasPer project. See https://github.com/jasper-software/jasper .
 
@@ -48,12 +22,6 @@ ARG IMAGEUSERNAME=imagemagick
 ARG USERID=33002
 
 COPY target/${env.project_artifactId}-${env.project_version}.jar /usr/bin
-
-# Build JasPer (JP2) then GraphicsMagick from source.
-# NOTE: no '#' comments inside this RUN chain - a comment after a line continuation would swallow
-# the rest of the command.
-# NOTE: 'curl' is deliberately NOT in the dnf list. The el9 base ships curl-minimal, which already
-# provides /usr/bin/curl; asking for the full 'curl' package makes dnf fail with a file conflict.
 RUN ln /usr/bin/${env.project_artifactId}-${env.project_version}.jar /usr/bin/${env.project_artifactId}.jar && \
     dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
     dnf install -y dnf-plugins-core && \
