@@ -29,7 +29,7 @@
         <dependency.jackson.version>3.2.1</dependency.jackson.version>
         <dependency.tika.version>3.2.3</dependency.tika.version>
         <dependency.poi.version>5.4.1</dependency.poi.version>
-        <dependency.bcprov.version>1.84</dependency.bcprov.version>
+        <dependency.bcprov.version>1.85</dependency.bcprov.version>
         <dependency.commons-io.version>2.20.0</dependency.commons-io.version>
         <dependency.imaging.version>1.0.0-alpha6</dependency.imaging.version>
         <dependency.snakeyaml.version>2.3</dependency.snakeyaml.version>
@@ -43,6 +43,7 @@
         <spring-retry.version>2.0.13</spring-retry.version>
         <log4j2.version>2.26.1</log4j2.version> <!-- security fix CVE-2026-49844, can be removed once Spring Boot manages log4j2 >= 2.26.1 -->
         <dependency.jsoup.version>1.23.1</dependency.jsoup.version> <!-- security fix CVE-2026-71497, can be removed once tika-parser-code-module manages jsoup >= 1.23.1 -->
+        <httpclient5.version>5.6.4</httpclient5.version> <!-- security fix CVE-2026-64607, can be removed once Spring Boot BOM manages httpclient5 >= 5.6.3 -->
         <httpcore5.version>5.4.3</httpcore5.version> <!-- security fix CVE-2026-54399, can be removed once Spring Boot BOM manages httpcore5 >= 5.4.3 -->
     </properties>
 
