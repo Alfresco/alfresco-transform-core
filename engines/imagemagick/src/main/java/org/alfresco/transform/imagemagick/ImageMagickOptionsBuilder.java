@@ -240,8 +240,10 @@ public final class ImageMagickOptionsBuilder
         StringJoiner args = new StringJoiner(" ");
         if (alphaRemove != null && alphaRemove)
         {
-            args.add("-alpha");
-            args.add(("remove"));
+            // GraphicsMagick has no "-alpha remove"; the equivalent is compositing onto a white background.
+            args.add("-background");
+            args.add("white");
+            args.add("-flatten");
         }
         if (autoOrient != null && autoOrient)
         {
