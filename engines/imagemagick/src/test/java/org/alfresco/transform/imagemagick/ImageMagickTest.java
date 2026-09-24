@@ -240,7 +240,7 @@ public class ImageMagickTest extends AbstractBaseTest
     @Test
     public void optionsTest() throws Exception
     {
-        expectedOptions = "-alpha remove -gravity SouthEast -crop 123x456%+90+12 +repage -thumbnail 321x654%!";
+        expectedOptions = "-background white -flatten -gravity SouthEast -crop 123x456%+90+12 +repage -thumbnail 321x654%!";
         expectedSourceSuffix = "[2-3]";
         mockMvc
                 .perform(MockMvcRequestBuilders
