@@ -50,6 +50,7 @@ public final class ImageMagickOptionsBuilder
 
     private Boolean alphaRemove;
     private Boolean autoOrient;
+    private Boolean flattenLayers;
     private String cropGravity;
     private Integer cropWidth;
     private Integer cropHeight;
@@ -75,6 +76,15 @@ public final class ImageMagickOptionsBuilder
     public ImageMagickOptionsBuilder withAlphaRemove(final Boolean alphaRemove)
     {
         this.alphaRemove = alphaRemove;
+        return this;
+    }
+
+    /**
+     * Composite every layer of a layered source into one image, for sources where no page range is selecting a single frame. GraphicsMagick has no merged-composite frame the way ImageMagick does, so without this a layered PSD converts to whichever layer comes first.
+     */
+    public ImageMagickOptionsBuilder withFlattenLayers(final Boolean flattenLayers)
+    {
+        this.flattenLayers = flattenLayers;
         return this;
     }
 
@@ -238,7 +248,8 @@ public final class ImageMagickOptionsBuilder
         }
 
         StringJoiner args = new StringJoiner(" ");
-        if (alphaRemove != null && alphaRemove)
+        boolean flattened = alphaRemove != null && alphaRemove;
+        if (flattened)
         {
             // GraphicsMagick has no "-alpha remove"; the equivalent is compositing onto a white background.
             args.add("-background");
@@ -248,6 +259,11 @@ public final class ImageMagickOptionsBuilder
         if (autoOrient != null && autoOrient)
         {
             args.add("-auto-orient");
+        }
+        if (flattenLayers != null && flattenLayers && !flattened)
+        {
+            // "-alpha remove" above already flattens, so only add this when it did not.
+            args.add("-flatten");
         }
 
         if (cropGravity != null || cropWidth != null || cropHeight != null || cropPercentage != null ||
