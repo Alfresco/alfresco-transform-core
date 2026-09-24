@@ -30,8 +30,8 @@ env:
   # Both variables are required to be set before the release process starts.
   # As the release is triggered by a commit message with "[release]" keyword on a release branch,
   # setting these variables to new values can be done in the same commit and will indicate the release and the dev versions in it.
-  RELEASE_VERSION: "5.4.4" # The version of the release (tag).
-  DEVELOPMENT_VERSION: "5.4.5-A.1-SNAPSHOT" # The version that will be set in pom files after the release (next dev version)
+  RELEASE_VERSION: "5.4.5-A.2" # The version of the release (tag).
+  DEVELOPMENT_VERSION: "5.4.5-A.3-SNAPSHOT" # The version that will be set in pom files after the release (next dev version)
 
 permissions:
   contents: read
@@ -107,9 +107,8 @@ jobs:
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
         run: |
-          if [ -d "${HOME}/.m2/repository" ]; then
-            find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
-          fi
+          mkdir -p "${HOME}/.m2/repository/"
+          find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
       - name: "Build"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
@@ -184,9 +183,8 @@ jobs:
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
         run: |
-          if [ -d "${HOME}/.m2/repository" ]; then
-            find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
-          fi
+          mkdir -p "${HOME}/.m2/repository/"
+          find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
       - name: "Build local docker image"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
@@ -242,9 +240,8 @@ jobs:
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
         run: |
-          if [ -d "${HOME}/.m2/repository" ]; then
-            find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
-          fi
+          mkdir -p "${HOME}/.m2/repository/"
+          find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
       - name: "Build local docker image"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
@@ -296,9 +293,8 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.0
       - name: "Clean-up SNAPSHOT artifacts"
         run: |
-          if [ -d "${HOME}/.m2/repository" ]; then
-            find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
-          fi
+          mkdir -p "${HOME}/.m2/repository/"
+          find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
       - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v18.21.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
@@ -377,9 +373,8 @@ jobs:
           sudo service docker restart
       - name: "Clean-up SNAPSHOT artifacts"
         run: |
-          if [ -d "${HOME}/.m2/repository" ]; then
-            find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
-          fi
+          mkdir -p "${HOME}/.m2/repository/"
+          find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
       - name: "Cache LibreOffice"
         run: bash _ci/cache_artifacts.sh
       # Builds the module(s) and pushes the multi-arch Docker image(s). The Maven
