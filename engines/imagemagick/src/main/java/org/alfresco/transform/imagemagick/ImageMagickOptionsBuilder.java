@@ -47,6 +47,8 @@ public final class ImageMagickOptionsBuilder
 {
     private static final List<String> GRAVITY_VALUES = ImmutableList.of("North", "NorthEast",
             "East", "SouthEast", "South", "SouthWest", "West", "NorthWest", "Center");
+    private static final int WHOLE_DIMENSION_PIXELS = 1_000_000;
+    private static final int WHOLE_DIMENSION_PERCENTAGE = 100;
 
     private Boolean alphaRemove;
     private Boolean autoOrient;
@@ -275,19 +277,20 @@ public final class ImageMagickOptionsBuilder
                 args.add(cropGravity);
             }
 
+            boolean percentageCrop = cropPercentage != null && cropPercentage;
+            Integer width = specifiedDimension(cropWidth);
+            Integer height = specifiedDimension(cropHeight);
+
             StringBuilder crop = new StringBuilder();
-            if (cropWidth != null && cropWidth >= 0)
+            if (width != null || height != null)
             {
-                crop.append(cropWidth);
-            }
-            if (cropHeight != null && cropHeight >= 0)
-            {
+                crop.append(width != null ? width : unspecifiedDimension(percentageCrop));
                 crop.append('x');
-                crop.append(cropHeight);
-            }
-            if (cropPercentage != null && cropPercentage)
-            {
-                crop.append('%');
+                crop.append(height != null ? height : unspecifiedDimension(percentageCrop));
+                if (percentageCrop)
+                {
+                    crop.append('%');
+                }
             }
             if (cropXOffset != null)
             {
@@ -348,6 +351,16 @@ public final class ImageMagickOptionsBuilder
         return (commandOptions == null || "".equals(
                 commandOptions.trim()) ? "" : commandOptions + ' ') +
                 args;
+    }
+
+    private static Integer specifiedDimension(final Integer dimension)
+    {
+        return dimension == null || dimension <= 0 ? null : dimension;
+    }
+
+    private static int unspecifiedDimension(final boolean percentageCrop)
+    {
+        return percentageCrop ? WHOLE_DIMENSION_PERCENTAGE : WHOLE_DIMENSION_PIXELS;
     }
 
     public static ImageMagickOptionsBuilder builder()
