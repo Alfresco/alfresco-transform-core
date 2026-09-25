@@ -28,9 +28,12 @@ package org.alfresco.transform.imagemagick.transformers;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.IntSupplier;
 import jakarta.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +43,13 @@ import org.alfresco.transform.base.executors.RuntimeExec;
 @Component
 public class ImageMagickCommandExecutor extends AbstractCommandExecutor
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageMagickCommandExecutor.class);
+
+    private static final String OMP_NUM_THREADS = "OMP_NUM_THREADS";
+    private static final String THREADS_PROPERTY = "transform.core.imagemagick.threads";
+    private static final String AUTO = "auto";
+    private static final int DEFAULT_MAX_CONCURRENT_TRANSFORMS = 10;
+
     @Value("${transform.core.imagemagick.exe}")
     private String exe;
     @Value("${transform.core.imagemagick.dyn}")
@@ -52,6 +62,16 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
     private String coders;
     @Value("${transform.core.imagemagick.config}")
     private String config;
+
+    @Value("${transform.core.imagemagick.threads:1}")
+    private String threads;
+
+    @Value("${jms-listener.concurrency:1-10}")
+    private String jmsListenerConcurrency;
+
+    IntSupplier cpuBudget = Runtime.getRuntime()::availableProcessors;
+
+    private String ompNumThreads;
 
     @PostConstruct
     private void createCommands()
@@ -69,8 +89,74 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
             throw new IllegalArgumentException("ImageMagickTransformer IMAGEMAGICK_ROOT variable cannot be null or empty");
         }
 
+        ompNumThreads = resolveOmpNumThreads();
+        LOGGER.info("{}={} resolved from {}={}, availableProcessors={}, jms-listener.concurrency={}",
+                OMP_NUM_THREADS, ompNumThreads, THREADS_PROPERTY, threads, cpuBudget.getAsInt(),
+                jmsListenerConcurrency);
+
         super.transformCommand = createTransformCommand();
         super.checkCommand = createCheckCommand();
+    }
+
+    private String resolveOmpNumThreads()
+    {
+        return resolveOmpNumThreads(threads, jmsListenerConcurrency, cpuBudget.getAsInt(),
+                System.getenv(OMP_NUM_THREADS));
+    }
+
+    static String resolveOmpNumThreads(String threads, String jmsListenerConcurrency, int cpuBudget,
+            String valueSetOnContainer)
+    {
+        if (StringUtils.isNotBlank(valueSetOnContainer))
+        {
+            return valueSetOnContainer.trim();
+        }
+
+        String requested = StringUtils.trimToEmpty(threads);
+        if (!AUTO.equalsIgnoreCase(requested))
+        {
+            return Integer.toString(parsePositiveThreadCount(requested));
+        }
+
+        int maxConcurrentTransforms = maxConcurrentTransforms(jmsListenerConcurrency);
+        return Integer.toString(Math.max(1, cpuBudget / maxConcurrentTransforms));
+    }
+
+    private static int parsePositiveThreadCount(String requested)
+    {
+        int threadCount;
+        try
+        {
+            threadCount = Integer.parseInt(requested);
+        }
+        catch (NumberFormatException e)
+        {
+            throw new IllegalArgumentException(THREADS_PROPERTY
+                    + " must be a positive integer or '" + AUTO + "', but was '" + requested + "'", e);
+        }
+        if (threadCount < 1)
+        {
+            throw new IllegalArgumentException(THREADS_PROPERTY
+                    + " must be a positive integer or '" + AUTO + "', but was " + threadCount);
+        }
+        return threadCount;
+    }
+
+    static int maxConcurrentTransforms(String jmsListenerConcurrency)
+    {
+        String range = StringUtils.trimToEmpty(jmsListenerConcurrency);
+        int separator = range.indexOf('-');
+        String upperBound = separator < 0 ? range : range.substring(separator + 1);
+        try
+        {
+            return Math.max(1, Integer.parseInt(upperBound.trim()));
+        }
+        catch (NumberFormatException e)
+        {
+            LOGGER.warn("Could not read an upper bound from jms-listener.concurrency '{}', assuming {}",
+                    jmsListenerConcurrency, DEFAULT_MAX_CONCURRENT_TRANSFORMS);
+            return DEFAULT_MAX_CONCURRENT_TRANSFORMS;
+        }
     }
 
     @Override
@@ -85,7 +171,10 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
         runtimeExec.setCommandsAndArguments(commandsAndArguments);
 
         Map<String, String> processProperties = new HashMap<>();
-        processProperties.put("OMP_NUM_THREADS", "2");   // injected from config
+        if (ompNumThreads != null)
+        {
+            processProperties.put(OMP_NUM_THREADS, ompNumThreads);
+        }
         processProperties.put("MAGICK_HOME", root);
         processProperties.put("DYLD_FALLBACK_LIBRARY_PATH", dyn);
         processProperties.put("LD_LIBRARY_PATH", dyn);
