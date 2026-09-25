@@ -85,6 +85,7 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
         runtimeExec.setCommandsAndArguments(commandsAndArguments);
 
         Map<String, String> processProperties = new HashMap<>();
+        processProperties.put("OMP_NUM_THREADS", "2");   // injected from config
         processProperties.put("MAGICK_HOME", root);
         processProperties.put("DYLD_FALLBACK_LIBRARY_PATH", dyn);
         processProperties.put("LD_LIBRARY_PATH", dyn);
