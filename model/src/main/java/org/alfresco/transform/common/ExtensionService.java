@@ -118,6 +118,15 @@ public class ExtensionService
             Map.entry(MIMETYPE_IMAGE_SVG, "svg"),
             Map.entry(MIMETYPE_TEXT_PLAIN, "txt"),
             Map.entry(MIMETYPE_XHTML, "xhtml"),
+            Map.entry(MIMETYPE_XHTML, "xhtml"),
+            Map.entry(MIMETYPE_IMAGE_PBM, "pbm"),
+            Map.entry(MIMETYPE_IMAGE_PGM, "pgm"),
+            Map.entry(MIMETYPE_IMAGE_PPM, "ppm"),
+            Map.entry(MIMETYPE_IMAGE_PNM, "pnm"),
+            Map.entry(MIMETYPE_IMAGE_RAS, "ras"),
+            Map.entry(MIMETYPE_IMAGE_XBM, "xbm"),
+            Map.entry(MIMETYPE_IMAGE_XPM, "xpm"),
+            Map.entry(MIMETYPE_IMAGE_XWD, "xwd"));
             Map.entry(MIMETYPE_IMAGE_XWD, "xwd"));
 
     protected ExtensionService()
