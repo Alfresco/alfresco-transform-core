@@ -32,11 +32,13 @@ import static org.alfresco.transform.base.util.Util.stringToBoolean;
 import static org.alfresco.transform.base.util.Util.stringToInteger;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import com.google.common.collect.ImmutableList;
 
 import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.imagemagick.dialect.MagickDialect;
 
 /**
  * ImageMagick options builder.
@@ -67,8 +69,12 @@ public final class ImageMagickOptionsBuilder
     private Boolean maintainAspectRatio;
     private String commandOptions;
 
-    private ImageMagickOptionsBuilder()
-    {}
+    private final MagickDialect dialect;
+
+    private ImageMagickOptionsBuilder(final MagickDialect dialect)
+    {
+        this.dialect = Objects.requireNonNull(dialect, "dialect");
+    }
 
     public ImageMagickOptionsBuilder withAlphaRemove(final String alphaRemove)
     {
@@ -250,19 +256,16 @@ public final class ImageMagickOptionsBuilder
         }
 
         StringJoiner args = new StringJoiner(" ");
-        boolean flattened = alphaRemove != null && alphaRemove;
-        if (flattened)
+        boolean alphaRemoved = alphaRemove != null && alphaRemove;
+        if (alphaRemoved)
         {
-            // GraphicsMagick has no "-alpha remove"; the equivalent is compositing onto a white background.
-            args.add("-background");
-            args.add("white");
-            args.add("-flatten");
+            dialect.alphaRemoveArgs().forEach(args::add);
         }
         if (autoOrient != null && autoOrient)
         {
             args.add("-auto-orient");
         }
-        if (flattenLayers != null && flattenLayers && !flattened)
+        if (flattenLayers != null && flattenLayers && !alphaRemoved)
         {
             // "-alpha remove" above already flattens, so only add this when it did not.
             args.add("-flatten");
@@ -277,20 +280,14 @@ public final class ImageMagickOptionsBuilder
                 args.add(cropGravity);
             }
 
-            boolean percentageCrop = cropPercentage != null && cropPercentage;
-            Integer width = specifiedDimension(cropWidth);
-            Integer height = specifiedDimension(cropHeight);
-
             StringBuilder crop = new StringBuilder();
-            if (width != null || height != null)
+            if (dialect.fillsUnspecifiedCropDimension())
             {
-                crop.append(width != null ? width : unspecifiedDimension(percentageCrop));
-                crop.append('x');
-                crop.append(height != null ? height : unspecifiedDimension(percentageCrop));
-                if (percentageCrop)
-                {
-                    crop.append('%');
-                }
+                appendCropSizeFillingUnspecified(crop);
+            }
+            else
+            {
+                appendCropSize(crop);
             }
             if (cropXOffset != null)
             {
@@ -353,6 +350,40 @@ public final class ImageMagickOptionsBuilder
                 args;
     }
 
+    private void appendCropSize(final StringBuilder crop)
+    {
+        if (cropWidth != null && cropWidth >= 0)
+        {
+            crop.append(cropWidth);
+        }
+        if (cropHeight != null && cropHeight >= 0)
+        {
+            crop.append('x');
+            crop.append(cropHeight);
+        }
+        if (cropPercentage != null && cropPercentage)
+        {
+            crop.append('%');
+        }
+    }
+
+    private void appendCropSizeFillingUnspecified(final StringBuilder crop)
+    {
+        boolean percentageCrop = cropPercentage != null && cropPercentage;
+        Integer width = specifiedDimension(cropWidth);
+        Integer height = specifiedDimension(cropHeight);
+        if (width != null || height != null)
+        {
+            crop.append(width != null ? width : unspecifiedDimension(percentageCrop));
+            crop.append('x');
+            crop.append(height != null ? height : unspecifiedDimension(percentageCrop));
+            if (percentageCrop)
+            {
+                crop.append('%');
+            }
+        }
+    }
+
     private static Integer specifiedDimension(final Integer dimension)
     {
         return dimension == null || dimension <= 0 ? null : dimension;
@@ -363,8 +394,8 @@ public final class ImageMagickOptionsBuilder
         return percentageCrop ? WHOLE_DIMENSION_PERCENTAGE : WHOLE_DIMENSION_PIXELS;
     }
 
-    public static ImageMagickOptionsBuilder builder()
+    public static ImageMagickOptionsBuilder builder(final MagickDialect dialect)
     {
-        return new ImageMagickOptionsBuilder();
+        return new ImageMagickOptionsBuilder(dialect);
     }
 }

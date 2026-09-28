@@ -39,12 +39,15 @@ import org.alfresco.transform.base.TransformEngine;
 import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.config.reader.TransformConfigResourceReader;
+import org.alfresco.transform.imagemagick.dialect.MagickDialect;
 
 @Component
 public class ImageMagickTransformEngine implements TransformEngine
 {
     @Autowired
     private TransformConfigResourceReader transformConfigResourceReader;
+    @Autowired
+    private MagickDialect dialect;
 
     @Override
     public String getTransformEngineName()
@@ -55,9 +58,7 @@ public class ImageMagickTransformEngine implements TransformEngine
     @Override
     public String getStartupMessage()
     {
-        return COMMUNITY_LICENCE +
-                "This transformer uses ImageMagick from ImageMagick Studio LLC. " +
-                "See the license at http://www.imagemagick.org/script/license.php or in /ImageMagick-license.txt";
+        return COMMUNITY_LICENCE + dialect.startupMessage();
     }
 
     @Override
@@ -70,6 +71,6 @@ public class ImageMagickTransformEngine implements TransformEngine
     public ProbeTransform getProbeTransform()
     {
         return new ProbeTransform("probe.jpg", MIMETYPE_IMAGE_JPEG, MIMETYPE_IMAGE_PNG, Collections.emptyMap(),
-                7913, 1024, 150, 1024, 60 * 15 + 1, 60 * 15);
+                dialect.probeExpectedLength(), 1024, 150, 1024, 60 * 15 + 1, 60 * 15);
     }
 }

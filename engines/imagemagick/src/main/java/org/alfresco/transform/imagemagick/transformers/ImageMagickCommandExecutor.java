@@ -34,11 +34,15 @@ import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.transform.base.executors.AbstractCommandExecutor;
 import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
+import org.alfresco.transform.imagemagick.dialect.MagickBackend;
+import org.alfresco.transform.imagemagick.dialect.MagickDialect;
 
 @Component
 public class ImageMagickCommandExecutor extends AbstractCommandExecutor
@@ -49,12 +53,16 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
     private static final String THREADS_PROPERTY = "transform.core.imagemagick.threads";
     private static final String AUTO = "auto";
     private static final int DEFAULT_MAX_CONCURRENT_TRANSFORMS = 10;
+    private static final long VERSION_CHECK_TIMEOUT_MS = 30_000;
 
-    @Value("${transform.core.imagemagick.exe}")
+    @Autowired
+    private MagickDialect dialect;
+
+    @Value("${transform.core.imagemagick.exe:}")
     private String exe;
-    @Value("${transform.core.imagemagick.dyn}")
+    @Value("${transform.core.imagemagick.dyn:}")
     private String dyn;
-    @Value("${transform.core.imagemagick.root}")
+    @Value("${transform.core.imagemagick.root:}")
     private String root;
 
     // Not currently used, but may be again in the future if we need an ImageMagick extension
@@ -63,7 +71,7 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
     @Value("${transform.core.imagemagick.config}")
     private String config;
 
-    @Value("${transform.core.imagemagick.threads:1}")
+    @Value("${" + THREADS_PROPERTY + ":}")
     private String threads;
 
     @Value("${jms-listener.concurrency:1-10}")
@@ -76,32 +84,39 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
     @PostConstruct
     private void createCommands()
     {
-        if (StringUtils.isEmpty(exe))
-        {
-            throw new IllegalArgumentException("ImageMagickTransformer IMAGEMAGICK_EXE variable cannot be null or empty");
-        }
-        if (StringUtils.isEmpty(dyn))
-        {
-            throw new IllegalArgumentException("ImageMagickTransformer IMAGEMAGICK_DYN variable cannot be null or empty");
-        }
-        if (StringUtils.isEmpty(root))
-        {
-            throw new IllegalArgumentException("ImageMagickTransformer IMAGEMAGICK_ROOT variable cannot be null or empty");
-        }
+        exe = StringUtils.defaultIfBlank(exe, dialect.defaultExe());
+        dyn = StringUtils.defaultIfBlank(dyn, dialect.defaultDyn());
+        root = StringUtils.defaultIfBlank(root, dialect.defaultRoot());
 
-        ompNumThreads = resolveOmpNumThreads();
-        LOGGER.info("{}={} resolved from {}={}, availableProcessors={}, jms-listener.concurrency={}",
-                OMP_NUM_THREADS, ompNumThreads, THREADS_PROPERTY, threads, cpuBudget.getAsInt(),
-                jmsListenerConcurrency);
+        ompNumThreads = resolveOmpNumThreads(threads, dialect.defaultThreads(), jmsListenerConcurrency,
+                cpuBudget.getAsInt(), System.getenv(OMP_NUM_THREADS));
+        if (ompNumThreads == null)
+        {
+            LOGGER.info("{} is not set for {}", OMP_NUM_THREADS, dialect.displayName());
+        }
+        else
+        {
+            LOGGER.info("{}={} resolved from {}={}, availableProcessors={}, jms-listener.concurrency={}",
+                    OMP_NUM_THREADS, ompNumThreads, THREADS_PROPERTY, threads, cpuBudget.getAsInt(),
+                    jmsListenerConcurrency);
+        }
 
         super.transformCommand = createTransformCommand();
         super.checkCommand = createCheckCommand();
+
+        verifyBinaryMatchesDialect();
+        LOGGER.info("Using {} at {}", dialect.displayName(), exe);
     }
 
-    private String resolveOmpNumThreads()
+    static String resolveOmpNumThreads(String threads, String defaultThreads, String jmsListenerConcurrency,
+            int cpuBudget, String valueSetOnContainer)
     {
-        return resolveOmpNumThreads(threads, jmsListenerConcurrency, cpuBudget.getAsInt(),
-                System.getenv(OMP_NUM_THREADS));
+        String requested = StringUtils.isBlank(threads) ? defaultThreads : threads;
+        if (requested == null && StringUtils.isBlank(valueSetOnContainer))
+        {
+            return null;
+        }
+        return resolveOmpNumThreads(requested, jmsListenerConcurrency, cpuBudget, valueSetOnContainer);
     }
 
     static String resolveOmpNumThreads(String threads, String jmsListenerConcurrency, int cpuBudget,
@@ -159,17 +174,62 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
         }
     }
 
+    private void verifyBinaryMatchesDialect()
+    {
+        RuntimeExec versionCommand = new RuntimeExec();
+        Map<String, String[]> commandsAndArguments = new HashMap<>();
+        commandsAndArguments.put(".*", new String[]{exe, "-version"});
+        versionCommand.setCommandsAndArguments(commandsAndArguments);
+        versionCommand.setProcessProperties(createProcessProperties());
+
+        ExecutionResult result = versionCommand.execute(new HashMap<>(), VERSION_CHECK_TIMEOUT_MS);
+        verifyVersionOutput(dialect, exe, result.getExitValue(), result.getStdOut(), result.getStdErr());
+    }
+
+    static void verifyVersionOutput(MagickDialect dialect, String exe, int exitValue, String stdOut, String stdErr)
+    {
+        if (exitValue != 0 || StringUtils.isBlank(stdOut))
+        {
+            LOGGER.warn("Could not run \"{} -version\" to confirm it is {}: {}", exe, dialect.displayName(),
+                    StringUtils.trimToEmpty(stdErr));
+            return;
+        }
+        String firstLine = stdOut.strip().lines().findFirst().orElse("");
+        if (!dialect.isOwnVersionOutput(stdOut))
+        {
+            throw new IllegalStateException(MagickBackend.PROPERTY + " selects " + dialect.displayName()
+                    + ", but " + exe + " reports \"" + firstLine + "\". Set IMAGEMAGICK_BACKEND to match the"
+                    + " installed binary, or point IMAGEMAGICK_EXE at the " + dialect.displayName() + " binary.");
+        }
+        LOGGER.info("{}", firstLine);
+    }
+
     @Override
     protected RuntimeExec createTransformCommand()
     {
         RuntimeExec runtimeExec = new RuntimeExec();
+        if (dialect == null)
+        {
+            return runtimeExec;
+        }
         Map<String, String[]> commandsAndArguments = new HashMap<>();
-        // GraphicsMagick is a single dispatch binary invoked as "gm convert ...".
-        // "-quiet" is dropped: it is not a GraphicsMagick option (GM is quiet by default).
-        commandsAndArguments.put(".*",
-                new String[]{exe, "convert", "${source}", "SPLIT:${options}", "-strip", "${target}"});
+        commandsAndArguments.put(".*", dialect.transformCommand(exe));
         runtimeExec.setCommandsAndArguments(commandsAndArguments);
 
+        runtimeExec.setProcessProperties(createProcessProperties());
+
+        Map<String, String> defaultProperties = new HashMap<>();
+        defaultProperties.put("options", null);
+        runtimeExec.setDefaultProperties(defaultProperties);
+
+        runtimeExec.setErrorCodes(
+                "1,2,255,400,405,410,415,420,425,430,435,440,450,455,460,465,470,475,480,485,490,495,499,700,705,710,715,720,725,730,735,740,750,755,760,765,770,775,780,785,790,795,799");
+
+        return runtimeExec;
+    }
+
+    private Map<String, String> createProcessProperties()
+    {
         Map<String, String> processProperties = new HashMap<>();
         if (ompNumThreads != null)
         {
@@ -188,25 +248,19 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
         {
             processProperties.put("MAGICK_CONFIGURE_PATH", config);
         }
-        runtimeExec.setProcessProperties(processProperties);
-
-        Map<String, String> defaultProperties = new HashMap<>();
-        defaultProperties.put("options", null);
-        runtimeExec.setDefaultProperties(defaultProperties);
-
-        runtimeExec.setErrorCodes(
-                "1,2,255,400,405,410,415,420,425,430,435,440,450,455,460,465,470,475,480,485,490,495,499,700,705,710,715,720,725,730,735,740,750,755,760,765,770,775,780,785,790,795,799");
-
-        return runtimeExec;
+        return processProperties;
     }
 
     @Override
     protected RuntimeExec createCheckCommand()
     {
         RuntimeExec runtimeExec = new RuntimeExec();
+        if (dialect == null)
+        {
+            return runtimeExec;
+        }
         Map<String, String[]> commandsAndArguments = new HashMap<>();
-        // GraphicsMagick reports its version via "gm version" (not "gm -version").
-        commandsAndArguments.put(".*", new String[]{exe, "version"});
+        commandsAndArguments.put(".*", dialect.checkCommand(exe));
         runtimeExec.setCommandsAndArguments(commandsAndArguments);
         return runtimeExec;
     }

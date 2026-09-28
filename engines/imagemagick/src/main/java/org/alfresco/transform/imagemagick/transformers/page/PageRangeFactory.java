@@ -42,16 +42,23 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.transform.imagemagick.dialect.MagickDialect;
+
 @Component
 public class PageRangeFactory
 {
     private final List<String> singlePageFormats = List.of(MIMETYPE_IMAGE_BMP, MIMETYPE_IMAGE_JP2, MIMETYPE_IMAGE_JPEG, MIMETYPE_IMAGE_PNG, MIMETYPE_IMAGE_XWD);
 
+    private final MagickDialect dialect;
+
+    public PageRangeFactory(MagickDialect dialect)
+    {
+        this.dialect = dialect;
+    }
+
     public String create(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions)
     {
-        String startPageString = transformOptions.get(START_PAGE);
-        String endPageString = transformOptions.get(END_PAGE);
-        if (selectsWholePsd(sourceMimetype, startPageString, endPageString))
+        if (flattensWholePsd(sourceMimetype, transformOptions))
         {
             // ImageMagick stores a merged composite at index 0 of a PSD, so "[0]" is the
             // flattened image. GraphicsMagick has no such frame -- index 0 is the first
@@ -60,6 +67,8 @@ public class PageRangeFactory
             // ImageMagickOptionsBuilder add "-flatten", which composites every layer.
             return "";
         }
+        String startPageString = transformOptions.get(START_PAGE);
+        String endPageString = transformOptions.get(END_PAGE);
         if (!singlePageFormats.contains(sourceMimetype) && singlePageFormats.contains(targetMimetype))
         {
             if (StringUtils.isEmpty(startPageString))
@@ -74,6 +83,12 @@ public class PageRangeFactory
         Integer startPage = stringToInteger(startPageString);
         Integer endPage = stringToInteger(endPageString);
         return calculatePageRange(startPage, endPage);
+    }
+
+    public boolean flattensWholePsd(String sourceMimetype, Map<String, String> transformOptions)
+    {
+        return dialect.flattensWholePsd()
+                && selectsWholePsd(sourceMimetype, transformOptions.get(START_PAGE), transformOptions.get(END_PAGE));
     }
 
     /**

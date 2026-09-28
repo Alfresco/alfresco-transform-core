@@ -13,6 +13,8 @@
 
     <properties>
         <image.name>alfresco/alfresco-transform-core-aio</image.name>
+        <magick.dockerfile>Dockerfile</magick.dockerfile>
+        <magick.tag.suffix></magick.tag.suffix>
         <env.project_artifactId>${project.artifactId}</env.project_artifactId>
     </properties>
 
@@ -274,7 +276,7 @@
                                             </run>
                                         </image>
                                         <image>
-                                            <name>${image.name}:${image.tag}</name>
+                                            <name>${image.name}:${image.tag}${magick.tag.suffix}</name>
                                             <run>
                                                 <ports>
                                                     <port>8090:8090</port>
@@ -321,9 +323,10 @@
                                 <configuration>
                                     <images>
                                         <image>
-                                            <name>${image.name}:${image.tag}</name>
+                                            <name>${image.name}:${image.tag}${magick.tag.suffix}</name>
                                             <build>
                                                 <contextDir>${project.basedir}</contextDir>
+                                                <dockerFile>${project.basedir}/${magick.dockerfile}</dockerFile>
                                                 <buildOptions>
                                                     <squash>true</squash>
                                                 </buildOptions>
@@ -349,7 +352,7 @@
                             <images>
                                 <!-- QuayIO image -->
                                  <image>
-                                    <name>${image.name}:${image.tag}</name>
+                                    <name>${image.name}:${image.tag}${magick.tag.suffix}</name>
                                     <registry>${image.registry}</registry>
                                     <build>
                                         <buildx>
@@ -362,6 +365,7 @@
                                             </attestations>
                                         </buildx>
                                         <contextDir>${project.basedir}</contextDir>
+                                        <dockerFile>${project.basedir}/${magick.dockerfile}</dockerFile>
                                         <buildOptions>
                                             <squash>true</squash>
                                         </buildOptions>
@@ -369,7 +373,7 @@
                                 </image>
                                 <!-- DockerHub image -->
                                 <image>
-                                    <name>${image.name}:${image.tag}</name>
+                                    <name>${image.name}:${image.tag}${magick.tag.suffix}</name>
                                     <build>
                                         <buildx>
                                             <platforms>
@@ -381,6 +385,7 @@
                                             </attestations>
                                         </buildx>
                                         <contextDir>${project.basedir}</contextDir>
+                                        <dockerFile>${project.basedir}/${magick.dockerfile}</dockerFile>
                                         <buildOptions>
                                             <squash>true</squash>
                                         </buildOptions>
@@ -421,7 +426,7 @@
                                 <!-- QuayIO image -->
                                 <image>
                                     <alias>aio</alias>
-                                    <name>${image.name}:${project.version}</name>
+                                    <name>${image.name}:${project.version}${magick.tag.suffix}</name>
                                     <registry>${image.registry}</registry>
                                     <build>
                                         <buildx>
@@ -434,6 +439,7 @@
                                             </attestations>
                                         </buildx>
                                         <contextDir>${project.basedir}</contextDir>
+                                        <dockerFile>${project.basedir}/${magick.dockerfile}</dockerFile>
                                         <buildOptions>
                                             <squash>true</squash>
                                         </buildOptions>
@@ -442,7 +448,7 @@
                                 <!-- DockerHub image -->
                                  <image>
                                     <alias>aio</alias>
-                                    <name>${image.name}:${project.version}</name>
+                                    <name>${image.name}:${project.version}${magick.tag.suffix}</name>
                                     <build>
                                         <buildx>
                                             <platforms>
@@ -454,6 +460,7 @@
                                             </attestations>
                                         </buildx>
                                         <contextDir>${project.basedir}</contextDir>
+                                        <dockerFile>${project.basedir}/${magick.dockerfile}</dockerFile>
                                         <buildOptions>
                                             <squash>true</squash>
                                         </buildOptions>
@@ -472,6 +479,19 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>graphicsmagick</id>
+            <activation>
+                <property>
+                    <name>magick.backend</name>
+                    <value>gm</value>
+                </property>
+            </activation>
+            <properties>
+                <magick.dockerfile>Dockerfile.gm</magick.dockerfile>
+                <magick.tag.suffix>-gm</magick.tag.suffix>
+            </properties>
         </profile>
     </profiles>
 </project>

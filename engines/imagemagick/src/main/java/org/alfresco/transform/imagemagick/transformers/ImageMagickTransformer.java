@@ -37,12 +37,10 @@ import static org.alfresco.transform.common.RequestParamMap.CROP_PERCENTAGE;
 import static org.alfresco.transform.common.RequestParamMap.CROP_WIDTH;
 import static org.alfresco.transform.common.RequestParamMap.CROP_X_OFFSET;
 import static org.alfresco.transform.common.RequestParamMap.CROP_Y_OFFSET;
-import static org.alfresco.transform.common.RequestParamMap.END_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.MAINTAIN_ASPECT_RATIO;
 import static org.alfresco.transform.common.RequestParamMap.RESIZE_HEIGHT;
 import static org.alfresco.transform.common.RequestParamMap.RESIZE_PERCENTAGE;
 import static org.alfresco.transform.common.RequestParamMap.RESIZE_WIDTH;
-import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.THUMBNAIL;
 import static org.alfresco.transform.common.RequestParamMap.TIMEOUT;
 
@@ -55,6 +53,7 @@ import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.imagemagick.ImageMagickOptionsBuilder;
+import org.alfresco.transform.imagemagick.dialect.MagickDialect;
 import org.alfresco.transform.imagemagick.transformers.page.PageRangeFactory;
 
 /**
@@ -66,12 +65,15 @@ public class ImageMagickTransformer implements CustomTransformerFileAdaptor
     private final ImageMagickCommandExecutor imageMagickCommandExecutor;
     private final PageRangeFactory pageRangeFactory;
     private final ImageMagickCommandOptions imageMagickCommandOptions;
+    private final MagickDialect dialect;
 
-    public ImageMagickTransformer(ImageMagickCommandExecutor imageMagickCommandExecutor, PageRangeFactory pageRangeFactory, ImageMagickCommandOptions imageMagickCommandOptions)
+    public ImageMagickTransformer(ImageMagickCommandExecutor imageMagickCommandExecutor, PageRangeFactory pageRangeFactory, ImageMagickCommandOptions imageMagickCommandOptions,
+            MagickDialect dialect)
     {
         this.imageMagickCommandExecutor = imageMagickCommandExecutor;
         this.pageRangeFactory = pageRangeFactory;
         this.imageMagickCommandOptions = imageMagickCommandOptions;
+        this.dialect = dialect;
     }
 
     @Override
@@ -85,11 +87,10 @@ public class ImageMagickTransformer implements CustomTransformerFileAdaptor
             File sourceFile, File targetFile, TransformManager transformManager) throws TransformException
     {
         ImageMagickOptionsBuilder builder = ImageMagickOptionsBuilder
-                .builder()
+                .builder(dialect)
                 .withAlphaRemove(transformOptions.get(ALPHA_REMOVE))
                 .withAutoOrient(transformOptions.get(AUTO_ORIENT))
-                .withFlattenLayers(PageRangeFactory.selectsWholePsd(sourceMimetype,
-                        transformOptions.get(START_PAGE), transformOptions.get(END_PAGE)))
+                .withFlattenLayers(pageRangeFactory.flattensWholePsd(sourceMimetype, transformOptions))
                 .withCropGravity(transformOptions.get(CROP_GRAVITY))
                 .withCropWidth(transformOptions.get(CROP_WIDTH))
                 .withCropHeight(transformOptions.get(CROP_HEIGHT))

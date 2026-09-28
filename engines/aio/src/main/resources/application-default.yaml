@@ -13,12 +13,13 @@ transform:
         templateProfileDir: ${LIBREOFFICE_TEMPLATE_PROFILE_DIR:alfresco_default}
         isEnabled: ${LIBREOFFICE_IS_ENABLED:true}
     imagemagick:
-        root: ${IMAGEMAGICK_ROOT:/usr/local}
-        dyn: ${IMAGEMAGICK_DYN:/usr/local/lib}
-        exe: ${IMAGEMAGICK_EXE:/usr/local/bin/gm}
+        backend: ${IMAGEMAGICK_BACKEND:imagemagick}
+        root: ${IMAGEMAGICK_ROOT:}
+        dyn: ${IMAGEMAGICK_DYN:}
+        exe: ${IMAGEMAGICK_EXE:}
         coders: ${IMAGEMAGICK_CODERS:}
         config: ${IMAGEMAGICK_CONFIG:}
-        threads: ${IMAGEMAGICK_THREADS:1}
+        threads: ${IMAGEMAGICK_THREADS:}
         commandOptions:
           enabled: ${IMAGEMAGICK_COMMAND_OPTIONS_ENABLED:false}
     tika:

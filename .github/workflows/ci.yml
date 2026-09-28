@@ -147,6 +147,11 @@ jobs:
           - testName: ImageMagick
             buildProfile: imagemagick
             testProfile: imagemagick
+          - testName: ImageMagick (GraphicsMagick)
+            buildProfile: imagemagick
+            testProfile: imagemagick
+            magickBackend: gm
+            skipDeploy: true
           - testName: LibreOffice
             buildProfile: libreoffice
             testProfile: libreoffice
@@ -162,6 +167,11 @@ jobs:
           - testName: All in One Transformer
             buildProfile: full-build
             testProfile: aio-test
+          - testName: All in One Transformer (GraphicsMagick)
+            buildProfile: full-build
+            testProfile: aio-test
+            magickBackend: gm
+            skipDeploy: true
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.21.0
@@ -194,6 +204,7 @@ jobs:
           QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          MAGICK_BACKEND: ${{ matrix.magickBackend }}
         run: bash _ci/build.sh ${{ matrix.buildProfile }}
       - name: "Cache LibreOffice"
         run: bash _ci/cache_artifacts.sh
@@ -206,6 +217,8 @@ jobs:
           QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          MAGICK_BACKEND: ${{ matrix.magickBackend }}
+          SKIP_DEPLOY: ${{ matrix.skipDeploy }}
         run: bash _ci/test.sh ${{ matrix.testProfile }}
 
   e2e_javaruntime_tests:
@@ -330,6 +343,9 @@ jobs:
         include:
           - testName: ImageMagick
             buildProfile: imagemagick
+          - testName: ImageMagick (GraphicsMagick)
+            buildProfile: imagemagick
+            dockerArgs: "-Dmagick.backend=gm"
           - testName: LibreOffice
             buildProfile: libreoffice
           - testName: Transform Misc
@@ -341,6 +357,9 @@ jobs:
           - testName: All in One Transformer
             buildProfile: full-build
             dockerArgs: "-Ddocker.filter=aio"
+          - testName: All in One Transformer (GraphicsMagick)
+            buildProfile: full-build
+            dockerArgs: "-Ddocker.filter=aio -Dmagick.backend=gm"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
