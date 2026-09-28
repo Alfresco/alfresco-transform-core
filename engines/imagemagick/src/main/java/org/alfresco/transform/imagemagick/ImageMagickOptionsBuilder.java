@@ -374,9 +374,9 @@ public final class ImageMagickOptionsBuilder
         Integer height = specifiedDimension(cropHeight);
         if (width != null || height != null)
         {
-            crop.append(width != null ? width : unspecifiedDimension(percentageCrop));
-            crop.append('x');
-            crop.append(height != null ? height : unspecifiedDimension(percentageCrop));
+            crop.append(width != null ? width : unspecifiedDimension(percentageCrop))
+                    .append('x')
+                    .append(height != null ? height : unspecifiedDimension(percentageCrop));
             if (percentageCrop)
             {
                 crop.append('%');

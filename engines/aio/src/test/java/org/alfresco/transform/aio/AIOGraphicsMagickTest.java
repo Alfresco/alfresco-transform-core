@@ -26,7 +26,23 @@
  */
 package org.alfresco.transform.aio;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.alfresco.transform.coreaio.AIOTransformEngine;
 import org.alfresco.transform.imagemagick.GraphicsMagickTest;
 
 public class AIOGraphicsMagickTest extends GraphicsMagickTest
-{}
+{
+    @Autowired
+    private AIOTransformEngine aioTransformEngine;
+
+    @Test
+    public void aioStartupMessageNamesGraphicsMagick()
+    {
+        String startupMessage = aioTransformEngine.getStartupMessage();
+        assertTrue(startupMessage.contains("GraphicsMagick Group"), startupMessage);
+    }
+}

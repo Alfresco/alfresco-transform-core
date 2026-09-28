@@ -27,6 +27,7 @@
 package org.alfresco.transform.imagemagick;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -71,6 +72,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -315,7 +317,7 @@ public class ImageMagickTest extends AbstractBaseTest
         sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
         expectedOptions = wholePsdOptions();
         expectedSourceSuffix = wholePsdSourceSuffix();
-        mockMvc
+        MvcResult result = mockMvc
                 .perform(MockMvcRequestBuilders
                         .multipart(ENDPOINT_TRANSFORM)
                         .file(sourceFile)
@@ -323,7 +325,8 @@ public class ImageMagickTest extends AbstractBaseTest
                         .param("targetMimetype", targetMimetype)
                         .param("sourceMimetype", sourceMimetype))
                 .andExpect(status().isOk())
-                .andExpect(content().bytes(expectedTargetFileBytes));
+                .andReturn();
+        assertArrayEquals(expectedTargetFileBytes, result.getResponse().getContentAsByteArray());
     }
 
     @Test

@@ -44,6 +44,7 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_TIFF;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -55,15 +56,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
 public class ImageMagickOutputIT
 {
     private static final String ENGINE_URL = "http://localhost:8090";
-
-    private static final int QUICK_WIDTH = 800;
-    private static final int QUICK_HEIGHT = 190;
 
     private static final byte[] PNG = {(byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
     private static final byte[] JPEG = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};
@@ -90,7 +89,7 @@ public class ImageMagickOutputIT
         assertStartsWith(signature, output, targetExtension);
         if (!"bmp".equals(targetExtension))
         {
-            assertSize(QUICK_WIDTH, QUICK_HEIGHT, decode(output, targetExtension));
+            assertSameSize(sourceImage("quick.png"), decode(output, targetExtension));
         }
     }
 
@@ -109,7 +108,9 @@ public class ImageMagickOutputIT
         byte[] output = transform("quick.png", MIMETYPE_IMAGE_PNG, MIMETYPE_IMAGE_PNG, "png",
                 Map.of("resizeWidth", "400"));
 
-        assertSize(400, 95, decode(output, "png"));
+        BufferedImage source = sourceImage("quick.png");
+        int expectedHeight = Math.round(source.getHeight() * 400f / source.getWidth());
+        assertSize(400, expectedHeight, decode(output, "png"));
     }
 
     @Test
@@ -128,7 +129,7 @@ public class ImageMagickOutputIT
                 Map.of("alphaRemove", "true"));
 
         assertStartsWith(JPEG, output, "jpg");
-        assertSize(QUICK_WIDTH, QUICK_HEIGHT, decode(output, "jpg"));
+        assertSameSize(sourceImage("quick.png"), decode(output, "jpg"));
     }
 
     @Test
@@ -137,7 +138,8 @@ public class ImageMagickOutputIT
         byte[] output = transform("quick.psd", MIMETYPE_IMAGE_PSD, MIMETYPE_IMAGE_PNG, "png", emptyMap());
 
         BufferedImage image = decode(output, "png");
-        assertSize(QUICK_WIDTH, QUICK_HEIGHT, image);
+        int[] psdSize = psdSize("quick.psd");
+        assertSize(psdSize[0], psdSize[1], image);
         assertTrue(distinctColours(image) > 2, "psd -> png looks like a single layer rather than the composite image");
     }
 
@@ -173,6 +175,38 @@ public class ImageMagickOutputIT
         {
             throw new AssertionError(format + " output could not be decoded", e);
         }
+    }
+
+    private static BufferedImage sourceImage(String sourceFile)
+    {
+        try (InputStream in = new ClassPathResource(sourceFile).getInputStream())
+        {
+            return decode(in.readAllBytes(), sourceFile);
+        }
+        catch (IOException e)
+        {
+            throw new AssertionError(sourceFile + " could not be read", e);
+        }
+    }
+
+    private static int[] psdSize(String sourceFile)
+    {
+        try (InputStream in = new ClassPathResource(sourceFile).getInputStream())
+        {
+            byte[] header = in.readNBytes(22);
+            int height = ((header[14] & 0xFF) << 24) | ((header[15] & 0xFF) << 16) | ((header[16] & 0xFF) << 8) | (header[17] & 0xFF);
+            int width = ((header[18] & 0xFF) << 24) | ((header[19] & 0xFF) << 16) | ((header[20] & 0xFF) << 8) | (header[21] & 0xFF);
+            return new int[]{width, height};
+        }
+        catch (IOException e)
+        {
+            throw new AssertionError(sourceFile + " could not be read", e);
+        }
+    }
+
+    private static void assertSameSize(BufferedImage expected, BufferedImage image)
+    {
+        assertSize(expected.getWidth(), expected.getHeight(), image);
     }
 
     private static void assertSize(int width, int height, BufferedImage image)

@@ -44,6 +44,11 @@ import org.alfresco.transform.imagemagick.dialect.MagickDialect;
 
 class ImageMagickCommandExecutorTest
 {
+    private static final MagickDialect IM = new ImageMagickDialect();
+    private static final MagickDialect GM = new GraphicsMagickDialect();
+    private static final String IM_VERSION = "Version: ImageMagick 7.1.2-13 Q16-HDRI x86_64 22800 https://imagemagick.org";
+    private static final String GM_VERSION = "GraphicsMagick 1.3.48 2025-09-06 Q16 http://www.GraphicsMagick.org/";
+
     @Test
     void valueSetOnContainerTakesPrecedence()
     {
@@ -106,11 +111,6 @@ class ImageMagickCommandExecutorTest
         assertThrows(IllegalArgumentException.class,
                 () -> resolveOmpNumThreads("", "1-10", 4, null));
     }
-
-    private static final MagickDialect IM = new ImageMagickDialect();
-    private static final MagickDialect GM = new GraphicsMagickDialect();
-    private static final String IM_VERSION = "Version: ImageMagick 7.1.2-13 Q16-HDRI x86_64 22800 https://imagemagick.org";
-    private static final String GM_VERSION = "GraphicsMagick 1.3.48 2025-09-06 Q16 http://www.GraphicsMagick.org/";
 
     @Test
     void imageMagickLeavesTheThreadCountUnsetByDefault()
