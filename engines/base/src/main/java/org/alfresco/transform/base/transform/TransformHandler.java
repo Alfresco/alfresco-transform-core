@@ -48,6 +48,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -66,6 +67,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.messaging.TransformReplySender;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.base.probes.ProbeTransform;
@@ -90,6 +92,12 @@ public class TransformHandler
     private static final Logger logger = LoggerFactory.getLogger(TransformHandler.class);
 
     private static final String FAILED_WRITING_TO_SFS = "Failed writing to SFS";
+
+    // Per-request timings for benchmarking, in milliseconds.
+    // Exec: the external command (convert/gm) alone. Engine: the whole request inside the T-Engine, which
+    // includes Exec but not multipart parsing before the controller, nor streaming the body back afterwards.
+    public static final String X_TRANSFORM_EXEC_MS = "X-Transform-Exec-Ms";
+    public static final String X_TRANSFORM_ENGINE_MS = "X-Transform-Engine-Ms";
 
     @Autowired(required = false)
     private CustomTransformers customTransformers;
@@ -146,11 +154,21 @@ public class TransformHandler
             protected void sendTransformResponse(TransformManagerImpl transformManager)
             {
                 String extension = ExtensionService.getExtensionForTargetMimetype(targetMimetype, sourceMimetype);
-                responseEntity.set(createAttachment("transform." + extension, transformManager.getTargetFile()));
+                ResponseEntity<Resource> attachment = createAttachment("transform." + extension, transformManager.getTargetFile());
+                responseEntity.set(ResponseEntity.ok()
+                        .headers(attachment.getHeaders())
+                        .header(X_TRANSFORM_EXEC_MS, millis(LogEntry.getExecNanos()))
+                        .header(X_TRANSFORM_ENGINE_MS, millis(LogEntry.getElapsedNanos()))
+                        .body(attachment.getBody()));
             }
         }.handleTransformRequest();
 
         return responseEntity.get();
+    }
+
+    private static String millis(long nanos)
+    {
+        return String.format(Locale.ROOT, "%.3f", nanos / 1_000_000.0);
     }
 
     public void handleProbeRequest(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
