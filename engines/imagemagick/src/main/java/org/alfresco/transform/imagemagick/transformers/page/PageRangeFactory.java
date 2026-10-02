@@ -31,6 +31,7 @@ import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_BMP;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JP2;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PSD;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_XWD;
 import static org.alfresco.transform.common.RequestParamMap.END_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
@@ -50,6 +51,15 @@ public class PageRangeFactory
     {
         String startPageString = transformOptions.get(START_PAGE);
         String endPageString = transformOptions.get(END_PAGE);
+        if (selectsWholePsd(sourceMimetype, startPageString, endPageString))
+        {
+            // ImageMagick stores a merged composite at index 0 of a PSD, so "[0]" is the
+            // flattened image. GraphicsMagick has no such frame -- index 0 is the first
+            // layer, which for a layered PSD is typically the mask, and the transform
+            // silently returns a near-blank image. Emit no range instead and let
+            // ImageMagickOptionsBuilder add "-flatten", which composites every layer.
+            return "";
+        }
         if (!singlePageFormats.contains(sourceMimetype) && singlePageFormats.contains(targetMimetype))
         {
             if (StringUtils.isEmpty(startPageString))
@@ -64,6 +74,23 @@ public class PageRangeFactory
         Integer startPage = stringToInteger(startPageString);
         Integer endPage = stringToInteger(endPageString);
         return calculatePageRange(startPage, endPage);
+    }
+
+    /**
+     * Whether this request wants the whole PSD rather than one specific layer. That covers both an absent range (the ACS default) and the explicit startPage=0/endPage=0 every image rendition sends. A request for a later layer is left alone: layer indexes are shifted by one between the two engines, and no rendition asks for one.
+     */
+    public static boolean selectsWholePsd(String sourceMimetype, String startPageString, String endPageString)
+    {
+        if (!MIMETYPE_IMAGE_PSD.equals(sourceMimetype))
+        {
+            return false;
+        }
+        return isAbsentOrFirstPage(startPageString) && isAbsentOrFirstPage(endPageString);
+    }
+
+    private static boolean isAbsentOrFirstPage(String pageString)
+    {
+        return StringUtils.isEmpty(pageString) || Integer.valueOf(0).equals(stringToInteger(pageString));
     }
 
     private String calculatePageRange(Integer startPage, Integer endPage)
