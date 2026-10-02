@@ -38,6 +38,8 @@ import static org.alfresco.transform.registry.TransformerType.PIPELINE_TRANSFORM
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -84,6 +86,10 @@ public class TransformRegistry extends AbstractTransformRegistry
     private boolean isTRouter;
 
     private final AtomicBoolean isRecoveryModeOn = new AtomicBoolean(true);
+
+    @Value("${transform.engine.config.retry.timeout}")
+    private long initialConfigWaitSeconds;
+    private final CountDownLatch initialConfigLoaded = new CountDownLatch(1);
 
     // Not autowired - avoids a circular reference in the router - initialised on startup event
     private List<CustomTransformer> customTransformerList;
@@ -180,6 +186,18 @@ public class TransformRegistry extends AbstractTransformRegistry
     }
 
     void retrieveConfig()
+    {
+        try
+        {
+            loadConfig();
+        }
+        finally
+        {
+            initialConfigLoaded.countDown();
+        }
+    }
+
+    private void loadConfig()
     {
         CombinedTransformConfig combinedTransformConfig = new CombinedTransformConfig();
         TreeMap<String, LocalTransformConfigSource> availableTransformers = new TreeMap<>();
@@ -299,6 +317,7 @@ public class TransformRegistry extends AbstractTransformRegistry
 
     public TransformConfig getTransformConfig()
     {
+        awaitInitialConfig();
         Data data = getData();
         return isTRouter
                 ? data.getTransformConfig()
@@ -371,14 +390,42 @@ public class TransformRegistry extends AbstractTransformRegistry
         logger.warn(msg);
     }
 
+    @Override
+    public String findTransformerName(final String sourceMimetype, final long sourceSizeInBytes,
+            final String targetMimetype, final Map<String, String> actualOptions, final String renditionName)
+    {
+        awaitInitialConfig();
+        return super.findTransformerName(sourceMimetype, sourceSizeInBytes, targetMimetype, actualOptions, renditionName);
+    }
+
     public Transformer getTransformer(final String sourceMediaType, final Long fileSizeBytes,
             final String targetMediaType, final Map<String, String> transformOptions)
     {
+        awaitInitialConfig();
         return concurrentRead(() -> {
             long fileSize = fileSizeBytes == null ? 0 : fileSizeBytes;
-            String transformerName = findTransformerName(sourceMediaType, fileSize, targetMediaType, transformOptions, null);
+            String transformerName = super.findTransformerName(sourceMediaType, fileSize, targetMediaType, transformOptions, null);
             return getTransformer(transformerName);
         });
+    }
+
+    private void awaitInitialConfig()
+    {
+        if (initialConfigLoaded.getCount() == 0)
+        {
+            return;
+        }
+        try
+        {
+            if (!initialConfigLoaded.await(initialConfigWaitSeconds, TimeUnit.SECONDS))
+            {
+                logger.warn("TransformConfig has not been loaded after {} seconds.", initialConfigWaitSeconds);
+            }
+        }
+        catch (InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
+        }
     }
 
     public Transformer getTransformer(String transformerName)
