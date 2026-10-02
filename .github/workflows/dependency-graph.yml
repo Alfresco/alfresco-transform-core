@@ -19,6 +19,26 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # TEMPORARY DIAGNOSTIC: runs the same depgraph goal as the scan action below,
+      # but WITHOUT --no-transfer-progress so Downloading/Downloaded lines are visible.
+      # If those lines stream, the "freeze" at [1/11] is just a cold-cache I/O resolve,
+      # not a deadlock. Remove this step (and setup-java) once confirmed.
+      - name: "Set up JDK (diagnostic)"
+        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5.5.0
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: "Diagnostic: resolve depgraph with transfer progress"
+        timeout-minutes: 15
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: |
+          mvn -B --show-version --settings .ci.settings.xml -Dscopes=compile,runtime \
+            com.github.ferstl:depgraph-maven-plugin:4.0.3:graph \
+            -DgraphFormat=json -DoutputFileName=diagnostic-depgraph.json
+
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@v18.21.0
         with:
           java-version: '21'
