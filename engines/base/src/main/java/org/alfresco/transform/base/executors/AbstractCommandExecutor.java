@@ -35,6 +35,7 @@ import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
 import java.io.File;
 import java.util.Map;
 
+import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.exceptions.TransformException;
 
 public abstract class AbstractCommandExecutor implements CommandExecutor
@@ -51,7 +52,9 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
     {
         targetFile = assertWithinTempDir(targetFile);
         timeout = timeout != null && timeout > 0 ? timeout : 0;
+        long execStart = System.nanoTime();
         final ExecutionResult result = transformCommand.execute(properties, timeout);
+        LogEntry.addExecDuration(System.nanoTime() - execStart);
 
         if (result.getExitValue() != 0 && result.getStdErr() != null && result.getStdErr().length() > 0)
         {
