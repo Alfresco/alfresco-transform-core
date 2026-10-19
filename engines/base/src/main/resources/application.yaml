@@ -59,6 +59,7 @@ management:
           - metrics
           - prometheus
           - health
+          - transforms
   metrics:
     enable[http]: false
     enable[logback]: false

@@ -1,10 +1,13 @@
 package org.alfresco.transform.base;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
 import java.net.URISyntaxException;
+import java.util.Locale;
 import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
@@ -44,9 +47,50 @@ public abstract class LivenessReadinessProbeTest
     }
 
     protected abstract ImagesForTests getImageForTest();
-
-    private GenericContainer<?> createEnv(String image) throws URISyntaxException
+    
+    @Test
+    public void transformsEndpointReportsRegistryStateWithoutAffectingHealth() throws URISyntaxException
     {
+        final ImagesForTests testData = getImageForTest();
+
+        try (final var env = createEnv(testData.image))
+        {
+            env.start();
+            final String url = "http://localhost:" + env.getFirstMappedPort();
+
+            // A started t-engine reads its config locally, so by the time it serves
+            // /transform/config it must also report itself ready.
+            final String transforms = getBody(url + "/actuator/transforms");
+            assertTrue(transforms.contains("\"ready\":true"),
+                    "/actuator/transforms should report ready once the registry is populated, but was: " + transforms);
+            assertTrue(transforms.contains("\"transformCount\""),
+                    "/actuator/transforms should report the transform count, but was: " + transforms);
+
+            for (String probe : new String[]{"/actuator/health/readiness", "/actuator/health/liveness"})
+            {
+                WebTestClient.bindToServer().baseUrl(url + probe).build()
+                        .get()
+                        .exchange()
+                        .expectStatus().isEqualTo(OK);
+            }
+
+            final String health = getBody(url + "/actuator/health");
+            assertFalse(health.toLowerCase(Locale.ROOT).contains("transform"),
+                    "The transform registry must not contribute to /actuator/health, but it answered: " + health);
+        }
+    }
+
+    private static String getBody(String uri)
+    {
+        final String body = WebClient.create()
+                .get()
+                .uri(uri)
+                .exchangeToMono(response -> response.bodyToMono(String.class))
+                .block();
+        return body == null ? "" : body;
+    }
+
+    private GenericContainer<?> createEnv(String image) {
         System.out.println(image);
         final GenericContainer<?> transformCore = new GenericContainer<>("alfresco/" + image + ":latest");
 

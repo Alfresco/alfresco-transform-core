@@ -313,6 +313,11 @@ public class TransformRegistry extends AbstractTransformRegistry
         return getData().getTransforms().size() > 0;
     }
 
+    public int getTransformCount()
+    {
+        return getData().getTransformCount();
+    }
+
     public boolean isRecoveryModeOn()
     {
         return isRecoveryModeOn.getAcquire();
