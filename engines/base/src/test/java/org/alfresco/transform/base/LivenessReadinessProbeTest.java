@@ -47,7 +47,7 @@ public abstract class LivenessReadinessProbeTest
     }
 
     protected abstract ImagesForTests getImageForTest();
-    
+
     @Test
     public void transformsEndpointReportsRegistryStateWithoutAffectingHealth() throws URISyntaxException
     {
@@ -90,7 +90,8 @@ public abstract class LivenessReadinessProbeTest
         return body == null ? "" : body;
     }
 
-    private GenericContainer<?> createEnv(String image) {
+    private GenericContainer<?> createEnv(String image)
+    {
         System.out.println(image);
         final GenericContainer<?> transformCore = new GenericContainer<>("alfresco/" + image + ":latest");
 

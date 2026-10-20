@@ -29,7 +29,6 @@ package org.alfresco.transform.base.registry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.util.Collections;
@@ -114,7 +113,7 @@ public class TransformsEndpointTest
     {
         populatedRegistry();
         assertEquals(true, transformsEndpoint.transforms().get("ready"));
-        
+
         emptyRegistry();
 
         assertEquals(false, transformsEndpoint.transforms().get("ready"));
@@ -132,7 +131,7 @@ public class TransformsEndpointTest
         assertTrue(body.contains("\"ready\":true"), body);
         assertTrue(body.contains("\"transformCount\""), body);
     }
-    
+
     @Test
     public void doesNotChangeWhatTheHealthEndpointsReport() throws Exception
     {

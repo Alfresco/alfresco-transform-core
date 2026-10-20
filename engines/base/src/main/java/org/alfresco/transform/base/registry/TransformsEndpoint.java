@@ -42,7 +42,8 @@ public class TransformsEndpoint
 {
     private final TransformRegistry transformRegistry;
 
-    public TransformsEndpoint(TransformRegistry transformRegistry) {
+    public TransformsEndpoint(TransformRegistry transformRegistry)
+    {
         this.transformRegistry = transformRegistry;
     }
 
