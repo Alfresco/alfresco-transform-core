@@ -60,7 +60,7 @@ public abstract class LivenessReadinessProbeTest
         {
             env.start();
             final String url = "http://localhost:" + env.getFirstMappedPort();
-            
+
             final String transforms = await("the transform registry to be loaded")
                     .atMost(2, TimeUnit.MINUTES)
                     .pollInterval(Duration.ofSeconds(1))
@@ -71,6 +71,14 @@ public abstract class LivenessReadinessProbeTest
             assertTrue(transforms.contains("\"transformCount\""),
                     "/actuator/transforms should report the transform count, but was: " + transforms);
 
+            // The k8s style probes must still answer exactly as they did before. They are
+            // available without any extra configuration: Spring Boot 4 declares
+            // AvailabilityProbesAutoConfiguration as
+            // @ConditionalOnBooleanProperty(name = "management.endpoint.health.probes.enabled",
+            // matchIfMissing = true), so the liveness and readiness groups exist by default
+            // rather than only on Kubernetes as in Spring Boot 3. Asserting the shipped
+            // default here is deliberate - enabling the probes just for the test would stop
+            // this covering the configuration the engines actually run with.
             for (String probe : new String[]{"/actuator/health/readiness", "/actuator/health/liveness"})
             {
                 WebTestClient.bindToServer().baseUrl(url + probe).build()
