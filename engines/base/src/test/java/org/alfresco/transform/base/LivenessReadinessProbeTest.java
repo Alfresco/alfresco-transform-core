@@ -56,7 +56,7 @@ public abstract class LivenessReadinessProbeTest
     {
         final ImagesForTests testData = getImageForTest();
 
-        try (final var env = createEnv(testData.image))
+        try (var env = createEnv(testData.image))
         {
             env.start();
             final String url = "http://localhost:" + env.getFirstMappedPort();

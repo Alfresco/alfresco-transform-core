@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.base;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,10 +65,12 @@ import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -103,6 +106,7 @@ import org.alfresco.transform.base.fakes.FakeTransformerTxT2Pdf;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.base.registry.TransformRegistry;
 import org.alfresco.transform.base.sfs.SharedFileStoreClient;
 import org.alfresco.transform.base.transform.TransformHandler;
 import org.alfresco.transform.client.model.TransformReply;
@@ -130,6 +134,8 @@ public class TransformControllerTest
     protected ObjectMapper objectMapper;
     @Autowired
     private String coreVersion;
+    @Autowired
+    private TransformRegistry transformRegistry;
     @TempDir
     public File tempDir;
     @MockitoBean
@@ -144,6 +150,11 @@ public class TransformControllerTest
     void setUp()
     {
         ReflectionTestUtils.setField(transformController, "enableTestEndpoint", true);
+        
+        await("the transform registry to be loaded")
+                .atMost(30, TimeUnit.SECONDS)
+                .pollInterval(Duration.ofMillis(200))
+                .until(transformRegistry::isReadyForTransformRequests);
     }
 
     @Test
