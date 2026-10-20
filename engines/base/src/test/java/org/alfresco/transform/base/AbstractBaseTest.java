@@ -28,6 +28,7 @@ package org.alfresco.transform.base;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -50,13 +51,16 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -76,6 +80,7 @@ import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.base.probes.ProbeTransform;
+import org.alfresco.transform.base.registry.TransformRegistry;
 import org.alfresco.transform.base.sfs.SharedFileStoreClient;
 import org.alfresco.transform.base.transform.TransformHandler;
 import org.alfresco.transform.client.model.TransformReply;
@@ -135,6 +140,18 @@ public abstract class AbstractBaseTest
     private CommandExecutor commandExecutor;
     private RuntimeExec origTransformCommand;
     private RuntimeExec origCheckCommand;
+
+    @BeforeEach
+    public void waitForTransformRegistry()
+    {
+        if (transformRegistry instanceof TransformRegistry registry)
+        {
+            await("the transform registry to be loaded")
+                    .atMost(30, TimeUnit.SECONDS)
+                    .pollInterval(Duration.ofMillis(200))
+                    .until(registry::isReadyForTransformRequests);
+        }
+    }
 
     protected void setMockExternalCommandsOnTransformer(CommandExecutor commandExecutor, RuntimeExec mockTransformCommand,
             RuntimeExec mockCheckCommand)

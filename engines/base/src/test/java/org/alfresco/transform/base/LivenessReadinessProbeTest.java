@@ -1,11 +1,17 @@
 package org.alfresco.transform.base;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
 import java.net.URISyntaxException;
+import java.time.Duration;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -24,7 +30,7 @@ public abstract class LivenessReadinessProbeTest
     {
         final ImagesForTests testData = getImageForTest();
 
-        try (final var env = createEnv(testData.image))
+        try (var env = createEnv(testData.image))
         {
             env.start();
             var url = "http://localhost:" + env.getFirstMappedPort();
@@ -45,7 +51,59 @@ public abstract class LivenessReadinessProbeTest
 
     protected abstract ImagesForTests getImageForTest();
 
-    private GenericContainer<?> createEnv(String image) throws URISyntaxException
+    @Test
+    public void transformsEndpointReportsRegistryStateWithoutAffectingHealth() throws URISyntaxException
+    {
+        final ImagesForTests testData = getImageForTest();
+
+        try (var env = createEnv(testData.image))
+        {
+            env.start();
+            final String url = "http://localhost:" + env.getFirstMappedPort();
+
+            final String transforms = await("the transform registry to be loaded")
+                    .atMost(2, TimeUnit.MINUTES)
+                    .pollInterval(Duration.ofSeconds(1))
+                    .ignoreExceptions()
+                    .until(() -> getBody(url + "/actuator/transforms"),
+                            body -> body.contains("\"ready\":true"));
+
+            assertTrue(transforms.contains("\"transformCount\""),
+                    "/actuator/transforms should report the transform count, but was: " + transforms);
+
+            // The k8s style probes must still answer exactly as they did before. They are
+            // available without any extra configuration: Spring Boot 4 declares
+            // AvailabilityProbesAutoConfiguration as
+            // @ConditionalOnBooleanProperty(name = "management.endpoint.health.probes.enabled",
+            // matchIfMissing = true), so the liveness and readiness groups exist by default
+            // rather than only on Kubernetes as in Spring Boot 3. Asserting the shipped
+            // default here is deliberate - enabling the probes just for the test would stop
+            // this covering the configuration the engines actually run with.
+            for (String probe : new String[]{"/actuator/health/readiness", "/actuator/health/liveness"})
+            {
+                WebTestClient.bindToServer().baseUrl(url + probe).build()
+                        .get()
+                        .exchange()
+                        .expectStatus().isEqualTo(OK);
+            }
+
+            final String health = getBody(url + "/actuator/health");
+            assertFalse(health.toLowerCase(Locale.ROOT).contains("transform"),
+                    "The transform registry must not contribute to /actuator/health, but it answered: " + health);
+        }
+    }
+
+    private static String getBody(String uri)
+    {
+        final String body = WebClient.create()
+                .get()
+                .uri(uri)
+                .exchangeToMono(response -> response.bodyToMono(String.class))
+                .block();
+        return body == null ? "" : body;
+    }
+
+    private GenericContainer<?> createEnv(String image)
     {
         System.out.println(image);
         final GenericContainer<?> transformCore = new GenericContainer<>("alfresco/" + image + ":latest");
