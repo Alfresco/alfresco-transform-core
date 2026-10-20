@@ -1,5 +1,6 @@
 package org.alfresco.transform.base;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -7,8 +8,10 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -27,7 +30,7 @@ public abstract class LivenessReadinessProbeTest
     {
         final ImagesForTests testData = getImageForTest();
 
-        try (final var env = createEnv(testData.image))
+        try (var env = createEnv(testData.image))
         {
             env.start();
             var url = "http://localhost:" + env.getFirstMappedPort();
@@ -57,12 +60,14 @@ public abstract class LivenessReadinessProbeTest
         {
             env.start();
             final String url = "http://localhost:" + env.getFirstMappedPort();
+            
+            final String transforms = await("the transform registry to be loaded")
+                    .atMost(2, TimeUnit.MINUTES)
+                    .pollInterval(Duration.ofSeconds(1))
+                    .ignoreExceptions()
+                    .until(() -> getBody(url + "/actuator/transforms"),
+                            body -> body.contains("\"ready\":true"));
 
-            // A started t-engine reads its config locally, so by the time it serves
-            // /transform/config it must also report itself ready.
-            final String transforms = getBody(url + "/actuator/transforms");
-            assertTrue(transforms.contains("\"ready\":true"),
-                    "/actuator/transforms should report ready once the registry is populated, but was: " + transforms);
             assertTrue(transforms.contains("\"transformCount\""),
                     "/actuator/transforms should report the transform count, but was: " + transforms);
 

@@ -63,29 +63,29 @@ public class TransformsEndpointTest
     @Autowired
     private List<TransformConfigSource> transformConfigSources;
     @Autowired
-    private TransformConfigFromTransformEngines transformConfigFromTransformEngines;
+    private TransformConfigFromTransformEngines config;
 
     @AfterEach
     public void after()
     {
         transformConfigSources.clear();
-        ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", Collections.emptyList());
+        ReflectionTestUtils.setField(config, "transformEngines", Collections.emptyList());
         transformRegistry.retrieveConfig();
     }
 
     private void emptyRegistry()
     {
         transformConfigSources.clear();
-        ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", Collections.emptyList());
-        transformConfigFromTransformEngines.initTransformEngineConfig();
+        ReflectionTestUtils.setField(config, "transformEngines", Collections.emptyList());
+        config.initTransformEngineConfig();
         transformRegistry.retrieveConfig();
     }
 
     private void populatedRegistry()
     {
-        ReflectionTestUtils.setField(transformConfigFromTransformEngines, "transformEngines", ImmutableList.of(
+        ReflectionTestUtils.setField(config, "transformEngines", ImmutableList.of(
                 new FakeTransformEngineWithOneCustomTransformer()));
-        transformConfigFromTransformEngines.initTransformEngineConfig();
+        config.initTransformEngineConfig();
         transformRegistry.retrieveConfig();
     }
 
