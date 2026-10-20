@@ -123,18 +123,6 @@ public abstract class AbstractBaseTest
     protected String targetMimetype;
     protected HashMap<String, String> options = new HashMap<>();
 
-    @BeforeEach
-    public void waitForTransformRegistry()
-    {
-        if (transformRegistry instanceof TransformRegistry registry)
-        {
-            await("the transform registry to be loaded")
-                    .atMost(30, TimeUnit.SECONDS)
-                    .pollInterval(Duration.ofMillis(200))
-                    .until(registry::isReadyForTransformRequests);
-        }
-    }
-
     protected MockMultipartFile sourceFile;
     protected String expectedOptions;
     protected String expectedSourceSuffix;
@@ -152,6 +140,18 @@ public abstract class AbstractBaseTest
     private CommandExecutor commandExecutor;
     private RuntimeExec origTransformCommand;
     private RuntimeExec origCheckCommand;
+
+    @BeforeEach
+    public void waitForTransformRegistry()
+    {
+        if (transformRegistry instanceof TransformRegistry registry)
+        {
+            await("the transform registry to be loaded")
+                    .atMost(30, TimeUnit.SECONDS)
+                    .pollInterval(Duration.ofMillis(200))
+                    .until(registry::isReadyForTransformRequests);
+        }
+    }
 
     protected void setMockExternalCommandsOnTransformer(CommandExecutor commandExecutor, RuntimeExec mockTransformCommand,
             RuntimeExec mockCheckCommand)

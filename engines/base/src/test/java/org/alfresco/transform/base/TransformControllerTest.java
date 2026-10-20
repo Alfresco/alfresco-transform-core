@@ -150,7 +150,7 @@ public class TransformControllerTest
     void setUp()
     {
         ReflectionTestUtils.setField(transformController, "enableTestEndpoint", true);
-        
+
         await("the transform registry to be loaded")
                 .atMost(30, TimeUnit.SECONDS)
                 .pollInterval(Duration.ofMillis(200))
