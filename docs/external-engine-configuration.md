@@ -89,6 +89,8 @@ The following externalized T-engines properties are available:
 | IMAGEMAGICK_CODERS | Path to Imagemagick custom coders.                                    |  |
 | IMAGEMAGICK_CONFIG | Path to Imagemagick custom config.                                    |  |
 | IMAGEMAGICK_COMMAND_OPTIONS_ENABLED | If set to true, enables usage of deprecated commandOptions parameter. |  |
+| IMAGEMAGICK_BACKEND | The binary the engine drives: `imagemagick` or `graphicsmagick`. When IMAGEMAGICK_EXE, IMAGEMAGICK_ROOT or IMAGEMAGICK_DYN are not set, GraphicsMagick defaults to `/usr/local/bin/gm`, `/usr/local` and `/usr/local/lib`. The `-gm` Docker images set it to `graphicsmagick`. | imagemagick |
+| IMAGEMAGICK_THREADS | OMP_NUM_THREADS passed to the binary: a positive integer or `auto` (available processors divided by the maximum JMS listener concurrency). When not set, it is left unset for ImageMagick and is 1 for GraphicsMagick. |  |
 
 ## Core-aio
 
@@ -118,5 +120,7 @@ The following externalized T-engines properties are available:
 | IMAGEMAGICK_CODERS | Path to Imagemagick custom coders. |  |
 | IMAGEMAGICK_CONFIG | Path to Imagemagick custom config. |  |
 | IMAGEMAGICK_COMMAND_OPTIONS_ENABLED | If set to true, enables usage of deprecated commandOptions parameter. |  |
+| IMAGEMAGICK_BACKEND | The binary the engine drives: `imagemagick` or `graphicsmagick`. When IMAGEMAGICK_EXE, IMAGEMAGICK_ROOT or IMAGEMAGICK_DYN are not set, GraphicsMagick defaults to `/usr/local/bin/gm`, `/usr/local` and `/usr/local/lib`. The `-gm` Docker images set it to `graphicsmagick`. | imagemagick |
+| IMAGEMAGICK_THREADS | OMP_NUM_THREADS passed to the binary: a positive integer or `auto` (available processors divided by the maximum JMS listener concurrency). When not set, it is left unset for ImageMagick and is 1 for GraphicsMagick. |  |
 | MISC_PDFBOX_DEFAULT_FONT | Default font used by PdfBox | NotoSans-Regular |
 | MISC_HTML_COLLAPSE | Html Collapsing Option for HTML to TXT transformation explicitly for Misc Engine | true |

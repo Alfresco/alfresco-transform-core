@@ -38,6 +38,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import org.alfresco.transform.imagemagick.dialect.ImageMagickDialect;
 import org.alfresco.transform.imagemagick.transformers.ImageMagickCommandExecutor;
 import org.alfresco.transform.imagemagick.transformers.ImageMagickCommandOptions;
 import org.alfresco.transform.imagemagick.transformers.ImageMagickTransformer;
@@ -55,7 +56,8 @@ public class ImageMagickTransformerTest
         imageMagickCommandExecutor = mock(ImageMagickCommandExecutor.class);
         PageRangeFactory pageRangeFactory = mock(PageRangeFactory.class);
         imageMagickCommandOptions = mock(ImageMagickCommandOptions.class);
-        imageMagickTransformer = new ImageMagickTransformer(imageMagickCommandExecutor, pageRangeFactory, imageMagickCommandOptions);
+        imageMagickTransformer = new ImageMagickTransformer(imageMagickCommandExecutor, pageRangeFactory, imageMagickCommandOptions,
+                new ImageMagickDialect());
     }
 
     @Test

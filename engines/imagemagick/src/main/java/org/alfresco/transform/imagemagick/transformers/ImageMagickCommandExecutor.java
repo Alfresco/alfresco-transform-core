@@ -28,23 +28,41 @@ package org.alfresco.transform.imagemagick.transformers;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.IntSupplier;
 import jakarta.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.transform.base.executors.AbstractCommandExecutor;
 import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.executors.RuntimeExec.ExecutionResult;
+import org.alfresco.transform.imagemagick.dialect.MagickBackend;
+import org.alfresco.transform.imagemagick.dialect.MagickDialect;
 
 @Component
 public class ImageMagickCommandExecutor extends AbstractCommandExecutor
 {
-    @Value("${transform.core.imagemagick.exe}")
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageMagickCommandExecutor.class);
+
+    private static final String OMP_NUM_THREADS = "OMP_NUM_THREADS";
+    private static final String THREADS_PROPERTY = "transform.core.imagemagick.threads";
+    private static final String AUTO = "auto";
+    private static final int DEFAULT_MAX_CONCURRENT_TRANSFORMS = 10;
+    private static final long VERSION_CHECK_TIMEOUT_MS = 30_000;
+
+    @Autowired
+    private MagickDialect dialect;
+
+    @Value("${transform.core.imagemagick.exe:}")
     private String exe;
-    @Value("${transform.core.imagemagick.dyn}")
+    @Value("${transform.core.imagemagick.dyn:}")
     private String dyn;
-    @Value("${transform.core.imagemagick.root}")
+    @Value("${transform.core.imagemagick.root:}")
     private String root;
 
     // Not currently used, but may be again in the future if we need an ImageMagick extension
@@ -53,36 +71,170 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
     @Value("${transform.core.imagemagick.config}")
     private String config;
 
+    @Value("${" + THREADS_PROPERTY + ":}")
+    private String threads;
+
+    @Value("${jms-listener.concurrency:1-10}")
+    private String jmsListenerConcurrency;
+
+    IntSupplier cpuBudget = Runtime.getRuntime()::availableProcessors;
+
+    private String ompNumThreads;
+
     @PostConstruct
     private void createCommands()
     {
-        if (StringUtils.isEmpty(exe))
+        exe = StringUtils.defaultIfBlank(exe, dialect.defaultExe());
+        dyn = StringUtils.defaultIfBlank(dyn, dialect.defaultDyn());
+        root = StringUtils.defaultIfBlank(root, dialect.defaultRoot());
+
+        ompNumThreads = resolveOmpNumThreads(threads, dialect.defaultThreads(), jmsListenerConcurrency,
+                cpuBudget.getAsInt(), System.getenv(OMP_NUM_THREADS));
+        if (ompNumThreads == null)
         {
-            throw new IllegalArgumentException("ImageMagickTransformer IMAGEMAGICK_EXE variable cannot be null or empty");
+            LOGGER.info("{} is not set for {}", OMP_NUM_THREADS, dialect.displayName());
         }
-        if (StringUtils.isEmpty(dyn))
+        else
         {
-            throw new IllegalArgumentException("ImageMagickTransformer IMAGEMAGICK_DYN variable cannot be null or empty");
-        }
-        if (StringUtils.isEmpty(root))
-        {
-            throw new IllegalArgumentException("ImageMagickTransformer IMAGEMAGICK_ROOT variable cannot be null or empty");
+            LOGGER.info("{}={} resolved from {}={}, availableProcessors={}, jms-listener.concurrency={}",
+                    OMP_NUM_THREADS, ompNumThreads, THREADS_PROPERTY, threads, cpuBudget.getAsInt(),
+                    jmsListenerConcurrency);
         }
 
         super.transformCommand = createTransformCommand();
         super.checkCommand = createCheckCommand();
+
+        verifyBinaryMatchesDialect();
+        LOGGER.info("Using {} at {}", dialect.displayName(), exe);
+    }
+
+    static String resolveOmpNumThreads(String threads, String defaultThreads, String jmsListenerConcurrency,
+            int cpuBudget, String valueSetOnContainer)
+    {
+        String requested = StringUtils.isBlank(threads) ? defaultThreads : threads;
+        if (requested == null && StringUtils.isBlank(valueSetOnContainer))
+        {
+            return null;
+        }
+        return resolveOmpNumThreads(requested, jmsListenerConcurrency, cpuBudget, valueSetOnContainer);
+    }
+
+    static String resolveOmpNumThreads(String threads, String jmsListenerConcurrency, int cpuBudget,
+            String valueSetOnContainer)
+    {
+        if (StringUtils.isNotBlank(valueSetOnContainer))
+        {
+            return valueSetOnContainer.trim();
+        }
+
+        String requested = StringUtils.trimToEmpty(threads);
+        if (!AUTO.equalsIgnoreCase(requested))
+        {
+            return Integer.toString(parsePositiveThreadCount(requested));
+        }
+
+        int maxConcurrentTransforms = maxConcurrentTransforms(jmsListenerConcurrency);
+        return Integer.toString(Math.max(1, cpuBudget / maxConcurrentTransforms));
+    }
+
+    private static int parsePositiveThreadCount(String requested)
+    {
+        int threadCount;
+        try
+        {
+            threadCount = Integer.parseInt(requested);
+        }
+        catch (NumberFormatException e)
+        {
+            throw new IllegalArgumentException(THREADS_PROPERTY
+                    + " must be a positive integer or '" + AUTO + "', but was '" + requested + "'", e);
+        }
+        if (threadCount < 1)
+        {
+            throw new IllegalArgumentException(THREADS_PROPERTY
+                    + " must be a positive integer or '" + AUTO + "', but was " + threadCount);
+        }
+        return threadCount;
+    }
+
+    static int maxConcurrentTransforms(String jmsListenerConcurrency)
+    {
+        String range = StringUtils.trimToEmpty(jmsListenerConcurrency);
+        int separator = range.indexOf('-');
+        String upperBound = separator < 0 ? range : range.substring(separator + 1);
+        try
+        {
+            return Math.max(1, Integer.parseInt(upperBound.trim()));
+        }
+        catch (NumberFormatException e)
+        {
+            LOGGER.warn("Could not read an upper bound from jms-listener.concurrency '{}', assuming {}",
+                    jmsListenerConcurrency, DEFAULT_MAX_CONCURRENT_TRANSFORMS);
+            return DEFAULT_MAX_CONCURRENT_TRANSFORMS;
+        }
+    }
+
+    private void verifyBinaryMatchesDialect()
+    {
+        RuntimeExec versionCommand = new RuntimeExec();
+        Map<String, String[]> commandsAndArguments = new HashMap<>();
+        commandsAndArguments.put(".*", new String[]{exe, "-version"});
+        versionCommand.setCommandsAndArguments(commandsAndArguments);
+        versionCommand.setProcessProperties(createProcessProperties());
+
+        ExecutionResult result = versionCommand.execute(new HashMap<>(), VERSION_CHECK_TIMEOUT_MS);
+        verifyVersionOutput(dialect, exe, result.getExitValue(), result.getStdOut(), result.getStdErr());
+    }
+
+    static void verifyVersionOutput(MagickDialect dialect, String exe, int exitValue, String stdOut, String stdErr)
+    {
+        if (exitValue != 0 || StringUtils.isBlank(stdOut))
+        {
+            LOGGER.warn("Could not run \"{} -version\" to confirm it is {}: {}", exe, dialect.displayName(),
+                    StringUtils.trimToEmpty(stdErr));
+            return;
+        }
+        String firstLine = stdOut.strip().lines().findFirst().orElse("");
+        if (!dialect.isOwnVersionOutput(stdOut))
+        {
+            throw new IllegalStateException(MagickBackend.PROPERTY + " selects " + dialect.displayName()
+                    + ", but " + exe + " reports \"" + firstLine + "\". Set IMAGEMAGICK_BACKEND to match the"
+                    + " installed binary, or point IMAGEMAGICK_EXE at the " + dialect.displayName() + " binary.");
+        }
+        LOGGER.info("{}", firstLine);
     }
 
     @Override
     protected RuntimeExec createTransformCommand()
     {
         RuntimeExec runtimeExec = new RuntimeExec();
+        if (dialect == null)
+        {
+            return runtimeExec;
+        }
         Map<String, String[]> commandsAndArguments = new HashMap<>();
-        commandsAndArguments.put(".*",
-                new String[]{exe, "${source}", "SPLIT:${options}", "-strip", "-quiet", "${target}"});
+        commandsAndArguments.put(".*", dialect.transformCommand(exe));
         runtimeExec.setCommandsAndArguments(commandsAndArguments);
 
+        runtimeExec.setProcessProperties(createProcessProperties());
+
+        Map<String, String> defaultProperties = new HashMap<>();
+        defaultProperties.put("options", null);
+        runtimeExec.setDefaultProperties(defaultProperties);
+
+        runtimeExec.setErrorCodes(
+                "1,2,255,400,405,410,415,420,425,430,435,440,450,455,460,465,470,475,480,485,490,495,499,700,705,710,715,720,725,730,735,740,750,755,760,765,770,775,780,785,790,795,799");
+
+        return runtimeExec;
+    }
+
+    private Map<String, String> createProcessProperties()
+    {
         Map<String, String> processProperties = new HashMap<>();
+        if (ompNumThreads != null)
+        {
+            processProperties.put(OMP_NUM_THREADS, ompNumThreads);
+        }
         processProperties.put("MAGICK_HOME", root);
         processProperties.put("DYLD_FALLBACK_LIBRARY_PATH", dyn);
         processProperties.put("LD_LIBRARY_PATH", dyn);
@@ -96,24 +248,19 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
         {
             processProperties.put("MAGICK_CONFIGURE_PATH", config);
         }
-        runtimeExec.setProcessProperties(processProperties);
-
-        Map<String, String> defaultProperties = new HashMap<>();
-        defaultProperties.put("options", null);
-        runtimeExec.setDefaultProperties(defaultProperties);
-
-        runtimeExec.setErrorCodes(
-                "1,2,255,400,405,410,415,420,425,430,435,440,450,455,460,465,470,475,480,485,490,495,499,700,705,710,715,720,725,730,735,740,750,755,760,765,770,775,780,785,790,795,799");
-
-        return runtimeExec;
+        return processProperties;
     }
 
     @Override
     protected RuntimeExec createCheckCommand()
     {
         RuntimeExec runtimeExec = new RuntimeExec();
+        if (dialect == null)
+        {
+            return runtimeExec;
+        }
         Map<String, String[]> commandsAndArguments = new HashMap<>();
-        commandsAndArguments.put(".*", new String[]{exe, "-version"});
+        commandsAndArguments.put(".*", dialect.checkCommand(exe));
         runtimeExec.setCommandsAndArguments(commandsAndArguments);
         return runtimeExec;
     }

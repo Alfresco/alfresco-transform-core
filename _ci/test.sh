@@ -28,6 +28,7 @@ mvn -B -U \
     clean ${MAVEN_PHASE} \
     -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true \
     -Dparent.core.deploy.skip=true -Dtransformer.base.deploy.skip=true \
+    -Dmagick.backend="${MAGICK_BACKEND:-im}" \
     "-P${PROFILE},docker-it-setup,${1}" \
     ${ADDITIONAL_MAVEN_OPTS}
 

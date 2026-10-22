@@ -9,6 +9,7 @@ mvn -B -U \
     clean install \
     -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true \
     -DskipTests \
+    -Dmagick.backend="${MAGICK_BACKEND:-im}" \
     "-P$1,"
 
 popd

@@ -27,7 +27,9 @@
 package org.alfresco.transform.imagemagick;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -70,6 +72,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -80,6 +83,8 @@ import org.alfresco.transform.base.model.FileRefEntity;
 import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
+import org.alfresco.transform.imagemagick.dialect.ImageMagickDialect;
+import org.alfresco.transform.imagemagick.dialect.MagickDialect;
 import org.alfresco.transform.imagemagick.transformers.ImageMagickCommandExecutor;
 
 /**
@@ -92,6 +97,8 @@ public class ImageMagickTest extends AbstractBaseTest
 
     @Autowired
     private ImageMagickCommandExecutor imageMagickCommandExecutor;
+    @Autowired
+    private MagickDialect magickDialect;
 
     @MockitoBean
     protected ExecutionResult mockExecutionResult;
@@ -240,7 +247,7 @@ public class ImageMagickTest extends AbstractBaseTest
     @Test
     public void optionsTest() throws Exception
     {
-        expectedOptions = "-alpha remove -gravity SouthEast -crop 123x456%+90+12 +repage -thumbnail 321x654%!";
+        expectedOptions = alphaRemoveOptions() + " -gravity SouthEast -crop 123x456%+90+12 +repage -thumbnail 321x654%!";
         expectedSourceSuffix = "[2-3]";
         mockMvc
                 .perform(MockMvcRequestBuilders
@@ -273,6 +280,53 @@ public class ImageMagickTest extends AbstractBaseTest
                 .andExpect(content().bytes(expectedTargetFileBytes))
                 .andExpect(header().string("Content-Disposition",
                         "attachment; filename*=UTF-8''transform." + targetExtension));
+    }
+
+    protected Class<? extends MagickDialect> expectedDialect()
+    {
+        return ImageMagickDialect.class;
+    }
+
+    @Test
+    public void selectedDialectTest()
+    {
+        assertInstanceOf(expectedDialect(), magickDialect);
+    }
+
+    protected String alphaRemoveOptions()
+    {
+        return "-alpha remove";
+    }
+
+    protected String wholePsdOptions()
+    {
+        return "-auto-orient";
+    }
+
+    protected String wholePsdSourceSuffix()
+    {
+        return "[0]";
+    }
+
+    @Test
+    public void wholePsdTest() throws Exception
+    {
+        sourceExtension = "psd";
+        sourceMimetype = "image/vnd.adobe.photoshop";
+        sourceFileBytes = readTestFile(sourceExtension);
+        sourceFile = new MockMultipartFile("file", "quick." + sourceExtension, sourceMimetype, sourceFileBytes);
+        expectedOptions = wholePsdOptions();
+        expectedSourceSuffix = wholePsdSourceSuffix();
+        MvcResult result = mockMvc
+                .perform(MockMvcRequestBuilders
+                        .multipart(ENDPOINT_TRANSFORM)
+                        .file(sourceFile)
+                        .param("targetExtension", targetExtension)
+                        .param("targetMimetype", targetMimetype)
+                        .param("sourceMimetype", sourceMimetype))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertArrayEquals(expectedTargetFileBytes, result.getResponse().getContentAsByteArray());
     }
 
     @Test
@@ -357,14 +411,12 @@ public class ImageMagickTest extends AbstractBaseTest
     @Test
     public void testPojoTransform() throws Exception
     {
-        // Files
         String sourceFileRef = UUID.randomUUID().toString();
         File sourceFile = getTestFile("quick." + sourceExtension, true);
         String targetFileRef = UUID.randomUUID().toString();
 
         TransformRequest transformRequest = createTransformRequest(sourceFileRef, sourceFile);
 
-        // HTTP Request
         HttpHeaders headers = new HttpHeaders();
         headers.set(CONTENT_DISPOSITION, "attachment; filename=quick." + sourceExtension);
         ResponseEntity<Resource> response = new ResponseEntity<>(new FileSystemResource(
@@ -375,10 +427,8 @@ public class ImageMagickTest extends AbstractBaseTest
                 .thenReturn(new FileRefResponse(new FileRefEntity(targetFileRef)));
         when(mockExecutionResult.getExitValue()).thenReturn(0);
 
-        // Update the Transformation Request with any specific params before sending it
         updateTransformRequestWithSpecificOptions(transformRequest);
 
-        // Serialize and call the transformer
         String tr = objectMapper.writeValueAsString(transformRequest);
         String transformationReplyAsString = mockMvc
                 .perform(MockMvcRequestBuilders
@@ -392,7 +442,6 @@ public class ImageMagickTest extends AbstractBaseTest
         TransformReply transformReply = objectMapper.readValue(transformationReplyAsString,
                 TransformReply.class);
 
-        // Assert the reply
         assertEquals(transformRequest.getRequestId(), transformReply.getRequestId());
         assertEquals(transformRequest.getClientData(), transformReply.getClientData());
         assertEquals(transformRequest.getSchema(), transformReply.getSchema());
