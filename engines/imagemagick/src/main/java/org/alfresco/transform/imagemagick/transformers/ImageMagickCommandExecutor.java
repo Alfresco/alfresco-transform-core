@@ -78,8 +78,10 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
     {
         RuntimeExec runtimeExec = new RuntimeExec();
         Map<String, String[]> commandsAndArguments = new HashMap<>();
+        // GraphicsMagick is a single dispatch binary invoked as "gm convert ...".
+        // "-quiet" is dropped: it is not a GraphicsMagick option (GM is quiet by default).
         commandsAndArguments.put(".*",
-                new String[]{exe, "${source}", "SPLIT:${options}", "-strip", "-quiet", "${target}"});
+                new String[]{exe, "convert", "${source}", "SPLIT:${options}", "-strip", "${target}"});
         runtimeExec.setCommandsAndArguments(commandsAndArguments);
 
         Map<String, String> processProperties = new HashMap<>();
@@ -113,7 +115,8 @@ public class ImageMagickCommandExecutor extends AbstractCommandExecutor
     {
         RuntimeExec runtimeExec = new RuntimeExec();
         Map<String, String[]> commandsAndArguments = new HashMap<>();
-        commandsAndArguments.put(".*", new String[]{exe, "-version"});
+        // GraphicsMagick reports its version via "gm version" (not "gm -version").
+        commandsAndArguments.put(".*", new String[]{exe, "version"});
         runtimeExec.setCommandsAndArguments(commandsAndArguments);
         return runtimeExec;
     }
