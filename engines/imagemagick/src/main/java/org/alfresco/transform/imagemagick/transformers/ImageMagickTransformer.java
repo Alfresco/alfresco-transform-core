@@ -37,10 +37,12 @@ import static org.alfresco.transform.common.RequestParamMap.CROP_PERCENTAGE;
 import static org.alfresco.transform.common.RequestParamMap.CROP_WIDTH;
 import static org.alfresco.transform.common.RequestParamMap.CROP_X_OFFSET;
 import static org.alfresco.transform.common.RequestParamMap.CROP_Y_OFFSET;
+import static org.alfresco.transform.common.RequestParamMap.END_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.MAINTAIN_ASPECT_RATIO;
 import static org.alfresco.transform.common.RequestParamMap.RESIZE_HEIGHT;
 import static org.alfresco.transform.common.RequestParamMap.RESIZE_PERCENTAGE;
 import static org.alfresco.transform.common.RequestParamMap.RESIZE_WIDTH;
+import static org.alfresco.transform.common.RequestParamMap.START_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.THUMBNAIL;
 import static org.alfresco.transform.common.RequestParamMap.TIMEOUT;
 
@@ -86,6 +88,8 @@ public class ImageMagickTransformer implements CustomTransformerFileAdaptor
                 .builder()
                 .withAlphaRemove(transformOptions.get(ALPHA_REMOVE))
                 .withAutoOrient(transformOptions.get(AUTO_ORIENT))
+                .withFlattenLayers(PageRangeFactory.selectsWholePsd(sourceMimetype,
+                        transformOptions.get(START_PAGE), transformOptions.get(END_PAGE)))
                 .withCropGravity(transformOptions.get(CROP_GRAVITY))
                 .withCropWidth(transformOptions.get(CROP_WIDTH))
                 .withCropHeight(transformOptions.get(CROP_HEIGHT))
