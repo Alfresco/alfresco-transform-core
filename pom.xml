@@ -295,12 +295,14 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>alfresco-public-snapshots</id>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/snapshots</url>
+            <id>alfresco-cloudsmith-snapshots</id>
+            <name>Alfresco Cloudsmith Snapshots</name>
+            <url>https://maven.cloudsmith.io/hyland/alfresco-community-releases/</url>
         </snapshotRepository>
         <repository>
-            <id>alfresco-public</id>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/releases</url>
+            <id>alfresco-cloudsmith-releases</id>
+            <name>Alfresco Cloudsmith Community Releases</name>
+            <url>https://maven.cloudsmith.io/hyland/alfresco-community-releases/</url>
         </repository>
     </distributionManagement>
 
