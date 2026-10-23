@@ -15,16 +15,16 @@
             <username>${env.CLOUDSMITH_USERNAME}</username>
             <password>${env.CLOUDSMITH_API_KEY}</password>
         </server>
-        <!-- Credential for deploying to Nexus (distributionManagement) -->
+        <!-- Credential for deploying to Cloudsmith (distributionManagement) -->
         <server>
-            <id>alfresco-public-snapshots</id>
-            <username>${env.NEXUS_USERNAME}</username>
-            <password>${env.NEXUS_PASSWORD}</password>
+            <id>alfresco-cloudsmith-snapshots</id>
+            <username>${env.CLOUDSMITH_USERNAME}</username>
+            <password>${env.CLOUDSMITH_API_KEY}</password>
         </server>
         <server>
-            <id>alfresco-public</id>
-            <username>${env.NEXUS_USERNAME}</username>
-            <password>${env.NEXUS_PASSWORD}</password>
+            <id>alfresco-cloudsmith-releases</id>
+            <username>${env.CLOUDSMITH_USERNAME}</username>
+            <password>${env.CLOUDSMITH_API_KEY}</password>
         </server>
 
         <!-- private docker registry-->

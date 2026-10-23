@@ -6,7 +6,7 @@ The `ci.yml` config file can be found in the `.github/workflows` directory of th
 ## Stages and Jobs
 
 1. **Build**: Java build with unit and integration tests.
-2. **Release**: Deploys the Maven artifacts to Nexus and creates the verified release
+2. **Release**: Deploys the Maven artifacts to Cloudsmith and creates the verified release
    commits and Git tag.
 3. **Push Docker Images**: Builds and pushes the multi-arch T-Engine Docker images to
    DockerHub and Quay.io.
