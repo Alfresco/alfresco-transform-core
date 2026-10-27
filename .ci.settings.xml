@@ -15,14 +15,9 @@
             <username>${env.CLOUDSMITH_USERNAME}</username>
             <password>${env.CLOUDSMITH_API_KEY}</password>
         </server>
-        <!-- Credential for deploying to Cloudsmith (distributionManagement) -->
+        <!-- Credential for deploying the artifacts (distributionManagement) -->
         <server>
-            <id>alfresco-cloudsmith-snapshots</id>
-            <username>${env.CLOUDSMITH_USERNAME}</username>
-            <password>${env.CLOUDSMITH_API_KEY}</password>
-        </server>
-        <server>
-            <id>alfresco-cloudsmith-releases</id>
+            <id>alfresco-releases</id>
             <username>${env.CLOUDSMITH_USERNAME}</username>
             <password>${env.CLOUDSMITH_API_KEY}</password>
         </server>
