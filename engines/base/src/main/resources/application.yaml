@@ -36,6 +36,20 @@ logging:
 filestore-url: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
 
 transform:
+  # How an exception from a CustomTransformer is turned into an HTTP status. A recognised
+  # content failure becomes 422 so the T-Router stops retrying a document that can never
+  # succeed; everything else stays 500 and is still retried.
+  # Defaults live in TransformExceptionClassifier, so omitting this block is safe. The
+  # class-name and message-fragment lists REPLACE those defaults when set, so an entry
+  # causing a false positive can be removed as well as added. The effective lists are
+  # logged at startup, every decision at DEBUG, and any failure the lists did not recognise
+  # at INFO, so the defaults can be corrected from what real deployments actually hit.
+  # infrastructure-class-names and infrastructure-message-fragments are the safety veto:
+  # a match anywhere in the cause chain forces 500 even if a content rule also matched,
+  # which stops a library wrapper hiding a disk, network or interrupt failure.
+  failure:
+    classification:
+      enabled: ${TRANSFORM_FAILURE_CLASSIFICATION_ENABLED:true}
   endpoint:
     test:
       enable: ${TEST_ENDPOINT_ENABLED:false}

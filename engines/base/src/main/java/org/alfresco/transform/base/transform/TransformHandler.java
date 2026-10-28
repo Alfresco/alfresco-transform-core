@@ -103,6 +103,8 @@ public class TransformHandler
     private TransformReplySender transformReplySender;
     @Autowired
     private TransformerDebug transformerDebug;
+    @Autowired
+    private TransformExceptionClassifier exceptionClassifier;
 
     private final AtomicInteger httpRequestCount = new AtomicInteger(1);
 
@@ -114,7 +116,7 @@ public class TransformHandler
 
         new ProcessHandler(sourceMimetype, targetMimetype, requestParameters,
                 "e" + httpRequestCount.getAndIncrement(), transformRegistry,
-                transformerDebug, probeTransform, customTransformers) {
+                transformerDebug, probeTransform, customTransformers, exceptionClassifier) {
             @Override
             protected void init() throws IOException
             {
@@ -158,7 +160,7 @@ public class TransformHandler
     {
         new ProcessHandler(sourceMimetype, targetMimetype, transformOptions,
                 "p" + httpRequestCount.getAndIncrement(), transformRegistry,
-                transformerDebug, probeTransform, customTransformers) {
+                transformerDebug, probeTransform, customTransformers, exceptionClassifier) {
             @Override
             protected void init() throws IOException
             {
@@ -194,7 +196,7 @@ public class TransformHandler
         TransformReply reply = createBasicTransformReply(request);
         new ProcessHandler(request.getSourceMediaType(), request.getTargetMediaType(),
                 request.getTransformRequestOptions(), "unset", transformRegistry,
-                transformerDebug, probeTransform, customTransformers) {
+                transformerDebug, probeTransform, customTransformers, exceptionClassifier) {
             @Override
             protected void init() throws IOException
             {
@@ -243,9 +245,9 @@ public class TransformHandler
             }
 
             @Override
-            protected void handleException(Exception e)
+            protected void handleException(Exception e, HttpStatus status)
             {
-                sendFailedResponse(reply, e, INTERNAL_SERVER_ERROR, replyToQueue);
+                sendFailedResponse(reply, e, status, replyToQueue);
             }
         }.handleTransformRequest();
         return reply;

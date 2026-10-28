@@ -73,10 +73,12 @@ abstract class ProcessHandler extends FragmentHandler
     private final TransformerDebug transformerDebug;
     private final ProbeTransform probeTransform;
     private final CustomTransformers customTransformers;
+    private final TransformExceptionClassifier exceptionClassifier;
 
     ProcessHandler(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
             String reference, TransformServiceRegistry transformRegistry, TransformerDebug transformerDebug,
-            ProbeTransform probeTransform, CustomTransformers customTransformers)
+            ProbeTransform probeTransform, CustomTransformers customTransformers,
+            TransformExceptionClassifier exceptionClassifier)
     {
         this.sourceMimetype = sourceMimetype;
         this.targetMimetype = targetMimetype;
@@ -88,6 +90,7 @@ abstract class ProcessHandler extends FragmentHandler
         this.transformerDebug = transformerDebug;
         this.probeTransform = probeTransform;
         this.customTransformers = customTransformers;
+        this.exceptionClassifier = exceptionClassifier;
     }
 
     private static Map<String, String> cleanTransformOptions(Map<String, String> requestParameters)
@@ -135,9 +138,10 @@ abstract class ProcessHandler extends FragmentHandler
         }
         catch (Exception e)
         {
+            HttpStatus status = exceptionClassifier.classify(e);
             transformerDebug.logFailure(reference, "  Error: " + e.getMessage());
-            LogEntry.setStatusCodeAndMessage(INTERNAL_SERVER_ERROR, e.getMessage());
-            handleException(e);
+            LogEntry.setStatusCodeAndMessage(status, e.getMessage());
+            handleException(e, status);
         }
         finally
         {
@@ -194,9 +198,13 @@ abstract class ProcessHandler extends FragmentHandler
         throw e;
     }
 
-    protected void handleException(Exception e)
+    /**
+     * @param status
+     *            the status {@link TransformExceptionClassifier} derived from {@code e}: {@code 422} when the supplied document is at fault, otherwise {@code 500}.
+     */
+    protected void handleException(Exception e, HttpStatus status)
     {
-        throw new TransformException(INTERNAL_SERVER_ERROR, e.getMessage(), e);
+        throw new TransformException(status, e.getMessage(), e);
     }
 
     private String getTransformerName(final String sourceMimetype, long sourceSizeInBytes, final String targetMimetype,
