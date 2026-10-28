@@ -34,7 +34,6 @@ env:
   DEVELOPMENT_VERSION: "5.5.0-A.4-SNAPSHOT" # The version that will be set in pom files after the release (next dev version)
 
 permissions:
-  id-token: write
   contents: read
 
 jobs:
@@ -69,9 +68,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.21.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.1.1
-        with:
-          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/ya-pmd-scan@1f36f8e45695ce60362010345a99a0c8f7310264 # v4.4.1
         env:
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
@@ -92,9 +88,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.21.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.1.1
-        with:
-          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: "Login to Docker Hub"
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
@@ -124,15 +117,14 @@ jobs:
         run: mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Pbase
       - name: "Cache LibreOffice"
         run: bash _ci/cache_artifacts.sh
-      - name: "Run tests and deploy snapshots (master only)"
+      - name: "Run tests"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
-          MAVEN_PHASE: ${{ github.event_name == 'push' && github.ref_name == 'master' && 'deploy' || 'verify' }}
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
           QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: mvn -B -U clean "$MAVEN_PHASE" -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Pbase
+        run: mvn -B -U clean verify -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Pbase
 
   all_tests_matrix:
     name: ${{ matrix.testName }}
@@ -167,9 +159,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.21.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.1.1
-        with:
-          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: "Login to Docker Hub"
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
@@ -223,9 +212,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.21.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.1.1
-        with:
-          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: "Login to Docker Hub"
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
@@ -276,6 +262,9 @@ jobs:
       contains(github.event.head_commit.message, '[release]') &&
       github.event_name != 'pull_request' &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'SP/') || startsWith(github.ref_name, 'HF/'))
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Generate app token
         id: app-token
@@ -307,12 +296,13 @@ jobs:
       # "push_docker_images" job below (docker.skip=true here).
       - name: "Release"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@v18.21.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@080221fd2e8016826418a3d6c350ac6571681912 # v19.8.0
         with:
           token: ${{ steps.app-token.outputs.token }}
           release-version: ${{ env.RELEASE_VERSION }}
           development-version: ${{ env.DEVELOPMENT_VERSION }}
           maven-args: "-DskipTests -Dmaven.javadoc.skip=true -DadditionalOption=-Xdoclint:none -Ddocker.skip=true"
+          prerelease-profile: prerelease
 
   push_docker_images:
     name: "Push Docker Images (${{ matrix.testName }})"
@@ -349,9 +339,6 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.21.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.21.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.1.1
-        with:
-          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
         with:

@@ -1,21 +1,6 @@
 <settings>
-    <mirrors>
-        <mirror>
-            <id>alfresco-internal</id>
-            <name>Alfresco Cloudsmith Internal</name>
-            <url>https://artifacts.hyland.dev/basic/alfresco-internal/maven/</url>
-            <mirrorOf>*</mirrorOf>
-        </mirror>
-    </mirrors>
-
     <servers>
-        <!-- Credential for the Cloudsmith mirror (exported by the cloudsmith-auth action) -->
-        <server>
-            <id>alfresco-internal</id>
-            <username>${env.CLOUDSMITH_USERNAME}</username>
-            <password>${env.CLOUDSMITH_API_KEY}</password>
-        </server>
-        <!-- Credential for deploying the artifacts (distributionManagement) -->
+        <!-- Credential for deploying the artifacts (distributionManagement), exported by the cloudsmith-auth action -->
         <server>
             <id>alfresco-releases</id>
             <username>${env.CLOUDSMITH_USERNAME}</username>

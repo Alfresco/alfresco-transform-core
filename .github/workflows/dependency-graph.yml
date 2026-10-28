@@ -11,20 +11,13 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write
   contents: write
 
 jobs:
   scan-dependencies:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-      NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.1.1
-        with:
-          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@v18.21.0
@@ -32,6 +25,4 @@ jobs:
           java-version: '21'
           maven-version: '3.9.9'
           maven-args: -Dscopes=compile,runtime
-          maven-username: ${{ secrets.NEXUS_USERNAME }}
-          maven-password: ${{ secrets.NEXUS_PASSWORD }}
           maven-settings-path: ".ci.settings.xml"
