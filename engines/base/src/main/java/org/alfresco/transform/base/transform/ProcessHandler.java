@@ -52,7 +52,7 @@ import org.alfresco.transform.base.TransformController;
 import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.base.registry.CustomTransformers;
-import org.alfresco.transform.base.util.RemoteSourceStream;
+import org.alfresco.transform.base.util.SourceDownloadStatus;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.common.TransformerMessages;
@@ -172,7 +172,7 @@ abstract class ProcessHandler extends FragmentHandler
     private HttpStatus classifyAllowingForAFailedDownload(Exception e)
     {
         HttpStatus status = exceptionClassifier.classify(e);
-        if (status == INTERNAL_SERVER_ERROR || !(inputStream instanceof RemoteSourceStream source)
+        if (status == INTERNAL_SERVER_ERROR || !(inputStream instanceof SourceDownloadStatus source)
                 || !source.sourceDownloadFailed())
         {
             return status;

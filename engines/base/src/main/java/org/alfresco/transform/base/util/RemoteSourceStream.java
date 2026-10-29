@@ -37,7 +37,7 @@ import java.io.InputStream;
  * <p/>
  * Only facts about the stream are recorded, never anything about how much of it the transform chose to read. A parser that rejects a bad header after 10 bytes has not been truncated; a stream that threw while being read, or that ended before the size the client said the content was, has been.
  */
-public class RemoteSourceStream extends FilterInputStream
+public class RemoteSourceStream extends FilterInputStream implements SourceDownloadStatus
 {
     /** Size the client said the content is, or a negative value when it did not say. */
     private final long expectedLength;
@@ -52,18 +52,14 @@ public class RemoteSourceStream extends FilterInputStream
         this.expectedLength = expectedLength;
     }
 
-    /**
-     * @return {@code true} if the download failed, or ended before all of the content had arrived. A transform that failed on such a stream must be reported as a server error so that it is retried, whatever the parser called the failure.
-     */
+    @Override
     public boolean sourceDownloadFailed()
     {
         return readFailure != null
                 || (endOfStreamReached && expectedLength >= 0 && bytesRead < expectedLength);
     }
 
-    /**
-     * @return a description of why the download is considered incomplete, for logging. Never {@code null} once {@link #sourceDownloadFailed()} is {@code true}.
-     */
+    @Override
     public String describeFailure()
     {
         if (readFailure != null)
