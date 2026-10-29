@@ -71,6 +71,7 @@ import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.base.registry.CustomTransformers;
 import org.alfresco.transform.base.sfs.SharedFileStoreClient;
+import org.alfresco.transform.base.util.RemoteSourceStream;
 import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
@@ -343,11 +344,24 @@ public class TransformHandler
             MultipartFile sourceMultipartFile)
     {
         final String directUrl = requestParameters.getOrDefault(DIRECT_ACCESS_URL, "");
-        // The direct access stream buffers itself. It is deliberately left as the outermost stream so that
-        // ProcessHandler can ask it whether a failed transform was really a failed download.
         return directUrl.isBlank()
                 ? new BufferedInputStream(getMultipartFileInputStream(sourceMultipartFile))
-                : getDirectAccessUrlInputStream(directUrl);
+                // No expected size on this path, so only an outright download failure can be detected. It is the
+                // test transform and probe path, not the one ACS uses for content.
+                : guardedDirectAccessUrlInputStream(directUrl, -1);
+    }
+
+    /**
+     * Opens a Direct Access URL behind a {@link RemoteSourceStream}, so that a download which dies part way through is not mistaken for an unreadable document.
+     * <p/>
+     * The guard has to be the outermost stream, because it is the one {@link ProcessHandler} looks for. It buffers internally, so nothing else wraps it.
+     * <p/>
+     * {@code expectedLength} is the size the client said the content is, which is what should have arrived. A negative value means it did not say, leaving only an outright download failure to go on.
+     */
+    private InputStream guardedDirectAccessUrlInputStream(String directUrl, long expectedLength)
+    {
+        return new RemoteSourceStream(new BufferedInputStream(getDirectAccessUrlInputStream(directUrl)),
+                expectedLength);
     }
 
     private InputStream getInputStreamForHandleProbeRequest(File sourceFile)
@@ -367,10 +381,10 @@ public class TransformHandler
         final String directUrl = request.getTransformRequestOptions().getOrDefault(DIRECT_ACCESS_URL, "");
         try
         {
-            // See getInputStreamForHandleHttpRequest: the direct access stream stays outermost on purpose.
             return directUrl.isBlank()
                     ? new BufferedInputStream(getSharedFileStoreInputStream(request.getSourceReference()))
-                    : getDirectAccessUrlInputStream(directUrl);
+                    : guardedDirectAccessUrlInputStream(directUrl,
+                            request.getSourceSize() == null ? -1 : request.getSourceSize());
         }
         catch (TransformException e)
         {

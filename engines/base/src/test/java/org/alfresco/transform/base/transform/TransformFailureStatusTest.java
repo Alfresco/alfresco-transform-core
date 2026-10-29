@@ -28,8 +28,11 @@ package org.alfresco.transform.base.transform;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
@@ -42,7 +45,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +61,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithFailingTransformer;
 import org.alfresco.transform.base.fakes.FakeTransformerFails;
+import org.alfresco.transform.client.model.TransformReply;
+import org.alfresco.transform.client.model.TransformRequest;
 
 /**
  * Checks the status a failing transform actually returns over HTTP, rather than what {@link TransformExceptionClassifier} decides in isolation.
@@ -68,8 +76,9 @@ import org.alfresco.transform.base.fakes.FakeTransformerFails;
         FakeTransformerFails.class})
 class TransformFailureStatusTest
 {
-    private static final boolean TRUNCATED = true;
-    private static final boolean COMPLETE = false;
+    /** "corrupt-pdf" is 11 bytes. Claiming 22 makes what the server serves exactly half the content. */
+    private static final long HALF_ARRIVED = 22;
+    private static final long ALL_ARRIVED = 11;
 
     @Autowired
     private MockMvc mockMvc;
@@ -115,10 +124,10 @@ class TransformFailureStatusTest
     @Test
     void testATruncatedDirectAccessUrlDownloadIsReportedAsInternalServerError() throws IOException
     {
-        HttpServer server = sourceServer("corrupt-pdf", TRUNCATED);
+        HttpServer server = sourceServer("corrupt-pdf");
         try
         {
-            assertEquals(INTERNAL_SERVER_ERROR.value(), statusOfTransformingDirectAccessUrl(server),
+            assertEquals(INTERNAL_SERVER_ERROR.value(), statusOfTransformingDirectAccessUrl(server, HALF_ARRIVED),
                     "A source that never arrived in full must stay retryable, whatever the transformer called it.");
         }
         finally
@@ -133,10 +142,10 @@ class TransformFailureStatusTest
     @Test
     void testACompleteDirectAccessUrlDownloadIsStillReportedAsUnprocessableEntity() throws IOException
     {
-        HttpServer server = sourceServer("corrupt-pdf", COMPLETE);
+        HttpServer server = sourceServer("corrupt-pdf");
         try
         {
-            assertEquals(UNPROCESSABLE_ENTITY.value(), statusOfTransformingDirectAccessUrl(server),
+            assertEquals(UNPROCESSABLE_ENTITY.value(), statusOfTransformingDirectAccessUrl(server, ALL_ARRIVED),
                     "The source arrived in full, so the transformer's verdict on the document must stand.");
         }
         finally
@@ -145,25 +154,45 @@ class TransformFailureStatusTest
         }
     }
 
-    private int statusOfTransformingDirectAccessUrl(HttpServer server)
+    /**
+     * Drives the asynchronous path, which is the one ACS uses for a Direct Access URL and the only one that carries the source size. {@code sourceSize} is what the client says the content is, so serving less than that is a download that did not finish.
+     */
+    private int statusOfTransformingDirectAccessUrl(HttpServer server, long sourceSize)
     {
-        return assertDoesNotThrow(() -> mockMvc.perform(
-                MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
-                        .param(DIRECT_ACCESS_URL, "http://localhost:" + server.getAddress().getPort() + "/source")
-                        .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
-                        .param(TARGET_MIMETYPE, MIMETYPE_PDF))
-                .andReturn().getResponse().getStatus());
+        TransformRequest request = TransformRequest.builder()
+                .withRequestId("1")
+                .withSchema(1)
+                .withClientData("Alfresco Digital Business Platform")
+                .withSourceReference(UUID.randomUUID().toString())
+                .withSourceMediaType(MIMETYPE_TEXT_PLAIN)
+                .withSourceExtension("txt")
+                .withSourceSize(sourceSize)
+                .withTargetMediaType(MIMETYPE_PDF)
+                .withTargetExtension("pdf")
+                .withTransformRequestOptions(Map.of(DIRECT_ACCESS_URL,
+                        "http://localhost:" + server.getAddress().getPort() + "/source"))
+                .withInternalContextForTransformEngineTests()
+                .build();
+
+        return assertDoesNotThrow(() -> {
+            String reply = mockMvc.perform(MockMvcRequestBuilders.post(ENDPOINT_TRANSFORM)
+                    .header(ACCEPT, APPLICATION_JSON_VALUE)
+                    .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                    .content(new ObjectMapper().writeValueAsString(request)))
+                    .andReturn().getResponse().getContentAsString();
+            return new ObjectMapper().readValue(reply, TransformReply.class).getStatus();
+        });
     }
 
     /**
-     * Serves {@code content}. When {@code truncated}, it promises twice as many bytes as it sends and then closes, which is what a download interrupted in flight looks like to the client.
+     * Serves {@code content} in full. Whether that counts as the whole document is decided by the source size on the request, which is how ACS says how big the content is.
      */
-    private static HttpServer sourceServer(String content, boolean truncated) throws IOException
+    private static HttpServer sourceServer(String content) throws IOException
     {
         final byte[] body = content.getBytes(StandardCharsets.UTF_8);
         HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
         server.createContext("/source", exchange -> {
-            exchange.sendResponseHeaders(200, truncated ? body.length * 2L : body.length);
+            exchange.sendResponseHeaders(200, body.length);
             try (OutputStream responseBody = exchange.getResponseBody())
             {
                 responseBody.write(body);

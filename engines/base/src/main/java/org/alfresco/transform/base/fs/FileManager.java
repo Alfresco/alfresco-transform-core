@@ -36,14 +36,12 @@ import static org.springframework.util.StringUtils.getFilename;
 
 import static org.alfresco.transform.common.ExtensionService.getExtensionForMimetype;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
@@ -56,7 +54,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
 import org.alfresco.transform.base.logging.LogEntry;
-import org.alfresco.transform.base.util.RemoteSourceStream;
 import org.alfresco.transform.common.ExtensionService;
 import org.alfresco.transform.exceptions.TransformException;
 
@@ -190,18 +187,11 @@ public class FileManager
         return inputStream;
     }
 
-    /**
-     * Opens a Direct Access URL for reading.
-     * <p/>
-     * The connection is opened explicitly rather than through {@code URL.openStream()} so that the declared content length is available to {@link RemoteSourceStream}, which uses it to tell a download that died half way through from a document that is genuinely unreadable. Without that distinction a failed download is reported as a content failure and never retried.
-     */
     public static InputStream getDirectAccessUrlInputStream(String directUrl)
     {
         try
         {
-            URLConnection connection = new URL(directUrl).openConnection();
-            return new RemoteSourceStream(new BufferedInputStream(connection.getInputStream()),
-                    connection.getContentLengthLong());
+            return new URL(directUrl).openStream();
         }
         catch (IllegalArgumentException e)
         {

@@ -35,11 +35,11 @@ import java.io.InputStream;
  * <p/>
  * The distinction matters because the bytes are pulled lazily, <i>inside</i> the transform. A download that dies half way through therefore surfaces as whatever the parser makes of a half file: PDFBox reports {@code "Error: End-of-File, expected line"}, zip-backed formats report {@code EOFException} or {@code ZipException}. Those are indistinguishable, by exception alone, from a genuinely corrupt document - and they are on the classifier's content list, so without this the transform would be reported as {@code 422} and never retried, when a retry is exactly what it needed.
  * <p/>
- * Only facts about the stream are recorded, never anything about how much of it the transform chose to read. A parser that rejects a bad header after 10 bytes has not been truncated; a stream that ends early, or that threw while being read, has been.
+ * Only facts about the stream are recorded, never anything about how much of it the transform chose to read. A parser that rejects a bad header after 10 bytes has not been truncated; a stream that threw while being read, or that ended before the size the client said the content was, has been.
  */
 public class RemoteSourceStream extends FilterInputStream
 {
-    /** Content length declared by the server, or a negative value when it did not say. */
+    /** Size the client said the content is, or a negative value when it did not say. */
     private final long expectedLength;
 
     private long bytesRead;
@@ -53,7 +53,7 @@ public class RemoteSourceStream extends FilterInputStream
     }
 
     /**
-     * @return {@code true} if the download failed or ended before the length the server promised. A transform that failed on such a stream must be reported as a server error so that it is retried, whatever the parser called the failure.
+     * @return {@code true} if the download failed, or ended before all of the content had arrived. A transform that failed on such a stream must be reported as a server error so that it is retried, whatever the parser called the failure.
      */
     public boolean sourceDownloadFailed()
     {
@@ -71,8 +71,7 @@ public class RemoteSourceStream extends FilterInputStream
             return "the source download failed after " + bytesRead + " bytes with "
                     + readFailure.getClass().getName() + ": " + readFailure.getMessage();
         }
-        return "the source download ended after " + bytesRead + " of the " + expectedLength
-                + " bytes the server declared";
+        return "the source download ended after " + bytesRead + " of the " + expectedLength + " bytes expected";
     }
 
     @Override
