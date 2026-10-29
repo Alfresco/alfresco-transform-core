@@ -1,10 +1,6 @@
 # Documentation for all configuration options:
 # https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
 version: 2
-registries:
-  maven-alfresco-public:
-    type: maven-repository
-    url: https://artifacts.hyland.dev/public/alfresco-public/maven/
 updates:
   - package-ecosystem: "github-actions"
     directories:
@@ -27,8 +23,6 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 99
-    registries:
-      - maven-alfresco-public
     labels:
       - "dependencies"
       - "java"
