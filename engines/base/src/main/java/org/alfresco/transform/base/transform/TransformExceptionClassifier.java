@@ -68,7 +68,7 @@ class TransformExceptionClassifier
     /**
      * Exception class names that only ever mean the supplied document could not be parsed.
      * <p/>
-     * Both simple and fully qualified names are matched, so an engine that shades or relocates a library still works.
+     * Simple names, fully qualified names and superclass names are all matched, so an engine that shades or relocates a library still works, and a library that throws a more specific subclass of a listed type still matches.
      */
     private static final List<String> DEFAULT_CLASS_NAMES = List.of(
             // java.util.zip - a corrupt OOXML/ODF file is a corrupt zip
@@ -90,15 +90,21 @@ class TransformExceptionClassifier
             // The generic `TikaException` is deliberately NOT listed. It is Tika's universal wrapper, not a content
             // failure type: `CompositeParser` rethrows every exception a parser raises as one, including
             // "TIKA-198: Illegal IOException from ...". Matching it would turn a disk-full or socket error into a
-            // terminal 422. The specific content subclasses below are the real signals, and are matched on their own
-            // runtime class name.
+            // terminal 422. Because it is absent, its content subclasses have to be named individually; they cannot
+            // inherit a match from it.
             "EncryptedDocumentException",
             "UnsupportedFormatException",
             "ZeroByteFileException",
             "CorruptedFileException",
+            // the document's own permissions forbid extraction, so no number of retries will ever read it
+            "AccessPermissionException",
             // Apache PDFBox
             "InvalidPasswordException",
             // Apache POI
+            //
+            // The specific types POI throws are usually subclasses of these - `OldExcelFormatException` extends
+            // `OldFileFormatException`, `OLE2NotOfficeXmlFileException` extends `NotOfficeXmlFileException` - and are
+            // matched through the superclass walk in `match`, so they do not need listing individually.
             "EmptyFileException",
             "OldFileFormatException",
             "UnsupportedFileFormatException",
@@ -107,11 +113,21 @@ class TransformExceptionClassifier
             "NotOLE2FileException",
             "RecordFormatException",
             "InvalidFormatException",
+            // these three have no listed ancestor: they extend IllegalStateException, RuntimeException and
+            // IOException respectively
+            "CorruptPowerPointFileException",
+            "XSSFBParseException",
+            "InvalidZipException",
             // XML content that is not well formed
             "SAXParseException",
             // Apache Commons Imaging
+            //
+            // `ImageReadException` was renamed `ImagingException` in 1.0.0-alpha6 and so no longer exists in the
+            // shipped version. It is kept for engines still pinning an earlier release, where it is the only signal.
+            // `ImagingFormatException` needs naming because it extends `ImagingRuntimeException`, not `ImagingException`.
             "ImageReadException",
-            "ImagingException");
+            "ImagingException",
+            "ImagingFormatException");
 
     /**
      * Lower case fragments that identify a content failure reported only as a plain {@code IOException}.
@@ -273,14 +289,23 @@ class TransformExceptionClassifier
 
     private static String match(Throwable t, Set<String> classNames, List<String> lowerCaseFragments)
     {
-        Class<?> type = t.getClass();
-        if (classNames.contains(type.getSimpleName()))
+        // Walk the superclasses, not just the runtime type. The parser libraries habitually declare a general
+        // content failure and then throw a more specific subclass of it: POI throws `OldExcelFormatException`
+        // where the listed type is its parent `OldFileFormatException`, and `OLE2NotOfficeXmlFileException`
+        // where the listed type is `NotOfficeXmlFileException`. Matching the runtime name alone missed every
+        // one of those, so a document POI had positively identified as unreadable still came back as a 500 and
+        // was retried. Only the names are compared, never the types, so this keeps working for an engine that
+        // shades or relocates a library.
+        for (Class<?> type = t.getClass(); type != null && type != Object.class; type = type.getSuperclass())
         {
-            return "class name '" + type.getSimpleName() + "'";
-        }
-        if (classNames.contains(type.getName()))
-        {
-            return "class name '" + type.getName() + "'";
+            if (classNames.contains(type.getSimpleName()))
+            {
+                return "class name '" + type.getSimpleName() + "'";
+            }
+            if (classNames.contains(type.getName()))
+            {
+                return "class name '" + type.getName() + "'";
+            }
         }
 
         String message = t.getMessage();

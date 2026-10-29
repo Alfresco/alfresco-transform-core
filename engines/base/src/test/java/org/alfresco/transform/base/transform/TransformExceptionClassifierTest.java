@@ -38,6 +38,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.MalformedInputException;
+import java.nio.file.FileSystemLoopException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipException;
@@ -105,6 +106,51 @@ class TransformExceptionClassifierTest
     {
         // It is Tika's universal wrapper, not a content failure type.
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new TikaException("Unexpected RuntimeException from parser")));
+    }
+
+    /**
+     * POI declares a general content failure and then throws a more specific subclass of it. The shipped 5.4.1 throws {@code OldExcelFormatException} where the listed type is its parent {@code OldFileFormatException}, and {@code OLE2NotOfficeXmlFileException} where the listed type is {@code NotOfficeXmlFileException}. Matching only the runtime name missed every one of those.
+     */
+    @Test
+    void testASubclassOfAListedTypeIsAContentFailure()
+    {
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new OldExcelFormatException()));
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(
+                new RuntimeException("Transform failed", new OldExcelFormatException())));
+    }
+
+    @Test
+    void testASubclassOfAnUnlistedTypeIsStill500()
+    {
+        // The walk must not turn every exception into a content failure: nothing in this hierarchy is listed.
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new UnrecognisedParserException()));
+    }
+
+    @Test
+    void testTheInfrastructureVetoAlsoMatchesSubclasses()
+    {
+        // FileSystemException is listed; its subclasses must veto too, as 500-and-retry is the safe direction.
+        Exception wrapped = new ZipException("corrupt entry");
+        wrapped.initCause(new FileSystemLoopException("/tmp/work"));
+
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(wrapped));
+    }
+
+    /** Mirrors POI's {@code OldExcelFormatException extends OldFileFormatException}, where only the parent is listed. */
+    private static class OldFileFormatException extends IllegalArgumentException
+    {
+        private static final long serialVersionUID = 1L;
+    }
+
+    private static class OldExcelFormatException extends OldFileFormatException
+    {
+        private static final long serialVersionUID = 1L;
+    }
+
+    /** Nothing in this hierarchy is listed, so the walk must leave it at 500. */
+    private static class UnrecognisedParserException extends IllegalStateException
+    {
+        private static final long serialVersionUID = 1L;
     }
 
     @Test
