@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.base.fakes;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -43,12 +44,31 @@ import org.alfresco.transform.base.TransformManager;
 @TestComponent
 public class FakeTransformerFails extends AbstractFakeTransformer
 {
+    /**
+     * Reads as much as the source will give, treating a read failure as the end of the content rather than as an error.
+     * <p>
+     * Real parsers behave this way: they swallow the underlying {@link IOException} and report their own "unexpected end of file" instead, which is precisely why a half finished download is so hard to tell apart from a corrupt document.
+     */
+    private static byte[] readAsFarAsPossible(InputStream inputStream)
+    {
+        ByteArrayOutputStream collected = new ByteArrayOutputStream();
+        try
+        {
+            inputStream.transferTo(collected);
+        }
+        catch (IOException e)
+        {
+            // Deliberately ignored, see the method javadoc.
+        }
+        return collected.toByteArray();
+    }
+
     @Override
     public void transform(String sourceMimetype, InputStream inputStream, String targetMimetype,
             OutputStream outputStream, Map<String, String> transformOptions, TransformManager transformManager)
             throws Exception
     {
-        final String content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        final String content = new String(readAsFarAsPossible(inputStream), StandardCharsets.UTF_8);
         switch (content)
         {
         case "corrupt-zip":

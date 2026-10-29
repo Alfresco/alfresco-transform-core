@@ -33,12 +33,17 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_PDF;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.common.RequestParamMap.DIRECT_ACCESS_URL;
 import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
+import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -63,6 +68,9 @@ import org.alfresco.transform.base.fakes.FakeTransformerFails;
         FakeTransformerFails.class})
 class TransformFailureStatusTest
 {
+    private static final boolean TRUNCATED = true;
+    private static final boolean COMPLETE = false;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -99,5 +107,70 @@ class TransformFailureStatusTest
                         .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
                         .param(TARGET_MIMETYPE, MIMETYPE_PDF))
                 .andReturn().getResponse().getStatus());
+    }
+
+    /**
+     * A Direct Access URL is read lazily, inside the transform, so a download that dies part way through is reported by the transformer as a broken document. Answering {@code 422} would stop the T-Router retrying a transform that was never given its source, losing it for good. This is the one case where the stream has to overrule the exception.
+     */
+    @Test
+    void testATruncatedDirectAccessUrlDownloadIsReportedAsInternalServerError() throws IOException
+    {
+        HttpServer server = sourceServer("corrupt-pdf", TRUNCATED);
+        try
+        {
+            assertEquals(INTERNAL_SERVER_ERROR.value(), statusOfTransformingDirectAccessUrl(server),
+                    "A source that never arrived in full must stay retryable, whatever the transformer called it.");
+        }
+        finally
+        {
+            server.stop(0);
+        }
+    }
+
+    /**
+     * The counterpart, and the reason the check is on the stream rather than on how much the transformer read: a document that arrived in full and was then rejected is still a content failure, so it must not be retried.
+     */
+    @Test
+    void testACompleteDirectAccessUrlDownloadIsStillReportedAsUnprocessableEntity() throws IOException
+    {
+        HttpServer server = sourceServer("corrupt-pdf", COMPLETE);
+        try
+        {
+            assertEquals(UNPROCESSABLE_ENTITY.value(), statusOfTransformingDirectAccessUrl(server),
+                    "The source arrived in full, so the transformer's verdict on the document must stand.");
+        }
+        finally
+        {
+            server.stop(0);
+        }
+    }
+
+    private int statusOfTransformingDirectAccessUrl(HttpServer server)
+    {
+        return assertDoesNotThrow(() -> mockMvc.perform(
+                MockMvcRequestBuilders.multipart(ENDPOINT_TRANSFORM)
+                        .param(DIRECT_ACCESS_URL, "http://localhost:" + server.getAddress().getPort() + "/source")
+                        .param(SOURCE_MIMETYPE, MIMETYPE_TEXT_PLAIN)
+                        .param(TARGET_MIMETYPE, MIMETYPE_PDF))
+                .andReturn().getResponse().getStatus());
+    }
+
+    /**
+     * Serves {@code content}. When {@code truncated}, it promises twice as many bytes as it sends and then closes, which is what a download interrupted in flight looks like to the client.
+     */
+    private static HttpServer sourceServer(String content, boolean truncated) throws IOException
+    {
+        final byte[] body = content.getBytes(StandardCharsets.UTF_8);
+        HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
+        server.createContext("/source", exchange -> {
+            exchange.sendResponseHeaders(200, truncated ? body.length * 2L : body.length);
+            try (OutputStream responseBody = exchange.getResponseBody())
+            {
+                responseBody.write(body);
+            }
+            exchange.close();
+        });
+        server.start();
+        return server;
     }
 }

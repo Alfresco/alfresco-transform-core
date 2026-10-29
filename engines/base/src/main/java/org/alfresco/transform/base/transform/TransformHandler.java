@@ -343,9 +343,11 @@ public class TransformHandler
             MultipartFile sourceMultipartFile)
     {
         final String directUrl = requestParameters.getOrDefault(DIRECT_ACCESS_URL, "");
-        return new BufferedInputStream(directUrl.isBlank()
-                ? getMultipartFileInputStream(sourceMultipartFile)
-                : getDirectAccessUrlInputStream(directUrl));
+        // The direct access stream buffers itself. It is deliberately left as the outermost stream so that
+        // ProcessHandler can ask it whether a failed transform was really a failed download.
+        return directUrl.isBlank()
+                ? new BufferedInputStream(getMultipartFileInputStream(sourceMultipartFile))
+                : getDirectAccessUrlInputStream(directUrl);
     }
 
     private InputStream getInputStreamForHandleProbeRequest(File sourceFile)
@@ -365,9 +367,10 @@ public class TransformHandler
         final String directUrl = request.getTransformRequestOptions().getOrDefault(DIRECT_ACCESS_URL, "");
         try
         {
-            return new BufferedInputStream(directUrl.isBlank()
-                    ? getSharedFileStoreInputStream(request.getSourceReference())
-                    : getDirectAccessUrlInputStream(directUrl));
+            // See getInputStreamForHandleHttpRequest: the direct access stream stays outermost on purpose.
+            return directUrl.isBlank()
+                    ? new BufferedInputStream(getSharedFileStoreInputStream(request.getSourceReference()))
+                    : getDirectAccessUrlInputStream(directUrl);
         }
         catch (TransformException e)
         {

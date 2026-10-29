@@ -42,6 +42,8 @@ import java.util.stream.Collectors;
 import jakarta.jms.Destination;
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,6 +52,7 @@ import org.alfresco.transform.base.TransformController;
 import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.base.registry.CustomTransformers;
+import org.alfresco.transform.base.util.RemoteSourceStream;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.common.TransformerMessages;
@@ -61,6 +64,9 @@ import org.alfresco.transform.registry.TransformServiceRegistry;
  */
 abstract class ProcessHandler extends FragmentHandler
 {
+    @SuppressWarnings("PMD.FieldNamingConventions") // `logger` is the convention throughout this codebase.
+    private static final Logger logger = LoggerFactory.getLogger(ProcessHandler.class);
+
     private static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
             TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, DIRECT_ACCESS_URL, SOURCE_FILENAME);
 
@@ -138,7 +144,7 @@ abstract class ProcessHandler extends FragmentHandler
         }
         catch (Exception e)
         {
-            HttpStatus status = exceptionClassifier.classify(e);
+            HttpStatus status = classifyAllowingForAFailedDownload(e);
             transformerDebug.logFailure(reference, "  Error: " + e.getMessage());
             LogEntry.setStatusCodeAndMessage(status, e.getMessage());
             handleException(e, status);
@@ -156,6 +162,25 @@ abstract class ProcessHandler extends FragmentHandler
     protected void logFragment(Integer index, Long outputLength)
     {
         transformerDebug.logFragment(reference, index, outputLength);
+    }
+
+    /**
+     * Classifies {@code e}, but refuses to call it a content failure when the source never arrived in full.
+     * <p/>
+     * A Direct Access URL is read lazily inside the transform, so a download that dies part way through is reported by the parser as whatever a half file looks like - {@code EOFException}, {@code ZipException}, PDFBox's {@code "Error: End-of-File"}. Those are on the content list and would otherwise be answered with {@code 422}, which the T-Router never retries, permanently losing a transform that a retry would have completed. The stream itself knows better, so it gets the final say.
+     */
+    private HttpStatus classifyAllowingForAFailedDownload(Exception e)
+    {
+        HttpStatus status = exceptionClassifier.classify(e);
+        if (status == INTERNAL_SERVER_ERROR || !(inputStream instanceof RemoteSourceStream source)
+                || !source.sourceDownloadFailed())
+        {
+            return status;
+        }
+
+        logger.warn("The transform failed and {}, so reporting {} rather than {} to leave the T-Router free to retry.",
+                source.describeFailure(), INTERNAL_SERVER_ERROR, status);
+        return INTERNAL_SERVER_ERROR;
     }
 
     @Override
