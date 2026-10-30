@@ -1,5 +1,20 @@
 <settings>
+    <mirrors>
+        <mirror>
+            <id>cic-ext-pull-through</id>
+            <name>Maven Central</name>
+            <url>https://artifacts.hyland.dev/basic/cic-ext-pull-through/maven/</url>
+            <mirrorOf>central</mirrorOf>
+        </mirror>
+    </mirrors>
+
     <servers>
+        <!-- Credential for resolving Maven Central, exported by the cloudsmith-auth action -->
+        <server>
+            <id>cic-ext-pull-through</id>
+            <username>${env.CLOUDSMITH_USERNAME}</username>
+            <password>${env.CLOUDSMITH_API_KEY}</password>
+        </server>
         <!-- Credential for deploying the artifacts (distributionManagement), exported by the cloudsmith-auth action -->
         <server>
             <id>alfresco-releases</id>

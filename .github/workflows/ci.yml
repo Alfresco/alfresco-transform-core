@@ -34,6 +34,7 @@ env:
   DEVELOPMENT_VERSION: "5.5.0-A.5-SNAPSHOT" # The version that will be set in pom files after the release (next dev version)
 
 permissions:
+  id-token: write
   contents: read
 
 jobs:
@@ -68,6 +69,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/ya-pmd-scan@1f36f8e45695ce60362010345a99a0c8f7310264 # v4.4.1
         env:
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
@@ -88,6 +92,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: "Login to Docker Hub"
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
@@ -159,6 +166,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: "Login to Docker Hub"
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
@@ -212,6 +222,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: "Login to Docker Hub"
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
@@ -339,6 +352,9 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
         with:
