@@ -240,9 +240,9 @@ public class TransformHandler
             }
 
             @Override
-            protected void handleTransformException(TransformException e)
+            protected void handleTransformException(TransformException e, HttpStatus status)
             {
-                sendFailedResponse(reply, e, e.getStatus(), replyToQueue);
+                sendFailedResponse(reply, e, status, replyToQueue);
             }
 
             @Override
@@ -353,15 +353,32 @@ public class TransformHandler
 
     /**
      * Opens a Direct Access URL behind a {@link RemoteSourceStream}, so that a download which dies part way through is not mistaken for an unreadable document.
+     */
+    private InputStream guardedDirectAccessUrlInputStream(String directUrl, long expectedLength)
+    {
+        return guardedRemoteSourceStream(getDirectAccessUrlInputStream(directUrl), expectedLength);
+    }
+
+    /**
+     * Wraps a source that arrives over the network in a {@link RemoteSourceStream}, so that a download which dies part way through is not mistaken for an unreadable document.
+     * <p/>
+     * Applied to the Shared File Store as well as to a Direct Access URL. Both are read lazily inside the transform, so a truncated or failing response surfaces as whatever the parser makes of a half file - {@code EOFException}, {@code ZipException}, PDFBox's end-of-file message - all of which are on the classifier's content list and would otherwise be answered with {@code 422}, which the T-Router never retries.
      * <p/>
      * The guard has to be the outermost stream, because it is the one {@link ProcessHandler} looks for. It buffers internally, so nothing else wraps it.
      * <p/>
      * {@code expectedLength} is the size the client said the content is, which is what should have arrived. A negative value means it did not say, leaving only an outright download failure to go on.
      */
-    private InputStream guardedDirectAccessUrlInputStream(String directUrl, long expectedLength)
+    private InputStream guardedRemoteSourceStream(InputStream remoteSource, long expectedLength)
     {
-        return new RemoteSourceStream(new BufferedInputStream(getDirectAccessUrlInputStream(directUrl)),
-                expectedLength);
+        return new RemoteSourceStream(new BufferedInputStream(remoteSource), expectedLength);
+    }
+
+    /**
+     * @return the size the client said the source is, or a negative value if it did not say.
+     */
+    private static long expectedSourceSize(TransformRequest request)
+    {
+        return request.getSourceSize() == null ? -1 : request.getSourceSize();
     }
 
     private InputStream getInputStreamForHandleProbeRequest(File sourceFile)
@@ -382,9 +399,9 @@ public class TransformHandler
         try
         {
             return directUrl.isBlank()
-                    ? new BufferedInputStream(getSharedFileStoreInputStream(request.getSourceReference()))
-                    : guardedDirectAccessUrlInputStream(directUrl,
-                            request.getSourceSize() == null ? -1 : request.getSourceSize());
+                    ? guardedRemoteSourceStream(getSharedFileStoreInputStream(request.getSourceReference()),
+                            expectedSourceSize(request))
+                    : guardedDirectAccessUrlInputStream(directUrl, expectedSourceSize(request));
         }
         catch (TransformException e)
         {

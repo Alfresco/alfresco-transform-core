@@ -138,13 +138,14 @@ abstract class ProcessHandler extends FragmentHandler
         }
         catch (TransformException e)
         {
+            HttpStatus status = overrideIfTheSourceNeverArrived(e.getStatus());
             transformerDebug.logFailure(reference, "  Error: " + e.getMessage());
-            LogEntry.setStatusCodeAndMessage(e.getStatus(), e.getMessage());
-            handleTransformException(e);
+            LogEntry.setStatusCodeAndMessage(status, e.getMessage());
+            handleTransformException(e, status);
         }
         catch (Exception e)
         {
-            HttpStatus status = classifyAllowingForAFailedDownload(e);
+            HttpStatus status = overrideIfTheSourceNeverArrived(exceptionClassifier.classify(e));
             transformerDebug.logFailure(reference, "  Error: " + e.getMessage());
             LogEntry.setStatusCodeAndMessage(status, e.getMessage());
             handleException(e, status);
@@ -165,15 +166,17 @@ abstract class ProcessHandler extends FragmentHandler
     }
 
     /**
-     * Classifies {@code e}, but refuses to call it a content failure when the source never arrived in full.
+     * Refuses to report a terminal status when the source never arrived in full, whatever decided that status.
      * <p/>
-     * A Direct Access URL is read lazily inside the transform, so a download that dies part way through is reported by the parser as whatever a half file looks like - {@code EOFException}, {@code ZipException}, PDFBox's {@code "Error: End-of-File"}. Those are on the content list and would otherwise be answered with {@code 422}, which the T-Router never retries, permanently losing a transform that a retry would have completed. The stream itself knows better, so it gets the final say.
+     * A remote source - a Direct Access URL or the Shared File Store - is read lazily inside the transform, so a download that dies part way through is reported by the parser as whatever a half file looks like: {@code EOFException}, {@code ZipException}, PDFBox's {@code "Error: End-of-File"}. Those are on the content list and would otherwise be answered with {@code 422}, which the T-Router never retries, permanently losing a transform that a retry would have completed.
+     * <p/>
+     * It applies to both failure paths, not just the classified one. The same truncated read can surface as a {@link TransformException} carrying a status of its own - {@code FileManager.createSourceFile} wraps it when a transformer materialises the stream to a file before parsing it - and that status is no more trustworthy than a classification when the bytes never arrived. The stream itself knows better, so it gets the final say either way.
      */
-    private HttpStatus classifyAllowingForAFailedDownload(Exception e)
+    private HttpStatus overrideIfTheSourceNeverArrived(HttpStatus status)
     {
-        HttpStatus status = exceptionClassifier.classify(e);
-        if (status == INTERNAL_SERVER_ERROR || !(inputStream instanceof SourceDownloadStatus source)
-                || !source.sourceDownloadFailed())
+        // A 5xx is already retryable, so there is nothing to correct and no need to examine the stream.
+        if (status == null || status.is5xxServerError()
+                || !(inputStream instanceof SourceDownloadStatus source) || !source.sourceDownloadFailed())
         {
             return status;
         }
@@ -218,9 +221,13 @@ abstract class ProcessHandler extends FragmentHandler
     protected void sendTransformResponse(TransformManagerImpl transformManager)
     {}
 
-    protected void handleTransformException(TransformException e)
+    /**
+     * @param status
+     *            {@code e}'s own status, unless the source never arrived in full, in which case {@code 500} so the T-Router can retry. See {@link #overrideIfTheSourceNeverArrived}.
+     */
+    protected void handleTransformException(TransformException e, HttpStatus status)
     {
-        throw e;
+        throw status == e.getStatus() ? e : new TransformException(status, e.getMessage(), e);
     }
 
     /**
