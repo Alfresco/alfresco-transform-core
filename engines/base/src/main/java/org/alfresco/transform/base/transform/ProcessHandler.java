@@ -42,6 +42,8 @@ import java.util.stream.Collectors;
 import jakarta.jms.Destination;
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,6 +52,7 @@ import org.alfresco.transform.base.TransformController;
 import org.alfresco.transform.base.logging.LogEntry;
 import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.base.registry.CustomTransformers;
+import org.alfresco.transform.base.util.SourceDownloadStatus;
 import org.alfresco.transform.client.model.TransformRequest;
 import org.alfresco.transform.common.TransformerDebug;
 import org.alfresco.transform.common.TransformerMessages;
@@ -61,6 +64,9 @@ import org.alfresco.transform.registry.TransformServiceRegistry;
  */
 abstract class ProcessHandler extends FragmentHandler
 {
+    @SuppressWarnings("PMD.FieldNamingConventions") // `logger` is the convention throughout this codebase.
+    private static final Logger logger = LoggerFactory.getLogger(ProcessHandler.class);
+
     private static final List<String> NON_TRANSFORM_OPTION_REQUEST_PARAMETERS = Arrays.asList(SOURCE_EXTENSION,
             TARGET_EXTENSION, TARGET_MIMETYPE, SOURCE_MIMETYPE, DIRECT_ACCESS_URL, SOURCE_FILENAME);
 
@@ -73,10 +79,12 @@ abstract class ProcessHandler extends FragmentHandler
     private final TransformerDebug transformerDebug;
     private final ProbeTransform probeTransform;
     private final CustomTransformers customTransformers;
+    private final TransformExceptionClassifier exceptionClassifier;
 
     ProcessHandler(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions,
             String reference, TransformServiceRegistry transformRegistry, TransformerDebug transformerDebug,
-            ProbeTransform probeTransform, CustomTransformers customTransformers)
+            ProbeTransform probeTransform, CustomTransformers customTransformers,
+            TransformExceptionClassifier exceptionClassifier)
     {
         this.sourceMimetype = sourceMimetype;
         this.targetMimetype = targetMimetype;
@@ -88,6 +96,7 @@ abstract class ProcessHandler extends FragmentHandler
         this.transformerDebug = transformerDebug;
         this.probeTransform = probeTransform;
         this.customTransformers = customTransformers;
+        this.exceptionClassifier = exceptionClassifier;
     }
 
     private static Map<String, String> cleanTransformOptions(Map<String, String> requestParameters)
@@ -129,15 +138,17 @@ abstract class ProcessHandler extends FragmentHandler
         }
         catch (TransformException e)
         {
+            HttpStatus status = overrideIfTheSourceNeverArrived(e.getStatus());
             transformerDebug.logFailure(reference, "  Error: " + e.getMessage());
-            LogEntry.setStatusCodeAndMessage(e.getStatus(), e.getMessage());
-            handleTransformException(e);
+            LogEntry.setStatusCodeAndMessage(status, e.getMessage());
+            handleTransformException(e, status);
         }
         catch (Exception e)
         {
+            HttpStatus status = overrideIfTheSourceNeverArrived(exceptionClassifier.classify(e));
             transformerDebug.logFailure(reference, "  Error: " + e.getMessage());
-            LogEntry.setStatusCodeAndMessage(INTERNAL_SERVER_ERROR, e.getMessage());
-            handleException(e);
+            LogEntry.setStatusCodeAndMessage(status, e.getMessage());
+            handleException(e, status);
         }
         finally
         {
@@ -152,6 +163,27 @@ abstract class ProcessHandler extends FragmentHandler
     protected void logFragment(Integer index, Long outputLength)
     {
         transformerDebug.logFragment(reference, index, outputLength);
+    }
+
+    /**
+     * Refuses to report a terminal status when the source never arrived in full, whatever decided that status.
+     * <p/>
+     * A remote source - a Direct Access URL or the Shared File Store - is read lazily inside the transform, so a download that dies part way through is reported by the parser as whatever a half file looks like: {@code EOFException}, {@code ZipException}, PDFBox's {@code "Error: End-of-File"}. Those are on the content list and would otherwise be answered with {@code 422}, which the T-Router never retries, permanently losing a transform that a retry would have completed.
+     * <p/>
+     * It applies to both failure paths, not just the classified one. The same truncated read can surface as a {@link TransformException} carrying a status of its own - {@code FileManager.createSourceFile} wraps it when a transformer materialises the stream to a file before parsing it - and that status is no more trustworthy than a classification when the bytes never arrived. The stream itself knows better, so it gets the final say either way.
+     */
+    private HttpStatus overrideIfTheSourceNeverArrived(HttpStatus status)
+    {
+        // A 5xx is already retryable, so there is nothing to correct and no need to examine the stream.
+        if (status == null || status.is5xxServerError()
+                || !(inputStream instanceof SourceDownloadStatus source) || !source.sourceDownloadFailed())
+        {
+            return status;
+        }
+
+        logger.warn("The transform failed and {}, so reporting {} rather than {} to leave the T-Router free to retry.",
+                source.describeFailure(), INTERNAL_SERVER_ERROR, status);
+        return INTERNAL_SERVER_ERROR;
     }
 
     @Override
@@ -189,14 +221,22 @@ abstract class ProcessHandler extends FragmentHandler
     protected void sendTransformResponse(TransformManagerImpl transformManager)
     {}
 
-    protected void handleTransformException(TransformException e)
+    /**
+     * @param status
+     *            {@code e}'s own status, unless the source never arrived in full, in which case {@code 500} so the T-Router can retry. See {@link #overrideIfTheSourceNeverArrived}.
+     */
+    protected void handleTransformException(TransformException e, HttpStatus status)
     {
-        throw e;
+        throw status == e.getStatus() ? e : new TransformException(status, e.getMessage(), e);
     }
 
-    protected void handleException(Exception e)
+    /**
+     * @param status
+     *            the status {@link TransformExceptionClassifier} derived from {@code e}: {@code 422} when the supplied document is at fault, otherwise {@code 500}.
+     */
+    protected void handleException(Exception e, HttpStatus status)
     {
-        throw new TransformException(INTERNAL_SERVER_ERROR, e.getMessage(), e);
+        throw new TransformException(status, e.getMessage(), e);
     }
 
     private String getTransformerName(final String sourceMimetype, long sourceSizeInBytes, final String targetMimetype,

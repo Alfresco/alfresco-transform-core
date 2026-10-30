@@ -71,6 +71,7 @@ import org.alfresco.transform.base.model.FileRefResponse;
 import org.alfresco.transform.base.probes.ProbeTransform;
 import org.alfresco.transform.base.registry.CustomTransformers;
 import org.alfresco.transform.base.sfs.SharedFileStoreClient;
+import org.alfresco.transform.base.util.RemoteSourceStream;
 import org.alfresco.transform.client.model.InternalContext;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
@@ -103,6 +104,8 @@ public class TransformHandler
     private TransformReplySender transformReplySender;
     @Autowired
     private TransformerDebug transformerDebug;
+    @Autowired
+    private TransformExceptionClassifier exceptionClassifier;
 
     private final AtomicInteger httpRequestCount = new AtomicInteger(1);
 
@@ -114,7 +117,7 @@ public class TransformHandler
 
         new ProcessHandler(sourceMimetype, targetMimetype, requestParameters,
                 "e" + httpRequestCount.getAndIncrement(), transformRegistry,
-                transformerDebug, probeTransform, customTransformers) {
+                transformerDebug, probeTransform, customTransformers, exceptionClassifier) {
             @Override
             protected void init() throws IOException
             {
@@ -158,7 +161,7 @@ public class TransformHandler
     {
         new ProcessHandler(sourceMimetype, targetMimetype, transformOptions,
                 "p" + httpRequestCount.getAndIncrement(), transformRegistry,
-                transformerDebug, probeTransform, customTransformers) {
+                transformerDebug, probeTransform, customTransformers, exceptionClassifier) {
             @Override
             protected void init() throws IOException
             {
@@ -194,7 +197,7 @@ public class TransformHandler
         TransformReply reply = createBasicTransformReply(request);
         new ProcessHandler(request.getSourceMediaType(), request.getTargetMediaType(),
                 request.getTransformRequestOptions(), "unset", transformRegistry,
-                transformerDebug, probeTransform, customTransformers) {
+                transformerDebug, probeTransform, customTransformers, exceptionClassifier) {
             @Override
             protected void init() throws IOException
             {
@@ -237,15 +240,15 @@ public class TransformHandler
             }
 
             @Override
-            protected void handleTransformException(TransformException e)
+            protected void handleTransformException(TransformException e, HttpStatus status)
             {
-                sendFailedResponse(reply, e, e.getStatus(), replyToQueue);
+                sendFailedResponse(reply, e, status, replyToQueue);
             }
 
             @Override
-            protected void handleException(Exception e)
+            protected void handleException(Exception e, HttpStatus status)
             {
-                sendFailedResponse(reply, e, INTERNAL_SERVER_ERROR, replyToQueue);
+                sendFailedResponse(reply, e, status, replyToQueue);
             }
         }.handleTransformRequest();
         return reply;
@@ -341,9 +344,41 @@ public class TransformHandler
             MultipartFile sourceMultipartFile)
     {
         final String directUrl = requestParameters.getOrDefault(DIRECT_ACCESS_URL, "");
-        return new BufferedInputStream(directUrl.isBlank()
-                ? getMultipartFileInputStream(sourceMultipartFile)
-                : getDirectAccessUrlInputStream(directUrl));
+        return directUrl.isBlank()
+                ? new BufferedInputStream(getMultipartFileInputStream(sourceMultipartFile))
+                // No expected size on this path, so only an outright download failure can be detected. It is the
+                // test transform and probe path, not the one ACS uses for content.
+                : guardedDirectAccessUrlInputStream(directUrl, -1);
+    }
+
+    /**
+     * Opens a Direct Access URL behind a {@link RemoteSourceStream}, so that a download which dies part way through is not mistaken for an unreadable document.
+     */
+    private InputStream guardedDirectAccessUrlInputStream(String directUrl, long expectedLength)
+    {
+        return guardedRemoteSourceStream(getDirectAccessUrlInputStream(directUrl), expectedLength);
+    }
+
+    /**
+     * Wraps a source that arrives over the network in a {@link RemoteSourceStream}, so that a download which dies part way through is not mistaken for an unreadable document.
+     * <p/>
+     * Applied to the Shared File Store as well as to a Direct Access URL. Both are read lazily inside the transform, so a truncated or failing response surfaces as whatever the parser makes of a half file - {@code EOFException}, {@code ZipException}, PDFBox's end-of-file message - all of which are on the classifier's content list and would otherwise be answered with {@code 422}, which the T-Router never retries.
+     * <p/>
+     * The guard has to be the outermost stream, because it is the one {@link ProcessHandler} looks for. It buffers internally, so nothing else wraps it.
+     * <p/>
+     * {@code expectedLength} is the size the client said the content is, which is what should have arrived. A negative value means it did not say, leaving only an outright download failure to go on.
+     */
+    private InputStream guardedRemoteSourceStream(InputStream remoteSource, long expectedLength)
+    {
+        return new RemoteSourceStream(new BufferedInputStream(remoteSource), expectedLength);
+    }
+
+    /**
+     * @return the size the client said the source is, or a negative value if it did not say.
+     */
+    private static long expectedSourceSize(TransformRequest request)
+    {
+        return request.getSourceSize() == null ? -1 : request.getSourceSize();
     }
 
     private InputStream getInputStreamForHandleProbeRequest(File sourceFile)
@@ -363,9 +398,10 @@ public class TransformHandler
         final String directUrl = request.getTransformRequestOptions().getOrDefault(DIRECT_ACCESS_URL, "");
         try
         {
-            return new BufferedInputStream(directUrl.isBlank()
-                    ? getSharedFileStoreInputStream(request.getSourceReference())
-                    : getDirectAccessUrlInputStream(directUrl));
+            return directUrl.isBlank()
+                    ? guardedRemoteSourceStream(getSharedFileStoreInputStream(request.getSourceReference()),
+                            expectedSourceSize(request))
+                    : guardedDirectAccessUrlInputStream(directUrl, expectedSourceSize(request));
         }
         catch (TransformException e)
         {
