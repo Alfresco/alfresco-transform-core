@@ -56,7 +56,7 @@ import org.springframework.stereotype.Component;
  * <p/>
  * Matching is by class <i>name</i>, not by type, because {@code engines/base} does not - and should not - depend on Tika, PDFBox, POI or the other parsing libraries the engines use.
  * <p/>
- * The lists were derived from reported failures and from those libraries, not from an exhaustive corpus, so they will need adjusting. A hardcoded list would have to travel the whole t-core &rarr; t-service &rarr; t-aspose &rarr; ai-renditions release chain to correct one entry, so all four lists and a kill switch ({@code transform.failure.classification.enabled}, {@code .class-names}, {@code .message-fragments}, {@code .infrastructure-class-names}, {@code .infrastructure-message-fragments}) are configuration. Setting a list <i>replaces</i> the default, so a false positive can be removed as well as added; the effective lists are logged at startup.
+ * The lists were derived from reported failures and from those libraries, not from an exhaustive corpus, so they will need adjusting. A hardcoded list would have to travel the whole t-core &rarr; t-service &rarr; t-aspose &rarr; ai-renditions release chain to correct one entry, so all five lists and a kill switch ({@code transform.failure.classification.enabled}, {@code .class-names}, {@code .message-fragments}, {@code .message-fragment-class-names}, {@code .infrastructure-class-names}, {@code .infrastructure-message-fragments}) are configuration. Setting a list <i>replaces</i> the default, so a false positive can be removed as well as added; the effective lists are logged at startup.
  */
 @Component
 @ConfigurationProperties(prefix = "transform.failure.classification")
@@ -133,6 +133,8 @@ class TransformExceptionClassifier
      * Lower case fragments that identify a content failure reported only as a plain {@code IOException}.
      * <p/>
      * PDFBox in particular signals most structural damage this way, which is exactly the case reported in MNT-25570 ("Missing root object specification in trailer"). Matching on the message is unpleasant, but the alternative - treating every {@code IOException} as a content failure - would hide real disk and network faults.
+     * <p/>
+     * Only consulted for the types in {@link #DEFAULT_MESSAGE_FRAGMENT_CLASS_NAMES}. See there for why.
      */
     private static final List<String> DEFAULT_MESSAGE_FRAGMENTS = List.of(
             "missing root object specification",
@@ -153,6 +155,20 @@ class TransformExceptionClassifier
             "unknown file format",
             "cannot be parsed",
             "could not be parsed");
+
+    /**
+     * Types whose message is worth reading for a content failure.
+     * <p/>
+     * The fragments above are parser vocabulary, and several of them - {@code corrupt}, {@code damaged}, {@code malformed}, {@code truncated} - are words an engine might just as easily use about itself. Scanning the message of <i>every</i> throwable therefore turns an engine bug such as {@code IllegalStateException("corrupt temporary output")} into a {@code 422}, permanently dropping a transform that a retry would have fixed. Confining the scan to the types that actually report content damage in their text closes that off.
+     * <p/>
+     * The three listed are where the parsers put it. PDFBox and the JDK report structural damage as a plain {@code IOException}; XML content arrives as a {@code SAXException}; {@code TikaException} is Tika's wrapper, which is safe to read here only because the infrastructure veto has already examined the whole cause chain. A type that announces a content failure by its own name does not need to be listed - it belongs in {@link #DEFAULT_CLASS_NAMES} instead.
+     * <p/>
+     * This restriction is deliberately <b>not</b> applied to {@link #DEFAULT_INFRA_MESSAGE_FRAGMENTS}: the veto must stay broad so it can still recognise an infrastructure failure however it was wrapped.
+     */
+    private static final List<String> DEFAULT_MESSAGE_FRAGMENT_CLASS_NAMES = List.of(
+            "IOException",
+            "SAXException",
+            "TikaException");
 
     /**
      * Class names that always mean the engine or its environment failed, never the document.
@@ -204,6 +220,11 @@ class TransformExceptionClassifier
     /** Lower cased copy of {@link #messageFragments}, so the comparison does not re-lower per call. */
     private List<String> lowerCaseMessageFragments = new ArrayList<>(DEFAULT_MESSAGE_FRAGMENTS);
 
+    private List<String> messageFragmentClassNames = new ArrayList<>(DEFAULT_MESSAGE_FRAGMENT_CLASS_NAMES);
+
+    /** Rebuilt from {@link #messageFragmentClassNames} after binding, as it is only ever used for lookups. */
+    private Set<String> messageFragmentClassNameSet = new LinkedHashSet<>(DEFAULT_MESSAGE_FRAGMENT_CLASS_NAMES);
+
     private List<String> infrastructureClassNames = new ArrayList<>(DEFAULT_INFRA_CLASS_NAMES);
     private List<String> infrastructureMessageFragments = new ArrayList<>(DEFAULT_INFRA_MESSAGE_FRAGMENTS);
 
@@ -220,10 +241,10 @@ class TransformExceptionClassifier
             return;
         }
         logger.info("Transform failure classification is enabled. Exceptions matching these are reported as {}, "
-                + "everything else as {}. Class names: {}. Message fragments: {}. "
+                + "everything else as {}. Class names: {}. Message fragments: {}, read only from {}. "
                 + "Overridden in all cases by these infrastructure class names: {}, and message fragments: {}.",
                 UNPROCESSABLE_ENTITY, INTERNAL_SERVER_ERROR, classNameSet, lowerCaseMessageFragments,
-                infrastructureClassNameSet, lowerCaseInfraMessageFragments);
+                messageFragmentClassNameSet, infrastructureClassNameSet, lowerCaseInfraMessageFragments);
     }
 
     /**
@@ -276,7 +297,9 @@ class TransformExceptionClassifier
      */
     private String infrastructureMatch(Throwable t)
     {
-        return match(t, infrastructureClassNameSet, lowerCaseInfraMessageFragments);
+        // Deliberately unrestricted: an infrastructure failure must be recognised however it was wrapped.
+        String classMatch = classNameMatch(t, infrastructureClassNameSet);
+        return classMatch != null ? classMatch : messageMatch(t, lowerCaseInfraMessageFragments);
     }
 
     /**
@@ -284,10 +307,20 @@ class TransformExceptionClassifier
      */
     private String contentFailureMatch(Throwable t)
     {
-        return match(t, classNameSet, lowerCaseMessageFragments);
+        String classMatch = classNameMatch(t, classNameSet);
+        if (classMatch != null)
+        {
+            return classMatch;
+        }
+        // Only the parser types get their message read. See DEFAULT_MESSAGE_FRAGMENT_CLASS_NAMES.
+        if (classNameMatch(t, messageFragmentClassNameSet) == null)
+        {
+            return null;
+        }
+        return messageMatch(t, lowerCaseMessageFragments);
     }
 
-    private static String match(Throwable t, Set<String> classNames, List<String> lowerCaseFragments)
+    private static String classNameMatch(Throwable t, Set<String> classNames)
     {
         // Walk the superclasses, not just the runtime type. The parser libraries habitually declare a general
         // content failure and then throw a more specific subclass of it: POI throws `OldExcelFormatException`
@@ -307,7 +340,11 @@ class TransformExceptionClassifier
                 return "class name '" + type.getName() + "'";
             }
         }
+        return null;
+    }
 
+    private static String messageMatch(Throwable t, List<String> lowerCaseFragments)
+    {
         String message = t.getMessage();
         if (message == null)
         {
@@ -379,6 +416,12 @@ class TransformExceptionClassifier
                 .toList();
     }
 
+    public void setMessageFragmentClassNames(List<String> messageFragmentClassNames)
+    {
+        this.messageFragmentClassNames = messageFragmentClassNames;
+        this.messageFragmentClassNameSet = new LinkedHashSet<>(messageFragmentClassNames);
+    }
+
     public void setInfrastructureClassNames(List<String> infrastructureClassNames)
     {
         this.infrastructureClassNames = infrastructureClassNames;
@@ -406,6 +449,11 @@ class TransformExceptionClassifier
     public List<String> getMessageFragments()
     {
         return messageFragments;
+    }
+
+    public List<String> getMessageFragmentClassNames()
+    {
+        return messageFragmentClassNames;
     }
 
     public List<String> getInfrastructureClassNames()

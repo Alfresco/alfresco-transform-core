@@ -47,6 +47,10 @@ transform:
   # infrastructure-class-names and infrastructure-message-fragments are the safety veto:
   # a match anywhere in the cause chain forces 500 even if a content rule also matched,
   # which stops a library wrapper hiding a disk, network or interrupt failure.
+  # message-fragments are read only from the types in message-fragment-class-names
+  # (IOException, SAXException, TikaException), so words such as "corrupt" in an engine's
+  # own exception are not mistaken for a statement about the document. The veto is not
+  # restricted this way, so it still recognises infrastructure failures however wrapped.
   failure:
     classification:
       enabled: ${TRANSFORM_FAILURE_CLASSIFICATION_ENABLED:true}

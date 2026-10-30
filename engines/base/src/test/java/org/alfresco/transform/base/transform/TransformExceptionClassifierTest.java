@@ -265,6 +265,44 @@ class TransformExceptionClassifierTest
     }
 
     /**
+     * Several content fragments - "corrupt", "damaged", "truncated" - are words an engine might use about itself. Reading them out of any exception would turn an engine bug into a terminal 422 and drop a transform that a retry would have fixed.
+     */
+    @Test
+    void testAContentFragmentIsOnlyReadFromAParserFailureType()
+    {
+        assertEquals(INTERNAL_SERVER_ERROR,
+                classifier.classify(new IllegalStateException("corrupt temporary output")));
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new RuntimeException("the engine is damaged")));
+        assertEquals(INTERNAL_SERVER_ERROR,
+                classifier.classify(new IllegalArgumentException("truncated command line")));
+
+        // The same words from the types the parsers actually report content damage with still decide.
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new IOException("corrupt object stream")));
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new TikaException("the document is damaged")));
+    }
+
+    /**
+     * The restriction applies only to the content list. The veto has to stay broad, or an infrastructure failure wrapped in something unexpected would no longer be recognised.
+     */
+    @Test
+    void testTheInfrastructureVetoStillReadsTheMessageOfAnyType()
+    {
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(
+                new IllegalStateException("corrupt entry", new IllegalStateException("No space left on device"))));
+    }
+
+    @Test
+    void testTheTypesWhoseMessageIsReadCanBeOverridden()
+    {
+        classifier.setMessageFragmentClassNames(List.of("IllegalStateException"));
+
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new IllegalStateException("the file is corrupt")));
+        // IOException is no longer configured, so MNT-25570's own shape must fall back to 500.
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(
+                new IOException("Missing root object specification in trailer.")));
+    }
+
+    /**
      * The defaults are inferred rather than harvested from real failures, so the one signal that can correct them - an exception the lists do not recognise - has to survive into a production log, where debug is off.
      */
     @Test
