@@ -55,6 +55,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Checks that a document the engine cannot parse is reported as {@code 422} so the T-Router stops retrying it, while anything that might be a genuine engine or infrastructure problem stays {@code 500} so it is still retried.
  */
+// One assertion per rule is what makes a misclassification traceable to the rule that caused it, so the method count
+// follows the number of rules rather than any structure worth splitting. Same reasoning as StreamHandlerTest.
+@SuppressWarnings("PMD.TooManyMethods")
 class TransformExceptionClassifierTest
 {
     private final TransformExceptionClassifier classifier = new TransformExceptionClassifier();

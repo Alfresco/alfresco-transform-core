@@ -134,7 +134,7 @@ class TransformExceptionClassifier
      * <p/>
      * PDFBox in particular signals most structural damage this way, which is exactly the case reported in MNT-25570 ("Missing root object specification in trailer"). Matching on the message is unpleasant, but the alternative - treating every {@code IOException} as a content failure - would hide real disk and network faults.
      * <p/>
-     * Only consulted for the types in {@link #DEFAULT_MESSAGE_FRAGMENT_CLASS_NAMES}. See there for why.
+     * Only consulted for the types in {@link #DEFAULT_MESSAGE_FRAGMENT_TYPES}. See there for why.
      */
     private static final List<String> DEFAULT_MESSAGE_FRAGMENTS = List.of(
             "missing root object specification",
@@ -165,7 +165,7 @@ class TransformExceptionClassifier
      * <p/>
      * This restriction is deliberately <b>not</b> applied to {@link #DEFAULT_INFRA_MESSAGE_FRAGMENTS}: the veto must stay broad so it can still recognise an infrastructure failure however it was wrapped.
      */
-    private static final List<String> DEFAULT_MESSAGE_FRAGMENT_CLASS_NAMES = List.of(
+    private static final List<String> DEFAULT_MESSAGE_FRAGMENT_TYPES = List.of(
             "IOException",
             "SAXException",
             "TikaException");
@@ -220,10 +220,10 @@ class TransformExceptionClassifier
     /** Lower cased copy of {@link #messageFragments}, so the comparison does not re-lower per call. */
     private List<String> lowerCaseMessageFragments = new ArrayList<>(DEFAULT_MESSAGE_FRAGMENTS);
 
-    private List<String> messageFragmentClassNames = new ArrayList<>(DEFAULT_MESSAGE_FRAGMENT_CLASS_NAMES);
+    private List<String> messageFragmentClassNames = new ArrayList<>(DEFAULT_MESSAGE_FRAGMENT_TYPES);
 
     /** Rebuilt from {@link #messageFragmentClassNames} after binding, as it is only ever used for lookups. */
-    private Set<String> messageFragmentClassNameSet = new LinkedHashSet<>(DEFAULT_MESSAGE_FRAGMENT_CLASS_NAMES);
+    private Set<String> messageFragmentClassNameSet = new LinkedHashSet<>(DEFAULT_MESSAGE_FRAGMENT_TYPES);
 
     private List<String> infrastructureClassNames = new ArrayList<>(DEFAULT_INFRA_CLASS_NAMES);
     private List<String> infrastructureMessageFragments = new ArrayList<>(DEFAULT_INFRA_MESSAGE_FRAGMENTS);
@@ -312,7 +312,7 @@ class TransformExceptionClassifier
         {
             return classMatch;
         }
-        // Only the parser types get their message read. See DEFAULT_MESSAGE_FRAGMENT_CLASS_NAMES.
+        // Only the parser types get their message read. See DEFAULT_MESSAGE_FRAGMENT_TYPES.
         if (classNameMatch(t, messageFragmentClassNameSet) == null)
         {
             return null;

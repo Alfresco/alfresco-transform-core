@@ -58,31 +58,39 @@ class RemoteSourceStreamTest
         return content;
     }
 
+    /**
+     * Reads to the end, which is what lets the stream say whether all of it arrived. Done a byte at a time so that a {@link RemoteSourceStream#mark(int)} taken by the test stays within the delegate's read limit.
+     */
     private static void drain(InputStream in) throws IOException
     {
-        while (in.read() != -1)
+        int read = in.read();
+        while (read != -1)
         {
-            // Reading to the end is what lets the stream say whether all of it arrived.
+            read = in.read();
         }
     }
 
     @Test
     void testAFullyReadSourceHasNotFailed() throws IOException
     {
-        RemoteSourceStream stream = stream(bytes(10), 10);
-        drain(stream);
+        try (RemoteSourceStream stream = stream(bytes(10), 10))
+        {
+            drain(stream);
 
-        assertFalse(stream.sourceDownloadFailed());
+            assertFalse(stream.sourceDownloadFailed());
+        }
     }
 
     @Test
     void testASourceThatEndedEarlyHasFailed() throws IOException
     {
-        RemoteSourceStream stream = stream(bytes(6), 10);
-        drain(stream);
+        try (RemoteSourceStream stream = stream(bytes(6), 10))
+        {
+            drain(stream);
 
-        assertTrue(stream.sourceDownloadFailed());
-        assertTrue(stream.describeFailure().contains("6 of the 10"), stream.describeFailure());
+            assertTrue(stream.sourceDownloadFailed());
+            assertTrue(stream.describeFailure().contains("6 of the 10"), stream.describeFailure());
+        }
     }
 
     /**
@@ -91,11 +99,12 @@ class RemoteSourceStreamTest
     @Test
     void testAbandoningAGoodSourceEarlyIsNotAFailure() throws IOException
     {
-        RemoteSourceStream stream = stream(bytes(10), 10);
+        try (RemoteSourceStream stream = stream(bytes(10), 10))
+        {
+            assertEquals(0, stream.read());
 
-        assertEquals(0, stream.read());
-
-        assertFalse(stream.sourceDownloadFailed());
+            assertFalse(stream.sourceDownloadFailed());
+        }
     }
 
     /**
@@ -104,31 +113,33 @@ class RemoteSourceStreamTest
     @Test
     void testRereadingAfterAResetDoesNotHideATruncatedSource() throws IOException
     {
-        RemoteSourceStream stream = stream(bytes(6), 10);
+        try (RemoteSourceStream stream = stream(bytes(6), 10))
+        {
+            stream.mark(16);
+            assertEquals(4, stream.read(new byte[4], 0, 4));
+            stream.reset();
 
-        stream.mark(16);
-        assertEquals(4, stream.read(new byte[4], 0, 4));
-        stream.reset();
+            drain(stream);
 
-        drain(stream);
-
-        assertTrue(stream.sourceDownloadFailed(),
-                "Only 6 of the 10 bytes arrived; re-reading 4 of them must not make up the difference");
-        assertTrue(stream.describeFailure().contains("6 of the 10"), stream.describeFailure());
+            assertTrue(stream.sourceDownloadFailed(),
+                    "Only 6 of the 10 bytes arrived; re-reading 4 of them must not make up the difference");
+            assertTrue(stream.describeFailure().contains("6 of the 10"), stream.describeFailure());
+        }
     }
 
     @Test
     void testRereadingAfterAResetDoesNotInventAFailureOnACompleteSource() throws IOException
     {
-        RemoteSourceStream stream = stream(bytes(10), 10);
+        try (RemoteSourceStream stream = stream(bytes(10), 10))
+        {
+            stream.mark(16);
+            assertEquals(4, stream.read(new byte[4], 0, 4));
+            stream.reset();
 
-        stream.mark(16);
-        assertEquals(4, stream.read(new byte[4], 0, 4));
-        stream.reset();
+            drain(stream);
 
-        drain(stream);
-
-        assertFalse(stream.sourceDownloadFailed());
+            assertFalse(stream.sourceDownloadFailed());
+        }
     }
 
     /**
@@ -137,41 +148,44 @@ class RemoteSourceStreamTest
     @Test
     void testAResetAfterTheEndOfTheSourceIsNotTreatedAsTheEnd() throws IOException
     {
-        RemoteSourceStream stream = stream(bytes(10), 10);
+        try (RemoteSourceStream stream = stream(bytes(10), 10))
+        {
+            stream.mark(16);
+            drain(stream);
+            stream.reset();
 
-        stream.mark(16);
-        drain(stream);
-        stream.reset();
-
-        assertFalse(stream.sourceDownloadFailed());
+            assertFalse(stream.sourceDownloadFailed());
+        }
     }
 
     @Test
     void testSkippedBytesCountAsArrived() throws IOException
     {
-        RemoteSourceStream stream = stream(bytes(10), 10);
+        try (RemoteSourceStream stream = stream(bytes(10), 10))
+        {
+            assertEquals(4, stream.skip(4));
+            drain(stream);
 
-        assertEquals(4, stream.skip(4));
-        drain(stream);
-
-        assertFalse(stream.sourceDownloadFailed());
+            assertFalse(stream.sourceDownloadFailed());
+        }
     }
 
     @Test
-    void testAReadThatThrowsIsAFailureHoweverMuchArrived()
+    void testAReadThatThrowsIsAFailureHoweverMuchArrived() throws IOException
     {
-        RemoteSourceStream stream = new RemoteSourceStream(new InputStream() {
+        try (RemoteSourceStream stream = new RemoteSourceStream(new InputStream() {
             @Override
             public int read() throws IOException
             {
                 throw new IOException("Connection reset");
             }
-        }, -1);
+        }, -1))
+        {
+            assertThrows(IOException.class, stream::read);
 
-        assertThrows(IOException.class, stream::read);
-
-        assertTrue(stream.sourceDownloadFailed());
-        assertTrue(stream.describeFailure().contains("Connection reset"), stream.describeFailure());
+            assertTrue(stream.sourceDownloadFailed());
+            assertTrue(stream.describeFailure().contains("Connection reset"), stream.describeFailure());
+        }
     }
 
     /**
@@ -180,9 +194,11 @@ class RemoteSourceStreamTest
     @Test
     void testAnUnknownExpectedLengthNeverReportsATruncatedSource() throws IOException
     {
-        RemoteSourceStream stream = stream(bytes(6), -1);
-        drain(stream);
+        try (RemoteSourceStream stream = stream(bytes(6), -1))
+        {
+            drain(stream);
 
-        assertFalse(stream.sourceDownloadFailed());
+            assertFalse(stream.sourceDownloadFailed());
+        }
     }
 }
