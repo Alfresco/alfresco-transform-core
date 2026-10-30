@@ -41,7 +41,7 @@ jobs:
   pre_commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v18.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
 
   test_run_check:
     name: "Test run check"
@@ -67,15 +67,13 @@ jobs:
     if: needs.test_run_check.outputs.tests == 'true' && github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/ya-pmd-scan@1f36f8e45695ce60362010345a99a0c8f7310264 # v4.4.1
         env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
           QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -92,9 +90,9 @@ jobs:
     if: needs.test_run_check.outputs.tests == 'true'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: "Login to Docker Hub"
@@ -119,8 +117,6 @@ jobs:
       - name: "Build"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
           QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -128,17 +124,14 @@ jobs:
         run: mvn -B -U -q clean install -DadditionalOption=-Xdoclint:none -DskipTests -Dmaven.javadoc.skip=true -Pbase
       - name: "Cache LibreOffice"
         run: bash _ci/cache_artifacts.sh
-      - name: "Run tests and deploy snapshots (master only)"
+      - name: "Run tests"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
-          MAVEN_PHASE: ${{ github.event_name == 'push' && github.ref_name == 'master' && 'deploy' || 'verify' }}
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
           QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: mvn -B -U clean "$MAVEN_PHASE" -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Pbase
+        run: mvn -B -U clean verify -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true -Pbase
 
   all_tests_matrix:
     name: ${{ matrix.testName }}
@@ -171,9 +164,9 @@ jobs:
             testProfile: aio-test
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: "Login to Docker Hub"
@@ -198,8 +191,6 @@ jobs:
       - name: "Build local docker image"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
           QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -210,8 +201,6 @@ jobs:
       - name: "Run tests"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
           QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -231,9 +220,9 @@ jobs:
         java: [ '21', '25' ]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: "Login to Docker Hub"
@@ -258,8 +247,6 @@ jobs:
       - name: "Build local docker image"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
           QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -273,8 +260,6 @@ jobs:
           SMOKE_TESTS: true
           SKIP_DEPLOY: true
           JAVA_RUNTIME_VERSION: ${{ matrix.java }}
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
           QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -290,6 +275,9 @@ jobs:
       contains(github.event.head_commit.message, '[release]') &&
       github.event_name != 'pull_request' &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'SP/') || startsWith(github.ref_name, 'HF/'))
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Generate app token
         id: app-token
@@ -298,20 +286,20 @@ jobs:
           client-id: ${{ vars.GH_APP_ENGINEERING_CONTRIB_CLIENT_ID }}
           private-key: ${{ secrets.GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY }}
           permission-contents: write
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ steps.app-token.outputs.token }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: "Clean-up SNAPSHOT artifacts"
         run: |
           mkdir -p "${HOME}/.m2/repository/"
           find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT*" -prune -exec rm -rf {} +
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v18.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
@@ -321,15 +309,13 @@ jobs:
       # "push_docker_images" job below (docker.skip=true here).
       - name: "Release"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@v18.21.0
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
         with:
           token: ${{ steps.app-token.outputs.token }}
           release-version: ${{ env.RELEASE_VERSION }}
           development-version: ${{ env.DEVELOPMENT_VERSION }}
           maven-args: "-DskipTests -Dmaven.javadoc.skip=true -DadditionalOption=-Xdoclint:none -Ddocker.skip=true"
+          prerelease-profile: prerelease
 
   push_docker_images:
     name: "Push Docker Images (${{ matrix.testName }})"
@@ -363,10 +349,10 @@ jobs:
           # The release job tags the release commit (which carries the release
           # version in the POMs) with ${{ env.RELEASE_VERSION }}.
           ref: refs/tags/${{ env.RELEASE_VERSION }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.21.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@148e8c308239d720af80dc33c6cc3cf897764610 # v19.9.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: Set up QEMU
@@ -402,8 +388,6 @@ jobs:
       - name: "Build and push docker image"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
           QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
