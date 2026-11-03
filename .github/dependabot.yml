@@ -1,12 +1,6 @@
 # Documentation for all configuration options:
 # https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
 version: 2
-registries:
-  maven-alfresco-internal:
-    type: maven-repository
-    url: https://artifacts.alfresco.com/nexus/content/groups/internal
-    username: ${{secrets.NEXUS_USERNAME}}
-    password: ${{secrets.NEXUS_PASSWORD}}
 updates:
   - package-ecosystem: "github-actions"
     directories:
@@ -29,8 +23,6 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 99
-    registries:
-      - maven-alfresco-internal
     labels:
       - "dependencies"
       - "java"

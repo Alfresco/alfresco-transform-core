@@ -1,30 +1,25 @@
 <settings>
     <mirrors>
         <mirror>
-            <id>alfresco-internal</id>
-            <name>Alfresco Cloudsmith Internal</name>
-            <url>https://artifacts.hyland.dev/basic/alfresco-internal/maven/</url>
-            <mirrorOf>*</mirrorOf>
+            <id>cic-ext-pull-through</id>
+            <name>Maven Central</name>
+            <url>https://artifacts.hyland.dev/basic/cic-ext-pull-through/maven/</url>
+            <mirrorOf>central</mirrorOf>
         </mirror>
     </mirrors>
 
     <servers>
-        <!-- Credential for the Cloudsmith mirror (exported by the cloudsmith-auth action) -->
+        <!-- Credential for resolving Maven Central, exported by the cloudsmith-auth action -->
         <server>
-            <id>alfresco-internal</id>
+            <id>cic-ext-pull-through</id>
             <username>${env.CLOUDSMITH_USERNAME}</username>
             <password>${env.CLOUDSMITH_API_KEY}</password>
         </server>
-        <!-- Credential for deploying to Nexus (distributionManagement) -->
+        <!-- Credential for deploying the artifacts (distributionManagement), exported by the cloudsmith-auth action -->
         <server>
-            <id>alfresco-public-snapshots</id>
-            <username>${env.NEXUS_USERNAME}</username>
-            <password>${env.NEXUS_PASSWORD}</password>
-        </server>
-        <server>
-            <id>alfresco-public</id>
-            <username>${env.NEXUS_USERNAME}</username>
-            <password>${env.NEXUS_PASSWORD}</password>
+            <id>alfresco-releases</id>
+            <username>${env.CLOUDSMITH_USERNAME}</username>
+            <password>${env.CLOUDSMITH_API_KEY}</password>
         </server>
 
         <!-- private docker registry-->
