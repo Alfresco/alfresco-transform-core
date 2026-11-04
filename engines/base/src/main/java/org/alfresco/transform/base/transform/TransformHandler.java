@@ -352,7 +352,9 @@ public class TransformHandler
     }
 
     /**
-     * Opens a Direct Access URL behind a {@link RemoteSourceStream}, so that a download which dies part way through is not mistaken for an unreadable document.
+     * Opens a Direct Access URL behind a {@link RemoteSourceStream}.
+     *
+     * @see #guardedRemoteSourceStream
      */
     private InputStream guardedDirectAccessUrlInputStream(String directUrl, long expectedLength)
     {
@@ -362,11 +364,11 @@ public class TransformHandler
     /**
      * Wraps a source that arrives over the network in a {@link RemoteSourceStream}, so that a download which dies part way through is not mistaken for an unreadable document.
      * <p/>
-     * Applied to the Shared File Store as well as to a Direct Access URL. Both are read lazily inside the transform, so a truncated or failing response surfaces as whatever the parser makes of a half file - {@code EOFException}, {@code ZipException}, PDFBox's end-of-file message - all of which are on the classifier's content list and would otherwise be answered with {@code 422}, which the T-Router never retries.
+     * Applied to the Shared File Store as well as to a Direct Access URL. Both are read lazily inside the transform, so a truncated response surfaces as whatever the parser makes of a half file - {@code EOFException}, {@code ZipException}, PDFBox's end-of-file message - all on the classifier's content list and otherwise answered with {@code 422}, which the T-Router never retries.
      * <p/>
      * The guard has to be the outermost stream, because it is the one {@link ProcessHandler} looks for. It buffers internally, so nothing else wraps it.
      * <p/>
-     * {@code expectedLength} is the size the client said the content is, which is what should have arrived. A negative value means it did not say, leaving only an outright download failure to go on.
+     * {@code expectedLength} is the size the client said the content is. A negative value means it did not say, leaving only an outright download failure to go on.
      */
     private InputStream guardedRemoteSourceStream(InputStream remoteSource, long expectedLength)
     {

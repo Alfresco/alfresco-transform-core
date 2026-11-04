@@ -74,7 +74,7 @@ public class FakeTransformerFails extends AbstractFakeTransformer
         case "corrupt-zip":
             throw new ZipException("invalid stored block lengths");
         case "corrupt-pdf":
-            // The exact failure reported in MNT-25570: a .docx renamed to .pdf.
+            // The exact failure originally reported: a .docx renamed to .pdf.
             throw new IOException("Missing root object specification in trailer.");
         case "infrastructure":
             throw new IllegalStateException("Connection pool shut down");

@@ -306,13 +306,13 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
     /**
      * Runs the parse, and reports a document the parser could not read as {@code 422} rather than letting it be retried.
      * <p/>
-     * Metadata extraction is its own transform type with its own path - it never reaches {@code Tika.transform}, so the classification done there does not apply, and the repository asks for an extract on more or less every upload. An unreadable document therefore arrives here first and most often.
+     * Metadata extraction is its own transform type with its own path - it never reaches {@code Tika.transform}, so the classification done there does not apply - and the repository asks for an extract on nearly every upload, so an unreadable document arrives here first and most often.
      * <p/>
-     * Everything between the call and the catch belongs to the parser, working on the supplied bytes, so the failures worth naming here are wider than a central list could safely carry. {@code TikaException} and {@code SAXException} are the declared ones. The bare runtime types matter just as much in practice: a damaged OLE2 document makes POI throw {@code NullPointerException} or {@code ArrayIndexOutOfBoundsException} straight out of its own block table, and out of this context those read as engine bugs, which is exactly why no central list would ever match them. In this context they cannot be - the parser was handed bytes it could not make sense of, and a retry hands it the same ones.
+     * Everything between the call and the catch belongs to the parser. {@code TikaException} and {@code SAXException} are the declared failures; the bare runtime types matter just as much, because a damaged OLE2 document makes POI throw {@code NullPointerException} or {@code ArrayIndexOutOfBoundsException} out of its own block table, which no central list would ever match.
      * <p/>
-     * {@code IOException} is deliberately left out, and is the only thing this method still lets through. It is the one type here equally likely to be the source download dying part way through, and that must stay retryable; the central message fragments already separate the readable cases such as PDFBox's missing trailer.
+     * {@code IOException} is deliberately left through: it is equally likely to be the source download dying part way through, and the central message fragments already separate the readable cases such as PDFBox's missing trailer.
      * <p/>
-     * The cause is always preserved, so the infrastructure veto can still overturn this to {@code 500} when the chain shows the environment failed rather than the document.
+     * The cause is preserved, so the infrastructure veto can still overturn this to {@code 500}.
      */
     private void parseOrReportUnreadable(Parser parser, InputStream inputStream, ContentHandler handler,
             Metadata metadata, ParseContext context, String sourceMimetype) throws IOException

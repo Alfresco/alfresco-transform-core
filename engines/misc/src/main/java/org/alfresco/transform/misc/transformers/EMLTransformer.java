@@ -110,14 +110,9 @@ public class EMLTransformer implements CustomTransformerFileAdaptor
         }
         catch (MessagingException e)
         {
-            // jakarta.mail raises this only when the bytes are not a message it can read: a truncated MIME structure,
-            // a header it cannot parse, an encoding the message declares but does not honour. Retrying hands the same
-            // bytes to the same parser, so the status has to say so.
-            //
-            // Said here rather than left to TransformExceptionClassifier because this is the only place that knows a
-            // .eml was being parsed. The classifier would see a type it has never been told about and, rightly,
-            // report 500. The infrastructure veto still applies on the way out, so a MessagingException raised
-            // because the disk filled is still reported as retryable.
+            // jakarta.mail raises this only when the bytes are not a message it can read, so a retry hands the same
+            // bytes to the same parser. Said here rather than in TransformExceptionClassifier because this is the
+            // only place that knows a .eml was being parsed. The infrastructure veto still applies on the way out.
             throw new TransformException(UNPROCESSABLE_ENTITY,
                     "The source is not a readable RFC822 message: " + e.getMessage(), e);
         }

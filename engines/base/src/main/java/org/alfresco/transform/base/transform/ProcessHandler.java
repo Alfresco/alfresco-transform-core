@@ -169,9 +169,9 @@ abstract class ProcessHandler extends FragmentHandler
     /**
      * Refuses to report a terminal status when the source never arrived in full, whatever decided that status.
      * <p/>
-     * A remote source - a Direct Access URL or the Shared File Store - is read lazily inside the transform, so a download that dies part way through is reported by the parser as whatever a half file looks like: {@code EOFException}, {@code ZipException}, PDFBox's {@code "Error: End-of-File"}. Those are on the content list and would otherwise be answered with {@code 422}, which the T-Router never retries, permanently losing a transform that a retry would have completed.
+     * A remote source - a Direct Access URL or the Shared File Store - is read lazily inside the transform, so a download that dies part way through is reported by the parser as whatever a half file looks like: {@code EOFException}, {@code ZipException}, PDFBox's {@code "Error: End-of-File"}. Those are on the content list and would otherwise be answered with {@code 422}, which the T-Router never retries.
      * <p/>
-     * It applies to both failure paths, not just the classified one. The same truncated read can surface as a {@link TransformException} carrying a status of its own - {@code FileManager.createSourceFile} wraps it when a transformer materialises the stream to a file before parsing it - and that status is no more trustworthy than a classification when the bytes never arrived. The stream itself knows better, so it gets the final say either way.
+     * It applies to both failure paths. The same truncated read can surface as a {@link TransformException} carrying a status of its own - {@code FileManager.createSourceFile} wraps it when a transformer materialises the stream to a file first - and that status is no more trustworthy when the bytes never arrived. The stream knows better, so it gets the final say either way.
      */
     private HttpStatus overrideIfTheSourceNeverArrived(HttpStatus status)
     {

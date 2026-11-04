@@ -46,24 +46,19 @@ import org.springframework.stereotype.Component;
 /**
  * Decides whether an exception thrown by a {@link org.alfresco.transform.base.CustomTransformer} means "this document cannot be transformed" or "this engine is unwell".
  * <p/>
- * The distinction matters because the T-Router only retries 5xx and 408. Reporting a bad document as {@code 500} makes the router retry it with a growing backoff for a document that can never succeed; with enough bad documents that occupies the JMS listener pool and delays healthy transforms.
+ * The T-Router only retries 5xx and 408, so reporting a bad document as {@code 500} has it retried with a growing backoff for something that can never succeed. {@code 422} already carries "bad document" elsewhere in the engine - see {@code ProcessHandler.validateOutputLength}.
  * <p/>
- * {@code 422 UNPROCESSABLE_ENTITY} already carries this meaning elsewhere in the engine - see {@code ProcessHandler.validateOutputLength} - so it is reused rather than inventing a status.
+ * <b>Deliberately conservative: anything not positively recognised stays {@code 500}.</b> A content failure reported as an outage only costs retries; an outage reported as a content failure drops a transform a retry would have fixed. Because libraries wrap - Tika's {@code CompositeParser} rethrows everything as {@code TikaException} - an infrastructure match anywhere in the cause chain vetoes the classification, and is checked first.
  * <p/>
- * <b>Deliberately conservative: anything not positively recognised stays {@code 500}.</b> A content failure wrongly reported as an outage only costs some retries, but an outage wrongly reported as a content failure would drop a transform that retrying would have fixed.
+ * Matching is by class <i>name</i>, since {@code engines/base} must not depend on Tika, PDFBox or POI.
  * <p/>
- * That rule needs enforcing, not just stating, because libraries wrap: Tika's {@code CompositeParser} rethrows every exception a parser raises as a {@code TikaException}. So an infrastructure match anywhere in the cause chain vetoes the whole classification, and is checked before any content rule.
- * <p/>
- * Matching is by class <i>name</i>, not by type, because {@code engines/base} does not - and should not - depend on Tika, PDFBox, POI or the other parsing libraries the engines use.
- * <p/>
- * The lists were derived from reported failures and from those libraries, not from an exhaustive corpus, so they will need adjusting. A hardcoded list would have to travel the whole t-core &rarr; t-service &rarr; t-aspose &rarr; ai-renditions release chain to correct one entry, so all five lists and a kill switch ({@code transform.failure.classification.enabled}, {@code .class-names}, {@code .message-fragments}, {@code .message-fragment-class-names}, {@code .infrastructure-class-names}, {@code .infrastructure-message-fragments}) are configuration. Setting a list <i>replaces</i> the default, so a false positive can be removed as well as added; a matching {@code additional-*} property adds to it instead, which is what an engine or an extension that knows one more of its own library's exceptions needs. The effective lists are logged at startup.
+ * The lists came from reported failures rather than an exhaustive corpus, so they will need adjusting; correcting a hardcoded entry would mean a full t-core &rarr; ai-renditions release. All five lists and a kill switch are therefore configuration under {@code transform.failure.classification}. Setting a list <i>replaces</i> the default; the matching {@code additional-*} property extends it. The effective lists are logged at startup.
  */
 @Component
 @ConfigurationProperties(prefix = "transform.failure.classification")
 // `logger` is the convention throughout this codebase. The method and complexity counts are those of a
-// configuration-properties bean: five configurable lists, each with a replacing setter, an extending setter and a
-// getter, around a decision that is four short private methods. Splitting it would separate the rules from the
-// explanation of why each entry is in them, which is the part that needs to stay readable.
+// configuration-properties bean: five configurable lists, each with three accessors, around a decision that is four
+// short private methods.
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TooManyMethods", "PMD.GodClass"})
 class TransformExceptionClassifier
 {
@@ -79,23 +74,19 @@ class TransformExceptionClassifier
             "ZipException",
             // java.io / java.nio.charset - truncated or undecodable content
             //
-            // `UnsupportedEncodingException` is deliberately NOT listed. Despite the name it says nothing about the
-            // document: it means the requested *charset name* is not installed in the JVM, and that name reaches the
-            // engine through the caller's `targetEncoding` transform option, not through the file. Listing it would
-            // turn one typo in a client's options into the silent, permanent loss of every request that client makes,
-            // where today it is a loud 500. Content that genuinely cannot be decoded arrives as one of the three
-            // entries below instead.
+            // `UnsupportedEncodingException` is deliberately NOT listed. It means the requested *charset name* is not
+            // installed in the JVM, and that name arrives in the caller's `targetEncoding` option, not in the file.
+            // Listing it would turn one typo in a client's options into the silent, permanent loss of every request
+            // that client makes. Undecodable content arrives as one of the three entries below instead.
             "EOFException",
             "CharConversionException",
             "MalformedInputException",
             "UnmappableCharacterException",
             // Apache Tika
             //
-            // The generic `TikaException` is deliberately NOT listed. It is Tika's universal wrapper, not a content
-            // failure type: `CompositeParser` rethrows every exception a parser raises as one, including
-            // "TIKA-198: Illegal IOException from ...". Matching it would turn a disk-full or socket error into a
-            // terminal 422. Because it is absent, its content subclasses have to be named individually; they cannot
-            // inherit a match from it.
+            // The generic `TikaException` is deliberately NOT listed: `CompositeParser` rethrows every parser
+            // exception as one, so matching it would turn a disk-full or socket error into a terminal 422. Its content
+            // subclasses therefore have to be named individually.
             "EncryptedDocumentException",
             "UnsupportedFormatException",
             "ZeroByteFileException",
@@ -106,9 +97,8 @@ class TransformExceptionClassifier
             "InvalidPasswordException",
             // Apache POI
             //
-            // The specific types POI throws are usually subclasses of these - `OldExcelFormatException` extends
-            // `OldFileFormatException`, `OLE2NotOfficeXmlFileException` extends `NotOfficeXmlFileException` - and are
-            // matched through the superclass walk in `match`, so they do not need listing individually.
+            // The specific types POI throws are usually subclasses of these and are matched through the superclass
+            // walk in `match`, so they do not need listing individually.
             "EmptyFileException",
             "OldFileFormatException",
             "UnsupportedFileFormatException",
@@ -126,9 +116,9 @@ class TransformExceptionClassifier
             "SAXParseException",
             // Apache Commons Imaging
             //
-            // `ImageReadException` was renamed `ImagingException` in 1.0.0-alpha6 and so no longer exists in the
-            // shipped version. It is kept for engines still pinning an earlier release, where it is the only signal.
-            // `ImagingFormatException` needs naming because it extends `ImagingRuntimeException`, not `ImagingException`.
+            // `ImageReadException` was renamed `ImagingException` in 1.0.0-alpha6; it is kept for engines still
+            // pinning an earlier release. `ImagingFormatException` needs naming because it extends
+            // `ImagingRuntimeException`, not `ImagingException`.
             "ImageReadException",
             "ImagingException",
             "ImagingFormatException");
@@ -136,9 +126,9 @@ class TransformExceptionClassifier
     /**
      * Lower case fragments that identify a content failure reported only as a plain {@code IOException}.
      * <p/>
-     * PDFBox in particular signals most structural damage this way, which is exactly the case reported in MNT-25570 ("Missing root object specification in trailer"). Matching on the message is unpleasant, but the alternative - treating every {@code IOException} as a content failure - would hide real disk and network faults.
+     * PDFBox signals most structural damage this way ("Missing root object specification in trailer"). Matching on the message is unpleasant, but treating every {@code IOException} as a content failure would hide real disk and network faults.
      * <p/>
-     * Only consulted for the types in {@link #DEFAULT_MESSAGE_FRAGMENT_TYPES}. See there for why.
+     * Only consulted for the types in {@link #DEFAULT_MESSAGE_FRAGMENT_TYPES}.
      */
     private static final List<String> DEFAULT_MESSAGE_FRAGMENTS = List.of(
             "missing root object specification",
@@ -163,11 +153,11 @@ class TransformExceptionClassifier
     /**
      * Types whose message is worth reading for a content failure.
      * <p/>
-     * The fragments above are parser vocabulary, and several of them - {@code corrupt}, {@code damaged}, {@code malformed}, {@code truncated} - are words an engine might just as easily use about itself. Scanning the message of <i>every</i> throwable therefore turns an engine bug such as {@code IllegalStateException("corrupt temporary output")} into a {@code 422}, permanently dropping a transform that a retry would have fixed. Confining the scan to the types that actually report content damage in their text closes that off.
+     * Several fragments above - {@code corrupt}, {@code damaged}, {@code malformed}, {@code truncated} - are words an engine might use about itself, so scanning the message of <i>every</i> throwable would turn an engine bug such as {@code IllegalStateException("corrupt temporary output")} into a {@code 422}. Confining the scan to the types that actually report content damage in their text closes that off.
      * <p/>
-     * The three listed are where the parsers put it. PDFBox and the JDK report structural damage as a plain {@code IOException}; XML content arrives as a {@code SAXException}; {@code TikaException} is Tika's wrapper, which is safe to read here only because the infrastructure veto has already examined the whole cause chain. A type that announces a content failure by its own name does not need to be listed - it belongs in {@link #DEFAULT_CLASS_NAMES} instead.
+     * PDFBox and the JDK report structural damage as a plain {@code IOException}; XML arrives as a {@code SAXException}; {@code TikaException} is Tika's wrapper, safe to read only because the infrastructure veto has already examined the whole chain. A type that announces a content failure by its own name belongs in {@link #DEFAULT_CLASS_NAMES} instead.
      * <p/>
-     * This restriction is deliberately <b>not</b> applied to {@link #DEFAULT_INFRA_MESSAGE_FRAGMENTS}: the veto must stay broad so it can still recognise an infrastructure failure however it was wrapped.
+     * Deliberately <b>not</b> applied to {@link #DEFAULT_INFRA_MESSAGE_FRAGMENTS}: the veto must stay broad.
      */
     private static final List<String> DEFAULT_MESSAGE_FRAGMENT_TYPES = List.of(
             "IOException",
@@ -222,7 +212,7 @@ class TransformExceptionClassifier
     /**
      * Entries an engine or extension contributes on top of the shipped list, rather than in place of it.
      * <p/>
-     * Held apart from the list they extend so the effective list does not depend on the order Spring happened to call the two setters in. The three shortened names carry the same meaning as the properties that set them - {@code additional-message-fragment-class-names}, {@code additional-infrastructure-class-names} and {@code additional-infrastructure-message-fragments}.
+     * Held apart from the list they extend so the effective list does not depend on the order Spring called the two setters in.
      */
     private List<String> additionalClassNames = List.of();
     private List<String> additionalMessageFragments = List.of();
@@ -302,11 +292,9 @@ class TransformExceptionClassifier
     /**
      * Refuses a terminal status when the cause chain shows the engine or its environment failed, rather than the document.
      * <p/>
-     * {@link #classify(Throwable)} applies this to the exceptions it classifies itself. This entry point exists for a status that arrived already decided - a {@code TransformException} a transformer threw with a status of its own - because that decision was made by a {@code catch} block that saw only the type it caught.
+     * {@link #classify(Throwable)} applies this to what it classifies itself. This entry point exists for a status that arrived already decided - a {@code TransformException} a transformer threw - because that decision was made by a {@code catch} block that saw only the type it caught. A transformer that answers {@code MessagingException} with {@code 422} is right about a malformed {@code .eml} and wrong about the same exception raised because the disk filled. Only the cause chain tells those apart, and a wrong {@code 422} is never retried.
      * <p/>
-     * A transformer that answers {@code MessagingException} with {@code 422} is right about a malformed {@code .eml} and wrong about the same exception raised because the disk filled while the attachment was being written. Only the cause chain can tell those apart, and a wrong {@code 422} is never retried.
-     * <p/>
-     * Statuses that are not terminal content failures are returned untouched: a {@code 400} is already the engine's considered answer about the request, and a {@code 5xx} is retryable regardless.
+     * Other statuses are returned untouched: a {@code 400} is already the engine's considered answer, and a {@code 5xx} is retryable regardless.
      *
      * @param status
      *            the status the transformer asked for.
@@ -337,12 +325,12 @@ class TransformExceptionClassifier
     /**
      * Withdraws a {@code 422} a transformer <i>inferred</i> from an exception it caught, leaving one it determined by looking at the document.
      * <p/>
-     * Turning classification off has to be a genuine way back to the previous behaviour, or it is no use as a safety valve. A transformer deciding its own status sidesteps {@link #classify(Throwable)} entirely, so without this the switch would silence the central lists while those decisions carried on - and, worse, would take the infrastructure veto down with them, leaving the terminal statuses in place and removing the one thing that corrects them.
+     * Turning classification off has to be a genuine way back to the previous behaviour. A transformer deciding its own status sidesteps {@link #classify(Throwable)}, so without this the switch would silence the central lists while those decisions carried on - and would take the infrastructure veto down with them, leaving the terminal statuses in place and removing the one thing that corrects them.
      * <p/>
-     * The cause tells the two kinds of {@code 422} apart, because the distinction is what produced it rather than where:
+     * The cause tells the two kinds apart:
      * <ul>
-     * <li><b>Inferred, so withdrawn.</b> A library threw, and a {@code catch} block read that as a statement about the document. That is the reasoning this work introduced and the reasoning an administrator would be turning off.</li>
-     * <li><b>Determined, so kept.</b> The engine read the document and found it wanting - no image reader accepts the format, the zip holds no preview, the transform produced nothing from a non-empty source. No exception was interpreted, so there is nothing to withdraw, and the last of those has answered {@code 422} since long before any of this.</li>
+     * <li><b>Inferred, so withdrawn.</b> A library threw and a {@code catch} block read that as a statement about the document.</li>
+     * <li><b>Determined, so kept.</b> The engine read the document and found it wanting - no image reader accepts the format, the zip holds no preview, the transform produced nothing from a non-empty source. No exception was interpreted, so there is nothing to withdraw.</li>
      * </ul>
      *
      * @param e
@@ -423,13 +411,10 @@ class TransformExceptionClassifier
 
     private static String classNameMatch(Throwable t, Set<String> classNames)
     {
-        // Walk the superclasses, not just the runtime type. The parser libraries habitually declare a general
-        // content failure and then throw a more specific subclass of it: POI throws `OldExcelFormatException`
-        // where the listed type is its parent `OldFileFormatException`, and `OLE2NotOfficeXmlFileException`
-        // where the listed type is `NotOfficeXmlFileException`. Matching the runtime name alone missed every
-        // one of those, so a document POI had positively identified as unreadable still came back as a 500 and
-        // was retried. Only the names are compared, never the types, so this keeps working for an engine that
-        // shades or relocates a library.
+        // Walk the superclasses, not just the runtime type. The parser libraries declare a general content failure
+        // and then throw a more specific subclass of it: POI throws `OldExcelFormatException` where the listed type
+        // is its parent `OldFileFormatException`. Matching the runtime name alone missed every one of those. Only
+        // names are compared, never types, so this keeps working for an engine that shades or relocates a library.
         for (Class<?> type = t.getClass(); type != null && type != Object.class; type = type.getSuperclass())
         {
             if (classNames.contains(type.getSimpleName()))
@@ -471,7 +456,7 @@ class TransformExceptionClassifier
     }
 
     /**
-     * Logged at info rather than debug, because this is the only case that names an exception the lists do not yet know about. The defaults are inferred, so correcting them depends on seeing real failures, and debug is not enabled in production. Only unhandled transform failures reach here, so the volume follows the failure rate rather than the traffic rate.
+     * Logged at info rather than debug, because this is the only case that names an exception the lists do not yet know about, and debug is not enabled in production. Only unhandled transform failures reach here, so the volume follows the failure rate rather than the traffic rate.
      */
     private void logUnrecognised(Throwable e)
     {
@@ -512,9 +497,9 @@ class TransformExceptionClassifier
     /**
      * Adds to the shipped list instead of replacing it.
      * <p/>
-     * Spring replaces a list property wholesale when it is set, which is right for a deployment overruling a decision but wrong for the commoner case: an engine, or an extension such as Aspose, that knows one more exception its own libraries raise. Restating the whole list to append a single name means every later correction to the defaults has to be copied into everything that did so, and anything that forgets silently loses the rest.
+     * Spring replaces a list property wholesale when it is set, which is right for a deployment overruling a decision but wrong for the commoner case: an engine or extension that knows one more exception its own libraries raise. Restating the whole list to append a single name means every later correction to the defaults has to be copied into everything that did so.
      * <p/>
-     * Setting both this and the list it extends is allowed, and the result does not depend on the order the two were bound in.
+     * Setting both this and the list it extends is allowed, and the result does not depend on binding order.
      */
     public void setAdditionalClassNames(List<String> additionalClassNames)
     {

@@ -39,6 +39,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import jakarta.mail.Address;
 import jakarta.mail.Header;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
@@ -110,107 +111,104 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractorEmbedder
         }
         catch (MessagingException e)
         {
-            // The same statement EMLTransformer makes about the same library, and it has to be made again here
-            // because this is a different entry point: the repository asks for metadata on almost every upload, so an
-            // unreadable .eml reaches this method long before it reaches a transform. jakarta.mail raises this only
-            // when the bytes are not a message it can read, and a retry hands the same bytes to the same parser.
-            //
-            // The infrastructure veto still applies on the way out, so a failure that was really the disk or the
-            // download is still reported as retryable.
+            // jakarta.mail raises this only when the bytes are not a message it can read, so a retry hands the same
+            // bytes to the same parser. The infrastructure veto still applies on the way out.
             throw new TransformException(UNPROCESSABLE_ENTITY,
                     "The source is not a readable RFC822 message: " + e.getMessage(), e);
         }
     }
 
     /**
-     * @return the raw properties read from the message. Separated from {@link #extractMetadata} so that the catch there covers the whole read: {@code MimeMessage} parses lazily, so a malformed header can surface at any of the accessors below rather than at construction.
+     * @return the raw properties read from the message. Separate from {@link #extractMetadata} so that the catch there covers the whole read: {@code MimeMessage} parses lazily, so a malformed header can surface at any accessor rather than at construction.
      */
     private Map<String, Serializable> extractFromMessage(InputStream inputStream)
             throws MessagingException, UnsupportedEncodingException
     {
         final Map<String, Serializable> rawProperties = new HashMap<>();
-
         MimeMessage mimeMessage = new MimeMessage(null, inputStream);
 
-        if (mimeMessage != null)
-        {
-            /**
-             * Extract RFC822 values that doesn't match to headers and need to be encoded. Or those special fields that require some code to extract data
-             */
-            String tmp = InternetAddress.toString(mimeMessage.getFrom());
-            tmp = tmp != null ? MimeUtility.decodeText(tmp) : null;
-            putRawValue(KEY_MESSAGE_FROM, tmp, rawProperties);
-
-            tmp = InternetAddress.toString(mimeMessage.getRecipients(RecipientType.TO));
-            tmp = tmp != null ? MimeUtility.decodeText(tmp) : null;
-            putRawValue(KEY_MESSAGE_TO, tmp, rawProperties);
-
-            tmp = InternetAddress.toString(mimeMessage.getRecipients(RecipientType.CC));
-            tmp = tmp != null ? MimeUtility.decodeText(tmp) : null;
-            putRawValue(KEY_MESSAGE_CC, tmp, rawProperties);
-
-            putRawValue(KEY_MESSAGE_SENT, mimeMessage.getSentDate(), rawProperties);
-
-            /**
-             * Received field from RFC 822
-             *
-             * "Received" ":" ; one per relay ["from" domain] ; sending host ["by" domain] ; receiving host ["via" atom] ; physical path ("with" atom) ; link/mail protocol ["id" msg-id] ; receiver msg id ["for" addr-spec] ; initial form ";" date-time ; time received
-             */
-            Date rxDate = mimeMessage.getReceivedDate();
-
-            if (rxDate != null)
-            {
-                // The email implementation extracted the received date for us.
-                putRawValue(KEY_MESSAGE_RECEIVED, rxDate, rawProperties);
-            }
-            else
-            {
-                // the email implementation did not parse the received date for us.
-                String[] rx = mimeMessage.getHeader("received");
-                if (rx != null && rx.length > 0)
-                {
-                    String lastReceived = rx[0];
-                    lastReceived = MimeUtility.unfold(lastReceived);
-                    int x = lastReceived.lastIndexOf(';');
-                    if (x > 0)
-                    {
-                        String dateStr = lastReceived.substring(x + 1).trim();
-                        putRawValue(KEY_MESSAGE_RECEIVED, dateStr, rawProperties);
-                    }
-                }
-            }
-
-            String[] subj = mimeMessage.getHeader("Subject");
-            if (subj != null && subj.length > 0)
-            {
-                String decodedSubject = subj[0];
-                try
-                {
-                    decodedSubject = MimeUtility.decodeText(decodedSubject);
-                }
-                catch (UnsupportedEncodingException e)
-                {
-                    logger.warn(e.toString());
-                }
-                putRawValue(KEY_MESSAGE_SUBJECT, decodedSubject, rawProperties);
-            }
-
-            /* Extract values from all header fields, including extension fields "X-" */
-            Set<String> keys = getExtractMapping().keySet();
-            Enumeration<Header> headers = mimeMessage.getAllHeaders();
-            while (headers.hasMoreElements())
-            {
-                Header header = headers.nextElement();
-                if (keys.contains(header.getName()))
-                {
-                    tmp = header.getValue();
-                    tmp = tmp != null ? MimeUtility.decodeText(tmp) : null;
-
-                    putRawValue(header.getName(), tmp, rawProperties);
-                }
-            }
-        }
+        putAddresses(KEY_MESSAGE_FROM, mimeMessage.getFrom(), rawProperties);
+        putAddresses(KEY_MESSAGE_TO, mimeMessage.getRecipients(RecipientType.TO), rawProperties);
+        putAddresses(KEY_MESSAGE_CC, mimeMessage.getRecipients(RecipientType.CC), rawProperties);
+        putRawValue(KEY_MESSAGE_SENT, mimeMessage.getSentDate(), rawProperties);
+        putReceivedDate(mimeMessage, rawProperties);
+        putSubject(mimeMessage, rawProperties);
+        putMappedHeaders(mimeMessage, rawProperties);
 
         return rawProperties;
+    }
+
+    private void putAddresses(String key, Address[] addresses, Map<String, Serializable> rawProperties)
+            throws UnsupportedEncodingException
+    {
+        String value = InternetAddress.toString(addresses);
+        putRawValue(key, value != null ? MimeUtility.decodeText(value) : null, rawProperties);
+    }
+
+    /**
+     * Reads the date the message was received, falling back to the last {@code Received} header when the mail implementation did not parse one. That header ends with {@code ";" date-time} (RFC 822).
+     */
+    private void putReceivedDate(MimeMessage mimeMessage, Map<String, Serializable> rawProperties)
+            throws MessagingException
+    {
+        Date rxDate = mimeMessage.getReceivedDate();
+        if (rxDate != null)
+        {
+            putRawValue(KEY_MESSAGE_RECEIVED, rxDate, rawProperties);
+            return;
+        }
+
+        String[] rx = mimeMessage.getHeader("received");
+        if (rx == null || rx.length == 0)
+        {
+            return;
+        }
+
+        String lastReceived = MimeUtility.unfold(rx[0]);
+        int x = lastReceived.lastIndexOf(';');
+        if (x > 0)
+        {
+            putRawValue(KEY_MESSAGE_RECEIVED, lastReceived.substring(x + 1).trim(), rawProperties);
+        }
+    }
+
+    private void putSubject(MimeMessage mimeMessage, Map<String, Serializable> rawProperties)
+            throws MessagingException
+    {
+        String[] subj = mimeMessage.getHeader("Subject");
+        if (subj == null || subj.length == 0)
+        {
+            return;
+        }
+
+        String decodedSubject = subj[0];
+        try
+        {
+            decodedSubject = MimeUtility.decodeText(decodedSubject);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            logger.warn(e.toString());
+        }
+        putRawValue(KEY_MESSAGE_SUBJECT, decodedSubject, rawProperties);
+    }
+
+    /**
+     * Extracts values from all mapped header fields, including extension fields "X-".
+     */
+    private void putMappedHeaders(MimeMessage mimeMessage, Map<String, Serializable> rawProperties)
+            throws MessagingException, UnsupportedEncodingException
+    {
+        Set<String> keys = getExtractMapping().keySet();
+        Enumeration<Header> headers = mimeMessage.getAllHeaders();
+        while (headers.hasMoreElements())
+        {
+            Header header = headers.nextElement();
+            if (keys.contains(header.getName()))
+            {
+                String value = header.getValue();
+                putRawValue(header.getName(), value != null ? MimeUtility.decodeText(value) : null, rawProperties);
+            }
+        }
     }
 }

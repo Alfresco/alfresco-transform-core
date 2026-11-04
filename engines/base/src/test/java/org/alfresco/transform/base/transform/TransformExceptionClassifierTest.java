@@ -73,7 +73,7 @@ class TransformExceptionClassifierTest
     @Test
     void testCorruptPdfReportedByPdfBoxIsAContentFailure()
     {
-        // The exact failure reported in MNT-25570: a .docx renamed to .pdf.
+        // The exact failure originally reported: a .docx renamed to .pdf.
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(
                 new IOException("Missing root object specification in trailer.")));
     }
@@ -243,7 +243,7 @@ class TransformExceptionClassifierTest
         classifier.setMessageFragments(List.of("Unreadable Glyph Table"));
 
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new IOException("unreadable glyph table at offset 12")));
-        // The MNT-25570 fragment is no longer configured, so it must fall back to 500.
+        // That fragment is no longer configured, so it must fall back to 500.
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(
                 new IOException("Missing root object specification in trailer.")));
     }
@@ -398,7 +398,7 @@ class TransformExceptionClassifierTest
         classifier.setMessageFragmentClassNames(List.of("IllegalStateException"));
 
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new IllegalStateException("the file is corrupt")));
-        // IOException is no longer configured, so MNT-25570's own shape must fall back to 500.
+        // IOException is no longer configured, so the originally reported shape must fall back to 500.
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(
                 new IOException("Missing root object specification in trailer.")));
     }

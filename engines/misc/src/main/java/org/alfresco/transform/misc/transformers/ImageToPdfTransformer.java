@@ -128,11 +128,11 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
     }
 
     /**
-     * ImageIO reports every kind of damage past the header - a truncated file, a bad chunk length, pixel data that does not match what the header declared - as an {@link IIOException}, whose text is the reader's own wording and so cannot be matched reliably by a central list. Naming it terminal here is safe because this is the one place that knows the exception came from decoding the supplied image rather than from anything the engine was doing.
+     * ImageIO reports every kind of damage past the header as an {@link IIOException}, whose text is the reader's own wording and so cannot be matched reliably by a central list. Naming it terminal here is safe because this is the one place that knows the exception came from decoding the supplied image.
      * <p/>
-     * Not every reader is that disciplined. A TIFF whose bytes were damaged inside the image data makes the JDK's reader index past the end of its own buffer and throw a bare {@link ArrayIndexOutOfBoundsException} - a type nothing would ever put on a content list, because out of this context it reads as an engine bug. Here it cannot be: the only thing between the try and the catch is the decoder, working on the supplied bytes, so a reader that falls over is a reader that was handed something it could not decode. The same bytes will do the same thing on every retry.
+     * Not every reader is that disciplined. A TIFF damaged inside the image data makes the JDK's reader index past the end of its own buffer and throw a bare {@link ArrayIndexOutOfBoundsException} - a type nothing would put on a content list, because out of this context it reads as an engine bug. Here it cannot be: the only thing between the try and the catch is the decoder working on the supplied bytes.
      * <p/>
-     * The original exception is kept as the cause, so the infrastructure veto can still restore a {@code 500} if the read failed because the environment did, not the image.
+     * The original exception is kept as the cause, so the infrastructure veto can still restore a {@code 500}.
      */
     @SuppressWarnings("PMD.ExcessiveParameterList") // the alternative is a parameter object for a single call site
     private void readAndDrawImages(PDDocument pdfDocument, ImageReader imageReader, String imageName, String mimetype,
