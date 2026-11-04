@@ -60,7 +60,35 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
 
         if (!targetFile.exists() || targetFile.length() == 0)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR, "Transformer failed to create an output file");
+            // Left as a retryable 500 on purpose. A command line tool that produced nothing may have been given a
+            // document it cannot read, but it may equally have run out of temporary space, been killed by the
+            // container, or hit a font or codec it could not load. Nothing here can tell those apart, and getting it
+            // wrong in the terminal direction loses a document that a retry would have converted. Only the engine's
+            // own code, which knows what it asked the tool to do, can say more than this.
+            //
+            // What the message can do is carry the evidence. Without it an operator sees one sentence and has no way
+            // to find out which of those happened.
+            throw new TransformException(INTERNAL_SERVER_ERROR,
+                    "Transformer failed to create an output file" + describe(result));
+        }
+    }
+
+    /**
+     * @return what the tool reported, so the cause of an empty output is visible in the response and the log rather than having to be guessed at. Both streams are included because a tool that exits zero and writes nothing usually explains itself on one of them, and which one varies by tool.
+     */
+    private static String describe(ExecutionResult result)
+    {
+        StringBuilder sb = new StringBuilder(". Exit code ").append(result.getExitValue());
+        appendIfPresent(sb, ", stderr: ", result.getStdErr());
+        appendIfPresent(sb, ", stdout: ", result.getStdOut());
+        return sb.toString();
+    }
+
+    private static void appendIfPresent(StringBuilder sb, String label, String output)
+    {
+        if (output != null && !output.isBlank())
+        {
+            sb.append(label).append(output.strip());
         }
     }
 }

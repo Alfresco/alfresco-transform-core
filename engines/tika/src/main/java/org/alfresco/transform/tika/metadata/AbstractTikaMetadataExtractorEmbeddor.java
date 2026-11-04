@@ -26,6 +26,9 @@
  */
 package org.alfresco.transform.tika.metadata;
 
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -41,6 +44,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.tika.embedder.Embedder;
+import org.apache.tika.exception.TikaException;
 import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
@@ -62,9 +66,11 @@ import org.slf4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
 
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * The parent of all Metadata Extractors which use Apache Tika under the hood. This handles all the common parts of processing the files, and the common mappings.
@@ -233,7 +239,7 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
             handler = new NullContentHandler();
         }
 
-        parser.parse(inputStream, handler, metadata, context);
+        parseOrReportUnreadable(parser, inputStream, handler, metadata, context, sourceMimetype);
 
         // First up, copy all the Tika metadata over
         // This allows people to map any of the Tika
@@ -295,6 +301,33 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
         rawProperties = extractSpecific(metadata, rawProperties, headers);
 
         return rawProperties;
+    }
+
+    /**
+     * Runs the parse, and reports a document the parser could not read as {@code 422} rather than letting it be retried.
+     * <p/>
+     * Metadata extraction is its own transform type with its own path - it never reaches {@code Tika.transform}, so the classification done there does not apply, and the repository asks for an extract on more or less every upload. An unreadable document therefore arrives here first and most often.
+     * <p/>
+     * Everything between the call and the catch belongs to the parser, working on the supplied bytes, so the failures worth naming here are wider than a central list could safely carry. {@code TikaException} and {@code SAXException} are the declared ones. The bare runtime types matter just as much in practice: a damaged OLE2 document makes POI throw {@code NullPointerException} or {@code ArrayIndexOutOfBoundsException} straight out of its own block table, and out of this context those read as engine bugs, which is exactly why no central list would ever match them. In this context they cannot be - the parser was handed bytes it could not make sense of, and a retry hands it the same ones.
+     * <p/>
+     * {@code IOException} is deliberately left out, and is the only thing this method still lets through. It is the one type here equally likely to be the source download dying part way through, and that must stay retryable; the central message fragments already separate the readable cases such as PDFBox's missing trailer.
+     * <p/>
+     * The cause is always preserved, so the infrastructure veto can still overturn this to {@code 500} when the chain shows the environment failed rather than the document.
+     */
+    private void parseOrReportUnreadable(Parser parser, InputStream inputStream, ContentHandler handler,
+            Metadata metadata, ParseContext context, String sourceMimetype) throws IOException
+    {
+        try
+        {
+            parser.parse(inputStream, handler, metadata, context);
+        }
+        catch (TikaException | SAXException | RuntimeException e)
+        {
+            throw new TransformException(UNPROCESSABLE_ENTITY,
+                    "The metadata of this " + sourceMimetype + " could not be read, as the document could not be parsed: "
+                            + e.getMessage(),
+                    e);
+        }
     }
 
     /**

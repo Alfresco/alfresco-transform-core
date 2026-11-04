@@ -28,6 +28,8 @@ package org.alfresco.transform.base.transform;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INSUFFICIENT_STORAGE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
@@ -51,6 +53,8 @@ import ch.qos.logback.core.AppenderBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
+
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * Checks that a document the engine cannot parse is reported as {@code 422} so the T-Router stops retrying it, while anything that might be a genuine engine or infrastructure problem stays {@code 500} so it is still retried.
@@ -294,6 +298,100 @@ class TransformExceptionClassifierTest
                 new IllegalStateException("corrupt entry", new IllegalStateException("No space left on device"))));
     }
 
+    /**
+     * A transformer that answers its library's exception with a status of its own decided that from the type it caught, which cannot show why the type was raised. A malformed document and a disk that filled mid-read reach the same {@code catch} block, and only one of them should be terminal.
+     */
+    @Test
+    void testAThrowSiteContentFailureIsVetoedWhenItsCauseIsInfrastructural()
+    {
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.vetoIfInfrastructural(UNPROCESSABLE_ENTITY,
+                new IllegalStateException("could not parse the message", new IOException("No space left on device"))));
+
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.vetoIfInfrastructural(UNPROCESSABLE_ENTITY,
+                new IllegalStateException("could not parse the message", new SocketTimeoutException("Read timed out"))));
+    }
+
+    @Test
+    void testAThrowSiteContentFailureIsLeftAloneWhenNothingSuggestsInfrastructure()
+    {
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.vetoIfInfrastructural(UNPROCESSABLE_ENTITY,
+                new IllegalStateException("could not parse the message", new EOFException())));
+
+        // A type the content list has never heard of still stands, because the transformer that threw it knew more
+        // than the list does. That is the point of classifying at the throw site.
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.vetoIfInfrastructural(UNPROCESSABLE_ENTITY,
+                new IllegalStateException("nothing the lists recognise")));
+    }
+
+    /**
+     * Only a terminal content failure is worth second-guessing. A {@code 400} is the engine's answer about the request rather than the document, and a {@code 5xx} is retried whatever the cause, so neither needs the veto.
+     */
+    @Test
+    void testOnlyAnUnprocessableEntityIsSecondGuessed()
+    {
+        IOException infrastructural = new IOException("No space left on device");
+
+        assertEquals(BAD_REQUEST, classifier.vetoIfInfrastructural(BAD_REQUEST, infrastructural));
+        assertEquals(INSUFFICIENT_STORAGE, classifier.vetoIfInfrastructural(INSUFFICIENT_STORAGE, infrastructural));
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.vetoIfInfrastructural(INTERNAL_SERVER_ERROR, infrastructural));
+    }
+
+    /**
+     * Turning classification off has to be a real way back, including for the transformers that decide a status themselves and never reach {@link TransformExceptionClassifier#classify}. Leaving those in place would be worse than either setting, because the switch also stands the veto down - the terminal statuses would survive and the thing that corrects them would not.
+     */
+    @Test
+    void testTheKillSwitchAlsoWithdrawsAThrowSiteDecision()
+    {
+        classifier.setEnabled(false);
+
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.vetoIfInfrastructural(UNPROCESSABLE_ENTITY,
+                new TransformException(UNPROCESSABLE_ENTITY, "The source could not be parsed",
+                        new IOException("Missing root object specification in trailer."))));
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.vetoIfInfrastructural(UNPROCESSABLE_ENTITY,
+                new IllegalStateException("could not parse", new IOException("No space left on device"))));
+    }
+
+    /**
+     * Only an inference is withdrawn. A {@code 422} the engine reached by reading the document - no image reader accepts the format, the zip holds no preview, or {@code ProcessHandler.validateOutputLength}'s empty output, which has answered {@code 422} since long before any of this - interpreted no exception, so the switch has nothing to take back and must not downgrade it.
+     */
+    @Test
+    void testTheKillSwitchLeavesADecisionThatWasNotInferredFromACause()
+    {
+        classifier.setEnabled(false);
+
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.vetoIfInfrastructural(UNPROCESSABLE_ENTITY,
+                new TransformException(UNPROCESSABLE_ENTITY, "Transform failed to produce an output file")));
+    }
+
+    /**
+     * The switch must not reach a status it was never responsible for.
+     */
+    @Test
+    void testTheKillSwitchLeavesTheOtherStatusesAlone()
+    {
+        classifier.setEnabled(false);
+        Throwable e = new IllegalStateException("broke", new IOException("No space left on device"));
+
+        assertEquals(BAD_REQUEST, classifier.vetoIfInfrastructural(BAD_REQUEST, e));
+        assertEquals(INSUFFICIENT_STORAGE, classifier.vetoIfInfrastructural(INSUFFICIENT_STORAGE, e));
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.vetoIfInfrastructural(INTERNAL_SERVER_ERROR, e));
+    }
+
+    /**
+     * The veto overturns a decision a transformer author made deliberately, so it cannot be a debug-only event: whoever wrote that {@code catch} block needs to find out it was wrong.
+     */
+    @Test
+    void testAnOverturnedThrowSiteDecisionIsLoggedAtWarn()
+    {
+        List<String> logged = captureLogs(Level.WARN);
+
+        classifier.vetoIfInfrastructural(UNPROCESSABLE_ENTITY,
+                new IllegalStateException("could not parse the message", new IOException("No space left on device")));
+
+        assertEquals(1, logged.size(), "Overturning a transformer's own decision must be visible");
+        assertTrue(logged.get(0).contains("No space left on device"), logged.get(0));
+    }
+
     @Test
     void testTheTypesWhoseMessageIsReadCanBeOverridden()
     {
@@ -303,6 +401,93 @@ class TransformExceptionClassifierTest
         // IOException is no longer configured, so MNT-25570's own shape must fall back to 500.
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(
                 new IOException("Missing root object specification in trailer.")));
+    }
+
+    /**
+     * What an engine or an extension actually needs: one more name it knows about, without having to restate - and thereafter maintain a copy of - the whole shipped list.
+     */
+    @Test
+    void testAnEngineCanAddAClassNameWithoutLosingTheShippedOnes()
+    {
+        classifier.setAdditionalClassNames(List.of("MessagingException"));
+
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new MessagingException("Missing start boundary")));
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new ZipException("corrupt entry")),
+                "Adding a name must not drop the defaults");
+    }
+
+    @Test
+    void testAnEngineCanAddAMessageFragmentWithoutLosingTheShippedOnes()
+    {
+        classifier.setAdditionalMessageFragments(List.of("invalid chunk length"));
+
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new IOException("Invalid chunk length 5700")));
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(
+                new IOException("Missing root object specification in trailer.")),
+                "Adding a fragment must not drop the defaults");
+    }
+
+    @Test
+    void testAnEngineCanAddToTheInfrastructureVetoWithoutLosingTheShippedEntries()
+    {
+        classifier.setAdditionalInfrastructureClassNames(List.of("MessagingException"));
+        classifier.setAdditionalInfrastructureMessageFragments(List.of("quota exhausted"));
+
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(
+                new IOException("corrupt", new MessagingException("the mail server went away"))));
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new IOException("corrupt quota exhausted")));
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(
+                new IOException("corrupt", new SocketTimeoutException("Read timed out"))),
+                "Adding to the veto must not drop the defaults");
+    }
+
+    /**
+     * Spring calls the setters of a {@code @ConfigurationProperties} bean in an order the class does not control, so a deployment that replaces a list and an engine that extends it must not be able to cancel each other out depending on which was bound first.
+     */
+    @Test
+    void testReplacingAndExtendingTheSameListDoesNotDependOnTheOrderTheyWereBound()
+    {
+        classifier.setAdditionalClassNames(List.of("MessagingException"));
+        classifier.setClassNames(List.of("ZipException"));
+
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new MessagingException("Missing start boundary")));
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new ZipException("corrupt entry")));
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new EOFException()),
+                "The replacement must still have dropped what it left out");
+
+        TransformExceptionClassifier other = new TransformExceptionClassifier();
+        other.setClassNames(List.of("ZipException"));
+        other.setAdditionalClassNames(List.of("MessagingException"));
+
+        assertEquals(UNPROCESSABLE_ENTITY, other.classify(new MessagingException("Missing start boundary")));
+        assertEquals(UNPROCESSABLE_ENTITY, other.classify(new ZipException("corrupt entry")));
+        assertEquals(INTERNAL_SERVER_ERROR, other.classify(new EOFException()));
+    }
+
+    /**
+     * Restarting must not make the list grow, and naming something the defaults already cover must be harmless rather than a duplicate in the startup log.
+     */
+    @Test
+    void testAddingSomethingAlreadyShippedChangesNothing()
+    {
+        List<String> logged = captureLogs(Level.INFO);
+        classifier.setAdditionalClassNames(List.of("ZipException"));
+
+        classifier.logEffectiveConfiguration();
+
+        assertEquals(1, logged.size());
+        assertEquals(1, countOccurrences(logged.get(0), "ZipException"),
+                "ZipException must appear once, not twice: " + logged.get(0));
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new ZipException("corrupt entry")));
+    }
+
+    private static int countOccurrences(String haystack, String needle)
+    {
+        // Word boundaries, or InvalidZipException would be counted as an occurrence of ZipException.
+        return (int) java.util.regex.Pattern.compile("\\b" + java.util.regex.Pattern.quote(needle) + "\\b")
+                .matcher(haystack)
+                .results()
+                .count();
     }
 
     /**
@@ -387,6 +572,19 @@ class TransformExceptionClassifierTest
         TikaException(String message, Throwable cause)
         {
             super(message, cause);
+        }
+    }
+
+    /**
+     * Stands in for {@code jakarta.mail.MessagingException}, a type the defaults deliberately do not list. It is the example used for the {@code additional-*} properties because it is exactly what an engine knows and {@code engines/base} does not.
+     */
+    private static final class MessagingException extends Exception
+    {
+        private static final long serialVersionUID = 1L;
+
+        MessagingException(String message)
+        {
+            super(message);
         }
     }
 }

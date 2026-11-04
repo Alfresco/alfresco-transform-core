@@ -56,11 +56,15 @@ import org.springframework.stereotype.Component;
  * <p/>
  * Matching is by class <i>name</i>, not by type, because {@code engines/base} does not - and should not - depend on Tika, PDFBox, POI or the other parsing libraries the engines use.
  * <p/>
- * The lists were derived from reported failures and from those libraries, not from an exhaustive corpus, so they will need adjusting. A hardcoded list would have to travel the whole t-core &rarr; t-service &rarr; t-aspose &rarr; ai-renditions release chain to correct one entry, so all five lists and a kill switch ({@code transform.failure.classification.enabled}, {@code .class-names}, {@code .message-fragments}, {@code .message-fragment-class-names}, {@code .infrastructure-class-names}, {@code .infrastructure-message-fragments}) are configuration. Setting a list <i>replaces</i> the default, so a false positive can be removed as well as added; the effective lists are logged at startup.
+ * The lists were derived from reported failures and from those libraries, not from an exhaustive corpus, so they will need adjusting. A hardcoded list would have to travel the whole t-core &rarr; t-service &rarr; t-aspose &rarr; ai-renditions release chain to correct one entry, so all five lists and a kill switch ({@code transform.failure.classification.enabled}, {@code .class-names}, {@code .message-fragments}, {@code .message-fragment-class-names}, {@code .infrastructure-class-names}, {@code .infrastructure-message-fragments}) are configuration. Setting a list <i>replaces</i> the default, so a false positive can be removed as well as added; a matching {@code additional-*} property adds to it instead, which is what an engine or an extension that knows one more of its own library's exceptions needs. The effective lists are logged at startup.
  */
 @Component
 @ConfigurationProperties(prefix = "transform.failure.classification")
-@SuppressWarnings("PMD.FieldNamingConventions") // `logger` is the convention throughout this codebase.
+// `logger` is the convention throughout this codebase. The method and complexity counts are those of a
+// configuration-properties bean: five configurable lists, each with a replacing setter, an extending setter and a
+// getter, around a decision that is four short private methods. Splitting it would separate the rules from the
+// explanation of why each entry is in them, which is the part that needs to stay readable.
+@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TooManyMethods", "PMD.GodClass"})
 class TransformExceptionClassifier
 {
     private static final Logger logger = LoggerFactory.getLogger(TransformExceptionClassifier.class);
@@ -215,6 +219,17 @@ class TransformExceptionClassifier
     private List<String> classNames = new ArrayList<>(DEFAULT_CLASS_NAMES);
     private List<String> messageFragments = new ArrayList<>(DEFAULT_MESSAGE_FRAGMENTS);
 
+    /**
+     * Entries an engine or extension contributes on top of the shipped list, rather than in place of it.
+     * <p/>
+     * Held apart from the list they extend so the effective list does not depend on the order Spring happened to call the two setters in. The three shortened names carry the same meaning as the properties that set them - {@code additional-message-fragment-class-names}, {@code additional-infrastructure-class-names} and {@code additional-infrastructure-message-fragments}.
+     */
+    private List<String> additionalClassNames = List.of();
+    private List<String> additionalMessageFragments = List.of();
+    private List<String> addedMessageFragmentTypes = List.of();
+    private List<String> addedInfraClassNames = List.of();
+    private List<String> addedInfraMessageFragments = List.of();
+
     /** Rebuilt from {@link #classNames} after binding, as it is only ever used for lookups. */
     private Set<String> classNameSet = new LinkedHashSet<>(DEFAULT_CLASS_NAMES);
     /** Lower cased copy of {@link #messageFragments}, so the comparison does not re-lower per call. */
@@ -236,8 +251,9 @@ class TransformExceptionClassifier
     {
         if (!enabled)
         {
-            logger.info("Transform failure classification is disabled: every unhandled exception will be reported as {}.",
-                    INTERNAL_SERVER_ERROR);
+            logger.info("Transform failure classification is disabled: every unhandled exception, and every {} a "
+                    + "transformer inferred from one it caught, will be reported as {}.",
+                    UNPROCESSABLE_ENTITY, INTERNAL_SERVER_ERROR);
             return;
         }
         logger.info("Transform failure classification is enabled. Exceptions matching these are reported as {}, "
@@ -259,24 +275,15 @@ class TransformExceptionClassifier
             return INTERNAL_SERVER_ERROR;
         }
 
-        // Guard against the self referencing cause chains some libraries produce.
-        List<Throwable> causeChain = new ArrayList<>();
-        Set<Throwable> seen = new HashSet<>();
-        for (Throwable t = e; t != null && seen.add(t); t = t.getCause())
-        {
-            causeChain.add(t);
-        }
+        List<Throwable> causeChain = causeChain(e);
 
         // An infrastructure failure anywhere in the chain wins, however it was wrapped. Without this a wrapper such as
         // Tika's "TIKA-198: Illegal IOException from ..." would be matched before its real cause was ever examined.
-        for (Throwable t : causeChain)
+        String veto = infrastructureVeto(causeChain);
+        if (veto != null)
         {
-            String veto = infrastructureMatch(t);
-            if (veto != null)
-            {
-                logDecision(INTERNAL_SERVER_ERROR, e, t.getClass().getName() + " matched " + veto);
-                return INTERNAL_SERVER_ERROR;
-            }
+            logDecision(INTERNAL_SERVER_ERROR, e, veto);
+            return INTERNAL_SERVER_ERROR;
         }
 
         for (Throwable t : causeChain)
@@ -290,6 +297,100 @@ class TransformExceptionClassifier
         }
         logUnrecognised(e);
         return INTERNAL_SERVER_ERROR;
+    }
+
+    /**
+     * Refuses a terminal status when the cause chain shows the engine or its environment failed, rather than the document.
+     * <p/>
+     * {@link #classify(Throwable)} applies this to the exceptions it classifies itself. This entry point exists for a status that arrived already decided - a {@code TransformException} a transformer threw with a status of its own - because that decision was made by a {@code catch} block that saw only the type it caught.
+     * <p/>
+     * A transformer that answers {@code MessagingException} with {@code 422} is right about a malformed {@code .eml} and wrong about the same exception raised because the disk filled while the attachment was being written. Only the cause chain can tell those apart, and a wrong {@code 422} is never retried.
+     * <p/>
+     * Statuses that are not terminal content failures are returned untouched: a {@code 400} is already the engine's considered answer about the request, and a {@code 5xx} is retryable regardless.
+     *
+     * @param status
+     *            the status the transformer asked for.
+     * @param e
+     *            the exception it threw.
+     * @return {@code status}, or {@code 500} if the chain shows an infrastructure failure.
+     */
+    HttpStatus vetoIfInfrastructural(HttpStatus status, Throwable e)
+    {
+        if (status != UNPROCESSABLE_ENTITY)
+        {
+            return status;
+        }
+        if (!enabled)
+        {
+            return withoutInferredClassification(e);
+        }
+        String veto = infrastructureVeto(causeChain(e));
+        if (veto == null)
+        {
+            return status;
+        }
+        logger.warn("A transformer reported {} for {}, but {}. Reporting {} so the T-Router still retries it.",
+                UNPROCESSABLE_ENTITY, describeCauseChain(e), veto, INTERNAL_SERVER_ERROR);
+        return INTERNAL_SERVER_ERROR;
+    }
+
+    /**
+     * Withdraws a {@code 422} a transformer <i>inferred</i> from an exception it caught, leaving one it determined by looking at the document.
+     * <p/>
+     * Turning classification off has to be a genuine way back to the previous behaviour, or it is no use as a safety valve. A transformer deciding its own status sidesteps {@link #classify(Throwable)} entirely, so without this the switch would silence the central lists while those decisions carried on - and, worse, would take the infrastructure veto down with them, leaving the terminal statuses in place and removing the one thing that corrects them.
+     * <p/>
+     * The cause tells the two kinds of {@code 422} apart, because the distinction is what produced it rather than where:
+     * <ul>
+     * <li><b>Inferred, so withdrawn.</b> A library threw, and a {@code catch} block read that as a statement about the document. That is the reasoning this work introduced and the reasoning an administrator would be turning off.</li>
+     * <li><b>Determined, so kept.</b> The engine read the document and found it wanting - no image reader accepts the format, the zip holds no preview, the transform produced nothing from a non-empty source. No exception was interpreted, so there is nothing to withdraw, and the last of those has answered {@code 422} since long before any of this.</li>
+     * </ul>
+     *
+     * @param e
+     *            the exception the transformer threw.
+     * @return {@code 500} if the {@code 422} was inferred from a cause, otherwise {@code 422}.
+     */
+    private HttpStatus withoutInferredClassification(Throwable e)
+    {
+        if (e.getCause() == null)
+        {
+            return UNPROCESSABLE_ENTITY;
+        }
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Classification is disabled, so reporting {} rather than the {} inferred from {}.",
+                    INTERNAL_SERVER_ERROR, UNPROCESSABLE_ENTITY, e.getCause().getClass().getName());
+        }
+        return INTERNAL_SERVER_ERROR;
+    }
+
+    /**
+     * @return a description of the first infrastructure match in {@code causeChain}, or {@code null} if there was none.
+     */
+    private String infrastructureVeto(List<Throwable> causeChain)
+    {
+        for (Throwable t : causeChain)
+        {
+            String match = infrastructureMatch(t);
+            if (match != null)
+            {
+                return t.getClass().getName() + " matched " + match;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return {@code e} and its causes, stopping at the self referencing chains some libraries produce.
+     */
+    private static List<Throwable> causeChain(Throwable e)
+    {
+        List<Throwable> causeChain = new ArrayList<>();
+        Set<Throwable> seen = new HashSet<>();
+        for (Throwable t = e; t != null && seen.add(t); t = t.getCause())
+        {
+            causeChain.add(t);
+        }
+        return causeChain;
     }
 
     /**
@@ -405,34 +506,122 @@ class TransformExceptionClassifier
     public void setClassNames(List<String> classNames)
     {
         this.classNames = classNames;
-        this.classNameSet = new LinkedHashSet<>(classNames);
+        rebuildClassNames();
+    }
+
+    /**
+     * Adds to the shipped list instead of replacing it.
+     * <p/>
+     * Spring replaces a list property wholesale when it is set, which is right for a deployment overruling a decision but wrong for the commoner case: an engine, or an extension such as Aspose, that knows one more exception its own libraries raise. Restating the whole list to append a single name means every later correction to the defaults has to be copied into everything that did so, and anything that forgets silently loses the rest.
+     * <p/>
+     * Setting both this and the list it extends is allowed, and the result does not depend on the order the two were bound in.
+     */
+    public void setAdditionalClassNames(List<String> additionalClassNames)
+    {
+        this.additionalClassNames = additionalClassNames;
+        rebuildClassNames();
     }
 
     public void setMessageFragments(List<String> messageFragments)
     {
         this.messageFragments = messageFragments;
-        this.lowerCaseMessageFragments = messageFragments.stream()
-                .map(fragment -> fragment.toLowerCase(Locale.ROOT))
-                .toList();
+        rebuildMessageFragments();
+    }
+
+    /** @see #setAdditionalClassNames(List) */
+    public void setAdditionalMessageFragments(List<String> additionalMessageFragments)
+    {
+        this.additionalMessageFragments = additionalMessageFragments;
+        rebuildMessageFragments();
     }
 
     public void setMessageFragmentClassNames(List<String> messageFragmentClassNames)
     {
         this.messageFragmentClassNames = messageFragmentClassNames;
-        this.messageFragmentClassNameSet = new LinkedHashSet<>(messageFragmentClassNames);
+        rebuildMessageFragmentClassNames();
+    }
+
+    /** @see #setAdditionalClassNames(List) */
+    public void setAdditionalMessageFragmentClassNames(List<String> addedMessageFragmentTypes)
+    {
+        this.addedMessageFragmentTypes = addedMessageFragmentTypes;
+        rebuildMessageFragmentClassNames();
     }
 
     public void setInfrastructureClassNames(List<String> infrastructureClassNames)
     {
         this.infrastructureClassNames = infrastructureClassNames;
-        this.infrastructureClassNameSet = new LinkedHashSet<>(infrastructureClassNames);
+        rebuildInfrastructureClassNames();
+    }
+
+    /** @see #setAdditionalClassNames(List) */
+    public void setAdditionalInfrastructureClassNames(List<String> addedInfraClassNames)
+    {
+        this.addedInfraClassNames = addedInfraClassNames;
+        rebuildInfrastructureClassNames();
     }
 
     public void setInfrastructureMessageFragments(List<String> infrastructureMessageFragments)
     {
         this.infrastructureMessageFragments = infrastructureMessageFragments;
-        this.lowerCaseInfraMessageFragments = infrastructureMessageFragments.stream()
-                .map(fragment -> fragment.toLowerCase(Locale.ROOT))
+        rebuildInfrastructureMessageFragments();
+    }
+
+    /** @see #setAdditionalClassNames(List) */
+    public void setAdditionalInfrastructureMessageFragments(List<String> addedInfraMessageFragments)
+    {
+        this.addedInfraMessageFragments = addedInfraMessageFragments;
+        rebuildInfrastructureMessageFragments();
+    }
+
+    private void rebuildClassNames()
+    {
+        this.classNameSet = new LinkedHashSet<>(concat(classNames, additionalClassNames));
+    }
+
+    private void rebuildMessageFragments()
+    {
+        this.lowerCaseMessageFragments = lowerCase(concat(messageFragments, additionalMessageFragments));
+    }
+
+    private void rebuildMessageFragmentClassNames()
+    {
+        this.messageFragmentClassNameSet = new LinkedHashSet<>(
+                concat(messageFragmentClassNames, addedMessageFragmentTypes));
+    }
+
+    private void rebuildInfrastructureClassNames()
+    {
+        this.infrastructureClassNameSet = new LinkedHashSet<>(
+                concat(infrastructureClassNames, addedInfraClassNames));
+    }
+
+    private void rebuildInfrastructureMessageFragments()
+    {
+        this.lowerCaseInfraMessageFragments = lowerCase(
+                concat(infrastructureMessageFragments, addedInfraMessageFragments));
+    }
+
+    /**
+     * @return {@code base} followed by the entries of {@code additions} it does not already hold, so repeating something the defaults already cover changes nothing.
+     */
+    private static List<String> concat(List<String> base, List<String> additions)
+    {
+        if (additions.isEmpty())
+        {
+            return base;
+        }
+        List<String> combined = new ArrayList<>(base);
+        additions.stream()
+                .filter(addition -> !combined.contains(addition))
+                .forEach(combined::add);
+        return combined;
+    }
+
+    private static List<String> lowerCase(List<String> values)
+    {
+        return values.stream()
+                .map(value -> value.toLowerCase(Locale.ROOT))
                 .toList();
     }
 
@@ -464,5 +653,30 @@ class TransformExceptionClassifier
     public List<String> getInfrastructureMessageFragments()
     {
         return infrastructureMessageFragments;
+    }
+
+    public List<String> getAdditionalClassNames()
+    {
+        return additionalClassNames;
+    }
+
+    public List<String> getAdditionalMessageFragments()
+    {
+        return additionalMessageFragments;
+    }
+
+    public List<String> getAdditionalMessageFragmentClassNames()
+    {
+        return addedMessageFragmentTypes;
+    }
+
+    public List<String> getAdditionalInfrastructureClassNames()
+    {
+        return addedInfraClassNames;
+    }
+
+    public List<String> getAdditionalInfrastructureMessageFragments()
+    {
+        return addedInfraMessageFragments;
     }
 }

@@ -26,6 +26,8 @@
  */
 package org.alfresco.transform.tika.transformers;
 
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
@@ -75,6 +77,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
+import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.tika.parsers.TikaOfficeDetectParser;
 
 @Component
@@ -239,8 +242,28 @@ public class Tika
         {
             throw new IllegalArgumentException("Unsupported encoding " + e.getMessage(), e);
         }
-        catch (SAXException | TikaException | IOException e)
+        catch (SAXException | TikaException e)
         {
+            // Reaching here means Tika chose a parser for these bytes and that parser gave up on them. Tika's wording
+            // for that varies with what went wrong underneath - "TIKA-198: Illegal IOException from ...", "Unexpected
+            // RuntimeException from ...", "Couldn't find core part" - and the useful detail is often an
+            // IndexOutOfBoundsException from POI several causes down, which no central list could safely claim. This
+            // is the only place that knows the failure came out of parsing the supplied document, so the verdict is
+            // given here instead.
+            //
+            // The cause is kept, so the infrastructure veto can still restore a 500 when the parser failed because the
+            // engine did - out of memory, a socket that dropped, a disk that filled. A parser that is simply buggy
+            // will also land here, but a retry cannot fix a deterministic parser bug either, so the only thing lost is
+            // three further attempts at the same outcome.
+            throw new TransformException(UNPROCESSABLE_ENTITY,
+                    "The source could not be parsed: " + e.getMessage(), e);
+        }
+        catch (IOException e)
+        {
+            // Deliberately not classified here. A bare IOException at this point is as likely to be the output stream
+            // or the source download as the document - PDFBox's "Missing root object specification in trailer" shares
+            // the type with a disk that filled mid-write. The central classifier reads the message, which is the only
+            // thing that separates them.
             throw new IllegalStateException(e.getMessage(), e);
         }
     }

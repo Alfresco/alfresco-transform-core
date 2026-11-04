@@ -26,6 +26,8 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+
 import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_MULTIPART_ALTERNATIVE;
@@ -56,6 +58,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.fs.FileManager;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * Uses javax.mail.MimeMessage to generate plain text versions of RFC822 email messages. Searches for all text content parts, and returns them. Any attachments are ignored. TIKA Note - could be replaced with the Tika email parser. Would require a recursing parser to be specified, but not the full Auto one (we don't want attachments), just one containing text and html related parsers.
@@ -104,6 +107,19 @@ public class EMLTransformer implements CustomTransformerFileAdaptor
                 sb.append(content.toString());
             }
             bufferedFileWriter.write(sb.toString());
+        }
+        catch (MessagingException e)
+        {
+            // jakarta.mail raises this only when the bytes are not a message it can read: a truncated MIME structure,
+            // a header it cannot parse, an encoding the message declares but does not honour. Retrying hands the same
+            // bytes to the same parser, so the status has to say so.
+            //
+            // Said here rather than left to TransformExceptionClassifier because this is the only place that knows a
+            // .eml was being parsed. The classifier would see a type it has never been told about and, rightly,
+            // report 500. The infrastructure veto still applies on the way out, so a MessagingException raised
+            // because the disk filled is still reported as retryable.
+            throw new TransformException(UNPROCESSABLE_ENTITY,
+                    "The source is not a readable RFC822 message: " + e.getMessage(), e);
         }
     }
 

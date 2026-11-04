@@ -26,6 +26,8 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+
 import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 
@@ -47,6 +49,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * Converts Apple iWorks files to JPEGs for thumbnailing and previewing. The transformer will only work for iWorks 2013/14 files. Support for iWorks 2008/9 has been dropped as we cannot support both, because the newer format does not contain a PDF. If we say this transformer supports PDF, Share will assume incorrectly that we can convert to PDF and we would only get a preview for the older format and never the newer one. Both formats have the same mimetype.
@@ -91,13 +94,13 @@ public class AppleIWorksContentTransformer implements CustomTransformerFileAdapt
 
         // iWorks files are zip (or package) files.
         // If it's not a zip file, the resultant ZipException will be caught as an IOException below.
+        boolean found = false;
         try (ZipArchiveInputStream iWorksZip = new ZipArchiveInputStream(
                 new BufferedInputStream(new FileInputStream(sourceFile))))
         {
             // Look through the zip file entries for the preview/thumbnail.
             List<String> paths = MIMETYPE_IMAGE_JPEG.equals(targetMimetype) ? JPG_PATHS : PDF_PATHS;
             ZipArchiveEntry entry;
-            boolean found = false;
             while ((entry = iWorksZip.getNextZipEntry()) != null)
             {
                 String name = entry.getName();
@@ -108,18 +111,24 @@ public class AppleIWorksContentTransformer implements CustomTransformerFileAdapt
                     break;
                 }
             }
-
-            if (!found)
-            {
-                throw new RuntimeException(
-                        "The source " + sourceMimetype + " file did not contain a " + targetMimetype + " preview");
-            }
         }
         catch (IOException e)
         {
-            throw new RuntimeException(
+            // Commons Compress reports a file that is not a zip, and a zip whose central directory is damaged, as an
+            // IOException. The same type also covers a read that failed part way, so the decision is handed to the
+            // classifier's veto rather than asserted here: it looks down the cause chain and restores a 500 if the
+            // failure was the environment's rather than the document's.
+            throw new TransformException(UNPROCESSABLE_ENTITY,
                     "Unable to transform " + sourceMimetype + " file. It should have been a zip format file.",
                     e);
+        }
+
+        if (!found)
+        {
+            // The zip opened and its entries were readable, so the bytes arrived intact - this file simply has no
+            // preview of the requested type stored in it. Nothing about that changes on a second attempt.
+            throw new TransformException(UNPROCESSABLE_ENTITY,
+                    "The source " + sourceMimetype + " file did not contain a " + targetMimetype + " preview");
         }
     }
 }

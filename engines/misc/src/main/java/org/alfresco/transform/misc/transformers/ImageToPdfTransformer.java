@@ -28,6 +28,7 @@ package org.alfresco.transform.misc.transformers;
 
 import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.TIFF_TAG_XRESOLUTION;
 import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.TIFF_TAG_YRESOLUTION;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 import static org.alfresco.transform.common.RequestParamMap.END_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.PDF_FORMAT;
@@ -45,6 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
@@ -68,6 +70,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.alfresco.transform.common.RequestParamMap;
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * Converts image files into PDF files. Transformer uses PDF Box to perform conversions. During conversion image might be scaled down (keeping proportions) to match width or height of the PDF document. If the image is smaller than PDF page size, the image will be placed in the top left-hand side of the PDF document page. Transformer accepts bellow optional transform parameters: - startPage - page number of image (for multi-page images) from which transformer should start conversion. Default: first page of the image. - endPage - page number of image (for multi-page images) up to which transformation should be performed. Default: last page of the image. - pdfFormat - output PDF file format. Available formats: DEFAULT, A0, A1, A2, A3, A4, A5, A6, LETTER, LEGAL. Default: original image size. - pdfOrientation - output PDF file orientation. Available options: DEFAULT, PORTRAIT, LANDSCAPE. Default: original image orientation.
@@ -83,6 +86,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
     private static final String START_PAGE_GREATER_THAN_END_PAGE_ERROR_MESSAGE = "Start page number cannot be greater than end page.";
     private static final String INVALID_OPTION_ERROR_MESSAGE = "Parameter '%s' is invalid: \"%s\" - it must be an integer.";
     private static final String INVALID_IMAGE_ERROR_MESSAGE = "Image file (%s) format (%s) not supported by ImageIO.";
+    private static final String UNREADABLE_IMAGE_ERROR_MESSAGE = "Image file (%s) of format (%s) could not be parsed: %s";
     private static final String DEFAULT_PDF_FORMAT_STRING = "DEFAULT"; // pdf format to use when no pdf format specified
     private static final String DEFAULT_PDF_ORIENTATION_STRING = "DEFAULT";
     private static final Boolean DEFAULT_IMPROVE_GRAYSCALE_FLAG = true;
@@ -116,6 +120,27 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
 
             final Map<String, Integer> resolution = determineImageResolution(imageFile);
             final ImageReader imageReader = findImageReader(imageInputStream, imageFile.getName(), sourceMimetype);
+            readAndDrawImages(pdfDocument, imageReader, imageFile.getName(), sourceMimetype,
+                    startPage, endPage, pdfFormat, pdfOrientation, improveGrayscale, resolution);
+
+            pdfDocument.save(pdfFile);
+        }
+    }
+
+    /**
+     * ImageIO reports every kind of damage past the header - a truncated file, a bad chunk length, pixel data that does not match what the header declared - as an {@link IIOException}, whose text is the reader's own wording and so cannot be matched reliably by a central list. Naming it terminal here is safe because this is the one place that knows the exception came from decoding the supplied image rather than from anything the engine was doing.
+     * <p/>
+     * Not every reader is that disciplined. A TIFF whose bytes were damaged inside the image data makes the JDK's reader index past the end of its own buffer and throw a bare {@link ArrayIndexOutOfBoundsException} - a type nothing would ever put on a content list, because out of this context it reads as an engine bug. Here it cannot be: the only thing between the try and the catch is the decoder, working on the supplied bytes, so a reader that falls over is a reader that was handed something it could not decode. The same bytes will do the same thing on every retry.
+     * <p/>
+     * The original exception is kept as the cause, so the infrastructure veto can still restore a {@code 500} if the read failed because the environment did, not the image.
+     */
+    @SuppressWarnings("PMD.ExcessiveParameterList") // the alternative is a parameter object for a single call site
+    private void readAndDrawImages(PDDocument pdfDocument, ImageReader imageReader, String imageName, String mimetype,
+            Integer startPage, Integer endPage, String pdfFormat, String pdfOrientation, Boolean improveGrayscale,
+            Map<String, Integer> resolution) throws IOException
+    {
+        try
+        {
             for (int i = 0; i < imageReader.getNumImages(true); i++)
             {
                 if (startPage != null && i < startPage)
@@ -129,8 +154,11 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
 
                 scaleAndDrawImage(pdfDocument, imageReader.read(i), pdfFormat, pdfOrientation, improveGrayscale, resolution);
             }
-
-            pdfDocument.save(pdfFile);
+        }
+        catch (IIOException | RuntimeException e)
+        {
+            throw new TransformException(UNPROCESSABLE_ENTITY,
+                    String.format(UNREADABLE_IMAGE_ERROR_MESSAGE, imageName, mimetype, e.getMessage()), e);
         }
     }
 
@@ -139,7 +167,9 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         final Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(imageInputStream);
         if (imageReaders == null || !imageReaders.hasNext())
         {
-            throw new IOException(String.format(INVALID_IMAGE_ERROR_MESSAGE, imageName, mimetype));
+            // ImageIO picks a reader from the bytes themselves, so having none means the header is not the format the
+            // request claimed, or is damaged beyond recognition. Either way the same bytes will fail the same way.
+            throw new TransformException(UNPROCESSABLE_ENTITY, String.format(INVALID_IMAGE_ERROR_MESSAGE, imageName, mimetype));
         }
         while (imageReaders.hasNext())
         {
@@ -151,7 +181,8 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
                 return reader;
             }
         }
-        throw new IOException(String.format(INVALID_IMAGE_ERROR_MESSAGE, imageName, mimetype));
+        // Every reader that recognised the format is denied, which is a property of the format, not of this attempt.
+        throw new TransformException(UNPROCESSABLE_ENTITY, String.format(INVALID_IMAGE_ERROR_MESSAGE, imageName, mimetype));
     }
 
     // return effective dpi or default pdfbox ppi if dpi is null or out of reasonable range

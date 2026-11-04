@@ -138,7 +138,8 @@ abstract class ProcessHandler extends FragmentHandler
         }
         catch (TransformException e)
         {
-            HttpStatus status = overrideIfTheSourceNeverArrived(e.getStatus());
+            HttpStatus status = overrideIfTheSourceNeverArrived(
+                    exceptionClassifier.vetoIfInfrastructural(e.getStatus(), e));
             transformerDebug.logFailure(reference, "  Error: " + e.getMessage());
             LogEntry.setStatusCodeAndMessage(status, e.getMessage());
             handleTransformException(e, status);

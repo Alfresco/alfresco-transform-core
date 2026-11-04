@@ -26,6 +26,8 @@
  */
 package org.alfresco.transform.misc.metadataExtractors;
 
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+
 import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
 
 import java.io.InputStream;
@@ -38,6 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import jakarta.mail.Header;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMessage.RecipientType;
@@ -49,6 +52,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * Metadata extractor for RFC822 mime emails.
@@ -99,6 +103,30 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractorEmbedder
     public Map<String, Serializable> extractMetadata(String sourceMimetype, InputStream inputStream,
             String targetMimetype, OutputStream outputStream, Map<String, String> transformOptions,
             TransformManager transformManager) throws Exception
+    {
+        try
+        {
+            return extractFromMessage(inputStream);
+        }
+        catch (MessagingException e)
+        {
+            // The same statement EMLTransformer makes about the same library, and it has to be made again here
+            // because this is a different entry point: the repository asks for metadata on almost every upload, so an
+            // unreadable .eml reaches this method long before it reaches a transform. jakarta.mail raises this only
+            // when the bytes are not a message it can read, and a retry hands the same bytes to the same parser.
+            //
+            // The infrastructure veto still applies on the way out, so a failure that was really the disk or the
+            // download is still reported as retryable.
+            throw new TransformException(UNPROCESSABLE_ENTITY,
+                    "The source is not a readable RFC822 message: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * @return the raw properties read from the message. Separated from {@link #extractMetadata} so that the catch there covers the whole read: {@code MimeMessage} parses lazily, so a malformed header can surface at any of the accessors below rather than at construction.
+     */
+    private Map<String, Serializable> extractFromMessage(InputStream inputStream)
+            throws MessagingException, UnsupportedEncodingException
     {
         final Map<String, Serializable> rawProperties = new HashMap<>();
 
