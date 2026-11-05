@@ -31,23 +31,21 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Wraps a source that arrives over the network - a Direct Access URL - and remembers whether the download itself failed, as opposed to the content being unreadable.
+ * Wraps a network source (Direct Access URL) and records whether the download failed or was truncated.
  * <p/>
- * The distinction matters because the bytes are pulled lazily, <i>inside</i> the transform. A download that dies half way through therefore surfaces as whatever the parser makes of a half file: PDFBox reports {@code "Error: End-of-File, expected line"}, zip-backed formats report {@code EOFException} or {@code ZipException}. Those are indistinguishable, by exception alone, from a genuinely corrupt document - and they are on the classifier's content list, so without this the transform would be reported as {@code 422} and never retried, when a retry is exactly what it needed.
+ * A truncated download looks corrupt to the parser; this lets it be retried as {@code 500} instead of failing as {@code 422}.
  * <p/>
- * Only facts about the stream are recorded, never anything about how much of it the transform chose to read. A parser that rejects a bad header after 10 bytes has not been truncated; a stream that threw while being read, or that ended before the size the client said the content was, has been.
- * <p/>
- * What is counted is the <i>logical position in the source</i>, not the number of bytes handed out. Those differ, because mark/reset is preserved from the buffered delegate and parsers use it: Tika's office detector marks, reads the first few bytes, resets and reads them again. Summing every read would count those bytes twice and could carry the total past {@link #expectedLength} on a source that was actually truncated, which would report a failed download as a readable one - the exact mistake this class exists to prevent.
+ * Tracks the logical position, not bytes handed out, so re-reads after mark/reset are not counted twice.
  */
 public class RemoteSourceStream extends FilterInputStream implements SourceDownloadStatus
 {
-    /** Size the client said the content is, or a negative value when it did not say. */
+    /** Declared content length, or negative if unknown. */
     private final long expectedLength;
 
-    /** Logical offset in the source. Advanced by reads and skips, rewound by {@link #reset()}. */
+    /** Logical offset in the source; rewound by {@link #reset()}. */
     private long position;
 
-    /** Furthest {@link #position} ever reached, which is how much of the source actually arrived. */
+    /** Furthest {@link #position} reached, i.e. how much of the source arrived. */
     private long highWaterMark;
 
     /** {@link #position} recorded by the last {@link #mark(int)}. */
@@ -158,15 +156,13 @@ public class RemoteSourceStream extends FilterInputStream implements SourceDownl
         markedPosition = position;
     }
 
-    /**
-     * Rewinds the logical position as well as the delegate, so bytes read again after a reset are not counted twice. {@link #highWaterMark} is deliberately left where it was: it records how much of the source arrived, which re-reading cannot change.
-     */
+    /** Rewinds the logical position too; {@link #highWaterMark} is left unchanged. */
     @Override
     public synchronized void reset() throws IOException
     {
         in.reset();
         position = markedPosition;
-        // A reset undoes the read that hit the end of the source, so what follows is no longer at the end.
+        // The reset undoes any read that hit the end.
         endOfStreamReached = false;
     }
 }

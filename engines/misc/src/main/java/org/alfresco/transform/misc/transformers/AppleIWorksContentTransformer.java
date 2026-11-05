@@ -114,10 +114,7 @@ public class AppleIWorksContentTransformer implements CustomTransformerFileAdapt
         }
         catch (IOException e)
         {
-            // Commons Compress reports a file that is not a zip, and a zip whose central directory is damaged, as an
-            // IOException. The same type also covers a read that failed part way, so the decision is handed to the
-            // classifier's veto rather than asserted here: it looks down the cause chain and restores a 500 if the
-            // failure was the environment's rather than the document's.
+            // Not-a-zip, a damaged zip and a failed read are all IOException; the classifier's veto separates them.
             throw new TransformException(UNPROCESSABLE_ENTITY,
                     "Unable to transform " + sourceMimetype + " file. It should have been a zip format file.",
                     e);
@@ -125,8 +122,7 @@ public class AppleIWorksContentTransformer implements CustomTransformerFileAdapt
 
         if (!found)
         {
-            // The zip opened and its entries were readable, so the bytes arrived intact - this file simply has no
-            // preview of the requested type stored in it. Nothing about that changes on a second attempt.
+            // The zip was readable but holds no preview of this type; a retry cannot change that.
             throw new TransformException(UNPROCESSABLE_ENTITY,
                     "The source " + sourceMimetype + " file did not contain a " + targetMimetype + " preview");
         }

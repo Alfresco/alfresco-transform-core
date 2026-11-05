@@ -27,21 +27,15 @@
 package org.alfresco.transform.base.util;
 
 /**
- * A source that knows whether it arrived in full.
- * <p/>
- * Kept separate from the stream that implements it so that a caller can ask the question without holding a reference to something closeable. The source is owned and closed by whoever opened it; code that only wants to know how a transform failed has no business being able to close it.
+ * A source that knows whether it arrived in full. An interface so callers can ask without holding the closeable stream.
  *
  * @see RemoteSourceStream
  */
 public interface SourceDownloadStatus
 {
-    /**
-     * @return {@code true} if the download failed, or ended before all of the content had arrived. A transform that failed on such a source must be reported as a server error so that it is retried, whatever the parser called the failure.
-     */
+    /** @return {@code true} if the download failed or ended early; the transform should then be retried. */
     boolean sourceDownloadFailed();
 
-    /**
-     * @return a description of why the download is considered incomplete, for logging. Never {@code null} once {@link #sourceDownloadFailed()} is {@code true}.
-     */
+    /** @return why the download is incomplete, for logging; non-null once {@link #sourceDownloadFailed()} is true. */
     String describeFailure();
 }

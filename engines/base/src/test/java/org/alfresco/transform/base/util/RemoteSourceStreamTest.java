@@ -39,7 +39,7 @@ import java.io.InputStream;
 import org.junit.jupiter.api.Test;
 
 /**
- * Checks that the stream can tell "the download did not finish" from "the transform stopped reading", because the first must stay a retryable {@code 500} and the second must be free to become a terminal {@code 422}.
+ * Distinguishes "the download did not finish" (retryable 500) from "the transform stopped reading" (may be 422).
  */
 class RemoteSourceStreamTest
 {
@@ -58,9 +58,7 @@ class RemoteSourceStreamTest
         return content;
     }
 
-    /**
-     * Reads to the end, which is what lets the stream say whether all of it arrived. Done a byte at a time so that a {@link RemoteSourceStream#mark(int)} taken by the test stays within the delegate's read limit.
-     */
+    /** Reads to the end a byte at a time, so a test's {@link RemoteSourceStream#mark(int)} stays within the read limit. */
     private static void drain(InputStream in) throws IOException
     {
         int read = in.read();
@@ -93,9 +91,7 @@ class RemoteSourceStreamTest
         }
     }
 
-    /**
-     * A parser that rejects a bad header after a few bytes has not been truncated, so it must stay free to be reported as a content failure.
-     */
+    /** A parser rejecting a bad header early has not been truncated. */
     @Test
     void testAbandoningAGoodSourceEarlyIsNotAFailure() throws IOException
     {
@@ -107,9 +103,7 @@ class RemoteSourceStreamTest
         }
     }
 
-    /**
-     * The case a cumulative byte count gets wrong. Tika's office detector marks, reads the first few bytes, resets and reads them again. Counting every read would reach the expected length on a source that is short of it, and report a failed download as a readable document.
-     */
+    /** Tika's office detector marks, reads, resets and re-reads; a cumulative count would overstate what arrived. */
     @Test
     void testRereadingAfterAResetDoesNotHideATruncatedSource() throws IOException
     {
@@ -142,9 +136,6 @@ class RemoteSourceStreamTest
         }
     }
 
-    /**
-     * Reading to the end, resetting and reading on must not leave the stream believing it is still at the end of a source it has rewound.
-     */
     @Test
     void testAResetAfterTheEndOfTheSourceIsNotTreatedAsTheEnd() throws IOException
     {
@@ -188,9 +179,6 @@ class RemoteSourceStreamTest
         }
     }
 
-    /**
-     * With no expected size only an outright failure can be detected, so a short read must not be guessed at.
-     */
     @Test
     void testAnUnknownExpectedLengthNeverReportsATruncatedSource() throws IOException
     {

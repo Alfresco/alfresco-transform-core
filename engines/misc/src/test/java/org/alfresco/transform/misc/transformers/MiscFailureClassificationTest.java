@@ -69,18 +69,14 @@ import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.misc.metadataExtractors.RFC822MetadataExtractor;
 
 /**
- * Feeds genuinely unreadable content to the real jakarta.mail, Commons Compress and ImageIO on this module's classpath, and asserts the status the transformer answers with.
- * <p/>
- * These three libraries report damage in ways no central list can safely claim: jakarta.mail by a type {@code engines/base} has never heard of, ImageIO by an {@code IIOException} whose text is whichever reader happened to be chosen. The transformers here decide it themselves, because this is the only code that knows what was being read. Building the damaged input in the test rather than checking in fixtures keeps the damage visible to a reader.
+ * Feeds damaged content to the real jakarta.mail, Commons Compress and ImageIO and checks the status returned.
  */
 class MiscFailureClassificationTest
 {
     @TempDir
     Path tempDir;
 
-    /**
-     * jakarta.mail is extremely forgiving - it will accept almost any bytes as a message with a single text part - so the case that matters is a message whose own headers promise a structure the body does not deliver. That is what a truncated or rewritten {@code .eml} looks like.
-     */
+    /** jakarta.mail accepts almost any bytes, so the damage is headers promising a structure the body lacks. */
     @Test
     void testAnEmlPromisingAStructureItDoesNotContainIsTerminal() throws IOException
     {
@@ -109,11 +105,7 @@ class MiscFailureClassificationTest
         assertTrue(Files.size(target.toPath()) > 0, "Expected the text of the message");
     }
 
-    /**
-     * The same library on a second entry point. Metadata extraction has its own parse and never goes through {@link EMLTransformer}, so the decision made there does not carry; and because the repository asks for metadata on nearly every upload, this is the path an unreadable {@code .eml} reaches first.
-     * <p/>
-     * {@code MimeMessage} reads lazily, so the failure surfaces at an accessor rather than at construction - here {@code AddressException}, a {@code MessagingException}, raised while parsing the address headers.
-     */
+    /** {@code MimeMessage} parses lazily, so this fails at an accessor with {@code AddressException}. */
     @Test
     void testAnEmlWithAnUnreadableAddressHeaderIsTerminalOnTheMetadataPath() throws IOException
     {
@@ -148,9 +140,7 @@ class MiscFailureClassificationTest
         return new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
     }
 
-    /**
-     * The real extractor, with the one thing a unit test cannot supply. The mapping is normally put in place by {@code AbstractMetadataExtractorEmbedder} as it reads the properties file, which only happens inside a Spring context; everything being asserted here happens in the extractor's own code.
-     */
+    /** Supplies the extract mapping that Spring would normally load from the properties file. */
     private static final class MappedRfc822Extractor extends RFC822MetadataExtractor
     {
         @Override
@@ -160,9 +150,6 @@ class MiscFailureClassificationTest
         }
     }
 
-    /**
-     * iWorks files are zips. Commons Compress reports anything that is not one as an {@code IOException}, and the transformer cannot tell that apart from a read that failed, so it hands the decision on with the cause attached.
-     */
     @Test
     void testAnIWorksFileThatIsNotAZipIsTerminal() throws IOException
     {
@@ -175,9 +162,6 @@ class MiscFailureClassificationTest
         assertEquals(UNPROCESSABLE_ENTITY, e.getStatus(), describe(e));
     }
 
-    /**
-     * A valid zip with no preview inside it is the case most easily mistaken for an engine fault: nothing failed to read, there is simply nothing to return. Retrying reads the same entries and finds the same nothing.
-     */
     @Test
     void testAnIWorksFileWithNoPreviewInsideIsTerminal() throws IOException
     {
@@ -197,9 +181,6 @@ class MiscFailureClassificationTest
         assertEquals(UNPROCESSABLE_ENTITY, e.getStatus(), describe(e));
     }
 
-    /**
-     * ImageIO chooses a reader from the bytes themselves, so having none means the header is not the format the request claimed.
-     */
     @Test
     void testAnImageNoReaderRecognisesIsTerminal() throws IOException
     {
@@ -212,9 +193,7 @@ class MiscFailureClassificationTest
         assertEquals(UNPROCESSABLE_ENTITY, e.getStatus(), describe(e));
     }
 
-    /**
-     * The case a central list cannot reach. The header survives, so a reader is still chosen and the failure happens deep inside it, reported as an {@code IIOException} whose wording - "Error reading PNG metadata", "Invalid chunk length" - belongs to that one reader. Nothing in it says "corrupt", so before this was decided at the throw site a truncated image was reported as an engine fault and retried.
-     */
+    /** The header survives, so a reader is chosen and fails with reader-specific {@code IIOException} wording. */
     @Test
     void testATruncatedImageIsTerminal() throws IOException
     {
@@ -247,9 +226,6 @@ class MiscFailureClassificationTest
         assertEquals(UNPROCESSABLE_ENTITY, e.getStatus(), describe(e));
     }
 
-    /**
-     * The counterweight. Every assertion above says a file is beyond saving, so one has to prove an intact image still converts - otherwise a change that reported everything as damaged would pass.
-     */
     @Test
     void testAnUndamagedImageStillTransforms() throws Exception
     {
@@ -262,13 +238,7 @@ class MiscFailureClassificationTest
     }
 
     /**
-     * The case that showed catching {@code IIOException} alone was not enough.
-     * <p/>
-     * Damaging a TIFF anywhere near its tags makes the reader fail while still reading them, which it reports properly as an {@code IIOException}. The interesting damage is further in: leave the header and the tag directory intact, so every strip is still described exactly as before, and corrupt only the compressed data those tags point at. The reader then believes what the tags told it and hands the bytes to the decompressor, which is where it falls over - for LZW, with {@code NullPointerException: Cannot read the array length because "oldString" is null} from inside the JDK's own decompressor. No {@code IIOException} is ever constructed, so before this the document was reported as an engine fault and retried three times before being lost.
-     * <p/>
-     * It is fair to call that a bug in the decompressor. It is still terminal, because a retry hands the same decompressor the same bytes.
-     * <p/>
-     * The image is written here rather than checked in so that the damage is visible, and so the layout is known: this writer puts the tag directory at the front, which is what makes "corrupt the data but not the tags" expressible as a byte range.
+     * Header and tags intact, compressed strip data corrupt: the JDK's LZW decompressor throws a bare {@code NullPointerException}, not {@code IIOException}.
      */
     @Test
     void testATiffWhoseCompressedDataIsCorruptIsTerminal() throws IOException
@@ -294,7 +264,7 @@ class MiscFailureClassificationTest
     }
 
     /**
-     * @return {@code tiff} with a fifth of the bytes between its tag directory and its last strip replaced. The untouched margins keep the header, the tags and the final strip's framing intact, so the file still describes itself correctly and only what it describes is wrong.
+     * @return {@code tiff} with a fifth of the bytes between the tag directory (written first) and the last strip replaced, leaving header and tags intact.
      */
     private static byte[] corruptCompressedData(byte[] tiff)
     {
@@ -362,9 +332,7 @@ class MiscFailureClassificationTest
         }
     }
 
-    /**
-     * @return every exception in the chain, so a failure names the library wording rather than just the outermost wrapper.
-     */
+    /** @return every exception in the chain, so a failure shows the library's wording. */
     private static String describe(Throwable e)
     {
         StringBuilder sb = new StringBuilder();

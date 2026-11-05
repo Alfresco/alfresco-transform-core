@@ -51,44 +51,36 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.alfresco.transform.exceptions.TransformException;
 
 /**
- * Feeds genuinely damaged documents to the real Tika, POI and PDFBox on the classpath and asserts the status the engine answers with.
- * <p/>
- * The classification rules match on exception class names and on fragments of message text, neither of which the compiler can check. A test that builds its own {@code new IOException("corrupt")} proves only that the list contains the word it was written from. These damage real files instead, so the assertions are pinned to what the shipped libraries actually throw: if a library upgrade reworded a message or changed which exception it raises, this test fails rather than the behaviour silently regressing in production.
- * <p/>
- * The corruptions are applied in code rather than checked in as fixtures, so the damage is visible to a reader and no binary needs reviewing.
+ * Feeds damaged documents to the real Tika, POI and PDFBox and asserts the engine's status, so library changes to exceptions or wording fail here.
  */
-// The Tika entry point this exercises declares Exception, so a helper that calls it has to as well.
+// The Tika entry point declares Exception.
 @SuppressWarnings("PMD.SignatureDeclareThrowsException")
 class TikaFailureClassificationTest
 {
-    /**
-     * Each case names a source file and a way of damaging it. The formats chosen are the ones a repository is most likely to hold: OOXML, the legacy OLE2 formats POI reports failures from quite differently, ODF and PDF.
-     */
     static Stream<Arguments> damagedDocuments()
     {
         return Stream.of(
-                // OOXML: the zip survives but its XML does not, so the failure surfaces as a SAX parse error
+                // OOXML: zip survives, XML does not (SAX parse error)
                 Arguments.of("quick.docx", Damage.HALVED),
                 Arguments.of("quick.xlsx", Damage.HALVED),
                 Arguments.of("quick.pptx", Damage.HALVED),
-                // cut short enough that the zip's own structure is gone
+                // zip structure gone
                 Arguments.of("quick.docx", Damage.MOSTLY_REMOVED),
                 Arguments.of("quick.xlsx", Damage.MOSTLY_REMOVED),
-                // the part Tika needs is simply not there
+                // the part Tika needs is missing
                 Arguments.of("quick.pptx", Damage.MOSTLY_REMOVED),
-                // the zip entries are present but their deflate streams are not decodable
+                // zip entries present but deflate streams undecodable
                 Arguments.of("quick.docx", Damage.BODY_SCRAMBLED),
                 Arguments.of("quick.xlsx", Damage.BODY_SCRAMBLED),
                 Arguments.of("quick.pptx", Damage.BODY_SCRAMBLED),
-                // OLE2: POI reports damage as an IndexOutOfBoundsException about a missing block, which is the case a
-                // central list of exception names cannot claim without also claiming every engine bug of that shape
+                // OLE2: POI throws IndexOutOfBoundsException, which only the throw site can classify
                 Arguments.of("quick.doc", Damage.HALVED),
                 Arguments.of("quick.doc", Damage.MOSTLY_REMOVED),
                 Arguments.of("quick.doc", Damage.BODY_SCRAMBLED),
                 // ODF
                 Arguments.of("quick.odt", Damage.HALVED),
                 Arguments.of("quick.odt", Damage.BODY_SCRAMBLED),
-                // PDF: the shape originally reported, where PDFBox cannot find the trailer
+                // PDF: PDFBox cannot find the trailer
                 Arguments.of("quick.pdf", Damage.HALVED),
                 Arguments.of("quick.pdf", Damage.MOSTLY_REMOVED),
                 Arguments.of("quick.pdf", Damage.BODY_SCRAMBLED));
@@ -107,9 +99,6 @@ class TikaFailureClassificationTest
                 () -> name + " " + damage + " was reported as " + e.getStatus() + ": " + describe(e));
     }
 
-    /**
-     * Tika has a type of its own for this, and it has to keep working: an empty file is the commonest way for a failed upload to reach a transform.
-     */
     @Test
     void testAnEmptyDocumentIsTerminal()
     {
@@ -127,9 +116,6 @@ class TikaFailureClassificationTest
         assertEquals(UNPROCESSABLE_ENTITY, e.getStatus(), describe(e));
     }
 
-    /**
-     * The counterweight to the rest of the class. Every assertion above says a document is beyond saving, so one case has to prove the engine can still read a document it was given intact - otherwise a change that reported everything as damaged would pass.
-     */
     @Test
     void testAnUndamagedDocumentStillTransforms() throws Exception
     {
@@ -143,7 +129,7 @@ class TikaFailureClassificationTest
 
     enum Damage
     {
-        /** The file stops half way, as it would if a download were cut short or a disk filled during an upload. */
+        /** The file stops half way, like a cut-short download. */
         HALVED
         {
             @Override
@@ -152,7 +138,7 @@ class TikaFailureClassificationTest
                 return truncate(original, original.length / 2);
             }
         },
-        /** Only the opening fragment survives, so even the container's own structure is missing. */
+        /** Only the opening fragment survives. */
         MOSTLY_REMOVED
         {
             @Override
@@ -161,7 +147,7 @@ class TikaFailureClassificationTest
                 return truncate(original, original.length / 20);
             }
         },
-        /** The header is intact, so the format is still detected and a parser is still chosen, but the content behind it is nonsense. This is the case that reaches furthest into a library before failing. */
+        /** Header intact, so a parser is chosen, but the body is nonsense. */
         BODY_SCRAMBLED
         {
             @Override
@@ -213,9 +199,7 @@ class TikaFailureClassificationTest
         }
     }
 
-    /**
-     * @return every exception in the chain, so a failure report names the library wording the rules have to keep up with rather than just the outermost wrapper.
-     */
+    /** @return every exception in the chain, so a failure shows the library's wording. */
     private static String describe(Throwable e)
     {
         StringBuilder sb = new StringBuilder();

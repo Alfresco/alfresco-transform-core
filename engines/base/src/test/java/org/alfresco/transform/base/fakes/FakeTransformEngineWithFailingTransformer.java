@@ -39,7 +39,7 @@ import org.alfresco.transform.config.TransformConfig;
 import org.alfresco.transform.config.Transformer;
 
 /**
- * Declares the single {@link FakeTransformerFails} transformer, so a failing transform can be driven through the real endpoints.
+ * Declares only {@link FakeTransformerFails}, to drive a failing transform through the real endpoints.
  */
 public class FakeTransformEngineWithFailingTransformer extends AbstractFakeTransformEngine
 {

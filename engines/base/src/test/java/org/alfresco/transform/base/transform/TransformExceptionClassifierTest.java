@@ -62,10 +62,9 @@ import org.alfresco.transform.base.transform.TransformExceptionClassifier.Contri
 import org.alfresco.transform.exceptions.TransformException;
 
 /**
- * Checks that a document the engine cannot parse is reported as {@code 422} so the T-Router stops retrying it, while anything that might be a genuine engine or infrastructure problem stays {@code 500} so it is still retried.
+ * Bad documents are {@code 422} (not retried); anything that might be an engine or infrastructure problem stays {@code 500}.
  */
-// One assertion per rule is what makes a misclassification traceable to the rule that caused it, so the method count
-// follows the number of rules rather than any structure worth splitting. Same reasoning as StreamHandlerTest.
+// One test per rule keeps misclassifications traceable.
 @SuppressWarnings("PMD.TooManyMethods")
 class TransformExceptionClassifierTest
 {
@@ -78,7 +77,7 @@ class TransformExceptionClassifierTest
     @Test
     void testCorruptPdfReportedByPdfBoxIsAContentFailure()
     {
-        // The exact failure originally reported: a .docx renamed to .pdf.
+        // A .docx renamed to .pdf.
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(
                 new IOException("Missing root object specification in trailer.")));
     }
@@ -104,8 +103,7 @@ class TransformExceptionClassifierTest
     @Test
     void testInfrastructureCauseVetoesAMatchingWrapper()
     {
-        // Tika's CompositeParser rethrows every parser IOException as a TikaException, so the wrapper alone must
-        // never decide the outcome - otherwise a full disk permanently drops a transform a retry would have fixed.
+        // Tika's CompositeParser wraps every parser IOException in a TikaException.
         Exception diskFull = new IllegalStateException("TIKA-198: Illegal IOException from parser",
                 new TikaException("TIKA-198: Illegal IOException from parser",
                         new IOException("No space left on device")));
@@ -116,13 +114,11 @@ class TransformExceptionClassifierTest
     @Test
     void testTikaExceptionAloneIsNotTreatedAsAContentFailure()
     {
-        // It is Tika's universal wrapper, not a content failure type.
+        // It is Tika's universal wrapper.
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new TikaException("Unexpected RuntimeException from parser")));
     }
 
-    /**
-     * POI declares a general content failure and then throws a more specific subclass of it. The shipped 5.4.1 throws {@code OldExcelFormatException} where the listed type is its parent {@code OldFileFormatException}, and {@code OLE2NotOfficeXmlFileException} where the listed type is {@code NotOfficeXmlFileException}. Matching only the runtime name missed every one of those.
-     */
+    /** POI throws subclasses of the listed types, e.g. {@code OldExcelFormatException extends OldFileFormatException}. */
     @Test
     void testASubclassOfAListedTypeIsAContentFailure()
     {
@@ -134,21 +130,21 @@ class TransformExceptionClassifierTest
     @Test
     void testASubclassOfAnUnlistedTypeIsStill500()
     {
-        // The walk must not turn every exception into a content failure: nothing in this hierarchy is listed.
+        // Nothing in this hierarchy is listed.
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new UnrecognisedParserException()));
     }
 
     @Test
     void testTheInfrastructureVetoAlsoMatchesSubclasses()
     {
-        // FileSystemException is listed; its subclasses must veto too, as 500-and-retry is the safe direction.
+        // FileSystemException is listed; its subclasses must veto too.
         Exception wrapped = new ZipException("corrupt entry");
         wrapped.initCause(new FileSystemLoopException("/tmp/work"));
 
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(wrapped));
     }
 
-    /** Mirrors POI's {@code OldExcelFormatException extends OldFileFormatException}, where only the parent is listed. */
+    /** Mirrors POI's {@code OldExcelFormatException extends OldFileFormatException}. */
     private static class OldFileFormatException extends IllegalArgumentException
     {
         private static final long serialVersionUID = 1L;
@@ -159,7 +155,7 @@ class TransformExceptionClassifierTest
         private static final long serialVersionUID = 1L;
     }
 
-    /** Nothing in this hierarchy is listed, so the walk must leave it at 500. */
+    /** Nothing in this hierarchy is listed. */
     private static class UnrecognisedParserException extends IllegalStateException
     {
         private static final long serialVersionUID = 1L;
@@ -168,7 +164,7 @@ class TransformExceptionClassifierTest
     @Test
     void testInfrastructureVetoBeatsAContentFailureEarlierInTheChain()
     {
-        // The content rule matches the outermost exception, the veto matches deeper. The veto must win.
+        // Content rule matches the outer exception, the veto a deeper one.
         Exception wrapped = new ZipException("corrupt entry");
         wrapped.initCause(new SocketException("Connection reset"));
 
@@ -185,9 +181,7 @@ class TransformExceptionClassifierTest
     @Test
     void testABadTargetEncodingIsNotAContentFailure()
     {
-        // This is the shape Tika produces for `--targetEncoding=rubbish`. The charset name comes from the caller's
-        // transform options, not from the file, so it fails every document identically. Classifying it as 422 would
-        // let the router drop each of those requests silently instead of surfacing the caller's mistake as a 500.
+        // Tika's shape for `--targetEncoding=rubbish`: a caller mistake that fails every document, so not a 422.
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new IllegalArgumentException(
                 "Unsupported encoding rubbish", new UnsupportedEncodingException("rubbish"))));
     }
@@ -203,8 +197,6 @@ class TransformExceptionClassifierTest
     @Test
     void testAnUnrecognisedFailureDefaultsTo500()
     {
-        // The safe default: retrying a doomed document only wastes time, but not retrying a
-        // recoverable one loses a transform that would have succeeded.
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new RuntimeException("something went wrong")));
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new RuntimeException()));
     }
@@ -222,8 +214,6 @@ class TransformExceptionClassifierTest
     @Test
     void testTheKillSwitchRestoresThePreviousBehaviour()
     {
-        // transform.failure.classification.enabled=false must make every unhandled exception a
-        // 500 again, so a deployment can back the feature out without downgrading.
         classifier.setEnabled(false);
 
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(
@@ -234,8 +224,7 @@ class TransformExceptionClassifierTest
     @Test
     void testTheClassNameListCanBeOverridden()
     {
-        // Replacing rather than appending is deliberate: an entry causing a false positive has
-        // to be removable, not just addable.
+        // Replaces rather than appends, so a false positive can be removed.
         classifier.setClassNames(List.of("IllegalArgumentException"));
 
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new IllegalArgumentException("bad glyph table")));
@@ -248,7 +237,7 @@ class TransformExceptionClassifierTest
         classifier.setMessageFragments(List.of("Unreadable Glyph Table"));
 
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new IOException("unreadable glyph table at offset 12")));
-        // That fragment is no longer configured, so it must fall back to 500.
+        // That fragment is no longer configured.
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(
                 new IOException("Missing root object specification in trailer.")));
     }
@@ -256,7 +245,7 @@ class TransformExceptionClassifierTest
     @Test
     void testAFullyQualifiedClassNameAlsoMatches()
     {
-        // Lets an engine that shades or relocates a library still be configured precisely.
+        // For engines that shade or relocate a library.
         classifier.setClassNames(List.of("java.util.zip.ZipException"));
 
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new ZipException("invalid entry size")));
@@ -268,17 +257,15 @@ class TransformExceptionClassifierTest
         Exception wrapped = new ZipException("corrupt entry");
         wrapped.initCause(new SocketTimeoutException("Read timed out"));
 
-        // SocketTimeoutException is vetoed by default, so the content rule on the wrapper loses.
+        // SocketTimeoutException is vetoed by default.
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(wrapped));
 
-        // Drop it from the veto list and the content rule is allowed to decide instead.
+        // Without the veto, the content rule decides.
         classifier.setInfrastructureClassNames(List.of("SocketException"));
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(wrapped));
     }
 
-    /**
-     * Several content fragments - "corrupt", "damaged", "truncated" - are words an engine might use about itself. Reading them out of any exception would turn an engine bug into a terminal 422 and drop a transform that a retry would have fixed.
-     */
+    /** Words like "corrupt" may appear in an engine's own exceptions, so only parser types are read. */
     @Test
     void testAContentFragmentIsOnlyReadFromAParserFailureType()
     {
@@ -288,14 +275,11 @@ class TransformExceptionClassifierTest
         assertEquals(INTERNAL_SERVER_ERROR,
                 classifier.classify(new IllegalArgumentException("truncated command line")));
 
-        // The same words from the types the parsers actually report content damage with still decide.
+        // The same words from a parser failure type still decide.
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new IOException("corrupt object stream")));
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new TikaException("the document is damaged")));
     }
 
-    /**
-     * The restriction applies only to the content list. The veto has to stay broad, or an infrastructure failure wrapped in something unexpected would no longer be recognised.
-     */
     @Test
     void testTheInfrastructureVetoStillReadsTheMessageOfAnyType()
     {
@@ -303,9 +287,7 @@ class TransformExceptionClassifierTest
                 new IllegalStateException("corrupt entry", new IllegalStateException("No space left on device"))));
     }
 
-    /**
-     * A transformer that answers its library's exception with a status of its own decided that from the type it caught, which cannot show why the type was raised. A malformed document and a disk that filled mid-read reach the same {@code catch} block, and only one of them should be terminal.
-     */
+    /** A malformed document and a full disk can reach the same {@code catch} block; only the cause tells them apart. */
     @Test
     void testAThrowSiteContentFailureIsVetoedWhenItsCauseIsInfrastructural()
     {
@@ -322,15 +304,11 @@ class TransformExceptionClassifierTest
         assertEquals(UNPROCESSABLE_ENTITY, classifier.vetoIfInfrastructural(UNPROCESSABLE_ENTITY,
                 new IllegalStateException("could not parse the message", new EOFException())));
 
-        // A type the content list has never heard of still stands, because the transformer that threw it knew more
-        // than the list does. That is the point of classifying at the throw site.
+        // An unlisted type still stands: the transformer knew more than the lists.
         assertEquals(UNPROCESSABLE_ENTITY, classifier.vetoIfInfrastructural(UNPROCESSABLE_ENTITY,
                 new IllegalStateException("nothing the lists recognise")));
     }
 
-    /**
-     * Only a terminal content failure is worth second-guessing. A {@code 400} is the engine's answer about the request rather than the document, and a {@code 5xx} is retried whatever the cause, so neither needs the veto.
-     */
     @Test
     void testOnlyAnUnprocessableEntityIsSecondGuessed()
     {
@@ -341,9 +319,7 @@ class TransformExceptionClassifierTest
         assertEquals(INTERNAL_SERVER_ERROR, classifier.vetoIfInfrastructural(INTERNAL_SERVER_ERROR, infrastructural));
     }
 
-    /**
-     * Turning classification off has to be a real way back, including for the transformers that decide a status themselves and never reach {@link TransformExceptionClassifier#classify}. Leaving those in place would be worse than either setting, because the switch also stands the veto down - the terminal statuses would survive and the thing that corrects them would not.
-     */
+    /** Disabling must also cover transformers that choose their own status and never reach {@code classify}. */
     @Test
     void testTheKillSwitchAlsoWithdrawsAThrowSiteDecision()
     {
@@ -356,9 +332,7 @@ class TransformExceptionClassifierTest
                 new IllegalStateException("could not parse", new IOException("No space left on device"))));
     }
 
-    /**
-     * Only an inference is withdrawn. A {@code 422} the engine reached by reading the document - no image reader accepts the format, the zip holds no preview, or {@code ProcessHandler.validateOutputLength}'s empty output, which has answered {@code 422} since long before any of this - interpreted no exception, so the switch has nothing to take back and must not downgrade it.
-     */
+    /** A {@code 422} with no cause (e.g. empty output) was determined, not inferred, so it is kept. */
     @Test
     void testTheKillSwitchLeavesADecisionThatWasNotInferredFromACause()
     {
@@ -368,9 +342,6 @@ class TransformExceptionClassifierTest
                 new TransformException(UNPROCESSABLE_ENTITY, "Transform failed to produce an output file")));
     }
 
-    /**
-     * The switch must not reach a status it was never responsible for.
-     */
     @Test
     void testTheKillSwitchLeavesTheOtherStatusesAlone()
     {
@@ -382,9 +353,6 @@ class TransformExceptionClassifierTest
         assertEquals(INTERNAL_SERVER_ERROR, classifier.vetoIfInfrastructural(INTERNAL_SERVER_ERROR, e));
     }
 
-    /**
-     * The veto overturns a decision a transformer author made deliberately, so it cannot be a debug-only event: whoever wrote that {@code catch} block needs to find out it was wrong.
-     */
     @Test
     void testAnOverturnedThrowSiteDecisionIsLoggedAtWarn()
     {
@@ -403,14 +371,11 @@ class TransformExceptionClassifierTest
         classifier.setMessageFragmentClassNames(List.of("IllegalStateException"));
 
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new IllegalStateException("the file is corrupt")));
-        // IOException is no longer configured, so the originally reported shape must fall back to 500.
+        // IOException is no longer configured.
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(
                 new IOException("Missing root object specification in trailer.")));
     }
 
-    /**
-     * What an engine or an extension actually needs: one more name it knows about, without having to restate - and thereafter maintain a copy of - the whole shipped list.
-     */
     @Test
     void testAnEngineCanAddAClassNameWithoutLosingTheShippedOnes()
     {
@@ -461,9 +426,6 @@ class TransformExceptionClassifierTest
                 "Adding to the veto must not drop the defaults");
     }
 
-    /**
-     * The reason contributions are keyed: an engine's packaged additions and a deployment's own must both apply.
-     */
     @Test
     void testEveryContributorsAdditionsApply()
     {
@@ -476,9 +438,7 @@ class TransformExceptionClassifierTest
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new ZipException("corrupt entry")));
     }
 
-    /**
-     * Spring calls the setters of a {@code @ConfigurationProperties} bean in an order the class does not control, so a deployment that replaces a list and an engine that extends it must not be able to cancel each other out depending on which was bound first.
-     */
+    /** Spring does not guarantee setter order for a {@code @ConfigurationProperties} bean. */
     @Test
     void testReplacingAndExtendingTheSameListDoesNotDependOnTheOrderTheyWereBound()
     {
@@ -501,9 +461,6 @@ class TransformExceptionClassifierTest
         assertEquals(INTERNAL_SERVER_ERROR, other.classify(new EOFException()));
     }
 
-    /**
-     * Restarting must not make the list grow, and naming something the defaults or another contributor already cover must be harmless rather than a duplicate in the startup log.
-     */
     @Test
     void testAddingSomethingAlreadyPresentChangesNothing()
     {
@@ -523,9 +480,7 @@ class TransformExceptionClassifierTest
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new ZipException("corrupt entry")));
     }
 
-    /**
-     * Every message contains the empty string, so a blank fragment - one trailing comma in an environment variable - would make every {@code IOException}, a full disk included, a {@code 422} that is never retried.
-     */
+    /** A blank fragment (e.g. a trailing comma in an env var) would match every message. */
     @Test
     void testBlankEntriesAreDroppedWithAWarningRatherThanMatchingEverything()
     {
@@ -579,9 +534,7 @@ class TransformExceptionClassifierTest
                 .count();
     }
 
-    /**
-     * The defaults are inferred rather than harvested from real failures, so the one signal that can correct them - an exception the lists do not recognise - has to survive into a production log, where debug is off.
-     */
+    /** Unrecognised exceptions must reach production logs (debug is off) so the lists can be corrected. */
     @Test
     void testAnUnrecognisedFailureIsNamedAtInfoSoTheListsCanBeCorrected()
     {
@@ -598,9 +551,6 @@ class TransformExceptionClassifierTest
                 "The log must carry the message, as that is what the fragment rules match on, but was: " + message);
     }
 
-    /**
-     * Only unhandled transform failures reach the classifier at all, but a recognised one teaches nothing, so it must not add to the production log.
-     */
     @Test
     void testARecognisedFailureIsNotLoggedAtInfo()
     {
@@ -612,9 +562,7 @@ class TransformExceptionClassifierTest
         assertEquals(List.of(), logged, "A recognised failure is already described by the lists");
     }
 
-    /**
-     * @return a live view of the messages logged by the classifier at or above {@code level}. Undone by {@link #restoreLogger()}, so the level change cannot leak into the other tests sharing this JVM.
-     */
+    /** @return a live view of messages the classifier logs at or above {@code level}; undone by {@link #restoreLogger()}. */
     private List<String> captureLogs(Level level)
     {
         List<String> messages = new ArrayList<>();
@@ -646,9 +594,7 @@ class TransformExceptionClassifierTest
         }
     }
 
-    /**
-     * Stands in for {@code org.apache.tika.exception.TikaException}. Matching is by class <i>name</i>, so a local class of the same simple name exercises the real rule without {@code engines/base} depending on Tika.
-     */
+    /** Stands in for {@code org.apache.tika.exception.TikaException}; matching is by simple name. */
     private static final class TikaException extends Exception
     {
         private static final long serialVersionUID = 1L;
@@ -664,9 +610,7 @@ class TransformExceptionClassifierTest
         }
     }
 
-    /**
-     * Stands in for {@code jakarta.mail.MessagingException}, a type the defaults deliberately do not list. It is the example used for contributions because it is exactly what an engine knows and {@code engines/base} does not.
-     */
+    /** Stands in for {@code jakarta.mail.MessagingException}, which the defaults do not list. */
     private static final class MessagingException extends Exception
     {
         private static final long serialVersionUID = 1L;

@@ -111,15 +111,14 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractorEmbedder
         }
         catch (MessagingException e)
         {
-            // jakarta.mail raises this only when the bytes are not a message it can read, so a retry hands the same
-            // bytes to the same parser. The infrastructure veto still applies on the way out.
+            // Only raised for unreadable bytes, so a retry cannot help; the infrastructure veto still applies.
             throw new TransformException(UNPROCESSABLE_ENTITY,
                     "The source is not a readable RFC822 message: " + e.getMessage(), e);
         }
     }
 
     /**
-     * @return the raw properties read from the message. Separate from {@link #extractMetadata} so that the catch there covers the whole read: {@code MimeMessage} parses lazily, so a malformed header can surface at any accessor rather than at construction.
+     * Separate so the caller's catch covers the whole read: {@code MimeMessage} parses lazily, so a bad header can fail at any accessor.
      */
     private Map<String, Serializable> extractFromMessage(InputStream inputStream)
             throws MessagingException, UnsupportedEncodingException
@@ -146,7 +145,7 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractorEmbedder
     }
 
     /**
-     * Reads the date the message was received, falling back to the last {@code Received} header when the mail implementation did not parse one. That header ends with {@code ";" date-time} (RFC 822).
+     * Reads the received date, falling back to the last {@code Received} header, which ends with {@code ";" date-time}.
      */
     private void putReceivedDate(MimeMessage mimeMessage, Map<String, Serializable> rawProperties)
             throws MessagingException

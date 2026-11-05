@@ -39,16 +39,12 @@ import org.springframework.boot.test.context.TestComponent;
 import org.alfresco.transform.base.TransformManager;
 
 /**
- * A transformer that always fails, throwing whichever exception the source content names. Used to check that {@code TransformExceptionClassifier} is wired into the real response path, so a document failure is reported as {@code 422} while an infrastructure failure stays {@code 500}.
+ * Always fails, throwing the exception the source content names, to check classification on the real response path.
  */
 @TestComponent
 public class FakeTransformerFails extends AbstractFakeTransformer
 {
-    /**
-     * Reads as much as the source will give, treating a read failure as the end of the content rather than as an error.
-     * <p>
-     * Real parsers behave this way: they swallow the underlying {@link IOException} and report their own "unexpected end of file" instead, which is precisely why a half finished download is so hard to tell apart from a corrupt document.
-     */
+    /** Swallows read failures like real parsers do, which then report their own "unexpected end of file". */
     private static byte[] readAsFarAsPossible(InputStream inputStream)
     {
         ByteArrayOutputStream collected = new ByteArrayOutputStream();
@@ -58,7 +54,7 @@ public class FakeTransformerFails extends AbstractFakeTransformer
         }
         catch (IOException e)
         {
-            // Deliberately ignored, see the method javadoc.
+            // Deliberately ignored.
         }
         return collected.toByteArray();
     }
@@ -74,7 +70,7 @@ public class FakeTransformerFails extends AbstractFakeTransformer
         case "corrupt-zip":
             throw new ZipException("invalid stored block lengths");
         case "corrupt-pdf":
-            // The exact failure originally reported: a .docx renamed to .pdf.
+            // A .docx renamed to .pdf.
             throw new IOException("Missing root object specification in trailer.");
         case "infrastructure":
             throw new IllegalStateException("Connection pool shut down");

@@ -52,14 +52,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 /**
- * Pins {@link TransformExceptionClassifier}'s class name and message fragment lists against the libraries they describe.
- * <p/>
- * The lists name types from Tika, POI, PDFBox and Commons Imaging, none of which {@code engines/base} depends on, and match some of them on wording the libraries chose. Neither can be checked by the compiler, so the unit tests next to the classifier can only build exceptions from the same strings the lists were written from - they would stay green if every one of those names were wrong. This test lives in a module that has the libraries on its classpath, damages real documents, and classifies whatever the libraries genuinely raise. A rewording or a renamed exception turns the build red here.
- * <p/>
- * It is in the classifier's own package because the class is package-private; {@code engines/tika} already depends on the {@code engines/base} test jar, so the package is shared.
+ * Pins the classifier's lists to what the real Tika, POI and PDFBox throw, so a renamed exception or reworded message fails the build.
  */
-// Catching Throwable and declaring Exception are the point of this test: what the libraries raise is precisely what it
-// must not assume, and POI reaches for unchecked types the classifier is deliberately not told about.
+// Catching Throwable is the point: the test must not assume what the libraries raise.
 @SuppressWarnings({"PMD.AvoidCatchingThrowable", "PMD.SignatureDeclareThrowsException"})
 class ClassifierLibraryPinningTest
 {
@@ -74,17 +69,17 @@ class ClassifierLibraryPinningTest
     static Stream<Arguments> damageTheListsMustStillRecognise()
     {
         return Stream.of(
-                // Tika's own type for an empty source, which is how a failed upload usually arrives
+                // empty source: Tika's own exception type
                 Arguments.of("an empty source", "quick.docx", truncateTo(Integer.MAX_VALUE)),
-                // the zip behind an OOXML file cut short, reported through java.util.zip
+                // OOXML zip cut short: java.util.zip
                 Arguments.of("a docx with its zip structure gone", "quick.docx", truncateTo(20)),
                 Arguments.of("an xlsx with its zip structure gone", "quick.xlsx", truncateTo(20)),
-                // the XML inside an OOXML file cut short, which arrives as a SAX parse error
+                // OOXML XML cut short: SAX parse error
                 Arguments.of("a docx with unterminated xml", "quick.docx", truncateTo(2)),
                 Arguments.of("an xlsx with unterminated xml", "quick.xlsx", truncateTo(2)),
-                // an ODF file whose zip end header has gone
+                // ODF zip end header gone
                 Arguments.of("an odt cut in half", "quick.odt", truncateTo(2)),
-                // the shape originally reported: PDFBox cannot find the trailer and says so only in the message
+                // PDFBox missing trailer, matched only by message
                 Arguments.of("a pdf cut in half", "quick.pdf", truncateTo(2)),
                 Arguments.of("a pdf with almost nothing left", "quick.pdf", truncateTo(20)));
     }
@@ -99,9 +94,7 @@ class ClassifierLibraryPinningTest
                 () -> description + " is no longer recognised by the classification lists." + describe(raised));
     }
 
-    /**
-     * PDFBox reports structural damage as a plain {@code IOException} whose message is the only signal, so the fragment matching it is the most fragile entry in the whole configuration. Going through PDFBox directly, rather than through Tika's wrapper, keeps the assertion on PDFBox's own wording.
-     */
+    /** Calls PDFBox directly so the assertion is on PDFBox's own wording, the most fragile fragment. */
     @Test
     void testPdfBoxStillWordsAMissingTrailerTheWayTheFragmentsExpect() throws IOException
     {
@@ -113,9 +106,7 @@ class ClassifierLibraryPinningTest
                 () -> "The message fragments no longer match what PDFBox reports." + describe(raised));
     }
 
-    /**
-     * POI announces this one by type, so it pins a name in the class list against the name POI actually uses. The list holds the superclass, which only works because POI still extends it.
-     */
+    /** The list holds the superclass, so this also checks POI still extends it. */
     @Test
     void testPoiStillNamesAnOle2FileOfferedAsOoxml() throws IOException
     {
@@ -147,7 +138,7 @@ class ClassifierLibraryPinningTest
     }
 
     /**
-     * The case the central lists are deliberately not asked to decide. POI reports a damaged OLE2 file as an {@code IndexOutOfBoundsException} about a missing block, which is also exactly what an engine bug looks like, so claiming it centrally would risk dropping documents a retry would have saved. The engine that owns the library answers it at the throw site instead - see {@code TikaFailureClassificationTest}. Asserting the fallback here keeps that boundary visible: if a later change did add the type to the lists, this test says so.
+     * The central lists leave POI's {@code IndexOutOfBoundsException} at 500; the Tika engine handles it where it is thrown.
      */
     @Test
     void testDamageOnlyPoiCanRecogniseIsLeftToTheEngineThatOwnsPoi() throws IOException
@@ -214,9 +205,7 @@ class ClassifierLibraryPinningTest
         }
     }
 
-    /**
-     * @return every exception in the chain, so a failure names the library wording the rules have to keep up with rather than just the outermost wrapper.
-     */
+    /** @return every exception in the chain, so a failure shows the library's wording. */
     private static String describe(Throwable e)
     {
         StringBuilder sb = new StringBuilder();

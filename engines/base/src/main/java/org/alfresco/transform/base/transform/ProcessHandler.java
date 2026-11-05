@@ -167,15 +167,11 @@ abstract class ProcessHandler extends FragmentHandler
     }
 
     /**
-     * Refuses to report a terminal status when the source never arrived in full, whatever decided that status.
-     * <p/>
-     * A remote source - a Direct Access URL or the Shared File Store - is read lazily inside the transform, so a download that dies part way through is reported by the parser as whatever a half file looks like: {@code EOFException}, {@code ZipException}, PDFBox's {@code "Error: End-of-File"}. Those are on the content list and would otherwise be answered with {@code 422}, which the T-Router never retries.
-     * <p/>
-     * It applies to both failure paths. The same truncated read can surface as a {@link TransformException} carrying a status of its own - {@code FileManager.createSourceFile} wraps it when a transformer materialises the stream to a file first - and that status is no more trustworthy when the bytes never arrived. The stream knows better, so it gets the final say either way.
+     * Forces {@code 500} when the remote source was truncated, as a half-downloaded file looks corrupt but a retry can succeed.
      */
     private HttpStatus overrideIfTheSourceNeverArrived(HttpStatus status)
     {
-        // A 5xx is already retryable, so there is nothing to correct and no need to examine the stream.
+        // A 5xx is already retryable.
         if (status == null || status.is5xxServerError()
                 || !(inputStream instanceof SourceDownloadStatus source) || !source.sourceDownloadFailed())
         {
@@ -224,7 +220,7 @@ abstract class ProcessHandler extends FragmentHandler
 
     /**
      * @param status
-     *            {@code e}'s own status, unless the source never arrived in full, in which case {@code 500} so the T-Router can retry. See {@link #overrideIfTheSourceNeverArrived}.
+     *            {@code e}'s status, or {@code 500} if the source was truncated.
      */
     protected void handleTransformException(TransformException e, HttpStatus status)
     {
@@ -233,7 +229,7 @@ abstract class ProcessHandler extends FragmentHandler
 
     /**
      * @param status
-     *            the status {@link TransformExceptionClassifier} derived from {@code e}: {@code 422} when the supplied document is at fault, otherwise {@code 500}.
+     *            the classified status: {@code 422} for a bad document, otherwise {@code 500}.
      */
     protected void handleException(Exception e, HttpStatus status)
     {

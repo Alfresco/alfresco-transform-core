@@ -49,21 +49,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
- * Decides whether an exception thrown by a {@link org.alfresco.transform.base.CustomTransformer} means "this document cannot be transformed" or "this engine is unwell".
+ * Classifies a transformer exception as a bad document ({@code 422}, not retried by the T-Router) or an engine failure ({@code 500}, retried).
  * <p/>
- * The T-Router only retries 5xx and 408, so reporting a bad document as {@code 500} has it retried with a growing backoff for something that can never succeed. {@code 422} already carries "bad document" elsewhere in the engine - see {@code ProcessHandler.validateOutputLength}.
+ * Unrecognised stays {@code 500}; an infrastructure match in the cause chain wins. Matches by class name, so base has no Tika/PDFBox/POI dependency.
  * <p/>
- * <b>Deliberately conservative: anything not positively recognised stays {@code 500}.</b> A content failure reported as an outage only costs retries; an outage reported as a content failure drops a transform a retry would have fixed. Because libraries wrap - Tika's {@code CompositeParser} rethrows everything as {@code TikaException} - an infrastructure match anywhere in the cause chain vetoes the classification, and is checked first.
- * <p/>
- * Matching is by class <i>name</i>, since {@code engines/base} must not depend on Tika, PDFBox or POI.
- * <p/>
- * The lists came from reported failures rather than an exhaustive corpus, so they will need adjusting. None of them is written down here: what the engine ships with is data, held in {@link ClassificationDefaults#RESOURCE}, and what a deployment runs is settled by the properties under {@code transform.failure.classification} - setting a list <i>replaces</i> the shipped one, and a named entry under {@code contributions} extends it. So a correction needs neither a release nor a rebuild. The effective lists are logged at startup.
+ * Defaults are in {@link ClassificationDefaults#RESOURCE}; properties under {@code transform.failure.classification} replace a list, and {@code contributions} extend it.
  */
 @Component
 @ConfigurationProperties(prefix = "transform.failure.classification")
-// `logger` is the convention throughout this codebase. The method and complexity counts are those of a
-// configuration-properties bean: five configurable lists and their contributions, around a decision that is four
-// short private methods.
+// `logger` is the codebase convention; the method count is that of a configuration-properties bean.
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TooManyMethods", "PMD.GodClass"})
 class TransformExceptionClassifier
 {
@@ -74,21 +68,19 @@ class TransformExceptionClassifier
     private List<String> messageFragments = new ArrayList<>(ClassificationDefaults.MESSAGE_FRAGMENTS);
 
     /**
-     * Entries added on top of the lists above rather than in place of them, keyed by whoever added them: an engine uses its own name, a deployment picks another.
-     * <p/>
-     * A map rather than a second set of lists because Spring merges a map key by key across property sources but replaces a list wholesale. With lists, a deployment adding one name at runtime would silently discard everything an engine had packaged. Held apart from the lists they extend so the effective lists do not depend on the order Spring called the setters in. Sorted by name, so the effective lists are the same on every start.
+     * Additions to the lists above, keyed by contributor. A map because Spring merges maps key by key across property sources but replaces lists wholesale.
      */
     private Map<String, Contribution> contributions = Map.of();
 
-    /** Rebuilt from {@link #classNames} after binding, as it is only ever used for lookups. */
+    /** Lookup copy of {@link #classNames} plus contributions. */
     private Set<String> classNameSet = new LinkedHashSet<>(ClassificationDefaults.CLASS_NAMES);
-    /** Lower cased copy of {@link #messageFragments}, so the comparison does not re-lower per call. */
+    /** Lower-cased copy of {@link #messageFragments} plus contributions. */
     private List<String> lowerCaseMessageFragments = lowerCase(ClassificationDefaults.MESSAGE_FRAGMENTS);
 
     private List<String> messageFragmentClassNames = new ArrayList<>(
             ClassificationDefaults.MESSAGE_FRAGMENT_CLASS_NAMES);
 
-    /** Rebuilt from {@link #messageFragmentClassNames} after binding, as it is only ever used for lookups. */
+    /** Lookup copy of {@link #messageFragmentClassNames} plus contributions. */
     private Set<String> messageFragmentClassNameSet = new LinkedHashSet<>(
             ClassificationDefaults.MESSAGE_FRAGMENT_CLASS_NAMES);
 
@@ -121,9 +113,7 @@ class TransformExceptionClassifier
     }
 
     /**
-     * @param e
-     *            the exception thrown while transforming.
-     * @return {@code 422} if {@code e} or any of its causes positively identifies a problem with the supplied document, otherwise {@code 500}.
+     * @return {@code 422} if {@code e} or a cause positively identifies a bad document, otherwise {@code 500}.
      */
     HttpStatus classify(Throwable e)
     {
@@ -134,8 +124,7 @@ class TransformExceptionClassifier
 
         List<Throwable> causeChain = causeChain(e);
 
-        // An infrastructure failure anywhere in the chain wins, however it was wrapped. Without this a wrapper such as
-        // Tika's "TIKA-198: Illegal IOException from ..." would be matched before its real cause was ever examined.
+        // Checked first, so a wrapper (e.g. Tika's "Illegal IOException from ...") cannot hide an infrastructure cause.
         String veto = infrastructureVeto(causeChain);
         if (veto != null)
         {
@@ -157,17 +146,7 @@ class TransformExceptionClassifier
     }
 
     /**
-     * Refuses a terminal status when the cause chain shows the engine or its environment failed, rather than the document.
-     * <p/>
-     * {@link #classify(Throwable)} applies this to what it classifies itself. This entry point exists for a status that arrived already decided - a {@code TransformException} a transformer threw - because that decision was made by a {@code catch} block that saw only the type it caught. A transformer that answers {@code MessagingException} with {@code 422} is right about a malformed {@code .eml} and wrong about the same exception raised because the disk filled. Only the cause chain tells those apart, and a wrong {@code 422} is never retried.
-     * <p/>
-     * Other statuses are returned untouched: a {@code 400} is already the engine's considered answer, and a {@code 5xx} is retryable regardless.
-     *
-     * @param status
-     *            the status the transformer asked for.
-     * @param e
-     *            the exception it threw.
-     * @return {@code status}, or {@code 500} if the chain shows an infrastructure failure.
+     * Turns a transformer's own {@code 422} into {@code 500} when its cause chain shows an infrastructure failure (e.g. a full disk).
      */
     HttpStatus vetoIfInfrastructural(HttpStatus status, Throwable e)
     {
@@ -190,19 +169,7 @@ class TransformExceptionClassifier
     }
 
     /**
-     * Withdraws a {@code 422} a transformer <i>inferred</i> from an exception it caught, leaving one it determined by looking at the document.
-     * <p/>
-     * Turning classification off has to be a genuine way back to the previous behaviour. A transformer deciding its own status sidesteps {@link #classify(Throwable)}, so without this the switch would silence the central lists while those decisions carried on - and would take the infrastructure veto down with them, leaving the terminal statuses in place and removing the one thing that corrects them.
-     * <p/>
-     * The cause tells the two kinds apart:
-     * <ul>
-     * <li><b>Inferred, so withdrawn.</b> A library threw and a {@code catch} block read that as a statement about the document.</li>
-     * <li><b>Determined, so kept.</b> The engine read the document and found it wanting - no image reader accepts the format, the zip holds no preview, the transform produced nothing from a non-empty source. No exception was interpreted, so there is nothing to withdraw.</li>
-     * </ul>
-     *
-     * @param e
-     *            the exception the transformer threw.
-     * @return {@code 500} if the {@code 422} was inferred from a cause, otherwise {@code 422}.
+     * When disabled, turns a {@code 422} with a cause back into {@code 500}; a {@code 422} without a cause was the engine's own and is kept.
      */
     private HttpStatus withoutInferredClassification(Throwable e)
     {
@@ -234,9 +201,7 @@ class TransformExceptionClassifier
         return null;
     }
 
-    /**
-     * @return {@code e} and its causes, stopping at the self referencing chains some libraries produce.
-     */
+    /** @return {@code e} and its causes, guarding against cyclic chains. */
     private static List<Throwable> causeChain(Throwable e)
     {
         List<Throwable> causeChain = new ArrayList<>();
@@ -253,7 +218,7 @@ class TransformExceptionClassifier
      */
     private String infrastructureMatch(Throwable t)
     {
-        // Deliberately unrestricted: an infrastructure failure must be recognised however it was wrapped.
+        // Unlike content matching, messages of any type are checked.
         String classMatch = classNameMatch(t, infrastructureClassNameSet);
         return classMatch != null ? classMatch : messageMatch(t, lowerCaseInfraMessageFragments);
     }
@@ -268,7 +233,7 @@ class TransformExceptionClassifier
         {
             return classMatch;
         }
-        // Only the parser types get their message read. See messageFragmentClassNames.
+        // Only messages of messageFragmentClassNames types are read.
         if (classNameMatch(t, messageFragmentClassNameSet) == null)
         {
             return null;
@@ -278,10 +243,7 @@ class TransformExceptionClassifier
 
     private static String classNameMatch(Throwable t, Set<String> classNames)
     {
-        // Walk the superclasses, not just the runtime type. The parser libraries declare a general content failure
-        // and then throw a more specific subclass of it: POI throws `OldExcelFormatException` where the listed type
-        // is its parent `OldFileFormatException`. Matching the runtime name alone missed every one of those. Only
-        // names are compared, never types, so this keeps working for an engine that shades or relocates a library.
+        // Superclasses too: libraries throw subclasses of the listed type (POI's OldExcelFormatException).
         for (Class<?> type = t.getClass(); type != null && type != Object.class; type = type.getSuperclass())
         {
             if (classNames.contains(type.getSimpleName()))
@@ -311,9 +273,6 @@ class TransformExceptionClassifier
                 .orElse(null);
     }
 
-    /**
-     * Logged at debug, because the lists already hold the answer and the decision can be replayed from them.
-     */
     private void logDecision(HttpStatus status, Throwable e, String reason)
     {
         if (logger.isDebugEnabled())
@@ -322,9 +281,7 @@ class TransformExceptionClassifier
         }
     }
 
-    /**
-     * Logged at info rather than debug, because this is the only case that names an exception the lists do not yet know about, and debug is not enabled in production. Only unhandled transform failures reach here, so the volume follows the failure rate rather than the traffic rate.
-     */
+    /** Info, not debug: this is how unknown exceptions surface in production; volume follows the failure rate. */
     private void logUnrecognised(Throwable e)
     {
         if (logger.isInfoEnabled())
@@ -387,11 +344,7 @@ class TransformExceptionClassifier
     }
 
     /**
-     * Adds to the lists instead of replacing them.
-     * <p/>
-     * Setting a list replaces it, which is right for a deployment overruling a decision but wrong for the commoner case: an engine or a deployment that knows one more exception its libraries raise. Restating the whole list to add a single name means every later correction to the defaults has to be copied into everything that did so.
-     * <p/>
-     * Each contributor has its own key, so contributions from different property sources - an engine's packaged file and a deployment's mounted one, say - are all kept. A deployment can still overrule an engine's contribution by setting the same key, and remove it by setting that key's lists empty. Setting a contribution and the list it extends together is allowed, and the result does not depend on binding order.
+     * Adds to the lists rather than replacing them. Different keys are all kept; reusing a key overrides it.
      */
     public void setContributions(Map<String, Contribution> contributions)
     {
@@ -413,9 +366,7 @@ class TransformExceptionClassifier
         rebuildInfrastructureMessageFragments();
     }
 
-    /**
-     * Trims every entry and drops blank ones, which a deployment can supply without meaning to - a trailing comma in an environment variable is enough. Dropping them is not cosmetic: every message contains the empty string, so a blank fragment would make every {@code IOException}, a full disk included, a {@code 422} that is never retried; and an anonymous exception class has an empty simple name, so a blank class name would match it.
-     */
+    /** Trims entries and drops blanks (e.g. a trailing comma in an env var): a blank fragment would match every message. */
     private static List<String> sanitise(String property, List<String> values)
     {
         if (values == null)
@@ -472,9 +423,7 @@ class TransformExceptionClassifier
                 .toList();
     }
 
-    /**
-     * @return {@code base} followed by the entries of {@code additions} it does not already hold, so repeating something the defaults already cover changes nothing.
-     */
+    /** @return {@code base} plus the {@code additions} it does not already hold. */
     private static List<String> concat(List<String> base, List<String> additions)
     {
         if (additions.isEmpty())
@@ -530,9 +479,7 @@ class TransformExceptionClassifier
         return contributions;
     }
 
-    /**
-     * One contributor's additions. Each list extends the classifier's list of the same name.
-     */
+    /** One contributor's additions; each list extends the classifier's list of the same name. */
     public static class Contribution
     {
         private List<String> classNames = List.of();

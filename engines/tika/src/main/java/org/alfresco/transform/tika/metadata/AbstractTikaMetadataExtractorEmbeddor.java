@@ -304,15 +304,7 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
     }
 
     /**
-     * Runs the parse, and reports a document the parser could not read as {@code 422} rather than letting it be retried.
-     * <p/>
-     * Metadata extraction is its own transform type with its own path - it never reaches {@code Tika.transform}, so the classification done there does not apply - and the repository asks for an extract on nearly every upload, so an unreadable document arrives here first and most often.
-     * <p/>
-     * Everything between the call and the catch belongs to the parser. {@code TikaException} and {@code SAXException} are the declared failures; the bare runtime types matter just as much, because a damaged OLE2 document makes POI throw {@code NullPointerException} or {@code ArrayIndexOutOfBoundsException} out of its own block table, which no central list would ever match.
-     * <p/>
-     * {@code IOException} is deliberately left through: it is equally likely to be the source download dying part way through, and the central message fragments already separate the readable cases such as PDFBox's missing trailer.
-     * <p/>
-     * The cause is preserved, so the infrastructure veto can still overturn this to {@code 500}.
+     * Reports an unreadable document as {@code 422}. {@code IOException} is left to the central classifier, as it may be a failed download.
      */
     private void parseOrReportUnreadable(Parser parser, InputStream inputStream, ContentHandler handler,
             Metadata metadata, ParseContext context, String sourceMimetype) throws IOException

@@ -244,22 +244,13 @@ public class Tika
         }
         catch (SAXException | TikaException e)
         {
-            // Reaching here means Tika chose a parser for these bytes and that parser gave up on them. Tika's wording
-            // varies with what went wrong underneath, and the useful detail is often an IndexOutOfBoundsException
-            // from POI several causes down, which no central list could safely claim. This is the only place that
-            // knows the failure came out of parsing the supplied document.
-            //
-            // The cause is kept, so the infrastructure veto can still restore a 500. A buggy parser also lands here,
-            // but a retry cannot fix a deterministic parser bug either.
+            // The chosen parser rejected these bytes; a retry cannot help. The cause is kept for the infrastructure veto.
             throw new TransformException(UNPROCESSABLE_ENTITY,
                     "The source could not be parsed: " + e.getMessage(), e);
         }
         catch (IOException e)
         {
-            // Deliberately not classified here. A bare IOException at this point is as likely to be the output stream
-            // or the source download as the document - PDFBox's "Missing root object specification in trailer" shares
-            // the type with a disk that filled mid-write. The central classifier reads the message, which is the only
-            // thing that separates them.
+            // Not classified here: could be the document, the output or the download; the classifier reads the message.
             throw new IllegalStateException(e.getMessage(), e);
         }
     }

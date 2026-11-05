@@ -36,11 +36,9 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 /**
- * The lists {@link TransformExceptionClassifier} ships with, read from {@value #RESOURCE} on the classpath.
+ * The default lists for {@link TransformExceptionClassifier}, read once from {@value #RESOURCE} on the classpath.
  * <p/>
- * They are data rather than code - a few hundred exception names and message fragments, each needing an explanation of why it is listed or deliberately absent - so they live in a file that can be read and reviewed without Java. Keeping them out of the class also stops a correction looking like a behaviour change in a diff.
- * <p/>
- * The file is <i>not</i> a Spring property source, and is read once however many engines are in the image. It supplies the starting point; what a deployment actually runs is settled by the properties under {@code transform.failure.classification}, which replace or extend these. Giving the file the same key path as those properties is what makes the two readable together.
+ * Not a Spring property source: properties under {@code transform.failure.classification} replace or extend these.
  */
 final class ClassificationDefaults
 {
@@ -59,11 +57,7 @@ final class ClassificationDefaults
     private ClassificationDefaults()
     {}
 
-    /**
-     * Every failure here stops the engine starting.
-     * <p/>
-     * The alternative - carrying on with empty lists - is worse than it looks: nothing would ever match, every failure would be reported as {@code 500}, and the T-Router would go back to retrying documents that can never succeed. That is the behaviour this classifier exists to correct, and it would return silently.
-     */
+    /** Fails startup rather than silently running with empty lists, which would make every failure a {@code 500}. */
     private static Object load()
     {
         try (InputStream stream = ClassificationDefaults.class.getResourceAsStream(RESOURCE))
@@ -73,8 +67,7 @@ final class ClassificationDefaults
                 throw new IllegalStateException(RESOURCE + " is not on the classpath. It is packaged in the "
                         + "engines/base jar, so an engine that repackages or filters resources needs to keep it.");
             }
-            // Safe rather than the default constructor: this is read before anything else runs, and the file is only
-            // ever five lists of strings, so there is no reason to let it name a type.
+            // SafeConstructor: the file only holds lists of strings, so it must not be able to name a type.
             return new Yaml(new SafeConstructor(new LoaderOptions())).load(stream);
         }
         catch (IOException e)
@@ -83,9 +76,7 @@ final class ClassificationDefaults
         }
     }
 
-    /**
-     * @return the mapping under the key path the configuration properties use. Sharing the path is what lets the file and an override be read together.
-     */
+    /** @return the mapping under the same key path as the configuration properties. */
     @SuppressWarnings("unchecked")
     static Map<String, Object> section(Object root)
     {
@@ -118,9 +109,7 @@ final class ClassificationDefaults
                 .toList();
     }
 
-    /**
-     * A blank entry would be far from harmless: message matching asks whether the message <i>contains</i> the fragment, so an empty one matches every message and would make every failure a terminal {@code 422}.
-     */
+    /** Rejects blanks: an empty fragment is contained in every message, making every failure a {@code 422}. */
     private static String entryText(String key, Object entry)
     {
         if (!(entry instanceof String text) || text.isBlank())

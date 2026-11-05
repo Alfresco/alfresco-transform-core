@@ -36,42 +36,12 @@ logging:
 filestore-url: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
 
 transform:
-  # How an exception from a CustomTransformer is turned into an HTTP status. A recognised
-  # content failure becomes 422 so the T-Router stops retrying a document that can never
-  # succeed; everything else stays 500 and is still retried.
-  #
-  # Defaults are shipped in transform-failure-classification-defaults.yaml, so omitting this
-  # block is safe. Setting a list REPLACES them. To ADD to them instead, which is what an
-  # engine, extension or deployment that knows one more exception usually wants, put the
-  # entries under contributions.<name>.<list> with a name of your own:
-  #
-  #   contributions:
-  #     site:
-  #       class-names: [MyParserException]
-  #
-  # Each name is kept separately, so an engine's packaged contribution (t-aspose ships
-  # "aspose") and a deployment's own are both applied wherever each comes from. Setting an
-  # engine's name overrules that engine's lists, and an empty list removes them. A list and a
-  # contribution may be set together. Names should be lower case letters and digits only, so
-  # they can also be set from environment variables, for example
-  # TRANSFORM_FAILURE_CLASSIFICATION_CONTRIBUTIONS_SITE_CLASSNAMES=MyParserException.
-  # Variables split on commas, so an entry containing one needs the indexed form
-  # (..._CLASSNAMES_0_=...) or SPRING_APPLICATION_JSON. Blank entries are ignored.
-  #
-  # The defaults file uses these same keys, so copying it out of the jar, editing it and
-  # mounting it with SPRING_CONFIG_ADDITIONAL_LOCATION replaces the defaults at runtime -
-  # including removing a single entry. The effective lists are logged at startup, each
-  # decision at DEBUG, and anything unrecognised at INFO so the defaults can be corrected
-  # from real deployments.
-  #
-  # infrastructure-class-names and infrastructure-message-fragments are a safety veto: a
-  # match anywhere in the cause chain forces 500 even if a content rule matched, so a
-  # library wrapper cannot hide a disk, network or interrupt failure. message-fragments are
-  # read only from the types in message-fragment-class-names, so words such as "corrupt" in
-  # an engine's own exception are not mistaken for a statement about the document; the veto
-  # is deliberately not restricted this way.
+  # Maps transformer exceptions to HTTP status: recognised content failures -> 422 (not retried), else 500.
+  # Defaults are in transform-failure-classification-defaults.yaml; setting a list replaces it. To add entries use
+  # contributions.<name>.<list>, e.g. TRANSFORM_FAILURE_CLASSIFICATION_CONTRIBUTIONS_SITE_CLASSNAMES=MyParserException.
   failure:
     classification:
+      # false disables classification: failures inferred from exceptions are reported as 500. Default: true.
       enabled: ${TRANSFORM_FAILURE_CLASSIFICATION_ENABLED:true}
   endpoint:
     test:

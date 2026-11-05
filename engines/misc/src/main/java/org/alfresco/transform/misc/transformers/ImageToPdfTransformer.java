@@ -128,11 +128,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
     }
 
     /**
-     * ImageIO reports every kind of damage past the header as an {@link IIOException}, whose text is the reader's own wording and so cannot be matched reliably by a central list. Naming it terminal here is safe because this is the one place that knows the exception came from decoding the supplied image.
-     * <p/>
-     * Not every reader is that disciplined. A TIFF damaged inside the image data makes the JDK's reader index past the end of its own buffer and throw a bare {@link ArrayIndexOutOfBoundsException} - a type nothing would put on a content list, because out of this context it reads as an engine bug. Here it cannot be: the only thing between the try and the catch is the decoder working on the supplied bytes.
-     * <p/>
-     * The original exception is kept as the cause, so the infrastructure veto can still restore a {@code 500}.
+     * Decode failures are the image's fault ({@link IIOException}, or {@link ArrayIndexOutOfBoundsException} for a damaged TIFF).
      */
     @SuppressWarnings("PMD.ExcessiveParameterList") // the alternative is a parameter object for a single call site
     private void readAndDrawImages(PDDocument pdfDocument, ImageReader imageReader, String imageName, String mimetype,
@@ -167,8 +163,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         final Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(imageInputStream);
         if (imageReaders == null || !imageReaders.hasNext())
         {
-            // ImageIO picks a reader from the bytes themselves, so having none means the header is not the format the
-            // request claimed, or is damaged beyond recognition. Either way the same bytes will fail the same way.
+            // ImageIO picks readers from the bytes, so none means a wrong or damaged header.
             throw new TransformException(UNPROCESSABLE_ENTITY, String.format(INVALID_IMAGE_ERROR_MESSAGE, imageName, mimetype));
         }
         while (imageReaders.hasNext())
@@ -181,7 +176,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
                 return reader;
             }
         }
-        // Every reader that recognised the format is denied, which is a property of the format, not of this attempt.
+        // Every matching reader is denied: a property of the format, so not retryable.
         throw new TransformException(UNPROCESSABLE_ENTITY, String.format(INVALID_IMAGE_ERROR_MESSAGE, imageName, mimetype));
     }
 

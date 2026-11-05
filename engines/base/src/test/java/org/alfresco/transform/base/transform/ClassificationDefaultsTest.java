@@ -40,11 +40,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 /**
- * Guards {@code transform-failure-classification-defaults.yaml}, which holds the lists {@link TransformExceptionClassifier} ships with.
- * <p/>
- * Moving them out of the class made them easy to correct, which is the point, and also easy to get wrong in ways the compiler no longer catches: a dropped key, an entry left blank, a list emptied. Each of those fails differently and none of them is loud, so they are checked here instead.
- * <p/>
- * What the entries <i>mean</i> is covered by {@code TransformExceptionClassifierTest} and, against the libraries that raise them, by {@code ClassifierLibraryPinningTest} in {@code engines/tika}.
+ * Guards the structure of {@code transform-failure-classification-defaults.yaml}: missing keys, blank or repeated entries, emptied lists.
  */
 class ClassificationDefaultsTest
 {
@@ -91,9 +87,7 @@ class ClassificationDefaultsTest
     }
 
     /**
-     * The two absences the file explains at length, pinned so that editing it cannot quietly undo them.
-     * <p/>
-     * {@code UnsupportedEncodingException} names a charset that is missing from the JVM, and that name comes from the caller's {@code targetEncoding} option rather than the document, so listing it would make one client-side typo permanently discard every request that client sent. {@code TikaException} is what {@code CompositeParser} rethrows everything as, so listing it would make a disk-full or a socket error terminal.
+     * {@code UnsupportedEncodingException} comes from the caller's options; {@code TikaException} wraps I/O failures too.
      */
     @Test
     void testTheDeliberatelyUnlistedTypesAreStillUnlisted()
@@ -102,9 +96,6 @@ class ClassificationDefaultsTest
         assertFalse(ClassificationDefaults.CLASS_NAMES.contains("TikaException"));
     }
 
-    /**
-     * {@code TikaException} is read for a message, which is only safe because the infrastructure veto has already examined the whole chain, but it must never be a content failure by name alone.
-     */
     @Test
     void testTikaExceptionIsReadForAMessageRatherThanMatchedByName()
     {
@@ -153,9 +144,6 @@ class ClassificationDefaultsTest
         assertThrows(IllegalStateException.class, () -> ClassificationDefaults.list(section, "message-fragments"));
     }
 
-    /**
-     * A YAML list of numbers or nested maps is a mistake, not an instruction to call {@code toString()} on them.
-     */
     @Test
     void testANonTextEntryIsRejected()
     {

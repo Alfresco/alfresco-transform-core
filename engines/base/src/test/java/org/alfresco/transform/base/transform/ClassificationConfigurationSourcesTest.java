@@ -64,14 +64,9 @@ import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.springframework.core.io.DefaultResourceLoader;
 
 /**
- * Proves every way a deployment can configure the classifier, and how they combine with the shipped defaults and with each other.
- * <p/>
- * {@code TransformExceptionClassifierBindingTest} proves the properties bind. It does so through {@code @SpringBootTest(properties)}, which is none of the routes an operator actually has, so it says nothing about whether a mounted file is found, how an environment variable spells a list, or which source wins when two disagree. Each case here starts a real {@link org.springframework.boot.SpringApplication} - so real config-data loading, relaxed binding and precedence - with the sources fully controlled: the process environment and system properties are replaced rather than inherited, so a variable set on the build machine cannot leak in.
- * <p/>
- * An engine's own {@code application-default.yaml} is modelled the way it really arrives, as a classpath resource in a separate jar, by putting a directory holding it on a child class loader.
+ * Checks each configuration route (files, env vars, system properties, args, JSON) and how they combine, using a real {@code SpringApplication}.
  */
-// The method count is the size of the matrix being proven - every source crossed with every way of combining them -
-// rather than a structure worth splitting.
+// One test per cell of the source/combination matrix.
 @SuppressWarnings("PMD.TooManyMethods")
 class ClassificationConfigurationSourcesTest
 {
@@ -82,10 +77,10 @@ class ClassificationConfigurationSourcesTest
     @TempDir
     Path tempDir;
 
-    /** Every route by which a deployment can supply a property, other than the engine's packaged file. */
+    /** Every route a deployment can supply a property by, other than the engine's packaged file. */
     enum Source
     {
-        /** A directory mounted into the container and named by {@code SPRING_CONFIG_ADDITIONAL_LOCATION}, the documented route. */
+        /** A mounted directory named by {@code SPRING_CONFIG_ADDITIONAL_LOCATION}. */
         EXTERNAL_DIRECTORY,
         /** A single file named by {@code --spring.config.additional-location}. */
         EXTERNAL_FILE,
@@ -165,9 +160,7 @@ class ClassificationConfigurationSourcesTest
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new ZipException("would be 422 if enabled")));
     }
 
-    /**
-     * The variable {@code application.yaml} documents, as distinct from the relaxed-binding name of the property.
-     */
+    /** The variable {@code application.yaml} documents, not the relaxed-binding name. */
     @Test
     void testTheDocumentedKillSwitchVariableWorks()
     {
@@ -195,9 +188,7 @@ class ClassificationConfigurationSourcesTest
     // ---------------------------------------------------------------------------------------------------------------
     // Static + engine-packaged + runtime
 
-    /**
-     * The case an Aspose deployment is in: the engine ships signatures for its own libraries, and an operator adds one they have found. Both must survive.
-     */
+    /** The engine ships its own entries and an operator adds one; both must survive. */
     @ParameterizedTest
     @EnumSource(Source.class)
     void testAnOperatorsContributionDoesNotDiscardAnEnginesContribution(Source source)
@@ -213,9 +204,6 @@ class ClassificationConfigurationSourcesTest
         assertEquals(Set.of("engine", "site"), classifier.getContributions().keySet(), source.name());
     }
 
-    /**
-     * Contributions arrive from wherever is convenient - here the engine's jar, a mounted file and an environment variable at once - and all of them apply.
-     */
     @Test
     void testContributionsFromThreeSourcesAllApply()
     {
@@ -232,9 +220,7 @@ class ClassificationConfigurationSourcesTest
         assertEquals(Set.of("engine", "site", "team"), classifier.getContributions().keySet());
     }
 
-    /**
-     * Setting an engine's key overrules that engine's entries list by list: what the operator sets replaces the engine's, and what they leave alone is kept.
-     */
+    /** Overruling is per list: lists the operator sets replace the engine's, the rest are kept. */
     @ParameterizedTest
     @EnumSource(Source.class)
     void testAnOperatorCanOverruleOneListOfAnEnginesContribution(Source source)
@@ -252,9 +238,7 @@ class ClassificationConfigurationSourcesTest
                 source.name());
     }
 
-    /**
-     * An engine's contribution is not imposed: an operator who disagrees with it can empty it. An indexed environment variable cannot express an empty list, so that form is left out.
-     */
+    /** Excludes the indexed environment form, which cannot express an empty list. */
     @ParameterizedTest
     @EnumSource(value = Source.class, mode = EnumSource.Mode.EXCLUDE, names = "ENVIRONMENT_INDEXED")
     void testAnOperatorCanRemoveAnEnginesContribution(Source source)
@@ -269,9 +253,7 @@ class ClassificationConfigurationSourcesTest
         assertEquals(List.of(), classifier.getContributions().get("engine").getClassNames(), source.name());
     }
 
-    /**
-     * An operator replacing the base list must not silently lose the engine's contribution, and the result must not depend on which source Spring binds first.
-     */
+    /** The result must not depend on which source Spring binds first. */
     @ParameterizedTest
     @EnumSource(Source.class)
     void testAnOperatorsReplacementKeepsAnEnginesContribution(Source source)
@@ -289,9 +271,7 @@ class ClassificationConfigurationSourcesTest
     // ---------------------------------------------------------------------------------------------------------------
     // The shipped file itself, edited and mounted at runtime
 
-    /**
-     * The shipped defaults file is keyed under the property path, so it is also a valid Spring configuration file. Copying it out of the jar, deleting one entry and mounting it is therefore how an operator removes a single default without restating the rest by hand.
-     */
+    /** The defaults file uses the property keys, so a copy can be edited and mounted as Spring config. */
     @Test
     void testTheShippedFileCanBeEditedAndMountedToRemoveOneDefault() throws IOException
     {
@@ -347,9 +327,7 @@ class ClassificationConfigurationSourcesTest
     // ---------------------------------------------------------------------------------------------------------------
     // Malformed values
 
-    /**
-     * A blank fragment is contained by every message, so it would turn every {@code IOException} - including a full disk - into a terminal {@code 422}. A trailing comma in an environment variable is all it takes.
-     */
+    /** A blank fragment would match every message. */
     @ParameterizedTest
     @EnumSource(Source.class)
     void testABlankFragmentIsIgnoredRatherThanMatchingEverything(Source source)
@@ -379,9 +357,7 @@ class ClassificationConfigurationSourcesTest
         assertEquals(List.of("unexpected end of file"), replaced.getMessageFragments());
     }
 
-    /**
-     * An anonymous class has an empty simple name, so a blank class name would match any anonymous exception.
-     */
+    /** An anonymous class has an empty simple name, which a blank entry would match. */
     @Test
     void testABlankClassNameIsIgnored()
     {
@@ -402,9 +378,7 @@ class ClassificationConfigurationSourcesTest
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new RuntimeAddedException()));
     }
 
-    /**
-     * {@code "error=2, no such file or directory"} is a shipped fragment. A comma-separated value cannot carry it, but the indexed and JSON forms can.
-     */
+    /** e.g. the shipped {@code "error=2, no such file or directory"}; comma-separated values cannot carry it. */
     @Test
     void testAFragmentContainingACommaNeedsTheIndexedOrJsonForm()
     {

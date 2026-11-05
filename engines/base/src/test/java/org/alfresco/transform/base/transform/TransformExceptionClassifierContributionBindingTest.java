@@ -38,9 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * Proves the {@code contributions} properties are bound by Spring, that more than one contributor can be set, and that they merge with the shipped defaults rather than replacing them.
- * <p/>
- * This is the form an engine or an extension is expected to use. {@code TransformExceptionClassifierBindingTest} covers the replacing form, which is for a deployment that needs to remove an entry rather than add one.
+ * Checks {@code contributions} bind from Spring, from more than one contributor, and extend rather than replace the defaults.
  */
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class},
         properties = {
@@ -81,9 +79,6 @@ class TransformExceptionClassifierContributionBindingTest
                 new IOException("corrupt, and engine is unwell")));
     }
 
-    /**
-     * The point of the whole property. Adding one name must leave every shipped rule working, or an engine that contributed a signature would quietly disable the rest.
-     */
     @Test
     void testTheShippedDefaultsStillMatchAlongsideTheAdditions()
     {
@@ -94,9 +89,7 @@ class TransformExceptionClassifierContributionBindingTest
                 new IOException("corrupt", new java.net.SocketTimeoutException("Read timed out"))));
     }
 
-    /**
-     * Stands in for {@code jakarta.mail.MessagingException}, which {@code engines/base} does not depend on. Matching is by class name, so a local class of the same simple name exercises the real rule.
-     */
+    /** Stands in for {@code jakarta.mail.MessagingException}; matching is by simple name. */
     private static final class MessagingException extends Exception
     {
         private static final long serialVersionUID = 1L;

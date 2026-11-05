@@ -38,9 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * Proves the classifier is genuinely reconfigurable from Spring configuration, which is the whole reason it is a bean rather than a static utility. Without this, {@code TransformExceptionClassifierTest} would only be exercising the setters.
- * <p/>
- * The lists are deliberately replaced rather than appended to, so this also checks that a built-in default which is <i>not</i> listed here stops matching.
+ * Checks the lists bind from Spring properties. They are replaced, so an unlisted built-in default must stop matching.
  */
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class},
         properties = {
@@ -62,7 +60,7 @@ class TransformExceptionClassifierBindingTest
     @Test
     void testTheConfiguredInfrastructureListsAreBoundAndVetoAContentMatch()
     {
-        // ZipException is a built-in content rule, but the configured veto must override it.
+        // ZipException is a built-in content rule, but the configured veto overrides it.
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new ZipException("invalid stored block lengths")));
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(
                 new IllegalArgumentException("engine is unwell, giving up")));
@@ -77,8 +75,7 @@ class TransformExceptionClassifierBindingTest
     @Test
     void testABuiltInDefaultNoLongerMatchesOnceTheListIsOverridden()
     {
-        // "missing root object specification" is a built-in default, but the configuration above
-        // replaced the list, so it must now fall back to the safe 500.
+        // A built-in default, but the list above replaced it.
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(
                 new IOException("Missing root object specification in trailer.")));
     }

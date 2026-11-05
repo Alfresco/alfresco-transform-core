@@ -65,9 +65,7 @@ import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 
 /**
- * Checks the status a failing transform actually returns over HTTP, rather than what {@link TransformExceptionClassifier} decides in isolation.
- * <p>
- * The T-Router only stops retrying if the classified status survives into the response, because {@code Router.isRecoverableError} looks at nothing but the reply status.
+ * Checks the status a failing transform returns over HTTP, since the T-Router decides retries from the reply status alone.
  */
 @AutoConfigureMockMvc
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class})
@@ -76,7 +74,7 @@ import org.alfresco.transform.client.model.TransformRequest;
         FakeTransformerFails.class})
 class TransformFailureStatusTest
 {
-    /** "corrupt-pdf" is 11 bytes. Claiming 22 makes what the server serves exactly half the content. */
+    /** "corrupt-pdf" is 11 bytes, so declaring 22 means half arrived. */
     private static final long HALF_ARRIVED = 22;
     private static final long ALL_ARRIVED = 11;
 
@@ -97,9 +95,6 @@ class TransformFailureStatusTest
                 "A corrupt pdf is a content failure, so the reply must be terminal rather than retryable.");
     }
 
-    /**
-     * The safety net: anything that might be the engine or its infrastructure must stay retryable.
-     */
     @Test
     void testInfrastructureFailureIsStillReportedAsInternalServerError()
     {
@@ -118,9 +113,7 @@ class TransformFailureStatusTest
                 .andReturn().getResponse().getStatus());
     }
 
-    /**
-     * A Direct Access URL is read lazily, inside the transform, so a download that dies part way through is reported by the transformer as a broken document. Answering {@code 422} would stop the T-Router retrying a transform that was never given its source, losing it for good. This is the one case where the stream has to overrule the exception.
-     */
+    /** A truncated lazy download looks like a broken document to the transformer; the stream must overrule it. */
     @Test
     void testATruncatedDirectAccessUrlDownloadIsReportedAsInternalServerError() throws IOException
     {
@@ -136,9 +129,6 @@ class TransformFailureStatusTest
         }
     }
 
-    /**
-     * The counterpart, and the reason the check is on the stream rather than on how much the transformer read: a document that arrived in full and was then rejected is still a content failure, so it must not be retried.
-     */
     @Test
     void testACompleteDirectAccessUrlDownloadIsStillReportedAsUnprocessableEntity() throws IOException
     {
@@ -154,9 +144,7 @@ class TransformFailureStatusTest
         }
     }
 
-    /**
-     * Drives the asynchronous path, which is the one ACS uses for a Direct Access URL and the only one that carries the source size. {@code sourceSize} is what the client says the content is, so serving less than that is a download that did not finish.
-     */
+    /** Uses the async path: the only one that carries the declared source size. */
     private int statusOfTransformingDirectAccessUrl(HttpServer server, long sourceSize)
     {
         TransformRequest request = TransformRequest.builder()
@@ -184,9 +172,7 @@ class TransformFailureStatusTest
         });
     }
 
-    /**
-     * Serves {@code content} in full. Whether that counts as the whole document is decided by the source size on the request, which is how ACS says how big the content is.
-     */
+    /** Serves {@code content} in full; the request's source size decides whether that is complete. */
     private static HttpServer sourceServer(String content) throws IOException
     {
         final byte[] body = content.getBytes(StandardCharsets.UTF_8);

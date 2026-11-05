@@ -53,30 +53,19 @@ import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.tika.metadata.extractors.OfficeMetadataExtractor;
 
 /**
- * Asserts the status a metadata extract answers with when the document cannot be parsed.
- * <p/>
- * Metadata extraction is a second route through the engine, and the one an unreadable document meets first: the repository asks for an extract on essentially every upload, long before anything asks for a rendition. It does not go through {@code Tika.transform}, so classifying failures there left this path untouched - and because the extractors are driven by the same libraries, the same damaged document that was answered terminally as a rendition was still answered as an engine fault here, and still retried.
- * <p/>
- * The extractors are driven directly rather than over HTTP so the status is read from the exception itself. As with the sibling tests, real documents are damaged in code: the point is to pin the behaviour to what the shipped libraries actually throw, which for this path is mostly not what a central list would predict.
+ * Asserts the status a metadata extract returns for damaged documents. Extraction bypasses {@code Tika.transform}, so it needs its own coverage.
  */
-// The metadata extraction entry point declares Exception, so a helper that calls it has to as well.
+// The extraction entry point declares Exception.
 @SuppressWarnings("PMD.SignatureDeclareThrowsException")
 class MetadataFailureClassificationTest
 {
-    /**
-     * Each case names a document and how to break it. The legacy OLE2 formats are the ones that matter here: POI reports damage in them quite differently depending on how far it gets, and the deepest of those failures is the one nothing else catches.
-     * <p/>
-     * TIFF is absent deliberately. The engine extracts image metadata with {@code IPTCMetadataExtractor}, which shells out to ExifTool - a native binary present in the image and not on a unit test's classpath - and plain Tika is tolerant enough of a damaged TIFF to return partial metadata rather than fail. That path is covered by the end-to-end run instead.
-     */
+    /** TIFF is omitted: image metadata uses ExifTool, which is not on the unit test classpath. */
     static Stream<Arguments> damagedDocuments()
     {
         return Stream.of(
-                // POI reports a damaged OLE2 header as an IOException, which the central class name list already names
+                // damaged OLE2 header: IOException named in the central list
                 Arguments.of("quick.doc", Damage.MOSTLY_REMOVED),
-                // but a scrambled body leaves POI walking structures it has already believed, and it emerges as a bare
-                // NullPointerException("Cannot read the array length because \"oldString\" is null") or an
-                // ArrayIndexOutOfBoundsException - no message to match on, and types no central list can claim without
-                // also claiming every engine bug of the same shape
+                // scrambled body: bare NullPointerException or ArrayIndexOutOfBoundsException from POI
                 Arguments.of("quick.doc", Damage.BODY_SCRAMBLED),
                 Arguments.of("quick.doc", Damage.HALVED));
     }
@@ -95,9 +84,7 @@ class MetadataFailureClassificationTest
                 () -> name + " " + damage + " was reported as " + e.getStatus() + ": " + describe(e));
     }
 
-    /**
-     * The case that justifies catching {@code RuntimeException} around the parse. POI leaves these with no cause, no useful message and a type shared with ordinary bugs, so the central lists cannot reach them - only the code that knows a document was being parsed can. Asserting the shape as well as the status keeps the reason visible if POI ever starts reporting it properly.
-     */
+    /** POI throws these with no cause or useful message; only the throw site can classify them. */
     @Test
     void testAnOle2FailurePoiReportsAsABareRuntimeExceptionIsStillTerminal() throws Exception
     {
@@ -112,9 +99,7 @@ class MetadataFailureClassificationTest
     }
 
     /**
-     * An empty file is the commonest way a failed upload reaches a transform, and the extract is what meets it.
-     * <p/>
-     * This one is left for the central lists on purpose. POI names it itself, and it travels as an {@code IOException} - which the throw site deliberately does not catch, because at that point an {@code IOException} is just as likely to be the source download dying, and that has to stay retryable. The engine still answers {@code 422}, by the other route: {@code NotOLE2FileException} is on the classifier's class name list, where {@code ClassifierLibraryPinningTest} holds it against this same library. Pinned here because the two halves dividing the work is the design, and a later change that "helpfully" widened this catch to {@code IOException} would break it.
+     * The throw site must not catch {@code IOException} (it may be a failed download); the central list classifies {@code NotOLE2FileException}.
      */
     @Test
     void testAnEmptyDocumentIsLeftForTheCentralListsAsAnIoException()
@@ -125,9 +110,6 @@ class MetadataFailureClassificationTest
         assertEquals("NotOLE2FileException", e.getClass().getSimpleName(), describe(e));
     }
 
-    /**
-     * The counterweight. Every assertion above says a document is beyond reading, so one has to prove an intact one still yields its metadata - otherwise an extractor that failed on everything would pass.
-     */
     @Test
     void testMetadataOfAnUndamagedDocumentIsStillExtracted() throws Exception
     {
@@ -147,7 +129,7 @@ class MetadataFailureClassificationTest
 
     enum Damage
     {
-        /** The file stops half way, as it would if a download were cut short or a disk filled during an upload. */
+        /** The file stops half way, like a cut-short download. */
         HALVED
         {
             @Override
@@ -156,7 +138,7 @@ class MetadataFailureClassificationTest
                 return truncate(original, original.length / 2);
             }
         },
-        /** Only the opening fragment survives, so even the container's own structure is missing. */
+        /** Only the opening fragment survives. */
         MOSTLY_REMOVED
         {
             @Override
@@ -165,7 +147,7 @@ class MetadataFailureClassificationTest
                 return truncate(original, original.length / 20);
             }
         },
-        /** The header is intact, so the format is still detected and a parser is still chosen, but what it then reads is nonsense. This is the case that reaches furthest into a library before failing, and the one that produced the bare runtime exceptions. */
+        /** Header intact, so a parser is chosen, but the body is nonsense; produces the bare runtime exceptions. */
         BODY_SCRAMBLED
         {
             @Override
@@ -202,9 +184,7 @@ class MetadataFailureClassificationTest
         }
     }
 
-    /**
-     * @return every exception in the chain, so a failure report names the library wording rather than just the outermost wrapper.
-     */
+    /** @return every exception in the chain, so a failure shows the library's wording. */
     private static String describe(Throwable e)
     {
         StringBuilder sb = new StringBuilder();
