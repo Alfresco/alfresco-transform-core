@@ -42,7 +42,11 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.MalformedInputException;
 import java.nio.file.FileSystemLoopException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import java.util.zip.ZipException;
 
 import ch.qos.logback.classic.Level;
@@ -54,6 +58,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
+import org.alfresco.transform.base.transform.TransformExceptionClassifier.Contribution;
 import org.alfresco.transform.exceptions.TransformException;
 
 /**
@@ -409,7 +414,7 @@ class TransformExceptionClassifierTest
     @Test
     void testAnEngineCanAddAClassNameWithoutLosingTheShippedOnes()
     {
-        classifier.setAdditionalClassNames(List.of("MessagingException"));
+        classifier.setContributions(Map.of("engine", contribution(c -> c.setClassNames(List.of("MessagingException")))));
 
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new MessagingException("Missing start boundary")));
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new ZipException("corrupt entry")),
@@ -419,7 +424,8 @@ class TransformExceptionClassifierTest
     @Test
     void testAnEngineCanAddAMessageFragmentWithoutLosingTheShippedOnes()
     {
-        classifier.setAdditionalMessageFragments(List.of("invalid chunk length"));
+        classifier.setContributions(
+                Map.of("engine", contribution(c -> c.setMessageFragments(List.of("invalid chunk length")))));
 
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new IOException("Invalid chunk length 5700")));
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(
@@ -428,10 +434,24 @@ class TransformExceptionClassifierTest
     }
 
     @Test
+    void testAnEngineCanWidenWhichTypesHaveTheirMessageRead()
+    {
+        classifier.setContributions(
+                Map.of("engine", contribution(c -> c.setMessageFragmentClassNames(List.of("IllegalStateException")))));
+
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new IllegalStateException("the file is corrupt")));
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(
+                new IOException("Missing root object specification in trailer.")),
+                "Adding a type must not drop the defaults");
+    }
+
+    @Test
     void testAnEngineCanAddToTheInfrastructureVetoWithoutLosingTheShippedEntries()
     {
-        classifier.setAdditionalInfrastructureClassNames(List.of("MessagingException"));
-        classifier.setAdditionalInfrastructureMessageFragments(List.of("quota exhausted"));
+        classifier.setContributions(Map.of("engine", contribution(c -> {
+            c.setInfrastructureClassNames(List.of("MessagingException"));
+            c.setInfrastructureMessageFragments(List.of("quota exhausted"));
+        })));
 
         assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(
                 new IOException("corrupt", new MessagingException("the mail server went away"))));
@@ -442,12 +462,29 @@ class TransformExceptionClassifierTest
     }
 
     /**
+     * The reason contributions are keyed: an engine's packaged additions and a deployment's own must both apply.
+     */
+    @Test
+    void testEveryContributorsAdditionsApply()
+    {
+        classifier.setContributions(Map.of(
+                "engine", contribution(c -> c.setClassNames(List.of("MessagingException"))),
+                "site", contribution(c -> c.setMessageFragments(List.of("invalid chunk length")))));
+
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new MessagingException("Missing start boundary")));
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new IOException("Invalid chunk length 5700")));
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new ZipException("corrupt entry")));
+    }
+
+    /**
      * Spring calls the setters of a {@code @ConfigurationProperties} bean in an order the class does not control, so a deployment that replaces a list and an engine that extends it must not be able to cancel each other out depending on which was bound first.
      */
     @Test
     void testReplacingAndExtendingTheSameListDoesNotDependOnTheOrderTheyWereBound()
     {
-        classifier.setAdditionalClassNames(List.of("MessagingException"));
+        Map<String, Contribution> contributions = Map.of("engine",
+                contribution(c -> c.setClassNames(List.of("MessagingException"))));
+        classifier.setContributions(contributions);
         classifier.setClassNames(List.of("ZipException"));
 
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new MessagingException("Missing start boundary")));
@@ -457,7 +494,7 @@ class TransformExceptionClassifierTest
 
         TransformExceptionClassifier other = new TransformExceptionClassifier();
         other.setClassNames(List.of("ZipException"));
-        other.setAdditionalClassNames(List.of("MessagingException"));
+        other.setContributions(contributions);
 
         assertEquals(UNPROCESSABLE_ENTITY, other.classify(new MessagingException("Missing start boundary")));
         assertEquals(UNPROCESSABLE_ENTITY, other.classify(new ZipException("corrupt entry")));
@@ -465,20 +502,72 @@ class TransformExceptionClassifierTest
     }
 
     /**
-     * Restarting must not make the list grow, and naming something the defaults already cover must be harmless rather than a duplicate in the startup log.
+     * Restarting must not make the list grow, and naming something the defaults or another contributor already cover must be harmless rather than a duplicate in the startup log.
      */
     @Test
-    void testAddingSomethingAlreadyShippedChangesNothing()
+    void testAddingSomethingAlreadyPresentChangesNothing()
     {
         List<String> logged = captureLogs(Level.INFO);
-        classifier.setAdditionalClassNames(List.of("ZipException"));
+        classifier.setContributions(Map.of(
+                "engine", contribution(c -> c.setClassNames(List.of("ZipException", "MessagingException"))),
+                "site", contribution(c -> c.setClassNames(List.of("MessagingException")))));
 
         classifier.logEffectiveConfiguration();
 
         assertEquals(1, logged.size());
         assertEquals(1, countOccurrences(logged.get(0), "ZipException"),
                 "ZipException must appear once, not twice: " + logged.get(0));
+        assertEquals(1, countOccurrences(logged.get(0), "MessagingException"),
+                "MessagingException must appear once, not twice: " + logged.get(0));
+        assertTrue(logged.get(0).contains("Contributions included: [engine, site]"), logged.get(0));
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new ZipException("corrupt entry")));
+    }
+
+    /**
+     * Every message contains the empty string, so a blank fragment - one trailing comma in an environment variable - would make every {@code IOException}, a full disk included, a {@code 422} that is never retried.
+     */
+    @Test
+    void testBlankEntriesAreDroppedWithAWarningRatherThanMatchingEverything()
+    {
+        List<String> logged = captureLogs(Level.WARN);
+
+        classifier.setMessageFragments(List.of("unexpected end of file", " "));
+        classifier.setContributions(Map.of("site", contribution(c -> {
+            c.setMessageFragments(Arrays.asList("", null, "  invalid chunk length  "));
+            c.setClassNames(List.of(""));
+        })));
+
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new IOException("the stream was reset")));
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new IllegalStateException("anonymous") {}),
+                "A blank class name must not match an anonymous class, whose simple name is empty");
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new IOException("Invalid chunk length 5700")),
+                "Surrounding whitespace must be trimmed, not kept");
+        assertEquals(List.of("unexpected end of file"), classifier.getMessageFragments());
+        assertEquals(3, logged.size(), String.join("\n", logged));
+        assertTrue(logged.stream().anyMatch(message -> message.contains(
+                "Ignored 2 blank entries in transform.failure.classification.contributions.site.message-fragments")),
+                String.join("\n", logged));
+    }
+
+    @Test
+    void testMissingValuesAreTreatedAsEmpty()
+    {
+        Map<String, Contribution> withNull = new HashMap<>();
+        withNull.put("site", null);
+        classifier.setContributions(withNull);
+        classifier.setContributions(null);
+        classifier.setClassNames(null);
+
+        assertEquals(List.of(), classifier.getClassNames());
+        assertEquals(Map.of(), classifier.getContributions());
+        assertEquals(INTERNAL_SERVER_ERROR, classifier.classify(new ZipException("no longer listed")));
+    }
+
+    private static Contribution contribution(Consumer<Contribution> settings)
+    {
+        Contribution contribution = new Contribution();
+        settings.accept(contribution);
+        return contribution;
     }
 
     private static int countOccurrences(String haystack, String needle)
@@ -576,7 +665,7 @@ class TransformExceptionClassifierTest
     }
 
     /**
-     * Stands in for {@code jakarta.mail.MessagingException}, a type the defaults deliberately do not list. It is the example used for the {@code additional-*} properties because it is exactly what an engine knows and {@code engines/base} does not.
+     * Stands in for {@code jakarta.mail.MessagingException}, a type the defaults deliberately do not list. It is the example used for contributions because it is exactly what an engine knows and {@code engines/base} does not.
      */
     private static final class MessagingException extends Exception
     {

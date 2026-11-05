@@ -30,11 +30,16 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.Function;
 import jakarta.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -52,189 +57,49 @@ import org.springframework.stereotype.Component;
  * <p/>
  * Matching is by class <i>name</i>, since {@code engines/base} must not depend on Tika, PDFBox or POI.
  * <p/>
- * The lists came from reported failures rather than an exhaustive corpus, so they will need adjusting; correcting a hardcoded entry would mean a full t-core &rarr; ai-renditions release. All five lists and a kill switch are therefore configuration under {@code transform.failure.classification}. Setting a list <i>replaces</i> the default; the matching {@code additional-*} property extends it. The effective lists are logged at startup.
+ * The lists came from reported failures rather than an exhaustive corpus, so they will need adjusting. None of them is written down here: what the engine ships with is data, held in {@link ClassificationDefaults#RESOURCE}, and what a deployment runs is settled by the properties under {@code transform.failure.classification} - setting a list <i>replaces</i> the shipped one, and a named entry under {@code contributions} extends it. So a correction needs neither a release nor a rebuild. The effective lists are logged at startup.
  */
 @Component
 @ConfigurationProperties(prefix = "transform.failure.classification")
 // `logger` is the convention throughout this codebase. The method and complexity counts are those of a
-// configuration-properties bean: five configurable lists, each with three accessors, around a decision that is four
+// configuration-properties bean: five configurable lists and their contributions, around a decision that is four
 // short private methods.
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TooManyMethods", "PMD.GodClass"})
 class TransformExceptionClassifier
 {
     private static final Logger logger = LoggerFactory.getLogger(TransformExceptionClassifier.class);
 
-    /**
-     * Exception class names that only ever mean the supplied document could not be parsed.
-     * <p/>
-     * Simple names, fully qualified names and superclass names are all matched, so an engine that shades or relocates a library still works, and a library that throws a more specific subclass of a listed type still matches.
-     */
-    private static final List<String> DEFAULT_CLASS_NAMES = List.of(
-            // java.util.zip - a corrupt OOXML/ODF file is a corrupt zip
-            "ZipException",
-            // java.io / java.nio.charset - truncated or undecodable content
-            //
-            // `UnsupportedEncodingException` is deliberately NOT listed. It means the requested *charset name* is not
-            // installed in the JVM, and that name arrives in the caller's `targetEncoding` option, not in the file.
-            // Listing it would turn one typo in a client's options into the silent, permanent loss of every request
-            // that client makes. Undecodable content arrives as one of the three entries below instead.
-            "EOFException",
-            "CharConversionException",
-            "MalformedInputException",
-            "UnmappableCharacterException",
-            // Apache Tika
-            //
-            // The generic `TikaException` is deliberately NOT listed: `CompositeParser` rethrows every parser
-            // exception as one, so matching it would turn a disk-full or socket error into a terminal 422. Its content
-            // subclasses therefore have to be named individually.
-            "EncryptedDocumentException",
-            "UnsupportedFormatException",
-            "ZeroByteFileException",
-            "CorruptedFileException",
-            // the document's own permissions forbid extraction, so no number of retries will ever read it
-            "AccessPermissionException",
-            // Apache PDFBox
-            "InvalidPasswordException",
-            // Apache POI
-            //
-            // The specific types POI throws are usually subclasses of these and are matched through the superclass
-            // walk in `match`, so they do not need listing individually.
-            "EmptyFileException",
-            "OldFileFormatException",
-            "UnsupportedFileFormatException",
-            "NotOfficeXmlFileException",
-            "OfficeXmlFileException",
-            "NotOLE2FileException",
-            "RecordFormatException",
-            "InvalidFormatException",
-            // these three have no listed ancestor: they extend IllegalStateException, RuntimeException and
-            // IOException respectively
-            "CorruptPowerPointFileException",
-            "XSSFBParseException",
-            "InvalidZipException",
-            // XML content that is not well formed
-            "SAXParseException",
-            // Apache Commons Imaging
-            //
-            // `ImageReadException` was renamed `ImagingException` in 1.0.0-alpha6; it is kept for engines still
-            // pinning an earlier release. `ImagingFormatException` needs naming because it extends
-            // `ImagingRuntimeException`, not `ImagingException`.
-            "ImageReadException",
-            "ImagingException",
-            "ImagingFormatException");
-
-    /**
-     * Lower case fragments that identify a content failure reported only as a plain {@code IOException}.
-     * <p/>
-     * PDFBox signals most structural damage this way ("Missing root object specification in trailer"). Matching on the message is unpleasant, but treating every {@code IOException} as a content failure would hide real disk and network faults.
-     * <p/>
-     * Only consulted for the types in {@link #DEFAULT_MESSAGE_FRAGMENT_TYPES}.
-     */
-    private static final List<String> DEFAULT_MESSAGE_FRAGMENTS = List.of(
-            "missing root object specification",
-            "expected='startxref'",
-            "expected 'startxref'",
-            "error: end-of-file",
-            "unexpected end of file",
-            "premature end of file",
-            "not a pdf",
-            "invalid pdf",
-            "corrupt",
-            "damaged",
-            "malformed",
-            "truncated",
-            "is encrypted",
-            "password-protected",
-            "unsupported file format",
-            "unknown file format",
-            "cannot be parsed",
-            "could not be parsed");
-
-    /**
-     * Types whose message is worth reading for a content failure.
-     * <p/>
-     * Several fragments above - {@code corrupt}, {@code damaged}, {@code malformed}, {@code truncated} - are words an engine might use about itself, so scanning the message of <i>every</i> throwable would turn an engine bug such as {@code IllegalStateException("corrupt temporary output")} into a {@code 422}. Confining the scan to the types that actually report content damage in their text closes that off.
-     * <p/>
-     * PDFBox and the JDK report structural damage as a plain {@code IOException}; XML arrives as a {@code SAXException}; {@code TikaException} is Tika's wrapper, safe to read only because the infrastructure veto has already examined the whole chain. A type that announces a content failure by its own name belongs in {@link #DEFAULT_CLASS_NAMES} instead.
-     * <p/>
-     * Deliberately <b>not</b> applied to {@link #DEFAULT_INFRA_MESSAGE_FRAGMENTS}: the veto must stay broad.
-     */
-    private static final List<String> DEFAULT_MESSAGE_FRAGMENT_TYPES = List.of(
-            "IOException",
-            "SAXException",
-            "TikaException");
-
-    /**
-     * Class names that always mean the engine or its environment failed, never the document.
-     * <p/>
-     * Checked across the whole cause chain <i>before</i> any content match, because libraries wrap: without this, an outer wrapper that looks like a content failure would mask an infrastructural cause and permanently drop a transform a retry would have fixed.
-     */
-    private static final List<String> DEFAULT_INFRA_CLASS_NAMES = List.of(
-            // java.net - the engine could not reach something it needed
-            "SocketException",
-            "SocketTimeoutException",
-            "ConnectException",
-            "UnknownHostException",
-            "NoRouteToHostException",
-            // interruption and timeout - shutdown or an overloaded engine, not the document
-            "InterruptedIOException",
-            "ClosedByInterruptException",
-            "InterruptedException",
-            "TimeoutException",
-            // java.nio.file - the environment, not the content
-            "FileSystemException",
-            "AccessDeniedException",
-            "NoSuchFileException",
-            // the engine itself is in trouble
-            "OutOfMemoryError",
-            "StackOverflowError");
-
-    /**
-     * Lower case message fragments that identify an infrastructure failure reported as a plain {@code IOException}, which is how the JDK reports most of them.
-     */
-    private static final List<String> DEFAULT_INFRA_MESSAGE_FRAGMENTS = List.of(
-            "no space left on device",
-            "disk quota exceeded",
-            "too many open files",
-            "connection reset",
-            "connection refused",
-            "broken pipe",
-            "read-only file system",
-            "cannot allocate memory",
-            "cannot run program",
-            "error=2, no such file or directory",
-            "permission denied");
-
     private boolean enabled = true;
-    private List<String> classNames = new ArrayList<>(DEFAULT_CLASS_NAMES);
-    private List<String> messageFragments = new ArrayList<>(DEFAULT_MESSAGE_FRAGMENTS);
+    private List<String> classNames = new ArrayList<>(ClassificationDefaults.CLASS_NAMES);
+    private List<String> messageFragments = new ArrayList<>(ClassificationDefaults.MESSAGE_FRAGMENTS);
 
     /**
-     * Entries an engine or extension contributes on top of the shipped list, rather than in place of it.
+     * Entries added on top of the lists above rather than in place of them, keyed by whoever added them: an engine uses its own name, a deployment picks another.
      * <p/>
-     * Held apart from the list they extend so the effective list does not depend on the order Spring called the two setters in.
+     * A map rather than a second set of lists because Spring merges a map key by key across property sources but replaces a list wholesale. With lists, a deployment adding one name at runtime would silently discard everything an engine had packaged. Held apart from the lists they extend so the effective lists do not depend on the order Spring called the setters in. Sorted by name, so the effective lists are the same on every start.
      */
-    private List<String> additionalClassNames = List.of();
-    private List<String> additionalMessageFragments = List.of();
-    private List<String> addedMessageFragmentTypes = List.of();
-    private List<String> addedInfraClassNames = List.of();
-    private List<String> addedInfraMessageFragments = List.of();
+    private Map<String, Contribution> contributions = Map.of();
 
     /** Rebuilt from {@link #classNames} after binding, as it is only ever used for lookups. */
-    private Set<String> classNameSet = new LinkedHashSet<>(DEFAULT_CLASS_NAMES);
+    private Set<String> classNameSet = new LinkedHashSet<>(ClassificationDefaults.CLASS_NAMES);
     /** Lower cased copy of {@link #messageFragments}, so the comparison does not re-lower per call. */
-    private List<String> lowerCaseMessageFragments = new ArrayList<>(DEFAULT_MESSAGE_FRAGMENTS);
+    private List<String> lowerCaseMessageFragments = lowerCase(ClassificationDefaults.MESSAGE_FRAGMENTS);
 
-    private List<String> messageFragmentClassNames = new ArrayList<>(DEFAULT_MESSAGE_FRAGMENT_TYPES);
+    private List<String> messageFragmentClassNames = new ArrayList<>(
+            ClassificationDefaults.MESSAGE_FRAGMENT_CLASS_NAMES);
 
     /** Rebuilt from {@link #messageFragmentClassNames} after binding, as it is only ever used for lookups. */
-    private Set<String> messageFragmentClassNameSet = new LinkedHashSet<>(DEFAULT_MESSAGE_FRAGMENT_TYPES);
+    private Set<String> messageFragmentClassNameSet = new LinkedHashSet<>(
+            ClassificationDefaults.MESSAGE_FRAGMENT_CLASS_NAMES);
 
-    private List<String> infrastructureClassNames = new ArrayList<>(DEFAULT_INFRA_CLASS_NAMES);
-    private List<String> infrastructureMessageFragments = new ArrayList<>(DEFAULT_INFRA_MESSAGE_FRAGMENTS);
+    private List<String> infrastructureClassNames = new ArrayList<>(ClassificationDefaults.INFRASTRUCTURE_CLASS_NAMES);
+    private List<String> infrastructureMessageFragments = new ArrayList<>(
+            ClassificationDefaults.INFRASTRUCTURE_MESSAGE_FRAGMENTS);
 
-    private Set<String> infrastructureClassNameSet = new LinkedHashSet<>(DEFAULT_INFRA_CLASS_NAMES);
-    private List<String> lowerCaseInfraMessageFragments = new ArrayList<>(DEFAULT_INFRA_MESSAGE_FRAGMENTS);
+    private Set<String> infrastructureClassNameSet = new LinkedHashSet<>(
+            ClassificationDefaults.INFRASTRUCTURE_CLASS_NAMES);
+    private List<String> lowerCaseInfraMessageFragments = lowerCase(
+            ClassificationDefaults.INFRASTRUCTURE_MESSAGE_FRAGMENTS);
 
     @PostConstruct
     void logEffectiveConfiguration()
@@ -248,9 +113,11 @@ class TransformExceptionClassifier
         }
         logger.info("Transform failure classification is enabled. Exceptions matching these are reported as {}, "
                 + "everything else as {}. Class names: {}. Message fragments: {}, read only from {}. "
-                + "Overridden in all cases by these infrastructure class names: {}, and message fragments: {}.",
+                + "Overridden in all cases by these infrastructure class names: {}, and message fragments: {}. "
+                + "Contributions included: {}.",
                 UNPROCESSABLE_ENTITY, INTERNAL_SERVER_ERROR, classNameSet, lowerCaseMessageFragments,
-                messageFragmentClassNameSet, infrastructureClassNameSet, lowerCaseInfraMessageFragments);
+                messageFragmentClassNameSet, infrastructureClassNameSet, lowerCaseInfraMessageFragments,
+                contributions.keySet());
     }
 
     /**
@@ -401,7 +268,7 @@ class TransformExceptionClassifier
         {
             return classMatch;
         }
-        // Only the parser types get their message read. See DEFAULT_MESSAGE_FRAGMENT_TYPES.
+        // Only the parser types get their message read. See messageFragmentClassNames.
         if (classNameMatch(t, messageFragmentClassNameSet) == null)
         {
             return null;
@@ -490,101 +357,119 @@ class TransformExceptionClassifier
 
     public void setClassNames(List<String> classNames)
     {
-        this.classNames = classNames;
-        rebuildClassNames();
-    }
-
-    /**
-     * Adds to the shipped list instead of replacing it.
-     * <p/>
-     * Spring replaces a list property wholesale when it is set, which is right for a deployment overruling a decision but wrong for the commoner case: an engine or extension that knows one more exception its own libraries raise. Restating the whole list to append a single name means every later correction to the defaults has to be copied into everything that did so.
-     * <p/>
-     * Setting both this and the list it extends is allowed, and the result does not depend on binding order.
-     */
-    public void setAdditionalClassNames(List<String> additionalClassNames)
-    {
-        this.additionalClassNames = additionalClassNames;
+        this.classNames = sanitise("class-names", classNames);
         rebuildClassNames();
     }
 
     public void setMessageFragments(List<String> messageFragments)
     {
-        this.messageFragments = messageFragments;
-        rebuildMessageFragments();
-    }
-
-    /** @see #setAdditionalClassNames(List) */
-    public void setAdditionalMessageFragments(List<String> additionalMessageFragments)
-    {
-        this.additionalMessageFragments = additionalMessageFragments;
+        this.messageFragments = sanitise("message-fragments", messageFragments);
         rebuildMessageFragments();
     }
 
     public void setMessageFragmentClassNames(List<String> messageFragmentClassNames)
     {
-        this.messageFragmentClassNames = messageFragmentClassNames;
-        rebuildMessageFragmentClassNames();
-    }
-
-    /** @see #setAdditionalClassNames(List) */
-    public void setAdditionalMessageFragmentClassNames(List<String> addedMessageFragmentTypes)
-    {
-        this.addedMessageFragmentTypes = addedMessageFragmentTypes;
+        this.messageFragmentClassNames = sanitise("message-fragment-class-names", messageFragmentClassNames);
         rebuildMessageFragmentClassNames();
     }
 
     public void setInfrastructureClassNames(List<String> infrastructureClassNames)
     {
-        this.infrastructureClassNames = infrastructureClassNames;
-        rebuildInfrastructureClassNames();
-    }
-
-    /** @see #setAdditionalClassNames(List) */
-    public void setAdditionalInfrastructureClassNames(List<String> addedInfraClassNames)
-    {
-        this.addedInfraClassNames = addedInfraClassNames;
+        this.infrastructureClassNames = sanitise("infrastructure-class-names", infrastructureClassNames);
         rebuildInfrastructureClassNames();
     }
 
     public void setInfrastructureMessageFragments(List<String> infrastructureMessageFragments)
     {
-        this.infrastructureMessageFragments = infrastructureMessageFragments;
+        this.infrastructureMessageFragments = sanitise("infrastructure-message-fragments",
+                infrastructureMessageFragments);
         rebuildInfrastructureMessageFragments();
     }
 
-    /** @see #setAdditionalClassNames(List) */
-    public void setAdditionalInfrastructureMessageFragments(List<String> addedInfraMessageFragments)
+    /**
+     * Adds to the lists instead of replacing them.
+     * <p/>
+     * Setting a list replaces it, which is right for a deployment overruling a decision but wrong for the commoner case: an engine or a deployment that knows one more exception its libraries raise. Restating the whole list to add a single name means every later correction to the defaults has to be copied into everything that did so.
+     * <p/>
+     * Each contributor has its own key, so contributions from different property sources - an engine's packaged file and a deployment's mounted one, say - are all kept. A deployment can still overrule an engine's contribution by setting the same key, and remove it by setting that key's lists empty. Setting a contribution and the list it extends together is allowed, and the result does not depend on binding order.
+     */
+    public void setContributions(Map<String, Contribution> contributions)
     {
-        this.addedInfraMessageFragments = addedInfraMessageFragments;
+        Map<String, Contribution> sanitised = new TreeMap<>();
+        if (contributions != null)
+        {
+            contributions.forEach((name, contribution) -> {
+                if (contribution != null)
+                {
+                    sanitised.put(name, contribution.sanitised("contributions." + name + "."));
+                }
+            });
+        }
+        this.contributions = Collections.unmodifiableMap(sanitised);
+        rebuildClassNames();
+        rebuildMessageFragments();
+        rebuildMessageFragmentClassNames();
+        rebuildInfrastructureClassNames();
         rebuildInfrastructureMessageFragments();
+    }
+
+    /**
+     * Trims every entry and drops blank ones, which a deployment can supply without meaning to - a trailing comma in an environment variable is enough. Dropping them is not cosmetic: every message contains the empty string, so a blank fragment would make every {@code IOException}, a full disk included, a {@code 422} that is never retried; and an anonymous exception class has an empty simple name, so a blank class name would match it.
+     */
+    private static List<String> sanitise(String property, List<String> values)
+    {
+        if (values == null)
+        {
+            return List.of();
+        }
+        List<String> sanitised = values.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(value -> !value.isEmpty())
+                .toList();
+        if (sanitised.size() != values.size())
+        {
+            logger.warn("Ignored {} blank {} in transform.failure.classification.{}.",
+                    values.size() - sanitised.size(), values.size() - sanitised.size() == 1 ? "entry" : "entries",
+                    property);
+        }
+        return sanitised;
     }
 
     private void rebuildClassNames()
     {
-        this.classNameSet = new LinkedHashSet<>(concat(classNames, additionalClassNames));
+        this.classNameSet = new LinkedHashSet<>(concat(classNames, contributed(Contribution::getClassNames)));
     }
 
     private void rebuildMessageFragments()
     {
-        this.lowerCaseMessageFragments = lowerCase(concat(messageFragments, additionalMessageFragments));
+        this.lowerCaseMessageFragments = lowerCase(
+                concat(messageFragments, contributed(Contribution::getMessageFragments)));
     }
 
     private void rebuildMessageFragmentClassNames()
     {
         this.messageFragmentClassNameSet = new LinkedHashSet<>(
-                concat(messageFragmentClassNames, addedMessageFragmentTypes));
+                concat(messageFragmentClassNames, contributed(Contribution::getMessageFragmentClassNames)));
     }
 
     private void rebuildInfrastructureClassNames()
     {
         this.infrastructureClassNameSet = new LinkedHashSet<>(
-                concat(infrastructureClassNames, addedInfraClassNames));
+                concat(infrastructureClassNames, contributed(Contribution::getInfrastructureClassNames)));
     }
 
     private void rebuildInfrastructureMessageFragments()
     {
-        this.lowerCaseInfraMessageFragments = lowerCase(
-                concat(infrastructureMessageFragments, addedInfraMessageFragments));
+        this.lowerCaseInfraMessageFragments = lowerCase(concat(infrastructureMessageFragments,
+                contributed(Contribution::getInfrastructureMessageFragments)));
+    }
+
+    private List<String> contributed(Function<Contribution, List<String>> list)
+    {
+        return contributions.values().stream()
+                .flatMap(contribution -> list.apply(contribution).stream())
+                .toList();
     }
 
     /**
@@ -640,28 +525,84 @@ class TransformExceptionClassifier
         return infrastructureMessageFragments;
     }
 
-    public List<String> getAdditionalClassNames()
+    public Map<String, Contribution> getContributions()
     {
-        return additionalClassNames;
+        return contributions;
     }
 
-    public List<String> getAdditionalMessageFragments()
+    /**
+     * One contributor's additions. Each list extends the classifier's list of the same name.
+     */
+    public static class Contribution
     {
-        return additionalMessageFragments;
-    }
+        private List<String> classNames = List.of();
+        private List<String> messageFragments = List.of();
+        private List<String> messageFragmentClassNames = List.of();
+        private List<String> infrastructureClassNames = List.of();
+        private List<String> infrastructureMessageFragments = List.of();
 
-    public List<String> getAdditionalMessageFragmentClassNames()
-    {
-        return addedMessageFragmentTypes;
-    }
+        private Contribution sanitised(String prefix)
+        {
+            Contribution sanitised = new Contribution();
+            sanitised.classNames = sanitise(prefix + "class-names", classNames);
+            sanitised.messageFragments = sanitise(prefix + "message-fragments", messageFragments);
+            sanitised.messageFragmentClassNames = sanitise(prefix + "message-fragment-class-names",
+                    messageFragmentClassNames);
+            sanitised.infrastructureClassNames = sanitise(prefix + "infrastructure-class-names",
+                    infrastructureClassNames);
+            sanitised.infrastructureMessageFragments = sanitise(prefix + "infrastructure-message-fragments",
+                    infrastructureMessageFragments);
+            return sanitised;
+        }
 
-    public List<String> getAdditionalInfrastructureClassNames()
-    {
-        return addedInfraClassNames;
-    }
+        public List<String> getClassNames()
+        {
+            return classNames;
+        }
 
-    public List<String> getAdditionalInfrastructureMessageFragments()
-    {
-        return addedInfraMessageFragments;
+        public void setClassNames(List<String> classNames)
+        {
+            this.classNames = classNames;
+        }
+
+        public List<String> getMessageFragments()
+        {
+            return messageFragments;
+        }
+
+        public void setMessageFragments(List<String> messageFragments)
+        {
+            this.messageFragments = messageFragments;
+        }
+
+        public List<String> getMessageFragmentClassNames()
+        {
+            return messageFragmentClassNames;
+        }
+
+        public void setMessageFragmentClassNames(List<String> messageFragmentClassNames)
+        {
+            this.messageFragmentClassNames = messageFragmentClassNames;
+        }
+
+        public List<String> getInfrastructureClassNames()
+        {
+            return infrastructureClassNames;
+        }
+
+        public void setInfrastructureClassNames(List<String> infrastructureClassNames)
+        {
+            this.infrastructureClassNames = infrastructureClassNames;
+        }
+
+        public List<String> getInfrastructureMessageFragments()
+        {
+            return infrastructureMessageFragments;
+        }
+
+        public void setInfrastructureMessageFragments(List<String> infrastructureMessageFragments)
+        {
+            this.infrastructureMessageFragments = infrastructureMessageFragments;
+        }
     }
 }

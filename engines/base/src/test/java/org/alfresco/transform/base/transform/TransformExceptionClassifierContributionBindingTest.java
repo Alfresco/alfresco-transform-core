@@ -38,18 +38,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * Proves the {@code additional-*} properties are bound by Spring and merge with the shipped defaults rather than replacing them.
+ * Proves the {@code contributions} properties are bound by Spring, that more than one contributor can be set, and that they merge with the shipped defaults rather than replacing them.
  * <p/>
  * This is the form an engine or an extension is expected to use. {@code TransformExceptionClassifierBindingTest} covers the replacing form, which is for a deployment that needs to remove an entry rather than add one.
  */
 @SpringBootTest(classes = {org.alfresco.transform.base.Application.class},
         properties = {
-                "transform.failure.classification.additional-class-names=MessagingException",
-                "transform.failure.classification.additional-message-fragments=Unreadable Glyph Table",
-                "transform.failure.classification.additional-message-fragment-class-names=IllegalStateException",
-                "transform.failure.classification.additional-infrastructure-class-names=ArithmeticException",
-                "transform.failure.classification.additional-infrastructure-message-fragments=Engine Is Unwell"})
-class TransformExceptionClassifierAdditionalBindingTest
+                "transform.failure.classification.contributions.engine.class-names=MessagingException",
+                "transform.failure.classification.contributions.engine.message-fragments=Unreadable Glyph Table",
+                "transform.failure.classification.contributions.engine.message-fragment-class-names=IllegalStateException",
+                "transform.failure.classification.contributions.site.infrastructure-class-names=ArithmeticException",
+                "transform.failure.classification.contributions.site.infrastructure-message-fragments=Engine Is Unwell"})
+class TransformExceptionClassifierContributionBindingTest
 {
     @Autowired
     private TransformExceptionClassifier classifier;
