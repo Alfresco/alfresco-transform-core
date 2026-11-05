@@ -122,25 +122,38 @@ class TikaFailureClassificationTest
     void testAReadThatFailsUnderTheParserIsRetryable() throws IOException
     {
         byte[] start = read("quick.docx");
-        InputStream failingRead = new InputStream() {
-            private int position;
+        try (InputStream failingRead = new FailsPartWayThrough(start, start.length / 2))
+        {
+            Exception e = assertThrows(Exception.class, () -> new Tika().transform(new AutoDetectParser(), null,
+                    failingRead, OutputStream.nullOutputStream(),
+                    new String[]{Tika.TARGET_MIMETYPE + MIMETYPE_TEXT_PLAIN, Tika.TARGET_ENCODING + "UTF-8"}));
 
-            @Override
-            public int read() throws IOException
+            assertEquals(INTERNAL_SERVER_ERROR, EngineStatus.of(e), describe(e));
+        }
+    }
+
+    /** Serves the first {@code readable} bytes of {@code content}, then fails as a dropped source would. */
+    private static final class FailsPartWayThrough extends InputStream
+    {
+        private final byte[] content;
+        private final int readable;
+        private int position;
+
+        FailsPartWayThrough(byte[] content, int readable)
+        {
+            this.content = content;
+            this.readable = readable;
+        }
+
+        @Override
+        public int read() throws IOException
+        {
+            if (position >= readable)
             {
-                if (position >= start.length / 2)
-                {
-                    throw new IOException("Unexpected read failure");
-                }
-                return start[position++] & 0xFF;
+                throw new IOException("Unexpected read failure");
             }
-        };
-
-        Exception e = assertThrows(Exception.class, () -> new Tika().transform(new AutoDetectParser(), null,
-                failingRead, OutputStream.nullOutputStream(),
-                new String[]{Tika.TARGET_MIMETYPE + MIMETYPE_TEXT_PLAIN, Tika.TARGET_ENCODING + "UTF-8"}));
-
-        assertEquals(INTERNAL_SERVER_ERROR, EngineStatus.of(e), describe(e));
+            return content[position++] & 0xFF;
+        }
     }
 
     @Test
