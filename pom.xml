@@ -48,6 +48,7 @@
         <httpclient5.version>5.6.4</httpclient5.version> <!-- security fix CVE-2026-64607, can be removed once Spring Boot BOM manages httpclient5 >= 5.6.3 -->
         <httpcore5.version>5.4.3</httpcore5.version> <!-- security fix CVE-2026-54399, can be removed once Spring Boot BOM manages httpcore5 >= 5.4.3 -->
         <dependency.guava.version>33.7.2-jre</dependency.guava.version> <!-- security fix CVE-2026-102554 (GHSA-xxph-c9ww-hj94) -->
+        <dependency.testcontainers.version>1.21.4</dependency.testcontainers.version>
     </properties>
 
     <profiles>
@@ -269,7 +270,7 @@
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers</artifactId>
-                <version>1.20.4</version>
+                <version>${dependency.testcontainers.version}</version>
             </dependency>
             <!-- Added as part of fixing vulnerability (PRODSEC-10503), Please remove it if no more needed -->
             <dependency>
