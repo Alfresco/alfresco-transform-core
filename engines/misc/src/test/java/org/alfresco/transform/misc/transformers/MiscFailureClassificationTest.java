@@ -179,6 +179,7 @@ class MiscFailureClassificationTest
                         Map.of(), source, target("out.jpg"), null));
 
         assertEquals(UNPROCESSABLE_ENTITY, e.getStatus(), describe(e));
+        assertNotNull(e.getCause(), "Without a cause, disabling classification could not restore the old 500");
     }
 
     @Test
@@ -191,6 +192,7 @@ class MiscFailureClassificationTest
                         source, target("out.pdf"), null));
 
         assertEquals(UNPROCESSABLE_ENTITY, e.getStatus(), describe(e));
+        assertNotNull(e.getCause(), "Without a cause, disabling classification could not restore the old 500");
     }
 
     /** The header survives, so a reader is chosen and fails with reader-specific {@code IIOException} wording. */

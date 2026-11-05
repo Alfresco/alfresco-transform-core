@@ -28,6 +28,8 @@ package org.alfresco.transform.base.transform;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -41,6 +43,7 @@ import static org.alfresco.transform.common.RequestParamMap.ENDPOINT_TRANSFORM;
 import static org.alfresco.transform.common.RequestParamMap.SOURCE_MIMETYPE;
 import static org.alfresco.transform.common.RequestParamMap.TARGET_MIMETYPE;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -56,11 +59,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.client.ResourceAccessException;
 
 import org.alfresco.transform.base.fakes.FakeTransformEngineWithFailingTransformer;
 import org.alfresco.transform.base.fakes.FakeTransformerFails;
+import org.alfresco.transform.base.sfs.SharedFileStoreClient;
 import org.alfresco.transform.client.model.TransformReply;
 import org.alfresco.transform.client.model.TransformRequest;
 
@@ -81,6 +87,9 @@ class TransformFailureStatusTest
     @Autowired
     private MockMvc mockMvc;
 
+    @MockitoBean
+    private SharedFileStoreClient sharedFileStoreClient;
+
     @Test
     void testCorruptZipIsReportedAsUnprocessableEntity()
     {
@@ -99,7 +108,7 @@ class TransformFailureStatusTest
     void testInfrastructureFailureIsStillReportedAsInternalServerError()
     {
         assertEquals(INTERNAL_SERVER_ERROR.value(), statusOfTransforming("infrastructure"),
-                "An infrastructure failure must stay retryable.");
+                "A content-looking failure caused by an infrastructure failure must stay retryable.");
     }
 
     private int statusOfTransforming(String content)
@@ -144,8 +153,25 @@ class TransformFailureStatusTest
         }
     }
 
-    /** Uses the async path: the only one that carries the declared source size. */
+    /** A connection dropped during the source download can end in an EOFException; that is not a corrupt document. */
+    @Test
+    void testAFailedSharedFileStoreDownloadIsReportedAsInternalServerError()
+    {
+        when(sharedFileStoreClient.retrieveFile(anyString())).thenThrow(new ResourceAccessException(
+                "I/O error on GET request", new EOFException("SSL peer shut down incorrectly")));
+
+        assertEquals(INTERNAL_SERVER_ERROR.value(), statusOfTransformingAsync(Map.of(), ALL_ARRIVED),
+                "A source that could not be fetched must stay retryable.");
+    }
+
     private int statusOfTransformingDirectAccessUrl(HttpServer server, long sourceSize)
+    {
+        return statusOfTransformingAsync(Map.of(DIRECT_ACCESS_URL,
+                "http://localhost:" + server.getAddress().getPort() + "/source"), sourceSize);
+    }
+
+    /** Uses the async path: the only one that carries the declared source size. */
+    private int statusOfTransformingAsync(Map<String, String> transformRequestOptions, long sourceSize)
     {
         TransformRequest request = TransformRequest.builder()
                 .withRequestId("1")
@@ -157,8 +183,7 @@ class TransformFailureStatusTest
                 .withSourceSize(sourceSize)
                 .withTargetMediaType(MIMETYPE_PDF)
                 .withTargetExtension("pdf")
-                .withTransformRequestOptions(Map.of(DIRECT_ACCESS_URL,
-                        "http://localhost:" + server.getAddress().getPort() + "/source"))
+                .withTransformRequestOptions(transformRequestOptions)
                 .withInternalContextForTransformEngineTests()
                 .build();
 

@@ -26,8 +26,7 @@
  */
 package org.alfresco.transform.tika.transformers;
 
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
-
+import static org.alfresco.transform.base.util.ContentFailures.unreadableDocument;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
@@ -77,7 +76,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
-import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transform.tika.parsers.TikaOfficeDetectParser;
 
 @Component
@@ -244,9 +242,8 @@ public class Tika
         }
         catch (SAXException | TikaException e)
         {
-            // The chosen parser rejected these bytes; a retry cannot help. The cause is kept for the infrastructure veto.
-            throw new TransformException(UNPROCESSABLE_ENTITY,
-                    "The source could not be parsed: " + e.getMessage(), e);
+            // The chosen parser rejected these bytes, unless a failed read lies underneath.
+            throw unreadableDocument("The source could not be parsed: " + e.getMessage(), e);
         }
         catch (IOException e)
         {

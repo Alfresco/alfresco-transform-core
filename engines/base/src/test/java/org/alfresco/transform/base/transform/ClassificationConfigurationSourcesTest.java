@@ -378,7 +378,7 @@ class ClassificationConfigurationSourcesTest
         assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(new RuntimeAddedException()));
     }
 
-    /** e.g. the shipped {@code "error=2, no such file or directory"}; comma-separated values cannot carry it. */
+    /** e.g. a fragment quoting a library message; comma-separated values cannot carry it. */
     @Test
     void testAFragmentContainingACommaNeedsTheIndexedOrJsonForm()
     {

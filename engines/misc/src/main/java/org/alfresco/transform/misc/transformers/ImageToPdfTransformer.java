@@ -30,6 +30,7 @@ import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants
 import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.TIFF_TAG_YRESOLUTION;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
+import static org.alfresco.transform.base.util.ContentFailures.unreadableDocument;
 import static org.alfresco.transform.common.RequestParamMap.END_PAGE;
 import static org.alfresco.transform.common.RequestParamMap.PDF_FORMAT;
 import static org.alfresco.transform.common.RequestParamMap.PDF_ORIENTATION;
@@ -153,8 +154,7 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         }
         catch (IIOException | RuntimeException e)
         {
-            throw new TransformException(UNPROCESSABLE_ENTITY,
-                    String.format(UNREADABLE_IMAGE_ERROR_MESSAGE, imageName, mimetype, e.getMessage()), e);
+            throw unreadableDocument(String.format(UNREADABLE_IMAGE_ERROR_MESSAGE, imageName, mimetype, e.getMessage()), e);
         }
     }
 
@@ -163,8 +163,9 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
         final Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(imageInputStream);
         if (imageReaders == null || !imageReaders.hasNext())
         {
-            // ImageIO picks readers from the bytes, so none means a wrong or damaged header.
-            throw new TransformException(UNPROCESSABLE_ENTITY, String.format(INVALID_IMAGE_ERROR_MESSAGE, imageName, mimetype));
+            // ImageIO hides read failures while choosing a reader, so surface one before blaming the header.
+            imageInputStream.read();
+            throw unsupportedImage(imageName, mimetype);
         }
         while (imageReaders.hasNext())
         {
@@ -177,7 +178,14 @@ public class ImageToPdfTransformer implements CustomTransformerFileAdaptor
             }
         }
         // Every matching reader is denied: a property of the format, so not retryable.
-        throw new TransformException(UNPROCESSABLE_ENTITY, String.format(INVALID_IMAGE_ERROR_MESSAGE, imageName, mimetype));
+        throw unsupportedImage(imageName, mimetype);
+    }
+
+    /** The cause marks the {@code 422} as inferred, so disabling classification restores the old {@code 500}. */
+    private static TransformException unsupportedImage(String imageName, String mimetype)
+    {
+        String message = String.format(INVALID_IMAGE_ERROR_MESSAGE, imageName, mimetype);
+        return new TransformException(UNPROCESSABLE_ENTITY, message, new IIOException(message));
     }
 
     // return effective dpi or default pdfbox ppi if dpi is null or out of reasonable range

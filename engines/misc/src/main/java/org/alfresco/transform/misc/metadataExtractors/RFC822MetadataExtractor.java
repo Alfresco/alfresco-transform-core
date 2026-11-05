@@ -26,9 +26,8 @@
  */
 package org.alfresco.transform.misc.metadataExtractors;
 
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
-
 import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
+import static org.alfresco.transform.base.util.ContentFailures.unreadableDocument;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -53,7 +52,6 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
-import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * Metadata extractor for RFC822 mime emails.
@@ -111,9 +109,8 @@ public class RFC822MetadataExtractor extends AbstractMetadataExtractorEmbedder
         }
         catch (MessagingException e)
         {
-            // Only raised for unreadable bytes, so a retry cannot help; the infrastructure veto still applies.
-            throw new TransformException(UNPROCESSABLE_ENTITY,
-                    "The source is not a readable RFC822 message: " + e.getMessage(), e);
+            // jakarta.mail also wraps failed reads in MessagingException; those are left to the classifier.
+            throw unreadableDocument("The source is not a readable RFC822 message: " + e.getMessage(), e);
         }
     }
 

@@ -136,8 +136,22 @@ class RemoteSourceStreamTest
         }
     }
 
+    /** A detector that read to the end of a short source and reset must not hide that the source was short. */
     @Test
-    void testAResetAfterTheEndOfTheSourceIsNotTreatedAsTheEnd() throws IOException
+    void testAResetAfterTheEndOfATruncatedSourceStillReportsIt() throws IOException
+    {
+        try (RemoteSourceStream stream = stream(bytes(6), 10))
+        {
+            stream.mark(16);
+            drain(stream);
+            stream.reset();
+
+            assertTrue(stream.sourceDownloadFailed(), "Only 6 of the 10 bytes arrived");
+        }
+    }
+
+    @Test
+    void testAResetAfterTheEndOfACompleteSourceIsNotAFailure() throws IOException
     {
         try (RemoteSourceStream stream = stream(bytes(10), 10))
         {

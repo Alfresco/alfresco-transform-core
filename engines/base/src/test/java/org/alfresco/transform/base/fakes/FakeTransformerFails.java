@@ -30,6 +30,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.zip.ZipException;
@@ -73,7 +74,10 @@ public class FakeTransformerFails extends AbstractFakeTransformer
             // A .docx renamed to .pdf.
             throw new IOException("Missing root object specification in trailer.");
         case "infrastructure":
-            throw new IllegalStateException("Connection pool shut down");
+            // Looks like a corrupt zip, but the read failed underneath it.
+            ZipException failedRead = new ZipException("invalid stored block lengths");
+            failedRead.initCause(new SocketException("Connection reset"));
+            throw failedRead;
         default:
             throw new IllegalArgumentException("Unexpected test content: " + content);
         }

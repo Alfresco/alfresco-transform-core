@@ -28,6 +28,7 @@ package org.alfresco.transform.tika.transformers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
@@ -48,7 +49,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transform.base.transform.EngineStatus;
 
 /**
  * Feeds damaged documents to the real Tika, POI and PDFBox and asserts the engine's status, so library changes to exceptions or wording fail here.
@@ -92,28 +93,54 @@ class TikaFailureClassificationTest
     {
         byte[] damaged = damage.apply(read(name));
 
-        TransformException e = assertThrows(TransformException.class, () -> parse(damaged),
-                name + " " + damage + " must be reported as a content failure");
+        Exception e = assertThrows(Exception.class, () -> parse(damaged),
+                name + " " + damage + " must fail");
 
-        assertEquals(UNPROCESSABLE_ENTITY, e.getStatus(),
-                () -> name + " " + damage + " was reported as " + e.getStatus() + ": " + describe(e));
+        assertEquals(UNPROCESSABLE_ENTITY, EngineStatus.of(e),
+                () -> name + " " + damage + " was reported as " + EngineStatus.of(e) + ": " + describe(e));
     }
 
     @Test
     void testAnEmptyDocumentIsTerminal()
     {
-        TransformException e = assertThrows(TransformException.class, () -> parse(new byte[0]));
+        Exception e = assertThrows(Exception.class, () -> parse(new byte[0]));
 
-        assertEquals(UNPROCESSABLE_ENTITY, e.getStatus(), describe(e));
+        assertEquals(UNPROCESSABLE_ENTITY, EngineStatus.of(e), describe(e));
     }
 
     @Test
     void testXmlThatIsNotWellFormedIsTerminal()
     {
-        TransformException e = assertThrows(TransformException.class,
+        Exception e = assertThrows(Exception.class,
                 () -> parse("<?xml version=\"1.0\"?><a><b></a>".getBytes(StandardCharsets.UTF_8)));
 
-        assertEquals(UNPROCESSABLE_ENTITY, e.getStatus(), describe(e));
+        assertEquals(UNPROCESSABLE_ENTITY, EngineStatus.of(e), describe(e));
+    }
+
+    /** A source that fails to read mid-parse must stay retryable. */
+    @Test
+    void testAReadThatFailsUnderTheParserIsRetryable() throws IOException
+    {
+        byte[] start = read("quick.docx");
+        InputStream failingRead = new InputStream() {
+            private int position;
+
+            @Override
+            public int read() throws IOException
+            {
+                if (position >= start.length / 2)
+                {
+                    throw new IOException("Unexpected read failure");
+                }
+                return start[position++] & 0xFF;
+            }
+        };
+
+        Exception e = assertThrows(Exception.class, () -> new Tika().transform(new AutoDetectParser(), null,
+                failingRead, OutputStream.nullOutputStream(),
+                new String[]{Tika.TARGET_MIMETYPE + MIMETYPE_TEXT_PLAIN, Tika.TARGET_ENCODING + "UTF-8"}));
+
+        assertEquals(INTERNAL_SERVER_ERROR, EngineStatus.of(e), describe(e));
     }
 
     @Test

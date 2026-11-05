@@ -156,13 +156,11 @@ public class RemoteSourceStream extends FilterInputStream implements SourceDownl
         markedPosition = position;
     }
 
-    /** Rewinds the logical position too; {@link #highWaterMark} is left unchanged. */
+    /** Rewinds the logical position too; {@link #highWaterMark} and the end of the source stay known. */
     @Override
     public synchronized void reset() throws IOException
     {
         in.reset();
         position = markedPosition;
-        // The reset undoes any read that hit the end.
-        endOfStreamReached = false;
     }
 }

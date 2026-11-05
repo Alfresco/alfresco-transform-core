@@ -26,7 +26,7 @@
  */
 package org.alfresco.transform.tika.metadata;
 
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+import static org.alfresco.transform.base.util.ContentFailures.unreadableDocument;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,7 +70,6 @@ import org.xml.sax.SAXException;
 
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
-import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * The parent of all Metadata Extractors which use Apache Tika under the hood. This handles all the common parts of processing the files, and the common mappings.
@@ -304,7 +303,7 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
     }
 
     /**
-     * Reports an unreadable document as {@code 422}. {@code IOException} is left to the central classifier, as it may be a failed download.
+     * Reports an unreadable document as {@code 422}. A failed read, thrown or underneath, is left to the central classifier, as it may be a failed download.
      */
     private void parseOrReportUnreadable(Parser parser, InputStream inputStream, ContentHandler handler,
             Metadata metadata, ParseContext context, String sourceMimetype) throws IOException
@@ -315,7 +314,7 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
         }
         catch (TikaException | SAXException | RuntimeException e)
         {
-            throw new TransformException(UNPROCESSABLE_ENTITY,
+            throw unreadableDocument(
                     "The metadata of this " + sourceMimetype + " could not be read, as the document could not be parsed: "
                             + e.getMessage(),
                     e);

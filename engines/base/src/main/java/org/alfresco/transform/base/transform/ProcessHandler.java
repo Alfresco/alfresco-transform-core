@@ -128,7 +128,7 @@ abstract class ProcessHandler extends FragmentHandler
         probeTransform.incrementTransformerCount();
         try
         {
-            init();
+            initWithoutClassification();
             long sourceSizeInBytes = getSourceSize();
             String transformName = getTransformerName(sourceMimetype, sourceSizeInBytes, targetMimetype, transformOptions);
             CustomTransformer customTransformer = getCustomTransformer(transformName);
@@ -157,6 +157,25 @@ abstract class ProcessHandler extends FragmentHandler
             probeTransform.recordTransformTime(time);
             transformerDebug.popTransform(reference, time);
             LogEntry.complete();
+        }
+    }
+
+    /**
+     * Fetching the source and creating files is not the document's fault (a dropped download may end in an EOFException), so such failures stay {@code 500}.
+     */
+    private void initWithoutClassification()
+    {
+        try
+        {
+            init();
+        }
+        catch (TransformException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR, e.getMessage(), e);
         }
     }
 

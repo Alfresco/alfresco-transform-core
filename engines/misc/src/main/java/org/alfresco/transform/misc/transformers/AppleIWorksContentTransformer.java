@@ -32,6 +32,7 @@ import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 
 import java.io.BufferedInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipException;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -93,7 +95,7 @@ public class AppleIWorksContentTransformer implements CustomTransformerFileAdapt
                 sourceMimetype, targetMimetype);
 
         // iWorks files are zip (or package) files.
-        // If it's not a zip file, the resultant ZipException will be caught as an IOException below.
+        // If it's not a zip file, the resultant ZipException will be caught below.
         boolean found = false;
         try (ZipArchiveInputStream iWorksZip = new ZipArchiveInputStream(
                 new BufferedInputStream(new FileInputStream(sourceFile))))
@@ -112,10 +114,16 @@ public class AppleIWorksContentTransformer implements CustomTransformerFileAdapt
                 }
             }
         }
+        catch (ZipException | EOFException e)
+        {
+            // Not a zip, or a damaged or truncated one; any other failed read is left to the classifier.
+            throw new TransformException(UNPROCESSABLE_ENTITY,
+                    "Unable to transform " + sourceMimetype + " file. It should have been a zip format file.",
+                    e);
+        }
         catch (IOException e)
         {
-            // Not-a-zip, a damaged zip and a failed read are all IOException; the classifier's veto separates them.
-            throw new TransformException(UNPROCESSABLE_ENTITY,
+            throw new IllegalStateException(
                     "Unable to transform " + sourceMimetype + " file. It should have been a zip format file.",
                     e);
         }
@@ -123,8 +131,9 @@ public class AppleIWorksContentTransformer implements CustomTransformerFileAdapt
         if (!found)
         {
             // The zip was readable but holds no preview of this type; a retry cannot change that.
-            throw new TransformException(UNPROCESSABLE_ENTITY,
-                    "The source " + sourceMimetype + " file did not contain a " + targetMimetype + " preview");
+            // The cause marks this 422 as inferred, so disabling classification restores the old 500.
+            String message = "The source " + sourceMimetype + " file did not contain a " + targetMimetype + " preview";
+            throw new TransformException(UNPROCESSABLE_ENTITY, message, new ZipException(message));
         }
     }
 }

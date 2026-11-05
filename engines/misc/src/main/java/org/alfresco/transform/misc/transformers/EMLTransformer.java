@@ -26,9 +26,8 @@
  */
 package org.alfresco.transform.misc.transformers;
 
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
-
 import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
+import static org.alfresco.transform.base.util.ContentFailures.unreadableDocument;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_MULTIPART_ALTERNATIVE;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
@@ -58,7 +57,6 @@ import org.springframework.stereotype.Component;
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.fs.FileManager;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
-import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * Uses javax.mail.MimeMessage to generate plain text versions of RFC822 email messages. Searches for all text content parts, and returns them. Any attachments are ignored. TIKA Note - could be replaced with the Tika email parser. Would require a recursing parser to be specified, but not the full Auto one (we don't want attachments), just one containing text and html related parsers.
@@ -110,9 +108,8 @@ public class EMLTransformer implements CustomTransformerFileAdaptor
         }
         catch (MessagingException e)
         {
-            // Only raised for unreadable bytes, so a retry cannot help; the infrastructure veto still applies.
-            throw new TransformException(UNPROCESSABLE_ENTITY,
-                    "The source is not a readable RFC822 message: " + e.getMessage(), e);
+            // jakarta.mail also wraps failed reads in MessagingException; those are left to the classifier.
+            throw unreadableDocument("The source is not a readable RFC822 message: " + e.getMessage(), e);
         }
     }
 
