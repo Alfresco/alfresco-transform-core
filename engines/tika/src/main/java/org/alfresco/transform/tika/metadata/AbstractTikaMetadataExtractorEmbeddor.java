@@ -26,6 +26,9 @@
  */
 package org.alfresco.transform.tika.metadata;
 
+import static org.alfresco.transform.base.util.ContentFailures.unreadableDocument;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -41,6 +44,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.tika.embedder.Embedder;
+import org.apache.tika.exception.TikaException;
 import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
@@ -62,6 +66,7 @@ import org.slf4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
 
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
@@ -233,7 +238,7 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
             handler = new NullContentHandler();
         }
 
-        parser.parse(inputStream, handler, metadata, context);
+        parseOrReportUnreadable(parser, inputStream, handler, metadata, context, sourceMimetype);
 
         // First up, copy all the Tika metadata over
         // This allows people to map any of the Tika
@@ -295,6 +300,25 @@ public abstract class AbstractTikaMetadataExtractorEmbeddor extends AbstractMeta
         rawProperties = extractSpecific(metadata, rawProperties, headers);
 
         return rawProperties;
+    }
+
+    /**
+     * Reports an unreadable document as {@code 422}. A failed read, thrown or underneath, is left to the central classifier, as it may be a failed download.
+     */
+    private void parseOrReportUnreadable(Parser parser, InputStream inputStream, ContentHandler handler,
+            Metadata metadata, ParseContext context, String sourceMimetype) throws IOException
+    {
+        try
+        {
+            parser.parse(inputStream, handler, metadata, context);
+        }
+        catch (TikaException | SAXException | RuntimeException e)
+        {
+            throw unreadableDocument(
+                    "The metadata of this " + sourceMimetype + " could not be read, as the document could not be parsed: "
+                            + e.getMessage(),
+                    e);
+        }
     }
 
     /**

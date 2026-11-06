@@ -60,7 +60,28 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
 
         if (!targetFile.exists() || targetFile.length() == 0)
         {
-            throw new TransformException(INTERNAL_SERVER_ERROR, "Transformer failed to create an output file");
+            // Stays a retryable 500: no output can mean a bad document or an environment failure (disk, OOM kill, fonts).
+            throw new TransformException(INTERNAL_SERVER_ERROR,
+                    "Transformer failed to create an output file" + describe(result));
+        }
+    }
+
+    /**
+     * @return the tool's exit code, stdout and stderr, so the cause of an empty output is visible.
+     */
+    private static String describe(ExecutionResult result)
+    {
+        StringBuilder sb = new StringBuilder(". Exit code ").append(result.getExitValue());
+        appendIfPresent(sb, ", stderr: ", result.getStdErr());
+        appendIfPresent(sb, ", stdout: ", result.getStdOut());
+        return sb.toString();
+    }
+
+    private static void appendIfPresent(StringBuilder sb, String label, String output)
+    {
+        if (output != null && !output.isBlank())
+        {
+            sb.append(label).append(output.strip());
         }
     }
 }

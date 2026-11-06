@@ -26,6 +26,7 @@
  */
 package org.alfresco.transform.tika.transformers;
 
+import static org.alfresco.transform.base.util.ContentFailures.unreadableDocument;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNG;
@@ -239,8 +240,14 @@ public class Tika
         {
             throw new IllegalArgumentException("Unsupported encoding " + e.getMessage(), e);
         }
-        catch (SAXException | TikaException | IOException e)
+        catch (SAXException | TikaException e)
         {
+            // The chosen parser rejected these bytes, unless a failed read lies underneath.
+            throw unreadableDocument("The source could not be parsed: " + e.getMessage(), e);
+        }
+        catch (IOException e)
+        {
+            // Not classified here: could be the document, the output or the download; the classifier reads the message.
             throw new IllegalStateException(e.getMessage(), e);
         }
     }

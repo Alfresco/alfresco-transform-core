@@ -1,0 +1,85 @@
+/*
+ * #%L
+ * Alfresco Transform Core
+ * %%
+ * Copyright (C) 2022 - 2026 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software.
+ * -
+ * If the software was purchased under a paid Alfresco license, the terms of
+ * the paid license agreement will prevail.  Otherwise, the software is
+ * provided under the following open source license terms:
+ * -
+ * Alfresco is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * -
+ * Alfresco is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * -
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
+ */
+package org.alfresco.transform.base.fakes;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.zip.ZipException;
+
+import org.springframework.boot.test.context.TestComponent;
+
+import org.alfresco.transform.base.TransformManager;
+
+/**
+ * Always fails, throwing the exception the source content names, to check classification on the real response path.
+ */
+@TestComponent
+public class FakeTransformerFails extends AbstractFakeTransformer
+{
+    /** Swallows read failures like real parsers do, which then report their own "unexpected end of file". */
+    private static byte[] readAsFarAsPossible(InputStream inputStream)
+    {
+        ByteArrayOutputStream collected = new ByteArrayOutputStream();
+        try
+        {
+            inputStream.transferTo(collected);
+        }
+        catch (IOException e)
+        {
+            // Deliberately ignored.
+        }
+        return collected.toByteArray();
+    }
+
+    @Override
+    public void transform(String sourceMimetype, InputStream inputStream, String targetMimetype,
+            OutputStream outputStream, Map<String, String> transformOptions, TransformManager transformManager)
+            throws Exception
+    {
+        final String content = new String(readAsFarAsPossible(inputStream), StandardCharsets.UTF_8);
+        switch (content)
+        {
+        case "corrupt-zip":
+            throw new ZipException("invalid stored block lengths");
+        case "corrupt-pdf":
+            // A .docx renamed to .pdf.
+            throw new IOException("Missing root object specification in trailer.");
+        case "infrastructure":
+            // Looks like a corrupt zip, but the read failed underneath it.
+            ZipException failedRead = new ZipException("invalid stored block lengths");
+            failedRead.initCause(new SocketException("Connection reset"));
+            throw failedRead;
+        default:
+            throw new IllegalArgumentException("Unexpected test content: " + content);
+        }
+    }
+}

@@ -26,10 +26,13 @@
  */
 package org.alfresco.transform.misc.transformers;
 
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+
 import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_JPEG;
 
 import java.io.BufferedInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -37,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipException;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -47,6 +51,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.transform.base.TransformManager;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
+import org.alfresco.transform.exceptions.TransformException;
 
 /**
  * Converts Apple iWorks files to JPEGs for thumbnailing and previewing. The transformer will only work for iWorks 2013/14 files. Support for iWorks 2008/9 has been dropped as we cannot support both, because the newer format does not contain a PDF. If we say this transformer supports PDF, Share will assume incorrectly that we can convert to PDF and we would only get a preview for the older format and never the newer one. Both formats have the same mimetype.
@@ -90,14 +95,14 @@ public class AppleIWorksContentTransformer implements CustomTransformerFileAdapt
                 sourceMimetype, targetMimetype);
 
         // iWorks files are zip (or package) files.
-        // If it's not a zip file, the resultant ZipException will be caught as an IOException below.
+        // If it's not a zip file, the resultant ZipException will be caught below.
+        boolean found = false;
         try (ZipArchiveInputStream iWorksZip = new ZipArchiveInputStream(
                 new BufferedInputStream(new FileInputStream(sourceFile))))
         {
             // Look through the zip file entries for the preview/thumbnail.
             List<String> paths = MIMETYPE_IMAGE_JPEG.equals(targetMimetype) ? JPG_PATHS : PDF_PATHS;
             ZipArchiveEntry entry;
-            boolean found = false;
             while ((entry = iWorksZip.getNextZipEntry()) != null)
             {
                 String name = entry.getName();
@@ -108,18 +113,27 @@ public class AppleIWorksContentTransformer implements CustomTransformerFileAdapt
                     break;
                 }
             }
-
-            if (!found)
-            {
-                throw new RuntimeException(
-                        "The source " + sourceMimetype + " file did not contain a " + targetMimetype + " preview");
-            }
+        }
+        catch (ZipException | EOFException e)
+        {
+            // Not a zip, or a damaged or truncated one; any other failed read is left to the classifier.
+            throw new TransformException(UNPROCESSABLE_ENTITY,
+                    "Unable to transform " + sourceMimetype + " file. It should have been a zip format file.",
+                    e);
         }
         catch (IOException e)
         {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "Unable to transform " + sourceMimetype + " file. It should have been a zip format file.",
                     e);
+        }
+
+        if (!found)
+        {
+            // The zip was readable but holds no preview of this type; a retry cannot change that.
+            // The cause marks this 422 as inferred, so disabling classification restores the old 500.
+            String message = "The source " + sourceMimetype + " file did not contain a " + targetMimetype + " preview";
+            throw new TransformException(UNPROCESSABLE_ENTITY, message, new ZipException(message));
         }
     }
 }
