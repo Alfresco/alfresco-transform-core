@@ -322,7 +322,6 @@ jobs:
           release-version: ${{ env.RELEASE_VERSION }}
           development-version: ${{ env.DEVELOPMENT_VERSION }}
           maven-args: "-DskipTests -Dmaven.javadoc.skip=true -DadditionalOption=-Xdoclint:none -Ddocker.skip=true"
-          prerelease-profile: prerelease
 
   push_docker_images:
     name: "Push Docker Images (${{ matrix.testName }})"

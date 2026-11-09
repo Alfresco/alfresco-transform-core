@@ -7,8 +7,7 @@ The `ci.yml` config file can be found in the `.github/workflows` directory of th
 
 1. **Build**: Java build with unit and integration tests.
 2. **Release**: Deploys the Maven artifacts to the Maven repository and creates the verified release
-   commits and Git tag. GA versions go to `alfresco-community-releases`; `-A.x` versions are
-   deployed with the `prerelease` profile to `alfresco-internal-releases`.
+   commits and Git tag. GA, milestone and `-A.x` versions all go to `alfresco-community-releases`.
 3. **Push Docker Images**: Builds and pushes the multi-arch T-Engine Docker images to
    DockerHub and Quay.io.
 

@@ -136,17 +136,6 @@
                 <module>engines/example</module>
             </modules>
         </profile>
-        <profile>
-            <id>prerelease</id>
-            <distributionManagement>
-                <repository>
-                    <id>alfresco-releases</id>
-                    <name>Alfresco Internal Releases</name>
-                    <!-- TODO: switch to maven.artifacts.hyland.dev once its DNS record exists -->
-                    <url>https://maven.cloudsmith.io/hyland/alfresco-internal-releases/</url>
-                </repository>
-            </distributionManagement>
-        </profile>
     </profiles>
 
     <scm>
