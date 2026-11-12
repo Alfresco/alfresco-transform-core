@@ -8,8 +8,8 @@ pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 # Always build the image, but only publish from the "master" branch
 [ "${PULL_REQUEST}" = "false" ] && [ "${BRANCH_NAME}" = "master" ] && PROFILE="internal" || PROFILE="local"
 
-# If the branch is "master" and the commit is not a Pull Request then deploy the JAR SNAPSHOT artifacts
-[ "${PULL_REQUEST}" = "false" ] && [ "${BRANCH_NAME}" = "master" ] && MAVEN_PHASE="deploy" || MAVEN_PHASE="verify"
+# If the branch is "master" and the commit is not a Pull Request then run the install phase to push the images
+[ "${PULL_REQUEST}" = "false" ] && [ "${BRANCH_NAME}" = "master" ] && MAVEN_PHASE="install" || MAVEN_PHASE="verify"
 
 if [ "${SMOKE_TESTS}" = "true" ]; then
   ADDITIONAL_MAVEN_OPTS="-Dit.test=**/*IT.java"
@@ -23,11 +23,9 @@ fi
 
 source "$(dirname "${BASH_SOURCE[0]}")/java_base_image_map.sh"
 
-# Do not deploy snapshots for alfresco-transform-core, alfresco-transformer-base and alfresco-base-t-engine
 mvn -B -U \
     clean ${MAVEN_PHASE} \
     -DadditionalOption=-Xdoclint:none -Dmaven.javadoc.skip=true \
-    -Dparent.core.deploy.skip=true -Dtransformer.base.deploy.skip=true \
     "-P${PROFILE},docker-it-setup,${1}" \
     ${ADDITIONAL_MAVEN_OPTS}
 

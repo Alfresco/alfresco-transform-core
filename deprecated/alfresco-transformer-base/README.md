@@ -214,7 +214,7 @@ mvn clean install
 
 The artifacts can be obtained by:
 
-* downloading from the [Alfresco repository](https://artifacts.alfresco.com/nexus/content/groups/public/)
+* downloading from the [Alfresco repository](https://artifacts.hyland.dev/public/alfresco-public/maven/)
 * Adding a Maven dependency to your pom file.
 
 ~~~
@@ -230,7 +230,7 @@ and the Alfresco Maven repository:
 ~~~
 <repository>
   <id>alfresco-maven-repo</id>
-  <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+  <url>https://artifacts.hyland.dev/public/alfresco-public/maven/</url>
 </repository>
 ~~~
 

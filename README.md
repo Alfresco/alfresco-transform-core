@@ -65,7 +65,7 @@ The config is available on `http://localhost:8090/transform/config`.
 
 The artifacts can be obtained by:
 
-* downloading from [Alfresco repository](https://artifacts.alfresco.com/nexus/content/groups/public)
+* downloading from [Alfresco repository](https://artifacts.hyland.dev/public/alfresco-public/maven/)
 * getting as Maven dependency by adding the dependency to your pom file:
 
 ```xml
@@ -87,7 +87,7 @@ and Alfresco Maven repository:
 ```xml
 <repository>
   <id>alfresco-maven-repo</id>
-  <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+  <url>https://artifacts.hyland.dev/public/alfresco-public/maven/</url>
 </repository>
 ```
 
