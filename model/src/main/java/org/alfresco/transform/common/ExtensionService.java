@@ -23,7 +23,14 @@ package org.alfresco.transform.common;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_DITA;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_EXCEL;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PBM;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PGM;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PNM;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_PPM;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_RAS;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_SVG;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_XBM;
+import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_XPM;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_IMAGE_XWD;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENDOCUMENT_GRAPHICS;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_OPENDOCUMENT_PRESENTATION;
@@ -118,6 +125,13 @@ public class ExtensionService
             Map.entry(MIMETYPE_IMAGE_SVG, "svg"),
             Map.entry(MIMETYPE_TEXT_PLAIN, "txt"),
             Map.entry(MIMETYPE_XHTML, "xhtml"),
+            Map.entry(MIMETYPE_IMAGE_PBM, "pbm"),
+            Map.entry(MIMETYPE_IMAGE_PGM, "pgm"),
+            Map.entry(MIMETYPE_IMAGE_PPM, "ppm"),
+            Map.entry(MIMETYPE_IMAGE_PNM, "pnm"),
+            Map.entry(MIMETYPE_IMAGE_RAS, "ras"),
+            Map.entry(MIMETYPE_IMAGE_XBM, "xbm"),
+            Map.entry(MIMETYPE_IMAGE_XPM, "xpm"),
             Map.entry(MIMETYPE_IMAGE_XWD, "xwd"));
 
     protected ExtensionService()
