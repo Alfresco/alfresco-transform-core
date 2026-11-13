@@ -27,6 +27,7 @@
 package org.alfresco.transform.misc.transformers;
 
 import static org.alfresco.transform.base.fs.FileManager.assertWithinTempDir;
+import static org.alfresco.transform.base.util.ContentFailures.unreadableDocument;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_HTML;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_MULTIPART_ALTERNATIVE;
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
@@ -104,6 +105,11 @@ public class EMLTransformer implements CustomTransformerFileAdaptor
                 sb.append(content.toString());
             }
             bufferedFileWriter.write(sb.toString());
+        }
+        catch (MessagingException e)
+        {
+            // jakarta.mail also wraps failed reads in MessagingException; those are left to the classifier.
+            throw unreadableDocument("The source is not a readable RFC822 message: " + e.getMessage(), e);
         }
     }
 

@@ -36,6 +36,13 @@ logging:
 filestore-url: ${FILE_STORE_URL:http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file}
 
 transform:
+  # Maps transformer exceptions to HTTP status: recognised content failures -> 422 (not retried), else 500.
+  # Defaults are in transform-failure-classification-defaults.yaml; setting a list replaces it. To add entries use
+  # contributions.<name>.<list>, e.g. TRANSFORM_FAILURE_CLASSIFICATION_CONTRIBUTIONS_SITE_CLASSNAMES=MyParserException.
+  failure:
+    classification:
+      # false disables classification: failures inferred from exceptions are reported as 500. Default: true.
+      enabled: ${TRANSFORM_FAILURE_CLASSIFICATION_ENABLED:true}
   endpoint:
     test:
       enable: ${TEST_ENDPOINT_ENABLED:false}

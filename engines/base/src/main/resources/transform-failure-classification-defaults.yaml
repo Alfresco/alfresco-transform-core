@@ -1,0 +1,114 @@
+---
+# Default lists for TransformExceptionClassifier; read from the classpath, not a Spring property source.
+# Properties under transform.failure.classification replace these lists; contributions extend them.
+# Matched by class name (simple, qualified or superclass). Anything unlisted stays a retryable 500.
+
+transform:
+  failure:
+    classification:
+
+      # Exception class names that only ever mean the document could not be parsed.
+      class-names:
+        # java.util.zip - a corrupt OOXML/ODF file is a corrupt zip
+        - ZipException
+        # java.io / java.nio.charset (not UnsupportedEncodingException: that comes from the caller's options)
+        - EOFException
+        - CharConversionException
+        - MalformedInputException
+        - UnmappableCharacterException
+        # Apache Tika (not TikaException: CompositeParser wraps everything, including I/O failures, in it)
+        - EncryptedDocumentException
+        - UnsupportedFormatException
+        - ZeroByteFileException
+        - CorruptedFileException
+        # the document's own permissions forbid extraction
+        - AccessPermissionException
+        # Apache PDFBox
+        - InvalidPasswordException
+        # Apache POI (subclasses match via the superclass walk)
+        - EmptyFileException
+        - OldFileFormatException
+        - UnsupportedFileFormatException
+        - NotOfficeXmlFileException
+        - OfficeXmlFileException
+        - NotOLE2FileException
+        - RecordFormatException
+        # qualified: Jackson has an InvalidFormatException too
+        - org.apache.poi.openxml4j.exceptions.InvalidFormatException
+        # no listed ancestor (they extend IllegalStateException, RuntimeException, IOException)
+        - CorruptPowerPointFileException
+        - XSSFBParseException
+        - InvalidZipException
+        # XML content that is not well formed
+        - SAXParseException
+        # Apache Commons Imaging (ImageReadException is the pre-1.0.0-alpha6 name; ImagingFormatException is a runtime exception)
+        - ImageReadException
+        - ImagingException
+        - ImagingFormatException
+
+      # Case-insensitive fragments for content failures reported as plain IOException (e.g. PDFBox); only read from message-fragment-class-names types.
+      message-fragments:
+        - missing root object specification
+        - expected='startxref'
+        - expected 'startxref'
+        - 'error: end-of-file'
+        - unexpected end of file
+        - premature end of file
+        - not a pdf
+        - invalid pdf
+        - corrupt
+        - damaged
+        - malformed
+        - truncated
+        - is encrypted
+        - password-protected
+        - unsupported file format
+        - unknown file format
+        - cannot be parsed
+        - could not be parsed
+
+      # Types whose message is checked against message-fragments, so an engine's own "corrupt ..." error is not a 422.
+      message-fragment-class-names:
+        - IOException
+        - SAXException
+        - TikaException
+
+      # Class names that always mean an engine/environment failure; a match anywhere in the cause chain forces 500.
+      infrastructure-class-names:
+        # java.net - the engine could not reach something it needed
+        - SocketException
+        - SocketTimeoutException
+        - ConnectException
+        - UnknownHostException
+        - NoRouteToHostException
+        # javax.net.ssl - a dropped TLS connection can end in an EOFException
+        - SSLException
+        # interruption and timeout - shutdown or overload
+        - InterruptedIOException
+        - ClosedByInterruptException
+        - InterruptedException
+        - TimeoutException
+        # java.nio.file - the environment
+        - FileSystemException
+        - AccessDeniedException
+        - NoSuchFileException
+        # the engine itself is in trouble
+        - OutOfMemoryError
+        - StackOverflowError
+
+      # Case-insensitive fragments for infrastructure failures (mostly plain IOException); checked on any type.
+      infrastructure-message-fragments:
+        - no space left on device
+        - disk quota exceeded
+        - too many open files
+        - connection reset
+        - connection refused
+        - broken pipe
+        - read-only file system
+        - cannot allocate memory
+        - cannot run program
+        # not FileNotFoundException: POI also throws it for a missing OLE2 entry
+        - no such file or directory
+        - stale file handle
+        - input/output error
+        - permission denied
