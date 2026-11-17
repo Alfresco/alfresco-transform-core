@@ -65,6 +65,8 @@ public final class LogEntry
 
     private final int id = count.incrementAndGet();
     private final long start = System.currentTimeMillis();
+    private final long startNanos = System.nanoTime();
+    private long durationExecNanos;
     private int statusCode;
     private long durationStreamIn;
     private long durationTransform = -1;
@@ -156,6 +158,27 @@ public final class LogEntry
     public static long getTransformDuration()
     {
         return currentLogEntry.get().durationTransform;
+    }
+
+    /**
+     * Adds the wall time of one external command (convert/gm) run. Summed, as one request may run more than one.
+     */
+    public static void addExecDuration(long nanos)
+    {
+        currentLogEntry.get().durationExecNanos += nanos;
+    }
+
+    public static long getExecNanos()
+    {
+        return currentLogEntry.get().durationExecNanos;
+    }
+
+    /**
+     * Time spent in the T-Engine so far on the current request, from {@link #start()}.
+     */
+    public static long getElapsedNanos()
+    {
+        return System.nanoTime() - currentLogEntry.get().startNanos;
     }
 
     public static void complete()
