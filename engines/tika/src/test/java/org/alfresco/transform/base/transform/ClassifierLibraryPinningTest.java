@@ -31,6 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
+import static org.alfresco.transform.tika.OoxmlTestDocuments.withMalformedXml;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,14 +76,21 @@ class ClassifierLibraryPinningTest
                 // OOXML zip cut short: java.util.zip
                 Arguments.of("a docx with its zip structure gone", "quick.docx", truncateTo(20)),
                 Arguments.of("an xlsx with its zip structure gone", "quick.xlsx", truncateTo(20)),
-                // OOXML XML cut short: SAX parse error
-                Arguments.of("a docx with unterminated xml", "quick.docx", truncateTo(2)),
-                Arguments.of("an xlsx with unterminated xml", "quick.xlsx", truncateTo(2)),
                 // ODF zip end header gone
                 Arguments.of("an odt cut in half", "quick.odt", truncateTo(2)),
                 // PDFBox missing trailer, matched only by message
                 Arguments.of("a pdf cut in half", "quick.pdf", truncateTo(2)),
                 Arguments.of("a pdf with almost nothing left", "quick.pdf", truncateTo(20)));
+    }
+
+    @ParameterizedTest(name = "{0} with malformed {1}")
+    @MethodSource("org.alfresco.transform.tika.OoxmlTestDocuments#malformedXmlParts")
+    void testMalformedOoxmlXmlIsStillRecognised(String file, String part) throws IOException
+    {
+        Throwable raised = parseExpectingFailure(withMalformedXml(read(file), part));
+
+        assertEquals(UNPROCESSABLE_ENTITY, classifier.classify(raised),
+                () -> file + " XML damage is no longer recognised by the classification lists." + describe(raised));
     }
 
     @ParameterizedTest(name = "{0}")
