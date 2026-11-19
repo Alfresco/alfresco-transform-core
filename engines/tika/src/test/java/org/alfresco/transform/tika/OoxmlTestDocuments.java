@@ -62,8 +62,7 @@ public final class OoxmlTestDocuments
         try (ZipInputStream in = new ZipInputStream(new ByteArrayInputStream(original));
                 ZipOutputStream out = new ZipOutputStream(bytes))
         {
-            ZipEntry entry;
-            while ((entry = in.getNextEntry()) != null)
+            for (ZipEntry entry = in.getNextEntry(); entry != null; entry = in.getNextEntry())
             {
                 byte[] content = in.readAllBytes();
                 if (entry.getName().equals(part))
