@@ -39,6 +39,9 @@ import org.alfresco.transform.exceptions.TransformException;
 
 public abstract class AbstractCommandExecutor implements CommandExecutor
 {
+    private static final int SIGNAL_EXIT_CODE_OFFSET = 128;
+    private static final int MAX_SIGNAL = 64;
+
     protected RuntimeExec transformCommand = createTransformCommand();
     protected RuntimeExec checkCommand = createCheckCommand();
 
@@ -67,14 +70,24 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
     }
 
     /**
-     * @return the tool's exit code, stdout and stderr, so the cause of an empty output is visible.
+     * @return the tool's exit code (and the signal that killed it, if any), stdout and stderr, so the cause of an empty output is visible.
      */
     private static String describe(ExecutionResult result)
     {
         StringBuilder sb = new StringBuilder(". Exit code ").append(result.getExitValue());
+        appendSignalIfKilled(sb, result.getExitValue());
         appendIfPresent(sb, ", stderr: ", result.getStdErr());
         appendIfPresent(sb, ", stdout: ", result.getStdOut());
         return sb.toString();
+    }
+
+    private static void appendSignalIfKilled(StringBuilder sb, int exitValue)
+    {
+        int signal = exitValue - SIGNAL_EXIT_CODE_OFFSET;
+        if (signal > 0 && signal <= MAX_SIGNAL)
+        {
+            sb.append(" (killed by signal ").append(signal).append(")");
+        }
     }
 
     private static void appendIfPresent(StringBuilder sb, String label, String output)
