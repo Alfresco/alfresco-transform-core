@@ -56,6 +56,13 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
         timeout = timeout != null && timeout > 0 ? timeout : 0;
         final ExecutionResult result = transformCommand.execute(properties, timeout);
 
+        int signal = signalThatKilled(result.getExitValue());
+        if (signal > 0)
+        {
+            throw new TransformException(INTERNAL_SERVER_ERROR,
+                    "Transformer was killed by signal " + signal + describe(result));
+        }
+
         if (result.getExitValue() != 0 && result.getStdErr() != null && result.getStdErr().length() > 0)
         {
             throw new TransformException(BAD_REQUEST, "Transformer exit code was not 0: \n" + result.getStdErr());
@@ -70,24 +77,23 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
     }
 
     /**
-     * @return the tool's exit code (and the signal that killed it, if any), stdout and stderr, so the cause of an empty output is visible.
+     * @return the signal that killed the tool, as Java on Linux reports a kill like a shell does (exit code 128 + signal), or 0 if it exited.
+     */
+    private static int signalThatKilled(int exitValue)
+    {
+        int signal = exitValue - SIGNAL_EXIT_CODE_OFFSET;
+        return signal > 0 && signal <= MAX_SIGNAL ? signal : 0;
+    }
+
+    /**
+     * @return the tool's exit code, stdout and stderr, so the cause of a failure is visible.
      */
     private static String describe(ExecutionResult result)
     {
         StringBuilder sb = new StringBuilder(". Exit code ").append(result.getExitValue());
-        appendSignalIfKilled(sb, result.getExitValue());
         appendIfPresent(sb, ", stderr: ", result.getStdErr());
         appendIfPresent(sb, ", stdout: ", result.getStdOut());
         return sb.toString();
-    }
-
-    private static void appendSignalIfKilled(StringBuilder sb, int exitValue)
-    {
-        int signal = exitValue - SIGNAL_EXIT_CODE_OFFSET;
-        if (signal > 0 && signal <= MAX_SIGNAL)
-        {
-            sb.append(" (killed by signal ").append(signal).append(")");
-        }
     }
 
     private static void appendIfPresent(StringBuilder sb, String label, String output)
