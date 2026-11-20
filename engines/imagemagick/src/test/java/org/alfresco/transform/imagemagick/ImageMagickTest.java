@@ -38,6 +38,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
@@ -352,6 +353,19 @@ public class ImageMagickTest extends AbstractBaseTest
                 .andExpect(status().is(BAD_REQUEST.value()))
                 .andExpect(status()
                         .reason(containsString("Transformer exit code was not 0: \nSTDERR")));
+    }
+
+    @Test
+    public void killedBySignalTest() throws Exception
+    {
+        when(mockExecutionResult.getExitValue()).thenReturn(137);
+        when(mockExecutionResult.getStdErr()).thenReturn(
+                "WARNING: The convert command is deprecated in IMv7, use \"magick\" instead of \"convert\" or \"magick convert\"\n\n");
+
+        mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", "xxx"))
+                .andExpect(status().is(INTERNAL_SERVER_ERROR.value()))
+                .andExpect(status()
+                        .reason(containsString("Transformer was killed by signal 9. Exit code 137, stderr: WARNING: The convert command is deprecated")));
     }
 
     @Test
