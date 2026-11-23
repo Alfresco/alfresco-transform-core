@@ -69,6 +69,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
@@ -362,10 +363,12 @@ public class ImageMagickTest extends AbstractBaseTest
         when(mockExecutionResult.getStdErr()).thenReturn(
                 "WARNING: The convert command is deprecated in IMv7, use \"magick\" instead of \"convert\" or \"magick convert\"\n\n");
 
-        mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", "xxx"))
-                .andExpect(status().is(INTERNAL_SERVER_ERROR.value()))
-                .andExpect(status()
-                        .reason(containsString("Transformer was killed by signal 9. Exit code 137, stderr: WARNING: The convert command is deprecated")));
+        MockHttpServletResponse response = mockMvc.perform(mockMvcRequest(ENDPOINT_TRANSFORM, sourceFile, "targetExtension", "xxx"))
+                .andReturn().getResponse();
+
+        assertEquals(INTERNAL_SERVER_ERROR.value(), response.getStatus());
+        assertTrue(response.getErrorMessage().contains(
+                "Transformer was killed by signal 9. Exit code 137, stderr: WARNING: The convert command is deprecated"));
     }
 
     @Test
