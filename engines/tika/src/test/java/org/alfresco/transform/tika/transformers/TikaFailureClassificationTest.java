@@ -28,10 +28,12 @@ package org.alfresco.transform.tika.transformers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 import static org.alfresco.transform.common.Mimetype.MIMETYPE_TEXT_PLAIN;
+import static org.alfresco.transform.tika.OoxmlTestDocuments.withMalformedXml;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -48,6 +50,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.alfresco.transform.base.transform.EngineStatus;
 
@@ -61,10 +64,6 @@ class TikaFailureClassificationTest
     static Stream<Arguments> damagedDocuments()
     {
         return Stream.of(
-                // OOXML: zip survives, XML does not (SAX parse error)
-                Arguments.of("quick.docx", Damage.HALVED),
-                Arguments.of("quick.xlsx", Damage.HALVED),
-                Arguments.of("quick.pptx", Damage.HALVED),
                 // zip structure gone
                 Arguments.of("quick.docx", Damage.MOSTLY_REMOVED),
                 Arguments.of("quick.xlsx", Damage.MOSTLY_REMOVED),
@@ -98,6 +97,17 @@ class TikaFailureClassificationTest
 
         assertEquals(UNPROCESSABLE_ENTITY, EngineStatus.of(e),
                 () -> name + " " + damage + " was reported as " + EngineStatus.of(e) + ": " + describe(e));
+    }
+
+    @ParameterizedTest(name = "{0} with malformed {1}")
+    @MethodSource("org.alfresco.transform.tika.OoxmlTestDocuments#malformedXmlParts")
+    void testMalformedOoxmlXmlIsTerminal(String name, String part) throws Exception
+    {
+        byte[] damaged = withMalformedXml(read(name), part);
+        Exception e = assertThrows(Exception.class, () -> parse(damaged),
+                name + " with malformed " + part + " must fail");
+
+        assertEquals(UNPROCESSABLE_ENTITY, EngineStatus.of(e), describe(e));
     }
 
     @Test
@@ -145,14 +155,15 @@ class TikaFailureClassificationTest
         }
     }
 
-    @Test
-    void testAnUndamagedDocumentStillTransforms() throws Exception
+    @ParameterizedTest
+    @ValueSource(strings = {"quick.docx", "quick.xlsx", "quick.pptx"})
+    void testAnUndamagedDocumentStillTransforms(String name) throws Exception
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        parse(read("quick.docx"), out);
+        parse(read(name), out);
 
-        assertEquals(true, out.toString(StandardCharsets.UTF_8).contains("quick brown fox"),
+        assertTrue(out.toString(StandardCharsets.UTF_8).contains("quick brown fox"),
                 "Expected the text of the document, but got: " + out.toString(StandardCharsets.UTF_8));
     }
 
