@@ -218,7 +218,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
-                <version>1.26.2</version>
+                <version>1.28.0</version>
             </dependency>
 
             <!-- temporary security fix CVE-2026-5598 / CVE-2026-0636 / CVE-2026-5588 -->
