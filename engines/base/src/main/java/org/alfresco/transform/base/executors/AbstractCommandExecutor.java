@@ -39,9 +39,6 @@ import org.alfresco.transform.exceptions.TransformException;
 
 public abstract class AbstractCommandExecutor implements CommandExecutor
 {
-    private static final int SIGNAL_EXIT_CODE_OFFSET = 128;
-    private static final int MAX_SIGNAL = 64;
-
     protected RuntimeExec transformCommand = createTransformCommand();
     protected RuntimeExec checkCommand = createCheckCommand();
 
@@ -55,13 +52,6 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
         targetFile = assertWithinTempDir(targetFile);
         timeout = timeout != null && timeout > 0 ? timeout : 0;
         final ExecutionResult result = transformCommand.execute(properties, timeout);
-
-        int signal = signalThatKilled(result.getExitValue());
-        if (signal > 0)
-        {
-            throw new TransformException(INTERNAL_SERVER_ERROR,
-                    "Transformer was killed by signal " + signal + describe(result));
-        }
 
         if (result.getExitValue() != 0 && result.getStdErr() != null && result.getStdErr().length() > 0)
         {
@@ -77,16 +67,7 @@ public abstract class AbstractCommandExecutor implements CommandExecutor
     }
 
     /**
-     * @return the signal that killed the tool, as Java on Linux reports a kill like a shell does (exit code 128 + signal), or 0 if it exited.
-     */
-    private static int signalThatKilled(int exitValue)
-    {
-        int signal = exitValue - SIGNAL_EXIT_CODE_OFFSET;
-        return signal > 0 && signal <= MAX_SIGNAL ? signal : 0;
-    }
-
-    /**
-     * @return the tool's exit code, stdout and stderr, so the cause of a failure is visible.
+     * @return the tool's exit code, stdout and stderr, so the cause of an empty output is visible.
      */
     private static String describe(ExecutionResult result)
     {
